@@ -1,0 +1,1302 @@
+# HG changeset patch
+# Parent f70560eaf77ca51caf54188c1fa0d838489d3c37
+
+diff -r f70560eaf77c src/Make_cyg.mak
+--- a/src/Make_cyg.mak	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/Make_cyg.mak	Sun Jan 20 00:05:23 2013 +0900
+@@ -8,6 +8,7 @@
+ # Cygwin application use the Makefile (just like on Unix).
+ #
+ # GUI		no or yes: set to yes if you want the GUI version (yes)
++# DIRECTX	no or yes: set to yes if you want use DirectWrite (no)
+ # PERL		define to path to Perl dir to get Perl support (not defined)
+ #   PERL_VER	  define to version of Perl being used (56)
+ #   DYNAMIC_PERL  no or yes: set to yes to load the Perl DLL dynamically (yes)
+@@ -88,6 +89,16 @@
+ ARCH = i386
+ endif
+ 
++ifndef DIRECTX
++DIRECTX = no
++endif
++ifeq ($(DIRECTX),yes)
++# DirectWrite requires that WINVER is 0x0600 or above
++ifndef WINVER
++WINVER = 0x0600
++endif
++endif
++
+ ifndef WINVER
+ WINVER = 0x0500
+ endif
+@@ -116,6 +127,7 @@
+ #>>>>> name of the compiler and linker, name of lib directory
+ CROSS_COMPILE =
+ CC = gcc
++CXX = g++
+ RC = windres
+ 
+ ##############################
+@@ -436,6 +448,14 @@
+ endif
+ 
+ ##############################
++ifeq (yes, $(DIRECTX))
++# Only allow DIRECTX for a GUI build.
++DEFINES += -DUSE_DIRECT_X
++EXTRA_OBJS += $(OUTDIR)/gui_dwrite.o
++EXTRA_LIBS += -ld2d1 -ldwrite -static-libgcc -static
++endif
++
++##############################
+ ifdef XPM
+ # Only allow XPM for a GUI build.
+ DEFINES += -DFEAT_XPM_W32
+@@ -540,8 +560,13 @@
+ # According to the Cygwin doc 1.2 FAQ, kernel32 should not be specified for
+ # linking unless calling ld directly.
+ # See /usr/doc/cygwin-doc-1.2/html/faq_toc.html#TOC93 for more information.
++ifeq ($(DIRECTX),yes)
++$(EXE): $(OUTDIR) $(OBJ)
++	$(CXX) $(CFLAGS) -o $(EXE) $(OBJ) $(LIBS) -luuid -lole32 $(EXTRA_LIBS)
++else
+ $(EXE): $(OUTDIR) $(OBJ)
+ 	$(CC) $(CFLAGS) -o $(EXE) $(OBJ) $(LIBS) -luuid -lole32 $(EXTRA_LIBS)
++endif
+ 
+ xxd/xxd.exe: xxd/xxd.c
+ 	$(MAKE) -C xxd -f Make_cyg.mak CC=$(CC) USEDLL=$(USEDLL)
+@@ -600,6 +625,9 @@
+ $(OUTDIR)/ex_eval.o:	ex_eval.c $(INCL) ex_cmds.h
+ 	$(CC) -c $(CFLAGS) ex_eval.c -o $(OUTDIR)/ex_eval.o
+ 
++$(OUTDIR)/gui_dwrite.o:	gui_dwrite.cpp $(INCL) gui_dwrite.h
++	$(CXX) -c $(CFLAGS) gui_dwrite.cpp -o $(OUTDIR)/gui_dwrite.o
++
+ $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
+ 	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
+ 
+diff -r f70560eaf77c src/Make_ming.mak
+--- a/src/Make_ming.mak	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/Make_ming.mak	Sun Jan 20 00:05:23 2013 +0900
+@@ -31,6 +31,14 @@
+ OPTIMIZE=MAXSPEED
+ # set to yes to make gvim, no for vim
+ GUI=yes
++# set to yes if you want to use DirectWrite (DirectX)
++DIRECTX=no
++ifeq ($(DIRECTX),yes)
++# DirectWrite requires that WINVER is 0x0600 or above
++ifndef WINVER
++WINVER = 0x0600
++endif
++endif
+ # FEATURES=[TINY | SMALL  | NORMAL | BIG | HUGE]
+ # Set to TINY to make minimal version (few features).
+ FEATURES=BIG
+@@ -340,6 +348,7 @@
+ endif
+ endif
+ CC := $(CROSS_COMPILE)gcc
++CXX := $(CROSS_COMPILE)g++
+ WINDRES := $(CROSS_COMPILE)windres
+ WINDRES_CC = $(CC)
+ 
+@@ -440,6 +449,14 @@
+ endif
+ endif
+ 
++# DirectWrite (DirectX)
++ifeq ($(DIRECTX),yes)
++# Only allow DirectWrite for a GUI build.
++ifeq (yes, $(GUI))
++DEFINES += -DUSE_DIRECT_X
++endif
++endif
++
+ # Only allow XPM for a GUI build.
+ ifeq (yes, $(GUI))
+ 
+@@ -576,6 +593,14 @@
+ LIB += -lwsock32
+ endif
+ endif
++ifeq ($(DIRECTX),yes)
++# Only allow DIRECTX for a GUI build.
++ifeq (yes, $(GUI))
++OBJ += $(OUTDIR)/gui_dwrite.o
++LIB += -ld2d1 -ldwrite
++LFLAGS += -static-libgcc -static
++endif
++endif
+ ifdef XPM
+ # Only allow XPM for a GUI build.
+ ifeq (yes, $(GUI))
+@@ -672,8 +697,13 @@
+ uninstal.exe: uninstal.c
+ 	$(CC) $(CFLAGS) -o uninstal.exe uninstal.c $(LIB)
+ 
++ifeq ($(DIRECTX),yes)
++$(TARGET): $(OUTDIR) $(OBJ)
++	$(CXX) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
++else
+ $(TARGET): $(OUTDIR) $(OBJ)
+ 	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
++endif
+ 
+ upx: exes
+ 	upx gvim.exe
+@@ -731,6 +761,9 @@
+ $(OUTDIR)/ex_eval.o:	ex_eval.c $(INCL) ex_cmds.h
+ 	$(CC) -c $(CFLAGS) ex_eval.c -o $(OUTDIR)/ex_eval.o
+ 
++$(OUTDIR)/gui_dwrite.o:	gui_dwrite.cpp $(INCL) gui_dwrite.h
++	$(CXX) -c $(CFLAGS) gui_dwrite.cpp -o $(OUTDIR)/gui_dwrite.o
++
+ $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
+ 	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
+ 
+diff -r f70560eaf77c src/Make_mvc.mak
+--- a/src/Make_mvc.mak	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/Make_mvc.mak	Sun Jan 20 00:05:23 2013 +0900
+@@ -24,6 +24,9 @@
+ #
+ #	GUI interface: GUI=yes (default is no)
+ #
++#	GUI with DirectWrite(DirectX): DIRECTX=yes
++#	  (default is no, requires GUI=yes and WINVER=0x0600)
++#
+ #	OLE interface: OLE=yes (usually with GUI=yes)
+ #
+ #	Multibyte support: MBYTE=yes (default is no)
+@@ -166,6 +169,9 @@
+ !else
+ OBJDIR = .\Obj\C
+ !endif
++!if "$(DIRECTX)" == "yes"
++OBJDIR = $(OBJDIR)X
++!endif
+ !if "$(OLE)" == "yes"
+ OBJDIR = $(OBJDIR)O
+ !endif
+@@ -290,6 +296,25 @@
+ NETBEANS_LIB	= WSock32.lib
+ !endif
+ 
++# DirectWrite(DirectX)
++!ifndef DIRECTX
++DIRECTX = no
++!endif
++!if "$(DIRECTX)" == "yes"
++# DirectWrite requires that WINVER is 0x0600 or above
++!ifndef WINVER
++WINVER = 0x0600
++!endif
++!if $(WINVER) < 0x0600
++!error DirectWrite (DirectX) requires WINVER is 0x0600 or above.
++!else
++DIRECTX_DEFS	= -DUSE_DIRECT_X
++DIRECTX_INCL	= gui_dwrite.h
++DIRECTX_LIB	= d2d1.lib dwrite.lib
++DIRECTX_OBJ	= $(OUTDIR)\gui_dwrite.obj
++!endif
++!endif
++
+ !ifndef XPM
+ # XPM is not set, use the included xpm files, depending on the architecture.
+ !if "$(CPU)" == "AMD64"
+@@ -622,6 +647,13 @@
+ SUBSYSTEM = console
+ !endif
+ 
++!if "$(GUI)" == "yes" && "$(DIRECTX)" == "yes"
++CFLAGS = $(CFLAGS) $(DIRECTX_DEFS)
++GUI_INCL = $(GUI_INCL) $(DIRECTX_INCL)
++GUI_OBJ = $(GUI_OBJ) $(DIRECTX_OBJ)
++GUI_LIB = $(DIRECTX_LIB) $(GUI_LIB)
++!endif
++
+ # iconv.dll library (dynamically loaded)
+ !ifndef ICONV
+ ICONV = yes
+@@ -1095,6 +1127,8 @@
+ 
+ $(OUTDIR)/gui_w32.obj:	$(OUTDIR) gui_w32.c gui_w48.c $(INCL) $(GUI_INCL)
+ 
++$(OUTDIR)/gui_dwrite.obj:	$(OUTDIR) gui_dwrite.cpp $(INCL) $(GUI_INCL)
++
+ $(OUTDIR)/if_cscope.obj: $(OUTDIR) if_cscope.c  $(INCL)
+ 
+ $(OUTDIR)/if_lua.obj: $(OUTDIR) if_lua.c  $(INCL)
+diff -r f70560eaf77c src/eval.c
+--- a/src/eval.c	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/eval.c	Sun Jan 20 00:05:23 2013 +0900
+@@ -31,6 +31,10 @@
+ # include <math.h>
+ #endif
+ 
++#ifdef USE_DIRECT_X
++# include "gui_dwrite.h"
++#endif
++
+ #define DICT_MAXNEST 100	/* maximum nesting of lists and dicts */
+ 
+ #define DO_NOT_FREE_CNT 99999	/* refcount for dict or list that should not
+@@ -686,6 +690,9 @@
+ static void f_setpos __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_setqflist __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_setreg __ARGS((typval_T *argvars, typval_T *rettv));
++#ifdef USE_DIRECT_X
++static void f_setrenderingparams __ARGS((typval_T *argvars, typval_T *rettv));
++#endif
+ static void f_settabvar __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_settabwinvar __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_setwinvar __ARGS((typval_T *argvars, typval_T *rettv));
+@@ -784,6 +791,9 @@
+ static char_u *get_tv_string __ARGS((typval_T *varp));
+ static char_u *get_tv_string_buf __ARGS((typval_T *varp, char_u *buf));
+ static char_u *get_tv_string_buf_chk __ARGS((typval_T *varp, char_u *buf));
++#ifdef FEAT_FLOAT
++static float_T get_tv_float __ARGS((typval_T *varp));
++#endif
+ static dictitem_T *find_var __ARGS((char_u *name, hashtab_T **htp));
+ static dictitem_T *find_var_in_ht __ARGS((hashtab_T *ht, char_u *varname, int writing));
+ static hashtab_T *find_var_ht __ARGS((char_u *name, char_u **varname));
+@@ -8054,6 +8064,9 @@
+     {"setpos",		2, 2, f_setpos},
+     {"setqflist",	1, 2, f_setqflist},
+     {"setreg",		2, 3, f_setreg},
++#ifdef USE_DIRECT_X
++    {"setrenderingparams", 5, 5, f_setrenderingparams},
++#endif
+     {"settabvar",	3, 3, f_settabvar},
+     {"settabwinvar",	4, 4, f_settabwinvar},
+     {"setwinvar",	3, 3, f_setwinvar},
+@@ -12185,6 +12198,9 @@
+ #ifdef FEAT_GUI
+ 	"gui",
+ #endif
++#ifdef USE_DIRECT_X
++	"gui_directx",
++#endif
+ #ifdef FEAT_GUI_ATHENA
+ # ifdef FEAT_GUI_NEXTAW
+ 	"gui_neXtaw",
+@@ -16559,6 +16575,33 @@
+     rettv->vval.v_number = 0;
+ }
+ 
++#ifdef USE_DIRECT_X
++    void
++f_setrenderingparams(argvars, rettv)
++    typval_T	*argvars;
++    typval_T	*rettv;
++{
++    DWriteContext *get_current_dwritecontext();
++
++    float gamma;
++    float enhancedContrast;
++    float clearTypeLevel;
++    int pixelGeometry;
++    int renderingMode;
++
++    gamma = (float)get_tv_float(&argvars[0]);
++    enhancedContrast = (float)get_tv_float(&argvars[1]);
++    clearTypeLevel = (float)get_tv_float(&argvars[2]);
++    pixelGeometry = (int)get_tv_number(&argvars[3]);
++    renderingMode = (int)get_tv_number(&argvars[4]);
++
++    DWriteContext_SetRenderingParams(get_current_dwritecontext(), gamma,
++	    enhancedContrast, clearTypeLevel, pixelGeometry, renderingMode);
++
++    rettv->vval.v_number = 0;
++}
++#endif
++
+ /*
+  * "settabvar()" function
+  */
+@@ -19970,6 +20013,25 @@
+     return NULL;
+ }
+ 
++#ifdef FEAT_FLOAT
++    static float_T
++get_tv_float(varp)
++    typval_T	*varp;
++{
++    float_T fv = 0.0;
++    switch (varp->v_type)
++    {
++	case VAR_NUMBER:
++	    fv = (float_T)varp->vval.v_number;
++	    break;
++	case VAR_FLOAT:
++	    fv = varp->vval.v_float;
++	    break;
++    }
++    return fv;
++}
++#endif
++
+ /*
+  * Find variable "name" in the list of variables.
+  * Return a pointer to it if found, NULL if not found.
+diff -r f70560eaf77c src/gui_dwrite.cpp
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/src/gui_dwrite.cpp	Sun Jan 20 00:05:23 2013 +0900
+@@ -0,0 +1,725 @@
++/* vi:set ts=8 sts=4 sw=4 noet: */
++
++#define WIN32_LEAN_AND_MEAN
++
++#if WINVER < 0x0600
++# error WINVER must be 0x0600 or above to use DirectWrite(Direct/X).
++#endif
++
++#include <windows.h>
++#include <crtdbg.h>
++#include <assert.h>
++#include <math.h>
++#include <d2d1.h>
++#include <d2d1helper.h>
++#include <dwrite.h>
++
++#include "gui_dwrite.h"
++
++#ifdef __MINGW32__
++# define __maybenull	SAL__maybenull
++# define __in		SAL__in
++# define __out		SAL__out
++#endif
++
++template <class T> inline void SafeRelease(T **ppT)
++{
++    if (*ppT)
++    {
++	(*ppT)->Release();
++	*ppT = NULL;
++    }
++}
++
++struct GdiTextRendererContext
++{
++    // const fields.
++    COLORREF color;
++    FLOAT cellWidth;
++
++    // working fileds.
++    FLOAT offsetX;
++};
++
++class AdjustedGlyphRun : public DWRITE_GLYPH_RUN
++{
++private:
++    FLOAT mDelta;
++    FLOAT *mAdjustedAdvances;
++
++public:
++    AdjustedGlyphRun(
++	    const DWRITE_GLYPH_RUN *glyphRun,
++	    FLOAT cellWidth) :
++	DWRITE_GLYPH_RUN(*glyphRun),
++	mDelta(0.0f),
++	mAdjustedAdvances(new FLOAT[glyphRun->glyphCount])
++    {
++	assert(cellWidth != 0.0f);
++	for (UINT32 i = 0; i < glyphRun->glyphCount; ++i)
++	{
++	    FLOAT orig = glyphRun->glyphAdvances[i];
++	    FLOAT adjusted = adjustToCell(orig, cellWidth);
++	    mAdjustedAdvances[i] = adjusted;
++	    mDelta += adjusted - orig;
++	}
++	glyphAdvances = mAdjustedAdvances;
++    }
++
++    ~AdjustedGlyphRun(void)
++    {
++	delete[] mAdjustedAdvances;
++    }
++
++    FLOAT getDelta(void) const
++    {
++	return mDelta;
++    }
++
++    static FLOAT adjustToCell(FLOAT value, FLOAT cellWidth)
++    {
++	int cellCount = (int)floor(value / cellWidth + 0.5f);
++	if (cellCount < 1)
++	    cellCount = 1;
++	return cellCount * cellWidth;
++    }
++};
++
++class GdiTextRenderer : public IDWriteTextRenderer
++{
++public:
++    GdiTextRenderer(
++	    IDWriteBitmapRenderTarget* bitmapRenderTarget,
++	    IDWriteRenderingParams* renderingParams) :
++	cRefCount_(0),
++	pRenderTarget_(bitmapRenderTarget),
++	pRenderingParams_(renderingParams)
++    {
++	pRenderTarget_->AddRef();
++	pRenderingParams_->AddRef();
++	AddRef();
++    }
++
++    ~GdiTextRenderer()
++    {
++	SafeRelease(&pRenderTarget_);
++	SafeRelease(&pRenderingParams_);
++    }
++
++    IFACEMETHOD(IsPixelSnappingDisabled)(
++	__maybenull void* clientDrawingContext,
++	__out BOOL* isDisabled)
++    {
++	*isDisabled = FALSE;
++	return S_OK;
++    }
++
++    IFACEMETHOD(GetCurrentTransform)(
++	__maybenull void* clientDrawingContext,
++	__out DWRITE_MATRIX* transform)
++    {
++	//forward the render target's transform
++	pRenderTarget_->GetCurrentTransform(transform);
++	return S_OK;
++    }
++
++    IFACEMETHOD(GetPixelsPerDip)(
++	__maybenull void* clientDrawingContext,
++	__out FLOAT* pixelsPerDip)
++    {
++	*pixelsPerDip = pRenderTarget_->GetPixelsPerDip();
++	return S_OK;
++    }
++
++    IFACEMETHOD(DrawGlyphRun)(
++	__maybenull void* clientDrawingContext,
++	FLOAT baselineOriginX,
++	FLOAT baselineOriginY,
++	DWRITE_MEASURING_MODE measuringMode,
++	__in DWRITE_GLYPH_RUN const* glyphRun,
++	__in DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
++	IUnknown* clientDrawingEffect)
++    {
++	HRESULT hr = S_OK;
++
++	GdiTextRendererContext *context =
++	    reinterpret_cast<GdiTextRendererContext*>(clientDrawingContext);
++
++	AdjustedGlyphRun adjustedGlyphRun(glyphRun, context->cellWidth);
++
++	// Pass on the drawing call to the render target to do the real work.
++	RECT dirtyRect = {0};
++
++	hr = pRenderTarget_->DrawGlyphRun(
++		baselineOriginX + context->offsetX,
++		baselineOriginY,
++		measuringMode,
++		&adjustedGlyphRun,
++		pRenderingParams_,
++		context->color,
++		&dirtyRect);
++
++	context->offsetX += adjustedGlyphRun.getDelta();
++
++	return hr;
++    }
++
++    IFACEMETHOD(DrawUnderline)(
++	__maybenull void* clientDrawingContext,
++	FLOAT baselineOriginX,
++	FLOAT baselineOriginY,
++	__in DWRITE_UNDERLINE const* underline,
++	IUnknown* clientDrawingEffect)
++    {
++	return E_NOTIMPL;
++    }
++
++    IFACEMETHOD(DrawStrikethrough)(
++	__maybenull void* clientDrawingContext,
++	FLOAT baselineOriginX,
++	FLOAT baselineOriginY,
++	__in DWRITE_STRIKETHROUGH const* strikethrough,
++	IUnknown* clientDrawingEffect)
++    {
++	return E_NOTIMPL;
++    }
++
++    IFACEMETHOD(DrawInlineObject)(
++	__maybenull void* clientDrawingContext,
++	FLOAT originX,
++	FLOAT originY,
++	IDWriteInlineObject* inlineObject,
++	BOOL isSideways,
++	BOOL isRightToLeft,
++	IUnknown* clientDrawingEffect)
++    {
++	return E_NOTIMPL;
++    }
++
++public:
++    IFACEMETHOD_(unsigned long, AddRef) ()
++    {
++	return InterlockedIncrement(&cRefCount_);
++    }
++
++    IFACEMETHOD_(unsigned long, Release) ()
++    {
++	long newCount = InterlockedDecrement(&cRefCount_);
++
++	if (newCount == 0)
++	{
++	    delete this;
++	    return 0;
++	}
++	return newCount;
++    }
++
++    IFACEMETHOD(QueryInterface)(
++	IID const& riid,
++	void** ppvObject)
++    {
++	if (__uuidof(IDWriteTextRenderer) == riid)
++	{
++	    *ppvObject = this;
++	}
++	else if (__uuidof(IDWritePixelSnapping) == riid)
++	{
++	    *ppvObject = this;
++	}
++	else if (__uuidof(IUnknown) == riid)
++	{
++	    *ppvObject = this;
++	}
++	else
++	{
++	    *ppvObject = NULL;
++	    return E_FAIL;
++	}
++
++	return S_OK;
++    }
++
++private:
++    unsigned long cRefCount_;
++    IDWriteBitmapRenderTarget* pRenderTarget_;
++    IDWriteRenderingParams* pRenderingParams_;
++};
++
++struct DWriteContext {
++    FLOAT mDpiScaleX;
++    FLOAT mDpiScaleY;
++    bool mDrawing;
++
++    ID2D1Factory *mD2D1Factory;
++
++    ID2D1DCRenderTarget *mRT;
++    ID2D1SolidColorBrush *mBrush;
++
++    IDWriteFactory *mDWriteFactory;
++    IDWriteGdiInterop *mGdiInterop;
++    IDWriteRenderingParams *mRenderingParams;
++    IDWriteTextFormat *mTextFormat;
++
++    HFONT mLastHFont;
++    DWRITE_FONT_WEIGHT mFontWeight;
++    DWRITE_FONT_STYLE mFontStyle;
++
++    // METHODS
++
++    DWriteContext();
++
++    virtual ~DWriteContext();
++
++    HRESULT SetLOGFONT(const LOGFONTW &logFont, float fontSize);
++
++    void SetFont(HFONT hFont);
++
++    void SetFont(const LOGFONTW &logFont);
++
++    void DrawText(HDC hdc, const WCHAR* text, int len,
++	int x, int y, int w, int h, int cellWidth, COLORREF color);
++
++    float PixelsToDipsY(int y);
++
++    void SetRenderingParams(
++	    float gamma,
++	    float enhancedContrast,
++	    float clearTypeLevel,
++	    DWRITE_PIXEL_GEOMETRY pixelGeometry,
++	    DWRITE_RENDERING_MODE renderingMode);
++};
++
++DWriteContext::DWriteContext() :
++    mDpiScaleX(1.f),
++    mDpiScaleY(1.f),
++    mDrawing(false),
++    mD2D1Factory(NULL),
++    mRT(NULL),
++    mBrush(NULL),
++    mDWriteFactory(NULL),
++    mGdiInterop(NULL),
++    mRenderingParams(NULL),
++    mTextFormat(NULL),
++    mLastHFont(NULL),
++    mFontWeight(DWRITE_FONT_WEIGHT_NORMAL),
++    mFontStyle(DWRITE_FONT_STYLE_NORMAL)
++{
++    HRESULT hr;
++
++    HDC screen = ::GetDC(0);
++    mDpiScaleX = ::GetDeviceCaps(screen, LOGPIXELSX) / 96.0f;
++    mDpiScaleY = ::GetDeviceCaps(screen, LOGPIXELSY) / 96.0f;
++    ::ReleaseDC(0, screen);
++
++    hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
++	    &mD2D1Factory);
++    _RPT2(_CRT_WARN, "D2D1CreateFactory: hr=%p p=%p\n", hr, mD2D1Factory);
++
++    if (SUCCEEDED(hr))
++    {
++	D2D1_RENDER_TARGET_PROPERTIES props = {
++	    D2D1_RENDER_TARGET_TYPE_DEFAULT,
++	    { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE },
++	    0, 0,
++	    D2D1_RENDER_TARGET_USAGE_NONE,
++	    D2D1_FEATURE_LEVEL_DEFAULT
++	};
++	hr = mD2D1Factory->CreateDCRenderTarget(&props, &mRT);
++	_RPT2(_CRT_WARN, "CreateDCRenderTarget: hr=%p p=%p\n", hr, mRT);
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	hr = mRT->CreateSolidColorBrush(
++		D2D1::ColorF(D2D1::ColorF::Black),
++		&mBrush);
++	_RPT2(_CRT_WARN, "CreateSolidColorBrush: hr=%p p=%p\n", hr, mBrush);
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	hr = DWriteCreateFactory(
++		DWRITE_FACTORY_TYPE_SHARED,
++		__uuidof(IDWriteFactory),
++		reinterpret_cast<IUnknown**>(&mDWriteFactory));
++	_RPT2(_CRT_WARN, "DWriteCreateFactory: hr=%p p=%p\n", hr,
++		mDWriteFactory);
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	hr = mDWriteFactory->GetGdiInterop(&mGdiInterop);
++	_RPT2(_CRT_WARN, "GetGdiInterop: hr=%p p=%p\n", hr, mGdiInterop);
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	hr = mDWriteFactory->CreateRenderingParams(&mRenderingParams);
++	_RPT2(_CRT_WARN, "CreateRenderingParams: hr=%p p=%p\n", hr,
++		mRenderingParams);
++    }
++}
++
++DWriteContext::~DWriteContext()
++{
++    SafeRelease(&mTextFormat);
++    SafeRelease(&mRenderingParams);
++    SafeRelease(&mGdiInterop);
++    SafeRelease(&mDWriteFactory);
++    SafeRelease(&mBrush);
++    SafeRelease(&mRT);
++    SafeRelease(&mD2D1Factory);
++}
++
++    HRESULT
++DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
++{
++    // Most of this function is copy from: http://msdn.microsoft.com/en-us/library/windows/desktop/dd941783(v=vs.85).aspx
++    HRESULT hr = S_OK;
++
++    IDWriteFont *font = NULL;
++    IDWriteFontFamily *fontFamily = NULL;
++    IDWriteLocalizedStrings *localizedFamilyNames = NULL;
++
++    if (SUCCEEDED(hr))
++    {
++	hr = mGdiInterop->CreateFontFromLOGFONT(&logFont, &font);
++    }
++
++    // Get the font family to which this font belongs.
++    if (SUCCEEDED(hr))
++    {
++	hr = font->GetFontFamily(&fontFamily);
++    }
++
++    // Get the family names. This returns an object that encapsulates one or
++    // more names with the same meaning but in different languages.
++    if (SUCCEEDED(hr))
++    {
++	hr = fontFamily->GetFamilyNames(&localizedFamilyNames);
++    }
++
++    // Get the family name at index zero. If we were going to display the name
++    // we'd want to try to find one that matched the use locale, but for
++    // purposes of creating a text format object any language will do.
++
++    wchar_t familyName[100];
++    if (SUCCEEDED(hr))
++    {
++	hr = localizedFamilyNames->GetString(0, familyName,
++		ARRAYSIZE(familyName));
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	// If no font size was passed in use the lfHeight of the LOGFONT.
++	if (fontSize == 0)
++	{
++	    // Convert from pixels to DIPs.
++	    fontSize = PixelsToDipsY(logFont.lfHeight);
++	    if (fontSize < 0)
++	    {
++		// Negative lfHeight represents the size of the em unit.
++		fontSize = -fontSize;
++	    }
++	    else
++	    {
++		// Positive lfHeight represents the cell height (ascent +
++		// descent).
++		DWRITE_FONT_METRICS fontMetrics;
++		font->GetMetrics(&fontMetrics);
++
++		// Convert the cell height (ascent + descent) from design units
++		// to ems.
++		float cellHeight = static_cast<float>(
++			fontMetrics.ascent + fontMetrics.descent) / 
++		    fontMetrics.designUnitsPerEm;
++
++		// Divide the font size by the cell height to get the font em
++		// size.
++		fontSize /= cellHeight;
++	    }
++	}
++    }
++
++    // The text format includes a locale name. Ideally, this would be the
++    // language of the text, which may or may not be the same as the primary
++    // language of the user. However, for our purposes the user locale will do.
++    wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
++    if (SUCCEEDED(hr))
++    {
++	if (GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH) == 0)
++	    hr = HRESULT_FROM_WIN32(GetLastError());
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	// Create the text format object.
++	hr = mDWriteFactory->CreateTextFormat(
++		familyName,
++		NULL, // no custom font collection
++		font->GetWeight(),
++		font->GetStyle(),
++		font->GetStretch(),
++		fontSize,
++		localeName,
++		&mTextFormat);
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	mFontWeight = static_cast<DWRITE_FONT_WEIGHT>(logFont.lfWeight);
++	mFontStyle = logFont.lfItalic ? DWRITE_FONT_STYLE_ITALIC
++	    : DWRITE_FONT_STYLE_NORMAL;
++    }
++
++    SafeRelease(&localizedFamilyNames);
++    SafeRelease(&fontFamily);
++    SafeRelease(&font);
++
++    return hr;
++}
++
++    void
++DWriteContext::SetFont(HFONT hFont)
++{
++    if (mLastHFont != hFont)
++    {
++	LOGFONTW lf;
++	if (GetObjectW(hFont, sizeof(lf), &lf))
++	{
++	    SetFont(lf);
++	    mLastHFont = hFont;
++	}
++    }
++}
++
++    void
++DWriteContext::SetFont(const LOGFONTW &logFont)
++{
++    SafeRelease(&mTextFormat);
++    mLastHFont = NULL;
++
++    HRESULT hr = SetLOGFONT(logFont, 0.f);
++
++    if (SUCCEEDED(hr))
++	hr = mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
++
++    if (SUCCEEDED(hr))
++	hr = mTextFormat->SetParagraphAlignment(
++		DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
++
++    if (SUCCEEDED(hr))
++	hr = mTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
++}
++
++    void
++DWriteContext::DrawText(HDC hdc, const WCHAR* text, int len,
++	int x, int y, int w, int h, int cellWidth, COLORREF color)
++{
++    HRESULT hr = S_OK;
++    IDWriteBitmapRenderTarget *bmpRT = NULL;
++
++    // Skip when any fonts are not set.
++    if (mTextFormat == NULL)
++	return;
++
++    // Check possibility of zero divided error.
++    if (cellWidth == 0 || mDpiScaleX == 0.0f)
++	return;
++
++    if (SUCCEEDED(hr))
++	hr = mGdiInterop->CreateBitmapRenderTarget(hdc, w, h, &bmpRT);
++
++    if (SUCCEEDED(hr))
++    {
++	IDWriteTextLayout *textLayout = NULL;
++
++	HDC memdc = bmpRT->GetMemoryDC();
++	BitBlt(memdc, 0, 0, w, h, hdc, x, y, SRCCOPY);
++
++	hr = mDWriteFactory->CreateGdiCompatibleTextLayout(
++		text, len, mTextFormat, static_cast<FLOAT>(w),
++		static_cast<FLOAT>(h), mDpiScaleX, NULL, TRUE, &textLayout);
++
++	if (SUCCEEDED(hr))
++	{
++	    DWRITE_TEXT_RANGE textRange = { 0, len };
++	    textLayout->SetFontWeight(mFontWeight, textRange);
++	    textLayout->SetFontStyle(mFontStyle, textRange);
++	}
++
++	if (SUCCEEDED(hr))
++	{
++	    GdiTextRenderer *renderer = new GdiTextRenderer(bmpRT,
++		    mRenderingParams);
++	    GdiTextRendererContext data = {
++		color,
++		(FLOAT)cellWidth / mDpiScaleX,
++		0.0f
++	    };
++	    textLayout->Draw(&data, renderer, 0, 0);
++	    SafeRelease(&renderer);
++	}
++
++	BitBlt(hdc, x, y, w, h, memdc, 0, 0, SRCCOPY);
++
++	SafeRelease(&textLayout);
++    }
++
++    SafeRelease(&bmpRT);
++}
++
++    float
++DWriteContext::PixelsToDipsY(int y)
++{
++    return y / mDpiScaleY;
++}
++
++    void
++DWriteContext::SetRenderingParams(
++	float gamma,
++	float enhancedContrast,
++	float clearTypeLevel,
++	DWRITE_PIXEL_GEOMETRY pixelGeometry,
++	DWRITE_RENDERING_MODE renderingMode)
++{
++    if (mDWriteFactory == NULL)
++	return;
++
++    IDWriteRenderingParams *newParam = NULL;
++    HRESULT hr;
++    hr = mDWriteFactory->CreateCustomRenderingParams(gamma, enhancedContrast,
++	    clearTypeLevel, pixelGeometry, renderingMode, &newParam);
++    if (SUCCEEDED(hr))
++    {
++	SafeRelease(&mRenderingParams);
++	mRenderingParams = newParam;
++    }
++}
++
++    static DWRITE_PIXEL_GEOMETRY
++ToPixelGeometry(int value)
++{
++    switch (value)
++    {
++	default:
++	case 0:
++	    return DWRITE_PIXEL_GEOMETRY_FLAT;
++	case 1:
++	    return DWRITE_PIXEL_GEOMETRY_RGB;
++	case 2:
++	    return DWRITE_PIXEL_GEOMETRY_BGR;
++    }
++}
++
++    static DWRITE_RENDERING_MODE
++ToRenderingMode(int value)
++{
++    switch (value)
++    {
++	default:
++	case 0:
++	    return DWRITE_RENDERING_MODE_DEFAULT;
++	case 1:
++	    return DWRITE_RENDERING_MODE_ALIASED;
++	case 2:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC;
++	case 3:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL;
++	case 4:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL;
++	case 5:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC;
++	case 6:
++	    return DWRITE_RENDERING_MODE_OUTLINE;
++    }
++}
++
++////////////////////////////////////////////////////////////////////////////
++// PUBLIC C INTERFACES
++
++    DWriteContext *
++DWriteContext_Open(void)
++{
++    return new DWriteContext();
++}
++
++    void
++DWriteContext_BeginDraw(DWriteContext *ctx)
++{
++    if (ctx != NULL && ctx->mRT != NULL)
++    {
++	ctx->mRT->BeginDraw();
++	ctx->mRT->SetTransform(D2D1::IdentityMatrix());
++	ctx->mDrawing = true;
++    }
++}
++
++    void
++DWriteContext_BindDC(DWriteContext *ctx, HDC hdc, RECT *rect)
++{
++    if (ctx != NULL && ctx->mRT != NULL)
++    {
++	ctx->mRT->BindDC(hdc, rect);
++    }
++}
++
++    void
++DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont)
++{
++    if (ctx != NULL)
++    {
++	ctx->SetFont(hFont);
++    }
++}
++
++    void
++DWriteContext_DrawText(
++	DWriteContext *ctx,
++	HDC hdc,
++	const WCHAR* text,
++	int len,
++	int x,
++	int y,
++	int w,
++	int h,
++	int cellWidth,
++	COLORREF color)
++{
++    if (ctx != NULL)
++	ctx->DrawText(hdc, text, len, x, y, w, h, cellWidth, color);
++}
++
++    void
++DWriteContext_EndDraw(DWriteContext *ctx)
++{
++    if (ctx != NULL && ctx->mRT != NULL)
++    {
++	ctx->mRT->EndDraw();
++	ctx->mDrawing = false;
++    }
++}
++
++    void
++DWriteContext_Close(DWriteContext *ctx)
++{
++    delete ctx;
++}
++
++    void
++DWriteContext_SetRenderingParams(
++	DWriteContext *ctx,
++	float gamma,
++	float enhancedContrast,
++	float clearTypeLevel,
++	int pixelGeometry,
++	int renderingMode)
++{
++    if (ctx != NULL)
++    {
++	ctx->SetRenderingParams(gamma, enhancedContrast, clearTypeLevel,
++		ToPixelGeometry(pixelGeometry),
++		ToRenderingMode(renderingMode));
++    }
++}
+diff -r f70560eaf77c src/gui_dwrite.h
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/src/gui_dwrite.h	Sun Jan 20 00:05:23 2013 +0900
+@@ -0,0 +1,56 @@
++/* vi:set ts=8 sts=4 sw=4 noet: */
++
++#ifndef GUI_DWRITE_H
++#define GUI_DWRITE_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++typedef struct DWriteContext DWriteContext;
++
++DWriteContext *DWriteContext_Open(void);
++void DWriteContext_BeginDraw(DWriteContext *ctx);
++void DWriteContext_BindDC(DWriteContext *ctx, HDC hdc, RECT *rect);
++void DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont);
++void DWriteContext_DrawText(
++	DWriteContext *ctx,
++	HDC hdc,
++	const WCHAR* text,
++	int len,
++	int x,
++	int y,
++	int w,
++	int h,
++	int cellWidth,
++	COLORREF color);
++void DWriteContext_EndDraw(DWriteContext *ctx);
++void DWriteContext_Close(DWriteContext *ctx);
++
++/**
++ * pixelGeometry:
++ *	0 - DWRITE_PIXEL_GEOMETRY_FLAT
++ *	1 - DWRITE_PIXEL_GEOMETRY_RGB
++ *	2 - DWRITE_PIXEL_GEOMETRY_BGR
++ *
++ * renderingMode:
++ *	0 - DWRITE_RENDERING_MODE_DEFAULT
++ *	1 - DWRITE_RENDERING_MODE_ALIASED
++ *	2 - DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC
++ *	3 - DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL
++ *	4 - DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL
++ *	5 - DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC
++ *	6 - DWRITE_RENDERING_MODE_OUTLINE
++ */
++void DWriteContext_SetRenderingParams(
++	DWriteContext *ctx,
++	float gamma,
++	float enhancedContrast,
++	float clearTypeLevel,
++	int pixelGeometry,
++	int renderingMode);
++
++#ifdef __cplusplus
++}
++#endif
++#endif/*GUI_DWRITE_H*/
+diff -r f70560eaf77c src/gui_w32.c
+--- a/src/gui_w32.c	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/gui_w32.c	Sun Jan 20 00:05:23 2013 +0900
+@@ -25,6 +25,19 @@
+ 
+ #include "vim.h"
+ 
++#if defined(USE_DIRECT_X)
++# include "gui_dwrite.h"
++#endif
++
++#if defined(USE_DIRECT_X)
++static DWriteContext *s_dwc = NULL;
++
++DWriteContext *get_current_dwritecontext()
++{
++    return s_dwc;
++}
++#endif
++
+ /*
+  * These are new in Windows ME/XP, only defined in recent compilers.
+  */
+@@ -1679,6 +1692,10 @@
+     set_vim_var_nr(VV_WINDOWID, HandleToLong(s_hwnd));
+ #endif
+ 
++#if defined(USE_DIRECT_X)
++    s_dwc = DWriteContext_Open();
++#endif
++
+ theend:
+     /* Display any pending error messages */
+     display_errors();
+@@ -2419,6 +2436,11 @@
+     SetTextColor(s_hdc, gui.currFgColor);
+     SelectFont(s_hdc, gui.currFont);
+ 
++#ifdef USE_DIRECT_X
++    if (p_antialias)
++	DWriteContext_SetFont(s_dwc, (HFONT)gui.currFont);
++#endif
++
+     if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
+     {
+ 	vim_free(padding);
+@@ -2453,6 +2475,14 @@
+ 	    if (text[n] >= 0x80)
+ 		break;
+ 
++#if defined(USE_DIRECT_X)
++    /* Quick hack to enable DirectWrite.  To use DirectWrite (antialias), it is
++     * required that unicode drawing routine, currently.  So this forces it
++     * enabled. */
++    if (p_antialias && enc_utf8)
++	n = 0; /* Keep n < len, to enter block for unicode. */
++#endif
++
+     /* Check if the Unicode buffer exists and is big enough.  Create it
+      * with the same length as the multi-byte string, the number of wide
+      * characters is always equal or smaller. */
+@@ -2511,8 +2541,17 @@
+ 	    i += utfc_ptr2len_len(text + i, len - i);
+ 	    ++clen;
+ 	}
+-	ExtTextOutW(s_hdc, TEXT_X(col), TEXT_Y(row),
+-			   foptions, pcliprect, unicodebuf, wlen, unicodepdy);
++#if defined(USE_DIRECT_X)
++	if (p_antialias)
++	{
++	    DWriteContext_DrawText(s_dwc, s_hdc, unicodebuf, wlen,
++		    TEXT_X(col), TEXT_Y(row), FILL_X(cells), FILL_Y(1),
++		    gui.char_width, gui.currFgColor);
++	}
++        else
++#endif
++	    ExtTextOutW(s_hdc, TEXT_X(col), TEXT_Y(row),
++		    foptions, pcliprect, unicodebuf, wlen, unicodepdy);
+ 	len = cells;	/* used for underlining */
+     }
+     else if ((enc_codepage > 0 && (int)GetACP() != enc_codepage) || enc_latin9)
+diff -r f70560eaf77c src/gui_w48.c
+--- a/src/gui_w48.c	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/gui_w48.c	Sun Jan 20 00:05:23 2013 +0900
+@@ -2778,6 +2778,10 @@
+ 
+ 	out_flush();	    /* make sure all output has been processed */
+ 	(void)BeginPaint(hwnd, &ps);
++#if defined(USE_DIRECT_X)
++	if (p_antialias)
++	    DWriteContext_BeginDraw(s_dwc);
++#endif
+ 
+ #ifdef FEAT_MBYTE
+ 	/* prevent multi-byte characters from misprinting on an invalid
+@@ -2793,9 +2797,20 @@
+ #endif
+ 
+ 	if (!IsRectEmpty(&ps.rcPaint))
++	{
++#if defined(USE_DIRECT_X)
++	    if (p_antialias)
++		DWriteContext_BindDC(s_dwc, s_hdc, &ps.rcPaint);
++#endif
+ 	    gui_redraw(ps.rcPaint.left, ps.rcPaint.top,
+ 		    ps.rcPaint.right - ps.rcPaint.left + 1,
+ 		    ps.rcPaint.bottom - ps.rcPaint.top + 1);
++	}
++
++#if defined(USE_DIRECT_X)
++	if (p_antialias)
++	    DWriteContext_EndDraw(s_dwc);
++#endif
+ 	EndPaint(hwnd, &ps);
+     }
+ }
+@@ -3034,6 +3049,11 @@
+     void
+ gui_mch_exit(int rc)
+ {
++#if defined(USE_DIRECT_X)
++    DWriteContext_Close(s_dwc);
++    s_dwc = NULL;
++#endif
++
+     ReleaseDC(s_textArea, s_hdc);
+     DeleteObject(s_brush);
+ 
+diff -r f70560eaf77c src/option.c
+--- a/src/option.c	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/option.c	Sun Jan 20 00:05:23 2013 +0900
+@@ -498,7 +498,7 @@
+ #endif
+ 					    (char_u *)0L} SCRIPTID_INIT},
+     {"antialias",   "anti", P_BOOL|P_VI_DEF|P_VIM|P_RCLR,
+-#if defined(FEAT_GUI) && defined(MACOS_X)
++#if defined(FEAT_GUI) && (defined(MACOS_X) || defined(USE_DIRECT_X))
+ 			    (char_u *)&p_antialias, PV_NONE,
+ 			    {(char_u *)FALSE, (char_u *)FALSE}
+ #else
+diff -r f70560eaf77c src/option.h
+--- a/src/option.h	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/option.h	Sun Jan 20 00:05:23 2013 +0900
+@@ -317,7 +317,7 @@
+ #ifdef FEAT_MBYTE
+ EXTERN char_u	*p_ambw;	/* 'ambiwidth' */
+ #endif
+-#if defined(FEAT_GUI) && defined(MACOS_X)
++#if defined(FEAT_GUI) && (defined(MACOS_X) || defined(USE_DIRECT_X))
+ EXTERN int	*p_antialias;	/* 'antialias' */
+ #endif
+ EXTERN int	p_ar;		/* 'autoread' */
+diff -r f70560eaf77c src/version.c
+--- a/src/version.c	Sat Jan 19 23:22:43 2013 +0900
++++ b/src/version.c	Sun Jan 20 00:05:23 2013 +0900
+@@ -182,6 +182,13 @@
+ #else
+ 	"-digraphs",
+ #endif
++#ifdef WIN3264
++# ifdef USE_DIRECT_X
++	"+directx",
++# else
++	"-directx",
++# endif
++#endif
+ #ifdef FEAT_DND
+ 	"+dnd",
+ #else

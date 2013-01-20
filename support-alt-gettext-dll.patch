@@ -1,0 +1,22 @@
+# HG changeset patch
+# Parent aeabcaf55533342e8dfb79dfcbf1d2898ce85c91
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -353,6 +353,7 @@
+ #if defined(DYNAMIC_GETTEXT) || defined(PROTO)
+ # ifndef GETTEXT_DLL
+ #  define GETTEXT_DLL "libintl.dll"
++#  define GETTEXT_DLL_ALT "intl.dll"
+ # endif
+ /* Dummy functions */
+ static char *null_libintl_gettext(const char *);
+@@ -389,6 +390,8 @@
+ 	return 1;
+     /* Load gettext library (libintl.dll) */
+     hLibintlDLL = vimLoadLib(libname != NULL ? libname : GETTEXT_DLL);
++    if (!hLibintlDLL && !libname)   /* sometimes it's called intl.dll */
++	hLibintlDLL = vimLoadLib(GETTEXT_DLL_ALT);
+     if (!hLibintlDLL)
+     {
+ 	if (p_verbose > 0)

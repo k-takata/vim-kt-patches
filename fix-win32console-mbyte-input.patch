@@ -1,0 +1,96 @@
+# HG changeset patch
+# Parent 04592728474a35794ae6397a0b90f2989864fb66
+
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -6205,8 +6205,23 @@
+ 	    if (vcp->vc_cpfrom == 0)
+ 		tmp_len = utf8_to_utf16(ptr, len, NULL, NULL);
+ 	    else
+-		tmp_len = MultiByteToWideChar(vcp->vc_cpfrom, 0,
+-							      ptr, len, 0, 0);
++	    {
++		tmp_len = MultiByteToWideChar(vcp->vc_cpfrom,
++					unconvlenp ? MB_ERR_INVALID_CHARS : 0,
++					ptr, len, 0, 0);
++		if (tmp_len == 0 &&
++			GetLastError() == ERROR_NO_UNICODE_TRANSLATION)
++		{
++		    if (lenp != NULL)
++			*lenp = 0;
++		    if (unconvlenp != NULL)
++			*unconvlenp = len;
++		    retval = alloc(1);
++		    if (retval)
++			retval[0] = NUL;
++		    return retval;
++		}
++	    }
+ 	    tmp = (short_u *)alloc(sizeof(short_u) * tmp_len);
+ 	    if (tmp == NULL)
+ 		break;
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -1431,6 +1431,11 @@
+ #define TYPEAHEADLEN 20
+     static char_u   typeahead[TYPEAHEADLEN];	/* previously typed bytes. */
+     static int	    typeaheadlen = 0;
++#ifdef FEAT_MBYTE
++    static char_u *rest = NULL;	    /* unconverted rest of previous read */
++    static int	restlen = 0;
++    int		unconverted;
++#endif
+ 
+     /* First use any typeahead that was kept because "buf" was too small. */
+     if (typeaheadlen > 0)
+@@ -1534,6 +1539,33 @@
+ 
+ 	    c = tgetch(&modifiers, &ch2);
+ 
++# ifdef FEAT_MBYTE
++	    /* stolen from fill_input_buf() in ui.c */
++	    if (rest != NULL)
++	    {
++		/* Use remainder of previous call, starts with an invalid
++		 * character that may become valid when reading more. */
++		if (restlen > TYPEAHEADLEN - typeaheadlen)
++		    unconverted = TYPEAHEADLEN - typeaheadlen;
++		else
++		    unconverted = restlen;
++		mch_memmove(typeahead + typeaheadlen, rest, unconverted);
++		if (unconverted == restlen)
++		{
++		    vim_free(rest);
++		    rest = NULL;
++		}
++		else
++		{
++		    restlen -= unconverted;
++		    mch_memmove(rest, rest + unconverted, restlen);
++		}
++		typeaheadlen += unconverted;
++	    }
++	    else
++		unconverted = 0;
++#endif
++
+ 	    if (typebuf_changed(tb_change_cnt))
+ 	    {
+ 		/* "buf" may be invalid now if a client put something in the
+@@ -1569,8 +1601,12 @@
+ 		 * when 'tenc' is set. */
+ 		if (input_conv.vc_type != CONV_NONE
+ 						&& (ch2 == NUL || c != K_NUL))
+-		    n = convert_input(typeahead + typeaheadlen, n,
+-						 TYPEAHEADLEN - typeaheadlen);
++		{
++		    typeaheadlen -= unconverted;
++		    n = convert_input_safe(typeahead + typeaheadlen,
++				n + unconverted, TYPEAHEADLEN - typeaheadlen,
++				rest == NULL ? &rest : NULL, &restlen);
++		}
+ #endif
+ 
+ 		/* Use the ALT key to set the 8th bit of the character

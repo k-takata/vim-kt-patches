@@ -1,0 +1,36 @@
+# HG changeset patch
+# Parent 637e7976fe628e55d944d51c11b31ca1996ac97e
+
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
+@@ -47,8 +47,8 @@
+ #               (i386)
+ # USEDLL	no or yes: set to yes to use the Runtime library DLL (no)
+ #		For USEDLL=yes the cygwin1.dll is required to run Vim.
+-#		"no" does not work with latest version of Cygwin, use
+-#		Make_ming.mak instead.  Or set CC to gcc-3 and add
++#		For "no" the mingw-gcc-g++ package or the mingw64-i686-gcc-g++
++#		package is required to complie Vim.  Or set CC to gcc-3 and add
+ #		-L/lib/w32api to EXTRA_LIBS.
+ # POSTSCRIPT	no or yes: set to yes for PostScript printing (no)
+ # FEATURES	TINY, SMALL, NORMAL, BIG or HUGE (BIG)
+@@ -114,9 +114,17 @@
+ INCLUDES = -march=$(ARCH) -Iproto
+ 
+ #>>>>> name of the compiler and linker, name of lib directory
+-CROSS_COMPILE =
++ifeq (yes, $(USEDLL))
++# CROSS_COMPILE is used for the gvimext DLL.
++CROSS_COMPILE = i686-pc-mingw32-
+ CC = gcc
+ RC = windres
++else
++# i686-pc-mingw32-gcc, i686-w64-mingw32-gcc or gcc-3 can be used.
++CROSS_COMPILE = i686-pc-mingw32-
++CC = $(CROSS_COMPILE)gcc
++RC = $(CROSS_COMPILE)windres
++endif
+ 
+ ##############################
+ # DYNAMIC_PERL=yes and no both work

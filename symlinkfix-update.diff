@@ -1,0 +1,452 @@
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -3778,12 +3778,12 @@
+ 	    }
+ 	}
+ 
+-# ifdef UNIX
+ 	/*
+ 	 * Break symlinks and/or hardlinks if we've been asked to.
+ 	 */
+ 	if ((bkc_flags & BKC_BREAKSYMLINK) || (bkc_flags & BKC_BREAKHARDLINK))
+ 	{
++# ifdef UNIX
+ 	    int	lstat_res;
+ 
+ 	    lstat_res = mch_lstat((char *)fname, &st);
+@@ -3799,8 +3799,18 @@
+ 		    && st_old.st_nlink > 1
+ 		    && (lstat_res != 0 || st.st_ino == st_old.st_ino))
+ 		backup_copy = FALSE;
+-	}
+-#endif
++# elif defined(WIN32)
++	    /* Symlinks. */
++	    if ((bkc_flags & BKC_BREAKSYMLINK)
++		    && mch_is_symbolic_link(fname))
++		backup_copy = FALSE;
++
++	    /* Hardlinks. */
++	    if ((bkc_flags & BKC_BREAKHARDLINK)
++		    && mch_is_hard_link(fname))
++		backup_copy = FALSE;
++# endif
++	}
+ 
+ #endif
+ 
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -78,6 +78,16 @@
+ # endif
+ #endif
+ 
++/*
++ * Reparse Point
++ */
++#ifndef FILE_ATTRIBUTE_REPARSE_POINT
++# define FILE_ATTRIBUTE_REPARSE_POINT	0x00000400
++#endif
++#ifndef IO_REPARSE_TAG_SYMLINK
++# define IO_REPARSE_TAG_SYMLINK		0xA000000C
++#endif
++
+ /* Record all output and all keyboard & mouse input */
+ /* #define MCH_WRITE_DUMP */
+ 
+@@ -219,6 +229,10 @@
+ static char *vimrun_path = "vimrun ";
+ #endif
+ 
++static int win32_getattrs(char_u *name);
++static int win32_setattrs(char_u *name, int attrs);
++static int win32_set_archive(char_u *name);
++
+ #ifndef FEAT_GUI_W32
+ static int suppress_winsize = 1;	/* don't fiddle with console */
+ #endif
+@@ -2605,57 +2619,54 @@
+ /*
+  * get file permissions for `name'
+  * -1 : error
+- * else FILE_ATTRIBUTE_* defined in winnt.h
++ * else mode_t
+  */
+     long
+ mch_getperm(char_u *name)
+ {
+-#ifdef FEAT_MBYTE
+-    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+-    {
+-	WCHAR	*p = enc_to_utf16(name, NULL);
+-	long	n;
+-
+-	if (p != NULL)
+-	{
+-	    n = (long)GetFileAttributesW(p);
+-	    vim_free(p);
+-	    if (n >= 0 || GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
+-		return n;
+-	    /* Retry with non-wide function (for Windows 98). */
+-	}
+-    }
+-#endif
+-    return (long)GetFileAttributes((char *)name);
++    struct stat st;
++    int n;
++
++    n = mch_stat(name, &st);
++    return n == 0 ? (int)st.st_mode : -1;
+ }
+ 
+ 
+ /*
+  * set file permission for `name' to `perm'
++ *
++ * return FAIL for failure, OK otherwise
+  */
+     int
+ mch_setperm(
+     char_u  *name,
+     long    perm)
+ {
+-    perm |= FILE_ATTRIBUTE_ARCHIVE;	/* file has changed, set archive bit */
++    long	n;
+ #ifdef FEAT_MBYTE
++    WCHAR *p;
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+-	WCHAR	*p = enc_to_utf16(name, NULL);
+-	long	n;
++	p = enc_to_utf16(name, NULL);
+ 
+ 	if (p != NULL)
+ 	{
+-	    n = (long)SetFileAttributesW(p, perm);
++	    n = _wchmod(p, perm);
+ 	    vim_free(p);
+-	    if (n || GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
+-		return n ? OK : FAIL;
++	    if (n == -1 && GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
++		return FAIL;
+ 	    /* Retry with non-wide function (for Windows 98). */
+ 	}
+     }
++    if (p == NULL)
+ #endif
+-    return SetFileAttributes((char *)name, perm) ? OK : FAIL;
++	n = _chmod(name, perm);
++    if (n == -1)
++	return FAIL;
++
++    win32_set_archive(name);
++
++    return OK;
+ }
+ 
+ /*
+@@ -2664,49 +2675,12 @@
+     void
+ mch_hide(char_u *name)
+ {
+-    int		perm;
+-#ifdef FEAT_MBYTE
+-    WCHAR	*p = NULL;
+-
+-    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+-	p = enc_to_utf16(name, NULL);
+-#endif
+-
+-#ifdef FEAT_MBYTE
+-    if (p != NULL)
+-    {
+-	perm = GetFileAttributesW(p);
+-	if (perm < 0 && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
+-	{
+-	    /* Retry with non-wide function (for Windows 98). */
+-	    vim_free(p);
+-	    p = NULL;
+-	}
+-    }
+-    if (p == NULL)
+-#endif
+-	perm = GetFileAttributes((char *)name);
+-    if (perm >= 0)
+-    {
+-	perm |= FILE_ATTRIBUTE_HIDDEN;
+-#ifdef FEAT_MBYTE
+-	if (p != NULL)
+-	{
+-	    if (SetFileAttributesW(p, perm) == 0
+-		    && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
+-	    {
+-		/* Retry with non-wide function (for Windows 98). */
+-		vim_free(p);
+-		p = NULL;
+-	    }
+-	}
+-	if (p == NULL)
+-#endif
+-	    SetFileAttributes((char *)name, perm);
+-    }
+-#ifdef FEAT_MBYTE
+-    vim_free(p);
+-#endif
++    int attrs = win32_getattrs(name);
++    if (attrs == -1)
++	return;
++
++    attrs |= FILE_ATTRIBUTE_HIDDEN;
++    win32_setattrs(name, attrs);
+ }
+ 
+ /*
+@@ -2716,7 +2690,7 @@
+     int
+ mch_isdir(char_u *name)
+ {
+-    int f = mch_getperm(name);
++    int f = win32_getattrs(name);
+ 
+     if (f == -1)
+ 	return FALSE;		    /* file does not exist at all */
+@@ -2752,12 +2726,86 @@
+  * Return TRUE if file "fname" has more than one link.
+  */
+     int
++mch_is_hard_link(char_u *fname)
++{
++    BY_HANDLE_FILE_INFORMATION info;
++
++    return win32_fileinfo(fname, &info) == FILEINFO_OK
++						   && info.nNumberOfLinks > 1;
++}
++
++/*
++ * Return TRUE if file "fname" is a symbolic link.
++ */
++    int
++mch_is_symbolic_link(char_u *fname)
++{
++    HANDLE hFind;
++    int res = FALSE;
++    WIN32_FIND_DATAA findDataA;
++    DWORD fileFlags = 0, reparseTag = 0;
++#ifdef FEAT_MBYTE
++    WCHAR	*wn = NULL;
++    WIN32_FIND_DATAW findDataW;
++
++    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
++    {
++	wn = enc_to_utf16(fname, NULL);
++    }
++    if (wn != NULL)
++    {
++	hFind = FindFirstFileW(wn, &findDataW);
++	vim_free(wn);
++	if (hFind == INVALID_HANDLE_VALUE
++		&& GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
++	{
++	    /* Retry with non-wide function (for Windows 98). */
++
++	    hFind = FindFirstFile(fname, &findDataA);
++	    if (hFind != INVALID_HANDLE_VALUE)
++	    {
++		fileFlags = findDataA.dwFileAttributes;
++		reparseTag = findDataA.dwReserved0;
++	    }
++	}
++	else
++	{
++	    fileFlags = findDataW.dwFileAttributes;
++	    reparseTag = findDataW.dwReserved0;
++	}
++    }
++#else
++    hFind = FindFirstFile(fname, &findDataA);
++    if (hFind != INVALID_HANDLE_VALUE)
++    {
++	fileFlags = findDataA.dwFileAttributes;
++	reparseTag = findDataA.dwReserved0;
++    }
++#endif
++
++    if (hFind != INVALID_HANDLE_VALUE)
++	FindClose(hFind);
++
++    if ((fileFlags & FILE_ATTRIBUTE_REPARSE_POINT)
++	    && reparseTag == IO_REPARSE_TAG_SYMLINK)
++	res = TRUE;
++
++    return res;
++}
++
++/*
++ * Return TRUE if file "fname" has more than one link or if it is a symbolic link.
++ */
++    int
+ mch_is_linked(char_u *fname)
+ {
+-    BY_HANDLE_FILE_INFORMATION info;
+-
+-    return win32_fileinfo(fname, &info) == FILEINFO_OK
+-						   && info.nNumberOfLinks > 1;
++    if (mch_is_hard_link(fname))
++ 	return TRUE;
++
++    if (mch_is_symbolic_link(fname))
++ 	return TRUE;
++
++    return FALSE;
+ }
+ 
+ /*
+@@ -2824,6 +2872,92 @@
+ }
+ 
+ /*
++ * get file attributes for `name'
++ * -1 : error
++ * else FILE_ATTRIBUTE_* defined in winnt.h
++ */
++    static
++    int
++win32_getattrs(char_u *name)
++{
++    int		attr;
++#ifdef FEAT_MBYTE
++    WCHAR	*p = NULL;
++
++    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
++	p = enc_to_utf16(name, NULL);
++
++    if (p != NULL)
++    {
++	attr = GetFileAttributesW(p);
++	if (attr < 0 && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
++	{
++	    /* Retry with non-wide function (for Windows 98). */
++	    vim_free(p);
++	    p = NULL;
++	}
++    }
++    if (p == NULL)
++#endif
++	attr = GetFileAttributes((char *)name);
++#ifdef FEAT_MBYTE
++    vim_free(p);
++#endif
++    return attr;
++}
++
++/*
++ * set file attributes for `name' to `attrs'
++ *
++ * return -1 for failure, 0 otherwise
++ */
++    static
++    int
++win32_setattrs(char_u *name, int attrs)
++{
++    int res;
++#ifdef FEAT_MBYTE
++    WCHAR	*p = NULL;
++
++    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
++	p = enc_to_utf16(name, NULL);
++
++    if (p != NULL)
++    {
++	res = SetFileAttributesW(p, attrs);
++	if (res == FALSE
++	    && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
++	{
++	    /* Retry with non-wide function (for Windows 98). */
++	    vim_free(p);
++	    p = NULL;
++	}
++    }
++    if (p == NULL)
++#endif
++	res = SetFileAttributes((char *)name, attrs);
++#ifdef FEAT_MBYTE
++    vim_free(p);
++#endif
++    return res ? 0 : -1;
++}
++
++/*
++ * Set archive flag for "name".
++ */
++    static
++    int
++win32_set_archive(char_u *name)
++{
++    int attrs = win32_getattrs(name);
++    if (attrs == -1)
++	return -1;
++
++    attrs |= FILE_ATTRIBUTE_ARCHIVE;
++    return win32_setattrs(name, attrs);
++}
++
++/*
+  * Return TRUE if file or directory "name" is writable (not readonly).
+  * Strange semantics of Win32: a readonly directory is writable, but you can't
+  * delete a file.  Let's say this means it is writable.
+@@ -2831,10 +2965,10 @@
+     int
+ mch_writable(char_u *name)
+ {
+-    int perm = mch_getperm(name);
+-
+-    return (perm != -1 && (!(perm & FILE_ATTRIBUTE_READONLY)
+-				       || (perm & FILE_ATTRIBUTE_DIRECTORY)));
++    int attrs = win32_getattrs(name);
++
++    return (attrs != -1 && (!(attrs & FILE_ATTRIBUTE_READONLY)
++			  || (attrs & FILE_ATTRIBUTE_DIRECTORY)));
+ }
+ 
+ /*
+@@ -4994,13 +5128,16 @@
+ #ifdef FEAT_MBYTE
+     WCHAR	*wn = NULL;
+     int		n;
+-
++#endif
++
++    win32_setattrs(name, FILE_ATTRIBUTE_NORMAL);
++
++#ifdef FEAT_MBYTE
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+ 	wn = enc_to_utf16(name, NULL);
+ 	if (wn != NULL)
+ 	{
+-	    SetFileAttributesW(wn, FILE_ATTRIBUTE_NORMAL);
+ 	    n = DeleteFileW(wn) ? 0 : -1;
+ 	    vim_free(wn);
+ 	    if (n == 0 || GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
+@@ -5009,7 +5146,6 @@
+ 	}
+     }
+ #endif
+-    SetFileAttributes(name, FILE_ATTRIBUTE_NORMAL);
+     return DeleteFile(name) ? 0 : -1;
+ }
+ 
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -21,6 +21,8 @@
+ void mch_hide __ARGS((char_u *name));
+ int mch_isdir __ARGS((char_u *name));
+ int mch_mkdir __ARGS((char_u *name));
++int mch_is_hard_link __ARGS((char_u *fname));
++int mch_is_symbolic_link __ARGS((char_u *fname));
+ int mch_is_linked __ARGS((char_u *fname));
+ int win32_fileinfo __ARGS((char_u *fname, BY_HANDLE_FILE_INFORMATION *info));
+ int mch_writable __ARGS((char_u *name));
