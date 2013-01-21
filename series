@@ -1,3 +1,4 @@
+win32-suppress-warnings.patch
 symlinkfix-update.diff
 acl-fix.patch
 acl-mingw.patch
