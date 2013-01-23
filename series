@@ -7,7 +7,6 @@ fix-win32console-mbyte-input.patch
 0025-kaoriya-feat-kaoriya.patch
 support-alt-gettext-dll.patch
 patch-use_gfw_for_ime.diff
-fix-gui_w32-dependency.patch
 version_acl_xpm.patch
 0001-support-mingw-w64.patch
 0002-set-RUBY_INSTALL_NAME-and-RUBY_PLATFORM.patch
