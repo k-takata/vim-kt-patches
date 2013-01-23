@@ -1,9 +1,9 @@
 # HG changeset patch
-# Parent f70560eaf77ca51caf54188c1fa0d838489d3c37
+# Parent 276810b322f10e2a5907d0da52bc26536f8b5326
 
-diff -r f70560eaf77c src/Make_cyg.mak
---- a/src/Make_cyg.mak	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/Make_cyg.mak	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/Make_cyg.mak
+--- a/src/Make_cyg.mak	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/Make_cyg.mak	Thu Jan 24 00:35:45 2013 +0900
 @@ -8,6 +8,7 @@
  # Cygwin application use the Makefile (just like on Unix).
  #
@@ -12,97 +12,96 @@ diff -r f70560eaf77c src/Make_cyg.mak
  # PERL		define to path to Perl dir to get Perl support (not defined)
  #   PERL_VER	  define to version of Perl being used (56)
  #   DYNAMIC_PERL  no or yes: set to yes to load the Perl DLL dynamically (yes)
-@@ -88,6 +89,16 @@
+@@ -88,6 +89,10 @@
  ARCH = i386
  endif
  
 +ifndef DIRECTX
 +DIRECTX = no
 +endif
-+ifeq ($(DIRECTX),yes)
-+# DirectWrite requires that WINVER is 0x0600 or above
-+ifndef WINVER
-+WINVER = 0x0600
-+endif
-+endif
 +
  ifndef WINVER
  WINVER = 0x0500
  endif
-@@ -116,6 +127,7 @@
- #>>>>> name of the compiler and linker, name of lib directory
- CROSS_COMPILE =
- CC = gcc
-+CXX = g++
- RC = windres
+@@ -106,6 +111,13 @@
+ OPTIMIZE = MAXSPEED
+ endif
  
- ##############################
-@@ -436,6 +448,14 @@
++
++# Link against the shared version of libstdc++ by default.  Set
++# STATIC_STDCPLUS to "yes" to link against static version instead.
++ifndef STATIC_STDCPLUS
++STATIC_STDCPLUS=no
++endif
++
+ ### See feature.h for a list of optionals.
+ ### Any other defines can be included here.
+ 
+@@ -436,6 +448,15 @@
  endif
  
  ##############################
 +ifeq (yes, $(DIRECTX))
 +# Only allow DIRECTX for a GUI build.
-+DEFINES += -DUSE_DIRECT_X
++DEFINES += -DFEAT_DIRECTX -DDYNAMIC_DIRECTX
 +EXTRA_OBJS += $(OUTDIR)/gui_dwrite.o
-+EXTRA_LIBS += -ld2d1 -ldwrite -static-libgcc -static
++EXTRA_LIBS += -ld2d1 -ldwrite
++USE_STDCPLUS = yes
 +endif
 +
 +##############################
  ifdef XPM
  # Only allow XPM for a GUI build.
  DEFINES += -DFEAT_XPM_W32
-@@ -540,8 +560,13 @@
- # According to the Cygwin doc 1.2 FAQ, kernel32 should not be specified for
- # linking unless calling ld directly.
- # See /usr/doc/cygwin-doc-1.2/html/faq_toc.html#TOC93 for more information.
-+ifeq ($(DIRECTX),yes)
-+$(EXE): $(OUTDIR) $(OBJ)
-+	$(CXX) $(CFLAGS) -o $(EXE) $(OBJ) $(LIBS) -luuid -lole32 $(EXTRA_LIBS)
-+else
- $(EXE): $(OUTDIR) $(OBJ)
- 	$(CC) $(CFLAGS) -o $(EXE) $(OBJ) $(LIBS) -luuid -lole32 $(EXTRA_LIBS)
-+endif
+@@ -460,7 +481,8 @@
+ ifeq (yes, $(OLE))
+ DEFINES += -DFEAT_OLE
+ EXTRA_OBJS += $(OUTDIR)/if_ole.o
+-EXTRA_LIBS += -loleaut32 -lstdc++
++EXTRA_LIBS += -loleaut32
++USE_STDCPLUS = yes
+ endif
  
- xxd/xxd.exe: xxd/xxd.c
- 	$(MAKE) -C xxd -f Make_cyg.mak CC=$(CC) USEDLL=$(USEDLL)
-@@ -600,6 +625,9 @@
+ ##############################
+@@ -474,6 +496,15 @@
+ DIRSLASH = \\
+ endif
+ 
++##############################
++ifeq (yes, $(USE_STDCPLUS))
++ifeq (yes, $(STATIC_STDCPLUS))
++EXTRA_LIBS += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
++else
++EXTRA_LIBS += -lstdc++
++endif
++endif
++
+ #>>>>> end of choices
+ ###########################################################################
+ 
+@@ -600,6 +631,9 @@
  $(OUTDIR)/ex_eval.o:	ex_eval.c $(INCL) ex_cmds.h
  	$(CC) -c $(CFLAGS) ex_eval.c -o $(OUTDIR)/ex_eval.o
  
 +$(OUTDIR)/gui_dwrite.o:	gui_dwrite.cpp $(INCL) gui_dwrite.h
-+	$(CXX) -c $(CFLAGS) gui_dwrite.cpp -o $(OUTDIR)/gui_dwrite.o
++	$(CC) -c $(CFLAGS) gui_dwrite.cpp -o $(OUTDIR)/gui_dwrite.o
 +
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r f70560eaf77c src/Make_ming.mak
---- a/src/Make_ming.mak	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/Make_ming.mak	Sun Jan 20 00:05:23 2013 +0900
-@@ -31,6 +31,14 @@
+diff -r 276810b322f1 src/Make_ming.mak
+--- a/src/Make_ming.mak	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/Make_ming.mak	Thu Jan 24 00:35:45 2013 +0900
+@@ -31,6 +31,8 @@
  OPTIMIZE=MAXSPEED
  # set to yes to make gvim, no for vim
  GUI=yes
 +# set to yes if you want to use DirectWrite (DirectX)
 +DIRECTX=no
-+ifeq ($(DIRECTX),yes)
-+# DirectWrite requires that WINVER is 0x0600 or above
-+ifndef WINVER
-+WINVER = 0x0600
-+endif
-+endif
  # FEATURES=[TINY | SMALL  | NORMAL | BIG | HUGE]
  # Set to TINY to make minimal version (few features).
  FEATURES=BIG
-@@ -340,6 +348,7 @@
- endif
- endif
- CC := $(CROSS_COMPILE)gcc
-+CXX := $(CROSS_COMPILE)g++
- WINDRES := $(CROSS_COMPILE)windres
- WINDRES_CC = $(CC)
- 
-@@ -440,6 +449,14 @@
+@@ -440,6 +442,14 @@
  endif
  endif
  
@@ -110,14 +109,14 @@ diff -r f70560eaf77c src/Make_ming.mak
 +ifeq ($(DIRECTX),yes)
 +# Only allow DirectWrite for a GUI build.
 +ifeq (yes, $(GUI))
-+DEFINES += -DUSE_DIRECT_X
++DEFINES += -DFEAT_DIRECTX -DDYNAMIC_DIRECTX
 +endif
 +endif
 +
  # Only allow XPM for a GUI build.
  ifeq (yes, $(GUI))
  
-@@ -576,6 +593,14 @@
+@@ -576,6 +586,14 @@
  LIB += -lwsock32
  endif
  endif
@@ -126,45 +125,59 @@ diff -r f70560eaf77c src/Make_ming.mak
 +ifeq (yes, $(GUI))
 +OBJ += $(OUTDIR)/gui_dwrite.o
 +LIB += -ld2d1 -ldwrite
-+LFLAGS += -static-libgcc -static
++USE_STDCPLUS = yes
 +endif
 +endif
  ifdef XPM
  # Only allow XPM for a GUI build.
  ifeq (yes, $(GUI))
-@@ -672,8 +697,13 @@
- uninstal.exe: uninstal.c
- 	$(CC) $(CFLAGS) -o uninstal.exe uninstal.c $(LIB)
+@@ -633,11 +651,7 @@
+ ifeq (yes, $(OLE))
+ LIB += -loleaut32
+ OBJ += $(OUTDIR)/if_ole.o
+-ifeq (yes, $(STATIC_STDCPLUS))
+-LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
+-else
+-LIB += -lstdc++
+-endif
++USE_STDCPLUS = yes
+ endif
  
-+ifeq ($(DIRECTX),yes)
-+$(TARGET): $(OUTDIR) $(OBJ)
-+	$(CXX) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
+ ifeq (yes, $(MBYTE))
+@@ -661,6 +675,14 @@
+ DEFINES+=-DDYNAMIC_ICONV
+ endif
+ 
++ifeq (yes, $(USE_STDCPLUS))
++ifeq (yes, $(STATIC_STDCPLUS))
++LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
 +else
- $(TARGET): $(OUTDIR) $(OBJ)
- 	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
++LIB += -lstdc++
 +endif
++endif
++
+ all: $(TARGET) vimrun.exe xxd/xxd.exe install.exe uninstal.exe GvimExt/gvimext.dll
  
- upx: exes
- 	upx gvim.exe
-@@ -731,6 +761,9 @@
+ vimrun.exe: vimrun.c
+@@ -731,6 +753,9 @@
  $(OUTDIR)/ex_eval.o:	ex_eval.c $(INCL) ex_cmds.h
  	$(CC) -c $(CFLAGS) ex_eval.c -o $(OUTDIR)/ex_eval.o
  
 +$(OUTDIR)/gui_dwrite.o:	gui_dwrite.cpp $(INCL) gui_dwrite.h
-+	$(CXX) -c $(CFLAGS) gui_dwrite.cpp -o $(OUTDIR)/gui_dwrite.o
++	$(CC) -c $(CFLAGS) gui_dwrite.cpp -o $(OUTDIR)/gui_dwrite.o
 +
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r f70560eaf77c src/Make_mvc.mak
---- a/src/Make_mvc.mak	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/Make_mvc.mak	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/Make_mvc.mak
+--- a/src/Make_mvc.mak	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/Make_mvc.mak	Thu Jan 24 00:35:45 2013 +0900
 @@ -24,6 +24,9 @@
  #
  #	GUI interface: GUI=yes (default is no)
  #
 +#	GUI with DirectWrite(DirectX): DIRECTX=yes
-+#	  (default is no, requires GUI=yes and WINVER=0x0600)
++#	  (default is no, requires GUI=yes)
 +#
  #	OLE interface: OLE=yes (usually with GUI=yes)
  #
@@ -179,33 +192,21 @@ diff -r f70560eaf77c src/Make_mvc.mak
  !if "$(OLE)" == "yes"
  OBJDIR = $(OBJDIR)O
  !endif
-@@ -290,6 +296,25 @@
+@@ -290,6 +296,13 @@
  NETBEANS_LIB	= WSock32.lib
  !endif
  
 +# DirectWrite(DirectX)
-+!ifndef DIRECTX
-+DIRECTX = no
-+!endif
 +!if "$(DIRECTX)" == "yes"
-+# DirectWrite requires that WINVER is 0x0600 or above
-+!ifndef WINVER
-+WINVER = 0x0600
-+!endif
-+!if $(WINVER) < 0x0600
-+!error DirectWrite (DirectX) requires WINVER is 0x0600 or above.
-+!else
-+DIRECTX_DEFS	= -DUSE_DIRECT_X
++DIRECTX_DEFS	= -DFEAT_DIRECTX -DDYNAMIC_DIRECTX
 +DIRECTX_INCL	= gui_dwrite.h
-+DIRECTX_LIB	= d2d1.lib dwrite.lib
 +DIRECTX_OBJ	= $(OUTDIR)\gui_dwrite.obj
-+!endif
 +!endif
 +
  !ifndef XPM
  # XPM is not set, use the included xpm files, depending on the architecture.
  !if "$(CPU)" == "AMD64"
-@@ -622,6 +647,13 @@
+@@ -622,6 +635,12 @@
  SUBSYSTEM = console
  !endif
  
@@ -213,13 +214,12 @@ diff -r f70560eaf77c src/Make_mvc.mak
 +CFLAGS = $(CFLAGS) $(DIRECTX_DEFS)
 +GUI_INCL = $(GUI_INCL) $(DIRECTX_INCL)
 +GUI_OBJ = $(GUI_OBJ) $(DIRECTX_OBJ)
-+GUI_LIB = $(DIRECTX_LIB) $(GUI_LIB)
 +!endif
 +
  # iconv.dll library (dynamically loaded)
  !ifndef ICONV
  ICONV = yes
-@@ -1095,6 +1127,8 @@
+@@ -1095,6 +1114,8 @@
  
  $(OUTDIR)/gui_w32.obj:	$(OUTDIR) gui_w32.c gui_w48.c $(INCL) $(GUI_INCL)
  
@@ -228,14 +228,14 @@ diff -r f70560eaf77c src/Make_mvc.mak
  $(OUTDIR)/if_cscope.obj: $(OUTDIR) if_cscope.c  $(INCL)
  
  $(OUTDIR)/if_lua.obj: $(OUTDIR) if_lua.c  $(INCL)
-diff -r f70560eaf77c src/eval.c
---- a/src/eval.c	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/eval.c	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/eval.c
+--- a/src/eval.c	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/eval.c	Thu Jan 24 00:35:45 2013 +0900
 @@ -31,6 +31,10 @@
  # include <math.h>
  #endif
  
-+#ifdef USE_DIRECT_X
++#ifdef FEAT_DIRECTX
 +# include "gui_dwrite.h"
 +#endif
 +
@@ -246,7 +246,7 @@ diff -r f70560eaf77c src/eval.c
  static void f_setpos __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setqflist __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setreg __ARGS((typval_T *argvars, typval_T *rettv));
-+#ifdef USE_DIRECT_X
++#ifdef FEAT_DIRECTX
 +static void f_setrenderingparams __ARGS((typval_T *argvars, typval_T *rettv));
 +#endif
  static void f_settabvar __ARGS((typval_T *argvars, typval_T *rettv));
@@ -266,7 +266,7 @@ diff -r f70560eaf77c src/eval.c
      {"setpos",		2, 2, f_setpos},
      {"setqflist",	1, 2, f_setqflist},
      {"setreg",		2, 3, f_setreg},
-+#ifdef USE_DIRECT_X
++#ifdef FEAT_DIRECTX
 +    {"setrenderingparams", 5, 5, f_setrenderingparams},
 +#endif
      {"settabvar",	3, 3, f_settabvar},
@@ -276,7 +276,7 @@ diff -r f70560eaf77c src/eval.c
  #ifdef FEAT_GUI
  	"gui",
  #endif
-+#ifdef USE_DIRECT_X
++#ifdef FEAT_DIRECTX
 +	"gui_directx",
 +#endif
  #ifdef FEAT_GUI_ATHENA
@@ -286,7 +286,7 @@ diff -r f70560eaf77c src/eval.c
      rettv->vval.v_number = 0;
  }
  
-+#ifdef USE_DIRECT_X
++#ifdef FEAT_DIRECTX
 +    void
 +f_setrenderingparams(argvars, rettv)
 +    typval_T	*argvars;
@@ -342,16 +342,18 @@ diff -r f70560eaf77c src/eval.c
  /*
   * Find variable "name" in the list of variables.
   * Return a pointer to it if found, NULL if not found.
-diff -r f70560eaf77c src/gui_dwrite.cpp
+diff -r 276810b322f1 src/gui_dwrite.cpp
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.cpp	Sun Jan 20 00:05:23 2013 +0900
-@@ -0,0 +1,725 @@
++++ b/src/gui_dwrite.cpp	Thu Jan 24 00:35:45 2013 +0900
+@@ -0,0 +1,798 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
 +#define WIN32_LEAN_AND_MEAN
 +
-+#if WINVER < 0x0600
-+# error WINVER must be 0x0600 or above to use DirectWrite(Direct/X).
++#ifndef DYNAMIC_DIRECTX
++# if WINVER < 0x0600
++#  error WINVER must be 0x0600 or above to use DirectWrite(DirectX)
++# endif
 +#endif
 +
 +#include <windows.h>
@@ -369,6 +371,37 @@ diff -r f70560eaf77c src/gui_dwrite.cpp
 +# define __in		SAL__in
 +# define __out		SAL__out
 +#endif
++
++#ifdef DYNAMIC_DIRECTX
++extern "C" HINSTANCE vimLoadLib(char *name);
++
++typedef int (WINAPI *PGETUSERDEFAULTLOCALENAME)(LPWSTR, int);
++typedef HRESULT (WINAPI *PD2D1CREATEFACTORY)(D2D1_FACTORY_TYPE,
++	REFIID, const D2D1_FACTORY_OPTIONS *, void **);
++typedef HRESULT (WINAPI *PDWRITECREATEFACTORY)(DWRITE_FACTORY_TYPE,
++	REFIID, IUnknown **);
++
++static HINSTANCE hD2D1DLL = NULL;
++static HINSTANCE hDWriteDLL = NULL;
++
++static PGETUSERDEFAULTLOCALENAME pGetUserDefaultLocaleName = NULL;
++static PD2D1CREATEFACTORY pD2D1CreateFactory = NULL;
++static PDWRITECREATEFACTORY pDWriteCreateFactory = NULL;
++
++#define GetUserDefaultLocaleName	(*pGetUserDefaultLocaleName)
++#define D2D1CreateFactory		(*pD2D1CreateFactory)
++#define DWriteCreateFactory		(*pDWriteCreateFactory)
++
++    static void
++unload(HINSTANCE &hinst)
++{
++    if (hinst != NULL)
++    {
++	FreeLibrary(hinst);
++	hinst = NULL;
++    }
++}
++#endif // DYNAMIC_DIRECTX
 +
 +template <class T> inline void SafeRelease(T **ppT)
 +{
@@ -660,7 +693,8 @@ diff -r f70560eaf77c src/gui_dwrite.cpp
 +    ::ReleaseDC(0, screen);
 +
 +    hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
-+	    &mD2D1Factory);
++	    __uuidof(ID2D1Factory), NULL,
++	    reinterpret_cast<void**>(&mD2D1Factory));
 +    _RPT2(_CRT_WARN, "D2D1CreateFactory: hr=%p p=%p\n", hr, mD2D1Factory);
 +
 +    if (SUCCEEDED(hr))
@@ -987,9 +1021,48 @@ diff -r f70560eaf77c src/gui_dwrite.cpp
 +////////////////////////////////////////////////////////////////////////////
 +// PUBLIC C INTERFACES
 +
++    void
++DWrite_Init(void)
++{
++#ifdef DYNAMIC_DIRECTX
++    // Load libraries.
++    hD2D1DLL = vimLoadLib(const_cast<char*>("d2d1.dll"));
++    hDWriteDLL = vimLoadLib(const_cast<char*>("dwrite.dll"));
++    if (hD2D1DLL == NULL || hDWriteDLL == NULL)
++    {
++	DWrite_Final();
++	return;
++    }
++    // Get address of procedures.
++    pGetUserDefaultLocaleName = (PGETUSERDEFAULTLOCALENAME)GetProcAddress(
++	    GetModuleHandle("kernel32.dll"), "GetUserDefaultLocaleName");
++    pD2D1CreateFactory = (PD2D1CREATEFACTORY)GetProcAddress(hD2D1DLL,
++	    "D2D1CreateFactory");
++    pDWriteCreateFactory = (PDWRITECREATEFACTORY)GetProcAddress(hDWriteDLL,
++	    "DWriteCreateFactory");
++#endif
++}
++
++    void
++DWrite_Final(void)
++{
++#ifdef DYNAMIC_DIRECTX
++    pGetUserDefaultLocaleName = NULL;
++    pD2D1CreateFactory = NULL;
++    pDWriteCreateFactory = NULL;
++    unload(hDWriteDLL);
++    unload(hD2D1DLL);
++#endif
++}
++
 +    DWriteContext *
 +DWriteContext_Open(void)
 +{
++#ifdef DYNAMIC_DIRECTX
++    if (pGetUserDefaultLocaleName == NULL || pD2D1CreateFactory == NULL
++	    || pDWriteCreateFactory == NULL)
++	return FALSE;
++#endif
 +    return new DWriteContext();
 +}
 +
@@ -1071,10 +1144,10 @@ diff -r f70560eaf77c src/gui_dwrite.cpp
 +		ToRenderingMode(renderingMode));
 +    }
 +}
-diff -r f70560eaf77c src/gui_dwrite.h
+diff -r 276810b322f1 src/gui_dwrite.h
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.h	Sun Jan 20 00:05:23 2013 +0900
-@@ -0,0 +1,56 @@
++++ b/src/gui_dwrite.h	Thu Jan 24 00:35:45 2013 +0900
+@@ -0,0 +1,59 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
 +#ifndef GUI_DWRITE_H
@@ -1085,6 +1158,9 @@ diff -r f70560eaf77c src/gui_dwrite.h
 +#endif
 +
 +typedef struct DWriteContext DWriteContext;
++
++void DWrite_Init(void);
++void DWrite_Final(void);
 +
 +DWriteContext *DWriteContext_Open(void);
 +void DWriteContext_BeginDraw(DWriteContext *ctx);
@@ -1131,18 +1207,18 @@ diff -r f70560eaf77c src/gui_dwrite.h
 +}
 +#endif
 +#endif/*GUI_DWRITE_H*/
-diff -r f70560eaf77c src/gui_w32.c
---- a/src/gui_w32.c	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/gui_w32.c	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/gui_w32.c
+--- a/src/gui_w32.c	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/gui_w32.c	Thu Jan 24 00:35:45 2013 +0900
 @@ -25,6 +25,19 @@
  
  #include "vim.h"
  
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
 +# include "gui_dwrite.h"
 +#endif
 +
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
 +static DWriteContext *s_dwc = NULL;
 +
 +DWriteContext *get_current_dwritecontext()
@@ -1154,52 +1230,53 @@ diff -r f70560eaf77c src/gui_w32.c
  /*
   * These are new in Windows ME/XP, only defined in recent compilers.
   */
-@@ -1679,6 +1692,10 @@
+@@ -1679,6 +1692,11 @@
      set_vim_var_nr(VV_WINDOWID, HandleToLong(s_hwnd));
  #endif
  
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
++    DWrite_Init();
 +    s_dwc = DWriteContext_Open();
 +#endif
 +
  theend:
      /* Display any pending error messages */
      display_errors();
-@@ -2419,6 +2436,11 @@
+@@ -2419,6 +2437,11 @@
      SetTextColor(s_hdc, gui.currFgColor);
      SelectFont(s_hdc, gui.currFont);
  
-+#ifdef USE_DIRECT_X
-+    if (p_antialias)
++#ifdef FEAT_DIRECTX
++    if (p_antialias && s_dwc != NULL)
 +	DWriteContext_SetFont(s_dwc, (HFONT)gui.currFont);
 +#endif
 +
      if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
      {
  	vim_free(padding);
-@@ -2453,6 +2475,14 @@
+@@ -2453,6 +2476,14 @@
  	    if (text[n] >= 0x80)
  		break;
  
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
 +    /* Quick hack to enable DirectWrite.  To use DirectWrite (antialias), it is
 +     * required that unicode drawing routine, currently.  So this forces it
 +     * enabled. */
-+    if (p_antialias && enc_utf8)
++    if (p_antialias && s_dwc && enc_utf8)
 +	n = 0; /* Keep n < len, to enter block for unicode. */
 +#endif
 +
      /* Check if the Unicode buffer exists and is big enough.  Create it
       * with the same length as the multi-byte string, the number of wide
       * characters is always equal or smaller. */
-@@ -2511,8 +2541,17 @@
+@@ -2511,8 +2542,17 @@
  	    i += utfc_ptr2len_len(text + i, len - i);
  	    ++clen;
  	}
 -	ExtTextOutW(s_hdc, TEXT_X(col), TEXT_Y(row),
 -			   foptions, pcliprect, unicodebuf, wlen, unicodepdy);
-+#if defined(USE_DIRECT_X)
-+	if (p_antialias)
++#if defined(FEAT_DIRECTX)
++	if (p_antialias && s_dwc)
 +	{
 +	    DWriteContext_DrawText(s_dwc, s_hdc, unicodebuf, wlen,
 +		    TEXT_X(col), TEXT_Y(row), FILL_X(cells), FILL_Y(1),
@@ -1212,14 +1289,14 @@ diff -r f70560eaf77c src/gui_w32.c
  	len = cells;	/* used for underlining */
      }
      else if ((enc_codepage > 0 && (int)GetACP() != enc_codepage) || enc_latin9)
-diff -r f70560eaf77c src/gui_w48.c
---- a/src/gui_w48.c	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/gui_w48.c	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/gui_w48.c
+--- a/src/gui_w48.c	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/gui_w48.c	Thu Jan 24 00:35:45 2013 +0900
 @@ -2778,6 +2778,10 @@
  
  	out_flush();	    /* make sure all output has been processed */
  	(void)BeginPaint(hwnd, &ps);
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
 +	if (p_antialias)
 +	    DWriteContext_BeginDraw(s_dwc);
 +#endif
@@ -1231,7 +1308,7 @@ diff -r f70560eaf77c src/gui_w48.c
  
  	if (!IsRectEmpty(&ps.rcPaint))
 +	{
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
 +	    if (p_antialias)
 +		DWriteContext_BindDC(s_dwc, s_hdc, &ps.rcPaint);
 +#endif
@@ -1240,58 +1317,59 @@ diff -r f70560eaf77c src/gui_w48.c
  		    ps.rcPaint.bottom - ps.rcPaint.top + 1);
 +	}
 +
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
 +	if (p_antialias)
 +	    DWriteContext_EndDraw(s_dwc);
 +#endif
  	EndPaint(hwnd, &ps);
      }
  }
-@@ -3034,6 +3049,11 @@
+@@ -3034,6 +3049,12 @@
      void
  gui_mch_exit(int rc)
  {
-+#if defined(USE_DIRECT_X)
++#if defined(FEAT_DIRECTX)
 +    DWriteContext_Close(s_dwc);
++    DWrite_Final();
 +    s_dwc = NULL;
 +#endif
 +
      ReleaseDC(s_textArea, s_hdc);
      DeleteObject(s_brush);
  
-diff -r f70560eaf77c src/option.c
---- a/src/option.c	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/option.c	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/option.c
+--- a/src/option.c	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/option.c	Thu Jan 24 00:35:45 2013 +0900
 @@ -498,7 +498,7 @@
  #endif
  					    (char_u *)0L} SCRIPTID_INIT},
      {"antialias",   "anti", P_BOOL|P_VI_DEF|P_VIM|P_RCLR,
 -#if defined(FEAT_GUI) && defined(MACOS_X)
-+#if defined(FEAT_GUI) && (defined(MACOS_X) || defined(USE_DIRECT_X))
++#if defined(FEAT_GUI) && (defined(MACOS_X) || defined(FEAT_DIRECTX))
  			    (char_u *)&p_antialias, PV_NONE,
  			    {(char_u *)FALSE, (char_u *)FALSE}
  #else
-diff -r f70560eaf77c src/option.h
---- a/src/option.h	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/option.h	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/option.h
+--- a/src/option.h	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/option.h	Thu Jan 24 00:35:45 2013 +0900
 @@ -317,7 +317,7 @@
  #ifdef FEAT_MBYTE
  EXTERN char_u	*p_ambw;	/* 'ambiwidth' */
  #endif
 -#if defined(FEAT_GUI) && defined(MACOS_X)
-+#if defined(FEAT_GUI) && (defined(MACOS_X) || defined(USE_DIRECT_X))
++#if defined(FEAT_GUI) && (defined(MACOS_X) || defined(FEAT_DIRECTX))
  EXTERN int	*p_antialias;	/* 'antialias' */
  #endif
  EXTERN int	p_ar;		/* 'autoread' */
-diff -r f70560eaf77c src/version.c
---- a/src/version.c	Sat Jan 19 23:22:43 2013 +0900
-+++ b/src/version.c	Sun Jan 20 00:05:23 2013 +0900
+diff -r 276810b322f1 src/version.c
+--- a/src/version.c	Wed Jan 23 23:21:42 2013 +0900
++++ b/src/version.c	Thu Jan 24 00:35:45 2013 +0900
 @@ -182,6 +182,13 @@
  #else
  	"-digraphs",
  #endif
 +#ifdef WIN3264
-+# ifdef USE_DIRECT_X
++# ifdef FEAT_DIRECTX
 +	"+directx",
 +# else
 +	"-directx",
