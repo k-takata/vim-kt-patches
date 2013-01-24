@@ -12,3 +12,4 @@ version_acl_xpm.patch
 0003-use-mingw-gcc-as-default.patch
 do_modelines-after-reload.patch
 patch-direct_write.diff
+dwrite-fix-various.txt.diff

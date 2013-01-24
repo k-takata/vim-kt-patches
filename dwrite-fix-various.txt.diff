@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent e9e9291956a242f006eabd7958a247f6c5ef42bd
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -310,7 +310,7 @@
+ N  *+dialog_con_gui*	Support for |:confirm| with GUI and console dialog.
+ N  *+diff*		|vimdiff| and 'diff'
+ N  *+digraphs*		|digraphs| *E196*
+-   *+directx*		MS-Windows only: |'directx'|
++m  *+directx*		Win32 GUI only: |'directx'|
+    *+dnd*		Support for DnD into the "~ register |quote_~|.
+ B  *+emacs_tags*	|emacs-tags| files
+ N  *+eval*		expression evaluation |eval.txt|
