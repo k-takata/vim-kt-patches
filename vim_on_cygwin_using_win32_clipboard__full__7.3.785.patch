@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 7b6ce7d3fc1f036bf95a8f8f24b17721d898ae8b
+# Parent 274c841f033afce5e46272521827f3e71e4240cd
 
 diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
 --- a/src/Make_bc5.mak
@@ -99,7 +99,7 @@ diff --git a/src/Make_w16.mak b/src/Make_w16.mak
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1637,7 +1637,7 @@
+@@ -1636,7 +1636,7 @@
  RSRC_DIR = os_mac_rsrc
  
  PRO_MANUAL = os_amiga.pro os_msdos.pro os_win16.pro os_win32.pro \
@@ -108,7 +108,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  # Default target is making the executable and tools
  all: $(VIMTARGET) $(TOOLS) languages $(GUI_BUNDLE)
-@@ -1796,6 +1796,10 @@
+@@ -1790,6 +1790,10 @@
  	$(CPROTO) -DWIN16 -DWIN32 -UHAVE_CONFIG_H $< > proto/$@
  	echo "/* vim: set ft=c : */" >> proto/$@
  
@@ -119,7 +119,7 @@ diff --git a/src/Makefile b/src/Makefile
  os_beos.pro: os_beos.c
  	$(CPROTO) -D__BEOS__ -UHAVE_CONFIG_H $< > proto/$@
  	echo "/* vim: set ft=c : */" >> proto/$@
-@@ -2649,6 +2653,12 @@
+@@ -2640,6 +2644,12 @@
  objects/os_unix.o: os_unix.c
  	$(CCC) -o $@ os_unix.c
  
@@ -132,7 +132,7 @@ diff --git a/src/Makefile b/src/Makefile
  objects/pathdef.o: auto/pathdef.c
  	$(CCC) -o $@ auto/pathdef.c
  
-@@ -2977,6 +2987,10 @@
+@@ -2968,6 +2978,10 @@
   ascii.h keymap.h term.h macros.h option.h structs.h regexp.h gui.h \
   gui_beval.h proto/gui_beval.pro ex_cmds.h proto.h globals.h farsi.h \
   arabic.h version.h
@@ -146,7 +146,7 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/auto/configure b/src/auto/configure
 --- a/src/auto/configure
 +++ b/src/auto/configure
-@@ -8844,6 +8844,29 @@
+@@ -8839,6 +8839,29 @@
  
  
  
@@ -189,7 +189,7 @@ diff --git a/src/config.h.in b/src/config.h.in
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -2472,6 +2472,21 @@
+@@ -2467,6 +2467,21 @@
  dnl end of GUI-checking
  dnl ---------------------------------------------------------------------------
  

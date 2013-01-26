@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 7b6ce7d3fc1f036bf95a8f8f24b17721d898ae8b
+# Parent 274c841f033afce5e46272521827f3e71e4240cd
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2649,6 +2649,9 @@
+@@ -2640,6 +2640,9 @@
  objects/os_unix.o: os_unix.c
  	$(CCC) -o $@ os_unix.c
  
@@ -17,7 +17,7 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/auto/configure b/src/auto/configure
 --- a/src/auto/configure
 +++ b/src/auto/configure
-@@ -8844,6 +8844,29 @@
+@@ -8839,6 +8839,29 @@
  
  
  
@@ -60,7 +60,7 @@ diff --git a/src/config.h.in b/src/config.h.in
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -2472,6 +2472,21 @@
+@@ -2467,6 +2467,21 @@
  dnl end of GUI-checking
  dnl ---------------------------------------------------------------------------
  
