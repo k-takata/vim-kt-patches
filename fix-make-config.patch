@@ -1,47 +1,21 @@
 # HG changeset patch
-# Parent 81914f94dd1d2330ba87fdf69852d5a421312bfd
+# Parent 274c841f033afce5e46272521827f3e71e4240cd
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1650,10 +1650,15 @@
- # doesn't always update auto/config.h.  The timestamp isn't changed if the
- # file contents didn't change (to avoid recompiling everything).  Including a
- # dependency on auto/config.h would cause running configure each time when
--# auto/config.h isn't updated.  The dependency on auto/config.mk should make
--# sure configure is run when it's needed.
-+# auto/config.h isn't updated.  The dependency on auto/config.status should
-+# make sure configure is run when it's needed.
+@@ -1653,6 +1653,11 @@
+ # sure configure is run when it's needed.
  #
--config auto/config.mk: auto/configure config.mk.in config.h.in
-+config auto/config.status: auto/configure config.mk.in config.h.in
+ config auto/config.mk: auto/configure config.mk.in config.h.in
 +	if test -f auto/config.cache; then \
-+		if grep '^ac_cv_env_CC_value=$$' auto/config.cache > /dev/null; then \
++		if ! grep -x -F 'ac_cv_env_CFLAGS_value=$(CFLAGS)' auto/config.cache > /dev/null; then \
 +			rm auto/config.cache; \
 +		fi \
 +	fi
  	GUI_INC_LOC="$(GUI_INC_LOC)" GUI_LIB_LOC="$(GUI_LIB_LOC)" \
  		CC="$(CC)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
  		LDFLAGS="$(LDFLAGS)" $(CONF_SHELL) srcdir="$(srcdir)" \
-@@ -1717,7 +1722,7 @@
- 
- # Link the target for normal use or debugging.
- # A shell script is used to try linking without unneccesary libraries.
--$(VIMTARGET): auto/config.mk objects $(OBJ) version.c version.h
-+$(VIMTARGET): auto/config.status objects $(OBJ) version.c version.h
- 	$(CCC) version.c -o objects/version.o
- 	@LINK="$(PURIFY) $(SHRPENV) $(CClink) $(ALL_LIB_DIRS) $(LDFLAGS) \
- 		-o $(VIMTARGET) $(OBJ) $(ALL_LIBS)" \
-@@ -2363,6 +2368,9 @@
- 	touch auto/config.h
- 	cp config.mk.dist auto/config.mk
- 
-+auto/config.mk:
-+	cp config.mk.dist auto/config.mk
-+
- distclean: clean scratch
- 	-rm -f tags
- 
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
