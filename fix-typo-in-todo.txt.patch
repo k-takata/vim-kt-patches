@@ -1,0 +1,32 @@
+# HG changeset patch
+# Parent cad82ddac1d4d7d77ac58a4068e3f427afe8223a
+diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
+--- a/runtime/doc/todo.txt
++++ b/runtime/doc/todo.txt
+@@ -260,7 +260,7 @@
+ 
+ Patch to add ":py3do". (Lilydjwg, 2012 Apr 7)
+ 
+-`[ moves to character after insert, instead of the last inserted character.
++`] moves to character after insert, instead of the last inserted character.
+ (Yukihiro Nakadaira, 2011 Dec 9)
+ 
+ Plugin for Modeleasy. (Massimiliano Tripoli, 2011 Nov 29)
+@@ -714,7 +714,7 @@
+ Patch for displaying 0x200c and 0x200d. (Ali Gholami Rudi, 2009 May 6)
+ Probably needs a bit of work.
+ 
+-List of encoding aliases. (Takao Fujiware, 2009 Jul 18)
++List of encoding aliases. (Takao Fujiwara, 2009 Jul 18)
+ Are they all OK?  Update Jul 22.
+ 
+ Win32: Improved Makefile for MSVC. (Leonardo Valeri Manera, 2010 Aug 18)
+@@ -744,7 +744,7 @@
+ When starting Vim with "gvim -f -u non_existent_file > foo.txt" there are a
+ few control characters in the output. (Dale Wiles, 2009 May 28)
+ 
+-'cmdwinheight is only used in last window when 'winheight' is a large value.
++'cmdwinheight' is only used in last window when 'winheight' is a large value.
+ (Tony Mechelynck, 2009 Apr 15)
+ 
+ Status line containing winnr() isn't updated when splitting the window (Clark

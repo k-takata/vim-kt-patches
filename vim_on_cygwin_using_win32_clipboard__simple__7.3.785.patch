@@ -1,0 +1,299 @@
+# HG changeset patch
+# Parent 7b6ce7d3fc1f036bf95a8f8f24b17721d898ae8b
+
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -2649,6 +2649,9 @@
+ objects/os_unix.o: os_unix.c
+ 	$(CCC) -o $@ os_unix.c
+ 
++objects/os_mswin.o: os_mswin.c
++	$(CCC) -o $@ os_mswin.c
++
+ objects/pathdef.o: auto/pathdef.c
+ 	$(CCC) -o $@ auto/pathdef.c
+ 
+diff --git a/src/auto/configure b/src/auto/configure
+--- a/src/auto/configure
++++ b/src/auto/configure
+@@ -8844,6 +8844,29 @@
+ 
+ 
+ 
++echo "$as_me:$LINENO: checking for CYGWIN environment" >&5
++echo $ECHO_N "checking for CYGWIN environment... $ECHO_C" >&6
++case `uname` in
++    CYGWIN*)    CYGWIN=yes; echo "$as_me:$LINENO: result: yes" >&5
++echo "${ECHO_T}yes" >&6
++                echo "$as_me:$LINENO: checking for CYGWIN clipboard support" >&5
++echo $ECHO_N "checking for CYGWIN clipboard support... $ECHO_C" >&6
++                if test "x$with_x" = "xno" ; then
++                  OS_EXTRA_SRC=os_mswin.c; OS_EXTRA_OBJ=objects/os_mswin.o
++                  echo "$as_me:$LINENO: result: yes" >&5
++echo "${ECHO_T}yes" >&6
++                  cat >>confdefs.h <<\_ACEOF
++#define FEAT_CYGWIN_WIN32_CLIPBOARD 1
++_ACEOF
++
++                else
++                  echo "$as_me:$LINENO: result: no - using X11" >&5
++echo "${ECHO_T}no - using X11" >&6
++                fi ;;
++
++    *)          CYGWIN=no; echo "$as_me:$LINENO: result: no" >&5
++echo "${ECHO_T}no" >&6;;
++esac
+ 
+ if test "$enable_hangulinput" = "yes"; then
+   if test "x$GUITYPE" = "xNONE"; then
+diff --git a/src/config.h.in b/src/config.h.in
+--- a/src/config.h.in
++++ b/src/config.h.in
+@@ -439,3 +439,6 @@
+ 
+ /* Define if fcntl()'s F_SETFD command knows about FD_CLOEXEC */
+ #undef HAVE_FD_CLOEXEC
++
++/* Define if you want Cygwin to use the WIN32 clipboard, not compatible with X11*/
++#undef FEAT_CYGWIN_WIN32_CLIPBOARD
+diff --git a/src/configure.in b/src/configure.in
+--- a/src/configure.in
++++ b/src/configure.in
+@@ -2472,6 +2472,21 @@
+ dnl end of GUI-checking
+ dnl ---------------------------------------------------------------------------
+ 
++dnl Check for Cygwin, which needs an extra source file if not using X11
++AC_MSG_CHECKING(for CYGWIN environment)
++case `uname` in
++    CYGWIN*)    CYGWIN=yes; AC_MSG_RESULT(yes)
++                AC_MSG_CHECKING(for CYGWIN clipboard support)
++                if test "x$with_x" = "xno" ; then
++                  OS_EXTRA_SRC=os_mswin.c; OS_EXTRA_OBJ=objects/os_mswin.o
++                  AC_MSG_RESULT(yes)
++                  AC_DEFINE(FEAT_CYGWIN_WIN32_CLIPBOARD)
++                else
++                  AC_MSG_RESULT(no - using X11)
++                fi ;;
++
++    *)          CYGWIN=no; AC_MSG_RESULT(no);;
++esac
+ 
+ dnl Only really enable hangul input when GUI and XFONTSET are available
+ if test "$enable_hangulinput" = "yes"; then
+diff --git a/src/feature.h b/src/feature.h
+--- a/src/feature.h
++++ b/src/feature.h
+@@ -1122,6 +1122,11 @@
+  * +xterm_clipboard	Unix only: Include code for handling the clipboard
+  *			in an xterm like in the GUI.
+  */
++
++#ifdef FEAT_CYGWIN_WIN32_CLIPBOARD
++# define FEAT_CLIPBOARD
++#endif
++
+ #ifdef FEAT_GUI
+ # ifndef FEAT_CLIPBOARD
+ #  define FEAT_CLIPBOARD
+diff --git a/src/globals.h b/src/globals.h
+--- a/src/globals.h
++++ b/src/globals.h
+@@ -802,7 +802,7 @@
+ EXTERN int	enc_unicode INIT(= 0);	/* 2: UCS-2 or UTF-16, 4: UCS-4 */
+ EXTERN int	enc_utf8 INIT(= FALSE);		/* UTF-8 encoded Unicode */
+ EXTERN int	enc_latin1like INIT(= TRUE);	/* 'encoding' is latin1 comp. */
+-# ifdef WIN3264
++# if defined(WIN3264) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
+ /* Codepage nr of 'encoding'.  Negative means it's not been set yet, zero
+  * means 'encoding' is not a valid codepage. */
+ EXTERN int	enc_codepage INIT(= -1);
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -613,7 +613,7 @@
+     enc_dbcs = enc_dbcs_new;
+     has_mbyte = (enc_dbcs != 0 || enc_utf8);
+ 
+-#ifdef WIN3264
++#if defined(WIN3264) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
+     enc_codepage = encname2codepage(p_enc);
+     enc_latin9 = (STRCMP(p_enc, "iso-8859-15") == 0);
+ #endif
+@@ -4081,7 +4081,7 @@
+     return enc_canonize((char_u *)buf);
+ }
+ 
+-#if defined(WIN3264) || defined(PROTO)
++#if defined(WIN3264) || defined(PROTO) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
+ /*
+  * Convert an encoding name to an MS-Windows codepage.
+  * Returns zero if no codepage can be figured out.
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -24,6 +24,18 @@
+ 
+ #include "vim.h"
+ 
++/* compile only the clipboard handling features when
++ * compiling for cygwin posix environment.
++ */
++#ifdef FEAT_CYGWIN_WIN32_CLIPBOARD
++# define WIN3264
++# define WIN32_LEAN_AND_MEAN
++# include <windows.h>
++# include "os_mswin.pro"
++#endif
++
++#if !defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
++
+ #ifdef WIN16
+ # define SHORT_FNAME		/* always 8.3 file name */
+ /* cproto fails on missing include files */
+@@ -905,6 +917,8 @@
+ }
+ #endif
+ 
++#endif /* !defined(FEAT_CYGWIN_WIN32_CLIPBOARD) */
++
+ #if defined(FEAT_MBYTE) || defined(PROTO)
+ /*
+  * Convert an UTF-8 string to UTF-16.
+@@ -1047,6 +1061,21 @@
+  * Clipboard stuff, for cutting and pasting text to other windows.
+  */
+ 
++    void
++win_clip_init(void)
++{
++    clip_init(TRUE);
++
++    /*
++     * Vim's own clipboard format recognises whether the text is char, line,
++     * or rectangular block.  Only useful for copying between two Vims.
++     * "VimClipboard" was used for previous versions, using the first
++     * character to specify MCHAR, MLINE or MBLOCK.
++     */
++    clip_star.format = RegisterClipboardFormat("VimClipboard2");
++    clip_star.format_raw = RegisterClipboardFormat("VimRawBytes");
++}
++
+ /* Type used for the clipboard type of Vim's data. */
+ typedef struct
+ {
+@@ -1634,6 +1663,7 @@
+ }
+ #endif
+ 
++#if !defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
+ 
+ /*
+  * Debugging helper: expose the MCH_WRITE_DUMP stuff to other modules
+@@ -3506,3 +3536,5 @@
+ }
+ 
+ #endif /* defined(FEAT_GUI) || defined(FEAT_PRINTER) */
++
++#endif /* !defined(FEAT_CYGWIN_WIN32_CLIPBOARD) */
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -61,6 +61,11 @@
+ #  include <cygwin/version.h>
+ #  include <sys/cygwin.h>	/* for cygwin_conv_to_posix_path() and/or
+ 				 * for cygwin_conv_path() */
++#  ifdef FEAT_CYGWIN_WIN32_CLIPBOARD
++#   define WIN32_LEAN_AND_MEAN
++#   include <windows.h>
++#   include "os_mswin.pro"
++#  endif
+ # endif
+ #endif
+ 
+@@ -1222,6 +1227,9 @@
+ #ifdef MACOS_CONVERT
+     mac_conv_init();
+ #endif
++#ifdef FEAT_CYGWIN_WIN32_CLIPBOARD
++    win_clip_init();
++#endif
+ }
+ 
+     static void
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -1815,16 +1815,7 @@
+ 	set_option_value((char_u *)"grepprg", 0, (char_u *)"grep -n", 0);
+ 
+ #ifdef FEAT_CLIPBOARD
+-    clip_init(TRUE);
+-
+-    /*
+-     * Vim's own clipboard format recognises whether the text is char, line,
+-     * or rectangular block.  Only useful for copying between two Vims.
+-     * "VimClipboard" was used for previous versions, using the first
+-     * character to specify MCHAR, MLINE or MBLOCK.
+-     */
+-    clip_star.format = RegisterClipboardFormat("VimClipboard2");
+-    clip_star.format_raw = RegisterClipboardFormat("VimRawBytes");
++    win_clip_init();
+ #endif
+ }
+ 
+@@ -2309,16 +2300,7 @@
+ #endif
+ 
+ #ifdef FEAT_CLIPBOARD
+-    clip_init(TRUE);
+-
+-    /*
+-     * Vim's own clipboard format recognises whether the text is char, line, or
+-     * rectangular block.  Only useful for copying between two Vims.
+-     * "VimClipboard" was used for previous versions, using the first
+-     * character to specify MCHAR, MLINE or MBLOCK.
+-     */
+-    clip_star.format = RegisterClipboardFormat("VimClipboard2");
+-    clip_star.format_raw = RegisterClipboardFormat("VimRawBytes");
++    win_clip_init();
+ #endif
+ 
+     /* This will be NULL on anything but NT 4.0 */
+diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
+--- a/src/proto/os_mswin.pro
++++ b/src/proto/os_mswin.pro
+@@ -26,6 +26,7 @@
+ int utf16_to_utf8 __ARGS((short_u *instr, int inlen, char_u *outstr));
+ void MultiByteToWideChar_alloc __ARGS((UINT cp, DWORD flags, LPCSTR in, int inlen, LPWSTR *out, int *outlen));
+ void WideCharToMultiByte_alloc __ARGS((UINT cp, DWORD flags, LPCWSTR in, int inlen, LPSTR *out, int *outlen, LPCSTR def, LPBOOL useddef));
++void win_clip_init __ARGS((void));
+ int clip_mch_own_selection __ARGS((VimClipboard *cbd));
+ void clip_mch_lose_selection __ARGS((VimClipboard *cbd));
+ void clip_mch_request_selection __ARGS((VimClipboard *cbd));
+diff --git a/src/term.c b/src/term.c
+--- a/src/term.c
++++ b/src/term.c
+@@ -1853,7 +1853,9 @@
+ #    ifdef FEAT_GUI
+ 	if (!gui.in_use)
+ #    endif
++#    ifndef FEAT_CYGWIN_WIN32_CLIPBOARD
+ 	    clip_init(FALSE);
++#    endif
+ #   endif
+ 	if (use_xterm_like_mouse(term))
+ 	{
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -1927,7 +1927,7 @@
+     GdkAtom     gtk_sel_atom;	/* PRIMARY/CLIPBOARD selection ID */
+ # endif
+ 
+-# ifdef MSWIN
++# if defined(MSWIN) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
+     int_u	format;		/* Vim's own special clipboard format */
+     int_u	format_raw;	/* Vim's raw text clipboard format */
+ # endif

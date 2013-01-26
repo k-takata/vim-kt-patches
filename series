@@ -1,0 +1,11 @@
+myconfiguration-for-cygwin.patch
+fix-make-config.patch
+fix-indent-in-configure.in.patch
+configure.patch
+fix-typo-in-todo.txt.patch
+version_acl_xpm.patch
+update-ja.po.patch
+update-menu_ja.patch
+backout-7.3.638.patch
+vim_on_cygwin_using_win32_clipboard__simple__7.3.785.patch
+vim_on_cygwin_using_win32_clipboard__full__7.3.785.patch
