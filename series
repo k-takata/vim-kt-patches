@@ -6,5 +6,6 @@ version_acl_xpm.patch
 update-ja.po.patch
 update-menu_ja.patch
 backout-7.3.638.patch
+fix-alignment.patch
 vim_on_cygwin_using_win32_clipboard__simple__7.3.785.patch
 vim_on_cygwin_using_win32_clipboard__full__7.3.785.patch
