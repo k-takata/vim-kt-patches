@@ -11,3 +11,4 @@ version_acl_xpm.patch
 0002-set-RUBY_INSTALL_NAME-and-RUBY_PLATFORM.patch
 0003-use-mingw-gcc-as-default.patch
 patch-direct_write.diff
+fix-python3-threads.patch
