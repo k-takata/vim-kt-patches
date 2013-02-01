@@ -12,3 +12,4 @@ version_acl_xpm.patch
 0003-use-mingw-gcc-as-default.patch
 fix-python-threads.patch
 patch-direct_write.diff
+patch-direct_write-ex1.diff

@@ -1,0 +1,234 @@
+# HG changeset patch
+# Parent 0618e70ddf93cedb9697695cbb1a153cf4de85cd
+
+diff -r 0618e70ddf93 src/gui_w32.c
+--- a/src/gui_w32.c	Sat Feb 02 01:13:31 2013 +0900
++++ b/src/gui_w32.c	Sat Feb 02 01:22:44 2013 +0900
+@@ -31,8 +31,9 @@
+ 
+ #if defined(FEAT_DIRECTX)
+ static DWriteContext *s_dwc = NULL;
++static int s_directx_enabled = 0;
+ static int s_directx_load_attempted = 0;
+-# define IS_ENABLE_DIRECTX() (p_directx && s_dwc != NULL)
++# define IS_ENABLE_DIRECTX() (s_directx_enabled && s_dwc != NULL)
+ 
+     int
+ directx_enabled(void)
+@@ -49,6 +50,110 @@
+ }
+ #endif
+ 
++#ifdef FEAT_RENDERING_OPTIONS
++    int
++gui_mch_set_rendering_options(char_u *s)
++{
++#ifdef FEAT_DIRECTX
++    int	    retval = FAIL;
++    char_u  *p, *q;
++
++    int	    dx_enable = 0;
++    int	    dx_flags = 0;
++    float   dx_gamma = 0.0f;
++    float   dx_contrast = 0.0f;
++    float   dx_level = 0.0f;
++    int	    dx_geom = 0;
++    int	    dx_mode = 0;
++
++    /* parse string as rendering options. */
++    for (p = s; p != NULL && *p != NUL; )
++    {
++	char_u  item[256];
++	char_u  name[128];
++	char_u  value[128];
++
++	copy_option_part(&p, item, sizeof(item), ","); 
++	if (p == NULL)
++	    break;
++	q = &item[0];
++	copy_option_part(&q, name, sizeof(name), ":");
++	if (q == NULL)
++	    return FAIL;
++	copy_option_part(&q, value, sizeof(value), ":");
++
++	if (STRCMP(name, "type") == 0)
++	{
++	    if (STRCMP(value, "directx") == 0)
++		dx_enable = 1;
++	    else
++		return FAIL;
++	}
++	else if (STRCMP(name, "gamma") == 0)
++	{
++	    dx_flags |= 1 << 0;
++	    dx_gamma = (float)atof(value);
++	}
++	else if (STRCMP(name, "contrast") == 0)
++	{
++	    dx_flags |= 1 << 1;
++	    dx_contrast = (float)atof(value);
++	}
++	else if (STRCMP(name, "level") == 0)
++	{
++	    dx_flags |= 1 << 2;
++	    dx_level = (float)atof(value);
++	}
++	else if (STRCMP(name, "geom") == 0)
++	{
++	    dx_flags |= 1 << 3;
++	    dx_geom = atoi(value);
++	    if (dx_geom < 0 || dx_geom > 2)
++		return FAIL;
++	}
++	else if (STRCMP(name, "mode") == 0)
++	{
++	    dx_flags |= 1 << 4;
++	    dx_mode = atoi(value);
++	    if (dx_mode < 0 || dx_mode > 6)
++		return FAIL;
++	}
++	else
++	    return FAIL;
++    }
++
++    /* Enable DirectX/DirextWrite */
++    if (dx_enable)
++    {
++	if (!directx_enabled())
++	    return FAIL;
++	DWriteContext_SetRenderingParams(s_dwc, NULL);
++	if (dx_flags)
++	{
++	    DWriteRenderingParams param;
++	    DWriteContext_GetRenderingParams(s_dwc, &param);
++	    if (dx_flags & (1 << 0))
++		param.gamma = dx_gamma;
++	    if (dx_flags & (1 << 1))
++		param.enhancedContrast = dx_contrast;
++	    if (dx_flags & (1 << 2))
++		param.clearTypeLevel = dx_level;
++	    if (dx_flags & (1 << 3))
++		param.pixelGeometry = dx_geom;
++	    if (dx_flags & (1 << 4))
++		param.renderingMode = dx_mode;
++	    DWriteContext_SetRenderingParams(s_dwc, &param);
++	}
++    }
++    s_directx_enabled = dx_enable;
++
++    return OK;
++#else
++    return FAIL;
++#endif
++}
++#endif
++
+ /*
+  * These are new in Windows ME/XP, only defined in recent compilers.
+  */
+diff -r 0618e70ddf93 src/option.c
+--- a/src/option.c	Sat Feb 02 01:13:31 2013 +0900
++++ b/src/option.c	Sat Feb 02 01:22:44 2013 +0900
+@@ -1024,11 +1024,6 @@
+     {"directory",   "dir",  P_STRING|P_EXPAND|P_VI_DEF|P_COMMA|P_NODUP|P_SECURE,
+ 			    (char_u *)&p_dir, PV_NONE,
+ 			    {(char_u *)DFLT_DIR, (char_u *)0L} SCRIPTID_INIT},
+-#ifdef FEAT_DIRECTX
+-    {"directx",     "dx", P_BOOL|P_VI_DEF|P_VIM|P_RCLR,
+-			    (char_u *)&p_directx, PV_NONE,
+-			    {(char_u *)FALSE, (char_u *)FALSE} SCRIPTID_INIT},
+-#endif
+     {"display",	    "dy",   P_STRING|P_VI_DEF|P_COMMA|P_RALL|P_NODUP,
+ 			    (char_u *)&p_dy, PV_NONE,
+ 			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
+@@ -2098,6 +2093,11 @@
+     {"remap",	    NULL,   P_BOOL|P_VI_DEF,
+ 			    (char_u *)&p_remap, PV_NONE,
+ 			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
++#ifdef FEAT_RENDERING_OPTIONS
++    {"renderingoptions", "renopt", P_STRING|P_COMMA|P_RCLR,
++			    (char_u *)&p_renopt, PV_NONE,
++			    {(char_u *)0L, (char_u *)0L} SCRIPTID_INIT},
++#endif
+     {"report",	    NULL,   P_NUM|P_VI_DEF,
+ 			    (char_u *)&p_report, PV_NONE,
+ 			    {(char_u *)2L, (char_u *)0L} SCRIPTID_INIT},
+@@ -6993,6 +6993,16 @@
+     }
+ #endif
+ 
++#if defined(FEAT_GUI) && defined(FEAT_RENDERING_OPTIONS)
++    else if (varp == &p_renopt && gui.in_use)
++    {
++	int gui_mch_set_rendering_options(char_u *);
++
++	if (!gui_mch_set_rendering_options(p_renopt))
++	    errmsg = e_invarg;
++    }
++#endif
++
+     /* Options that are a list of flags. */
+     else
+     {
+@@ -7971,21 +7981,6 @@
+     }
+ #endif
+ 
+-#ifdef FEAT_DIRECTX
+-    /* directx */
+-    else if ((int *)varp == &p_directx && p_directx)
+-    {
+-	int directx_enabled(void);
+-
+-	if (!directx_enabled())
+-	{
+-	    /* TODO: assign new error code. */
+-	    EMSG(_("E999: failed to enable DirectX"));
+-	}
+-    }
+-#endif
+-
+-
+ #ifdef USE_IM_CONTROL
+     /* 'imdisable' */
+     else if ((int *)varp == &p_imdisable)
+diff -r 0618e70ddf93 src/option.h
+--- a/src/option.h	Sat Feb 02 01:13:31 2013 +0900
++++ b/src/option.h	Sat Feb 02 01:22:44 2013 +0900
+@@ -428,9 +428,6 @@
+ EXTERN int	p_dg;		/* 'digraph' */
+ #endif
+ EXTERN char_u	*p_dir;		/* 'directory' */
+-#ifdef FEAT_DIRECTX
+-EXTERN int	p_directx;	/* 'directx' */
+-#endif
+ EXTERN char_u	*p_dy;		/* 'display' */
+ EXTERN unsigned	dy_flags;
+ #ifdef IN_OPTION_C
+@@ -663,6 +660,9 @@
+ EXTERN long	p_rdt;		/* 'redrawtime' */
+ #endif
+ EXTERN int	p_remap;	/* 'remap' */
++#ifdef FEAT_RENDERING_OPTIONS
++EXTERN char_u	*p_renopt;	/* 'renderingoptions' */
++#endif
+ EXTERN long	p_report;	/* 'report' */
+ #if defined(FEAT_WINDOWS) && defined(FEAT_QUICKFIX)
+ EXTERN long	p_pvh;		/* 'previewheight' */
+diff -r 0618e70ddf93 src/vim.h
+--- a/src/vim.h	Sat Feb 02 01:13:31 2013 +0900
++++ b/src/vim.h	Sat Feb 02 01:22:44 2013 +0900
+@@ -127,6 +127,13 @@
+ # endif
+ #endif
+ 
++/* Check support for rendering options */
++#ifdef FEAT_GUI
++# if defined(FEAT_DIRECTX)
++#  define FEAT_RENDERING_OPTIONS
++# endif
++#endif
++
+ /* Visual Studio 2005 has 'deprecated' many of the standard CRT functions */
+ #if _MSC_VER >= 1400
+ # define _CRT_SECURE_NO_DEPRECATE
