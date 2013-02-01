@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent fa662aa324572809215221f4e7e560c946f7138a
+# Parent 743d30acb80e119d1fe576c8ce375f3523d4ff42
 
-diff -r fa662aa32457 runtime/doc/eval.txt
---- a/runtime/doc/eval.txt	Sat Jan 26 11:01:36 2013 +0900
-+++ b/runtime/doc/eval.txt	Sat Jan 26 11:50:12 2013 +0900
-@@ -6319,6 +6319,7 @@
+diff -r 743d30acb80e runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt	Thu Jan 31 08:31:51 2013 +0900
++++ b/runtime/doc/eval.txt	Fri Feb 01 21:44:59 2013 +0900
+@@ -6320,6 +6320,7 @@
  dialog_gui		Compiled with GUI dialog support.
  diff			Compiled with |vimdiff| and 'diff' support.
  digraphs		Compiled with support for digraphs.
@@ -12,9 +12,9 @@ diff -r fa662aa32457 runtime/doc/eval.txt
  dnd			Compiled with support for the "~ register |quote_~|.
  dos16			16 bits DOS version of Vim.
  dos32			32 bits DOS (DJGPP) version of Vim.
-diff -r fa662aa32457 runtime/doc/options.txt
---- a/runtime/doc/options.txt	Sat Jan 26 11:01:36 2013 +0900
-+++ b/runtime/doc/options.txt	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e runtime/doc/options.txt
+--- a/runtime/doc/options.txt	Thu Jan 31 08:31:51 2013 +0900
++++ b/runtime/doc/options.txt	Fri Feb 01 21:44:59 2013 +0900
 @@ -2518,6 +2518,24 @@
  	security reasons.
  	{Vi: directory to put temp file in, defaults to "/tmp"}
@@ -40,10 +40,10 @@ diff -r fa662aa32457 runtime/doc/options.txt
  					*'display'* *'dy'*
  'display' 'dy'		string	(default "")
  			global
-diff -r fa662aa32457 runtime/doc/various.txt
---- a/runtime/doc/various.txt	Sat Jan 26 11:01:36 2013 +0900
-+++ b/runtime/doc/various.txt	Sat Jan 26 11:50:12 2013 +0900
-@@ -310,6 +310,7 @@
+diff -r 743d30acb80e runtime/doc/various.txt
+--- a/runtime/doc/various.txt	Thu Jan 31 08:31:51 2013 +0900
++++ b/runtime/doc/various.txt	Fri Feb 01 21:44:59 2013 +0900
+@@ -320,6 +320,7 @@
  N  *+dialog_con_gui*	Support for |:confirm| with GUI and console dialog.
  N  *+diff*		|vimdiff| and 'diff'
  N  *+digraphs*		|digraphs| *E196*
@@ -51,9 +51,9 @@ diff -r fa662aa32457 runtime/doc/various.txt
     *+dnd*		Support for DnD into the "~ register |quote_~|.
  B  *+emacs_tags*	|emacs-tags| files
  N  *+eval*		expression evaluation |eval.txt|
-diff -r fa662aa32457 src/Make_cyg.mak
---- a/src/Make_cyg.mak	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/Make_cyg.mak	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/Make_cyg.mak
+--- a/src/Make_cyg.mak	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/Make_cyg.mak	Fri Feb 01 21:44:59 2013 +0900
 @@ -8,6 +8,7 @@
  # Cygwin application use the Makefile (just like on Unix).
  #
@@ -139,9 +139,9 @@ diff -r fa662aa32457 src/Make_cyg.mak
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r fa662aa32457 src/Make_ming.mak
---- a/src/Make_ming.mak	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/Make_ming.mak	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/Make_ming.mak
+--- a/src/Make_ming.mak	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/Make_ming.mak	Fri Feb 01 21:44:59 2013 +0900
 @@ -31,6 +31,8 @@
  OPTIMIZE=MAXSPEED
  # set to yes to make gvim, no for vim
@@ -151,7 +151,7 @@ diff -r fa662aa32457 src/Make_ming.mak
  # FEATURES=[TINY | SMALL  | NORMAL | BIG | HUGE]
  # Set to TINY to make minimal version (few features).
  FEATURES=BIG
-@@ -440,6 +442,14 @@
+@@ -443,6 +445,14 @@
  endif
  endif
  
@@ -166,7 +166,7 @@ diff -r fa662aa32457 src/Make_ming.mak
  # Only allow XPM for a GUI build.
  ifeq (yes, $(GUI))
  
-@@ -576,6 +586,14 @@
+@@ -579,6 +589,14 @@
  LIB += -lwsock32
  endif
  endif
@@ -181,7 +181,7 @@ diff -r fa662aa32457 src/Make_ming.mak
  ifdef XPM
  # Only allow XPM for a GUI build.
  ifeq (yes, $(GUI))
-@@ -633,11 +651,7 @@
+@@ -636,11 +654,7 @@
  ifeq (yes, $(OLE))
  LIB += -loleaut32
  OBJ += $(OUTDIR)/if_ole.o
@@ -194,7 +194,7 @@ diff -r fa662aa32457 src/Make_ming.mak
  endif
  
  ifeq (yes, $(MBYTE))
-@@ -661,6 +675,14 @@
+@@ -664,6 +678,14 @@
  DEFINES+=-DDYNAMIC_ICONV
  endif
  
@@ -209,7 +209,7 @@ diff -r fa662aa32457 src/Make_ming.mak
  all: $(TARGET) vimrun.exe xxd/xxd.exe install.exe uninstal.exe GvimExt/gvimext.dll
  
  vimrun.exe: vimrun.c
-@@ -734,6 +756,9 @@
+@@ -737,6 +759,9 @@
  $(OUTDIR)/gui_w32.o:	gui_w32.c gui_w48.c $(INCL)
  	$(CC) -c $(CFLAGS) gui_w32.c -o $(OUTDIR)/gui_w32.o
  
@@ -219,9 +219,9 @@ diff -r fa662aa32457 src/Make_ming.mak
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r fa662aa32457 src/Make_mvc.mak
---- a/src/Make_mvc.mak	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/Make_mvc.mak	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/Make_mvc.mak
+--- a/src/Make_mvc.mak	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/Make_mvc.mak	Fri Feb 01 21:44:59 2013 +0900
 @@ -24,6 +24,9 @@
  #
  #	GUI interface: GUI=yes (default is no)
@@ -278,9 +278,9 @@ diff -r fa662aa32457 src/Make_mvc.mak
  $(OUTDIR)/if_cscope.obj: $(OUTDIR) if_cscope.c  $(INCL)
  
  $(OUTDIR)/if_lua.obj: $(OUTDIR) if_lua.c  $(INCL)
-diff -r fa662aa32457 src/eval.c
---- a/src/eval.c	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/eval.c	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/eval.c
+--- a/src/eval.c	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/eval.c	Fri Feb 01 21:44:59 2013 +0900
 @@ -12151,6 +12151,9 @@
  #ifdef FEAT_DIGRAPHS
  	"digraphs",
@@ -291,10 +291,10 @@ diff -r fa662aa32457 src/eval.c
  #ifdef FEAT_DND
  	"dnd",
  #endif
-diff -r fa662aa32457 src/gui_dwrite.cpp
+diff -r 743d30acb80e src/gui_dwrite.cpp
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.cpp	Sat Jan 26 11:50:12 2013 +0900
-@@ -0,0 +1,798 @@
++++ b/src/gui_dwrite.cpp	Fri Feb 01 21:44:59 2013 +0900
+@@ -0,0 +1,856 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
 +#define WIN32_LEAN_AND_MEAN
@@ -370,6 +370,84 @@ diff -r fa662aa32457 src/gui_dwrite.cpp
 +    // working fileds.
 +    FLOAT offsetX;
 +};
++
++    static DWRITE_PIXEL_GEOMETRY
++ToPixelGeometry(int value)
++{
++    switch (value)
++    {
++	default:
++	case 0:
++	    return DWRITE_PIXEL_GEOMETRY_FLAT;
++	case 1:
++	    return DWRITE_PIXEL_GEOMETRY_RGB;
++	case 2:
++	    return DWRITE_PIXEL_GEOMETRY_BGR;
++    }
++}
++
++    static int
++ToInt(DWRITE_PIXEL_GEOMETRY value)
++{
++    switch (value)
++    {
++	case DWRITE_PIXEL_GEOMETRY_FLAT:
++	    return 0;
++	case DWRITE_PIXEL_GEOMETRY_RGB:
++	    return 1;
++	case DWRITE_PIXEL_GEOMETRY_BGR:
++	    return 2;
++	default:
++	    return -1;
++    }
++}
++
++    static DWRITE_RENDERING_MODE
++ToRenderingMode(int value)
++{
++    switch (value)
++    {
++	default:
++	case 0:
++	    return DWRITE_RENDERING_MODE_DEFAULT;
++	case 1:
++	    return DWRITE_RENDERING_MODE_ALIASED;
++	case 2:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC;
++	case 3:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL;
++	case 4:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL;
++	case 5:
++	    return DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC;
++	case 6:
++	    return DWRITE_RENDERING_MODE_OUTLINE;
++    }
++}
++
++    static int
++ToInt(DWRITE_RENDERING_MODE value)
++{
++    switch (value)
++    {
++	case DWRITE_RENDERING_MODE_DEFAULT:
++	    return 0;
++	case DWRITE_RENDERING_MODE_ALIASED:
++	    return 1;
++	case DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC:
++	    return 2;
++	case DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL:
++	    return 3;
++	case DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL:
++	    return 4;
++	case DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC:
++	    return 5;
++	case DWRITE_RENDERING_MODE_OUTLINE:
++	    return 6;
++	default:
++	    return -1;
++    }
++}
 +
 +class AdjustedGlyphRun : public DWRITE_GLYPH_RUN
 +{
@@ -612,11 +690,10 @@ diff -r fa662aa32457 src/gui_dwrite.cpp
 +    float PixelsToDipsY(int y);
 +
 +    void SetRenderingParams(
-+	    float gamma,
-+	    float enhancedContrast,
-+	    float clearTypeLevel,
-+	    DWRITE_PIXEL_GEOMETRY pixelGeometry,
-+	    DWRITE_RENDERING_MODE renderingMode);
++	    const DWriteRenderingParams *params);
++
++    DWriteRenderingParams *GetRenderingParams(
++	    DWriteRenderingParams *params);
 +};
 +
 +DWriteContext::DWriteContext() :
@@ -909,62 +986,40 @@ diff -r fa662aa32457 src/gui_dwrite.cpp
 +
 +    void
 +DWriteContext::SetRenderingParams(
-+	float gamma,
-+	float enhancedContrast,
-+	float clearTypeLevel,
-+	DWRITE_PIXEL_GEOMETRY pixelGeometry,
-+	DWRITE_RENDERING_MODE renderingMode)
++	const DWriteRenderingParams *params)
 +{
 +    if (mDWriteFactory == NULL)
 +	return;
 +
-+    IDWriteRenderingParams *newParam = NULL;
++    IDWriteRenderingParams *renderingParams = NULL;
 +    HRESULT hr;
-+    hr = mDWriteFactory->CreateCustomRenderingParams(gamma, enhancedContrast,
-+	    clearTypeLevel, pixelGeometry, renderingMode, &newParam);
-+    if (SUCCEEDED(hr))
++    if (params != NULL)
++	hr = mDWriteFactory->CreateCustomRenderingParams(params->gamma,
++		params->enhancedContrast, params->clearTypeLevel,
++		ToPixelGeometry(params->pixelGeometry),
++		ToRenderingMode(params->renderingMode), &renderingParams);
++    else
++	hr = mDWriteFactory->CreateRenderingParams(&renderingParams);
++    if (SUCCEEDED(hr) && renderingParams != NULL)
 +    {
 +	SafeRelease(&mRenderingParams);
-+	mRenderingParams = newParam;
++	mRenderingParams = renderingParams;
 +    }
 +}
 +
-+    static DWRITE_PIXEL_GEOMETRY
-+ToPixelGeometry(int value)
++    DWriteRenderingParams *
++DWriteContext::GetRenderingParams(
++	DWriteRenderingParams *params)
 +{
-+    switch (value)
++    if (params != NULL && mRenderingParams != NULL)
 +    {
-+	default:
-+	case 0:
-+	    return DWRITE_PIXEL_GEOMETRY_FLAT;
-+	case 1:
-+	    return DWRITE_PIXEL_GEOMETRY_RGB;
-+	case 2:
-+	    return DWRITE_PIXEL_GEOMETRY_BGR;
++	params->gamma = mRenderingParams->GetGamma();
++	params->enhancedContrast = mRenderingParams->GetEnhancedContrast();
++	params->clearTypeLevel = mRenderingParams->GetClearTypeLevel();
++	params->pixelGeometry = ToInt(mRenderingParams->GetPixelGeometry());
++	params->renderingMode = ToInt(mRenderingParams->GetRenderingMode());
 +    }
-+}
-+
-+    static DWRITE_RENDERING_MODE
-+ToRenderingMode(int value)
-+{
-+    switch (value)
-+    {
-+	default:
-+	case 0:
-+	    return DWRITE_RENDERING_MODE_DEFAULT;
-+	case 1:
-+	    return DWRITE_RENDERING_MODE_ALIASED;
-+	case 2:
-+	    return DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC;
-+	case 3:
-+	    return DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL;
-+	case 4:
-+	    return DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL;
-+	case 5:
-+	    return DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC;
-+	case 6:
-+	    return DWRITE_RENDERING_MODE_OUTLINE;
-+    }
++    return params;
 +}
 +
 +////////////////////////////////////////////////////////////////////////////
@@ -1080,23 +1135,26 @@ diff -r fa662aa32457 src/gui_dwrite.cpp
 +    void
 +DWriteContext_SetRenderingParams(
 +	DWriteContext *ctx,
-+	float gamma,
-+	float enhancedContrast,
-+	float clearTypeLevel,
-+	int pixelGeometry,
-+	int renderingMode)
++	const DWriteRenderingParams *params)
 +{
 +    if (ctx != NULL)
-+    {
-+	ctx->SetRenderingParams(gamma, enhancedContrast, clearTypeLevel,
-+		ToPixelGeometry(pixelGeometry),
-+		ToRenderingMode(renderingMode));
-+    }
++	ctx->SetRenderingParams(params);
 +}
-diff -r fa662aa32457 src/gui_dwrite.h
++
++    DWriteRenderingParams *
++DWriteContext_GetRenderingParams(
++	DWriteContext *ctx,
++	DWriteRenderingParams *params)
++{
++    if (ctx != NULL)
++	return ctx->GetRenderingParams(params);
++    else
++	return NULL;
++}
+diff -r 743d30acb80e src/gui_dwrite.h
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.h	Sat Jan 26 11:50:12 2013 +0900
-@@ -0,0 +1,59 @@
++++ b/src/gui_dwrite.h	Fri Feb 01 21:44:59 2013 +0900
+@@ -0,0 +1,68 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
 +#ifndef GUI_DWRITE_H
@@ -1107,6 +1165,30 @@ diff -r fa662aa32457 src/gui_dwrite.h
 +#endif
 +
 +typedef struct DWriteContext DWriteContext;
++
++typedef struct DWriteRenderingParams {
++    float gamma;
++    float enhancedContrast;
++    float clearTypeLevel;
++    /*
++     * pixelGeometry:
++     *	0 - DWRITE_PIXEL_GEOMETRY_FLAT
++     *	1 - DWRITE_PIXEL_GEOMETRY_RGB
++     *	2 - DWRITE_PIXEL_GEOMETRY_BGR
++     */
++    int pixelGeometry;
++    /*
++     * renderingMode:
++     *	0 - DWRITE_RENDERING_MODE_DEFAULT
++     *	1 - DWRITE_RENDERING_MODE_ALIASED
++     *	2 - DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC
++     *	3 - DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL
++     *	4 - DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL
++     *	5 - DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC
++     *	6 - DWRITE_RENDERING_MODE_OUTLINE
++     */
++    int renderingMode;
++} DWriteRenderingParams;
 +
 +void DWrite_Init(void);
 +void DWrite_Final(void);
@@ -1129,36 +1211,21 @@ diff -r fa662aa32457 src/gui_dwrite.h
 +void DWriteContext_EndDraw(DWriteContext *ctx);
 +void DWriteContext_Close(DWriteContext *ctx);
 +
-+/**
-+ * pixelGeometry:
-+ *	0 - DWRITE_PIXEL_GEOMETRY_FLAT
-+ *	1 - DWRITE_PIXEL_GEOMETRY_RGB
-+ *	2 - DWRITE_PIXEL_GEOMETRY_BGR
-+ *
-+ * renderingMode:
-+ *	0 - DWRITE_RENDERING_MODE_DEFAULT
-+ *	1 - DWRITE_RENDERING_MODE_ALIASED
-+ *	2 - DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC
-+ *	3 - DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL
-+ *	4 - DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL
-+ *	5 - DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC
-+ *	6 - DWRITE_RENDERING_MODE_OUTLINE
-+ */
 +void DWriteContext_SetRenderingParams(
 +	DWriteContext *ctx,
-+	float gamma,
-+	float enhancedContrast,
-+	float clearTypeLevel,
-+	int pixelGeometry,
-+	int renderingMode);
++	const DWriteRenderingParams *params);
++
++DWriteRenderingParams *DWriteContext_GetRenderingParams(
++	DWriteContext *ctx,
++	DWriteRenderingParams *params);
 +
 +#ifdef __cplusplus
 +}
 +#endif
 +#endif/*GUI_DWRITE_H*/
-diff -r fa662aa32457 src/gui_w32.c
---- a/src/gui_w32.c	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/gui_w32.c	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/gui_w32.c
+--- a/src/gui_w32.c	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/gui_w32.c	Fri Feb 01 21:44:59 2013 +0900
 @@ -25,6 +25,30 @@
  
  #include "vim.h"
@@ -1256,9 +1323,9 @@ diff -r fa662aa32457 src/gui_w32.c
  	len = cells;	/* used for underlining */
      }
      else if ((enc_codepage > 0 && (int)GetACP() != enc_codepage) || enc_latin9)
-diff -r fa662aa32457 src/gui_w48.c
---- a/src/gui_w48.c	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/gui_w48.c	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/gui_w48.c
+--- a/src/gui_w48.c	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/gui_w48.c	Fri Feb 01 21:44:59 2013 +0900
 @@ -2778,6 +2778,10 @@
  
  	out_flush();	    /* make sure all output has been processed */
@@ -1304,9 +1371,9 @@ diff -r fa662aa32457 src/gui_w48.c
      ReleaseDC(s_textArea, s_hdc);
      DeleteObject(s_brush);
  
-diff -r fa662aa32457 src/option.c
---- a/src/option.c	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/option.c	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/option.c
+--- a/src/option.c	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/option.c	Fri Feb 01 21:44:59 2013 +0900
 @@ -1024,6 +1024,11 @@
      {"directory",   "dir",  P_STRING|P_EXPAND|P_VI_DEF|P_COMMA|P_NODUP|P_SECURE,
  			    (char_u *)&p_dir, PV_NONE,
@@ -1341,9 +1408,9 @@ diff -r fa662aa32457 src/option.c
  #ifdef USE_IM_CONTROL
      /* 'imdisable' */
      else if ((int *)varp == &p_imdisable)
-diff -r fa662aa32457 src/option.h
---- a/src/option.h	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/option.h	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/option.h
+--- a/src/option.h	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/option.h	Fri Feb 01 21:44:59 2013 +0900
 @@ -428,6 +428,9 @@
  EXTERN int	p_dg;		/* 'digraph' */
  #endif
@@ -1354,9 +1421,9 @@ diff -r fa662aa32457 src/option.h
  EXTERN char_u	*p_dy;		/* 'display' */
  EXTERN unsigned	dy_flags;
  #ifdef IN_OPTION_C
-diff -r fa662aa32457 src/version.c
---- a/src/version.c	Sat Jan 26 11:01:36 2013 +0900
-+++ b/src/version.c	Sat Jan 26 11:50:12 2013 +0900
+diff -r 743d30acb80e src/version.c
+--- a/src/version.c	Thu Jan 31 08:31:51 2013 +0900
++++ b/src/version.c	Fri Feb 01 21:44:59 2013 +0900
 @@ -182,6 +182,13 @@
  #else
  	"-digraphs",
