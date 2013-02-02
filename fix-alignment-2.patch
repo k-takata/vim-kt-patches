@@ -1,5 +1,6 @@
 # HG changeset patch
 # Parent 771d733133e57aa489fb9de753c57295c96bedc5
+
 diff --git a/runtime/doc/pattern.txt b/runtime/doc/pattern.txt
 --- a/runtime/doc/pattern.txt
 +++ b/runtime/doc/pattern.txt
@@ -12,3 +13,51 @@ diff --git a/runtime/doc/pattern.txt b/runtime/doc/pattern.txt
  
  |/\c|	\c	\c	ignore case, do not use the 'ignorecase' option
  |/\C|	\C	\C	match case, do not use the 'ignorecase' option
+diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
+--- a/runtime/doc/quickref.txt
++++ b/runtime/doc/quickref.txt
+@@ -7,7 +7,7 @@
+ 
+ 							 *quickref* *Contents*
+  tag	  subject			 tag	  subject	~
+-|Q_ct|  list of help files		|Q_re|	Repeating commands
++|Q_ct|	list of help files		|Q_re|	Repeating commands
+ |Q_lr|	motion: Left-right		|Q_km|	Key mapping
+ |Q_ud|	motion: Up-down			|Q_ab|	Abbreviations
+ |Q_tm|	motion: Text object		|Q_op|	Options
+@@ -27,7 +27,7 @@
+ |Q_co|	change: Complex			|Q_bu|	Buffer list commands
+ |Q_vi|	Visual mode			|Q_sy|	Syntax highlighting
+ |Q_to|	Text objects			|Q_gu|	GUI commands
+-					|Q_fo|  Folding
++					|Q_fo|	Folding
+ 
+ ------------------------------------------------------------------------------
+ N is used to indicate an optional count that can be given before the command.
+@@ -260,7 +260,7 @@
+ |:startreplace| :startr[eplace][!]  start Replace mode, at EOL when [!] used
+ 
+ in Visual block mode:
+-|v_b_I|    I	insert the same text in front of all the selected lines
++|v_b_I|	   I	insert the same text in front of all the selected lines
+ |v_b_A|	   A	append the same text after all the selected lines
+ ------------------------------------------------------------------------------
+ *Q_ai*		Insert mode keys
+@@ -334,7 +334,7 @@
+ *Q_de*		Deleting text
+ 
+ |x|	N  x		delete N characters under and after the cursor
+-|<Del>| N  <Del>	delete N characters under and after the cursor
++|<Del>|	N  <Del>	delete N characters under and after the cursor
+ |X|	N  X		delete N characters before the cursor
+ |d|	N  d{motion}	delete the text that is moved over with {motion}
+ |v_d|	{visual}d	delete the highlighted text
+@@ -1173,7 +1173,7 @@
+ |:edit_f|  :e[dit][!] {file}	edit {file}
+ |:edit|	   :e[dit][!]		reload the current file
+ |:enew|	   :ene[w][!]		edit a new, unnamed buffer
+-|:find|    :fin[d][!] {file}	find {file} in 'path' and edit it
++|:find|	   :fin[d][!] {file}	find {file} in 'path' and edit it
+ 
+ |CTRL-^|   N   CTRL-^		edit alternate file N (equivalent to ":e #N")
+ |gf|	       gf  or ]f	edit the file whose name is under the cursor
