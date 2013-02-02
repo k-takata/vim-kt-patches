@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent 771d733133e57aa489fb9de753c57295c96bedc5
+diff --git a/runtime/doc/pattern.txt b/runtime/doc/pattern.txt
+--- a/runtime/doc/pattern.txt
++++ b/runtime/doc/pattern.txt
+@@ -504,7 +504,7 @@
+ 	x	x	a character with no special meaning matches itself
+ 
+ |/[]|	[]	\[]	any character specified inside the []
+-|/\%[]| \%[]	\%[]	a sequence of optionally matched atoms
++|/\%[]|	\%[]	\%[]	a sequence of optionally matched atoms
+ 
+ |/\c|	\c	\c	ignore case, do not use the 'ignorecase' option
+ |/\C|	\C	\C	match case, do not use the 'ignorecase' option
