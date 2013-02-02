@@ -61,3 +61,27 @@ diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
  
  |CTRL-^|   N   CTRL-^		edit alternate file N (equivalent to ":e #N")
  |gf|	       gf  or ]f	edit the file whose name is under the cursor
+diff --git a/runtime/doc/usr_08.txt b/runtime/doc/usr_08.txt
+--- a/runtime/doc/usr_08.txt
++++ b/runtime/doc/usr_08.txt
+@@ -17,7 +17,7 @@
+ |08.6|	Commands for all windows
+ |08.7|	Viewing differences with vimdiff
+ |08.8|	Various
+-|08.9|  Tab pages
++|08.9|	Tab pages
+ 
+      Next chapter: |usr_09.txt|  Using the GUI
+  Previous chapter: |usr_07.txt|  Editing more than one file
+diff --git a/runtime/doc/usr_28.txt b/runtime/doc/usr_28.txt
+--- a/runtime/doc/usr_28.txt
++++ b/runtime/doc/usr_28.txt
+@@ -18,7 +18,7 @@
+ |28.7|	Folding by syntax
+ |28.8|	Folding by expression
+ |28.9|	Folding unchanged lines
+-|28.10| Which fold method to use?
++|28.10|	Which fold method to use?
+ 
+      Next chapter: |usr_29.txt|  Moving through programs
+  Previous chapter: |usr_27.txt|  Search commands and patterns
