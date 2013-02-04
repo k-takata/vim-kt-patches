@@ -1,6 +1,32 @@
 # HG changeset patch
-# Parent 771d733133e57aa489fb9de753c57295c96bedc5
+# Parent 1931865567f5d747bd6f8b13f09639db7a22e24e
 
+diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
+--- a/runtime/doc/autocmd.txt
++++ b/runtime/doc/autocmd.txt
+@@ -266,7 +266,7 @@
+ |GUIFailed|		after starting the GUI failed
+ |TermResponse|		after the terminal response to |t_RV| is received
+ 
+-|QuitPre|			when using `:quit`, before deciding whether to quit
++|QuitPre|		when using `:quit`, before deciding whether to quit
+ |VimLeavePre|		before exiting Vim, before writing the viminfo file
+ |VimLeave|		before exiting Vim, after writing the viminfo file
+ 
+diff --git a/runtime/doc/intro.txt b/runtime/doc/intro.txt
+--- a/runtime/doc/intro.txt
++++ b/runtime/doc/intro.txt
+@@ -394,8 +394,8 @@
+ 							*quotecommandquote*
+ "command"	A reference to a command that you can type is enclosed in
+ 		double quotes.
+-`command`		New style command, this distinguishes it from other
+-		quoted text and strings.
++`command`	New style command, this distinguishes it from other quoted
++		text and strings.
+ 
+ 					*key-notation* *key-codes* *keycodes*
+ These names for keys are used in the documentation.  They can also be used
 diff --git a/runtime/doc/pattern.txt b/runtime/doc/pattern.txt
 --- a/runtime/doc/pattern.txt
 +++ b/runtime/doc/pattern.txt
@@ -52,15 +78,6 @@ diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
  |X|	N  X		delete N characters before the cursor
  |d|	N  d{motion}	delete the text that is moved over with {motion}
  |v_d|	{visual}d	delete the highlighted text
-@@ -1173,7 +1173,7 @@
- |:edit_f|  :e[dit][!] {file}	edit {file}
- |:edit|	   :e[dit][!]		reload the current file
- |:enew|	   :ene[w][!]		edit a new, unnamed buffer
--|:find|    :fin[d][!] {file}	find {file} in 'path' and edit it
-+|:find|	   :fin[d][!] {file}	find {file} in 'path' and edit it
- 
- |CTRL-^|   N   CTRL-^		edit alternate file N (equivalent to ":e #N")
- |gf|	       gf  or ]f	edit the file whose name is under the cursor
 diff --git a/runtime/doc/usr_08.txt b/runtime/doc/usr_08.txt
 --- a/runtime/doc/usr_08.txt
 +++ b/runtime/doc/usr_08.txt
