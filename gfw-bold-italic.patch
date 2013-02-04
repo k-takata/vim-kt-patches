@@ -1,0 +1,262 @@
+# HG changeset patch
+# Parent 88d87cc0e61c11211af6c3bf07457a2f1d03c07c
+
+diff --git a/src/gui.c b/src/gui.c
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -410,6 +410,14 @@
+     gui.fontset = NOFONTSET;
+ # endif
+ #endif
++#ifdef FEAT_MBYTE
++    gui.norm_wide_font = NOFONT;
++# ifndef FEAT_GUI_GTK
++    gui.bold_wide_font = NOFONT;
++    gui.ital_wide_font = NOFONT;
++    gui.boldital_wide_font = NOFONT;
++# endif
++#endif
+ 
+ #ifdef FEAT_MENU
+ # ifndef FEAT_GUI_GTK
+@@ -949,8 +957,8 @@
+ 		    font = gui_mch_get_font(wide_name, FALSE);
+ 		    if (font != NOFONT)
+ 		    {
+-			gui_mch_free_font(gui.wide_font);
+-			gui.wide_font = font;
++			gui_mch_free_font(gui.norm_wide_font);
++			gui.norm_wide_font = font;
+ 			set_string_option_direct((char_u *)"gfw", -1,
+ 						      wide_name, OPT_FREE, 0);
+ 		    }
+@@ -990,21 +998,21 @@
+ 	    return FAIL;
+     }
+ 
+-    gui_mch_free_font(gui.wide_font);
+-#ifdef FEAT_GUI_GTK
++    gui_mch_free_font(gui.norm_wide_font);
++# ifdef FEAT_GUI_GTK
+     /* Avoid unnecessary overhead if 'guifontwide' is equal to 'guifont'. */
+     if (font != NOFONT && gui.norm_font != NOFONT
+ 			 && pango_font_description_equal(font, gui.norm_font))
+     {
+-	gui.wide_font = NOFONT;
++	gui.norm_wide_font = NOFONT;
+ 	gui_mch_free_font(font);
+     }
+     else
+-#endif
+-	gui.wide_font = font;
+-#ifdef FEAT_GUI_MSWIN
++# endif
++	gui.norm_wide_font = font;
++# ifdef FEAT_GUI_MSWIN
+     gui_mch_wide_font_changed();
+-#endif
++# endif
+     return OK;
+ }
+ #endif
+@@ -2172,6 +2180,9 @@
+     guicolor_T	sp_color;
+ #if !defined(MSWIN16_FASTTEXT) && !defined(FEAT_GUI_GTK)
+     GuiFont	font = NOFONT;
++# ifdef FEAT_MBYTE
++    GuiFont	wide_font = NOFONT;
++# endif
+ # ifdef FEAT_XFONTSET
+     GuiFontset	fontset = NOFONTSET;
+ # endif
+@@ -2261,6 +2272,16 @@
+ 	}
+ 	else
+ 	    font = gui.norm_font;
++# ifdef FEAT_MBYTE
++	if (font == gui.boldital_font && gui.boldital_wide_font)
++	    wide_font = gui.boldital_wide_font;
++	else if (font == gui.bold_font && gui.bold_wide_font)
++	    wide_font = gui.bold_wide_font;
++	else if (font == gui.ital_font && gui.ital_wide_font)
++	    wide_font = gui.ital_wide_font;
++	else if (font == gui.norm_font && gui.norm_wide_font)
++	    wide_font = gui.norm_wide_font;
++# endif
+     }
+ # ifdef FEAT_XFONTSET
+     if (fontset != NOFONTSET)
+@@ -2399,7 +2420,7 @@
+ #  ifdef FEAT_XFONTSET
+ 		    && fontset == NOFONTSET
+ #  endif
+-		    && gui.wide_font != NOFONT)
++		    && wide_font != NOFONT)
+ 		curr_wide = TRUE;
+ 	    else
+ 		curr_wide = FALSE;
+@@ -2433,7 +2454,7 @@
+ 		if (thislen > 0)
+ 		{
+ 		    if (prev_wide)
+-			gui_mch_set_font(gui.wide_font);
++			gui_mch_set_font(wide_font);
+ 		    gui_mch_draw_string(gui.row, scol, s + start, thislen,
+ 								  draw_flags);
+ 		    if (prev_wide)
+diff --git a/src/gui.h b/src/gui.h
+--- a/src/gui.h
++++ b/src/gui.h
+@@ -311,7 +311,12 @@
+ # endif
+ #endif
+ #ifdef FEAT_MBYTE
+-    GuiFont	wide_font;	    /* 'guifontwide' font */
++    GuiFont	norm_wide_font;	    /* 'guifontwide' font */
++# ifndef FEAT_GUI_GTK
++    GuiFont	bold_wide_font;	    /* Bold 'guifontwide' font */
++    GuiFont	ital_wide_font;	    /* Italic 'guifontwide' font */
++    GuiFont	boldital_wide_font; /* Bold-Italic 'guifontwide' font */
++# endif
+ #endif
+ #ifdef FEAT_XFONTSET
+     GuiFontset	fontset;	    /* set of fonts for multi-byte chars */
+diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
+--- a/src/gui_gtk_x11.c
++++ b/src/gui_gtk_x11.c
+@@ -4445,11 +4445,11 @@
+     ascii_glyph_table_init();
+ 
+     /* Avoid unnecessary overhead if 'guifontwide' is equal to 'guifont'. */
+-    if (gui.wide_font != NULL
+-	&& pango_font_description_equal(gui.norm_font, gui.wide_font))
++    if (gui.norm_wide_font != NULL
++	&& pango_font_description_equal(gui.norm_font, gui.norm_wide_font))
+     {
+-	pango_font_description_free(gui.wide_font);
+-	gui.wide_font = NULL;
++	pango_font_description_free(gui.norm_wide_font);
++	gui.norm_wide_font = NULL;
+     }
+ 
+     if (gui_mch_maximized())
+@@ -4694,14 +4694,14 @@
+ 	else if (uc < 0x80 /* optimization shortcut */
+ 		 || (utf_char2cells(uc) != 2 && !utf_iscomposing(uc)))
+ 	{
+-	    INSERT_PANGO_ATTR(pango_attr_font_desc_new(gui.wide_font),
++	    INSERT_PANGO_ATTR(pango_attr_font_desc_new(gui.norm_wide_font),
+ 			      attr_list, start - s, p - s);
+ 	    start = NULL;
+ 	}
+     }
+ 
+     if (start != NULL)
+-	INSERT_PANGO_ATTR(pango_attr_font_desc_new(gui.wide_font),
++	INSERT_PANGO_ATTR(pango_attr_font_desc_new(gui.norm_wide_font),
+ 			  attr_list, start - s, len);
+ }
+ 
+@@ -5004,7 +5004,7 @@
+ 
+ 	/* If 'guifontwide' is set then use that for double-width characters.
+ 	 * Otherwise just go with 'guifont' and let Pango do its thing. */
+-	if (gui.wide_font != NULL)
++	if (gui.norm_wide_font != NULL)
+ 	    apply_wide_font_attr(s, len, attr_list);
+ 
+ 	if ((flags & DRAW_BOLD) && gui.font_can_bold)
+diff --git a/src/gui_mac.c b/src/gui_mac.c
+--- a/src/gui_mac.c
++++ b/src/gui_mac.c
+@@ -3672,13 +3672,13 @@
+ 	ATSUCreateFontFallbacks(&gFontFallbacks);
+ 	ATSUSetObjFontFallbacks(gFontFallbacks, );
+ */
+-	if (gui.wide_font)
++	if (gui.norm_wide_font)
+ 	{
+ 	    ATSUFontID fallbackFonts;
+ 	    gIsFontFallbackSet = TRUE;
+ 
+ 	    if (FMGetFontFromFontFamilyInstance(
+-			(gui.wide_font & 0xFFFF),
++			(gui.norm_wide_font & 0xFFFF),
+ 			0,
+ 			&fallbackFonts,
+ 			NULL) == noErr)
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -5009,7 +5009,7 @@
+ gui_mch_get_charwidth(int c)
+ {
+     static char cache[CHARWIDE_CACHESIZE];
+-    GuiFont usingfont = gui.wide_font ? gui.wide_font : gui.norm_font;
++    GuiFont usingfont = gui.norm_wide_font ? gui.norm_wide_font : gui.norm_font;
+ 
+     /* Check validity of charwide cache */
+     if (last_font != usingfont)
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -3128,8 +3128,8 @@
+     LOGFONT	lf_wide;
+ 
+     if (p_guifontwide != NULL && *p_guifontwide != NUL
+-	    && gui.wide_font != NOFONT
+-	    && GetObject((HFONT)gui.wide_font, sizeof(lf_wide), &lf_wide))
++	    && gui.norm_wide_font != NOFONT
++	    && GetObject((HFONT)gui.norm_wide_font, sizeof(lf_wide), &lf_wide))
+ 	norm_logfont = lf_wide;
+     else
+ 	norm_logfont = sub_logfont;
+@@ -3139,14 +3139,47 @@
+ 
+ #ifdef FEAT_MBYTE
+ /*
+- * Handler of gui.wide_font (p_guifontwide) changed notification.
++ * Handler of gui.norm_wide_font (p_guifontwide) changed notification.
+  */
+     void
+ gui_mch_wide_font_changed()
+ {
++    LOGFONT lf;
++
+ # ifdef FEAT_MBYTE_IME
+     update_im_font();
+ # endif
++
++# ifndef MSWIN16_FASTTEXT
++    gui_mch_free_font(gui.ital_wide_font);
++    gui.ital_wide_font = NOFONT;
++    gui_mch_free_font(gui.bold_wide_font);
++    gui.bold_wide_font = NOFONT;
++    gui_mch_free_font(gui.boldital_wide_font);
++    gui.boldital_wide_font = NOFONT;
++
++    if (gui.norm_wide_font)
++    {
++	GetObject((HFONT)gui.norm_wide_font, sizeof(lf), &lf);
++
++	if (!lf.lfItalic)
++	{
++	    lf.lfItalic = TRUE;
++	    gui.ital_wide_font = get_font_handle(&lf);
++	    lf.lfItalic = FALSE;
++	}
++	if (lf.lfWeight < FW_BOLD)
++	{
++	    lf.lfWeight = FW_BOLD;
++	    gui.bold_wide_font = get_font_handle(&lf);
++	    if (!lf.lfItalic)
++	    {
++		lf.lfItalic = TRUE;
++		gui.boldital_wide_font = get_font_handle(&lf);
++	    }
++	}
++    }
++# endif
+ }
+ #endif
+ 

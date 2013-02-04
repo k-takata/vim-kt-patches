@@ -14,3 +14,4 @@ fix-python-threads.patch
 patch-direct_write.diff
 patch-direct_write-ex1.diff
 use-proto.diff
+gfw-bold-italic.patch
