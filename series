@@ -4,6 +4,7 @@ fix-indent-in-configure.in.patch
 configure.patch
 version_acl_xpm.patch
 update-ja.po.patch
+update-ja.po-2.patch
 update-menu_ja.patch
 backout-7.3.638.patch
 fix-alignment.patch
