@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent ef89d62f7a7b43b24320f8cd4c601c40adc1b271
+diff --git a/runtime/syntax/help.vim b/runtime/syntax/help.vim
+--- a/runtime/syntax/help.vim
++++ b/runtime/syntax/help.vim
+@@ -40,7 +40,7 @@
+ syn match helpVim		"VIM REFERENCE.*"
+ syn match helpOption		"'[a-z]\{2,\}'"
+ syn match helpOption		"'t_..'"
+-syn match helpCommand		"`[^` ]*`"hs=s+1,he=e-1 contains=helpBacktick
++syn match helpCommand		"`[^` ]\+`"hs=s+1,he=e-1 contains=helpBacktick
+ syn match helpHeader		"\s*\zs.\{-}\ze\s\=\~$" nextgroup=helpIgnore
+ syn match helpGraphic		".* \ze`$" nextgroup=helpIgnore
+ if has("conceal")
