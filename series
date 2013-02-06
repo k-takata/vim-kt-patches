@@ -7,10 +7,8 @@ update-ja.po.patch
 update-ja.po-2.patch
 update-menu_ja.patch
 backout-7.3.638.patch
-fix-alignment.patch
 fix-alignment-2.patch
 fix-alignment-3.patch
-fix-conceal-backtick.patch
 update-tutor.ja.patch
 vim_on_cygwin_using_win32_clipboard__simple__7.3.785.patch
 vim_on_cygwin_using_win32_clipboard__full__7.3.785.patch
