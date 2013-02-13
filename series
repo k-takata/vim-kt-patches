@@ -16,3 +16,4 @@ patch-direct_write-ex1.diff
 use-proto.diff
 fix-dwrite-renopt.diff
 gfw-bold-italic.patch
+add-tests-for-thread-and-settrace.patch
