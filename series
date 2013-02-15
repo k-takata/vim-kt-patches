@@ -9,5 +9,5 @@ update-menu_ja.patch
 backout-7.3.638.patch
 fix-alignment-4.patch
 fix-double-backtick.patch
-vim_on_cygwin_using_win32_clipboard__simple__7.3.785.patch
-vim_on_cygwin_using_win32_clipboard__full__7.3.785.patch
+vim_on_cygwin_using_win32_clipboard__simple__7.3.785.patch #+cygclip-simple #-cygclip-full
+vim_on_cygwin_using_win32_clipboard__full__7.3.785.patch #-cygclip-simple #+cygclip-full
