@@ -1,5 +1,6 @@
 # HG changeset patch
 # Parent c6107b4575a4f00f6f896b9335ae6c406af61453
+
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 --- a/src/Make_cyg.mak
 +++ b/src/Make_cyg.mak
@@ -24,9 +25,9 @@ diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 -EXTRA_LIBS += -loleaut32 -lstdc++
 +EXTRA_LIBS += -loleaut32
 +ifeq (yes, $(STATIC_STDCPLUS))
-+LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
++EXTRA_LIBS += -Wl,-Bstatic -lstdc++ -lsupc++ -Wl,-Bdynamic
 +else
-+LIB += -lstdc++
++EXTRA_LIBS += -lstdc++
 +endif
  endif
  
