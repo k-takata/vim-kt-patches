@@ -1,0 +1,33 @@
+# HG changeset patch
+# Parent c6107b4575a4f00f6f896b9335ae6c406af61453
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
+@@ -106,6 +106,13 @@
+ OPTIMIZE = MAXSPEED
+ endif
+ 
++
++# Link against the shared version of libstdc++ by default.  Set
++# STATIC_STDCPLUS to "yes" to link against static version instead.
++ifndef STATIC_STDCPLUS
++STATIC_STDCPLUS=no
++endif
++
+ ### See feature.h for a list of optionals.
+ ### Any other defines can be included here.
+ 
+@@ -478,7 +485,12 @@
+ ifeq (yes, $(OLE))
+ DEFINES += -DFEAT_OLE
+ EXTRA_OBJS += $(OUTDIR)/if_ole.o
+-EXTRA_LIBS += -loleaut32 -lstdc++
++EXTRA_LIBS += -loleaut32
++ifeq (yes, $(STATIC_STDCPLUS))
++LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
++else
++LIB += -lstdc++
++endif
+ endif
+ 
+ ##############################
