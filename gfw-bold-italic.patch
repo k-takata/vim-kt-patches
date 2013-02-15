@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 88d87cc0e61c11211af6c3bf07457a2f1d03c07c
+# Parent 90377af96216cf46377d52bf76c66ec693f53771
 
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
@@ -112,7 +112,7 @@ diff --git a/src/gui.h b/src/gui.h
  #endif
  #ifdef FEAT_MBYTE
 -    GuiFont	wide_font;	    /* 'guifontwide' font */
-+    GuiFont	norm_wide_font;	    /* 'guifontwide' font */
++    GuiFont	norm_wide_font;	    /* Normal 'guifontwide' font */
 +# ifndef FEAT_GUI_GTK
 +    GuiFont	bold_wide_font;	    /* Bold 'guifontwide' font */
 +    GuiFont	ital_wide_font;	    /* Italic 'guifontwide' font */
@@ -211,7 +211,7 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
  	norm_logfont = lf_wide;
      else
  	norm_logfont = sub_logfont;
-@@ -3139,14 +3139,47 @@
+@@ -3139,14 +3139,48 @@
  
  #ifdef FEAT_MBYTE
  /*
@@ -221,7 +221,9 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
      void
  gui_mch_wide_font_changed()
  {
++# ifndef MSWIN16_FASTTEXT
 +    LOGFONT lf;
++# endif
 +
  # ifdef FEAT_MBYTE_IME
      update_im_font();
@@ -235,10 +237,9 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
 +    gui_mch_free_font(gui.boldital_wide_font);
 +    gui.boldital_wide_font = NOFONT;
 +
-+    if (gui.norm_wide_font)
++    if (gui.norm_wide_font
++	&& GetObject((HFONT)gui.norm_wide_font, sizeof(lf), &lf))
 +    {
-+	GetObject((HFONT)gui.norm_wide_font, sizeof(lf), &lf);
-+
 +	if (!lf.lfItalic)
 +	{
 +	    lf.lfItalic = TRUE;
