@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 743d30acb80e119d1fe576c8ce375f3523d4ff42
+# Parent dac67253fa493ad0860e101d2044d557ccddc625
 
-diff -r 743d30acb80e runtime/doc/eval.txt
---- a/runtime/doc/eval.txt	Thu Jan 31 08:31:51 2013 +0900
-+++ b/runtime/doc/eval.txt	Fri Feb 01 21:44:59 2013 +0900
-@@ -6320,6 +6320,7 @@
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -6326,6 +6326,7 @@
  dialog_gui		Compiled with GUI dialog support.
  diff			Compiled with |vimdiff| and 'diff' support.
  digraphs		Compiled with support for digraphs.
@@ -12,10 +12,10 @@ diff -r 743d30acb80e runtime/doc/eval.txt
  dnd			Compiled with support for the "~ register |quote_~|.
  dos16			16 bits DOS version of Vim.
  dos32			32 bits DOS (DJGPP) version of Vim.
-diff -r 743d30acb80e runtime/doc/options.txt
---- a/runtime/doc/options.txt	Thu Jan 31 08:31:51 2013 +0900
-+++ b/runtime/doc/options.txt	Fri Feb 01 21:44:59 2013 +0900
-@@ -2518,6 +2518,24 @@
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -2521,6 +2521,24 @@
  	security reasons.
  	{Vi: directory to put temp file in, defaults to "/tmp"}
  
@@ -40,9 +40,9 @@ diff -r 743d30acb80e runtime/doc/options.txt
  					*'display'* *'dy'*
  'display' 'dy'		string	(default "")
  			global
-diff -r 743d30acb80e runtime/doc/various.txt
---- a/runtime/doc/various.txt	Thu Jan 31 08:31:51 2013 +0900
-+++ b/runtime/doc/various.txt	Fri Feb 01 21:44:59 2013 +0900
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
 @@ -320,6 +320,7 @@
  N  *+dialog_con_gui*	Support for |:confirm| with GUI and console dialog.
  N  *+diff*		|vimdiff| and 'diff'
@@ -51,9 +51,9 @@ diff -r 743d30acb80e runtime/doc/various.txt
     *+dnd*		Support for DnD into the "~ register |quote_~|.
  B  *+emacs_tags*	|emacs-tags| files
  N  *+eval*		expression evaluation |eval.txt|
-diff -r 743d30acb80e src/Make_cyg.mak
---- a/src/Make_cyg.mak	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/Make_cyg.mak	Fri Feb 01 21:44:59 2013 +0900
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
 @@ -8,6 +8,7 @@
  # Cygwin application use the Makefile (just like on Unix).
  #
@@ -73,21 +73,7 @@ diff -r 743d30acb80e src/Make_cyg.mak
  ifndef WINVER
  WINVER = 0x0500
  endif
-@@ -106,6 +111,13 @@
- OPTIMIZE = MAXSPEED
- endif
- 
-+
-+# Link against the shared version of libstdc++ by default.  Set
-+# STATIC_STDCPLUS to "yes" to link against static version instead.
-+ifndef STATIC_STDCPLUS
-+STATIC_STDCPLUS=no
-+endif
-+
- ### See feature.h for a list of optionals.
- ### Any other defines can be included here.
- 
-@@ -436,6 +448,15 @@
+@@ -461,6 +466,15 @@
  endif
  
  ##############################
@@ -103,17 +89,20 @@ diff -r 743d30acb80e src/Make_cyg.mak
  ifdef XPM
  # Only allow XPM for a GUI build.
  DEFINES += -DFEAT_XPM_W32
-@@ -460,7 +481,8 @@
- ifeq (yes, $(OLE))
+@@ -486,11 +500,7 @@
  DEFINES += -DFEAT_OLE
  EXTRA_OBJS += $(OUTDIR)/if_ole.o
--EXTRA_LIBS += -loleaut32 -lstdc++
-+EXTRA_LIBS += -loleaut32
+ EXTRA_LIBS += -loleaut32
+-ifeq (yes, $(STATIC_STDCPLUS))
+-EXTRA_LIBS += -Wl,-Bstatic -lstdc++ -lsupc++ -Wl,-Bdynamic
+-else
+-EXTRA_LIBS += -lstdc++
+-endif
 +USE_STDCPLUS = yes
  endif
  
  ##############################
-@@ -474,6 +496,15 @@
+@@ -504,6 +514,15 @@
  DIRSLASH = \\
  endif
  
@@ -129,7 +118,7 @@ diff -r 743d30acb80e src/Make_cyg.mak
  #>>>>> end of choices
  ###########################################################################
  
-@@ -603,6 +634,9 @@
+@@ -633,6 +652,9 @@
  $(OUTDIR)/gui_w32.o:	gui_w32.c gui_w48.c $(INCL)
  	$(CC) -c $(CFLAGS) gui_w32.c -o $(OUTDIR)/gui_w32.o
  
@@ -139,9 +128,9 @@ diff -r 743d30acb80e src/Make_cyg.mak
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r 743d30acb80e src/Make_ming.mak
---- a/src/Make_ming.mak	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/Make_ming.mak	Fri Feb 01 21:44:59 2013 +0900
+diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+--- a/src/Make_ming.mak
++++ b/src/Make_ming.mak
 @@ -31,6 +31,8 @@
  OPTIMIZE=MAXSPEED
  # set to yes to make gvim, no for vim
@@ -219,9 +208,9 @@ diff -r 743d30acb80e src/Make_ming.mak
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r 743d30acb80e src/Make_mvc.mak
---- a/src/Make_mvc.mak	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/Make_mvc.mak	Fri Feb 01 21:44:59 2013 +0900
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
 @@ -24,6 +24,9 @@
  #
  #	GUI interface: GUI=yes (default is no)
@@ -269,7 +258,7 @@ diff -r 743d30acb80e src/Make_mvc.mak
  # iconv.dll library (dynamically loaded)
  !ifndef ICONV
  ICONV = yes
-@@ -1095,6 +1114,8 @@
+@@ -1081,6 +1100,8 @@
  
  $(OUTDIR)/gui_w32.obj:	$(OUTDIR) gui_w32.c gui_w48.c $(INCL) $(GUI_INCL)
  
@@ -278,10 +267,10 @@ diff -r 743d30acb80e src/Make_mvc.mak
  $(OUTDIR)/if_cscope.obj: $(OUTDIR) if_cscope.c  $(INCL)
  
  $(OUTDIR)/if_lua.obj: $(OUTDIR) if_lua.c  $(INCL)
-diff -r 743d30acb80e src/eval.c
---- a/src/eval.c	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/eval.c	Fri Feb 01 21:44:59 2013 +0900
-@@ -12151,6 +12151,9 @@
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -12158,6 +12158,9 @@
  #ifdef FEAT_DIGRAPHS
  	"digraphs",
  #endif
@@ -291,9 +280,10 @@ diff -r 743d30acb80e src/eval.c
  #ifdef FEAT_DND
  	"dnd",
  #endif
-diff -r 743d30acb80e src/gui_dwrite.cpp
---- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.cpp	Fri Feb 01 21:44:59 2013 +0900
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+new file mode 100644
+--- /dev/null
++++ b/src/gui_dwrite.cpp
 @@ -0,0 +1,856 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
@@ -1151,9 +1141,10 @@ diff -r 743d30acb80e src/gui_dwrite.cpp
 +    else
 +	return NULL;
 +}
-diff -r 743d30acb80e src/gui_dwrite.h
---- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.h	Fri Feb 01 21:44:59 2013 +0900
+diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
+new file mode 100644
+--- /dev/null
++++ b/src/gui_dwrite.h
 @@ -0,0 +1,68 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
@@ -1223,9 +1214,9 @@ diff -r 743d30acb80e src/gui_dwrite.h
 +}
 +#endif
 +#endif/*GUI_DWRITE_H*/
-diff -r 743d30acb80e src/gui_w32.c
---- a/src/gui_w32.c	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/gui_w32.c	Fri Feb 01 21:44:59 2013 +0900
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
 @@ -25,6 +25,30 @@
  
  #include "vim.h"
@@ -1257,7 +1248,7 @@ diff -r 743d30acb80e src/gui_w32.c
  /*
   * These are new in Windows ME/XP, only defined in recent compilers.
   */
-@@ -2332,6 +2356,9 @@
+@@ -2235,6 +2259,9 @@
  #endif
      HPEN	hpen, old_pen;
      int		y;
@@ -1267,7 +1258,7 @@ diff -r 743d30acb80e src/gui_w32.c
  
  #ifndef MSWIN16_FASTTEXT
      /*
-@@ -2419,6 +2446,20 @@
+@@ -2322,6 +2349,20 @@
      SetTextColor(s_hdc, gui.currFgColor);
      SelectFont(s_hdc, gui.currFont);
  
@@ -1288,7 +1279,7 @@ diff -r 743d30acb80e src/gui_w32.c
      if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
      {
  	vim_free(padding);
-@@ -2453,6 +2494,14 @@
+@@ -2356,6 +2397,14 @@
  	    if (text[n] >= 0x80)
  		break;
  
@@ -1303,7 +1294,7 @@ diff -r 743d30acb80e src/gui_w32.c
      /* Check if the Unicode buffer exists and is big enough.  Create it
       * with the same length as the multi-byte string, the number of wide
       * characters is always equal or smaller. */
-@@ -2511,8 +2560,17 @@
+@@ -2414,8 +2463,17 @@
  	    i += utfc_ptr2len_len(text + i, len - i);
  	    ++clen;
  	}
@@ -1323,10 +1314,10 @@ diff -r 743d30acb80e src/gui_w32.c
  	len = cells;	/* used for underlining */
      }
      else if ((enc_codepage > 0 && (int)GetACP() != enc_codepage) || enc_latin9)
-diff -r 743d30acb80e src/gui_w48.c
---- a/src/gui_w48.c	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/gui_w48.c	Fri Feb 01 21:44:59 2013 +0900
-@@ -2778,6 +2778,10 @@
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -2777,6 +2777,10 @@
  
  	out_flush();	    /* make sure all output has been processed */
  	(void)BeginPaint(hwnd, &ps);
@@ -1337,7 +1328,7 @@ diff -r 743d30acb80e src/gui_w48.c
  
  #ifdef FEAT_MBYTE
  	/* prevent multi-byte characters from misprinting on an invalid
-@@ -2793,9 +2797,20 @@
+@@ -2792,9 +2796,20 @@
  #endif
  
  	if (!IsRectEmpty(&ps.rcPaint))
@@ -1358,7 +1349,7 @@ diff -r 743d30acb80e src/gui_w48.c
  	EndPaint(hwnd, &ps);
      }
  }
-@@ -3034,6 +3049,12 @@
+@@ -3033,6 +3048,12 @@
      void
  gui_mch_exit(int rc)
  {
@@ -1371,10 +1362,10 @@ diff -r 743d30acb80e src/gui_w48.c
      ReleaseDC(s_textArea, s_hdc);
      DeleteObject(s_brush);
  
-diff -r 743d30acb80e src/option.c
---- a/src/option.c	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/option.c	Fri Feb 01 21:44:59 2013 +0900
-@@ -1024,6 +1024,11 @@
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -1013,6 +1013,11 @@
      {"directory",   "dir",  P_STRING|P_EXPAND|P_VI_DEF|P_COMMA|P_NODUP|P_SECURE,
  			    (char_u *)&p_dir, PV_NONE,
  			    {(char_u *)DFLT_DIR, (char_u *)0L} SCRIPTID_INIT},
@@ -1386,7 +1377,7 @@ diff -r 743d30acb80e src/option.c
      {"display",	    "dy",   P_STRING|P_VI_DEF|P_COMMA|P_RALL|P_NODUP,
  			    (char_u *)&p_dy, PV_NONE,
  			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
-@@ -7966,6 +7971,21 @@
+@@ -7942,6 +7947,21 @@
      }
  #endif
  
@@ -1408,10 +1399,10 @@ diff -r 743d30acb80e src/option.c
  #ifdef USE_IM_CONTROL
      /* 'imdisable' */
      else if ((int *)varp == &p_imdisable)
-diff -r 743d30acb80e src/option.h
---- a/src/option.h	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/option.h	Fri Feb 01 21:44:59 2013 +0900
-@@ -428,6 +428,9 @@
+diff --git a/src/option.h b/src/option.h
+--- a/src/option.h
++++ b/src/option.h
+@@ -424,6 +424,9 @@
  EXTERN int	p_dg;		/* 'digraph' */
  #endif
  EXTERN char_u	*p_dir;		/* 'directory' */
@@ -1421,10 +1412,10 @@ diff -r 743d30acb80e src/option.h
  EXTERN char_u	*p_dy;		/* 'display' */
  EXTERN unsigned	dy_flags;
  #ifdef IN_OPTION_C
-diff -r 743d30acb80e src/version.c
---- a/src/version.c	Thu Jan 31 08:31:51 2013 +0900
-+++ b/src/version.c	Fri Feb 01 21:44:59 2013 +0900
-@@ -182,6 +182,13 @@
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -187,6 +187,13 @@
  #else
  	"-digraphs",
  #endif
