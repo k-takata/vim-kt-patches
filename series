@@ -12,3 +12,4 @@ patch-direct_write-ex1.diff
 use-proto.diff
 fix-dwrite-renopt.diff
 gfw-bold-italic.patch
+cpo-N.diff
