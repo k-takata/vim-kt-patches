@@ -1,3 +1,4 @@
+remove-supc++.patch #+skip
 win32-suppress-warnings.patch
 symlinkfix-update.diff
 acl-fix.patch
