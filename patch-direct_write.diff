@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent dac67253fa493ad0860e101d2044d557ccddc625
+# Parent 37ab25f9f0a93049fceb81d5ea41ddf40ffb50e6
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -94,7 +94,7 @@ diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
  EXTRA_OBJS += $(OUTDIR)/if_ole.o
  EXTRA_LIBS += -loleaut32
 -ifeq (yes, $(STATIC_STDCPLUS))
--EXTRA_LIBS += -Wl,-Bstatic -lstdc++ -lsupc++ -Wl,-Bdynamic
+-EXTRA_LIBS += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
 -else
 -EXTRA_LIBS += -lstdc++
 -endif
