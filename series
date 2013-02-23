@@ -10,7 +10,5 @@ version_acl_xpm.patch
 patch-direct_write.diff
 patch-direct_write-ex1.diff
 use-proto.diff
-fix-dwrite-renopt.diff
-fix-dwrite-document.diff
 gfw-bold-italic.patch
 cpo-N.diff

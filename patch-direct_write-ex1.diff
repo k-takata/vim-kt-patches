@@ -1,9 +1,84 @@
 # HG changeset patch
-# Parent 0618e70ddf93cedb9697695cbb1a153cf4de85cd
+# Parent c26a0a4c46b1c0c4bc49cb903dd0a515a8274de7
 
-diff -r 0618e70ddf93 src/gui_w32.c
---- a/src/gui_w32.c	Sat Feb 02 01:13:31 2013 +0900
-+++ b/src/gui_w32.c	Sat Feb 02 01:22:44 2013 +0900
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -2521,24 +2521,6 @@
+ 	security reasons.
+ 	{Vi: directory to put temp file in, defaults to "/tmp"}
+ 
+-					*'directx'* *'dx'*
+-'directx' 'dx'		boolean (default: off)
+-			global
+-			{not in Vi}
+-			{only available when compiled with GUI and DIRECTX
+-			enabled for MS-Windows, and run on Vista or newer}
+-	When on, Vim will draw text using DirectX (DirectWrite).  It makes
+-	drawn glyphs more beautiful than default GDI.  It requires 'encoding'
+-	is "utf-8", and only works on MS-Windows Vista or newer version.
+-
+-	Example: >
+-		set encoding=utf-8
+-		set gfn=Ricty_Diminished:h12:cSHIFTJIS
+-		set directx
+-<
+-	If select a raster font (Courier, Terminal or FixedSys) to 'guifont',
+-	it fallbacks to be drawn by GDI automatically.
+-
+ 					*'display'* *'dy'*
+ 'display' 'dy'		string	(default "")
+ 			global
+@@ -5556,6 +5538,46 @@
+ 	this option at the default "on".  Only switch it off when working with
+ 	old Vi scripts.
+ 
++						*'renderingoptions'* *'renopt'*
++'renderingoptions' 'renopt'
++			string	(default: empty)
++			global
++			{not in Vi}
++			{only available when compiled with GUI and DIRECTX
++			enabled for MS-Windows}
++	Select a text renderer and set its options.  The options are depends
++	on the renderer.
++
++	Syntax: >
++		set renopt=type:{renderer}(,{name}:{value})*
++<
++	Currently, only one renderer is available.
++
++	renderer    behavior	~
++	directx	    Vim will draw text using DirectX (DirectWrite).  It makes
++		    drawn glyphs more beautiful than default GDI.
++		    It requires 'encoding' is "utf-8", and only works on
++		    MS-Windows Vista or newer version.
++
++		    Options:
++			name	  meaning	    type    value	~
++			gamma	  gamma		    float   1.0 - 2.2 (maybe)
++			contrast  enhancedContrast  float   (unknown)
++			level	  clearTypeLevel    float   (unknown)
++			geom	  pixelGeometry	    int	    0 - 2
++			mode	  renderingMode	    int	    0 - 6
++
++			See the following page for detail:
++			http://msdn.microsoft.com/en-us/library/dd368190.aspx
++
++		    Example: >
++			set encoding=utf-8
++			set gfn=Ricty_Diminished:h12:cSHIFTJIS
++			set renopt=type:directx
++<
++		    If select a raster font (Courier, Terminal or FixedSys) to
++		    'guifont', it fallbacks to be drawn by GDI automatically.
++
+ 						*'report'*
+ 'report'		number	(default 2)
+ 			global
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
 @@ -31,8 +31,9 @@
  
  #if defined(FEAT_DIRECTX)
@@ -42,7 +117,7 @@ diff -r 0618e70ddf93 src/gui_w32.c
 +	char_u  name[128];
 +	char_u  value[128];
 +
-+	copy_option_part(&p, item, sizeof(item), ","); 
++	copy_option_part(&p, item, sizeof(item), ",");
 +	if (p == NULL)
 +	    break;
 +	q = &item[0];
@@ -91,7 +166,7 @@ diff -r 0618e70ddf93 src/gui_w32.c
 +	    return FAIL;
 +    }
 +
-+    /* Enable DirectX/DirextWrite */
++    /* Enable DirectX/DirectWrite */
 +    if (dx_enable)
 +    {
 +	if (!directx_enabled())
@@ -126,10 +201,10 @@ diff -r 0618e70ddf93 src/gui_w32.c
  /*
   * These are new in Windows ME/XP, only defined in recent compilers.
   */
-diff -r 0618e70ddf93 src/option.c
---- a/src/option.c	Sat Feb 02 01:13:31 2013 +0900
-+++ b/src/option.c	Sat Feb 02 01:22:44 2013 +0900
-@@ -1024,11 +1024,6 @@
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -1013,11 +1013,6 @@
      {"directory",   "dir",  P_STRING|P_EXPAND|P_VI_DEF|P_COMMA|P_NODUP|P_SECURE,
  			    (char_u *)&p_dir, PV_NONE,
  			    {(char_u *)DFLT_DIR, (char_u *)0L} SCRIPTID_INIT},
@@ -141,7 +216,7 @@ diff -r 0618e70ddf93 src/option.c
      {"display",	    "dy",   P_STRING|P_VI_DEF|P_COMMA|P_RALL|P_NODUP,
  			    (char_u *)&p_dy, PV_NONE,
  			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
-@@ -2098,6 +2093,11 @@
+@@ -2079,6 +2074,11 @@
      {"remap",	    NULL,   P_BOOL|P_VI_DEF,
  			    (char_u *)&p_remap, PV_NONE,
  			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
@@ -153,12 +228,12 @@ diff -r 0618e70ddf93 src/option.c
      {"report",	    NULL,   P_NUM|P_VI_DEF,
  			    (char_u *)&p_report, PV_NONE,
  			    {(char_u *)2L, (char_u *)0L} SCRIPTID_INIT},
-@@ -6993,6 +6993,16 @@
+@@ -6964,6 +6964,16 @@
      }
  #endif
  
 +#if defined(FEAT_GUI) && defined(FEAT_RENDERING_OPTIONS)
-+    else if (varp == &p_renopt && gui.in_use)
++    else if (varp == &p_renopt)
 +    {
 +	int gui_mch_set_rendering_options(char_u *);
 +
@@ -170,7 +245,7 @@ diff -r 0618e70ddf93 src/option.c
      /* Options that are a list of flags. */
      else
      {
-@@ -7971,21 +7981,6 @@
+@@ -7947,21 +7957,6 @@
      }
  #endif
  
@@ -192,10 +267,10 @@ diff -r 0618e70ddf93 src/option.c
  #ifdef USE_IM_CONTROL
      /* 'imdisable' */
      else if ((int *)varp == &p_imdisable)
-diff -r 0618e70ddf93 src/option.h
---- a/src/option.h	Sat Feb 02 01:13:31 2013 +0900
-+++ b/src/option.h	Sat Feb 02 01:22:44 2013 +0900
-@@ -428,9 +428,6 @@
+diff --git a/src/option.h b/src/option.h
+--- a/src/option.h
++++ b/src/option.h
+@@ -424,9 +424,6 @@
  EXTERN int	p_dg;		/* 'digraph' */
  #endif
  EXTERN char_u	*p_dir;		/* 'directory' */
@@ -205,7 +280,7 @@ diff -r 0618e70ddf93 src/option.h
  EXTERN char_u	*p_dy;		/* 'display' */
  EXTERN unsigned	dy_flags;
  #ifdef IN_OPTION_C
-@@ -663,6 +660,9 @@
+@@ -655,6 +652,9 @@
  EXTERN long	p_rdt;		/* 'redrawtime' */
  #endif
  EXTERN int	p_remap;	/* 'remap' */
@@ -215,9 +290,9 @@ diff -r 0618e70ddf93 src/option.h
  EXTERN long	p_report;	/* 'report' */
  #if defined(FEAT_WINDOWS) && defined(FEAT_QUICKFIX)
  EXTERN long	p_pvh;		/* 'previewheight' */
-diff -r 0618e70ddf93 src/vim.h
---- a/src/vim.h	Sat Feb 02 01:13:31 2013 +0900
-+++ b/src/vim.h	Sat Feb 02 01:22:44 2013 +0900
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
 @@ -127,6 +127,13 @@
  # endif
  #endif
