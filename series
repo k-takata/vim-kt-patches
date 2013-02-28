@@ -12,5 +12,4 @@ patch-direct_write-ex1.diff
 use-proto.diff
 gfw-bold-italic.patch
 cpo-N.diff
-fix-ruby20-msvc.patch
-fix-ruby20-x64.patch
+fix-ruby20-x64-and-msvc.patch
