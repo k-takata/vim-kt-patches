@@ -10,3 +10,4 @@ backout-7.3.638.patch
 fix-alignment-4.patch
 fix-double-backtick.patch
 fix-test55.patch
+fix-tutor.ja.patch
