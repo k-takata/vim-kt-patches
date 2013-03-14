@@ -12,3 +12,4 @@ patch-direct_write-ex1.diff
 use-proto.diff
 gfw-bold-italic.patch
 cpo-N.diff
+if_perl-use-output.patch
