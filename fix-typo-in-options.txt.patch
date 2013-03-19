@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent 89e090d58782f4640be86468d9ced5c9d33fe3ea
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -701,7 +701,7 @@
+ 
+ 	Vim may set this option automatically at startup time when Vim is
+ 	compiled with the |+termresponse| feature and if |t_u7| is set to the
+-	sescape sequense to request cursor position report.
++	escape sequense to request cursor position report.
+ 
+ 			*'antialias'* *'anti'* *'noantialias'* *'noanti'*
+ 'antialias' 'anti'	boolean (default: off)
