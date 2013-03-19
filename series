@@ -1,5 +1,4 @@
 merge-Make_cyg-into-Make_ming.patch
-win32-suppress-warnings.patch
 symlinkfix-update.diff
 acl-fix.patch
 acl-mingw.patch
