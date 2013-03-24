@@ -1,0 +1,33 @@
+# HG changeset patch
+# Parent f336297106423e606b33566736a3dcaaab979946
+
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
+@@ -118,13 +118,6 @@
+ STATIC_STDCPLUS=no
+ endif
+ 
+-
+-# Link against the shared version of libstdc++ by default.  Set
+-# STATIC_STDCPLUS to "yes" to link against static version instead.
+-ifndef STATIC_STDCPLUS
+-STATIC_STDCPLUS=no
+-endif
+-
+ ### See feature.h for a list of optionals.
+ ### Any other defines can be included here.
+ 
+@@ -515,11 +508,7 @@
+ DEFINES += -DFEAT_OLE
+ EXTRA_OBJS += $(OUTDIR)/if_ole.o
+ EXTRA_LIBS += -loleaut32
+-ifeq (yes, $(STATIC_STDCPLUS))
+-EXTRA_LIBS += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
+-else
+-EXTRA_LIBS += -lstdc++
+-endif
++USE_STDCPLUS = yes
+ endif
+ 
+ ##############################
