@@ -1,5 +1,6 @@
 # HG changeset patch
-# Parent 703feace0ed867dc5d45a31f088ee387a0e0bfa9
+# Parent d3a8ddaf58e63ee16a43ea1926af9bdcdfae903b
+
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
@@ -7,21 +8,21 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  #endif
  
--#ifdef FEAT_RENDERING_OPTIONS
-+#if defined(FEAT_RENDERING_OPTIONS) || defined(PROTO)
+-#ifdef FEAT_RENDER_OPTIONS
++#if defined(FEAT_RENDER_OPTIONS) || defined(PROTO)
      int
  gui_mch_set_rendering_options(char_u *s)
  {
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -6996,8 +6996,6 @@
- #if defined(FEAT_GUI) && defined(FEAT_RENDERING_OPTIONS)
-     else if (varp == &p_renopt && gui.in_use)
+@@ -6977,8 +6977,6 @@
+ #if defined(FEAT_GUI) && defined(FEAT_RENDER_OPTIONS)
+     else if (varp == &p_rop && gui.in_use)
      {
 -	int gui_mch_set_rendering_options(char_u *);
 -
- 	if (!gui_mch_set_rendering_options(p_renopt))
+ 	if (!gui_mch_set_rendering_options(p_rop))
  	    errmsg = e_invarg;
      }
 diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
