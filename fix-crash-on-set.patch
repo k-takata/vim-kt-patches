@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent d3a8ddaf58e63ee16a43ea1926af9bdcdfae903b
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -2086,7 +2086,7 @@
+ #ifdef FEAT_RENDER_OPTIONS
+     {"renderoptions", "rop", P_STRING|P_COMMA|P_RCLR,
+ 			    (char_u *)&p_rop, PV_NONE,
+-			    {(char_u *)0L, (char_u *)0L} SCRIPTID_INIT},
++			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
+ #endif
+     {"report",	    NULL,   P_NUM|P_VI_DEF,
+ 			    (char_u *)&p_report, PV_NONE,
