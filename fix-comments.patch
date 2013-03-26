@@ -1,0 +1,224 @@
+# HG changeset patch
+# Parent 338671f54690327a55b3ece6e63562898a91b4a0
+diff --git a/src/buffer.c b/src/buffer.c
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -1995,7 +1995,7 @@
+ 	 * "buf" if one exists */
+ 	if (swb_flags & SWB_USEOPEN)
+ 	    wp = buf_jump_open_win(buf);
+-	/* If 'switchbuf' contians "usetab": jump to first window in any tab
++	/* If 'switchbuf' contains "usetab": jump to first window in any tab
+ 	 * page containing "buf" if one exists */
+ 	if (wp == NULL && (swb_flags & SWB_USETAB))
+ 	    wp = buf_jump_open_tab(buf);
+diff --git a/src/feature.h b/src/feature.h
+--- a/src/feature.h
++++ b/src/feature.h
+@@ -1007,7 +1007,7 @@
+ 
+ /*
+  * MODIFIED_BY		Name of who modified Vim.  Required when distributing
+- *			a modifed version of Vim.
++ *			a modified version of Vim.
+  *			Also from the "--with-modified-by" configure argument.
+  */
+ /* #define MODIFIED_BY "John Doe" */
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -3301,7 +3301,7 @@
+ 	int		empty_memline = (buf->b_ml.ml_mfp == NULL);
+ 
+ 	/*
+-	 * Apply PRE aucocommands.
++	 * Apply PRE autocommands.
+ 	 * Set curbuf to the buffer to be written.
+ 	 * Careful: The autocommands may call buf_write() recursively!
+ 	 */
+@@ -8874,7 +8874,7 @@
+     else
+     {
+ 	/* There is no window for "buf", use "aucmd_win".  To minimize the side
+-	 * effects, insert it in a the current tab page.
++	 * effects, insert it in the current tab page.
+ 	 * Anything related to a window (e.g., setting folds) may have
+ 	 * unexpected results. */
+ 	aco->use_aucmd_win = TRUE;
+diff --git a/src/gui.c b/src/gui.c
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -834,7 +834,7 @@
+ #endif
+ 
+ /*
+- * Set the font.  "font_list" is a a comma separated list of font names.  The
++ * Set the font.  "font_list" is a comma separated list of font names.  The
+  * first font name that works is used.  If none is found, use the default
+  * font.
+  * If "fontset" is TRUE, the "font_list" is used as one name for the fontset.
+@@ -2397,7 +2397,7 @@
+     {
+ 	int	start;		/* index of bytes to be drawn */
+ 	int	cells;		/* cellwidth of bytes to be drawn */
+-	int	thislen;	/* length of bytes to be drawin */
++	int	thislen;	/* length of bytes to be drawn */
+ 	int	cn;		/* cellwidth of current char */
+ 	int	i;		/* index of current char */
+ 	int	c;		/* current char value */
+@@ -3907,7 +3907,7 @@
+ 	gui.dragged_sb = SBAR_NONE;
+ #ifdef FEAT_GUI_GTK
+ 	/* Keep the "dragged_wp" value until after the scrolling, for when the
+-	 * moust button is released.  GTK2 doesn't send the button-up event. */
++	 * mouse button is released.  GTK2 doesn't send the button-up event. */
+ 	gui.dragged_wp = NULL;
+ #endif
+     }
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -1810,7 +1810,7 @@
+      * used by the taskbar or appbars. */
+     get_work_area(&workarea_rect);
+ 
+-    /* Get current posision of our window.  Note that the .left and .top are
++    /* Get current position of our window.  Note that the .left and .top are
+      * relative to the work area.  */
+     wndpl.length = sizeof(WINDOWPLACEMENT);
+     GetWindowPlacement(s_hwnd, &wndpl);
+@@ -4559,7 +4559,7 @@
+     }
+ 
+     sign.hImage = NULL;
+-    ext = signfile + STRLEN(signfile) - 4; /* get extention */
++    ext = signfile + STRLEN(signfile) - 4; /* get extension */
+     if (ext > signfile)
+     {
+ 	int do_load = 1;
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -657,7 +657,7 @@
+ 
+ /*
+  * perl_win_free
+- *	Remove all refences to the window to be destroyed
++ *	Remove all references to the window to be destroyed
+  */
+     void
+ perl_win_free(wp)
+diff --git a/src/if_py_both.h b/src/if_py_both.h
+--- a/src/if_py_both.h
++++ b/src/if_py_both.h
+@@ -1769,7 +1769,7 @@
+     static int
+ SetBufferLine(buf_T *buf, PyInt n, PyObject *line, PyInt *len_change)
+ {
+-    /* First of all, we check the thpe of the supplied Python object.
++    /* First of all, we check the type of the supplied Python object.
+      * There are three cases:
+      *	  1. NULL, or None - this is a deletion.
+      *	  2. A string	   - this is a replacement.
+@@ -1860,7 +1860,7 @@
+     static int
+ SetBufferLineList(buf_T *buf, PyInt lo, PyInt hi, PyObject *list, PyInt *len_change)
+ {
+-    /* First of all, we check the thpe of the supplied Python object.
++    /* First of all, we check the type of the supplied Python object.
+      * There are three cases:
+      *	  1. NULL, or None - this is a deletion.
+      *	  2. A list	   - this is a replacement.
+@@ -2037,7 +2037,7 @@
+     }
+ }
+ 
+-/* Insert a number of lines into the specified buffer after the specifed line.
++/* Insert a number of lines into the specified buffer after the specified line.
+  * The line number is in Vim format (1-based). The lines to be inserted are
+  * given as a Python list of string objects or as a single string. The lines
+  * to be added are checked for validity and correct format. Errors are
+@@ -2378,7 +2378,7 @@
+ 	return NULL;
+     }
+ 
+-    /* Ckeck for keyboard interrupt */
++    /* Check for keyboard interrupt */
+     if (VimErrorCheck())
+ 	return NULL;
+ 
+diff --git a/src/if_python.c b/src/if_python.c
+--- a/src/if_python.c
++++ b/src/if_python.c
+@@ -762,7 +762,7 @@
+ 
+ 	/* Remove the element from sys.path that was added because of our
+ 	 * argv[0] value in PythonMod_Init().  Previously we used an empty
+-	 * string, but dependinding on the OS we then get an empty entry or
++	 * string, but depending on the OS we then get an empty entry or
+ 	 * the current directory in sys.path. */
+ 	PyRun_SimpleString("import sys; sys.path = filter(lambda x: x != '/must>not&exist', sys.path)");
+ 
+diff --git a/src/if_python3.c b/src/if_python3.c
+--- a/src/if_python3.c
++++ b/src/if_python3.c
+@@ -748,7 +748,7 @@
+ 
+ 	/* Remove the element from sys.path that was added because of our
+ 	 * argv[0] value in Py3Init_vim().  Previously we used an empty
+-	 * string, but dependinding on the OS we then get an empty entry or
++	 * string, but depending on the OS we then get an empty entry or
+ 	 * the current directory in sys.path.
+ 	 * Only after vim has been imported, the element does exist in
+ 	 * sys.path.
+diff --git a/src/if_ruby.c b/src/if_ruby.c
+--- a/src/if_ruby.c
++++ b/src/if_ruby.c
+@@ -105,7 +105,7 @@
+ #endif
+ 
+ /*
+- * Backward compatiblity for Ruby 1.8 and earlier.
++ * Backward compatibility for Ruby 1.8 and earlier.
+  * Ruby 1.9 does not provide STR2CSTR, instead StringValuePtr is provided.
+  * Ruby 1.9 does not provide RXXX(s)->len and RXXX(s)->ptr, instead
+  * RXXX_LEN(s) and RXXX_PTR(s) are provided.
+@@ -1314,7 +1314,7 @@
+     rb_global_variable(&objtbl);
+ 
+     /* The Vim module used to be called "VIM", but "Vim" is better.  Make an
+-     * alias "VIM" for backwards compatiblity. */
++     * alias "VIM" for backwards compatibility. */
+     mVIM = rb_define_module("Vim");
+     rb_define_const(rb_cObject, "VIM", mVIM);
+     rb_define_const(mVIM, "VERSION_MAJOR", INT2NUM(VIM_VERSION_MAJOR));
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -903,7 +903,7 @@
+ {
+     switch (enc_dbcs)
+     {
+-	/* please add classfy routine for your language in here */
++	/* please add classify routine for your language in here */
+ 
+ 	case DBCS_JPNU:	/* ? */
+ 	case DBCS_JPN:
+@@ -1003,7 +1003,7 @@
+ 		 * 26 : Box Drawings
+ 		 * 27 : Unit Symbols
+ 		 * 28 : Circled/Parenthesized Letter
+-		 * 29 : Hirigana/Katakana
++		 * 29 : Hiragana/Katakana
+ 		 * 30 : Cyrillic Letter
+ 		 */
+ 
+@@ -1054,7 +1054,7 @@
+ 			    return 28;
+ 		    case 0xAA:
+ 		    case 0xAB:
+-			/* Hirigana/Katakana */
++			/* Hiragana/Katakana */
+ 			return 29;
+ 		    case 0xAC:
+ 			/* Cyrillic Letter */
