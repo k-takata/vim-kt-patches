@@ -3,7 +3,7 @@
 
 diff -r 73ed2bb6def5 runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt	Sun Mar 24 10:08:39 2013 +0900
-+++ b/runtime/doc/eval.txt	Mon Mar 25 09:05:55 2013 +0900
++++ b/runtime/doc/eval.txt	Tue Mar 26 21:15:32 2013 +0900
 @@ -6348,6 +6348,7 @@
  dialog_gui		Compiled with GUI dialog support.
  diff			Compiled with |vimdiff| and 'diff' support.
@@ -14,7 +14,7 @@ diff -r 73ed2bb6def5 runtime/doc/eval.txt
  dos32			32 bits DOS (DJGPP) version of Vim.
 diff -r 73ed2bb6def5 runtime/doc/options.txt
 --- a/runtime/doc/options.txt	Sun Mar 24 10:08:39 2013 +0900
-+++ b/runtime/doc/options.txt	Mon Mar 25 09:05:55 2013 +0900
++++ b/runtime/doc/options.txt	Tue Mar 26 21:15:32 2013 +0900
 @@ -5553,6 +5553,46 @@
  	this option at the default "on".  Only switch it off when working with
  	old Vi scripts.
@@ -64,7 +64,7 @@ diff -r 73ed2bb6def5 runtime/doc/options.txt
  			global
 diff -r 73ed2bb6def5 runtime/doc/various.txt
 --- a/runtime/doc/various.txt	Sun Mar 24 10:08:39 2013 +0900
-+++ b/runtime/doc/various.txt	Mon Mar 25 09:05:55 2013 +0900
++++ b/runtime/doc/various.txt	Tue Mar 26 21:15:32 2013 +0900
 @@ -320,6 +320,7 @@
  N  *+dialog_con_gui*	Support for |:confirm| with GUI and console dialog.
  N  *+diff*		|vimdiff| and 'diff'
@@ -75,7 +75,7 @@ diff -r 73ed2bb6def5 runtime/doc/various.txt
  N  *+eval*		expression evaluation |eval.txt|
 diff -r 73ed2bb6def5 src/Make_cyg.mak
 --- a/src/Make_cyg.mak	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/Make_cyg.mak	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/Make_cyg.mak	Tue Mar 26 21:15:32 2013 +0900
 @@ -8,6 +8,7 @@
  # Cygwin application use the Makefile (just like on Unix).
  #
@@ -152,7 +152,7 @@ diff -r 73ed2bb6def5 src/Make_cyg.mak
  
 diff -r 73ed2bb6def5 src/Make_ming.mak
 --- a/src/Make_ming.mak	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/Make_ming.mak	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/Make_ming.mak	Tue Mar 26 21:15:32 2013 +0900
 @@ -31,6 +31,8 @@
  OPTIMIZE=MAXSPEED
  # set to yes to make gvim, no for vim
@@ -232,7 +232,7 @@ diff -r 73ed2bb6def5 src/Make_ming.mak
  
 diff -r 73ed2bb6def5 src/Make_mvc.mak
 --- a/src/Make_mvc.mak	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/Make_mvc.mak	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/Make_mvc.mak	Tue Mar 26 21:15:32 2013 +0900
 @@ -24,6 +24,9 @@
  #
  #	GUI interface: GUI=yes (default is no)
@@ -291,7 +291,7 @@ diff -r 73ed2bb6def5 src/Make_mvc.mak
  $(OUTDIR)/if_lua.obj: $(OUTDIR) if_lua.c  $(INCL)
 diff -r 73ed2bb6def5 src/eval.c
 --- a/src/eval.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/eval.c	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/eval.c	Tue Mar 26 21:15:32 2013 +0900
 @@ -12166,6 +12166,9 @@
  #ifdef FEAT_DIGRAPHS
  	"digraphs",
@@ -304,7 +304,7 @@ diff -r 73ed2bb6def5 src/eval.c
  #endif
 diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.cpp	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/gui_dwrite.cpp	Tue Mar 26 21:15:32 2013 +0900
 @@ -0,0 +1,856 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
@@ -1164,7 +1164,7 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +}
 diff -r 73ed2bb6def5 src/gui_dwrite.h
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.h	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/gui_dwrite.h	Tue Mar 26 21:15:32 2013 +0900
 @@ -0,0 +1,68 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
@@ -1236,7 +1236,7 @@ diff -r 73ed2bb6def5 src/gui_dwrite.h
 +#endif/*GUI_DWRITE_H*/
 diff -r 73ed2bb6def5 src/gui_w32.c
 --- a/src/gui_w32.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/gui_w32.c	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/gui_w32.c	Tue Mar 26 21:15:32 2013 +0900
 @@ -25,6 +25,135 @@
  
  #include "vim.h"
@@ -1453,7 +1453,7 @@ diff -r 73ed2bb6def5 src/gui_w32.c
      else if ((enc_codepage > 0 && (int)GetACP() != enc_codepage) || enc_latin9)
 diff -r 73ed2bb6def5 src/gui_w48.c
 --- a/src/gui_w48.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/gui_w48.c	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/gui_w48.c	Tue Mar 26 21:15:32 2013 +0900
 @@ -2778,6 +2778,10 @@
  
  	out_flush();	    /* make sure all output has been processed */
@@ -1501,15 +1501,15 @@ diff -r 73ed2bb6def5 src/gui_w48.c
  
 diff -r 73ed2bb6def5 src/option.c
 --- a/src/option.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/option.c	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/option.c	Tue Mar 26 21:15:32 2013 +0900
 @@ -2102,6 +2102,11 @@
      {"remap",	    NULL,   P_BOOL|P_VI_DEF,
  			    (char_u *)&p_remap, PV_NONE,
  			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
 +#ifdef FEAT_RENDER_OPTIONS
-+    {"renderoptions", "rop", P_STRING|P_COMMA|P_RCLR,
++    {"renderoptions", "rop", P_STRING|P_COMMA|P_RCLR|P_VI_DEF,
 +			    (char_u *)&p_rop, PV_NONE,
-+			    {(char_u *)0L, (char_u *)0L} SCRIPTID_INIT},
++			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
 +#endif
      {"report",	    NULL,   P_NUM|P_VI_DEF,
  			    (char_u *)&p_report, PV_NONE,
@@ -1533,7 +1533,7 @@ diff -r 73ed2bb6def5 src/option.c
      {
 diff -r 73ed2bb6def5 src/option.h
 --- a/src/option.h	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/option.h	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/option.h	Tue Mar 26 21:15:32 2013 +0900
 @@ -661,6 +661,9 @@
  EXTERN long	p_rdt;		/* 'redrawtime' */
  #endif
@@ -1546,7 +1546,7 @@ diff -r 73ed2bb6def5 src/option.h
  EXTERN long	p_pvh;		/* 'previewheight' */
 diff -r 73ed2bb6def5 src/version.c
 --- a/src/version.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/version.c	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/version.c	Tue Mar 26 21:15:32 2013 +0900
 @@ -185,6 +185,13 @@
  #else
  	"-digraphs",
@@ -1563,7 +1563,7 @@ diff -r 73ed2bb6def5 src/version.c
  #else
 diff -r 73ed2bb6def5 src/vim.h
 --- a/src/vim.h	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/vim.h	Mon Mar 25 09:05:55 2013 +0900
++++ b/src/vim.h	Tue Mar 26 21:15:32 2013 +0900
 @@ -127,6 +127,13 @@
  # endif
  #endif
