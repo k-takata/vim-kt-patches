@@ -8,6 +8,7 @@ support-alt-gettext-dll.patch
 version_acl_xpm.patch
 patch-direct_write-r3c.diff
 use-proto.diff
+correct-ifdef-indent.diff
 gfw-bold-italic.patch
 cpo-N.diff
 if_perl-use-output.patch
