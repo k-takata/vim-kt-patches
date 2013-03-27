@@ -1,5 +1,30 @@
 # HG changeset patch
-# Parent 338671f54690327a55b3ece6e63562898a91b4a0
+# Parent afdc419d88b30740ed36579d56497d1dad1abf62
+
+diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
+--- a/src/GvimExt/gvimext.cpp
++++ b/src/GvimExt/gvimext.cpp
+@@ -527,7 +527,7 @@
+ //
+ //  PARAMETERS:
+ //    pIDFolder - Specifies the parent folder
+-//    pDataObj  - Spefifies the set of items selected in that folder.
++//    pDataObj  - Specifies the set of items selected in that folder.
+ //    hRegKey   - Specifies the type of the focused item in the selection.
+ //
+ //  RETURN VALUE:
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -418,7 +418,7 @@
+ !endif
+ !endif
+ 
+-# Abort bulding VIM if version of VC is unrecognised.
++# Abort building VIM if version of VC is unrecognised.
+ !ifndef MSVCVER
+ !message *** ERROR
+ !message Cannot determine Visual C version being used.  If you are using the
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
@@ -12,6 +37,117 @@ diff --git a/src/buffer.c b/src/buffer.c
  	 * page containing "buf" if one exists */
  	if (wp == NULL && (swb_flags & SWB_USETAB))
  	    wp = buf_jump_open_tab(buf);
+diff --git a/src/dosinst.c b/src/dosinst.c
+--- a/src/dosinst.c
++++ b/src/dosinst.c
+@@ -1609,7 +1609,7 @@
+ 
+ /*
+  * Only add the choice for the open-with menu entry when gvim.exe was found
+- * and and regedit.exe exist.
++ * and regedit.exe exist.
+  */
+     static void
+ init_openwith_choice(void)
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -1418,7 +1418,7 @@
+ 
+ normalchar:
+ 	    /*
+-	     * Insert a nomal character.
++	     * Insert a normal character.
+ 	     */
+ #ifdef FEAT_AUTOCMD
+ 	    if (!p_paste)
+@@ -7162,7 +7162,7 @@
+ 	    /*
+ 	     * Count each sequence of folded lines as one logical line.
+ 	     */
+-	    /* go to the the start of the current fold */
++	    /* go to the start of the current fold */
+ 	    (void)hasFolding(lnum, &lnum, NULL);
+ 
+ 	    while (n--)
+@@ -7213,7 +7213,7 @@
+ 	(void)hasFolding(lnum, NULL, &lnum);
+ #endif
+ 	/* This fails if the cursor is already in the last line or would move
+-	 * beyound the last line and '-' is in 'cpoptions' */
++	 * beyond the last line and '-' is in 'cpoptions' */
+ 	if (lnum >= curbuf->b_ml.ml_line_count
+ 		|| (lnum + n > curbuf->b_ml.ml_line_count
+ 		    && vim_strchr(p_cpo, CPO_MINUS) != NULL))
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -16717,7 +16717,7 @@
+ 	}
+ 
+ #ifdef FEAT_WINDOWS
+-	/* Restore current tabpage and window, if still valid (autocomands can
++	/* Restore current tabpage and window, if still valid (autocommands can
+ 	 * make them invalid). */
+ 	if (valid_tabpage(save_curtab))
+ 	    goto_tabpage_tp(save_curtab, TRUE);
+diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
+--- a/src/ex_cmds2.c
++++ b/src/ex_cmds2.c
+@@ -2851,7 +2851,7 @@
+ 	EMSG(_(e_argreq));
+ 
+     else if (eap != NULL && eap->forceit)
+-	/* ":source!": read Normal mdoe commands
++	/* ":source!": read Normal mode commands
+ 	 * Need to execute the commands directly.  This is required at least
+ 	 * for:
+ 	 * - ":g" command busy
+diff --git a/src/ex_docmd.c b/src/ex_docmd.c
+--- a/src/ex_docmd.c
++++ b/src/ex_docmd.c
+@@ -1298,7 +1298,7 @@
+ 	    && !(did_emsg
+ #ifdef FEAT_EVAL
+ 		/* Keep going when inside try/catch, so that the error can be
+-		 * dealth with, except when it is a syntax error, it may cause
++		 * deal with, except when it is a syntax error, it may cause
+ 		 * the :endtry to be missed. */
+ 		&& (cstack.cs_trylevel == 0 || did_emsg_syntax)
+ #endif
+@@ -10982,7 +10982,7 @@
+ 		*p = '/';
+     }
+ 
+-    /* escapse special characters */
++    /* escape special characters */
+     p = vim_strsave_fnameescape(sname, FALSE);
+     vim_free(sname);
+     if (p == NULL)
+diff --git a/src/ex_eval.c b/src/ex_eval.c
+--- a/src/ex_eval.c
++++ b/src/ex_eval.c
+@@ -44,7 +44,7 @@
+  * executed.  Otherwise, errors and/or interrupts are converted into catchable
+  * exceptions (did_throw additionally set), which terminate the script only if
+  * not caught.  For user exceptions, only did_throw is set.  (Note: got_int can
+- * be set asyncronously afterwards by a SIGINT, so did_throw && got_int is not
++ * be set asynchronously afterwards by a SIGINT, so did_throw && got_int is not
+  * a reliant test that the exception currently being thrown is an interrupt
+  * exception.  Similarly, did_emsg can be set afterwards on an error in an
+  * (unskipped) conditional command inside an inactive conditional, so did_throw
+diff --git a/src/farsi.c b/src/farsi.c
+--- a/src/farsi.c
++++ b/src/farsi.c
+@@ -1841,7 +1841,7 @@
+ }
+ 
+ /*
+- * Convert the Farsi VIM into Farsi 3342 standad.
++ * Convert the Farsi VIM into Farsi 3342 standard.
+  */
+     void
+ conv_to_pstd()
 diff --git a/src/feature.h b/src/feature.h
 --- a/src/feature.h
 +++ b/src/feature.h
@@ -36,7 +172,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  	 * Set curbuf to the buffer to be written.
  	 * Careful: The autocommands may call buf_write() recursively!
  	 */
-@@ -8874,7 +8874,7 @@
+@@ -8864,7 +8864,7 @@
      else
      {
  	/* There is no window for "buf", use "aucmd_win".  To minimize the side
@@ -45,10 +181,22 @@ diff --git a/src/fileio.c b/src/fileio.c
  	 * Anything related to a window (e.g., setting folds) may have
  	 * unexpected results. */
  	aco->use_aucmd_win = TRUE;
+diff --git a/src/glbl_ime.cpp b/src/glbl_ime.cpp
+--- a/src/glbl_ime.cpp
++++ b/src/glbl_ime.cpp
+@@ -156,7 +156,7 @@
+ }
+ 
+ /*
+- * Set position of IME compotision window.
++ * Set position of IME composition window.
+  *
+  * You have to call this before starting composition.  If once composition
+  * started, this can take no effect until that composition have finished.  So
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -834,7 +834,7 @@
+@@ -826,7 +826,7 @@
  #endif
  
  /*
@@ -57,7 +205,7 @@ diff --git a/src/gui.c b/src/gui.c
   * first font name that works is used.  If none is found, use the default
   * font.
   * If "fontset" is TRUE, the "font_list" is used as one name for the fontset.
-@@ -2397,7 +2397,7 @@
+@@ -2376,7 +2376,7 @@
      {
  	int	start;		/* index of bytes to be drawn */
  	int	cells;		/* cellwidth of bytes to be drawn */
@@ -66,7 +214,7 @@ diff --git a/src/gui.c b/src/gui.c
  	int	cn;		/* cellwidth of current char */
  	int	i;		/* index of current char */
  	int	c;		/* current char value */
-@@ -3907,7 +3907,7 @@
+@@ -3886,7 +3886,7 @@
  	gui.dragged_sb = SBAR_NONE;
  #ifdef FEAT_GUI_GTK
  	/* Keep the "dragged_wp" value until after the scrolling, for when the
@@ -75,10 +223,43 @@ diff --git a/src/gui.c b/src/gui.c
  	gui.dragged_wp = NULL;
  #endif
      }
+diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
+--- a/src/gui_gtk_x11.c
++++ b/src/gui_gtk_x11.c
+@@ -1257,7 +1257,7 @@
+ 	}
+     }
+ 
+-    /* Chop off any traiing NUL bytes.  OpenOffice sends these. */
++    /* Chop off any trailing NUL bytes.  OpenOffice sends these. */
+     while (len > 0 && text[len - 1] == NUL)
+ 	--len;
+ 
+diff --git a/src/gui_mac.c b/src/gui_mac.c
+--- a/src/gui_mac.c
++++ b/src/gui_mac.c
+@@ -41,7 +41,7 @@
+ #define USE_AEVENT		/* Enable AEVENT */
+ #undef USE_OFFSETED_WINDOW	/* Debugging feature: start Vim window OFFSETed */
+ 
+-/* Compile as CodeWarior External Editor */
++/* Compile as CodeWarrior External Editor */
+ #if defined(FEAT_CW_EDITOR) && !defined(USE_AEVENT)
+ # define USE_AEVENT /* Need Apple Event Support */
+ #endif
+@@ -5704,7 +5704,7 @@
+ 
+ 	/* Resize the button to fit its name */
+ 	width = StringWidth(name) + 2 * dfltButtonEdge;
+-	/* Limite the size of any button to an acceptable value. */
++	/* Limit the size of any button to an acceptable value. */
+ 	/* TODO: Should be based on the message width */
+ 	if (width > maxButtonWidth)
+ 	    width = maxButtonWidth;
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -1810,7 +1810,7 @@
+@@ -1676,7 +1676,7 @@
       * used by the taskbar or appbars. */
      get_work_area(&workarea_rect);
  
@@ -87,7 +268,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
       * relative to the work area.  */
      wndpl.length = sizeof(WINDOWPLACEMENT);
      GetWindowPlacement(s_hwnd, &wndpl);
-@@ -4559,7 +4559,7 @@
+@@ -4391,7 +4391,7 @@
      }
  
      sign.hImage = NULL;
@@ -222,3 +403,96 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  			return 29;
  		    case 0xAC:
  			/* Cyrillic Letter */
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -1654,7 +1654,7 @@
+ 	    if (vim_iswhite(string[0]))
+ 	    {
+ 		if (i == 0 || !vim_iswhite(line[i - 1]))
+-		    continue;  /* missing shite space */
++		    continue;  /* missing white space */
+ 		while (vim_iswhite(string[0]))
+ 		    ++string;
+ 	    }
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -161,7 +161,7 @@
+ 
+ #ifndef PROTO
+ 
+-/* Enable common dialogs input unicode from IME if posible. */
++/* Enable common dialogs input unicode from IME if possible. */
+ #ifdef FEAT_MBYTE
+ LRESULT (WINAPI *pDispatchMessage)(CONST MSG *) = DispatchMessage;
+ BOOL (WINAPI *pGetMessage)(LPMSG, HWND, UINT, UINT) = GetMessage;
+@@ -1032,7 +1032,7 @@
+ 	    DWORD dwLR = (pmer->dwButtonState & LEFT_RIGHT);
+ 
+ 	    /* if either left or right button only is pressed, see if the
+-	     * the next mouse event has both of them pressed */
++	     * next mouse event has both of them pressed */
+ 	    if (dwLR == LEFT || dwLR == RIGHT)
+ 	    {
+ 		for (;;)
+diff --git a/src/os_win32.h b/src/os_win32.h
+--- a/src/os_win32.h
++++ b/src/os_win32.h
+@@ -201,7 +201,7 @@
+ 
+ #ifndef PROTO
+ 
+-/* Enable common dialogs input unicode from IME if posible. */
++/* Enable common dialogs input unicode from IME if possible. */
+ #ifdef FEAT_MBYTE
+     /* The variables are defined in os_win32.c. */
+ extern LRESULT (WINAPI *pDispatchMessage)(CONST MSG *);
+diff --git a/src/quickfix.c b/src/quickfix.c
+--- a/src/quickfix.c
++++ b/src/quickfix.c
+@@ -3235,7 +3235,7 @@
+     mch_dirname(dirname_start, MAXPATHL);
+ 
+ #ifdef FEAT_AUTOCMD
+-     /* Remeber the value of qf_start, so that we can check for autocommands
++     /* Remember the value of qf_start, so that we can check for autocommands
+       * changing the current quickfix list. */
+     cur_qf_start = qi->qf_lists[qi->qf_curlist].qf_start;
+ #endif
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -4044,7 +4044,7 @@
+ 
+ 		/* If a double-width char doesn't fit at the left side display
+ 		 * a '<' in the first column.  Don't do this for unprintable
+-		 * charactes. */
++		 * characters. */
+ 		if (n_skip > 0 && mb_l > 1 && n_extra == 0)
+ 		{
+ 		    n_extra = 1;
+diff --git a/src/search.c b/src/search.c
+--- a/src/search.c
++++ b/src/search.c
+@@ -73,7 +73,7 @@
+ {
+     char_u	    *pat;	/* the pattern (in allocated memory) or NULL */
+     int		    magic;	/* magicness of the pattern */
+-    int		    no_scs;	/* no smarcase for this pattern */
++    int		    no_scs;	/* no smartcase for this pattern */
+     struct soffset  off;
+ };
+ 
+diff --git a/src/window.c b/src/window.c
+--- a/src/window.c
++++ b/src/window.c
+@@ -3674,7 +3674,7 @@
+ 
+ /*
+  * Prepare for leaving the current tab page.
+- * When autocomands change "curtab" we don't leave the tab page and return
++ * When autocommands change "curtab" we don't leave the tab page and return
+  * FAIL.
+  * Careful: When OK is returned need to get a new tab page very very soon!
+  */
