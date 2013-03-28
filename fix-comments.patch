@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent afdc419d88b30740ed36579d56497d1dad1abf62
+# Parent 5ce2e0c0df6f2110bd0faf66176f588d450c3c4a
 
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 --- a/src/GvimExt/gvimext.cpp
@@ -25,6 +25,27 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !ifndef MSVCVER
  !message *** ERROR
  !message Cannot determine Visual C version being used.  If you are using the
+diff --git a/src/VisVim/README_VisVim.txt b/src/VisVim/README_VisVim.txt
+--- a/src/VisVim/README_VisVim.txt
++++ b/src/VisVim/README_VisVim.txt
+@@ -220,7 +220,7 @@
+ 		 2. Close Visual Studio.
+ 		 3. Delete VisVim.dll or move it somewhere it can't be found.
+ 		 4. Run Visual Studio.
+-		 5. Tools -> Cursomize ->Add-ins and Macro-Files.
++		 5. Tools -> Customize ->Add-ins and Macro-Files.
+ 		 6. A message appears:
+ 		    ".../VisVim.dll" "This add-in no longer exists.  It will
+ 		    no longer be displayed."
+@@ -298,7 +298,7 @@
+ P8  Execute :tag command in Vim for word under cursor in DevStudio
+ 
+ P7  Controlling the Visual Studio Debugger from inside Vim
+-    See message above. Also a 'Debug' highligh group and a
++    See message above. Also a 'Debug' highlight group and a
+     command to highlight a certain line would be necessary.
+ 
+ P6  Provide an option to open the current file in VisVim in
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
@@ -256,6 +277,69 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
  	/* TODO: Should be based on the message width */
  	if (width > maxButtonWidth)
  	    width = maxButtonWidth;
+diff --git a/src/gui_motif.c b/src/gui_motif.c
+--- a/src/gui_motif.c
++++ b/src/gui_motif.c
+@@ -1344,7 +1344,7 @@
+ 	else
+ 	{
+ 	    /* Without shadows one can't sense whatever the button has been
+-	     * pressed or not! However we wan't to save a bit of space...
++	     * pressed or not! However we want to save a bit of space...
+ 	     * Need the highlightThickness to see the focus.
+ 	     */
+ 	    XtSetArg(args[n], XmNhighlightThickness, 1); n++;
+@@ -3205,7 +3205,7 @@
+ # ifdef FEAT_FOOTER
+ /*
+  * The next toolbar enter/leave callbacks should really do balloon help.  But
+- * I have to use footer help for backwards compatability.  Hopefully both will
++ * I have to use footer help for backwards compatibility.  Hopefully both will
+  * get implemented and the user will have a choice.
+  */
+     static void
+diff --git a/src/gui_photon.c b/src/gui_photon.c
+--- a/src/gui_photon.c
++++ b/src/gui_photon.c
+@@ -61,7 +61,7 @@
+ static PhPoint_t    gui_ph_raw_offset;
+ static PtWidget_t   *gui_ph_timer_cursor;   /* handle cursor blinking */
+ static PtWidget_t   *gui_ph_timer_timeout;  /* used in gui_mch_wait_for_chars */
+-static short	    is_timeout;		    /* Has the timeout occured? */
++static short	    is_timeout;		    /* Has the timeout occurred? */
+ 
+ /*
+  * This is set inside the mouse callback for a right mouse
+@@ -1156,7 +1156,7 @@
+     PtSetArg(&args[ n++ ], Pt_ARG_POS, &pos, 0);
+ 
+ #ifdef USE_PANEL_GROUP
+-    /* Put in a temprary place holder title */
++    /* Put in a temporary place holder title */
+     PtSetArg(&args[ n++ ], Pt_ARG_PG_PANEL_TITLES, &empty_title, 1);
+ 
+     gui.vimPanelGroup = PtCreateWidget(PtPanelGroup, gui.vimWindow, n, args);
+@@ -1527,7 +1527,7 @@
+     /* There is one less separator than buttons, so bump up the button count */
+     button_count = 1;
+ 
+-    /* Count string length and number of seperators */
++    /* Count string length and number of separators */
+     for (str = buttons; *str; str++)
+     {
+ 	len++;
+diff --git a/src/gui_w16.c b/src/gui_w16.c
+--- a/src/gui_w16.c
++++ b/src/gui_w16.c
+@@ -511,7 +511,7 @@
+     workarea_rect.right = GetSystemMetrics(SM_CXSCREEN);
+     workarea_rect.bottom = GetSystemMetrics(SM_CYFULLSCREEN);
+ 
+-    /* get current posision of our window */
++    /* get current position of our window */
+     wndpl.length = sizeof(WINDOWPLACEMENT);
+     GetWindowPlacement(s_hwnd, &wndpl);
+     if (wndpl.showCmd == SW_SHOWNORMAL)
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
@@ -277,6 +361,59 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (ext > signfile)
      {
  	int do_load = 1;
+diff --git a/src/gui_xmebw.c b/src/gui_xmebw.c
+--- a/src/gui_xmebw.c
++++ b/src/gui_xmebw.c
+@@ -345,7 +345,7 @@
+ 	    &eb->primitive.top_shadow_color,
+ 	    &eb->primitive.highlight_color);
+ 
+-    /* Setup color subsititution table. */
++    /* Setup color substitution table. */
+     color[0].pixel = eb->core.background_pixel;
+     color[1].pixel = eb->core.background_pixel;
+     color[2].pixel = eb->core.background_pixel;
+@@ -919,8 +919,8 @@
+     }
+ 
+     /*
+-     * Plase note that we manipulate the width only in case of push buttons not
+-     * used in the context of a menu pane.
++     * Please note that we manipulate the width only in case of push buttons
++     * not used in the context of a menu pane.
+      */
+     if (Lab_IsMenupane(newtb))
+     {
+@@ -1006,7 +1006,7 @@
+ 	XmString str;
+ 	set_pixmap(eb);
+ 
+-	/* FIXME: this is not the perfect way to deal with menues, which do not
++	/* FIXME: this is not the perfect way to deal with menus, which do not
+ 	 * have any string set right now.  */
+ 	str = XmStringCreateLocalized("");
+ 	XtVaSetValues((Widget) eb, XmNlabelString, str, NULL);
+diff --git a/src/gui_xmebwp.h b/src/gui_xmebwp.h
+--- a/src/gui_xmebwp.h
++++ b/src/gui_xmebwp.h
+@@ -26,7 +26,7 @@
+ 
+ 
+ /*
+- * EnahncedButton class structure.
++ * EnhancedButton class structure.
+  */
+ typedef struct _XmEnhancedButtonClassPart
+ {
+@@ -49,7 +49,7 @@
+ extern XmEnhancedButtonClassRec xmEnhancedButtonClassRec;
+ 
+ /*
+- * EnahncedButton instance record.
++ * EnhancedButton instance record.
+  */
+ typedef struct _XmEnhancedButtonPart
+ {
 diff --git a/src/if_perl.xs b/src/if_perl.xs
 --- a/src/if_perl.xs
 +++ b/src/if_perl.xs
@@ -415,6 +552,153 @@ diff --git a/src/misc1.c b/src/misc1.c
  		while (vim_iswhite(string[0]))
  		    ++string;
  	    }
+diff --git a/src/normal.c b/src/normal.c
+--- a/src/normal.c
++++ b/src/normal.c
+@@ -2510,7 +2510,7 @@
+ 
+ #ifndef FEAT_VISUAL
+     /*
+-     * ALT is only used for starging/extending Visual mode.
++     * ALT is only used for starting/extending Visual mode.
+      */
+     if ((mod_mask & MOD_MASK_ALT))
+ 	return FALSE;
+@@ -5081,7 +5081,7 @@
+ 		}
+ 		break;
+ 
+-		/* "zE": erease all folds */
++		/* "zE": erase all folds */
+     case 'E':	if (foldmethodIsManual(curwin))
+ 		{
+ 		    clearFolding(curwin);
+@@ -7456,7 +7456,7 @@
+     static char_u trans[] = "YyDdCcxdXdAAIIrr";
+ 
+     /* Uppercase means linewise, except in block mode, then "D" deletes till
+-     * the end of the line, and "C" replaces til EOL */
++     * the end of the line, and "C" replaces till EOL */
+     if (isupper(cap->cmdchar))
+     {
+ 	if (VIsual_mode != Ctrl_V)
+@@ -8795,7 +8795,7 @@
+ 		 * at first, but it's really more what we mean when we say
+ 		 * 'cw'.
+ 		 * Another strangeness: When standing on the end of a word
+-		 * "ce" will change until the end of the next wordt, but "cw"
++		 * "ce" will change until the end of the next word, but "cw"
+ 		 * will change only one character! This is done by setting
+ 		 * flag.
+ 		 */
+@@ -9141,7 +9141,7 @@
+ 		{
+ 		    int save_State = State;
+ 
+-		    /* Pretent Insert mode here to allow the cursor on the
++		    /* Pretend Insert mode here to allow the cursor on the
+ 		     * character past the end of the line */
+ 		    State = INSERT;
+ 		    coladvance((colnr_T)MAXCOL);
+@@ -9180,7 +9180,7 @@
+ 	{
+ 	    int save_State = State;
+ 
+-	    /* Pretent Insert mode here to allow the cursor on the
++	    /* Pretend Insert mode here to allow the cursor on the
+ 	     * character past the end of the line */
+ 	    State = INSERT;
+ 	    coladvance(getviscol());
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -398,7 +398,7 @@
+ #ifdef FEAT_RIGHTLEFT
+     int			old_p_ri = p_ri;
+ 
+-    p_ri = 0;			/* don't want revins in ident */
++    p_ri = 0;			/* don't want revins in indent */
+ #endif
+ 
+     State = INSERT;		/* don't want REPLACE for State */
+diff --git a/src/os_amiga.c b/src/os_amiga.c
+--- a/src/os_amiga.c
++++ b/src/os_amiga.c
+@@ -118,7 +118,7 @@
+ }
+ 
+ /*
+- * mch_inchar(): low level input funcion.
++ * mch_inchar(): low level input function.
+  * Get a characters from the keyboard.
+  * If time == 0 do not wait for characters.
+  * If time == n wait a short time for characters.
+diff --git a/src/os_mac.h b/src/os_mac.h
+--- a/src/os_mac.h
++++ b/src/os_mac.h
+@@ -45,7 +45,7 @@
+ /* Get stat.h or something similar. Comment: How come some OS get in in vim.h */
+ # include <sys/stat.h>
+ /* && defined(HAVE_CURSE) */
+-/* The curses.h from MacOS X provides by default some BACKWARD compatibilty
++/* The curses.h from MacOS X provides by default some BACKWARD compatibility
+  * definition which can cause us problem later on. So we undefine a few of them. */
+ # include <curses.h>
+ # undef reg
+diff --git a/src/os_msdos.c b/src/os_msdos.c
+--- a/src/os_msdos.c
++++ b/src/os_msdos.c
+@@ -971,7 +971,7 @@
+ }
+ 
+ /*
+- * mch_inchar(): low level input funcion.
++ * mch_inchar(): low level input function.
+  * Get a characters from the keyboard.
+  * If time == 0 do not wait for characters.
+  * If time == n wait a short time for characters.
+@@ -993,7 +993,7 @@
+ 
+     /*
+      * if we got a ctrl-C when we were busy, there will be a "^C" somewhere
+-     * on the sceen, so we need to redisplay it.
++     * on the screen, so we need to redisplay it.
+      */
+     if (delayed_redraw)
+     {
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -1794,7 +1794,7 @@
+  *
+  * So we create a hidden window, and arrange to destroy it on exit.
+  */
+-HWND message_window = 0;	    /* window that's handling messsages */
++HWND message_window = 0;	    /* window that's handling messages */
+ 
+ #define VIM_CLASSNAME      "VIM_MESSAGES"
+ #define VIM_CLASSNAME_LEN  (sizeof(VIM_CLASSNAME) - 1)
+@@ -2603,7 +2603,7 @@
+ 
+     ReleaseDC(hwnd, hdc);
+ 
+-    /* If we couldn't find a useable font, return failure */
++    /* If we couldn't find a usable font, return failure */
+     if (n == 1)
+ 	return FAIL;
+ 
+diff --git a/src/os_win16.h b/src/os_win16.h
+--- a/src/os_win16.h
++++ b/src/os_win16.h
+@@ -50,7 +50,7 @@
+ #endif
+ 
+ /* toupper() is not really broken, but it's very slow.	Probably because of
+- * using unicde characters on Windows NT */
++ * using unicode characters on Windows NT */
+ #define BROKEN_TOUPPER
+ 
+ #define FNAME_ILLEGAL "\"*?><|" /* illegal characters in a file name */
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
@@ -484,6 +768,30 @@ diff --git a/src/search.c b/src/search.c
      struct soffset  off;
  };
  
+diff --git a/src/structs.h b/src/structs.h
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -1215,7 +1215,7 @@
+ #ifdef FEAT_SYN_HL
+     hashtab_T	b_keywtab;		/* syntax keywords hash table */
+     hashtab_T	b_keywtab_ic;		/* idem, ignore case */
+-    int		b_syn_error;		/* TRUE when error occured in HL */
++    int		b_syn_error;		/* TRUE when error occurred in HL */
+     int		b_syn_ic;		/* ignore case for :syn cmds */
+     int		b_syn_spell;		/* SYNSPL_ values */
+     garray_T	b_syn_patterns;		/* table for syntax patterns */
+diff --git a/src/syntax.c b/src/syntax.c
+--- a/src/syntax.c
++++ b/src/syntax.c
+@@ -6069,7 +6069,7 @@
+     static int	depth = 0;
+     int		r;
+ 
+-    /* If spp has a "containedin" list and "cur_si" is in it, return TRUE. */
++    /* If ssp has a "containedin" list and "cur_si" is in it, return TRUE. */
+     if (cur_si != NULL && ssp->cont_in_list != NULL
+ 					    && !(cur_si->si_flags & HL_MATCH))
+     {
 diff --git a/src/window.c b/src/window.c
 --- a/src/window.c
 +++ b/src/window.c

@@ -7,4 +7,5 @@ backout-7.3.638.patch
 fix-alignment-4.patch
 fix-double-backtick.patch
 fix-typo-in-options.txt.patch
+fix-typo-in-error-message.patch
 fix-comments.patch
