@@ -6,7 +6,7 @@ acl-mingw.patch
 0025-kaoriya-feat-kaoriya.patch
 support-alt-gettext-dll.patch
 version_acl_xpm.patch
-patch-direct_write-r3c.diff
+patch-direct_write-r3d.diff
 use-proto.diff
 correct-ifdef-indent.diff
 gfw-bold-italic.patch

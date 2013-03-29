@@ -3,7 +3,7 @@
 
 diff -r 73ed2bb6def5 runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt	Sun Mar 24 10:08:39 2013 +0900
-+++ b/runtime/doc/eval.txt	Tue Mar 26 21:15:32 2013 +0900
++++ b/runtime/doc/eval.txt	Fri Mar 29 21:40:04 2013 +0900
 @@ -6348,6 +6348,7 @@
  dialog_gui		Compiled with GUI dialog support.
  diff			Compiled with |vimdiff| and 'diff' support.
@@ -14,57 +14,88 @@ diff -r 73ed2bb6def5 runtime/doc/eval.txt
  dos32			32 bits DOS (DJGPP) version of Vim.
 diff -r 73ed2bb6def5 runtime/doc/options.txt
 --- a/runtime/doc/options.txt	Sun Mar 24 10:08:39 2013 +0900
-+++ b/runtime/doc/options.txt	Tue Mar 26 21:15:32 2013 +0900
-@@ -5553,6 +5553,46 @@
++++ b/runtime/doc/options.txt	Fri Mar 29 21:40:04 2013 +0900
+@@ -5553,6 +5553,77 @@
  	this option at the default "on".  Only switch it off when working with
  	old Vi scripts.
  
 +                                               *'renderoptions'* *'rop'*
-+'renderoptions' 'rop'
-+                       string  (default: empty)
-+                       global
-+                       {not in Vi}
-+                       {only available when compiled with GUI and DIRECTX
-+                       enabled for MS-Windows}
-+       Select a text renderer and set its options.  The options are depends
-+       on the renderer.
++'renderoptions' 'rop'	string  (default: empty)
++			global
++			{not in Vi}
++			{only available when compiled with GUI and DIRECTX
++			enabled for MS-Windows}
++	Select a text renderer and set its options.  The options are depends
++	on the renderer.
 +
-+       Syntax: >
-+               set rop=type:{renderer}(,{name}:{value})*
++	Syntax: >
++		set rop=type:{renderer}(,{name}:{value})*
 +<
-+       Currently, only one renderer is available.
++	Currently, only one renderer is available.
 +
-+       renderer    behavior    ~
-+       directx     Vim will draw text using DirectX (DirectWrite).  It makes
-+                   drawn glyphs more beautiful than default GDI.
-+                   It requires 'encoding' is "utf-8", and only works on
-+                   MS-Windows Vista or newer version.
++	render	behavior    ~
++	directx	Vim will draw text using DirectX (DirectWrite).  It makes
++		drawn glyphs more beautiful than default GDI.
++		It requires 'encoding' is "utf-8", and only works on
++		MS-Windows Vista or newer version.
 +
-+                   Options:
-+                       name      meaning           type    value       ~
-+                       gamma     gamma             float   1.0 - 2.2 (maybe)
-+                       contrast  enhancedContrast  float   (unknown)
-+                       level     clearTypeLevel    float   (unknown)
-+                       geom      pixelGeometry     int     0 - 2
-+                       mode      renderingMode     int     0 - 6
++		Options:
++		  name	    meaning		type	value       ~
++		  gamma	    gamma		float	1.0 - 2.2 (maybe)
++		  contrast  enhancedContrast	float	(unknown)
++		  level	    clearTypeLevel	float	(unknown)
++		  geom	    pixelGeometry	int	0 - 2 (see below)
++		  renmode   renderingMode	int	0 - 6 (see below)
++		  taamode   textAntialiasMode	int	0 - 3 (see below)
 +
-+                       See the following page for detail:
-+                       http://msdn.microsoft.com/en-us/library/dd368190.aspx
++		See this URL for detail:
++		  http://msdn.microsoft.com/en-us/library/dd368190.aspx
 +
-+                   Example: >
-+                       set encoding=utf-8
-+                       set gfn=Ricty_Diminished:h12:cSHIFTJIS
-+                       set rop=type:directx
++		For geom: structure of a device pixel.
++		  0 - DWRITE_PIXEL_GEOMETRY_FLAT
++		  1 - DWRITE_PIXEL_GEOMETRY_RGB
++		  2 - DWRITE_PIXEL_GEOMETRY_BGR
++
++		See this URL for detail:
++		  http://msdn.microsoft.com/en-us/library/dd368114.aspx
++
++		For renmode: method of rendering glyphs.
++		  0 - DWRITE_RENDERING_MODE_DEFAULT
++		  1 - DWRITE_RENDERING_MODE_ALIASED
++		  2 - DWRITE_RENDERING_MODE_GDI_CLASSIC
++		  3 - DWRITE_RENDERING_MODE_GDI_NATURAL
++		  4 - DWRITE_RENDERING_MODE_NATURAL
++		  5 - DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC
++		  6 - DWRITE_RENDERING_MODE_OUTLINE
++
++		See this URL for detail:
++		  http://msdn.microsoft.com/en-us/library/dd368118.aspx
++
++		For taamode: antialiasing mode used for drawing text.
++		  0 - D2D1_TEXT_ANTIALIAS_MODE_DEFAULT
++		  1 - D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE
++		  2 - D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE
++		  3 - D2D1_TEXT_ANTIALIAS_MODE_ALIASED
++
++		See this URL for detail:
++		  http://msdn.microsoft.com/en-us/library/dd368170.aspx
++
++		Example: >
++		  set encoding=utf-8
++		  set gfn=Ricty_Diminished:h12:cSHIFTJIS
++		  set rop=type:directx
 +<
-+                   If select a raster font (Courier, Terminal or FixedSys) to
-+                   'guifont', it fallbacks to be drawn by GDI automatically.
++		If select a raster font (Courier, Terminal or FixedSys) to
++		'guifont', it fallbacks to be drawn by GDI automatically.
++
++	Other render types are not supported currently.
 +
  						*'report'*
  'report'		number	(default 2)
  			global
 diff -r 73ed2bb6def5 runtime/doc/various.txt
 --- a/runtime/doc/various.txt	Sun Mar 24 10:08:39 2013 +0900
-+++ b/runtime/doc/various.txt	Tue Mar 26 21:15:32 2013 +0900
++++ b/runtime/doc/various.txt	Fri Mar 29 21:40:04 2013 +0900
 @@ -320,6 +320,7 @@
  N  *+dialog_con_gui*	Support for |:confirm| with GUI and console dialog.
  N  *+diff*		|vimdiff| and 'diff'
@@ -75,7 +106,7 @@ diff -r 73ed2bb6def5 runtime/doc/various.txt
  N  *+eval*		expression evaluation |eval.txt|
 diff -r 73ed2bb6def5 src/Make_cyg.mak
 --- a/src/Make_cyg.mak	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/Make_cyg.mak	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/Make_cyg.mak	Fri Mar 29 21:40:04 2013 +0900
 @@ -8,6 +8,7 @@
  # Cygwin application use the Makefile (just like on Unix).
  #
@@ -152,7 +183,7 @@ diff -r 73ed2bb6def5 src/Make_cyg.mak
  
 diff -r 73ed2bb6def5 src/Make_ming.mak
 --- a/src/Make_ming.mak	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/Make_ming.mak	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/Make_ming.mak	Fri Mar 29 21:40:04 2013 +0900
 @@ -31,6 +31,8 @@
  OPTIMIZE=MAXSPEED
  # set to yes to make gvim, no for vim
@@ -232,7 +263,7 @@ diff -r 73ed2bb6def5 src/Make_ming.mak
  
 diff -r 73ed2bb6def5 src/Make_mvc.mak
 --- a/src/Make_mvc.mak	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/Make_mvc.mak	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/Make_mvc.mak	Fri Mar 29 21:40:04 2013 +0900
 @@ -24,6 +24,9 @@
  #
  #	GUI interface: GUI=yes (default is no)
@@ -291,7 +322,7 @@ diff -r 73ed2bb6def5 src/Make_mvc.mak
  $(OUTDIR)/if_lua.obj: $(OUTDIR) if_lua.c  $(INCL)
 diff -r 73ed2bb6def5 src/eval.c
 --- a/src/eval.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/eval.c	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/eval.c	Fri Mar 29 21:40:04 2013 +0900
 @@ -12166,6 +12166,9 @@
  #ifdef FEAT_DIGRAPHS
  	"digraphs",
@@ -304,8 +335,8 @@ diff -r 73ed2bb6def5 src/eval.c
  #endif
 diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.cpp	Tue Mar 26 21:15:32 2013 +0900
-@@ -0,0 +1,856 @@
++++ b/src/gui_dwrite.cpp	Fri Mar 29 21:40:04 2013 +0900
+@@ -0,0 +1,884 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
 +#define WIN32_LEAN_AND_MEAN
@@ -433,6 +464,23 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +	    return DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC;
 +	case 6:
 +	    return DWRITE_RENDERING_MODE_OUTLINE;
++    }
++}
++
++    static D2D1_TEXT_ANTIALIAS_MODE
++ToTextAntialiasMode(int value)
++{
++    switch (value)
++    {
++	default:
++	case 0:
++	    return D2D1_TEXT_ANTIALIAS_MODE_DEFAULT;
++	case 1:
++	    return D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE;
++	case 2:
++	    return D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
++	case 3:
++	    return D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
 +    }
 +}
 +
@@ -683,6 +731,8 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +    DWRITE_FONT_WEIGHT mFontWeight;
 +    DWRITE_FONT_STYLE mFontStyle;
 +
++    D2D1_TEXT_ANTIALIAS_MODE mTextAntialiasMode;
++
 +    // METHODS
 +
 +    DWriteContext();
@@ -720,7 +770,8 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +    mTextFormat(NULL),
 +    mLastHFont(NULL),
 +    mFontWeight(DWRITE_FONT_WEIGHT_NORMAL),
-+    mFontStyle(DWRITE_FONT_STYLE_NORMAL)
++    mFontStyle(DWRITE_FONT_STYLE_NORMAL),
++    mTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_DEFAULT)
 +{
 +    HRESULT hr;
 +
@@ -1003,18 +1054,24 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +	return;
 +
 +    IDWriteRenderingParams *renderingParams = NULL;
++    D2D1_TEXT_ANTIALIAS_MODE textAntialiasMode =
++	D2D1_TEXT_ANTIALIAS_MODE_DEFAULT;
 +    HRESULT hr;
 +    if (params != NULL)
++    {
 +	hr = mDWriteFactory->CreateCustomRenderingParams(params->gamma,
 +		params->enhancedContrast, params->clearTypeLevel,
 +		ToPixelGeometry(params->pixelGeometry),
 +		ToRenderingMode(params->renderingMode), &renderingParams);
++	textAntialiasMode = ToTextAntialiasMode(params->textAntialiasMode);
++    }
 +    else
 +	hr = mDWriteFactory->CreateRenderingParams(&renderingParams);
 +    if (SUCCEEDED(hr) && renderingParams != NULL)
 +    {
 +	SafeRelease(&mRenderingParams);
 +	mRenderingParams = renderingParams;
++	mTextAntialiasMode = textAntialiasMode;
 +    }
 +}
 +
@@ -1029,6 +1086,7 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +	params->clearTypeLevel = mRenderingParams->GetClearTypeLevel();
 +	params->pixelGeometry = ToInt(mRenderingParams->GetPixelGeometry());
 +	params->renderingMode = ToInt(mRenderingParams->GetRenderingMode());
++	params->textAntialiasMode = mTextAntialiasMode;
 +    }
 +    return params;
 +}
@@ -1098,6 +1156,7 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +    if (ctx != NULL && ctx->mRT != NULL)
 +    {
 +	ctx->mRT->BindDC(hdc, rect);
++	ctx->mRT->SetTextAntialiasMode(ctx->mTextAntialiasMode);
 +    }
 +}
 +
@@ -1164,8 +1223,8 @@ diff -r 73ed2bb6def5 src/gui_dwrite.cpp
 +}
 diff -r 73ed2bb6def5 src/gui_dwrite.h
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.h	Tue Mar 26 21:15:32 2013 +0900
-@@ -0,0 +1,68 @@
++++ b/src/gui_dwrite.h	Fri Mar 29 21:40:04 2013 +0900
+@@ -0,0 +1,76 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
 +#ifndef GUI_DWRITE_H
@@ -1199,6 +1258,14 @@ diff -r 73ed2bb6def5 src/gui_dwrite.h
 +     *	6 - DWRITE_RENDERING_MODE_OUTLINE
 +     */
 +    int renderingMode;
++    /*
++     * antialiasMode:
++     *	0 - D2D1_TEXT_ANTIALIAS_MODE_DEFAULT
++     *	1 - D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE
++     *	2 - D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE
++     *	3 - D2D1_TEXT_ANTIALIAS_MODE_ALIASED
++     */
++    int textAntialiasMode;
 +} DWriteRenderingParams;
 +
 +void DWrite_Init(void);
@@ -1236,8 +1303,8 @@ diff -r 73ed2bb6def5 src/gui_dwrite.h
 +#endif/*GUI_DWRITE_H*/
 diff -r 73ed2bb6def5 src/gui_w32.c
 --- a/src/gui_w32.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/gui_w32.c	Tue Mar 26 21:15:32 2013 +0900
-@@ -25,6 +25,135 @@
++++ b/src/gui_w32.c	Fri Mar 29 21:40:04 2013 +0900
+@@ -25,6 +25,145 @@
  
  #include "vim.h"
  
@@ -1280,7 +1347,8 @@ diff -r 73ed2bb6def5 src/gui_w32.c
 +    float   dx_contrast = 0.0f;
 +    float   dx_level = 0.0f;
 +    int	    dx_geom = 0;
-+    int	    dx_mode = 0;
++    int	    dx_renmode = 0;
++    int	    dx_taamode = 0;
 +
 +    /* parse string as rendering options. */
 +    for (p = s; p != NULL && *p != NUL; )
@@ -1327,11 +1395,18 @@ diff -r 73ed2bb6def5 src/gui_w32.c
 +	    if (dx_geom < 0 || dx_geom > 2)
 +		return FAIL;
 +	}
-+	else if (STRCMP(name, "mode") == 0)
++	else if (STRCMP(name, "renmode") == 0)
 +	{
 +	    dx_flags |= 1 << 4;
-+	    dx_mode = atoi(value);
-+	    if (dx_mode < 0 || dx_mode > 6)
++	    dx_renmode = atoi(value);
++	    if (dx_renmode < 0 || dx_renmode > 6)
++		return FAIL;
++	}
++	else if (STRCMP(name, "taamode") == 0)
++	{
++	    dx_flags |= 1 << 5;
++	    dx_taamode = atoi(value);
++	    if (dx_taamode < 0 || dx_taamode > 3)
 +		return FAIL;
 +	}
 +	else
@@ -1357,7 +1432,9 @@ diff -r 73ed2bb6def5 src/gui_w32.c
 +	    if (dx_flags & (1 << 3))
 +		param.pixelGeometry = dx_geom;
 +	    if (dx_flags & (1 << 4))
-+		param.renderingMode = dx_mode;
++		param.renderingMode = dx_renmode;
++	    if (dx_taamode & (1 << 5))
++		param.textAntialiasMode = dx_taamode;
 +	    DWriteContext_SetRenderingParams(s_dwc, &param);
 +	}
 +    }
@@ -1373,7 +1450,7 @@ diff -r 73ed2bb6def5 src/gui_w32.c
  /*
   * These are new in Windows ME/XP, only defined in recent compilers.
   */
-@@ -1679,6 +1808,11 @@
+@@ -1679,6 +1818,11 @@
      set_vim_var_nr(VV_WINDOWID, HandleToLong(s_hwnd));
  #endif
  
@@ -1385,7 +1462,7 @@ diff -r 73ed2bb6def5 src/gui_w32.c
  theend:
      /* Display any pending error messages */
      display_errors();
-@@ -2332,6 +2466,9 @@
+@@ -2332,6 +2476,9 @@
  #endif
      HPEN	hpen, old_pen;
      int		y;
@@ -1395,7 +1472,7 @@ diff -r 73ed2bb6def5 src/gui_w32.c
  
  #ifndef MSWIN16_FASTTEXT
      /*
-@@ -2419,6 +2556,20 @@
+@@ -2419,6 +2566,20 @@
      SetTextColor(s_hdc, gui.currFgColor);
      SelectFont(s_hdc, gui.currFont);
  
@@ -1416,7 +1493,7 @@ diff -r 73ed2bb6def5 src/gui_w32.c
      if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
      {
  	vim_free(padding);
-@@ -2453,6 +2604,14 @@
+@@ -2453,6 +2614,14 @@
  	    if (text[n] >= 0x80)
  		break;
  
@@ -1431,7 +1508,7 @@ diff -r 73ed2bb6def5 src/gui_w32.c
      /* Check if the Unicode buffer exists and is big enough.  Create it
       * with the same length as the multi-byte string, the number of wide
       * characters is always equal or smaller. */
-@@ -2511,8 +2670,17 @@
+@@ -2511,8 +2680,17 @@
  	    i += utfc_ptr2len_len(text + i, len - i);
  	    ++clen;
  	}
@@ -1453,7 +1530,7 @@ diff -r 73ed2bb6def5 src/gui_w32.c
      else if ((enc_codepage > 0 && (int)GetACP() != enc_codepage) || enc_latin9)
 diff -r 73ed2bb6def5 src/gui_w48.c
 --- a/src/gui_w48.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/gui_w48.c	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/gui_w48.c	Fri Mar 29 21:40:04 2013 +0900
 @@ -2778,6 +2778,10 @@
  
  	out_flush();	    /* make sure all output has been processed */
@@ -1501,7 +1578,7 @@ diff -r 73ed2bb6def5 src/gui_w48.c
  
 diff -r 73ed2bb6def5 src/option.c
 --- a/src/option.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/option.c	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/option.c	Fri Mar 29 21:40:04 2013 +0900
 @@ -2102,6 +2102,11 @@
      {"remap",	    NULL,   P_BOOL|P_VI_DEF,
  			    (char_u *)&p_remap, PV_NONE,
@@ -1533,7 +1610,7 @@ diff -r 73ed2bb6def5 src/option.c
      {
 diff -r 73ed2bb6def5 src/option.h
 --- a/src/option.h	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/option.h	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/option.h	Fri Mar 29 21:40:04 2013 +0900
 @@ -661,6 +661,9 @@
  EXTERN long	p_rdt;		/* 'redrawtime' */
  #endif
@@ -1546,7 +1623,7 @@ diff -r 73ed2bb6def5 src/option.h
  EXTERN long	p_pvh;		/* 'previewheight' */
 diff -r 73ed2bb6def5 src/version.c
 --- a/src/version.c	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/version.c	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/version.c	Fri Mar 29 21:40:04 2013 +0900
 @@ -185,6 +185,13 @@
  #else
  	"-digraphs",
@@ -1563,7 +1640,7 @@ diff -r 73ed2bb6def5 src/version.c
  #else
 diff -r 73ed2bb6def5 src/vim.h
 --- a/src/vim.h	Sun Mar 24 10:08:39 2013 +0900
-+++ b/src/vim.h	Tue Mar 26 21:15:32 2013 +0900
++++ b/src/vim.h	Fri Mar 29 21:40:04 2013 +0900
 @@ -127,6 +127,13 @@
  # endif
  #endif
