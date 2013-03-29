@@ -1,5 +1,6 @@
 # HG changeset patch
-# Parent 139058cadda1f59cf11c44a5824d69d192b7e154
+# Parent 4bda13dff6a7642be1bf88c6032277211ee2b727
+
 diff --git a/src/VisVim/OleAut.cpp b/src/VisVim/OleAut.cpp
 --- a/src/VisVim/OleAut.cpp
 +++ b/src/VisVim/OleAut.cpp
@@ -12,3 +13,15 @@ diff --git a/src/VisVim/OleAut.cpp b/src/VisVim/OleAut.cpp
  		 (char*) ErrName, m_hResult);
  	MessageBox (NULL, Buf, "OLE Error", MB_OK);
  }
+diff --git a/vimtutor.com b/vimtutor.com
+--- a/vimtutor.com
++++ b/vimtutor.com
+@@ -30,7 +30,7 @@
+ $ !
+ $	if f$search ("vim:vim.exe") .eqs. ""
+ $	then
+-$	    write sys$error "Error - Can't run tutoral. VIM not found."
++$	    write sys$error "Error - Can't run tutorial. VIM not found."
+ $	    exit
+ $	endif
+ $ !

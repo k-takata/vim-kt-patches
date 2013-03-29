@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 5ce2e0c0df6f2110bd0faf66176f588d450c3c4a
+# Parent ccd2b1c13400647bf528daadc986c42c5740f410
 
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 --- a/src/GvimExt/gvimext.cpp
@@ -100,6 +100,24 @@ diff --git a/src/edit.c b/src/edit.c
  	if (lnum >= curbuf->b_ml.ml_line_count
  		|| (lnum + n > curbuf->b_ml.ml_line_count
  		    && vim_strchr(p_cpo, CPO_MINUS) != NULL))
+@@ -7715,7 +7715,7 @@
+ /*
+  * return TRUE if 'cinkeys' contains the key "keytyped",
+  * when == '*':	    Only if key is preceded with '*'	(indent before insert)
+- * when == '!':	    Only if key is prededed with '!'	(don't insert)
++ * when == '!':	    Only if key is preceded with '!'	(don't insert)
+  * when == ' ':	    Only if key is not preceded with '*'(indent afterwards)
+  *
+  * "keytyped" can have a few special values:
+@@ -8541,7 +8541,7 @@
+ #endif
+ 
+ /*
+- * <Insert> key in Insert mode: toggle insert/remplace mode.
++ * <Insert> key in Insert mode: toggle insert/replace mode.
+  */
+     static void
+ ins_insert(replaceState)
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
@@ -552,6 +570,18 @@ diff --git a/src/misc1.c b/src/misc1.c
  		while (vim_iswhite(string[0]))
  		    ++string;
  	    }
+diff --git a/src/nbdebug.c b/src/nbdebug.c
+--- a/src/nbdebug.c
++++ b/src/nbdebug.c
+@@ -17,7 +17,7 @@
+  * debugging startup problems because gvim will be started automatically from
+  * netbeans and cannot be run directly from a debugger. The only way to debug
+  * a gvim started by netbeans is by attaching a debugger to it. Without this
+- * tool all starup code will have completed before you can get the pid and
++ * tool all startup code will have completed before you can get the pid and
+  * attach.
+  *
+  * The second tool is a log tool.
 diff --git a/src/normal.c b/src/normal.c
 --- a/src/normal.c
 +++ b/src/normal.c
