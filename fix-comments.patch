@@ -13,6 +13,18 @@ diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
  //    hRegKey   - Specifies the type of the focused item in the selection.
  //
  //  RETURN VALUE:
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
+@@ -48,7 +48,7 @@
+ # USEDLL	no or yes: set to yes to use the Runtime library DLL (no)
+ #		For USEDLL=yes the cygwin1.dll is required to run Vim.
+ #		For "no" the mingw-gcc-g++ package or the mingw64-i686-gcc-g++
+-#		package is required to complie Vim.  Or set CC to gcc-3 and add
++#		package is required to compile Vim.  Or set CC to gcc-3 and add
+ #		-L/lib/w32api to EXTRA_LIBS.
+ # POSTSCRIPT	no or yes: set to yes for PostScript printing (no)
+ # FEATURES	TINY, SMALL, NORMAL, BIG or HUGE (BIG)
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
@@ -25,6 +37,90 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !ifndef MSVCVER
  !message *** ERROR
  !message Cannot determine Visual C version being used.  If you are using the
+diff --git a/src/Make_sas.mak b/src/Make_sas.mak
+--- a/src/Make_sas.mak
++++ b/src/Make_sas.mak
+@@ -251,7 +251,7 @@
+ 
+ # generate GlobalSymbolTable, which speeds up the compile time.
+ #
+-# A preprocessing stage is used to work arounda bug in the GST generator, in
++# A preprocessing stage is used to work around a bug in the GST generator, in
+ # that it does not handle nested makefiles properly in this stage.
+ # Ignore error message for not producing any code (105).
+ $(GST): scoptions vim.h keymap.h macros.h ascii.h term.h structs.h
+@@ -283,7 +283,7 @@
+ .c.pro:
+ 	$(CC) $(CFLAGS) GPFILE=proto/$*.pro $(PROPT) $*.c
+ 
+-# dependancies
++# dependencies
+ blowfish.o:		blowfish.c
+ proto/blowfish.pro:	blowfish.c
+ buffer.o:		buffer.c
+diff --git a/src/Make_vms.mms b/src/Make_vms.mms
+--- a/src/Make_vms.mms
++++ b/src/Make_vms.mms
+@@ -34,7 +34,7 @@
+ # SMALL  - Few features enabled, as basic as possible
+ # NORMAL - A default selection of features enabled
+ # BIG    - Many features enabled, as rich as possible. (default)
+-# HUGE   - All possible featues enabled.
++# HUGE   - All possible features enabled.
+ # Please select one of these alternatives above.
+ MODEL = HUGE
+ 
+@@ -55,7 +55,7 @@
+ # Comment out if you want the compiler version with :ver command.
+ # NOTE: This part can make some complications if you're using some
+ # predefined symbols/flags for your compiler. If does, just leave behind
+-# the comment varialbe CCVER.
++# the comment variable CCVER.
+ CCVER = YES
+ 
+ # Uncomment if want a debug version. Resulting executable is DVIM.EXE
+diff --git a/src/Make_w16.mak b/src/Make_w16.mak
+--- a/src/Make_w16.mak
++++ b/src/Make_w16.mak
+@@ -4,7 +4,7 @@
+ # *************************************************************
+ # * WARNING!
+ # * This was originally produced by the IDE, but has since been
+-# * modifed to make it work properly. Adjust with care!
++# * modified to make it work properly. Adjust with care!
+ # * In particular, leave LinkerLocalOptsAtW16_gvim16dexe alone
+ # * unless you are a guru.
+ # *************************************************************
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -402,7 +402,7 @@
+ # to the command line.	If you see strange flags during compilation, check in
+ # auto/config.mk where they come from.  If it's PERL_CFLAGS, try commenting
+ # the next line.
+-# When you get an error for a missing "perl.exp" file, try creating an emtpy
++# When you get an error for a missing "perl.exp" file, try creating an empty
+ # one: "touch perl.exp".
+ # This requires at least "small" features, "tiny" doesn't work.
+ #CONF_OPT_PERL = --enable-perlinterp
+@@ -1295,7 +1295,7 @@
+ ### prototype headers are ignored due to -DPROTO, system
+ ### headers #include <...> are ignored if we use the -MM option, as
+ ### e.g. provided by gcc-cpp.
+-### Include FEAT_GUI to get gependency on gui.h
++### Include FEAT_GUI to get dependency on gui.h
+ ### Need to change "-I /<path>" to "-isystem /<path>" for GCC 3.x.
+ CPP_DEPEND = $(CC) -I$(srcdir) -M$(CPP_MM) \
+ 		`echo "$(DEPEND_CFLAGS)" $(DEPEND_CFLAGS_FILTER)`
+@@ -1723,7 +1723,7 @@
+ 
+ 
+ # Link the target for normal use or debugging.
+-# A shell script is used to try linking without unneccesary libraries.
++# A shell script is used to try linking without unnecessary libraries.
+ $(VIMTARGET): auto/config.mk objects $(OBJ) version.c version.h
+ 	$(CCC) version.c -o objects/version.o
+ 	@LINK="$(PURIFY) $(SHRPENV) $(CClink) $(ALL_LIB_DIRS) $(LDFLAGS) \
 diff --git a/src/VisVim/README_VisVim.txt b/src/VisVim/README_VisVim.txt
 --- a/src/VisVim/README_VisVim.txt
 +++ b/src/VisVim/README_VisVim.txt
@@ -798,6 +894,54 @@ diff --git a/src/search.c b/src/search.c
      struct soffset  off;
  };
  
+diff --git a/src/spell.c b/src/spell.c
+--- a/src/spell.c
++++ b/src/spell.c
+@@ -4228,7 +4228,7 @@
+     ga_init2(&ga, sizeof(langp_T), 2);
+     clear_midword(wp);
+ 
+-    /* Make a copy of 'spellang', the SpellFileMissing autocommands may change
++    /* Make a copy of 'spelllang', the SpellFileMissing autocommands may change
+      * it under our fingers. */
+     spl_copy = vim_strsave(wp->w_s->b_p_spl);
+     if (spl_copy == NULL)
+@@ -7645,7 +7645,7 @@
+ 
+ 	/* Compress both trees.  Either they both have many nodes, which makes
+ 	 * compression useful, or one of them is small, which means
+-	 * compression goes fast.  But when filling the souldfold word tree
++	 * compression goes fast.  But when filling the soundfold word tree
+ 	 * there is no keep-case tree. */
+ 	wordtree_compress(spin, spin->si_foldroot);
+ 	if (affixID >= 0)
+@@ -8671,7 +8671,7 @@
+     unsigned	words_done = 0;
+     int		wordcount[MAXWLEN];
+ 
+-    /* We use si_foldroot for the souldfolded trie. */
++    /* We use si_foldroot for the soundfolded trie. */
+     spin->si_foldroot = wordtree_alloc(spin);
+     if (spin->si_foldroot == NULL)
+ 	return FAIL;
+@@ -13019,7 +13019,7 @@
+ 
+ /*
+  * Combine the list of suggestions in su->su_ga and su->su_sga.
+- * They are intwined.
++ * They are entwined.
+  */
+     static void
+ score_combine(su)
+@@ -13457,7 +13457,7 @@
+ 
+ 		/* Add a small penalty for changing the first letter from
+ 		 * lower to upper case.  Helps for "tath" -> "Kath", which is
+-		 * less common thatn "tath" -> "path".  Don't do it when the
++		 * less common than "tath" -> "path".  Don't do it when the
+ 		 * letter is the same, that has already been counted. */
+ 		gc = PTR2CHAR(p);
+ 		if (SPELL_ISUPPER(gc))
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
