@@ -1,6 +1,36 @@
 # HG changeset patch
-# Parent ccd2b1c13400647bf528daadc986c42c5740f410
+# Parent 20655820989582556a69ecb98e1b2ca3730134f1
 
+diff --git a/runtime/plugin/matchparen.vim b/runtime/plugin/matchparen.vim
+--- a/runtime/plugin/matchparen.vim
++++ b/runtime/plugin/matchparen.vim
+@@ -5,7 +5,7 @@
+ " Exit quickly when:
+ " - this plugin was already loaded (or disabled)
+ " - when 'compatible' is set
+-" - the "CursorMoved" autocmd event is not availble.
++" - the "CursorMoved" autocmd event is not available.
+ if exists("g:loaded_matchparen") || &cp || !exists("##CursorMoved")
+   finish
+ endif
+diff --git a/runtime/tools/vim_vs_net.cmd b/runtime/tools/vim_vs_net.cmd
+--- a/runtime/tools/vim_vs_net.cmd
++++ b/runtime/tools/vim_vs_net.cmd
+@@ -7,12 +7,12 @@
+ @rem      Arguments - +$(CurLine) $(ItemPath)
+ @rem      Init Dir  - Empty
+ @rem
+-@rem Coutesy of Brian Sturk
++@rem Courtesy of Brian Sturk
+ @rem
+ @rem --remote-silent +%1 is a command +954, move ahead 954 lines
+ @rem --remote-silent %2 full path to file
+ @rem In Vim
+-@rem    :h --remote-silent for mor details
++@rem    :h --remote-silent for more details
+ @rem
+ @rem --servername VS_NET
+ @rem This will create a new instance of vim called VS_NET.  So if you
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 --- a/src/GvimExt/gvimext.cpp
 +++ b/src/GvimExt/gvimext.cpp
@@ -94,6 +124,26 @@ diff --git a/src/Make_w16.mak b/src/Make_w16.mak
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
+@@ -200,7 +200,7 @@
+ #Solaris 2.5 (sun4m)  cc (SC4.0)     +X11R6 +GUI (CDE)	4.6b (E) Andrew Large
+ #Solaris 2.5	      cc	     +X11 +GUI Athena	4.2  (9) Sonia Heimann
+ #Solaris 2.5	      gcc 2.5.6      +X11 Motif		5.0m (R) Ant. Colombo
+-#Solaris 2.6	      gcc 2.8.1      ncursus		5.3  (G) Larry W. Virden
++#Solaris 2.6	      gcc 2.8.1      ncurses		5.3  (G) Larry W. Virden
+ #Solaris with -lthread					5.5  (W) K. Nagano
+ #Solaris	      gcc				     (b) Riccardo
+ #SunOS 4.1.x			     +X11 -GUI		5.1b (J) Bram Moolenaar
+@@ -231,8 +231,8 @@
+ # (D)  Uncomment lines below for QNX
+ # (E)  You might want to use termlib instead of termcap, see below.
+ # (F)  See below for instructions.
+-# (G)  Using ncursus version 4.2 has reported to cause a crash.  Use the
+-#      Sun cursus library instead.
++# (G)  Using ncurses version 4.2 has reported to cause a crash.  Use the
++#      Sun curses library instead.
+ # (H)  See line for EXTRA_LIBS below.
+ # (I)  SINIX-N 5.42 and 5.43 need some EXTRA_LIBS.  Also for Reliant-Unix.
+ # (J)  If you get undefined symbols, see below for a solution.
 @@ -402,7 +402,7 @@
  # to the command line.	If you see strange flags during compilation, check in
  # auto/config.mk where they come from.  If it's PERL_CFLAGS, try commenting
@@ -121,6 +171,18 @@ diff --git a/src/Makefile b/src/Makefile
  $(VIMTARGET): auto/config.mk objects $(OBJ) version.c version.h
  	$(CCC) version.c -o objects/version.o
  	@LINK="$(PURIFY) $(SHRPENV) $(CClink) $(ALL_LIB_DIRS) $(LDFLAGS) \
+@@ -2785,9 +2785,9 @@
+ 	mv gui_mac.rsrc.rsrcfork $(RESDIR)/$(VIMNAME).rsrc
+ 
+ # po/Make_osx.pl says something about generating a Mac message file
+-# for Ukrananian.  Would somebody using Mac OS X in Ukranian
++# for Ukrainian.  Would somebody using Mac OS X in Ukrainian
+ # *really* be upset that Carbon Vim was not localised in
+-# Ukranian?
++# Ukrainian?
+ #
+ #bundle-language: bundle-dir po/Make_osx.pl
+ #	cd po && perl Make_osx.pl --outdir ../$(RESDIR) $(MULTILANG)
 diff --git a/src/VisVim/README_VisVim.txt b/src/VisVim/README_VisVim.txt
 --- a/src/VisVim/README_VisVim.txt
 +++ b/src/VisVim/README_VisVim.txt
@@ -154,6 +216,27 @@ diff --git a/src/buffer.c b/src/buffer.c
  	 * page containing "buf" if one exists */
  	if (wp == NULL && (swb_flags & SWB_USETAB))
  	    wp = buf_jump_open_tab(buf);
+diff --git a/src/configure.in b/src/configure.in
+--- a/src/configure.in
++++ b/src/configure.in
+@@ -306,7 +306,7 @@
+ AC_SUBST(line_break)
+ 
+ if test "$cf_cv_ebcdic" = "yes"; then
+-dnl If we have EBCDIC we most likley have z/OS Unix, let's test it!
++dnl If we have EBCDIC we most likely have z/OS Unix, let's test it!
+ AC_MSG_CHECKING(for z/OS Unix)
+ case `uname` in
+     OS/390)	zOSUnix="yes";
+@@ -1268,7 +1268,7 @@
+     /* If this program fails, then RTLD_GLOBAL is needed.
+      * RTLD_GLOBAL will be used and then it is not possible to
+      * have both python versions enabled in the same vim instance.
+-     * Only the first pyhton version used will be switched on.
++     * Only the first python version used will be switched on.
+      */
+ 
+     int no_rtl_global_needed_for(char *python_instsoname, wchar_t *prefix)
 diff --git a/src/dosinst.c b/src/dosinst.c
 --- a/src/dosinst.c
 +++ b/src/dosinst.c
@@ -624,6 +707,21 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      mVIM = rb_define_module("Vim");
      rb_define_const(rb_cObject, "VIM", mVIM);
      rb_define_const(mVIM, "VERSION_MAJOR", INT2NUM(VIM_VERSION_MAJOR));
+diff --git a/src/main.aap b/src/main.aap
+--- a/src/main.aap
++++ b/src/main.aap
+@@ -1213,9 +1213,9 @@
+     :move gui_mac.rsrc.rsrcfork $(RESDIR)/$(VIMNAME).rsrc
+ 
+ # po/Make_osx.pl says something about generating a Mac message file
+-# for Ukrananian.  Would somebody using Mac OS X in Ukranian
++# for Ukrainian.  Would somebody using Mac OS X in Ukrainian
+ # *really* be upset that Carbon Vim was not localised in
+-# Ukranian?
++# Ukrainian?
+ #
+ #bundle-language: bundle-dir po/Make_osx.pl
+ #	cd po && perl Make_osx.pl --outdir ../$(RESDIR) $(MULTILANG)
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
