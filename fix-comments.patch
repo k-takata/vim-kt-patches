@@ -43,6 +43,18 @@ diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
  //    hRegKey   - Specifies the type of the focused item in the selection.
  //
  //  RETURN VALUE:
+diff --git a/src/INSTALLvms.txt b/src/INSTALLvms.txt
+--- a/src/INSTALLvms.txt
++++ b/src/INSTALLvms.txt
+@@ -330,7 +330,7 @@
+      Also VMS_JACKETS.EXE from OpenVMS Porting Library.
+ 
+      Please note, that GTK uses /name=(as_is,short)/float=ieee/ieee=denorm
+-     complier directives that is not compatible with "standard" VMS usage,
++     compiler directives that is not compatible with "standard" VMS usage,
+      therefore other external features might fail as PERL, PYTHON and TCL
+      support.
+ 
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 --- a/src/Make_cyg.mak
 +++ b/src/Make_cyg.mak
@@ -237,6 +249,18 @@ diff --git a/src/configure.in b/src/configure.in
       */
  
      int no_rtl_global_needed_for(char *python_instsoname, wchar_t *prefix)
+diff --git a/src/diff.c b/src/diff.c
+--- a/src/diff.c
++++ b/src/diff.c
+@@ -1110,7 +1110,7 @@
+ }
+ 
+ /*
+- * Set options to show difs for the current window.
++ * Set options to show diffs for the current window.
+  */
+     void
+ ex_diffthis(eap)
 diff --git a/src/dosinst.c b/src/dosinst.c
 --- a/src/dosinst.c
 +++ b/src/dosinst.c
@@ -354,6 +378,20 @@ diff --git a/src/ex_eval.c b/src/ex_eval.c
   * a reliant test that the exception currently being thrown is an interrupt
   * exception.  Similarly, did_emsg can be set afterwards on an error in an
   * (unskipped) conditional command inside an inactive conditional, so did_throw
+@@ -2091,11 +2091,11 @@
+  * Values used for "searched_cond" are (CSF_WHILE | CSF_FOR) or CSF_TRY or 0,
+  * the latter meaning the innermost try conditional not in its finally clause.
+  * "inclusive" tells whether the conditional searched for should be made
+- * inactive itself (a try conditional not in its finally claused possibly find
++ * inactive itself (a try conditional not in its finally clause possibly find
+  * before is always made inactive).  If "inclusive" is TRUE and
+  * "searched_cond" is CSF_TRY|CSF_SILENT, the saved former value of
+  * "emsg_silent", if reset when the try conditional finally reached was
+- * entered, is restored (unsed by ex_endtry()).  This is normally done only
++ * entered, is restored (used by ex_endtry()).  This is normally done only
+  * when such a try conditional is left.
+  */
+     int
 diff --git a/src/farsi.c b/src/farsi.c
 --- a/src/farsi.c
 +++ b/src/farsi.c
@@ -381,6 +419,15 @@ diff --git a/src/feature.h b/src/feature.h
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
+@@ -3277,7 +3277,7 @@
+ 	overwriting = FALSE;
+ 
+     if (exiting)
+-	settmode(TMODE_COOK);	    /* when exiting allow typahead now */
++	settmode(TMODE_COOK);	    /* when exiting allow typeahead now */
+ 
+     ++no_wait_return;		    /* don't wait for return yet */
+ 
 @@ -3301,7 +3301,7 @@
  	int		empty_memline = (buf->b_ml.ml_mfp == NULL);
  
@@ -537,9 +584,27 @@ diff --git a/src/gui_w16.c b/src/gui_w16.c
      wndpl.length = sizeof(WINDOWPLACEMENT);
      GetWindowPlacement(s_hwnd, &wndpl);
      if (wndpl.showCmd == SW_SHOWNORMAL)
+@@ -1161,7 +1161,7 @@
+ 	return -1;
+ 
+     /*
+-     * make a copy of 'buttons' to fiddle with it.  complier grizzles because
++     * make a copy of 'buttons' to fiddle with it.  compiler grizzles because
+      * vim_strsave() doesn't take a const arg (why not?), so cast away the
+      * const.
+      */
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
+@@ -1258,7 +1258,7 @@
+ 
+ #ifdef FEAT_NETBEANS_INTG
+     {
+-	/* stolen from gui_x11.x */
++	/* stolen from gui_x11.c */
+ 	int arg;
+ 
+ 	for (arg = 1; arg < *argc; arg++)
 @@ -1676,7 +1676,7 @@
       * used by the taskbar or appbars. */
      get_work_area(&workarea_rect);
@@ -549,6 +614,15 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
       * relative to the work area.  */
      wndpl.length = sizeof(WINDOWPLACEMENT);
      GetWindowPlacement(s_hwnd, &wndpl);
+@@ -3100,7 +3100,7 @@
+ 	return -1;
+ 
+     /*
+-     * make a copy of 'buttons' to fiddle with it.  complier grizzles because
++     * make a copy of 'buttons' to fiddle with it.  compiler grizzles because
+      * vim_strsave() doesn't take a const arg (why not?), so cast away the
+      * const.
+      */
 @@ -4391,7 +4391,7 @@
      }
  
