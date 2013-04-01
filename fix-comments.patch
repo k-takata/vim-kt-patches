@@ -488,6 +488,18 @@ diff --git a/src/gui.c b/src/gui.c
  	gui.dragged_wp = NULL;
  #endif
      }
+diff --git a/src/gui_athena.c b/src/gui_athena.c
+--- a/src/gui_athena.c
++++ b/src/gui_athena.c
+@@ -519,7 +519,7 @@
+ 	    &color[TOP_SHADOW].pixel,
+ 	    &color[HIGHLIGHT].pixel);
+ 
+-    /* Setup the color subsititution table */
++    /* Setup the color substitution table */
+     attrs.valuemask = XpmColorSymbols;
+     attrs.colorsymbols = color;
+     attrs.numsymbols = 5;
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
