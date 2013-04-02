@@ -337,7 +337,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 new file mode 100644
 --- /dev/null
 +++ b/src/gui_dwrite.cpp
-@@ -0,0 +1,884 @@
+@@ -0,0 +1,891 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +
 +#define WIN32_LEAN_AND_MEAN
@@ -749,6 +749,7 @@ new file mode 100644
 +    void DrawText(HDC hdc, const WCHAR* text, int len,
 +	int x, int y, int w, int h, int cellWidth, COLORREF color);
 +
++    float PixelsToDipsX(int x);
 +    float PixelsToDipsY(int y);
 +
 +    void SetRenderingParams(
@@ -1010,8 +1011,8 @@ new file mode 100644
 +	BitBlt(memdc, 0, 0, w, h, hdc, x, y, SRCCOPY);
 +
 +	hr = mDWriteFactory->CreateGdiCompatibleTextLayout(
-+		text, len, mTextFormat, static_cast<FLOAT>(w),
-+		static_cast<FLOAT>(h), mDpiScaleX, NULL, TRUE, &textLayout);
++		text, len, mTextFormat, PixelsToDipsX(w),
++		PixelsToDipsY(h), mDpiScaleX, NULL, TRUE, &textLayout);
 +
 +	if (SUCCEEDED(hr))
 +	{
@@ -1026,7 +1027,7 @@ new file mode 100644
 +		    mRenderingParams);
 +	    GdiTextRendererContext data = {
 +		color,
-+		(FLOAT)cellWidth / mDpiScaleX,
++		PixelsToDipsX(cellWidth),
 +		0.0f
 +	    };
 +	    textLayout->Draw(&data, renderer, 0, 0);
@@ -1039,6 +1040,12 @@ new file mode 100644
 +    }
 +
 +    SafeRelease(&bmpRT);
++}
++
++    float
++DWriteContext::PixelsToDipsX(int x)
++{
++    return x / mDpiScaleX;
 +}
 +
 +    float
