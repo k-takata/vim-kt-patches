@@ -500,6 +500,18 @@ diff --git a/src/gui_athena.c b/src/gui_athena.c
      attrs.valuemask = XpmColorSymbols;
      attrs.colorsymbols = color;
      attrs.numsymbols = 5;
+diff --git a/src/gui_beval.c b/src/gui_beval.c
+--- a/src/gui_beval.c
++++ b/src/gui_beval.c
+@@ -726,7 +726,7 @@
+     BalloonEval	*beval;
+     XEvent	*event;
+ {
+-    Position	distance;	    /* a measure of how much the ponter moved */
++    Position	distance;	    /* a measure of how much the pointer moved */
+     Position	delta;		    /* used to compute distance */
+ 
+     switch (event->type)
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
