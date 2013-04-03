@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent c43b4ed8f6fab59f1676d522515888e7b42c2d49
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+--- a/src/gui_dwrite.cpp
++++ b/src/gui_dwrite.cpp
+@@ -658,7 +658,7 @@
+ 	return;
+ 
+     // Check possibility of zero divided error.
+-    if (cellWidth == 0 || mDpiScaleX == 0.0f || mDpiScaleX == 0.0f)
++    if (cellWidth == 0 || mDpiScaleX == 0.0f || mDpiScaleY == 0.0f)
+ 	return;
+ 
+     if (SUCCEEDED(hr))
