@@ -709,6 +709,66 @@ diff --git a/src/gui_xmebwp.h b/src/gui_xmebwp.h
   */
  typedef struct _XmEnhancedButtonPart
  {
+diff --git a/src/if_mzsch.c b/src/if_mzsch.c
+--- a/src/if_mzsch.c
++++ b/src/if_mzsch.c
+@@ -3053,7 +3053,7 @@
+ 		status = FAIL;
+ 	    else
+ 	    {
+-		/* add the value in advance to allow handling of self-referencial
++		/* add the value in advance to allow handling of self-referential
+ 		 * data structures */
+ 		typval_T    *visited_tv = (typval_T *)alloc(sizeof(typval_T));
+ 		copy_tv(tv, visited_tv);
+@@ -3088,7 +3088,7 @@
+ 			if (status == FAIL)
+ 			    break;
+ 		    }
+-		    /* impoper list not terminated with null
++		    /* improper list not terminated with null
+ 		     * need to handle the last element */
+ 		    if (status == OK && !SCHEME_NULLP(curr))
+ 		    {
+@@ -3136,7 +3136,7 @@
+ 	    {
+ 		if (((Scheme_Hash_Table *) obj)->vals[i] != NULL)
+ 		{
+-		    /* generate item for `diplay'ed Scheme key */
++		    /* generate item for `display'ed Scheme key */
+ 		    dictitem_T  *item = dictitem_alloc((char_u *)string_to_line(
+ 				((Scheme_Hash_Table *) obj)->keys[i]));
+ 		    /* convert Scheme val to Vim and add it to the dict */
+diff --git a/src/if_ole.cpp b/src/if_ole.cpp
+--- a/src/if_ole.cpp
++++ b/src/if_ole.cpp
+@@ -645,7 +645,7 @@
+     CoTaskMemFree(wGUID);
+ }
+ 
+-// Delete a key and all of its descendents
++// Delete a key and all of its descendants
+ static void RecursiveDeleteKey(HKEY hKeyParent, const char *child)
+ {
+     // Open the child
+@@ -655,7 +655,7 @@
+     if (result != ERROR_SUCCESS)
+ 	return;
+ 
+-    // Enumerate all of the decendents of this child
++    // Enumerate all of the descendants of this child
+     FILETIME time;
+     char buffer[1024];
+     DWORD size = 1024;
+@@ -663,7 +663,7 @@
+     while (RegEnumKeyEx(hKeyChild, 0, buffer, &size, NULL,
+ 			NULL, NULL, &time) == S_OK)
+     {
+-	// Delete the decendents of this child
++	// Delete the descendants of this child
+ 	RecursiveDeleteKey(hKeyChild, buffer);
+ 	size = 256;
+     }
 diff --git a/src/if_perl.xs b/src/if_perl.xs
 --- a/src/if_perl.xs
 +++ b/src/if_perl.xs
@@ -1090,6 +1150,15 @@ diff --git a/src/search.c b/src/search.c
      struct soffset  off;
  };
  
+@@ -3546,7 +3546,7 @@
+ 
+ /*
+  * Find block under the cursor, cursor at end.
+- * "what" and "other" are two matching parenthesis/paren/etc.
++ * "what" and "other" are two matching parenthesis/brace/etc.
+  */
+     int
+ current_block(oap, count, include, what, other)
 diff --git a/src/spell.c b/src/spell.c
 --- a/src/spell.c
 +++ b/src/spell.c
