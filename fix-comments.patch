@@ -910,6 +910,36 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  			return 29;
  		    case 0xAC:
  			/* Cyrillic Letter */
+diff --git a/src/memfile.c b/src/memfile.c
+--- a/src/memfile.c
++++ b/src/memfile.c
+@@ -1075,7 +1075,7 @@
+ 	if (nr > mfp->mf_infile_count)		/* beyond end of file */
+ 	{
+ 	    nr = mfp->mf_infile_count;
+-	    hp2 = mf_find_hash(mfp, nr);	/* NULL catched below */
++	    hp2 = mf_find_hash(mfp, nr);	/* NULL caught below */
+ 	}
+ 	else
+ 	    hp2 = hp;
+@@ -1184,7 +1184,7 @@
+     {
+ 	new_bnum = freep->bh_bnum;
+ 	/*
+-	 * If the page count of the free block was larger, recude it.
++	 * If the page count of the free block was larger, reduce it.
+ 	 * If the page count matches, remove the block from the free list
+ 	 */
+ 	if (freep->bh_page_count > page_count)
+@@ -1309,7 +1309,7 @@
+     mf_set_ffname(mfp);
+ #if defined(MSDOS) || defined(MSWIN)
+     /*
+-     * A ":!cd e:xxx" may change the directory without us knowning, use the
++     * A ":!cd e:xxx" may change the directory without us knowing, use the
+      * full pathname always.  Careful: This frees fname!
+      */
+     mf_fullname(mfp);
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
@@ -1030,6 +1060,15 @@ diff --git a/src/os_mac.h b/src/os_mac.h
 diff --git a/src/os_msdos.c b/src/os_msdos.c
 --- a/src/os_msdos.c
 +++ b/src/os_msdos.c
+@@ -702,7 +702,7 @@
+  * If Vim should work over the serial line after a 'ctty com1' we must use
+  * kbhit() and getch(). (jw)
+  * Usually kbhit() is not used, because then CTRL-C and CTRL-P
+- * will be catched by DOS (mool).
++ * will be caught by DOS (mool).
+  *
+  * return TRUE if a character is available, FALSE otherwise
+  */
 @@ -971,7 +971,7 @@
  }
  
@@ -1048,6 +1087,42 @@ diff --git a/src/os_msdos.c b/src/os_msdos.c
       */
      if (delayed_redraw)
      {
+@@ -2438,7 +2438,7 @@
+     long    start_time;
+     int	    tick_count;
+ 
+-    /* int 02xf, AX = 0x1701 attempts to open the Windows clipboard.  Upon
++    /* int 0x2f, AX = 0x1701 attempts to open the Windows clipboard.  Upon
+      * return from the interrupt, if AX is non-zero, the clipboard was
+      * successfully opened.  If AX is zero, the clipboard could not be opened
+      * because it is currently in use by another process.
+@@ -2533,7 +2533,7 @@
+ {
+     __dpmi_regs  dpmi_regs;
+ 
+-    /* int 02xf, AX = 0x1702 attempts to empty the Windows clipboard.  Upon
++    /* int 0x2f, AX = 0x1702 attempts to empty the Windows clipboard.  Upon
+      * return from the interrupt, if AX == 0, the clipboard could not be
+      * emptied (for some reason).
+      */
+@@ -2616,7 +2616,7 @@
+     case CF_TEXT:		    /* Windows text */
+     case CF_OEMTEXT:		    /* DOS (OEM) text */
+ 
+-	/* int 02xf, AX = 0x1704 returns the number of bytes of data currently
++	/* int 0x2f, AX = 0x1704 returns the number of bytes of data currently
+ 	 * on the Windows clipboard, for the specified format.  Upon return
+ 	 * from the interrupt, DX:AX = the number of bytes, rounded up to the
+ 	 * nearest multiple of 32.
+@@ -2820,7 +2820,7 @@
+ 	clip_data_size);		/* how many bytes to copy */
+ 
+     /* Send data from the DOS transfer buffer to the Windows clipboard.
+-     * int 02xf, AX = 0x1703 sends SI:CX bytes of data from the buffer
++     * int 0x2f, AX = 0x1703 sends SI:CX bytes of data from the buffer
+      * at ES:BX, to the clipboard.
+      */
+     dpmi_regs.x.ax = 0x1703;			/* send clipboard data */
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
@@ -1060,6 +1135,15 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  
  #define VIM_CLASSNAME      "VIM_MESSAGES"
  #define VIM_CLASSNAME_LEN  (sizeof(VIM_CLASSNAME) - 1)
+@@ -1857,7 +1857,7 @@
+ 
+ static int save_reply(HWND server, char_u *reply, int expr);
+ 
+-/*s
++/*
+  * The window procedure for the hidden message window.
+  * It handles callback messages and notifications from servers.
+  * In order to process these messages, it is necessary to run a
 @@ -2603,7 +2603,7 @@
  
      ReleaseDC(hwnd, hdc);
