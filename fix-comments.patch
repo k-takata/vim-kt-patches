@@ -536,6 +536,15 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
  #if defined(FEAT_CW_EDITOR) && !defined(USE_AEVENT)
  # define USE_AEVENT /* Need Apple Event Support */
  #endif
+@@ -5356,7 +5356,7 @@
+     char_u *initdir,
+     char_u *filter)
+ {
+-    /* TODO: Add Ammon's safety checl (Dany) */
++    /* TODO: Add Ammon's safety check (Dany) */
+     NavReplyRecord	reply;
+     char_u		*fname = NULL;
+     char_u		**fnames = NULL;
 @@ -5704,7 +5704,7 @@
  
  	/* Resize the button to fit its name */
@@ -545,6 +554,33 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
  	/* TODO: Should be based on the message width */
  	if (width > maxButtonWidth)
  	    width = maxButtonWidth;
+@@ -5887,7 +5887,7 @@
+     /* Free the modal filterProc */
+     DisposeRoutineDescriptor(dialogUPP);
+ 
+-    /* Get ride of th edialog (free memory) */
++    /* Get ride of the dialog (free memory) */
+     DisposeDialog(theDialog);
+ 
+     return itemHit;
+@@ -6151,7 +6151,7 @@
+ }
+ 
+ /*
+- * Convert a FSSpec to a fuill path
++ * Convert a FSSpec to a full path
+  */
+ 
+ char_u *FullPathFromFSSpec_save(FSSpec file)
+@@ -6544,7 +6544,7 @@
+ 
+ // when the tabline is hidden, vim doesn't call update_tabline(). When
+ // the tabline is shown again, show_tabline() is called before update_tabline(),
+-// and because of this, the tab labels and vims internal tabs are out of sync
++// and because of this, the tab labels and vim's internal tabs are out of sync
+ // for a very short time. to prevent inconsistent state, we store the labels
+ // of the tabs, not pointers to the tabs (which are invalid for a short time).
+ static CFStringRef *tabLabels = NULL;
 diff --git a/src/gui_motif.c b/src/gui_motif.c
 --- a/src/gui_motif.c
 +++ b/src/gui_motif.c
@@ -656,6 +692,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (ext > signfile)
      {
  	int do_load = 1;
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -1222,7 +1222,7 @@
+ 
+     /* When side scroll bar is unshown, the size of window will change.
+      * then, the text area move left or right. thus client rect should be
+-     * forcely redraw. (Yasuhiro Matsumoto) */
++     * forcedly redrawn. (Yasuhiro Matsumoto) */
+     if (oldx != x || oldy != y)
+     {
+ 	InvalidateRect(s_hwnd, NULL, FALSE);
 diff --git a/src/gui_xmebw.c b/src/gui_xmebw.c
 --- a/src/gui_xmebw.c
 +++ b/src/gui_xmebw.c
@@ -910,6 +958,15 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  			return 29;
  		    case 0xAC:
  			/* Cyrillic Letter */
+@@ -4599,7 +4599,7 @@
+     }
+ 
+     /* The thing which setting "preedit_start_col" to MAXCOL means that
+-     * "preedit_start_col" will be set forcely when calling
++     * "preedit_start_col" will be set forcedly when calling
+      * preedit_changed_cb() next time.
+      * "preedit_start_col" should not reset with MAXCOL on this part. Vim
+      * is simulating the preediting by using add_to_input_str(). when
 diff --git a/src/memfile.c b/src/memfile.c
 --- a/src/memfile.c
 +++ b/src/memfile.c
