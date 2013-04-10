@@ -1,9 +1,12 @@
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -498,13 +498,15 @@
+@@ -496,15 +496,17 @@
+       else
+ 	dnl Determine the SONAME for the current version, but fallback to
  	dnl liblua${vi_cv_version_lua}.so if no SONAME-versioned file is found.
- 	for LUA_SOVER in "${vi_cv_version_lua}.so" ".so.${vi_cv_version_lua}"; do
+-	for LUA_SOVER in "${vi_cv_version_lua}.so" ".so.${vi_cv_version_lua}"; do
++	for LUA_SOVER in "${vi_cv_version_lua}.so" "-${vi_cv_version_lua}.so" ".so.${vi_cv_version_lua}"; do
  	  for i in 0 1 2 3 4 5 6 7 8 9; do
 -	    if test -f "${vi_cv_path_lua_pfx}/lib/liblua${LUA_SOVER}.$i"; then
 -	      LUA_SONAME=".$i"
