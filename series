@@ -9,3 +9,4 @@ fix-double-backtick.patch
 fix-typo-in-error-message.patch
 fix-comments.patch
 linux-lua-dyn.patch
+python3-config-dir.patch
