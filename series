@@ -8,3 +8,4 @@ fix-alignment-4.patch
 fix-double-backtick.patch
 fix-typo-in-error-message.patch
 fix-comments.patch
+linux-lua-dyn.patch
