@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 20655820989582556a69ecb98e1b2ca3730134f1
+# Parent 5148275c0bbe2da1ec2b14b5926fcdf8d38be3bd
 
 diff --git a/runtime/plugin/matchparen.vim b/runtime/plugin/matchparen.vim
 --- a/runtime/plugin/matchparen.vim
@@ -216,6 +216,18 @@ diff --git a/src/VisVim/README_VisVim.txt b/src/VisVim/README_VisVim.txt
      command to highlight a certain line would be necessary.
  
  P6  Provide an option to open the current file in VisVim in
+diff --git a/src/auto/configure b/src/auto/configure
+--- a/src/auto/configure
++++ b/src/auto/configure
+@@ -5825,7 +5825,7 @@
+     /* If this program fails, then RTLD_GLOBAL is needed.
+      * RTLD_GLOBAL will be used and then it is not possible to
+      * have both python versions enabled in the same vim instance.
+-     * Only the first pyhton version used will be switched on.
++     * Only the first python version used will be switched on.
+      */
+ 
+     int no_rtl_global_needed_for(char *python_instsoname, char *prefix)
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
@@ -1042,7 +1054,7 @@ diff --git a/src/normal.c b/src/normal.c
      case 'E':	if (foldmethodIsManual(curwin))
  		{
  		    clearFolding(curwin);
-@@ -7456,7 +7456,7 @@
+@@ -7462,7 +7462,7 @@
      static char_u trans[] = "YyDdCcxdXdAAIIrr";
  
      /* Uppercase means linewise, except in block mode, then "D" deletes till
@@ -1051,7 +1063,7 @@ diff --git a/src/normal.c b/src/normal.c
      if (isupper(cap->cmdchar))
      {
  	if (VIsual_mode != Ctrl_V)
-@@ -8795,7 +8795,7 @@
+@@ -8801,7 +8801,7 @@
  		 * at first, but it's really more what we mean when we say
  		 * 'cw'.
  		 * Another strangeness: When standing on the end of a word
@@ -1060,7 +1072,7 @@ diff --git a/src/normal.c b/src/normal.c
  		 * will change only one character! This is done by setting
  		 * flag.
  		 */
-@@ -9141,7 +9141,7 @@
+@@ -9147,7 +9147,7 @@
  		{
  		    int save_State = State;
  
@@ -1069,7 +1081,7 @@ diff --git a/src/normal.c b/src/normal.c
  		     * character past the end of the line */
  		    State = INSERT;
  		    coladvance((colnr_T)MAXCOL);
-@@ -9180,7 +9180,7 @@
+@@ -9186,7 +9186,7 @@
  	{
  	    int save_State = State;
  
