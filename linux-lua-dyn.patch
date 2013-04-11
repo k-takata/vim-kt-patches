@@ -1,18 +1,22 @@
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -496,15 +496,17 @@
+@@ -496,15 +496,21 @@
        else
  	dnl Determine the SONAME for the current version, but fallback to
  	dnl liblua${vi_cv_version_lua}.so if no SONAME-versioned file is found.
 -	for LUA_SOVER in "${vi_cv_version_lua}.so" ".so.${vi_cv_version_lua}"; do
++	multiarch=`dpkg-architecture -qDEB_HOST_MULTIARCH 2> /dev/null`
++	if test "X$multiarch" != "X"; then
++	  lib_multiarch="lib/${multiarch}"
++	fi
 +	for LUA_SOVER in "${vi_cv_version_lua}.so" "-${vi_cv_version_lua}.so" ".so.${vi_cv_version_lua}"; do
  	  for i in 0 1 2 3 4 5 6 7 8 9; do
 -	    if test -f "${vi_cv_path_lua_pfx}/lib/liblua${LUA_SOVER}.$i"; then
 -	      LUA_SONAME=".$i"
 -	      break
 -	    fi
-+	    for subdir in lib/x86_64-linux-gnu lib64 lib; do
++	    for subdir in ${lib_multiarch} lib64 lib; do
 +	      if test -f "${vi_cv_path_lua_pfx}/${subdir}/liblua${LUA_SOVER}.$i"; then
 +		LUA_SONAME=".$i"
 +		break 3
