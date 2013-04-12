@@ -1,4 +1,5 @@
 myconfiguration-for-cygwin.patch
+myconfiguration-for-linux-gui.patch #+linux-gui
 fix-make-config.patch
 fix-indent-in-configure.in.patch
 configure.patch
