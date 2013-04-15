@@ -8,5 +8,4 @@ backout-7.3.638.patch
 fix-alignment-4.patch
 fix-typo-in-error-message.patch
 fix-comments.patch
-linux-lua-dyn.patch
 python-config-dir.patch
