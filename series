@@ -9,3 +9,4 @@ fix-alignment-4.patch
 fix-typo-in-error-message.patch
 fix-comments.patch
 python-config-dir.patch
+configure-2.patch
