@@ -1,17 +1,17 @@
 # HG changeset patch
-# Parent 274c841f033afce5e46272521827f3e71e4240cd
+# Parent 5ec6d1aa71bed577c98066badacdff9cba8e0265
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1653,6 +1653,11 @@
+@@ -1656,6 +1656,11 @@
  # sure configure is run when it's needed.
  #
  config auto/config.mk: auto/configure config.mk.in config.h.in
-+	if test -f auto/config.cache; then \
-+		if ! grep -x -F 'ac_cv_env_CFLAGS_value=$(CFLAGS)' auto/config.cache > /dev/null; then \
-+			rm auto/config.cache; \
-+		fi \
++	if test -f auto/config.cache && \
++	    grep '^ac_cv_env_CFLAGS_value=' auto/config.cache > /dev/null && \
++	    ! grep -x -F 'ac_cv_env_CFLAGS_value=$(CFLAGS)' auto/config.cache > /dev/null; then \
++		rm auto/config.cache; \
 +	fi
  	GUI_INC_LOC="$(GUI_INC_LOC)" GUI_LIB_LOC="$(GUI_LIB_LOC)" \
  		CC="$(CC)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
@@ -19,7 +19,7 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -760,6 +760,7 @@
+@@ -776,6 +776,7 @@
        ldflags_save=$LDFLAGS
        CFLAGS="$CFLAGS $perlcppflags"
        LIBS="$LIBS $perllibs"
@@ -27,7 +27,7 @@ diff --git a/src/configure.in b/src/configure.in
        LDFLAGS="$perlldflags $LDFLAGS"
        AC_TRY_LINK(,[ ],
  	     AC_MSG_RESULT(yes); perl_ok=yes,
-@@ -773,7 +774,9 @@
+@@ -789,7 +790,9 @@
  	  PERL_CFLAGS=`echo "$perlcppflags" | sed -e 's/-pipe //' -e 's/-W[[^ ]]*//'`
  	fi
  	if test "X$perlldflags" != "X"; then
@@ -38,7 +38,7 @@ diff --git a/src/configure.in b/src/configure.in
  	fi
  	PERL_LIBS=$perllibs
  	PERL_SRC="auto/if_perl.c if_perlsfio.c"
-@@ -1502,7 +1505,9 @@
+@@ -1518,7 +1521,9 @@
  	  dnl configure, so strip these flags first (if present)
  	  rubyldflags=`echo "$rubyldflags" | sed -e 's/-arch\ ppc//' -e 's/-arch\ i386//' -e 's/-arch\ x86_64//'`
  	  if test "X$rubyldflags" != "X"; then
@@ -49,7 +49,7 @@ diff --git a/src/configure.in b/src/configure.in
  	  fi
  	fi
  	RUBY_SRC="if_ruby.c"
-@@ -3651,7 +3656,7 @@
+@@ -3682,7 +3687,7 @@
    dnl And undefine it first to avoid a warning.
    AC_MSG_CHECKING(whether we need -D_FORTIFY_SOURCE=1)
    if test "$gccmajor" -gt "3"; then
@@ -58,7 +58,7 @@ diff --git a/src/configure.in b/src/configure.in
      AC_MSG_RESULT(yes)
    else
      AC_MSG_RESULT(no)
-@@ -3666,7 +3671,7 @@
+@@ -3697,7 +3702,7 @@
  LINK_AS_NEEDED=
  # Check if linker supports --as-needed and --no-as-needed options
  if $CC -Wl,--help 2>/dev/null | grep as-needed > /dev/null; then
