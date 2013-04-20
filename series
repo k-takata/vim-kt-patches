@@ -10,3 +10,4 @@ fix-typo-in-error-message.patch
 fix-comments.patch
 python-config-dir.patch
 configure-2.patch
+fix-c-vim-spellcheck.patch
