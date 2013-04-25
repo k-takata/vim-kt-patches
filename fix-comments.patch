@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 5148275c0bbe2da1ec2b14b5926fcdf8d38be3bd
+# Parent 5a385dec3e81a9c64c0795cea4168dbc732781ab
 
 diff --git a/runtime/plugin/matchparen.vim b/runtime/plugin/matchparen.vim
 --- a/runtime/plugin/matchparen.vim
@@ -219,7 +219,7 @@ diff --git a/src/VisVim/README_VisVim.txt b/src/VisVim/README_VisVim.txt
 diff --git a/src/auto/configure b/src/auto/configure
 --- a/src/auto/configure
 +++ b/src/auto/configure
-@@ -5825,7 +5825,7 @@
+@@ -5834,7 +5834,7 @@
      /* If this program fails, then RTLD_GLOBAL is needed.
       * RTLD_GLOBAL will be used and then it is not possible to
       * have both python versions enabled in the same vim instance.
@@ -228,7 +228,7 @@ diff --git a/src/auto/configure b/src/auto/configure
       */
  
      int no_rtl_global_needed_for(char *python_instsoname, char *prefix)
-@@ -5891,7 +5891,7 @@
+@@ -5900,7 +5900,7 @@
      /* If this program fails, then RTLD_GLOBAL is needed.
       * RTLD_GLOBAL will be used and then it is not possible to
       * have both python versions enabled in the same vim instance.
@@ -240,7 +240,7 @@ diff --git a/src/auto/configure b/src/auto/configure
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
-@@ -1995,7 +1995,7 @@
+@@ -2005,7 +2005,7 @@
  	 * "buf" if one exists */
  	if (swb_flags & SWB_USEOPEN)
  	    wp = buf_jump_open_win(buf);
@@ -261,7 +261,7 @@ diff --git a/src/configure.in b/src/configure.in
  AC_MSG_CHECKING(for z/OS Unix)
  case `uname` in
      OS/390)	zOSUnix="yes";
-@@ -1222,7 +1222,7 @@
+@@ -1231,7 +1231,7 @@
      /* If this program fails, then RTLD_GLOBAL is needed.
       * RTLD_GLOBAL will be used and then it is not possible to
       * have both python versions enabled in the same vim instance.
@@ -270,7 +270,7 @@ diff --git a/src/configure.in b/src/configure.in
       */
  
      int no_rtl_global_needed_for(char *python_instsoname, char *prefix)
-@@ -1268,7 +1268,7 @@
+@@ -1277,7 +1277,7 @@
      /* If this program fails, then RTLD_GLOBAL is needed.
       * RTLD_GLOBAL will be used and then it is not possible to
       * have both python versions enabled in the same vim instance.
@@ -354,7 +354,7 @@ diff --git a/src/edit.c b/src/edit.c
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -16717,7 +16717,7 @@
+@@ -16718,7 +16718,7 @@
  	}
  
  #ifdef FEAT_WINDOWS
@@ -449,7 +449,7 @@ diff --git a/src/feature.h b/src/feature.h
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -3277,7 +3277,7 @@
+@@ -3279,7 +3279,7 @@
  	overwriting = FALSE;
  
      if (exiting)
@@ -458,7 +458,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
      ++no_wait_return;		    /* don't wait for return yet */
  
-@@ -3301,7 +3301,7 @@
+@@ -3303,7 +3303,7 @@
  	int		empty_memline = (buf->b_ml.ml_mfp == NULL);
  
  	/*
@@ -467,7 +467,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  	 * Set curbuf to the buffer to be written.
  	 * Careful: The autocommands may call buf_write() recursively!
  	 */
-@@ -8864,7 +8864,7 @@
+@@ -8866,7 +8866,7 @@
      else
      {
  	/* There is no window for "buf", use "aucmd_win".  To minimize the side
@@ -566,6 +566,33 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
  #if defined(FEAT_CW_EDITOR) && !defined(USE_AEVENT)
  # define USE_AEVENT /* Need Apple Event Support */
  #endif
+@@ -1478,7 +1478,7 @@
+ /*
+  *  gui_mac_get_menu_item_index
+  *
+- *  Returns the index inside the menu wher
++ *  Returns the index inside the menu where
+  */
+     short /* Should we return MenuItemIndex? */
+ gui_mac_get_menu_item_index(vimmenu_T *pMenu)
+@@ -1693,7 +1693,7 @@
+ 
+     if (theControl != NUL)
+     {
+-	/* We hit a scollbar */
++	/* We hit a scrollbar */
+ 
+ 	if (thePortion != kControlIndicatorPart)
+ 	{
+@@ -2630,7 +2630,7 @@
+     {
+ 	/* Handle the menu CntxMenuID, CntxMenuItem */
+ 	/* The submenu can be handle directly by gui_mac_handle_menu */
+-	/* But what about the current menu, is the meny changed by ContextualMenuSelect */
++	/* But what about the current menu, is the many changed by ContextualMenuSelect */
+ 	gui_mac_handle_menu((CntxMenuID << 16) + CntxMenuItem);
+     }
+     else if (CntxMenuID == kCMShowHelpSelected)
 @@ -5356,7 +5356,7 @@
      char_u *initdir,
      char_u *filter)
@@ -593,6 +620,19 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
      DisposeDialog(theDialog);
  
      return itemHit;
+@@ -5967,9 +5967,9 @@
+ 	/* New way */
+ 
+ 	/*
+-	 * Get first devoice with one button.
+-	 * This will probably be the standad mouse
+-	 * startat head of cursor dev list
++	 * Get first device with one button.
++	 * This will probably be the standard mouse
++	 * start at head of cursor dev list
+ 	 *
+ 	 */
+ 
 @@ -6151,7 +6151,7 @@
  }
  
@@ -611,6 +651,15 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
  // for a very short time. to prevent inconsistent state, we store the labels
  // of the tabs, not pointers to the tabs (which are invalid for a short time).
  static CFStringRef *tabLabels = NULL;
+@@ -6578,7 +6578,7 @@
+ 
+     // assert(property == kTabsColumn); // why is this violated??
+ 
+-    // changeValue is true if we have a modifieable list and data was changed.
++    // changeValue is true if we have a modifiable list and data was changed.
+     // In our case, it's always false.
+     // (that is: if (changeValue) updateInternalData(); else return
+     // internalData();
 diff --git a/src/gui_motif.c b/src/gui_motif.c
 --- a/src/gui_motif.c
 +++ b/src/gui_motif.c
@@ -862,7 +911,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
 diff --git a/src/if_py_both.h b/src/if_py_both.h
 --- a/src/if_py_both.h
 +++ b/src/if_py_both.h
-@@ -1769,7 +1769,7 @@
+@@ -1883,7 +1883,7 @@
      static int
  SetBufferLine(buf_T *buf, PyInt n, PyObject *line, PyInt *len_change)
  {
@@ -871,7 +920,7 @@ diff --git a/src/if_py_both.h b/src/if_py_both.h
       * There are three cases:
       *	  1. NULL, or None - this is a deletion.
       *	  2. A string	   - this is a replacement.
-@@ -1860,7 +1860,7 @@
+@@ -1974,7 +1974,7 @@
      static int
  SetBufferLineList(buf_T *buf, PyInt lo, PyInt hi, PyObject *list, PyInt *len_change)
  {
@@ -880,7 +929,7 @@ diff --git a/src/if_py_both.h b/src/if_py_both.h
       * There are three cases:
       *	  1. NULL, or None - this is a deletion.
       *	  2. A list	   - this is a replacement.
-@@ -2037,7 +2037,7 @@
+@@ -2151,7 +2151,7 @@
      }
  }
  
@@ -889,7 +938,7 @@ diff --git a/src/if_py_both.h b/src/if_py_both.h
   * The line number is in Vim format (1-based). The lines to be inserted are
   * given as a Python list of string objects or as a single string. The lines
   * to be added are checked for validity and correct format. Errors are
-@@ -2378,7 +2378,7 @@
+@@ -2539,7 +2539,7 @@
  	return NULL;
      }
  
@@ -901,7 +950,7 @@ diff --git a/src/if_py_both.h b/src/if_py_both.h
 diff --git a/src/if_python.c b/src/if_python.c
 --- a/src/if_python.c
 +++ b/src/if_python.c
-@@ -762,7 +762,7 @@
+@@ -773,7 +773,7 @@
  
  	/* Remove the element from sys.path that was added because of our
  	 * argv[0] value in PythonMod_Init().  Previously we used an empty
@@ -913,7 +962,7 @@ diff --git a/src/if_python.c b/src/if_python.c
 diff --git a/src/if_python3.c b/src/if_python3.c
 --- a/src/if_python3.c
 +++ b/src/if_python3.c
-@@ -748,7 +748,7 @@
+@@ -766,7 +766,7 @@
  
  	/* Remove the element from sys.path that was added because of our
  	 * argv[0] value in Py3Init_vim().  Previously we used an empty
@@ -925,7 +974,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 diff --git a/src/if_ruby.c b/src/if_ruby.c
 --- a/src/if_ruby.c
 +++ b/src/if_ruby.c
-@@ -105,7 +105,7 @@
+@@ -113,7 +113,7 @@
  #endif
  
  /*
@@ -934,7 +983,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
   * Ruby 1.9 does not provide STR2CSTR, instead StringValuePtr is provided.
   * Ruby 1.9 does not provide RXXX(s)->len and RXXX(s)->ptr, instead
   * RXXX_LEN(s) and RXXX_PTR(s) are provided.
-@@ -1314,7 +1314,7 @@
+@@ -1333,7 +1333,7 @@
      rb_global_variable(&objtbl);
  
      /* The Vim module used to be called "VIM", but "Vim" is better.  Make an
@@ -1054,7 +1103,7 @@ diff --git a/src/nbdebug.c b/src/nbdebug.c
 diff --git a/src/normal.c b/src/normal.c
 --- a/src/normal.c
 +++ b/src/normal.c
-@@ -2510,7 +2510,7 @@
+@@ -2513,7 +2513,7 @@
  
  #ifndef FEAT_VISUAL
      /*
@@ -1063,7 +1112,7 @@ diff --git a/src/normal.c b/src/normal.c
       */
      if ((mod_mask & MOD_MASK_ALT))
  	return FALSE;
-@@ -5081,7 +5081,7 @@
+@@ -5084,7 +5084,7 @@
  		}
  		break;
  
@@ -1072,7 +1121,7 @@ diff --git a/src/normal.c b/src/normal.c
      case 'E':	if (foldmethodIsManual(curwin))
  		{
  		    clearFolding(curwin);
-@@ -7462,7 +7462,7 @@
+@@ -7465,7 +7465,7 @@
      static char_u trans[] = "YyDdCcxdXdAAIIrr";
  
      /* Uppercase means linewise, except in block mode, then "D" deletes till
@@ -1081,7 +1130,7 @@ diff --git a/src/normal.c b/src/normal.c
      if (isupper(cap->cmdchar))
      {
  	if (VIsual_mode != Ctrl_V)
-@@ -8801,7 +8801,7 @@
+@@ -8804,7 +8804,7 @@
  		 * at first, but it's really more what we mean when we say
  		 * 'cw'.
  		 * Another strangeness: When standing on the end of a word
@@ -1090,7 +1139,7 @@ diff --git a/src/normal.c b/src/normal.c
  		 * will change only one character! This is done by setting
  		 * flag.
  		 */
-@@ -9147,7 +9147,7 @@
+@@ -9150,7 +9150,7 @@
  		{
  		    int save_State = State;
  
@@ -1099,7 +1148,7 @@ diff --git a/src/normal.c b/src/normal.c
  		     * character past the end of the line */
  		    State = INSERT;
  		    coladvance((colnr_T)MAXCOL);
-@@ -9186,7 +9186,7 @@
+@@ -9189,7 +9189,7 @@
  	{
  	    int save_State = State;
  
@@ -1405,7 +1454,7 @@ diff --git a/src/syntax.c b/src/syntax.c
 diff --git a/src/window.c b/src/window.c
 --- a/src/window.c
 +++ b/src/window.c
-@@ -3674,7 +3674,7 @@
+@@ -3687,7 +3687,7 @@
  
  /*
   * Prepare for leaving the current tab page.
