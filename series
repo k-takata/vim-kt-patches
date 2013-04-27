@@ -6,7 +6,7 @@ acl-mingw.patch
 2005-ambiwidth_auto.diff
 support-alt-gettext-dll.patch
 version_acl_xpm.patch
-patch-direct_write-r3f.diff
+X001-direct_write-r3.diff
 use-proto.diff
 gfw-bold-italic.patch
 cpo-N.diff
