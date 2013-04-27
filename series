@@ -2,8 +2,8 @@ merge-Make_cyg-into-Make_ming.patch
 symlinkfix-update.diff
 acl-fix.patch
 acl-mingw.patch
-0009-kaoriya-ambiwidth-auto.patch
-0025-kaoriya-feat-kaoriya.patch
+0000-kaoriya_marks.diff
+2005-ambiwidth_auto.diff
 support-alt-gettext-dll.patch
 version_acl_xpm.patch
 patch-direct_write-r3f.diff

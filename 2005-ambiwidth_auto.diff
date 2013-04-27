@@ -1,8 +1,10 @@
-[PATCH 09/25] kaoriya-ambiwidth-auto
+# HG changeset patch
+# Parent b310fc3abf0bd107728295980e4090a7573dea3d
+add 'auto' for 'ambiwidth'
 
-diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
---- a/runtime/doc/options.txt
-+++ b/runtime/doc/options.txt
+diff -r b310fc3abf0b -r 5a2d7f302b1d runtime/doc/options.txt
+--- a/runtime/doc/options.txt	Sat Apr 13 22:05:04 2013 +0900
++++ b/runtime/doc/options.txt	Sat Apr 13 22:11:26 2013 +0900
 @@ -680,6 +680,9 @@
  	"single":	Use the same width as characters in US-ASCII.  This is
  			expected by most users.
@@ -13,9 +15,9 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  							*E834* *E835*
  	The value "double" cannot be used if 'listchars' or 'fillchars'
  	contains a character that would be double width.
-@@ -699,6 +702,10 @@
- 	when the system locale is set to one of CJK locales.  See Unicode
- 	Standard Annex #11 (http://www.unicode.org/reports/tr11).
+@@ -703,6 +706,10 @@
+ 	compiled with the |+termresponse| feature and if |t_u7| is set to the
+ 	escape sequence to request cursor position report.
  
 +	On some systems, we can use width for a character which defined by
 +	font design.  If you use such a system try "auto" for this option.
@@ -24,10 +26,10 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  			*'antialias'* *'anti'* *'noantialias'* *'noanti'*
  'antialias' 'anti'	boolean (default: off)
  			global
-diff --git a/src/gui_w32.c b/src/gui_w32.c
---- a/src/gui_w32.c
-+++ b/src/gui_w32.c
-@@ -4829,3 +4829,54 @@
+diff -r b310fc3abf0b -r 5a2d7f302b1d src/gui_w32.c
+--- a/src/gui_w32.c	Sat Apr 13 22:05:04 2013 +0900
++++ b/src/gui_w32.c	Sat Apr 13 22:11:26 2013 +0900
+@@ -4924,3 +4924,54 @@
  	WSInitialized = TRUE;
  }
  #endif
@@ -82,10 +84,10 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	return 0;
 +}
 +#endif
-diff --git a/src/mbyte.c b/src/mbyte.c
---- a/src/mbyte.c
-+++ b/src/mbyte.c
-@@ -1458,6 +1458,19 @@
+diff -r b310fc3abf0b -r 5a2d7f302b1d src/mbyte.c
+--- a/src/mbyte.c	Sat Apr 13 22:05:04 2013 +0900
++++ b/src/mbyte.c	Sat Apr 13 22:11:26 2013 +0900
+@@ -1460,6 +1460,19 @@
  	{0x100000, 0x10fffd}
      };
  
@@ -105,10 +107,10 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      if (c >= 0x100)
      {
  #ifdef USE_WCHAR_FUNCTIONS
-diff --git a/src/option.c b/src/option.c
---- a/src/option.c
-+++ b/src/option.c
-@@ -2942,7 +2942,11 @@
+diff -r b310fc3abf0b -r 5a2d7f302b1d src/option.c
+--- a/src/option.c	Sat Apr 13 22:05:04 2013 +0900
++++ b/src/option.c	Sat Apr 13 22:11:26 2013 +0900
+@@ -2954,7 +2954,11 @@
  #define PARAM_COUNT (sizeof(options) / sizeof(struct vimoption))
  
  #ifdef FEAT_MBYTE
@@ -121,10 +123,10 @@ diff --git a/src/option.c b/src/option.c
  #endif
  static char *(p_bg_values[]) = {"light", "dark", NULL};
  static char *(p_nf_values[]) = {"octal", "hex", "alpha", NULL};
-diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
---- a/src/proto/gui_w32.pro
-+++ b/src/proto/gui_w32.pro
-@@ -73,6 +73,7 @@
+diff -r b310fc3abf0b -r 5a2d7f302b1d src/proto/gui_w32.pro
+--- a/src/proto/gui_w32.pro	Sat Apr 13 22:05:04 2013 +0900
++++ b/src/proto/gui_w32.pro	Sat Apr 13 22:11:26 2013 +0900
+@@ -76,6 +76,7 @@
  int im_get_status __ARGS((void));
  void gui_mch_draw_string __ARGS((int row, int col, char_u *text, int len, int flags));
  void gui_mch_flush __ARGS((void));
@@ -132,10 +134,10 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
  void gui_mch_get_screen_dimensions __ARGS((int *screen_w, int *screen_h));
  void gui_mch_add_menu __ARGS((vimmenu_T *menu, int pos));
  void gui_mch_show_popupmenu __ARGS((vimmenu_T *menu));
-diff --git a/src/vim.h b/src/vim.h
---- a/src/vim.h
-+++ b/src/vim.h
-@@ -554,6 +554,14 @@
+diff -r b310fc3abf0b -r 5a2d7f302b1d src/vim.h
+--- a/src/vim.h	Sat Apr 13 22:05:04 2013 +0900
++++ b/src/vim.h	Sat Apr 13 22:11:26 2013 +0900
+@@ -553,6 +553,14 @@
  #endif
  
  /*
