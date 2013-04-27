@@ -7,7 +7,7 @@ acl-mingw.patch
 support-alt-gettext-dll.patch
 version_acl_xpm.patch
 X001-direct_write-r3.diff
-use-proto.diff
+direct_write-use-proto.diff
 gfw-bold-italic.patch
 cpo-N.diff
 if_perl-use-output.patch
