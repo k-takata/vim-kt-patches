@@ -1,0 +1,33 @@
+# HG changeset patch
+# Parent 7978101f5f83b6c42e0aa72129a2fcd43fd9e310
+diff --git a/src/if_py_both.h b/src/if_py_both.h
+--- a/src/if_py_both.h
++++ b/src/if_py_both.h
+@@ -1521,12 +1521,11 @@
+     int		flags;
+     long	numval;
+     char_u	*stringval;
++    DICTKEY_DECL
+ 
+     if (this->Check(this->from))
+ 	return NULL;
+ 
+-    DICTKEY_DECL
+-
+     DICTKEY_GET_NOTEMPTY(NULL)
+ 
+     flags = get_option_value_strict(key, &numval, &stringval,
+@@ -1616,12 +1615,11 @@
+     int		flags;
+     int		opt_flags;
+     int		r = 0;
++    DICTKEY_DECL
+ 
+     if (this->Check(this->from))
+ 	return -1;
+ 
+-    DICTKEY_DECL
+-
+     DICTKEY_GET_NOTEMPTY(-1)
+ 
+     flags = get_option_value_strict(key, NULL, NULL,
