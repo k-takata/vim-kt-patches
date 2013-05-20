@@ -1,0 +1,78 @@
+diff --git a/src/regexp_nfa.c b/src/regexp_nfa.c
+--- a/src/regexp_nfa.c
++++ b/src/regexp_nfa.c
+@@ -15,8 +15,6 @@
+ #define	    NFA_BRACES_MAXLIMIT		    10
+ /* For allocating space for the postfix representation */
+ #define	    NFA_POSTFIX_MULTIPLIER	    (NFA_BRACES_MAXLIMIT + 2)*2
+-/* Size of stack, used when converting the postfix regexp into NFA */
+-#define	    NFA_STACK_SIZE		    1024
+ 
+ enum
+ {
+@@ -1826,13 +1824,13 @@
+ 	else if (retval == OK)
+ 	    fprintf(f, ">>> NFA engine succeeded !\n");
+ 	fprintf(f, "Regexp: \"%s\"\nPostfix notation (char): \"", expr);
+-	for (p=post_start; *p; p++)
++	for (p = post_start; *p && p < post_end; p++)
+ 	{
+ 	    nfa_set_code(*p);
+ 	    fprintf(f, "%s, ", code);
+ 	}
+ 	fprintf(f, "\"\nPostfix notation (int): ");
+-	for (p=post_start; *p; p++)
++	for (p = post_start; *p && p < post_end; p++)
+ 		fprintf(f, "%d ", *p);
+ 	fprintf(f, "\n\n");
+ 	fclose(f);
+@@ -2160,7 +2158,7 @@
+ 	/* Allocate space for the stack. Max states on the stack : nstate */
+ 	stack = (Frag_T *) lalloc((nstate + 1)*sizeof(Frag_T), TRUE);
+ 	stackp = stack;
+-	stack_end = stack + NFA_STACK_SIZE;
++	stack_end = stack + (nstate + 1);
+     }
+ 
+     for (p = postfix; p < end; ++p)
+@@ -2667,11 +2665,11 @@
+     switch (class)
+     {
+ 	case NFA_CLASS_ALNUM:
+-	    if (isalnum(c))
++	    if ((1 <= c && c <= 255) && isalnum(c))
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_ALPHA:
+-	    if (isalpha(c))
++	    if ((1 <= c && c <= 255) && isalpha(c))
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_BLANK:
+@@ -2679,7 +2677,7 @@
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_CNTRL:
+-	    if (iscntrl(c))
++	    if ((1 <= c && c <= 255) && iscntrl(c))
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_DIGIT:
+@@ -2687,7 +2685,7 @@
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_GRAPH:
+-	    if (isgraph(c))
++	    if ((1 <= c && c <= 255) && isgraph(c))
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_LOWER:
+@@ -2699,7 +2697,7 @@
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_PUNCT:
+-	    if (ispunct(c))
++	    if ((1 <= c && c <= 255) && ispunct(c))
+ 		return OK;
+ 	    break;
+ 	case NFA_CLASS_SPACE:
