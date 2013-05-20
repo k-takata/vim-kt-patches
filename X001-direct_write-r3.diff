@@ -1,9 +1,9 @@
 # HG changeset patch
-# Parent 1981e49cd65e2441280d2856908d7c24a501c7ab
+# Parent 6eac1b90a90ddd7fb531fd11b39f58381922f0b6
 
-diff -r 1981e49cd65e runtime/doc/eval.txt
---- a/runtime/doc/eval.txt	Tue May 14 21:06:43 2013 +0900
-+++ b/runtime/doc/eval.txt	Tue May 14 21:15:49 2013 +0900
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
 @@ -6344,6 +6344,7 @@
  dialog_gui		Compiled with GUI dialog support.
  diff			Compiled with |vimdiff| and 'diff' support.
@@ -12,10 +12,10 @@ diff -r 1981e49cd65e runtime/doc/eval.txt
  dnd			Compiled with support for the "~ register |quote_~|.
  dos16			16 bits DOS version of Vim.
  dos32			32 bits DOS (DJGPP) version of Vim.
-diff -r 1981e49cd65e runtime/doc/options.txt
---- a/runtime/doc/options.txt	Tue May 14 21:06:43 2013 +0900
-+++ b/runtime/doc/options.txt	Tue May 14 21:15:49 2013 +0900
-@@ -5555,6 +5555,77 @@
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -5552,6 +5552,77 @@
  	this option at the default "on".  Only switch it off when working with
  	old Vi scripts.
  
@@ -93,9 +93,9 @@ diff -r 1981e49cd65e runtime/doc/options.txt
  						*'report'*
  'report'		number	(default 2)
  			global
-diff -r 1981e49cd65e runtime/doc/various.txt
---- a/runtime/doc/various.txt	Tue May 14 21:06:43 2013 +0900
-+++ b/runtime/doc/various.txt	Tue May 14 21:15:49 2013 +0900
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
 @@ -320,6 +320,7 @@
  N  *+dialog_con_gui*	Support for |:confirm| with GUI and console dialog.
  N  *+diff*		|vimdiff| and 'diff'
@@ -104,9 +104,9 @@ diff -r 1981e49cd65e runtime/doc/various.txt
     *+dnd*		Support for DnD into the "~ register |quote_~|.
  B  *+emacs_tags*	|emacs-tags| files
  N  *+eval*		expression evaluation |eval.txt|
-diff -r 1981e49cd65e src/Make_cyg.mak
---- a/src/Make_cyg.mak	Tue May 14 21:06:43 2013 +0900
-+++ b/src/Make_cyg.mak	Tue May 14 21:15:49 2013 +0900
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
 @@ -8,6 +8,7 @@
  # Cygwin application use the Makefile (just like on Unix).
  #
@@ -181,9 +181,9 @@ diff -r 1981e49cd65e src/Make_cyg.mak
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r 1981e49cd65e src/Make_ming.mak
---- a/src/Make_ming.mak	Tue May 14 21:06:43 2013 +0900
-+++ b/src/Make_ming.mak	Tue May 14 21:15:49 2013 +0900
+diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+--- a/src/Make_ming.mak
++++ b/src/Make_ming.mak
 @@ -31,6 +31,8 @@
  OPTIMIZE=MAXSPEED
  # set to yes to make gvim, no for vim
@@ -193,7 +193,7 @@ diff -r 1981e49cd65e src/Make_ming.mak
  # FEATURES=[TINY | SMALL  | NORMAL | BIG | HUGE]
  # Set to TINY to make minimal version (few features).
  FEATURES=BIG
-@@ -451,6 +453,14 @@
+@@ -469,6 +471,14 @@
  endif
  endif
  
@@ -208,7 +208,7 @@ diff -r 1981e49cd65e src/Make_ming.mak
  # Only allow XPM for a GUI build.
  ifeq (yes, $(GUI))
  
-@@ -588,6 +598,14 @@
+@@ -606,6 +616,14 @@
  LIB += -lwsock32
  endif
  endif
@@ -223,7 +223,7 @@ diff -r 1981e49cd65e src/Make_ming.mak
  ifdef XPM
  # Only allow XPM for a GUI build.
  ifeq (yes, $(GUI))
-@@ -645,11 +663,7 @@
+@@ -663,11 +681,7 @@
  ifeq (yes, $(OLE))
  LIB += -loleaut32
  OBJ += $(OUTDIR)/if_ole.o
@@ -236,7 +236,7 @@ diff -r 1981e49cd65e src/Make_ming.mak
  endif
  
  ifeq (yes, $(MBYTE))
-@@ -673,6 +687,14 @@
+@@ -691,6 +705,14 @@
  DEFINES+=-DDYNAMIC_ICONV
  endif
  
@@ -251,7 +251,7 @@ diff -r 1981e49cd65e src/Make_ming.mak
  all: $(TARGET) vimrun.exe xxd/xxd.exe install.exe uninstal.exe GvimExt/gvimext.dll
  
  vimrun.exe: vimrun.c
-@@ -746,6 +768,9 @@
+@@ -764,6 +786,9 @@
  $(OUTDIR)/gui_w32.o:	gui_w32.c gui_w48.c $(INCL)
  	$(CC) -c $(CFLAGS) gui_w32.c -o $(OUTDIR)/gui_w32.o
  
@@ -261,9 +261,9 @@ diff -r 1981e49cd65e src/Make_ming.mak
  $(OUTDIR)/if_cscope.o:	if_cscope.c $(INCL) if_cscope.h
  	$(CC) -c $(CFLAGS) if_cscope.c -o $(OUTDIR)/if_cscope.o
  
-diff -r 1981e49cd65e src/Make_mvc.mak
---- a/src/Make_mvc.mak	Tue May 14 21:06:43 2013 +0900
-+++ b/src/Make_mvc.mak	Tue May 14 21:15:49 2013 +0900
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
 @@ -24,6 +24,9 @@
  #
  #	GUI interface: GUI=yes (default is no)
@@ -311,7 +311,7 @@ diff -r 1981e49cd65e src/Make_mvc.mak
  # iconv.dll library (dynamically loaded)
  !ifndef ICONV
  ICONV = yes
-@@ -1098,6 +1117,8 @@
+@@ -1085,6 +1104,8 @@
  
  $(OUTDIR)/gui_w32.obj:	$(OUTDIR) gui_w32.c gui_w48.c $(INCL) $(GUI_INCL)
  
@@ -320,10 +320,10 @@ diff -r 1981e49cd65e src/Make_mvc.mak
  $(OUTDIR)/if_cscope.obj: $(OUTDIR) if_cscope.c  $(INCL)
  
  $(OUTDIR)/if_lua.obj: $(OUTDIR) if_lua.c  $(INCL)
-diff -r 1981e49cd65e src/eval.c
---- a/src/eval.c	Tue May 14 21:06:43 2013 +0900
-+++ b/src/eval.c	Tue May 14 21:15:49 2013 +0900
-@@ -12167,6 +12167,9 @@
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -12163,6 +12163,9 @@
  #ifdef FEAT_DIGRAPHS
  	"digraphs",
  #endif
@@ -333,9 +333,10 @@ diff -r 1981e49cd65e src/eval.c
  #ifdef FEAT_DND
  	"dnd",
  #endif
-diff -r 1981e49cd65e src/gui_dwrite.cpp
---- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.cpp	Tue May 14 21:15:49 2013 +0900
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+new file mode 100644
+--- /dev/null
++++ b/src/gui_dwrite.cpp
 @@ -0,0 +1,901 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +/*
@@ -1238,9 +1239,10 @@ diff -r 1981e49cd65e src/gui_dwrite.cpp
 +    else
 +	return NULL;
 +}
-diff -r 1981e49cd65e src/gui_dwrite.h
---- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/src/gui_dwrite.h	Tue May 14 21:15:49 2013 +0900
+diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
+new file mode 100644
+--- /dev/null
++++ b/src/gui_dwrite.h
 @@ -0,0 +1,85 @@
 +/* vi:set ts=8 sts=4 sw=4 noet: */
 +/*
@@ -1327,9 +1329,9 @@ diff -r 1981e49cd65e src/gui_dwrite.h
 +}
 +#endif
 +#endif/*GUI_DWRITE_H*/
-diff -r 1981e49cd65e src/gui_w32.c
---- a/src/gui_w32.c	Tue May 14 21:06:43 2013 +0900
-+++ b/src/gui_w32.c	Tue May 14 21:15:49 2013 +0900
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
 @@ -25,6 +25,145 @@
  
  #include "vim.h"
@@ -1476,7 +1478,7 @@ diff -r 1981e49cd65e src/gui_w32.c
  /*
   * These are new in Windows ME/XP, only defined in recent compilers.
   */
-@@ -1686,6 +1825,11 @@
+@@ -1622,6 +1761,11 @@
      set_vim_var_nr(VV_WINDOWID, HandleToLong(s_hwnd));
  #endif
  
@@ -1488,7 +1490,7 @@ diff -r 1981e49cd65e src/gui_w32.c
  theend:
      /* Display any pending error messages */
      display_errors();
-@@ -2339,6 +2483,9 @@
+@@ -2235,6 +2379,9 @@
  #endif
      HPEN	hpen, old_pen;
      int		y;
@@ -1498,7 +1500,7 @@ diff -r 1981e49cd65e src/gui_w32.c
  
  #ifndef MSWIN16_FASTTEXT
      /*
-@@ -2426,6 +2573,20 @@
+@@ -2322,6 +2469,20 @@
      SetTextColor(s_hdc, gui.currFgColor);
      SelectFont(s_hdc, gui.currFont);
  
@@ -1519,7 +1521,7 @@ diff -r 1981e49cd65e src/gui_w32.c
      if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
      {
  	vim_free(padding);
-@@ -2460,6 +2621,14 @@
+@@ -2356,6 +2517,14 @@
  	    if (text[n] >= 0x80)
  		break;
  
@@ -1534,7 +1536,7 @@ diff -r 1981e49cd65e src/gui_w32.c
      /* Check if the Unicode buffer exists and is big enough.  Create it
       * with the same length as the multi-byte string, the number of wide
       * characters is always equal or smaller. */
-@@ -2518,8 +2687,17 @@
+@@ -2414,8 +2583,17 @@
  	    i += utfc_ptr2len_len(text + i, len - i);
  	    ++clen;
  	}
@@ -1554,10 +1556,10 @@ diff -r 1981e49cd65e src/gui_w32.c
  	len = cells;	/* used for underlining */
      }
      else if ((enc_codepage > 0 && (int)GetACP() != enc_codepage) || enc_latin9)
-diff -r 1981e49cd65e src/gui_w48.c
---- a/src/gui_w48.c	Tue May 14 21:06:43 2013 +0900
-+++ b/src/gui_w48.c	Tue May 14 21:15:49 2013 +0900
-@@ -2778,6 +2778,10 @@
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -2777,6 +2777,10 @@
  
  	out_flush();	    /* make sure all output has been processed */
  	(void)BeginPaint(hwnd, &ps);
@@ -1568,7 +1570,7 @@ diff -r 1981e49cd65e src/gui_w48.c
  
  #ifdef FEAT_MBYTE
  	/* prevent multi-byte characters from misprinting on an invalid
-@@ -2793,9 +2797,20 @@
+@@ -2792,9 +2796,20 @@
  #endif
  
  	if (!IsRectEmpty(&ps.rcPaint))
@@ -1589,7 +1591,7 @@ diff -r 1981e49cd65e src/gui_w48.c
  	EndPaint(hwnd, &ps);
      }
  }
-@@ -3034,6 +3049,12 @@
+@@ -3033,6 +3048,12 @@
      void
  gui_mch_exit(int rc)
  {
@@ -1602,10 +1604,10 @@ diff -r 1981e49cd65e src/gui_w48.c
      ReleaseDC(s_textArea, s_hdc);
      DeleteObject(s_brush);
  
-diff -r 1981e49cd65e src/option.c
---- a/src/option.c	Tue May 14 21:06:43 2013 +0900
-+++ b/src/option.c	Tue May 14 21:15:49 2013 +0900
-@@ -2102,6 +2102,11 @@
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -2086,6 +2086,11 @@
      {"remap",	    NULL,   P_BOOL|P_VI_DEF,
  			    (char_u *)&p_remap, PV_NONE,
  			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
@@ -1617,7 +1619,7 @@ diff -r 1981e49cd65e src/option.c
      {"report",	    NULL,   P_NUM|P_VI_DEF,
  			    (char_u *)&p_report, PV_NONE,
  			    {(char_u *)2L, (char_u *)0L} SCRIPTID_INIT},
-@@ -6998,6 +7003,16 @@
+@@ -6972,6 +6977,16 @@
      }
  #endif
  
@@ -1634,23 +1636,23 @@ diff -r 1981e49cd65e src/option.c
      /* Options that are a list of flags. */
      else
      {
-diff -r 1981e49cd65e src/option.h
---- a/src/option.h	Tue May 14 21:06:43 2013 +0900
-+++ b/src/option.h	Tue May 14 21:15:49 2013 +0900
-@@ -661,6 +661,9 @@
- EXTERN long	p_rdt;		/* 'redrawtime' */
+diff --git a/src/option.h b/src/option.h
+--- a/src/option.h
++++ b/src/option.h
+@@ -654,6 +654,9 @@
  #endif
  EXTERN int	p_remap;	/* 'remap' */
+ EXTERN long	p_re;		/* 'regexpengine' */
 +#ifdef FEAT_RENDER_OPTIONS
 +EXTERN char_u	*p_rop;		/* 'renderoptions' */
 +#endif
  EXTERN long	p_report;	/* 'report' */
  #if defined(FEAT_WINDOWS) && defined(FEAT_QUICKFIX)
  EXTERN long	p_pvh;		/* 'previewheight' */
-diff -r 1981e49cd65e src/version.c
---- a/src/version.c	Tue May 14 21:06:43 2013 +0900
-+++ b/src/version.c	Tue May 14 21:15:49 2013 +0900
-@@ -185,6 +185,13 @@
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -190,6 +190,13 @@
  #else
  	"-digraphs",
  #endif
@@ -1664,9 +1666,9 @@ diff -r 1981e49cd65e src/version.c
  #ifdef FEAT_DND
  	"+dnd",
  #else
-diff -r 1981e49cd65e src/vim.h
---- a/src/vim.h	Tue May 14 21:06:43 2013 +0900
-+++ b/src/vim.h	Tue May 14 21:15:49 2013 +0900
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
 @@ -127,6 +127,13 @@
  # endif
  #endif
