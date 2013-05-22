@@ -9,4 +9,3 @@ fix-alignment-5.patch
 python-config-dir.patch
 configure-2.patch
 fix-c-vim-spellcheck.patch
-fix-alignment-4.patch
