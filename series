@@ -11,3 +11,4 @@ direct_write-use-proto.diff
 gfw-bold-italic.patch
 cpo-N.diff
 if_perl-use-output.patch
+fix-ruby-win64.patch
