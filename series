@@ -12,4 +12,3 @@ gfw-bold-italic.patch
 cpo-N.diff
 if_perl-use-output.patch
 fix-ruby-win64.patch
-fix-test95-on-windows.patch
