@@ -1,6 +1,5 @@
 # HG changeset patch
-# Parent 54c996082422b13af75b4f4face40bfd1816dd5c
-
+# Parent 7e19cc676a2e9c44ecee4dc97e8bbe750142c977
 diff --git a/src/if_py_both.h b/src/if_py_both.h
 --- a/src/if_py_both.h
 +++ b/src/if_py_both.h
@@ -12,15 +11,4 @@ diff --git a/src/if_py_both.h b/src/if_py_both.h
 +	return NULL;
      if (!(r = PyObject_Call(_chdir, args, kwargs)))
  	return NULL;
- 
-@@ -785,8 +787,8 @@
-     {"eval",	     VimEval,			METH_VARARGS,			"Evaluate an expression using Vim evaluator" },
-     {"bindeval",     VimEvalPy,			METH_VARARGS,			"Like eval(), but returns objects attached to vim ones"},
-     {"strwidth",     VimStrwidth,		METH_VARARGS,			"Screen string width, counts <Tab> as having width 1"},
--    {"chdir",	     (PyCFunction)VimChdir,	METH_VARARGS|METH_KEYWORDS,	"Change directory"},
--    {"fchdir",	     (PyCFunction)VimFchdir,	METH_VARARGS|METH_KEYWORDS,	"Change directory"},
-+    {"chdir",	     (PyCFunction)VimChdir,	METH_VARARGS|METH_KEYWORDS,	"Change directory (Internal use only)"},
-+    {"fchdir",	     (PyCFunction)VimFchdir,	METH_VARARGS|METH_KEYWORDS,	"Change directory (Internal use only)"},
-     { NULL,	     NULL,			0,				NULL }
- };
  
