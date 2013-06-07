@@ -1,0 +1,100 @@
+# HG changeset patch
+# Parent c36924e0386be8a9d0676b674933c530a673f6e9
+
+diff --git a/runtime/autoload/zip.vim b/runtime/autoload/zip.vim
+--- a/runtime/autoload/zip.vim
++++ b/runtime/autoload/zip.vim
+@@ -1,7 +1,7 @@
+ " zip.vim: Handles browsing zipfiles
+ "            AUTOLOAD PORTION
+-" Date:		Apr 17, 2013
+-" Version:	26
++" Date:		Jun 07, 2013
++" Version:	27a	ASTRO-ONLY
+ " Maintainer:	Charles E Campbell <NdrOchip@ScampbellPfamily.AbizM-NOSPAM>
+ " License:	Vim License  (see vim's :help license)
+ " Copyright:    Copyright (C) 2005-2012 Charles E. Campbell {{{1
+@@ -19,7 +19,7 @@
+ if &cp || exists("g:loaded_zip")
+  finish
+ endif
+-let g:loaded_zip= "v26"
++let g:loaded_zip= "v27a"
+ if v:version < 702
+  echohl WarningMsg
+  echo "***warning*** this version of zip needs vim 7.2"
+@@ -60,6 +60,13 @@
+ " zip#Browse: {{{2
+ fun! zip#Browse(zipfile)
+ "  call Dfunc("zip#Browse(zipfile<".a:zipfile.">)")
++  " sanity check: insure that the zipfile has "PK" as its first two letters
++  "               (required for proper zip file format)
++  if readfile(a:zipfile, "", 1)[0] !~ '^PK'
++"   call Dret("zip#Browse : not a zipfile<".a:zipfile.">")
++   return
++  endif
++
+   let repkeep= &report
+   set report=10
+ 
+diff --git a/runtime/doc/pi_zip.txt b/runtime/doc/pi_zip.txt
+--- a/runtime/doc/pi_zip.txt
++++ b/runtime/doc/pi_zip.txt
+@@ -1,4 +1,4 @@
+-*pi_zip.txt*	For Vim version 7.3.  Last change: 2013 Apr 17
++*pi_zip.txt*	For Vim version 7.3.  Last change: 2013 Jun 07
+ 
+ 				+====================+
+ 				| Zip File Interface |
+@@ -92,7 +92,7 @@
+ 		    * (Ben Staniford) now uses
+ 			has("win32unix") && executable("cygpath")
+ 		      before converting to cygwin-style paths
+-   v24 Jun 21, 2010 * (Cédric Bosdonnat) unzip seems to need its filenames
++   v24 Jun 21, 2010 * (Cedric Bosdonnat) unzip seems to need its filenames
+ 		      fnameescape'd as well as shellquote'd
+ 		    * (Motoya Kurotsu) inserted keepj before 0d to protect
+ 		      jump list
+diff --git a/runtime/plugin/zipPlugin.vim b/runtime/plugin/zipPlugin.vim
+--- a/runtime/plugin/zipPlugin.vim
++++ b/runtime/plugin/zipPlugin.vim
+@@ -1,9 +1,9 @@
+ " zipPlugin.vim: Handles browsing zipfiles
+ "            PLUGIN PORTION
+-" Date:			Nov 15, 2012
++" Date:			Jun 07, 2013
+ " Maintainer:	Charles E Campbell <NdrOchip@ScampbellPfamily.AbizM-NOSPAM>
+ " License:		Vim License  (see vim's :help license)
+-" Copyright:    Copyright (C) 2005-2012 Charles E. Campbell {{{1
++" Copyright:    Copyright (C) 2005-2013 Charles E. Campbell {{{1
+ "               Permission is hereby granted to use and distribute this code,
+ "               with or without modifications, provided that this copyright
+ "               notice is copied with it. Like anything else that's free,
+@@ -20,11 +20,17 @@
+ if &cp || exists("g:loaded_zipPlugin")
+  finish
+ endif
+-let g:loaded_zipPlugin = "v26"
++let g:loaded_zipPlugin = "v27a"
+ let s:keepcpo          = &cpo
+ set cpo&vim
+ 
+ " ---------------------------------------------------------------------
++" Options: {{{1
++if !exists("g:zipPlugin_ext")
++ let g:zipPlugin_ext= '*.zip,*.jar,*.xpi,*.ja,*.war,*.ear,*.celzip,*.oxt,*.kmz,*.wsz,*.xap,*.docx,*.docm,*.dotx,*.dotm,*.potx,*.potm,*.ppsx,*.ppsm,*.pptx,*.pptm,*.ppam,*.sldx,*.thmx,*.xlam,*.xlsx,*.xlsm,*.xlsb,*.xltx,*.xltm,*.xlam,*.crtx,*.vdw,*.glox,*.gcsx,*.gqsx'
++endif
++
++" ---------------------------------------------------------------------
+ " Public Interface: {{{1
+ augroup zip
+  au!
+@@ -40,7 +46,7 @@
+   au FileWriteCmd zipfile:*/*	call zip#Write(expand("<amatch>"))
+  endif
+ 
+- au BufReadCmd   *.zip,*.jar,*.xpi,*.ja,*.war,*.ear,*.celzip,*.oxt,*.kmz,*.wsz,*.xap,*.docx,*.docm,*.dotx,*.dotm,*.potx,*.potm,*.ppsx,*.ppsm,*.pptx,*.pptm,*.ppam,*.sldx,*.thmx,*.xlam,*.xlsx,*.xlsm,*.xlsb,*.xltx,*.xltm,*.xlam,*.crtx,*.vdw,*.glox,*.gcsx,*.gqsx		call zip#Browse(expand("<amatch>"))
++ exe "au BufReadCmd ".g:zipPlugin_ext.' call zip#Browse(expand("<amatch>"))'
+ augroup END
+ 
+ " ---------------------------------------------------------------------
