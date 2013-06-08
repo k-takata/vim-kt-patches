@@ -1,0 +1,45 @@
+# HG changeset patch
+# Parent 0fd78aabd17463c89ad23169dbf53d46d25d94e7
+
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -1631,7 +1631,37 @@
+ #ifdef FEAT_PROPORTIONAL_FONTS
+     SIZE	sz;
+ #endif
+-
++#if defined(FEAT_MBYTE) && !defined(WIN16)
++    WCHAR	*wp = NULL;
++    int		wlen = len;
++
++    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
++    {
++	wp = enc_to_utf16(p, &wlen);
++    }
++    if (wp != NULL)
++    {
++	int ret;
++
++	TextOutW(prt_dlg.hDC, prt_pos_x + prt_left_margin,
++					 prt_pos_y + prt_top_margin, wp, wlen);
++# ifndef FEAT_PROPORTIONAL_FONTS
++	prt_pos_x += wlen * prt_tm.tmAveCharWidth;
++	ret = (prt_pos_x + prt_left_margin + prt_tm.tmAveCharWidth
++				     + prt_tm.tmOverhang > prt_right_margin);
++# else
++	GetTextExtentPoint32W(prt_dlg.hDC, wp, wlen, &sz);
++	prt_pos_x += (sz.cx - prt_tm.tmOverhang);
++	/* This is wrong when printing spaces for a TAB. */
++	if (wp[wlen] == NUL)
++	    return FALSE;
++	GetTextExtentPoint32W(prt_dlg.hDC, wp + wlen, 1, &sz);
++	ret = (prt_pos_x + prt_left_margin + sz.cx > prt_right_margin);
++# endif
++	vim_free(wp);
++	return ret;
++    }
++#endif
+     TextOut(prt_dlg.hDC, prt_pos_x + prt_left_margin,
+ 					  prt_pos_y + prt_top_margin, p, len);
+ #ifndef FEAT_PROPORTIONAL_FONTS
