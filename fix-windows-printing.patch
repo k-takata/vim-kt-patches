@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 2a67b8b9742b069c30fdba313c498aeff6673688
+# Parent 799702aeb1f88597f05e393e416e440e2fd258c0
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -1628,10 +1628,39 @@
+@@ -1628,10 +1628,40 @@
      int
  mch_print_text_out(char_u *p, int len)
  {
@@ -23,23 +23,24 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +    }
 +    if (wp != NULL)
 +    {
-+	int ret;
++	int ret = FALSE;
 +
 +	TextOutW(prt_dlg.hDC, prt_pos_x + prt_left_margin,
 +					 prt_pos_y + prt_top_margin, wp, wlen);
 +	GetTextExtentPoint32W(prt_dlg.hDC, wp, wlen, &sz);
++	vim_free(wp);
 +	prt_pos_x += (sz.cx - prt_tm.tmOverhang);
 +	/* This is wrong when printing spaces for a TAB. */
-+	if (wp[wlen] == NUL)
++	if (p[len] != NUL)
 +	{
-+	    ret = FALSE;
++	    wp = enc_to_utf16(p + len, NULL);
++	    if (wp != NULL)
++	    {
++		GetTextExtentPoint32W(prt_dlg.hDC, wp, 1, &sz);
++		ret = (prt_pos_x + prt_left_margin + sz.cx > prt_right_margin);
++		vim_free(wp);
++	    }
 +	}
-+	else
-+	{
-+	    GetTextExtentPoint32W(prt_dlg.hDC, wp + wlen, 1, &sz);
-+	    ret = (prt_pos_x + prt_left_margin + sz.cx > prt_right_margin);
-+	}
-+	vim_free(wp);
 +	return ret;
 +    }
 +#endif
