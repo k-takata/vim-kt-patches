@@ -1,5 +1,4 @@
 merge-Make_cyg-into-Make_ming.patch
-symlinkfix-update.diff
 acl-fix.patch
 acl-mingw.patch
 0000-kaoriya_marks.diff
