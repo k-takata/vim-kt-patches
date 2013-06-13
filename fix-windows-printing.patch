@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 799702aeb1f88597f05e393e416e440e2fd258c0
+# Parent 6572850f51b524317b12f88afb8fec943a905526
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -1628,10 +1628,40 @@
+@@ -1628,10 +1628,41 @@
      int
  mch_print_text_out(char_u *p, int len)
  {
@@ -33,7 +33,8 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +	/* This is wrong when printing spaces for a TAB. */
 +	if (p[len] != NUL)
 +	{
-+	    wp = enc_to_utf16(p + len, NULL);
++	    wlen = MB_PTR2LEN(p + len);
++	    wp = enc_to_utf16(p + len, &wlen);
 +	    if (wp != NULL)
 +	    {
 +		GetTextExtentPoint32W(prt_dlg.hDC, wp, 1, &sz);
