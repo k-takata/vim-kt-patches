@@ -1,5 +1,6 @@
 # HG changeset patch
-# Parent cf0dbf40eaea8bbfa6cc2d45597ab70d8c76eba9
+# Parent 7f8532ea34c7d59db270a883fe55e1126eed16c6
+
 diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
 --- a/src/Make_bc5.mak
 +++ b/src/Make_bc5.mak
@@ -10,7 +11,7 @@ diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
 -	    $(PERL)\lib\ExtUtils\typemap if_perl.xs > $@
 +	    $(PERL)\lib\ExtUtils\typemap if_perl.xs -output $@
  
- $(OBJDIR)\if_python.obj: if_python.c python.lib
+ $(OBJDIR)\if_python.obj: if_python.c if_py_both.h python.lib
  	$(CC) -I$(PYTHON)\include $(CCARG) $(CC1) $(CC2)$@ -pc if_python.c
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 --- a/src/Make_cyg.mak
@@ -39,7 +40,7 @@ diff --git a/src/Make_ming.mak b/src/Make_ming.mak
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1110,7 +1110,7 @@
+@@ -1120,7 +1120,7 @@
  
  if_perl.c : if_perl.xs typemap
  	$(XSUBPP) -prototypes -typemap $(XSUBPP_TYPEMAP) \
