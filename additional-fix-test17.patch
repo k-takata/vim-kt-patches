@@ -1,0 +1,30 @@
+# HG changeset patch
+# Parent a13a5ff3d5e9e1543522eea4ddec8edcb4bc4639
+diff --git a/src/testdir/test17.in b/src/testdir/test17.in
+--- a/src/testdir/test17.in
++++ b/src/testdir/test17.in
+@@ -111,19 +111,24 @@
+ :endfunction
+ :let &includeexpr='StripNewlineChar()'
+ :e! Xdir1/dir2/foo.c
++:set ff=unix
+ i%inc   bar.c
+ :w
+ :e Xdir1/dir2/bar.c
++:set ff=unix
+ i%inc      baz.c
+ :w
+ :e Xdir1/dir2/baz.c
++:set ff=unix
+ i%inc            foo.c
+ :w
+ :e Xdir1/dir2/FALSE.c
++:set ff=unix
+ i%inc            foo.c
+ :w
+ :e Xbase.c
+ :set path=Xdir1/dir2
++:set ff=unix
+ i%inc    FALSE.c foo.c
+ :w
+ :redir! >>test.out
