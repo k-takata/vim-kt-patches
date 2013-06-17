@@ -14,3 +14,4 @@ fix-ruby-win64.patch
 fix-test17.patch
 additional-fix-test17.patch
 fix-test71.patch
+update-make_dos.patch
