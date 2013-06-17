@@ -1,11 +1,12 @@
 # HG changeset patch
-# Parent 9414f2dda0d48da2ed34b7e2ffed5fae20a11e28
+# Parent 5212123bc6731bd9b37e5382bd6641bdb8ec9ed4
+
 diff --git a/src/testdir/test17.in b/src/testdir/test17.in
 --- a/src/testdir/test17.in
 +++ b/src/testdir/test17.in
-@@ -20,6 +20,13 @@
- :endif
- /TDIR
+@@ -9,6 +9,13 @@
+ :else
+ : set isfname=@,48-57,/,.,-,_,+,,,$,:,~,{,}
  :endif
 +:function! DeleteDirectory(dir)
 +: if has("win16") || has("win32") || has("win64") || has("dos16") || has("dos32")
@@ -14,24 +15,38 @@ diff --git a/src/testdir/test17.in b/src/testdir/test17.in
 +:  exec "silent !rm -rf " . a:dir
 +: endif
 +:endfun
+ :if has("unix")
+ :let $CDIR = "."
+ /CDIR
+@@ -20,6 +27,11 @@
+ :endif
+ /TDIR
+ :endif
++:" Dummy writing for making that sure gf doesn't fail even if the current
++:" file is modified. It can be occurred when executing the following command
++:" directly on Windows without fixing the 'fileformat':
++:"  > nmake -f Make_dos.mak test17.out
++:w! test.out
  gf
  :w! test.out
  :brewind
-@@ -31,9 +38,10 @@
+@@ -31,10 +43,11 @@
  STARTTEST
  :" check for 'include' without \zs or \ze
  :lang C
 -:!rm -f ./Xbase.a
 -:!rm -rf ./Xdir1
 -:!mkdir -p Xdir1/dir2
+-:e Xdir1/dir2/foo.a
 +:call delete("./Xbase.a")
 +:call DeleteDirectory("Xdir1")
 +:!mkdir Xdir1
 +:!mkdir "Xdir1/dir2"
- :e Xdir1/dir2/foo.a
++:e! Xdir1/dir2/foo.a
  i#include   "bar.a"
  :w
-@@ -55,9 +63,10 @@
+ :e Xdir1/dir2/bar.a
+@@ -55,15 +68,16 @@
  
  STARTTEST
  :" check for 'include' with \zs and \ze
@@ -45,7 +60,14 @@ diff --git a/src/testdir/test17.in b/src/testdir/test17.in
  :let &include='^\s*%inc\s*/\zs[^/]\+\ze'
  :function! DotsToSlashes()
  :  return substitute(v:fname, '\.', '/', 'g') . '.b'
-@@ -84,9 +93,10 @@
+ :endfunction
+ :let &includeexpr='DotsToSlashes()'
+-:e Xdir1/dir2/foo.b
++:e! Xdir1/dir2/foo.b
+ i%inc   /bar/
+ :w
+ :e Xdir1/dir2/bar.b
+@@ -84,9 +98,10 @@
  
  STARTTEST
  :" check for 'include' with \zs and no \ze
@@ -59,7 +81,16 @@ diff --git a/src/testdir/test17.in b/src/testdir/test17.in
  :let &include='^\s*%inc\s*\%([[:upper:]][^[:space:]]*\s\+\)\?\zs\S\+\ze'
  :function! StripNewlineChar()
  :  if v:fname =~ '\n$'
-@@ -115,6 +125,10 @@
+@@ -95,7 +110,7 @@
+ :  return v:fname
+ :endfunction
+ :let &includeexpr='StripNewlineChar()'
+-:e Xdir1/dir2/foo.c
++:e! Xdir1/dir2/foo.c
+ i%inc   bar.c
+ :w
+ :e Xdir1/dir2/bar.c
+@@ -115,6 +130,10 @@
  :checkpath!
  :redir END
  :brewind
