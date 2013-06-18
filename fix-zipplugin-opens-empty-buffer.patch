@@ -1,0 +1,19 @@
+# HG changeset patch
+# Parent 12ddb0f8f4dca32098e2aa3d923945bdcd2ac0b7
+
+diff --git a/runtime/autoload/zip.vim b/runtime/autoload/zip.vim
+--- a/runtime/autoload/zip.vim
++++ b/runtime/autoload/zip.vim
+@@ -63,6 +63,12 @@
+   " sanity check: insure that the zipfile has "PK" as its first two letters
+   "               (required for proper zip file format)
+   if readfile(a:zipfile, "", 1)[0] !~ '^PK'
++   keepj sil! %d
++   let eikeep= &ei
++   set ei=BufReadCmd,FileReadCmd
++   exe "keepj r ".fnameescape(a:zipfile)
++   let &ei= eikeep
++   keepj 1d
+ "   call Dret("zip#Browse : not a zipfile<".a:zipfile.">")
+    return
+   endif
