@@ -1,0 +1,97 @@
+# HG changeset patch
+# Parent a16c8b418a38ae1f5781f722aad4c944eb74ec9c
+* use #ifdef instead of #if defined()
+* use tab
+* remove trailing space
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -25,11 +25,11 @@
+ 
+ #include "vim.h"
+ 
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+ # include "gui_dwrite.h"
+ #endif
+ 
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+ static DWriteContext *s_dwc = NULL;
+ static int s_directx_enabled = 0;
+ static int s_directx_load_attempted = 0;
+@@ -74,7 +74,7 @@
+ 	char_u  name[128];
+ 	char_u  value[128];
+ 
+-	copy_option_part(&p, item, sizeof(item), ","); 
++	copy_option_part(&p, item, sizeof(item), ",");
+ 	if (p == NULL)
+ 	    break;
+ 	q = &item[0];
+@@ -2517,7 +2517,7 @@
+ 	    if (text[n] >= 0x80)
+ 		break;
+ 
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+     /* Quick hack to enable DirectWrite.  To use DirectWrite (antialias), it is
+      * required that unicode drawing routine, currently.  So this forces it
+      * enabled. */
+@@ -2583,14 +2583,14 @@
+ 	    i += utfc_ptr2len_len(text + i, len - i);
+ 	    ++clen;
+ 	}
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+ 	if (IS_ENABLE_DIRECTX() && font_is_ttf_or_vector)
+ 	{
+ 	    DWriteContext_DrawText(s_dwc, s_hdc, unicodebuf, wlen,
+ 		    TEXT_X(col), TEXT_Y(row), FILL_X(cells), FILL_Y(1),
+ 		    gui.char_width, gui.currFgColor);
+ 	}
+-        else
++	else
+ #endif
+ 	    ExtTextOutW(s_hdc, TEXT_X(col), TEXT_Y(row),
+ 		    foptions, pcliprect, unicodebuf, wlen, unicodepdy);
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -2777,7 +2777,7 @@
+ 
+ 	out_flush();	    /* make sure all output has been processed */
+ 	(void)BeginPaint(hwnd, &ps);
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+ 	if (IS_ENABLE_DIRECTX())
+ 	    DWriteContext_BeginDraw(s_dwc);
+ #endif
+@@ -2797,7 +2797,7 @@
+ 
+ 	if (!IsRectEmpty(&ps.rcPaint))
+ 	{
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+ 	    if (IS_ENABLE_DIRECTX())
+ 		DWriteContext_BindDC(s_dwc, s_hdc, &ps.rcPaint);
+ #endif
+@@ -2806,7 +2806,7 @@
+ 		    ps.rcPaint.bottom - ps.rcPaint.top + 1);
+ 	}
+ 
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+ 	if (IS_ENABLE_DIRECTX())
+ 	    DWriteContext_EndDraw(s_dwc);
+ #endif
+@@ -3048,7 +3048,7 @@
+     void
+ gui_mch_exit(int rc)
+ {
+-#if defined(FEAT_DIRECTX)
++#ifdef FEAT_DIRECTX
+     DWriteContext_Close(s_dwc);
+     DWrite_Final();
+     s_dwc = NULL;
