@@ -9,5 +9,5 @@ direct_write-use-ifdef-consistently.patch
 cpo-N.diff
 if_perl-use-output.patch
 fix-ruby-win64.patch
-test71-set-enc-latin1.patch
+fix-test71.patch
 additional-fix-test17.patch
