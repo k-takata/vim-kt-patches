@@ -6,7 +6,7 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
     may crash Vim though.
  
 +							*E880*
-+Raising SystemExit exception in python isn't endosed way to quit vim, use: >
++Raising SystemExit exception in python isn't endorsed way to quit vim, use: >
 +	:py vim.command("qall!")
 +<
 +
