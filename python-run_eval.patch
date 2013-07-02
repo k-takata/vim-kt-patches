@@ -1,0 +1,27 @@
+# HG changeset patch
+# Parent cdb9fea3024e40cd7f126fbcac058aa73361b987
+diff --git a/src/if_py_both.h b/src/if_py_both.h
+--- a/src/if_py_both.h
++++ b/src/if_py_both.h
+@@ -5103,14 +5103,17 @@
+     run_ret = PyRun_String((char *)cmd, Py_eval_input, globals, globals);
+     if (run_ret == NULL)
+     {
+-	if (PyErr_ExceptionMatches(PyExc_SystemExit))
++	if (PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_SystemExit))
+ 	{
+ 	    EMSG2(_(e_py_systemexit), "python");
+ 	    PyErr_Clear();
+ 	}
+-	if (PyErr_Occurred() && !msg_silent)
+-	    PyErr_PrintEx(0);
+-	EMSG(_("E858: Eval did not return a valid python object"));
++	else
++	{
++	    if (PyErr_Occurred() && !msg_silent)
++		PyErr_PrintEx(0);
++	    EMSG(_("E858: Eval did not return a valid python object"));
++	}
+     }
+     else
+     {
