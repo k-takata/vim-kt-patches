@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent 64bc52351bf4f78c6130a2e8262f0422f7cfab9d
+diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
+--- a/nsis/gvim.nsi
++++ b/nsis/gvim.nsi
+@@ -56,6 +56,9 @@
+   !packhdr temp.dat "upx --best --compress-icons=1 temp.dat"
+ !endif
+ 
++SetCompressor /SOLID lzma
++XPStyle on
++
+ # This adds '\vim' to the user choice automagically.  The actual value is
+ # obtained below with ReadINIStr.
+ InstallDir "$PROGRAMFILES\Vim"
