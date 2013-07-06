@@ -9,5 +9,6 @@ direct_write-use-proto.diff
 direct_write-use-ifdef-consistently.patch
 cpo-N.diff
 if_perl-use-output.patch
+improve_dos_test.diff
 restoreff.patch
 python-run_eval.patch
