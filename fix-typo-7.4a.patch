@@ -1,0 +1,59 @@
+# HG changeset patch
+# Parent c8d91586347a5bf4e946f09a2e1625ed80ad69e0
+diff --git a/runtime/doc/version7.txt b/runtime/doc/version7.txt
+--- a/runtime/doc/version7.txt
++++ b/runtime/doc/version7.txt
+@@ -15864,7 +15864,7 @@
+ Files:	    src/regexp_nfa.c, src/testdir/test95.in, src/testdir/test95.ok
+ 
+ Patch 7.3.983
+-Problem:    Uneccessary temp variable.
++Problem:    Unnecessary temp variable.
+ Solution:   Remove the variable.
+ Files:	    src/regexp_nfa.c
+ 
+@@ -16018,7 +16018,7 @@
+ Patch 7.3.1010
+ Problem:    New regexp: adding \Z makes every character match.
+ Solution:   Only apply ireg_icombine for composing characters.
+-	    Alsl add missing change from patch 1008. (Ken Takata)
++	    Also add missing change from patch 1008. (Ken Takata)
+ Files:	    src/regexp_nfa.c, src/testdir/test95.in, src/testdir/test95.ok
+ 
+ Patch 7.3.1011
+@@ -16108,7 +16108,7 @@
+ Files:	    src/regexp_nfa.c, src/testdir/test64.in, src/testdir/test64.ok
+ 
+ Patch 7.3.1026
+-Problem:    New regexp: pattern that includs a new-line matches too early.
++Problem:    New regexp: pattern that includes a new-line matches too early.
+ 	    (john McGowan)
+ Solution:   Do not start searching in the second line.
+ Files:	    src/regexp_nfa.c, src/testdir/test64.in, src/testdir/test64.ok
+@@ -17057,7 +17057,7 @@
+ Files:	    src/regexp_nfa.c
+ 
+ Patch 7.3.1195
+-Problem:    Compiler warning for unitialized variable. (Tony Mechelynck)
++Problem:    Compiler warning for uninitialized variable. (Tony Mechelynck)
+ Solution:   Set the length to the matching backref.
+ Files:	    src/regexp.c
+ 
+@@ -17206,7 +17206,7 @@
+ Problem:    When build flags change "make distclean" run into a configure
+ 	    error.
+ Solution:   When CFLAGS changes delete auto/config.cache.  Also avoid adding
+-	    duplicate text to flags.
++	    duplicate text to flags. (Ken Takata)
+ Files:	    src/Makefile, src/configure.in, src/auto/configure
+ 
+ Patch 7.3.1222
+@@ -17621,7 +17621,7 @@
+ Files:	    src/screen.c
+ 
+ Patch 7.3.1292
+-Problem:    Possibly using invalid pointer when searcing for window. (Raichoo)
++Problem:    Possibly using invalid pointer when searching for window. (Raichoo)
+ Solution:   Use "firstwin" instead of "tp_firstwin" for current tab.
+ Files:	    src/window.c
+ 
