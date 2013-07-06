@@ -2,4 +2,3 @@ myconfiguration-for-cygwin.patch
 myconfiguration-for-linux-gui.patch #+linux-gui
 version_acl_xpm.patch
 backout-7.3.638.patch
-fix-alignment-5.patch
