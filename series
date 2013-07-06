@@ -1,3 +1,4 @@
+fix-python-win64-mingw.patch
 merge-Make_cyg-into-Make_ming.patch
 0000-kaoriya_marks.diff
 2005-ambiwidth_auto.diff
@@ -8,6 +9,5 @@ direct_write-use-proto.diff
 direct_write-use-ifdef-consistently.patch
 cpo-N.diff
 if_perl-use-output.patch
-fix-ruby-win64.patch
 restoreff.patch
 python-run_eval.patch
