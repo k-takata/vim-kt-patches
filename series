@@ -1,4 +1,3 @@
-fix-python-win64-mingw.patch
 merge-Make_cyg-into-Make_ming.patch
 0000-kaoriya_marks.diff
 2005-ambiwidth_auto.diff
