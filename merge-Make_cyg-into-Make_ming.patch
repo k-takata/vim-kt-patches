@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 8b86b69546a9ea9309ebf7d05e1d443457cd58d8
+# Parent 1e1d6c9607d2521bbaa59f1f1e2bbd7fc0052baa
 
 diff --git a/src/Make_cyg_new.mak b/src/Make_cyg_new.mak
 new file mode 100644
@@ -66,8 +66,8 @@ diff --git a/src/Make_ming.mak b/src/Make_ming.mak
  else
  XSUBPP=xsubpp
  endif
-@@ -322,13 +329,17 @@
- 	-DHAVE_PATHDEF -DFEAT_$(FEATURES)
+@@ -333,13 +340,17 @@
+ endif
  ifeq ($(CROSS),yes)
  # cross-compiler prefix:
 +ifndef CROSS_COMPILE
@@ -84,7 +84,7 @@ diff --git a/src/Make_ming.mak b/src/Make_ming.mak
  ifneq (sh.exe, $(SHELL))
  DEL = rm
  MKDIR = mkdir -p
-@@ -339,7 +350,10 @@
+@@ -350,7 +361,10 @@
  DIRSLASH = \\
  endif
  endif
@@ -95,7 +95,7 @@ diff --git a/src/Make_ming.mak b/src/Make_ming.mak
  WINDRES := $(CROSS_COMPILE)windres
  WINDRES_CC = $(CC)
  
-@@ -395,6 +409,10 @@
+@@ -406,6 +420,10 @@
  CFLAGS += -DDYNAMIC_RUBY -DDYNAMIC_RUBY_DLL=\"$(RUBY_INSTALL_NAME).dll\"
  CFLAGS += -DDYNAMIC_RUBY_VER=$(RUBY_VER)
  endif
@@ -106,7 +106,7 @@ diff --git a/src/Make_ming.mak b/src/Make_ming.mak
  endif
  
  ifdef PYTHON
-@@ -687,10 +705,10 @@
+@@ -699,10 +717,10 @@
  	mpress vim.exe
  
  xxd/xxd.exe: xxd/xxd.c
@@ -119,7 +119,7 @@ diff --git a/src/Make_ming.mak b/src/Make_ming.mak
  
  clean:
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.o
-@@ -751,7 +769,7 @@
+@@ -763,7 +781,7 @@
  
  if_perl.c: if_perl.xs typemap
  	$(XSUBPP) -prototypes -typemap \
