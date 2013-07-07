@@ -1,9 +1,48 @@
 # HG changeset patch
-# Parent f31131101d618b54f713604888b21ece0a1c1727
+# Parent 0b855debb1de2e7e38259d0bc0f4230ae944c954
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -6334,6 +6334,7 @@
+ <   Note that it's possible for patch 147 to be omitted even though 148 is
+     included.
+ 
++acl			Compiled with |ACL| support.
+ all_builtin_terms	Compiled with all builtin terminals enabled.
+ amiga			Amiga version of Vim.
+ arabic			Compiled with Arabic support |Arabic|.
+@@ -6500,6 +6501,7 @@
+ writebackup		Compiled with 'writebackup' default on.
+ xfontset		Compiled with X fontset support |xfontset|.
+ xim			Compiled with X input method support |xim|.
++xpm			Compiled with pixmap support.
+ xpm_w32			Compiled with pixmap support for Win32.
+ xsmp			Compiled with X session management support.
+ xsmp_interact		Compiled with interactive X session management support.
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -291,6 +291,7 @@
+ 			in the normal, big and huge versions of Vim.
+ 
+ 							*+feature-list*
++   *+acl*		|ACL| support included
+    *+ARP*		Amiga only: ARP support included
+ B  *+arabic*		|Arabic| language support
+ N  *+autocmd*		|:autocmd|, automatic commands
+@@ -426,6 +427,7 @@
+ m  *+writebackup*	|'writebackup'| is default on
+ m  *+xim*		X input method |xim|
+    *+xfontset*		X fontset support |xfontset|
++   *+xpm*		pixmap support
+ m  *+xpm_w32*		Win32 GUI only: pixmap support |w32-xpm-support|
+    *+xsmp*		XSMP (X session management) support
+    *+xsmp_interact*	interactive XSMP (X session management) support
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12065,6 +12065,9 @@
+@@ -12135,6 +12135,9 @@
  #ifndef CASE_INSENSITIVE_FILENAME
  	"fname_case",
  #endif
@@ -13,9 +52,11 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_ARABIC
  	"arabic",
  #endif
-@@ -12469,6 +12472,8 @@
+@@ -12538,7 +12541,10 @@
+ 	"xfontset",
  #endif
  #ifdef FEAT_XPM_W32
++	"xpm",
  	"xpm_w32",
 +#elif defined(HAVE_XPM)
 +	"xpm",
@@ -25,7 +66,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/version.c b/src/version.c
 --- a/src/version.c
 +++ b/src/version.c
-@@ -58,6 +58,11 @@
+@@ -61,6 +61,11 @@
  
  static char *(features[]) =
  {
@@ -37,7 +78,7 @@ diff --git a/src/version.c b/src/version.c
  #ifdef AMIGA		/* only for Amiga systems */
  # ifdef FEAT_ARP
  	"+ARP",
-@@ -719,6 +724,12 @@
+@@ -722,6 +727,12 @@
  # else
  	"-xpm_w32",
  # endif
