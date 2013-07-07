@@ -1,0 +1,162 @@
+diff --git a/runtime/doc/version7.txt b/runtime/doc/version7.txt
+--- a/runtime/doc/version7.txt
++++ b/runtime/doc/version7.txt
+@@ -5994,7 +5994,7 @@
+ Files:	    src/ex_cmds2.c, src/ex_docmd.c
+ 
+ Patch 7.1.201
+-Problem:    When reading stdin 'fenc' and 'ff are not set.
++Problem:    When reading stdin 'fenc' and 'ff' are not set.
+ Solution:   Set the options after reading stdin. (Ben Schmidt)
+ Files:	    src/fileio.c
+ 
+@@ -8787,7 +8787,7 @@
+ Files:	    src/getchar.c
+ 
+ Patch 7.2.231
+-Problem:    Warning for unreacheable code.
++Problem:    Warning for unreachable code.
+ Solution:   Add #ifdef.
+ Files:	    src/if_perl.xs
+ 
+@@ -10656,7 +10656,7 @@
+ 
+ Patch 7.3.078
+ Problem:    Warning for unused variable.
+-Solution:   Adjuste #ifdefs.
++Solution:   Adjust #ifdefs.
+ Files:	    src/ops.c
+ 
+ Patch 7.3.079
+@@ -10756,7 +10756,7 @@
+ Files:	    src/menu.c
+ 
+ Patch 7.3.096
+-Problem:    "gvim -nb" is not interruptable.  Leaking file descriptor on
++Problem:    "gvim -nb" is not interruptible.  Leaking file descriptor on
+ 	    netbeans connection error.
+ Solution:   Check for CTRL-C typed.  Free file descriptor.  (Xavier de Gaye)
+ Files:	    src/netbeans.c
+@@ -11068,7 +11068,7 @@
+ Patch 7.3.149
+ Problem:    The cursor disappears after the processing of the 'setDot'
+ 	    netbeans command when vim runs in a terminal.
+-Solution:   Show the cursor after a screen update. (Xavier de Gaye, 2011
++Solution:   Show the cursor after a screen update. (Xavier de Gaye)
+ Files:	    src/netbeans.c
+ 
+ Patch 7.3.150
+@@ -11249,7 +11249,7 @@
+ 
+ Patch 7.3.180
+ Problem:    When both a middle part of 'comments' matches and an end part, the
+-	    middle part was used errornously.
++	    middle part was used erroneously.
+ Solution:   After finding the middle part match continue looking for a better
+ 	    end part match. (partly by Lech Lorens)
+ Files:	    src/misc1.c, src/testdir/test3.in, src/testdir/test3.ok
+@@ -11483,7 +11483,7 @@
+ 	    so 'except' or 'raise' it causes a 'SystemError' exception.
+ 	    Buffer objects do not support slice assignment.
+ 	    When exchanging text between Vim and Python, multibyte texts become
+-	    gabage or cause Unicode Exceptions, etc.
++	    garbage or cause Unicode Exceptions, etc.
+ 	    'py3file' tries to read in the file as Unicode, sometimes causes
+ 	    UnicodeDecodeException
+ Solution:   Fix the problems. (lilydjwg)
+@@ -12679,7 +12679,7 @@
+ 
+ Patch 7.3.429
+ Problem:    When 'cpoptions' includes "E" "c0" in the first column is an
+-	    error. The redo register is then set to the errornous command.
++	    error. The redo register is then set to the erroneous command.
+ Solution:   Do not set the redo register if the command fails because of an
+ 	    empty region. (Hideki Eiraku)
+ Files:	    src/getchar.c, src/normal.c, src/proto/getchar.pro
+@@ -12923,7 +12923,7 @@
+ Patch 7.3.472
+ Problem:    Crash when using ":redraw" in a BufEnter autocommand and
+ 	    switching to another tab. (驼峰)
+-Solution:   Move triggering the the autocommands to after correcting the
++Solution:   Move triggering the autocommands to after correcting the
+ 	    option values. Also check the row value to be out of bounds.
+ 	    (Christian Brabandt, Sergey Khorev)
+ Files:	    src/screen.c, src/window.c
+@@ -13049,7 +13049,7 @@
+ 
+ Patch 7.3.492
+ Problem:    Can't indent conditions separately from function arguments.
+-Solution:   Add the 'k' flag in 'cino. (Lech Lorens)
++Solution:   Add the 'k' flag in 'cino'. (Lech Lorens)
+ Files:	    runtime/doc/indent.txt, src/misc1.c, src/testdir/test3.in,
+ 	    src/testdir/test3.ok
+ 
+@@ -13639,7 +13639,7 @@
+ Patch 7.3.597
+ Problem:    'clipboard' "autoselect" only applies to the * register. (Sergey
+ 	    Vakulenko)
+-Solution:   Make 'autoselect' work for the + register. (Christian Brabant)
++Solution:   Make 'autoselect' work for the + register. (Christian Brabandt)
+ 	    Add the "autoselectplus" option in 'clipboard' and the "P" flag in
+ 	    'guioptions'.
+ Files:	    runtime/doc/options.txt, src/normal.c, src/ops.c, src/screen.c,
+@@ -14532,7 +14532,7 @@
+ Problem:    A location list can get a wrong count in :lvimgrep.
+ Solution:   Check if the list was changed by autocommands. (mostly by
+ 	    Christian Brabandt)
+-Files:	    src/quickfic.c
++Files:	    src/quickfix.c
+ 
+ Patch 7.3.757
+ Problem:    Issue 96: May access freed memory when a put command triggers
+@@ -14731,7 +14731,7 @@
+ Files:	    src/ex_cmds.c
+ 
+ Patch 7.3.793 (after 7.3.792)
+-Problem:    New interactive :substutite behavior is not tested.
++Problem:    New interactive :substitute behavior is not tested.
+ Solution:   Add tests. (Christian Brabandt)
+ Files:	    src/testdir/test80.in, src/testdir/test80.ok
+ 
+@@ -14827,7 +14827,7 @@
+ Files:	    src/dosinst.c
+ 
+ Patch 7.3.810
+-Problem:    'relativenumber is reset unexpectedly. (François Ingelrest)
++Problem:    'relativenumber' is reset unexpectedly. (François Ingelrest)
+ Solution:   After an option was reset also reset the global value. Add a test.
+ 	    (Christian Brabandt)
+ Files:	    src/option.c, src/testdir/Make_amiga.mak,
+@@ -15774,7 +15774,7 @@
+ Files:	    src/feature.h
+ 
+ Patch 7.3.969
+-Problem:    Can't built with Python 3 and without Python 2.
++Problem:    Can't build with Python 3 and without Python 2.
+ Solution:   Adjust #ifdef. (Xavier de Gaye)
+ Files:	    src/window.c
+ 
+@@ -16822,12 +16822,12 @@
+ 
+ Patch 7.3.1153
+ Problem:    New regexp engine: Some look-behind matches are very expensive.
+-Solution:   Pospone invisible matches further, until a match is almost found.
++Solution:   Postpone invisible matches further, until a match is almost found.
+ Files:	    src/regexp_nfa.c
+ 
+ Patch 7.3.1154
+ Problem:    New regexp_nfa engine: Unnecessary code.
+-Solution:   Remove uneccessary code.
++Solution:   Remove unnecessary code.
+ Files:	    src/regexp_nfa.c
+ 
+ Patch 7.3.1155
+@@ -17478,7 +17478,7 @@
+ Files:	    src/os_win32.c
+ 
+ Patch 7.3.1268
+-Problem:    ACL support doesn't work when when compiled with MingW.
++Problem:    ACL support doesn't work when compiled with MingW.
+ Solution:   Support ACL on MingW. (Ken Takata)
+ Files:	    src/os_win32.c, src/os_win32.h
+ 
