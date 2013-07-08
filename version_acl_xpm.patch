@@ -12,14 +12,17 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  all_builtin_terms	Compiled with all builtin terminals enabled.
  amiga			Amiga version of Vim.
  arabic			Compiled with Arabic support |Arabic|.
-@@ -6500,6 +6501,7 @@
+@@ -6500,7 +6501,9 @@
  writebackup		Compiled with 'writebackup' default on.
  xfontset		Compiled with X fontset support |xfontset|.
  xim			Compiled with X input method support |xim|.
+-xpm_w32			Compiled with pixmap support for Win32.
 +xpm			Compiled with pixmap support.
- xpm_w32			Compiled with pixmap support for Win32.
++xpm_w32			Compiled with pixmap support for Win32. (Only for
++			backward compatibility. Use "xpm" instead.)
  xsmp			Compiled with X session management support.
  xsmp_interact		Compiled with interactive X session management support.
+ xterm_clipboard		Compiled with support for xterm clipboard.
 diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
 --- a/runtime/doc/various.txt
 +++ b/runtime/doc/various.txt
@@ -56,8 +59,9 @@ diff --git a/src/eval.c b/src/eval.c
  	"xfontset",
  #endif
  #ifdef FEAT_XPM_W32
+-	"xpm_w32",
 +	"xpm",
- 	"xpm_w32",
++	"xpm_w32",	/* for backward compatibility */
 +#elif defined(HAVE_XPM)
 +	"xpm",
  #endif
