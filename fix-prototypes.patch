@@ -1,0 +1,56 @@
+# HG changeset patch
+# Parent a28186b29f28e8d9ce350d781037c61961745cd3
+
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -3123,7 +3123,7 @@
+  * 'guifont'
+  */
+     static void
+-update_im_font()
++update_im_font(void)
+ {
+     LOGFONT	lf_wide;
+ 
+diff --git a/src/if_py_both.h b/src/if_py_both.h
+--- a/src/if_py_both.h
++++ b/src/if_py_both.h
+@@ -2100,7 +2100,7 @@
+ }
+ 
+     static list_T *
+-py_list_alloc()
++py_list_alloc(void)
+ {
+     list_T	*ret;
+ 
+@@ -5857,7 +5857,7 @@
+ 	return -1;
+ 
+     static int
+-init_types()
++init_types(void)
+ {
+     PYTYPE_READY(IterType);
+     PYTYPE_READY(BufferType);
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -35,8 +35,6 @@
+ char	longVersion[sizeof(VIM_VERSION_LONG_DATE) + sizeof(__DATE__)
+ 						      + sizeof(__TIME__) + 3];
+ 
+-static void list_features __ARGS((void));
+-
+     void
+ make_version()
+ {
+@@ -57,6 +55,7 @@
+ char	*longVersion = VIM_VERSION_LONG;
+ #endif
+ 
++static void list_features __ARGS((void));
+ static void version_msg __ARGS((char *s));
+ 
+ static char *(features[]) =

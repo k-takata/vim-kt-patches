@@ -1,4 +1,5 @@
 disable-warning8060-with-bcc.patch
+fix-prototypes.patch
 merge-Make_cyg-into-Make_ming.patch
 0000-kaoriya_marks.diff
 2005-ambiwidth_auto.diff
