@@ -1,0 +1,32 @@
+# HG changeset patch
+# Parent 072432e9e2137750a4b0cfde20323b7ad4542ffd
+diff --git a/runtime/doc/version7.txt b/runtime/doc/version7.txt
+--- a/runtime/doc/version7.txt
++++ b/runtime/doc/version7.txt
+@@ -11730,7 +11730,7 @@
+ Files:	    src/fileio.c
+ 
+ Patch 7.3.261
+-Problem:    G++ error message errornously recognized as error.
++Problem:    G++ error message erroneously recognized as error.
+ Solution:   Ignore "In file included from" line also when it ends in a colon.
+ 	    (Fernando Castillo)
+ Files:	    src/option.h
+@@ -13682,7 +13682,7 @@
+ Patch 7.3.604
+ Problem:    inputdialog() doesn't use the cancel argument in the console.
+ 	    (David Fishburn)
+-Solution:   Use the third argument. (Christian Brabant)
++Solution:   Use the third argument. (Christian Brabandt)
+ Files:	    src/eval.c
+ 
+ Patch 7.3.605 (after 7.3.577)
+@@ -15523,7 +15523,7 @@
+ Problem:    Autocommands are triggered by setwinvar() et al. Missing BufEnter
+ 	    on :tabclose. Duplicate WinEnter on :tabclose. Wrong order of
+ 	    events for :tablose and :tabnew.
+-Solution:   Fix these autocommand events. (Zyx)
++Solution:   Fix these autocommand events. (ZyX)
+ Files:	    runtime/doc/eval.txt, src/buffer.c, src/eval.c, src/ex_cmds2.c,
+ 	    src/fileio.c, src/proto/window.pro, src/testdir/test62.in,
+ 	    src/testdir/test62.ok, src/window.c
