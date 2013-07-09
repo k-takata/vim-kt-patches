@@ -11,4 +11,3 @@ cpo-N.diff
 if_perl-use-output.patch
 improve_dos_test.diff
 fix-py3-eval.patch
-update-copyright-year.patch
