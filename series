@@ -3,3 +3,5 @@ myconfiguration-for-linux-gui.patch #+linux-gui
 version_acl_xpm.patch
 backout-7.3.638.patch
 fix-typo-7.4a-3.patch
+add-man.ja.patch
+add-man.ja-2.patch
