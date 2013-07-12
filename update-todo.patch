@@ -1,0 +1,66 @@
+# HG changeset patch
+# Parent 3c28eacb145969c5e2f2b88912cd43c3d12aac34
+
+diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
+--- a/runtime/doc/todo.txt
++++ b/runtime/doc/todo.txt
+@@ -330,9 +330,6 @@
+ Win32: Cannot cd into a directory that starts with a space. (Andy Wokula, 2012
+ Jan 19)
+ 
+-Win32: default for 'backupcopy' is wrong for a symbolic link. (mklink one
+-two). (Benjamin Fritz, 2012 Mar 15)
+-
+ Need to escape $HOME on Windows?  (ZyX, 2011 Jul 21, discussion 2013 Jul 4)
+ Can't simply use a backslash, \$HOME has a different meaning already.
+ Would be possible to use $$HOME where $HOME is to be used.
+@@ -593,10 +590,6 @@
+ When using cp850 the NBSP (0xff) is not drawn correctly. (Brett Stahlman, 2010
+ Oct 22)  'isprint' is set to "@,161-255".
+ 
+-Test 73 fails on MS-Windows when compiled with DJGPP and run twice.  How to
+-delete the Xfind directory?  Add an rmdir() function, just like we have
+-mkdir().
+-
+ ":echo "\x85" =~# '[\u0085]'" returns 1 instead of 0. (ZyX, 2010 Oct 3)
+ 
+ 'cindent' not correct when 'list' is set. (Zdravi Korusef, 2010 Apr 15)
+@@ -852,8 +845,6 @@
+ file names. (Kikuchan, 2010 Oct 5).  Useful on a latin1 or double-byte Asian
+ system when 'encoding' is "utf-8".
+ 
+-Win32 GUI: Changing manifest helps for dpi changes (Joe Castro, 2009 Mar 27)
+-
+ Win32 GUI: last message from startup doesn't show up when there is an echoerr
+ command. (Cyril Slobin, 2009 Mar 13)
+ 
+@@ -994,9 +985,6 @@
+ Win32: associating a type with Vim doesn't take care of space after a
+ backslash? (Robert Vibrant, 2008 Jun 5)
+ 
+-Win32: bold font doesn't work when 'guifontwide' has been set. (Yue Wu, 2010
+-Aug 23)
+-
+ When 'rightleft' is set, cursorcolumn isn't highlighted after the end of a
+ line.  It's also wrong in folds. (Dominique Pelle, 2010 Aug 21)
+ 
+@@ -1293,10 +1281,6 @@
+ Win32: compiling with normal features and OLE fails.  Patch by Mathias
+ Michaelis, 2006 Jun 4.
+ 
+-Win32: echo doesn't work for gvim.exe.mnf.  Use inline file.  Patch by Mathias
+-Michaelis.  http://groups.yahoo.com/group/vimdev/message/43765
+-Patch that includes this and does more by George Reilly, 2007 Feb 12
+-
+ Win16: include patches to make Win16 version work. (Vince Negri, 2006 May 22)
+ 
+ Win32: after "[I" showing matches, scroll wheel messes up screen. (Tsakiridis,
+@@ -1544,8 +1528,6 @@
+ the cursor line.  It works OK after some other commands.
+ 
+ Win32: Is it possible to have both postscript and Win32 printing?
+-Does multi-byte printing with ":hardcopy" work?  Add remark in documentation
+-about this.
+ 
+ Check: Running Vim in a console and still having connect to the X server for
+ copy/paste: is stopping the X server handled gracefully?  Should catch the X
