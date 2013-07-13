@@ -1,6 +1,7 @@
 myconfiguration-for-cygwin.patch
 myconfiguration-for-linux-gui.patch #+linux-gui
 version_acl_xpm.patch
+update-tags-for-acl_xpm.patch
 backout-7.3.638.patch
 fix-typo-7.4a-3.patch
 add-man.ja.patch
