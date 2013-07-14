@@ -10,4 +10,3 @@ direct_write-use-proto.diff
 cpo-N.diff
 if_perl-use-output.patch
 improve_dos_test.diff
-fix-test98-stop-on-gui.patch
