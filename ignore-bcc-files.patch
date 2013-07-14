@@ -1,0 +1,20 @@
+# HG changeset patch
+# Parent d30d1416180efad3146908ca79453af16398efec
+diff --git a/.hgignore b/.hgignore
+--- a/.hgignore
++++ b/.hgignore
+@@ -37,6 +37,14 @@
+ src/Obj*/pathdef.c
+ gvimext.dll
+ gvimext.lib
++# Borland C++
++bcc.cfg
++*.ilc
++*.ild
++*.ilf
++*.ils
++*.map
++*.tds
+ 
+ # Mac OSX
+ src/xxd/xxd.dSYM
