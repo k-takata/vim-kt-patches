@@ -5,3 +5,4 @@ update-tags-for-acl_xpm.patch
 backout-7.3.638.patch
 fix-typo-7.4a-3.patch
 update-todo.patch
+change-man-ja-directory.patch
