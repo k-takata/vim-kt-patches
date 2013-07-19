@@ -1,0 +1,20 @@
+# HG changeset patch
+# Parent 215c8b1b53860e567c2b3c1e960efac1e6b583c8
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -846,6 +846,14 @@
+ 
+ CFLAGS = $(CFLAGS) -DFEAT_PERL
+ 
++# Currently 32-bit version of ActivePerl is built with VC6.
++# (http://community.activestate.com/faq/windows-compilers-perl-modules)
++# It means that time_t should be 32-bit. However the default size of
++# time_t is 64-bit since VC8. So we have to define _USE_32BIT_TIME_T.
++!if "$(CPU)" == "i386"
++CFLAGS = $(CFLAGS) -D_USE_32BIT_TIME_T
++!endif
++
+ # Do we want to load Perl dynamically?
+ !if "$(DYNAMIC_PERL)" == "yes"
+ CFLAGS = $(CFLAGS) -DDYNAMIC_PERL -DDYNAMIC_PERL_DLL=\"$(PERL_DLL)\"
