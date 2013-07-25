@@ -12,3 +12,4 @@ if_perl-use-output.patch
 improve_dos_test.diff
 use-vimLoadLib.patch
 use_32bit_time_t.patch
+fix-alignment-in-regexp_nfa.patch
