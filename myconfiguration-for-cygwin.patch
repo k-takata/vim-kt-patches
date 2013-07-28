@@ -1,19 +1,19 @@
 # HG changeset patch
-# Parent 3bc0838d318836f4dde9ebd06e65fc2ed54ad97c
+# Parent 771f986ab9c0c1da13cb5e235d11649467236b47
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -377,7 +377,7 @@
- # Uncomment one of these when you want to include the Lua interface.
- # First one is for static linking, second one for dynamic loading.
+@@ -384,7 +384,7 @@
+ # Use --with-luajit if you want to use LuaJIT instead of Lua.
+ # Set PATH environment variable to find lua or luajit executable.
  #CONF_OPT_LUA = --enable-luainterp
 -#CONF_OPT_LUA = --enable-luainterp=dynamic
 +CONF_OPT_LUA = --enable-luainterp=dynamic
+ #CONF_OPT_LUA = --enable-luainterp --with-luajit
+ #CONF_OPT_LUA = --enable-luainterp=dynamic --with-luajit
  # Lua installation dir (when not set uses $LUA_PREFIX or defaults to /usr)
- #CONF_OPT_LUA_PREFIX = --with-lua-prefix=/usr/local
- 
-@@ -406,7 +406,7 @@
+@@ -410,7 +410,7 @@
  # one: "touch perl.exp".
  # This requires at least "small" features, "tiny" doesn't work.
  #CONF_OPT_PERL = --enable-perlinterp
@@ -22,7 +22,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  # PYTHON
  # Uncomment this when you want to include the Python interface.
-@@ -420,16 +420,16 @@
+@@ -425,16 +425,16 @@
  # However, this may still cause problems, such as "import termios" failing.
  # Build two separate versions of Vim in that case.
  #CONF_OPT_PYTHON = --enable-pythoninterp
@@ -42,7 +42,7 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_RUBY = --enable-rubyinterp --with-ruby-command=ruby1.9.1
  
  # TCL
-@@ -498,7 +498,7 @@
+@@ -503,7 +503,7 @@
  #CONF_OPT_FEAT = --with-features=small
  #CONF_OPT_FEAT = --with-features=normal
  #CONF_OPT_FEAT = --with-features=big
@@ -51,7 +51,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  # COMPILED BY - For including a specific e-mail address for ":version".
  #CONF_OPT_COMPBY = "--with-compiledby=John Doe <JohnDoe@yahoo.com>"
-@@ -915,6 +915,7 @@
+@@ -920,6 +920,7 @@
  #
  # Uncomment the next line to install Vim in your home directory.
  #prefix = $(HOME)
