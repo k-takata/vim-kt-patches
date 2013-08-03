@@ -10,6 +10,3 @@ direct_write-use-proto.diff
 cpo-N.diff
 if_perl-use-output.patch
 improve_dos_test.diff
-use-vimLoadLib.patch
-use_32bit_time_t-only-in-if_perl.patch
-use_32bit_time_t.patch
