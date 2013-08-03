@@ -3,5 +3,4 @@ myconfiguration-for-linux-gui.patch #+linux-gui
 version_acl_xpm.patch
 update-tags-for-acl_xpm.patch
 backout-7.3.638.patch
-change-man-ja-directory.patch
 update-version7.txt.patch
