@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 771f986ab9c0c1da13cb5e235d11649467236b47
+# Parent 42bf9264e64efa2d7ea02fc4ff03d4a7aa05fde8
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
@@ -51,11 +51,3 @@ diff --git a/src/Makefile b/src/Makefile
  
  # COMPILED BY - For including a specific e-mail address for ":version".
  #CONF_OPT_COMPBY = "--with-compiledby=John Doe <JohnDoe@yahoo.com>"
-@@ -920,6 +920,7 @@
- #
- # Uncomment the next line to install Vim in your home directory.
- #prefix = $(HOME)
-+prefix = /usr
- 
- ### exec_prefix	is the top directory for the executable (default $(prefix))
- #
