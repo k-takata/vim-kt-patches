@@ -1,0 +1,38 @@
+# HG changeset patch
+# Parent 6eb1cf75a138f150ec4cecd33592b7a16e5c7aee
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -2459,6 +2459,7 @@
+     TCITEM	tie;
+     int		nr = 0;
+     int		curtabidx = 0;
++    int		tabadded = 0;
+ #ifdef FEAT_MBYTE
+     static int	use_unicode = FALSE;
+     int		uu;
+@@ -2499,6 +2500,7 @@
+ 	    /* Add the tab */
+ 	    tie.pszText = "-Empty-";
+ 	    TabCtrl_InsertItem(s_tabhwnd, nr, &tie);
++	    tabadded = 1;
+ 	}
+ 
+ 	get_tabline_label(tp, FALSE);
+@@ -2531,12 +2533,15 @@
+     while (nr < TabCtrl_GetItemCount(s_tabhwnd))
+ 	TabCtrl_DeleteItem(s_tabhwnd, nr);
+ 
++    if (!tabadded && TabCtrl_GetCurSel(s_tabhwnd) != curtabidx)
++	TabCtrl_SetCurSel(s_tabhwnd, curtabidx);
++
+     /* Re-enable redraw and redraw. */
+     SendMessage(s_tabhwnd, WM_SETREDRAW, (WPARAM)TRUE, 0);
+     RedrawWindow(s_tabhwnd, NULL, NULL,
+ 		    RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
+ 
+-    if (TabCtrl_GetCurSel(s_tabhwnd) != curtabidx)
++    if (tabadded && TabCtrl_GetCurSel(s_tabhwnd) != curtabidx)
+ 	TabCtrl_SetCurSel(s_tabhwnd, curtabidx);
+ }
+ 
