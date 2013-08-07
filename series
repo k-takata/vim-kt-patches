@@ -11,3 +11,4 @@ cpo-N.diff
 if_perl-use-output.patch
 improve_dos_test.diff
 fix-tabline-update.patch
+fix-GetTickCount-overflow.patch
