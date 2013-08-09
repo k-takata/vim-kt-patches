@@ -1,0 +1,16 @@
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -4091,10 +4091,10 @@
+     {
+ 	MSG	msg;
+ 
+-	if (PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE))
++	if (pPeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE))
+ 	{
+ 	    TranslateMessage(&msg);
+-	    DispatchMessage(&msg);
++	    pDispatchMessage(&msg);
+ 	}
+ 
+ 	/* write pipe information in the window */

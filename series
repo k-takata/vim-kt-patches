@@ -11,3 +11,6 @@ cpo-N.diff
 if_perl-use-output.patch
 improve_dos_test.diff
 fix-GetTickCount-overflow.patch
+fix-utf8-username.patch
+fix-utf8-hostname.patch
+fix-utf8-msgloop.patch
