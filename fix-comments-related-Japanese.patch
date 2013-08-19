@@ -1,0 +1,16 @@
+# HG changeset patch
+# Parent 6f023d577591a2686854c13b2a34b9bf481eb5cf
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -947,8 +947,8 @@
+ 		{
+ 		    case 0x2121: /* ZENKAKU space */
+ 			return 0;
+-		    case 0x2122: /* KU-TEN (Japanese comma) */
+-		    case 0x2123: /* TOU-TEN (Japanese period) */
++		    case 0x2122: /* TOU-TEN (Japanese comma) */
++		    case 0x2123: /* KU-TEN (Japanese period) */
+ 		    case 0x2124: /* ZENKAKU comma */
+ 		    case 0x2125: /* ZENKAKU period */
+ 			return 1;

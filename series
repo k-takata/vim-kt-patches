@@ -15,3 +15,4 @@ fix-utf8-hostname.patch
 fix-utf8-msgloop.patch
 support-tcl86.patch
 fix-filename-completion.patch
+fix-comments-related-Japanese.patch
