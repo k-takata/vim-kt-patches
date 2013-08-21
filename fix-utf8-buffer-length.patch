@@ -1,0 +1,41 @@
+# HG changeset patch
+# Parent 0fbdfb05dcfd9087f4469b02d4a384d6188814f1
+
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -456,7 +456,9 @@
+     int
+ mch_isFullName(char_u *fname)
+ {
+-    char szName[_MAX_PATH + 1];
++    /* WinNT can use _MAX_PATH wide characters for pathname, which means
++     * that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is UTF-8. */
++    char szName[_MAX_PATH * 3 + 1];
+ 
+     /* A name like "d:/foo" and "//server/share" is absolute */
+     if ((fname[0] && fname[1] == ':' && (fname[2] == '/' || fname[2] == '\\'))
+@@ -464,7 +466,7 @@
+ 	return TRUE;
+ 
+     /* A name that can't be made absolute probably isn't absolute. */
+-    if (mch_FullName(fname, szName, _MAX_PATH, FALSE) == FAIL)
++    if (mch_FullName(fname, szName, _MAX_PATH * 3, FALSE) == FAIL)
+ 	return FALSE;
+ 
+     return pathcmp(fname, szName, -1) == 0;
+@@ -498,10 +500,12 @@
+     int
+ vim_stat(const char *name, struct stat *stp)
+ {
+-    char	buf[_MAX_PATH + 1];
++    /* WinNT can use _MAX_PATH wide characters for pathname, which means
++     * that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is UTF-8. */
++    char	buf[_MAX_PATH * 3 + 1];
+     char	*p;
+ 
+-    vim_strncpy((char_u *)buf, (char_u *)name, _MAX_PATH);
++    vim_strncpy((char_u *)buf, (char_u *)name, _MAX_PATH * 3);
+     p = buf + strlen(buf);
+     if (p > buf)
+ 	mb_ptr_back(buf, p);

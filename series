@@ -19,3 +19,4 @@ fix-comments-related-Japanese.patch
 fix-utf8-fname_case.patch
 fix-device-check-on-Windows.patch
 fix-utf8-nodetype.patch
+fix-utf8-buffer-length.patch
