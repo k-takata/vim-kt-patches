@@ -18,3 +18,4 @@ fix-filename-completion.patch
 fix-comments-related-Japanese.patch
 fix-utf8-fname_case.patch
 fix-device-check-on-Windows.patch
+fix-utf8-nodetype.patch
