@@ -1,5 +1,6 @@
 # HG changeset patch
 # Parent eddf34b551154883887d9613847a307ac28386fa
+
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
@@ -46,7 +47,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +		if (hr != S_OK)
 +		    goto shortcut_errorw;
 +#if 0  // This makes Vim wait a long time if the target doesn't exist.
-+		hr = psl->lpVtbl->Resolve(psl, NULL, SLR_NO_UI);
++		hr = pslw->lpVtbl->Resolve(pslw, NULL, SLR_NO_UI);
 +		if (hr != S_OK)
 +		    goto shortcut_errorw;
 +#endif
