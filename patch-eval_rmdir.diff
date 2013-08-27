@@ -1,0 +1,171 @@
+# HG changeset patch
+# Parent c9b04aa83bb319301224ccf5fd8283fbedb2236e
+implement a new vim script function rmdir()
+
+diff -r c9b04aa83bb3 runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt Tue Aug 27 00:41:34 2013 +0900
++++ b/runtime/doc/eval.txt	Tue Aug 27 00:55:31 2013 +0900
+@@ -1905,6 +1905,7 @@
+ repeat( {expr}, {count})	String	repeat {expr} {count} times
+ resolve( {filename})		String	get filename a shortcut points to
+ reverse( {list})		List	reverse {list} in-place
++rmdir( {dname} [, {flags}])	Number	remove directory {dname}.
+ round( {expr})			Float	round off {expr}
+ screenattr( {row}, {col})	Number	attribute at screen position
+ screenchar( {row}, {col})	Number	character at screen position
+@@ -4879,6 +4880,14 @@
+ 		If you want a list to remain unmodified make a copy first: >
+ 			:let revlist = reverse(copy(mylist))
+ 
++							*rmdir()*
++rmdir({dname} [, {flags}])
++		Remove a directory {dname}.  Return 0 for success, otherwise
++		return non-zero value.  If the direcotry contains any files or
++		sub-directories, this function will fail, when no {flags}
++		specified.  When "r" is given as {flags}, it remove the
++		directory and its contents recursively.
++
+ round({expr})							*round()*
+ 		Round off {expr} to the nearest integral value and return it
+ 		as a |Float|.  If {expr} lies halfway between two integral
+diff -r c9b04aa83bb3 src/eval.c
+--- a/src/eval.c	Tue Aug 27 00:41:34 2013 +0900
++++ b/src/eval.c	Tue Aug 27 00:55:31 2013 +0900
+@@ -655,6 +655,7 @@
+ static void f_repeat __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_resolve __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_reverse __ARGS((typval_T *argvars, typval_T *rettv));
++static void f_rmdir __ARGS((typval_T *argvars, typval_T *rettv));
+ #ifdef FEAT_FLOAT
+ static void f_round __ARGS((typval_T *argvars, typval_T *rettv));
+ #endif
+@@ -8045,6 +8046,7 @@
+     {"repeat",		2, 2, f_repeat},
+     {"resolve",		1, 1, f_resolve},
+     {"reverse",		1, 1, f_reverse},
++    {"rmdir",		1, 2, f_rmdir},
+ #ifdef FEAT_FLOAT
+     {"round",		1, 1, f_round},
+ #endif
+@@ -15675,6 +15677,78 @@
+     }
+ }
+ 
++    static int
++rmdir_sub(path, recurse)
++    char_u	*path;
++    int		recurse;
++{
++    char_u	*buf;
++    char_u	**files;
++    int		file_count;
++    int		i;
++
++    if (recurse)
++    {
++	buf = alloc(MAXPATHL);
++	STRCPY(buf, path);
++	add_pathsep(buf);
++	STRCAT(buf, "*");
++	if (gen_expand_wildcards(1, &buf, &file_count, &files,
++					      EW_DIR|EW_FILE|EW_SILENT) == OK)
++	{
++	    for (i = 0; i < file_count; ++i)
++	    {
++		if (mch_isdir(files[i]))
++		    rmdir_sub(files[i], TRUE);
++		else
++		    mch_remove(files[i]);
++	    }
++	    FreeWild(file_count, files);
++	}
++	vim_free(buf);
++    }
++    return mch_rmdir(path);
++}
++
++/*
++ * "rmdir({dname} [, {flags}])" function
++ */
++    static void
++f_rmdir(argvars, rettv)
++    typval_T	*argvars;
++    typval_T	*rettv;
++{
++    char_u	*dname;
++    char_u	*flags;
++    char_u	ch;
++    char_u	buf1[NUMBUFLEN];
++    char_u	buf2[NUMBUFLEN];
++    int		recurse = FALSE;
++
++    rettv->vval.v_number = 1;
++    if (check_restricted() || check_secure())
++	return;
++
++    dname = get_tv_string_buf(&argvars[0], buf1);
++
++    /* Parse {flags}. */
++    if (argvars[1].v_type != VAR_UNKNOWN)
++    {
++	flags = get_tv_string_buf(&argvars[1], buf2);
++	while ((ch = *flags++) != NUL)
++	{
++	    switch (ch)
++	    {
++		case 'r':
++		    recurse = TRUE;
++		    break;
++	    }
++	}
++    }
++
++    rettv->vval.v_number = rmdir_sub(dname, recurse);
++}
++
+ #define SP_NOMOVE	0x01	    /* don't move cursor */
+ #define SP_REPEAT	0x02	    /* repeat to find outer pair */
+ #define SP_RETCOUNT	0x04	    /* return matchcount */
+diff -r c9b04aa83bb3 src/os_win32.c
+--- a/src/os_win32.c	Tue Aug 27 00:41:34 2013 +0900
++++ b/src/os_win32.c	Tue Aug 27 00:55:31 2013 +0900
+@@ -5541,6 +5541,28 @@
+     return 0;	/* success */
+ }
+ 
++    int
++mch_rmdir __ARGS((const char *dirname))
++{
++    BOOL result = FALSE;
++
++#ifdef FEAT_MBYTE
++    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
++    {
++	WCHAR	*wdirname = enc_to_utf16((char_u *)dirname, NULL);
++	if (wdirname != NULL)
++	    result = RemoveDirectoryW(wdirname);
++    }
++    else
++#endif
++    {
++	if (dirname != NULL)
++	    result = RemoveDirectoryA(dirname);
++    }
++
++    return result != FALSE ? 0 : 1;
++}
++
+ /*
+  * Get the default shell for the current hardware platform
+  */
+diff -r c9b04aa83bb3 src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro	Tue Aug 27 00:41:34 2013 +0900
++++ b/src/proto/os_win32.pro	Tue Aug 27 00:55:31 2013 +0900
+@@ -44,6 +44,7 @@
+ void mch_breakcheck __ARGS((void));
+ int mch_wrename __ARGS((WCHAR *wold, WCHAR *wnew));
+ int mch_rename __ARGS((const char *pszOldFile, const char *pszNewFile));
++int mch_rmdir __ARGS((const char *dirname));
+ char *default_shell __ARGS((void));
+ int mch_access __ARGS((char *n, int p));
+ int mch_open __ARGS((char *name, int flags, int mode));

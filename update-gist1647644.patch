@@ -1,0 +1,96 @@
+# HG changeset patch
+# Parent 07c20b164d679ed54e22ccac0424fbdcf7ce0f64
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -4883,7 +4883,7 @@
+ 							*rmdir()*
+ rmdir({dname} [, {flags}])
+ 		Remove a directory {dname}.  Return 0 for success, otherwise
+-		return non-zero value.  If the direcotry contains any files or
++		return non-zero value.  If the directory contains any files or
+ 		sub-directories, this function will fail, when no {flags}
+ 		specified.  When "r" is given as {flags}, it remove the
+ 		directory and its contents recursively.
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -15665,22 +15665,25 @@
+     if (recurse)
+     {
+ 	buf = alloc(MAXPATHL);
+-	STRCPY(buf, path);
+-	add_pathsep(buf);
+-	STRCAT(buf, "*");
+-	if (gen_expand_wildcards(1, &buf, &file_count, &files,
++	if (buf)
++	{
++	    STRCPY(buf, path);
++	    add_pathsep(buf);
++	    STRCAT(buf, "*");
++	    if (gen_expand_wildcards(1, &buf, &file_count, &files,
+ 					      EW_DIR|EW_FILE|EW_SILENT) == OK)
+-	{
+-	    for (i = 0; i < file_count; ++i)
+-	    {
+-		if (mch_isdir(files[i]))
+-		    rmdir_sub(files[i], TRUE);
+-		else
+-		    mch_remove(files[i]);
+-	    }
+-	    FreeWild(file_count, files);
+-	}
+-	vim_free(buf);
++	    {
++		for (i = 0; i < file_count; ++i)
++		{
++		    if (mch_isdir(files[i]))
++			rmdir_sub(files[i], TRUE);
++		    else
++			mch_remove(files[i]);
++		}
++		FreeWild(file_count, files);
++	    }
++	    vim_free(buf);
++	}
+     }
+     return mch_rmdir(path);
+ }
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -5764,8 +5764,12 @@
+     return 0;	/* success */
+ }
+ 
++/*
++ * Remove a directory.
++ * Returns 0 for success, -1 for failure.
++ */
+     int
+-mch_rmdir __ARGS((const char *dirname))
++mch_rmdir(const char *dirname)
+ {
+     BOOL result = FALSE;
+ 
+@@ -5774,7 +5778,10 @@
+     {
+ 	WCHAR	*wdirname = enc_to_utf16((char_u *)dirname, NULL);
+ 	if (wdirname != NULL)
++	{
+ 	    result = RemoveDirectoryW(wdirname);
++	    vim_free(wdirname);
++	}
+     }
+     else
+ #endif
+@@ -5783,7 +5790,7 @@
+ 	    result = RemoveDirectoryA(dirname);
+     }
+ 
+-    return result != FALSE ? 0 : 1;
++    return result != FALSE ? 0 : -1;
+ }
+ 
+ /*
