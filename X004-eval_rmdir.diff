@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent c9b04aa83bb319301224ccf5fd8283fbedb2236e
+# Parent 220891ce830e40764e94115ab9c9dfae419edb08
 implement a new vim script function rmdir()
 
-diff -r c9b04aa83bb3 runtime/doc/eval.txt
---- a/runtime/doc/eval.txt Tue Aug 27 00:41:34 2013 +0900
-+++ b/runtime/doc/eval.txt	Tue Aug 27 00:55:31 2013 +0900
+diff -r 220891ce830e runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt	Tue Aug 27 00:56:09 2013 +0900
++++ b/runtime/doc/eval.txt	Tue Aug 27 08:55:14 2013 +0900
 @@ -1905,6 +1905,7 @@
  repeat( {expr}, {count})	String	repeat {expr} {count} times
  resolve( {filename})		String	get filename a shortcut points to
@@ -20,7 +20,7 @@ diff -r c9b04aa83bb3 runtime/doc/eval.txt
 +							*rmdir()*
 +rmdir({dname} [, {flags}])
 +		Remove a directory {dname}.  Return 0 for success, otherwise
-+		return non-zero value.  If the direcotry contains any files or
++		return non-zero value.  If the directory contains any files or
 +		sub-directories, this function will fail, when no {flags}
 +		specified.  When "r" is given as {flags}, it remove the
 +		directory and its contents recursively.
@@ -28,9 +28,9 @@ diff -r c9b04aa83bb3 runtime/doc/eval.txt
  round({expr})							*round()*
  		Round off {expr} to the nearest integral value and return it
  		as a |Float|.  If {expr} lies halfway between two integral
-diff -r c9b04aa83bb3 src/eval.c
---- a/src/eval.c	Tue Aug 27 00:41:34 2013 +0900
-+++ b/src/eval.c	Tue Aug 27 00:55:31 2013 +0900
+diff -r 220891ce830e src/eval.c
+--- a/src/eval.c	Tue Aug 27 00:56:09 2013 +0900
++++ b/src/eval.c	Tue Aug 27 08:55:14 2013 +0900
 @@ -655,6 +655,7 @@
  static void f_repeat __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_resolve __ARGS((typval_T *argvars, typval_T *rettv));
@@ -47,43 +47,10 @@ diff -r c9b04aa83bb3 src/eval.c
  #ifdef FEAT_FLOAT
      {"round",		1, 1, f_round},
  #endif
-@@ -15675,6 +15677,78 @@
+@@ -15675,6 +15677,45 @@
      }
  }
  
-+    static int
-+rmdir_sub(path, recurse)
-+    char_u	*path;
-+    int		recurse;
-+{
-+    char_u	*buf;
-+    char_u	**files;
-+    int		file_count;
-+    int		i;
-+
-+    if (recurse)
-+    {
-+	buf = alloc(MAXPATHL);
-+	STRCPY(buf, path);
-+	add_pathsep(buf);
-+	STRCAT(buf, "*");
-+	if (gen_expand_wildcards(1, &buf, &file_count, &files,
-+					      EW_DIR|EW_FILE|EW_SILENT) == OK)
-+	{
-+	    for (i = 0; i < file_count; ++i)
-+	    {
-+		if (mch_isdir(files[i]))
-+		    rmdir_sub(files[i], TRUE);
-+		else
-+		    mch_remove(files[i]);
-+	    }
-+	    FreeWild(file_count, files);
-+	}
-+	vim_free(buf);
-+    }
-+    return mch_rmdir(path);
-+}
-+
 +/*
 + * "rmdir({dname} [, {flags}])" function
 + */
@@ -120,21 +87,68 @@ diff -r c9b04aa83bb3 src/eval.c
 +	}
 +    }
 +
-+    rettv->vval.v_number = rmdir_sub(dname, recurse);
++    rettv->vval.v_number = recurse ? vim_rmdir_r(dname) : mch_rmdir(dname);
 +}
 +
  #define SP_NOMOVE	0x01	    /* don't move cursor */
  #define SP_REPEAT	0x02	    /* repeat to find outer pair */
  #define SP_RETCOUNT	0x04	    /* return matchcount */
-diff -r c9b04aa83bb3 src/os_win32.c
---- a/src/os_win32.c	Tue Aug 27 00:41:34 2013 +0900
-+++ b/src/os_win32.c	Tue Aug 27 00:55:31 2013 +0900
-@@ -5541,6 +5541,28 @@
-     return 0;	/* success */
+diff -r 220891ce830e src/misc2.c
+--- a/src/misc2.c	Tue Aug 27 00:56:09 2013 +0900
++++ b/src/misc2.c	Tue Aug 27 08:55:14 2013 +0900
+@@ -6641,3 +6641,40 @@
+     return FALSE;
+ }
+ #endif
++
++/*
++ * Remove a "path" directory and its contents (recursively).
++ *
++ * Returns 0 for success, -1 for failure.
++ */
++    int
++vim_rmdir_r(path)
++    char_u	*path;
++{
++    char_u	*buf;
++    char_u	**files;
++    int		file_count;
++    int		i;
++
++    buf = alloc(MAXPATHL);
++    if (buf)
++    {
++	STRCPY(buf, path);
++	add_pathsep(buf);
++	STRCAT(buf, "*");
++	if (gen_expand_wildcards(1, &buf, &file_count, &files,
++					  EW_DIR|EW_FILE|EW_SILENT) == OK)
++	{
++	    for (i = 0; i < file_count; ++i)
++	    {
++		if (mch_isdir(files[i]))
++		    vim_rmdir_r(files[i]);
++		else
++		    mch_remove(files[i]);
++	    }
++	    FreeWild(file_count, files);
++	}
++	vim_free(buf);
++    }
++    return mch_rmdir(path) == 0 ? 0 : -1;
++}
+diff -r 220891ce830e src/os_win32.c
+--- a/src/os_win32.c	Tue Aug 27 00:56:09 2013 +0900
++++ b/src/os_win32.c	Tue Aug 27 08:55:14 2013 +0900
+@@ -5542,6 +5542,35 @@
  }
  
+ /*
++ * Remove a directory.
++ * Returns 0 for success, -1 for failure.
++ */
 +    int
-+mch_rmdir __ARGS((const char *dirname))
++mch_rmdir(const char *dirname)
 +{
 +    BOOL result = FALSE;
 +
@@ -143,7 +157,10 @@ diff -r c9b04aa83bb3 src/os_win32.c
 +    {
 +	WCHAR	*wdirname = enc_to_utf16((char_u *)dirname, NULL);
 +	if (wdirname != NULL)
++	{
 +	    result = RemoveDirectoryW(wdirname);
++	    vim_free(wdirname);
++	}
 +    }
 +    else
 +#endif
@@ -152,15 +169,25 @@ diff -r c9b04aa83bb3 src/os_win32.c
 +	    result = RemoveDirectoryA(dirname);
 +    }
 +
-+    return result != FALSE ? 0 : 1;
++    return result != FALSE ? 0 : -1;
 +}
 +
- /*
++/*
   * Get the default shell for the current hardware platform
   */
-diff -r c9b04aa83bb3 src/proto/os_win32.pro
---- a/src/proto/os_win32.pro	Tue Aug 27 00:41:34 2013 +0900
-+++ b/src/proto/os_win32.pro	Tue Aug 27 00:55:31 2013 +0900
+     char *
+diff -r 220891ce830e src/proto/misc2.pro
+--- a/src/proto/misc2.pro	Tue Aug 27 00:56:09 2013 +0900
++++ b/src/proto/misc2.pro	Tue Aug 27 08:55:14 2013 +0900
+@@ -117,4 +117,5 @@
+ int put_bytes __ARGS((FILE *fd, long_u nr, int len));
+ void put_time __ARGS((FILE *fd, time_t the_time));
+ int has_non_ascii __ARGS((char_u *s));
++int vim_rmdir_r __ARGS((char_u *path));
+ /* vim: set ft=c : */
+diff -r 220891ce830e src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro	Tue Aug 27 00:56:09 2013 +0900
++++ b/src/proto/os_win32.pro	Tue Aug 27 08:55:14 2013 +0900
 @@ -44,6 +44,7 @@
  void mch_breakcheck __ARGS((void));
  int mch_wrename __ARGS((WCHAR *wold, WCHAR *wnew));
