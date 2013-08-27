@@ -1,0 +1,168 @@
+# HG changeset patch
+# Parent 2429ec764d044f0a33a947919af0f44ef9e315a9
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -4880,13 +4880,13 @@
+ 		If you want a list to remain unmodified make a copy first: >
+ 			:let revlist = reverse(copy(mylist))
+ 
+-							*rmdir()*
+-rmdir({dname} [, {flags}])
++rmdir({dname} [, {flags}])				*rmdir()*
+ 		Remove a directory {dname}.  Return 0 for success, otherwise
+ 		return non-zero value.  If the directory contains any files or
+ 		sub-directories, this function will fail, when no {flags}
+ 		specified.  When "r" is given as {flags}, it remove the
+ 		directory and its contents recursively.
++		This function is not available in the |sandbox|.
+ 
+ round({expr})							*round()*
+ 		Round off {expr} to the nearest integral value and return it
+diff --git a/src/misc2.c b/src/misc2.c
+--- a/src/misc2.c
++++ b/src/misc2.c
+@@ -6656,6 +6656,16 @@
+     int		file_count;
+     int		i;
+ 
++    if (!mch_isdir(path))
++	return -1;
++#ifdef UNIX
++    if (mch_is_symbolic_link(path))
++	return mch_remove(path) == 0 ? 0 : -1;
++#elif defined(WIN32)
++    if (mch_is_symbolic_link(path))
++	return mch_rmdir(path) == 0 ? 0 : -1;
++#endif
++
+     buf = alloc(MAXPATHL);
+     if (buf)
+     {
+@@ -6668,7 +6678,18 @@
+ 	    for (i = 0; i < file_count; ++i)
+ 	    {
+ 		if (mch_isdir(files[i]))
+-		    vim_rmdir_r(files[i]);
++		{
++#ifdef UNIX
++		    if (mch_is_symbolic_link(files[i]))
++			mch_remove(files[i]);
++		    else
++#elif defined(WIN32)
++		    if (mch_is_symbolic_link(files[i]))
++			mch_rmdir(files[i]);
++		    else
++#endif
++			vim_rmdir_r(files[i]);
++		}
+ 		else
+ 		    mch_remove(files[i]);
+ 	    }
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -2943,6 +2943,28 @@
+ #endif
+ }
+ 
++/*
++ * return TRUE if "name" is a symbolic link
++ * return FALSE if "name" is not a symbolic link
++ * return FALSE for error
++ */
++    int
++mch_is_symbolic_link(name)
++    char_u *name;
++{
++    struct stat statb;
++
++    if (*name == NUL)	    /* Some lstat()s don't flag "" as an error. */
++	return FALSE;
++    if (lstat((char *)name, &statb))
++	return FALSE;
++#ifdef _POSIX_SOURCE
++    return (S_ISLNK(statb.st_mode) ? TRUE : FALSE);
++#else
++    return ((statb.st_mode & S_IFMT) == S_IFLNK ? TRUE : FALSE);
++#endif
++}
++
+ static int executable_file __ARGS((char_u *name));
+ 
+ /*
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -84,6 +84,9 @@
+ #ifndef FILE_ATTRIBUTE_REPARSE_POINT
+ # define FILE_ATTRIBUTE_REPARSE_POINT	0x00000400
+ #endif
++#ifndef IO_REPARSE_TAG_MOUNT_POINT
++# define IO_REPARSE_TAG_MOUNT_POINT	0xA0000003
++#endif
+ #ifndef IO_REPARSE_TAG_SYMLINK
+ # define IO_REPARSE_TAG_SYMLINK		0xA000000C
+ #endif
+@@ -3011,10 +3014,10 @@
+ }
+ 
+ /*
+- * Return TRUE if file "fname" is a symbolic link.
++ * Return TRUE if "name" is a symbolic link (or a junction).
+  */
+     int
+-mch_is_symbolic_link(char_u *fname)
++mch_is_symbolic_link(char_u *name)
+ {
+     HANDLE		hFind;
+     int			res = FALSE;
+@@ -3025,7 +3028,7 @@
+     WIN32_FIND_DATAW	findDataW;
+ 
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+-	wn = enc_to_utf16(fname, NULL);
++	wn = enc_to_utf16(name, NULL);
+     if (wn != NULL)
+     {
+ 	hFind = FindFirstFileW(wn, &findDataW);
+@@ -3034,7 +3037,7 @@
+ 		&& GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
+ 	{
+ 	    /* Retry with non-wide function (for Windows 98). */
+-	    hFind = FindFirstFile(fname, &findDataA);
++	    hFind = FindFirstFile(name, &findDataA);
+ 	    if (hFind != INVALID_HANDLE_VALUE)
+ 	    {
+ 		fileFlags = findDataA.dwFileAttributes;
+@@ -3050,7 +3053,7 @@
+     else
+ #endif
+     {
+-	hFind = FindFirstFile(fname, &findDataA);
++	hFind = FindFirstFile(name, &findDataA);
+ 	if (hFind != INVALID_HANDLE_VALUE)
+ 	{
+ 	    fileFlags = findDataA.dwFileAttributes;
+@@ -3062,7 +3065,8 @@
+ 	FindClose(hFind);
+ 
+     if ((fileFlags & FILE_ATTRIBUTE_REPARSE_POINT)
+-	    && reparseTag == IO_REPARSE_TAG_SYMLINK)
++	    && (reparseTag == IO_REPARSE_TAG_SYMLINK
++		|| reparseTag == IO_REPARSE_TAG_MOUNT_POINT))
+ 	res = TRUE;
+ 
+     return res;
+diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
+--- a/src/proto/os_unix.pro
++++ b/src/proto/os_unix.pro
+@@ -42,6 +42,7 @@
+ void mch_free_acl __ARGS((vim_acl_T aclent));
+ void mch_hide __ARGS((char_u *name));
+ int mch_isdir __ARGS((char_u *name));
++int mch_is_symbolic_link __ARGS((char_u *name));
+ int mch_can_exe __ARGS((char_u *name));
+ int mch_nodetype __ARGS((char_u *name));
+ void mch_early_init __ARGS((void));

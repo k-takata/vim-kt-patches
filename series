@@ -22,3 +22,4 @@ fix-utf8-nodetype.patch
 fix-utf8-buffer-length.patch
 fix-utf8-mch_resolve_shortcut.patch
 X004-eval_rmdir.diff
+update-rmdir.patch
