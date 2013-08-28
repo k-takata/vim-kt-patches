@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent eddf34b551154883887d9613847a307ac28386fa
+# Parent 14afed63802da2b0e9ab4e90322399982978676b
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -1765,9 +1765,13 @@
+@@ -1775,9 +1775,13 @@
      IPersistFile	*ppf = NULL;
      OLECHAR		wsz[MAX_PATH];
      WIN32_FIND_DATA	ffd; // we get those free of charge
@@ -12,18 +12,18 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +    CHAR		buf[MAX_PATH]; // could have simply reused 'wsz'...
      char_u		*rfname = NULL;
      int			len;
-+#ifdef FEAT_MBYTE
++# ifdef FEAT_MBYTE
 +    IShellLinkW		*pslw = NULL;
 +    WIN32_FIND_DATAW	ffdw; // we get those free of charge
-+#endif
++# endif
  
      /* Check if the file name ends in ".lnk". Avoid calling
       * CoCreateInstance(), it's quite slow. */
-@@ -1779,6 +1783,50 @@
+@@ -1789,6 +1793,50 @@
  
      CoInitialize(NULL);
  
-+#ifdef FEAT_MBYTE
++# ifdef FEAT_MBYTE
 +    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +    {
 +	// create a link manager object and request its interface
@@ -46,11 +46,11 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +		hr = ppf->lpVtbl->Load(ppf, p, STGM_READ);
 +		if (hr != S_OK)
 +		    goto shortcut_errorw;
-+#if 0  // This makes Vim wait a long time if the target doesn't exist.
++#  if 0  // This makes Vim wait a long time if the target doesn't exist.
 +		hr = pslw->lpVtbl->Resolve(pslw, NULL, SLR_NO_UI);
 +		if (hr != S_OK)
 +		    goto shortcut_errorw;
-+#endif
++#  endif
 +
 +		// Get the path to the link target.
 +		ZeroMemory(wsz, MAX_PATH * sizeof(WCHAR));
@@ -66,11 +66,25 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +	}
 +	/* Retry with non-wide function (for Windows 98). */
 +    }
-+#endif
++# endif
      // create a link manager object and request its interface
      hr = CoCreateInstance(
  	    &CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER,
-@@ -1811,12 +1859,17 @@
+@@ -1809,11 +1857,11 @@
+     hr = ppf->lpVtbl->Load(ppf, wsz, STGM_READ);
+     if (hr != S_OK)
+ 	goto shortcut_error;
+-#if 0  // This makes Vim wait a long time if the target doesn't exist.
++# if 0  // This makes Vim wait a long time if the target doesn't exist.
+     hr = psl->lpVtbl->Resolve(psl, NULL, SLR_NO_UI);
+     if (hr != S_OK)
+ 	goto shortcut_error;
+-#endif
++# endif
+ 
+     // Get the path to the link target.
+     ZeroMemory(buf, MAX_PATH);
+@@ -1821,12 +1869,17 @@
      if (hr == S_OK && buf[0] != NUL)
  	rfname = vim_strsave(buf);
  
@@ -81,10 +95,10 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	ppf->lpVtbl->Release(ppf);
      if (psl != NULL)
  	psl->lpVtbl->Release(psl);
-+#ifdef FEAT_MBYTE
++# ifdef FEAT_MBYTE
 +    if (pslw != NULL)
 +	pslw->lpVtbl->Release(pslw);
-+#endif
++# endif
  
      CoUninitialize();
      return rfname;
