@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 66d24e3400915ca220f0b420ba7a8c530594e4bc
+# Parent da32d9de29693f4a9d68450bcb9b9bd71f3be8f6
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -23,43 +23,22 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/misc2.c b/src/misc2.c
 --- a/src/misc2.c
 +++ b/src/misc2.c
-@@ -6656,6 +6656,16 @@
-     int		file_count;
-     int		i;
- 
-+    if (!mch_isdir(path))
-+	return -1;
-+#ifdef UNIX
-+    if (mch_is_symbolic_link(path))
-+	return mch_remove(path) == 0 ? 0 : -1;
-+#elif defined(WIN32)
-+    if (mch_is_symbolic_link(path))
-+	return mch_rmdir(path) == 0 ? 0 : -1;
-+#endif
-+
-     buf = alloc(MAXPATHL);
-     if (buf)
+@@ -6668,9 +6668,12 @@
+     if (gen_expand_wildcards(1, &pat, &file_count, &files,
+ 		EW_DIR|EW_FILE|EW_SILENT) == OK)
      {
-@@ -6668,7 +6678,18 @@
- 	    for (i = 0; i < file_count; ++i)
- 	    {
- 		if (mch_isdir(files[i]))
--		    vim_rmdir_r(files[i]);
-+		{
-+#ifdef UNIX
-+		    if (mch_is_symbolic_link(files[i]))
-+			mch_remove(files[i]);
-+		    else
-+#elif defined(WIN32)
-+		    if (mch_is_symbolic_link(files[i]))
-+			mch_rmdir(files[i]);
-+		    else
-+#endif
-+			vim_rmdir_r(files[i]);
-+		}
- 		else
- 		    mch_remove(files[i]);
- 	    }
+-	ga_grow(gap, file_count);
+-	for (i = 0; i < file_count; ++i)
+-	    ((char_u **)gap->ga_data)[i] = vim_strsave(files[i]);
++	if (ga_grow(gap, file_count))
++	{
++	    for (i = 0; i < file_count; ++i)
++		((char_u **)gap->ga_data)[i] = vim_strsave(files[i]);
++	    gap->ga_len += file_count;
++	}
+ 	FreeWild(file_count, files);
+     }
+     vim_free(pat);
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
@@ -183,6 +162,15 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  static int executable_file __ARGS((char_u *name));
  
  /*
+diff --git a/src/os_unix.h b/src/os_unix.h
+--- a/src/os_unix.h
++++ b/src/os_unix.h
+@@ -568,3 +568,5 @@
+ 
+ /* We have three kinds of ACL support. */
+ #define HAVE_ACL (HAVE_POSIX_ACL || HAVE_SOLARIS_ACL || HAVE_AIX_ACL)
++
++#define FEAT_SYMBOLIC_LINKS
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
@@ -253,10 +241,39 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	res = TRUE;
  
      return res;
+@@ -5544,7 +5535,8 @@
+ 
+ 
+ /*
+- * this version of remove is not scared by a readonly (backup) file
++ * This version of remove is not scared by a readonly (backup) file.
++ * This can also remove a symbolic link like Unix.
+  * Return 0 for success, -1 for failure.
+  */
+     int
+@@ -5555,6 +5547,9 @@
+     int		n;
+ #endif
+ 
++    if (mch_isdir(name) && mch_is_symbolic_link(name))
++	return mch_rmdir(name);
++
+     win32_setattrs(name, FILE_ATTRIBUTE_NORMAL);
+ 
+ #ifdef FEAT_MBYTE
 diff --git a/src/os_win32.h b/src/os_win32.h
 --- a/src/os_win32.h
 +++ b/src/os_win32.h
-@@ -130,6 +130,19 @@
+@@ -57,6 +57,8 @@
+ 
+ #define FEAT_SHORTCUT		/* resolve shortcuts */
+ 
++#define FEAT_SYMBOLIC_LINKS
++
+ #if (!defined(__BORLANDC__) || __BORLANDC__ >= 0x550) \
+ 	&& (!defined(_MSC_VER) || _MSC_VER > 1020)
+ /*
+@@ -130,6 +132,19 @@
  # define DFLT_MAXMEMTOT	(5*1024)    /* use up to 5 Mbyte for Vim */
  #endif
  
