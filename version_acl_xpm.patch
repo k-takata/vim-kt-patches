@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 0b855debb1de2e7e38259d0bc0f4230ae944c954
+# Parent d17ef148ada4ada411ab7a88a3a678b6964d0fba
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -6334,6 +6334,7 @@
+@@ -6337,6 +6337,7 @@
  <   Note that it's possible for patch 147 to be omitted even though 148 is
      included.
  
@@ -12,7 +12,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  all_builtin_terms	Compiled with all builtin terminals enabled.
  amiga			Amiga version of Vim.
  arabic			Compiled with Arabic support |Arabic|.
-@@ -6500,7 +6501,9 @@
+@@ -6503,7 +6504,9 @@
  writebackup		Compiled with 'writebackup' default on.
  xfontset		Compiled with X fontset support |xfontset|.
  xim			Compiled with X input method support |xim|.
@@ -42,56 +42,3 @@ diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
  m  *+xpm_w32*		Win32 GUI only: pixmap support |w32-xpm-support|
     *+xsmp*		XSMP (X session management) support
     *+xsmp_interact*	interactive XSMP (X session management) support
-diff --git a/src/eval.c b/src/eval.c
---- a/src/eval.c
-+++ b/src/eval.c
-@@ -12135,6 +12135,9 @@
- #ifndef CASE_INSENSITIVE_FILENAME
- 	"fname_case",
- #endif
-+#ifdef HAVE_ACL
-+	"acl",
-+#endif
- #ifdef FEAT_ARABIC
- 	"arabic",
- #endif
-@@ -12538,7 +12541,10 @@
- 	"xfontset",
- #endif
- #ifdef FEAT_XPM_W32
--	"xpm_w32",
-+	"xpm",
-+	"xpm_w32",	/* for backward compatibility */
-+#elif defined(HAVE_XPM)
-+	"xpm",
- #endif
- #ifdef USE_XSMP
- 	"xsmp",
-diff --git a/src/version.c b/src/version.c
---- a/src/version.c
-+++ b/src/version.c
-@@ -61,6 +61,11 @@
- 
- static char *(features[]) =
- {
-+#ifdef HAVE_ACL
-+	"+acl",
-+#else
-+	"-acl",
-+#endif
- #ifdef AMIGA		/* only for Amiga systems */
- # ifdef FEAT_ARP
- 	"+ARP",
-@@ -722,6 +727,12 @@
- # else
- 	"-xpm_w32",
- # endif
-+#else
-+# ifdef HAVE_XPM
-+	"+xpm",
-+# else
-+	"-xpm",
-+# endif
- #endif
- 	NULL
- };
