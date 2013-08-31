@@ -1,0 +1,53 @@
+# HG changeset patch
+# Parent 42bf9264e64efa2d7ea02fc4ff03d4a7aa05fde8
+
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -384,7 +384,7 @@
+ # Use --with-luajit if you want to use LuaJIT instead of Lua.
+ # Set PATH environment variable to find lua or luajit executable.
+ #CONF_OPT_LUA = --enable-luainterp
+-#CONF_OPT_LUA = --enable-luainterp=dynamic
++CONF_OPT_LUA = --enable-luainterp=dynamic
+ #CONF_OPT_LUA = --enable-luainterp --with-luajit
+ #CONF_OPT_LUA = --enable-luainterp=dynamic --with-luajit
+ # Lua installation dir (when not set uses $LUA_PREFIX or defaults to /usr)
+@@ -410,7 +410,7 @@
+ # one: "touch perl.exp".
+ # This requires at least "small" features, "tiny" doesn't work.
+ #CONF_OPT_PERL = --enable-perlinterp
+-#CONF_OPT_PERL = --enable-perlinterp=dynamic
++CONF_OPT_PERL = --enable-perlinterp=dynamic
+ 
+ # PYTHON
+ # Uncomment this when you want to include the Python interface.
+@@ -425,16 +425,16 @@
+ # However, this may still cause problems, such as "import termios" failing.
+ # Build two separate versions of Vim in that case.
+ #CONF_OPT_PYTHON = --enable-pythoninterp
+-#CONF_OPT_PYTHON = --enable-pythoninterp=dynamic
++CONF_OPT_PYTHON = --enable-pythoninterp=dynamic
+ #CONF_OPT_PYTHON3 = --enable-python3interp
+-#CONF_OPT_PYTHON3 = --enable-python3interp=dynamic
++CONF_OPT_PYTHON3 = --enable-python3interp=dynamic
+ 
+ # RUBY
+ # Uncomment this when you want to include the Ruby interface.
+ # First one for static linking, second one for loading when used.
+ # Note: you need the development package (e.g., ruby1.9.1-dev on Ubuntu).
+ #CONF_OPT_RUBY = --enable-rubyinterp
+-#CONF_OPT_RUBY = --enable-rubyinterp=dynamic
++CONF_OPT_RUBY = --enable-rubyinterp=dynamic
+ #CONF_OPT_RUBY = --enable-rubyinterp --with-ruby-command=ruby1.9.1
+ 
+ # TCL
+@@ -503,7 +503,7 @@
+ #CONF_OPT_FEAT = --with-features=small
+ #CONF_OPT_FEAT = --with-features=normal
+ #CONF_OPT_FEAT = --with-features=big
+-#CONF_OPT_FEAT = --with-features=huge
++CONF_OPT_FEAT = --with-features=huge
+ 
+ # COMPILED BY - For including a specific e-mail address for ":version".
+ #CONF_OPT_COMPBY = "--with-compiledby=John Doe <JohnDoe@yahoo.com>"

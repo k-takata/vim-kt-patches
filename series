@@ -1,10 +1,14 @@
+myconfiguration-for-cygwin.patch #+cygwin #+linux
+myconfiguration-for-linux-gui.patch #+linux
+backout-7.3.638.patch #+linux
+version_acl_xpm.patch
+update-tags-for-acl_xpm.patch
 ignore-bcc-files.patch
 disable-warning8060-with-bcc.patch
 merge-Make_cyg-into-Make_ming.patch
 0000-kaoriya_marks.diff
 2005-ambiwidth_auto.diff
 support-alt-gettext-dll.patch
-version_acl_xpm.patch
 X001-direct_write-r3.diff
 direct_write-use-proto.diff
 cpo-N.diff

@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent 7925fb4dc355b549ea9e75287c761a1754abb0c0
+
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -5521,9 +5521,8 @@
+ 		    && (ScreenLinesUC[off_from] != ScreenLinesUC[off_to]
+ 			|| (ScreenLinesUC[off_from] != 0
+ 			    && comp_char_differs(off_from, off_to))
+-			|| ((*mb_off2cells)(off_from, off_from + cols) > 1
+-			    && ScreenLines[off_from + 1]
+-						  != ScreenLines[off_to + 1])))
++			|| (cols > 1 && ScreenLines[off_from + 1]
++						 != ScreenLines[off_to + 1])))
+ #endif
+ 	       ))
+ 	return TRUE;

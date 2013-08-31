@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent e51be89c4f65bffe50219bea62fe965a208a92e6
+
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -351,7 +351,7 @@
+ # If the selected GUI isn't found, the GUI is disabled automatically
+ #CONF_OPT_GUI = --enable-gui=gtk2
+ #CONF_OPT_GUI = --enable-gui=gtk2 --disable-gtktest
+-#CONF_OPT_GUI = --enable-gui=gnome2
++CONF_OPT_GUI = --enable-gui=gnome2
+ #CONF_OPT_GUI = --enable-gui=gnome2 --disable-gtktest
+ #CONF_OPT_GUI = --enable-gui=motif
+ #CONF_OPT_GUI = --enable-gui=motif --with-motif-lib="-static -lXm -shared"
+@@ -439,7 +439,7 @@
+ 
+ # TCL
+ # Uncomment this when you want to include the Tcl interface.
+-#CONF_OPT_TCL = --enable-tclinterp
++CONF_OPT_TCL = --enable-tclinterp
+ #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
+ 
+ # CSCOPE
