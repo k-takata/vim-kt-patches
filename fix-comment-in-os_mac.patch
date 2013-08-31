@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent c47ec625b92666b757312635ef420f64a6fe97d8
+diff --git a/src/os_mac.h b/src/os_mac.h
+--- a/src/os_mac.h
++++ b/src/os_mac.h
+@@ -263,7 +263,7 @@
+ #endif
+ 
+ /* Some "prep work" definition to be able to compile the MacOS X
+- * version with os_unix.x instead of os_mac.c. Based on the result
++ * version with os_unix.c instead of os_mac.c. Based on the result
+  * of ./configure for console MacOS X.
+  */
+ 
