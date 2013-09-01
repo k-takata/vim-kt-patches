@@ -1,69 +1,25 @@
 # HG changeset patch
-# Parent 4dac7e21a69929191766158902837ef22166fbdc
+# Parent 411154c3f7dd2450736ded250ab0fb306b560fd6
 
-diff -r 4dac7e21a699 src/os_mswin.c
---- a/src/os_mswin.c	Sun Sep 01 13:44:28 2013 +0900
-+++ b/src/os_mswin.c	Sun Sep 01 13:47:36 2013 +0900
-@@ -514,6 +514,12 @@
-     char	buf[_MAX_PATH + 1];
- #endif
-     char	*p;
+diff -r 411154c3f7dd src/os_mswin.c
+--- a/src/os_mswin.c	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/os_mswin.c	Sun Sep 01 22:35:43 2013 +0900
+@@ -498,6 +498,86 @@
+     }
+ }
+ 
++    static int
++stat_symlink_aware(const char *name, struct stat *stp)
++{
 +#if defined(_MSC_VER) && _MSC_VER < 1700
++    /* Work around for VC10 or earlier. stat() can't handle a symlink to a
++     * directory. */
 +    WIN32_FIND_DATA	findData;
 +    HANDLE		hFind, h;
 +    DWORD		attr;
 +    BOOL		is_symlink = FALSE;
-+#endif
- 
-     vim_strncpy((char_u *)buf, (char_u *)name, sizeof(buf) - 1);
-     p = buf + strlen(buf);
-@@ -534,6 +540,38 @@
- 
- 	if (wp != NULL)
- 	{
-+# if defined(_MSC_VER) && _MSC_VER < 1700
-+	    /* Work around for VC10 or earlier. _wstat() can't handle a
-+	     * symlink to a directory. */
-+	    WIN32_FIND_DATAW	findDataW;
 +
-+	    hFind = FindFirstFileW(wp, &findDataW);
-+	    if (hFind != INVALID_HANDLE_VALUE)
-+	    {
-+		attr = findDataW.dwFileAttributes;
-+		if ((attr & FILE_ATTRIBUTE_REPARSE_POINT)
-+			&& (attr & FILE_ATTRIBUTE_DIRECTORY)
-+			&& (findDataW.dwReserved0 == IO_REPARSE_TAG_SYMLINK))
-+		    is_symlink = TRUE;
-+		FindClose(hFind);
-+	    }
-+	    if (is_symlink)
-+	    {
-+		h = CreateFileW(wp, FILE_READ_ATTRIBUTES,
-+			FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-+			OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-+		if (h != INVALID_HANDLE_VALUE)
-+		{
-+		    int	    fd;
-+
-+		    fd = _open_osfhandle((intptr_t)h, _O_RDONLY);
-+		    n = _fstat(fd, (struct _stat*)stp);
-+		    _close(fd);
-+		    vim_free(wp);
-+		    return n;
-+		}
-+	    }
-+# endif
- 	    n = _wstat(wp, (struct _stat *)stp);
- 	    vim_free(wp);
- 	    if (n >= 0)
-@@ -544,6 +582,35 @@
- 	}
-     }
- #endif
-+#if defined(_MSC_VER) && _MSC_VER < 1700
-+    /* Work around for VC10 or earlier. _stat() can't handle a
-+     * symlink to a directory. */
-+    hFind = FindFirstFile(buf, &findData);
++    hFind = FindFirstFile(name, &findData);
 +    if (hFind != INVALID_HANDLE_VALUE)
 +    {
 +	attr = findData.dwFileAttributes;
@@ -75,7 +31,7 @@ diff -r 4dac7e21a699 src/os_mswin.c
 +    }
 +    if (is_symlink)
 +    {
-+	h = CreateFile(buf, FILE_READ_ATTRIBUTES,
++	h = CreateFile(name, FILE_READ_ATTRIBUTES,
 +		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 +		OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 +	if (h != INVALID_HANDLE_VALUE)
@@ -89,12 +45,73 @@ diff -r 4dac7e21a699 src/os_mswin.c
 +	}
 +    }
 +#endif
-     return stat(buf, stp);
++    return stat(name, stp);
++}
++
++    static int
++wstat_symlink_aware(const WCHAR *name, struct _stat *stp)
++{
++# if defined(_MSC_VER) && _MSC_VER < 1700
++    /* Work around for VC10 or earlier. _wstat() can't handle a symlink to a
++     * directory. */
++    int			n;
++    BOOL		is_symlink = FALSE;
++    HANDLE		hFind, h;
++    DWORD		attr;
++    WIN32_FIND_DATAW	findDataW;
++
++    hFind = FindFirstFileW(name, &findDataW);
++    if (hFind != INVALID_HANDLE_VALUE)
++    {
++	attr = findDataW.dwFileAttributes;
++	if ((attr & FILE_ATTRIBUTE_REPARSE_POINT)
++		&& (attr & FILE_ATTRIBUTE_DIRECTORY)
++		&& (findDataW.dwReserved0 == IO_REPARSE_TAG_SYMLINK))
++	    is_symlink = TRUE;
++	FindClose(hFind);
++    }
++    if (is_symlink)
++    {
++	h = CreateFileW(name, FILE_READ_ATTRIBUTES,
++		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
++		OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
++	if (h != INVALID_HANDLE_VALUE)
++	{
++	    int	    fd;
++
++	    fd = _open_osfhandle((intptr_t)h, _O_RDONLY);
++	    n = _fstat(fd, stp);
++	    _close(fd);
++	    return n;
++	}
++    }
++# endif
++    return _wstat(name, stp);
++}
+ 
+ /*
+  * stat() can't handle a trailing '/' or '\', remove it first.
+@@ -534,7 +614,7 @@
+ 
+ 	if (wp != NULL)
+ 	{
+-	    n = _wstat(wp, (struct _stat *)stp);
++	    n = wstat_symlink_aware(wp, (struct _stat *)stp);
+ 	    vim_free(wp);
+ 	    if (n >= 0)
+ 		return n;
+@@ -544,7 +624,7 @@
+ 	}
+     }
+ #endif
+-    return stat(buf, stp);
++    return stat_symlink_aware(buf, stp);
  }
  
-diff -r 4dac7e21a699 src/os_unix.c
---- a/src/os_unix.c	Sun Sep 01 13:44:28 2013 +0900
-+++ b/src/os_unix.c	Sun Sep 01 13:47:36 2013 +0900
+ #if defined(FEAT_GUI_MSWIN) || defined(PROTO)
+diff -r 411154c3f7dd src/os_unix.c
+--- a/src/os_unix.c	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/os_unix.c	Sun Sep 01 22:35:43 2013 +0900
 @@ -2943,6 +2943,28 @@
  #endif
  }
@@ -124,18 +141,18 @@ diff -r 4dac7e21a699 src/os_unix.c
  static int executable_file __ARGS((char_u *name));
  
  /*
-diff -r 4dac7e21a699 src/os_unix.h
---- a/src/os_unix.h	Sun Sep 01 13:44:28 2013 +0900
-+++ b/src/os_unix.h	Sun Sep 01 13:47:36 2013 +0900
+diff -r 411154c3f7dd src/os_unix.h
+--- a/src/os_unix.h	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/os_unix.h	Sun Sep 01 22:35:43 2013 +0900
 @@ -568,3 +568,5 @@
  
  /* We have three kinds of ACL support. */
  #define HAVE_ACL (HAVE_POSIX_ACL || HAVE_SOLARIS_ACL || HAVE_AIX_ACL)
 +
 +#define FEAT_SYMBOLIC_LINKS
-diff -r 4dac7e21a699 src/os_win32.c
---- a/src/os_win32.c	Sun Sep 01 13:44:28 2013 +0900
-+++ b/src/os_win32.c	Sun Sep 01 13:47:36 2013 +0900
+diff -r 411154c3f7dd src/os_win32.c
+--- a/src/os_win32.c	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/os_win32.c	Sun Sep 01 22:35:43 2013 +0900
 @@ -78,16 +78,6 @@
  # endif
  #endif
@@ -213,19 +230,23 @@ diff -r 4dac7e21a699 src/os_win32.c
   * Return 0 for success, -1 for failure.
   */
      int
-@@ -5511,6 +5503,9 @@
+@@ -5511,6 +5503,13 @@
      int		n;
  #endif
  
++    /*
++     * On Windows, deleting a directory's symbolic link is done by
++     * RemoveDirectory(): mch_rmdir.  It seems unnatural, but it is fact.
++     */
 +    if (mch_isdir(name) && mch_is_symbolic_link(name))
 +	return mch_rmdir(name);
 +
      win32_setattrs(name, FILE_ATTRIBUTE_NORMAL);
  
  #ifdef FEAT_MBYTE
-diff -r 4dac7e21a699 src/os_win32.h
---- a/src/os_win32.h	Sun Sep 01 13:44:28 2013 +0900
-+++ b/src/os_win32.h	Sun Sep 01 13:47:36 2013 +0900
+diff -r 411154c3f7dd src/os_win32.h
+--- a/src/os_win32.h	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/os_win32.h	Sun Sep 01 22:35:43 2013 +0900
 @@ -57,6 +57,8 @@
  
  #define FEAT_SHORTCUT		/* resolve shortcuts */
@@ -255,9 +276,9 @@ diff -r 4dac7e21a699 src/os_win32.h
  #if defined(_MSC_VER) || defined(__BORLANDC__)
      /* Support for __try / __except.  All versions of MSVC and Borland C are
       * expected to have this.  Any other compilers that support it? */
-diff -r 4dac7e21a699 src/proto/os_unix.pro
---- a/src/proto/os_unix.pro	Sun Sep 01 13:44:28 2013 +0900
-+++ b/src/proto/os_unix.pro	Sun Sep 01 13:47:36 2013 +0900
+diff -r 411154c3f7dd src/proto/os_unix.pro
+--- a/src/proto/os_unix.pro	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/proto/os_unix.pro	Sun Sep 01 22:35:43 2013 +0900
 @@ -42,6 +42,7 @@
  void mch_free_acl __ARGS((vim_acl_T aclent));
  void mch_hide __ARGS((char_u *name));
