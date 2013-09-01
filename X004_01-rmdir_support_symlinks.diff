@@ -1,47 +1,9 @@
 # HG changeset patch
-# Parent da32d9de29693f4a9d68450bcb9b9bd71f3be8f6
+# Parent 4dac7e21a69929191766158902837ef22166fbdc
 
-diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
---- a/runtime/doc/eval.txt
-+++ b/runtime/doc/eval.txt
-@@ -4880,13 +4880,13 @@
- 		If you want a list to remain unmodified make a copy first: >
- 			:let revlist = reverse(copy(mylist))
- 
--							*rmdir()*
--rmdir({dname} [, {flags}])
-+rmdir({dname} [, {flags}])				*rmdir()*
- 		Remove a directory {dname}.  Return 0 for success, otherwise
- 		return non-zero value.  If the directory contains any files or
- 		sub-directories, this function will fail, when no {flags}
- 		specified.  When "r" is given as {flags}, it remove the
- 		directory and its contents recursively.
-+		This function is not available in the |sandbox|.
- 
- round({expr})							*round()*
- 		Round off {expr} to the nearest integral value and return it
-diff --git a/src/misc2.c b/src/misc2.c
---- a/src/misc2.c
-+++ b/src/misc2.c
-@@ -6668,9 +6668,12 @@
-     if (gen_expand_wildcards(1, &pat, &file_count, &files,
- 		EW_DIR|EW_FILE|EW_SILENT) == OK)
-     {
--	ga_grow(gap, file_count);
--	for (i = 0; i < file_count; ++i)
--	    ((char_u **)gap->ga_data)[i] = vim_strsave(files[i]);
-+	if (ga_grow(gap, file_count))
-+	{
-+	    for (i = 0; i < file_count; ++i)
-+		((char_u **)gap->ga_data)[i] = vim_strsave(files[i]);
-+	    gap->ga_len += file_count;
-+	}
- 	FreeWild(file_count, files);
-     }
-     vim_free(pat);
-diff --git a/src/os_mswin.c b/src/os_mswin.c
---- a/src/os_mswin.c
-+++ b/src/os_mswin.c
+diff -r 4dac7e21a699 src/os_mswin.c
+--- a/src/os_mswin.c	Sun Sep 01 13:44:28 2013 +0900
++++ b/src/os_mswin.c	Sun Sep 01 13:47:36 2013 +0900
 @@ -514,6 +514,12 @@
      char	buf[_MAX_PATH + 1];
  #endif
@@ -130,9 +92,9 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      return stat(buf, stp);
  }
  
-diff --git a/src/os_unix.c b/src/os_unix.c
---- a/src/os_unix.c
-+++ b/src/os_unix.c
+diff -r 4dac7e21a699 src/os_unix.c
+--- a/src/os_unix.c	Sun Sep 01 13:44:28 2013 +0900
++++ b/src/os_unix.c	Sun Sep 01 13:47:36 2013 +0900
 @@ -2943,6 +2943,28 @@
  #endif
  }
@@ -162,18 +124,18 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  static int executable_file __ARGS((char_u *name));
  
  /*
-diff --git a/src/os_unix.h b/src/os_unix.h
---- a/src/os_unix.h
-+++ b/src/os_unix.h
+diff -r 4dac7e21a699 src/os_unix.h
+--- a/src/os_unix.h	Sun Sep 01 13:44:28 2013 +0900
++++ b/src/os_unix.h	Sun Sep 01 13:47:36 2013 +0900
 @@ -568,3 +568,5 @@
  
  /* We have three kinds of ACL support. */
  #define HAVE_ACL (HAVE_POSIX_ACL || HAVE_SOLARIS_ACL || HAVE_AIX_ACL)
 +
 +#define FEAT_SYMBOLIC_LINKS
-diff --git a/src/os_win32.c b/src/os_win32.c
---- a/src/os_win32.c
-+++ b/src/os_win32.c
+diff -r 4dac7e21a699 src/os_win32.c
+--- a/src/os_win32.c	Sun Sep 01 13:44:28 2013 +0900
++++ b/src/os_win32.c	Sun Sep 01 13:47:36 2013 +0900
 @@ -78,16 +78,6 @@
  # endif
  #endif
@@ -191,7 +153,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /* Record all output and all keyboard & mouse input */
  /* #define MCH_WRITE_DUMP */
  
-@@ -3011,10 +3001,10 @@
+@@ -2967,10 +2957,10 @@
  }
  
  /*
@@ -204,7 +166,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      HANDLE		hFind;
      int			res = FALSE;
-@@ -3025,7 +3015,7 @@
+@@ -2981,7 +2971,7 @@
      WIN32_FIND_DATAW	findDataW;
  
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
@@ -213,7 +175,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (wn != NULL)
      {
  	hFind = FindFirstFileW(wn, &findDataW);
-@@ -3034,7 +3024,7 @@
+@@ -2990,7 +2980,7 @@
  		&& GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
  	{
  	    /* Retry with non-wide function (for Windows 98). */
@@ -222,7 +184,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    if (hFind != INVALID_HANDLE_VALUE)
  	    {
  		fileFlags = findDataA.dwFileAttributes;
-@@ -3050,7 +3040,7 @@
+@@ -3006,7 +2996,7 @@
      else
  #endif
      {
@@ -231,7 +193,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (hFind != INVALID_HANDLE_VALUE)
  	{
  	    fileFlags = findDataA.dwFileAttributes;
-@@ -3062,7 +3052,8 @@
+@@ -3018,7 +3008,8 @@
  	FindClose(hFind);
  
      if ((fileFlags & FILE_ATTRIBUTE_REPARSE_POINT)
@@ -241,7 +203,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	res = TRUE;
  
      return res;
-@@ -5544,7 +5535,8 @@
+@@ -5500,7 +5491,8 @@
  
  
  /*
@@ -251,7 +213,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
   * Return 0 for success, -1 for failure.
   */
      int
-@@ -5555,6 +5547,9 @@
+@@ -5511,6 +5503,9 @@
      int		n;
  #endif
  
@@ -261,9 +223,9 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      win32_setattrs(name, FILE_ATTRIBUTE_NORMAL);
  
  #ifdef FEAT_MBYTE
-diff --git a/src/os_win32.h b/src/os_win32.h
---- a/src/os_win32.h
-+++ b/src/os_win32.h
+diff -r 4dac7e21a699 src/os_win32.h
+--- a/src/os_win32.h	Sun Sep 01 13:44:28 2013 +0900
++++ b/src/os_win32.h	Sun Sep 01 13:47:36 2013 +0900
 @@ -57,6 +57,8 @@
  
  #define FEAT_SHORTCUT		/* resolve shortcuts */
@@ -293,9 +255,9 @@ diff --git a/src/os_win32.h b/src/os_win32.h
  #if defined(_MSC_VER) || defined(__BORLANDC__)
      /* Support for __try / __except.  All versions of MSVC and Borland C are
       * expected to have this.  Any other compilers that support it? */
-diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
---- a/src/proto/os_unix.pro
-+++ b/src/proto/os_unix.pro
+diff -r 4dac7e21a699 src/proto/os_unix.pro
+--- a/src/proto/os_unix.pro	Sun Sep 01 13:44:28 2013 +0900
++++ b/src/proto/os_unix.pro	Sun Sep 01 13:47:36 2013 +0900
 @@ -42,6 +42,7 @@
  void mch_free_acl __ARGS((vim_acl_T aclent));
  void mch_hide __ARGS((char_u *name));
