@@ -24,3 +24,4 @@ fix-comment-in-os_mac.patch
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
 X004_02-win_stat_simplify.diff
+update-rmdir.patch

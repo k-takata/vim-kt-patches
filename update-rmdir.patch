@@ -1,0 +1,39 @@
+# HG changeset patch
+# Parent e715fd8719021d79dd8e4c0dd8804f3951b29e12
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -502,13 +502,13 @@
+ stat_symlink_aware(const char *name, struct stat *stp)
+ {
+ #if defined(_MSC_VER) && _MSC_VER < 1700
++    /* Work around for VC10 or earlier. stat() can't handle a symlink to a
++     * directory. */
+     WIN32_FIND_DATA	findData;
+     HANDLE		hFind, h;
+     DWORD		attr;
+     BOOL		is_symlink = FALSE;
+ 
+-    /* Work around for VC10 or earlier. stat() can't handle a symlink to a
+-     * directory. */
+     hFind = FindFirstFile(name, &findData);
+     if (hFind != INVALID_HANDLE_VALUE)
+     {
+@@ -539,7 +539,7 @@
+ }
+ 
+     static int
+-wstat_symlink_aware(const WCHAR *name, struct _stat *stp)
++wstat_symlink_aware(const WCHAR *name, struct stat *stp)
+ {
+ # if defined(_MSC_VER) && _MSC_VER < 1700
+     /* Work around for VC10 or earlier. _wstat() can't handle a symlink to a
+@@ -614,7 +614,7 @@
+ 
+ 	if (wp != NULL)
+ 	{
+-	    n = wstat_symlink_aware(wp, (struct _stat *)stp);
++	    n = wstat_symlink_aware(wp, stp);
+ 	    vim_free(wp);
+ 	    if (n >= 0)
+ 		return n;
