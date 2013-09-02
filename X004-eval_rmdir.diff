@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 956af17cd6d935ebf381aae6c64524b24d9f1a72
+# Parent 54d16fd0043efd5d2228090ba2d4627df5d54dc0
 implement a new vim script function rmdir()
 
-diff -r 956af17cd6d9 runtime/doc/eval.txt
---- a/runtime/doc/eval.txt	Sun Sep 01 13:41:30 2013 +0900
-+++ b/runtime/doc/eval.txt	Sun Sep 01 13:44:28 2013 +0900
+diff -r 54d16fd0043e runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt	Sun Sep 01 21:56:38 2013 +0900
++++ b/runtime/doc/eval.txt	Mon Sep 02 23:16:53 2013 +0900
 @@ -1905,6 +1905,7 @@
  repeat( {expr}, {count})	String	repeat {expr} {count} times
  resolve( {filename})		String	get filename a shortcut points to
@@ -28,9 +28,9 @@ diff -r 956af17cd6d9 runtime/doc/eval.txt
  round({expr})							*round()*
  		Round off {expr} to the nearest integral value and return it
  		as a |Float|.  If {expr} lies halfway between two integral
-diff -r 956af17cd6d9 src/eval.c
---- a/src/eval.c	Sun Sep 01 13:41:30 2013 +0900
-+++ b/src/eval.c	Sun Sep 01 13:44:28 2013 +0900
+diff -r 54d16fd0043e src/eval.c
+--- a/src/eval.c	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/eval.c	Mon Sep 02 23:16:53 2013 +0900
 @@ -654,6 +654,7 @@
  static void f_repeat __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_resolve __ARGS((typval_T *argvars, typval_T *rettv));
@@ -96,16 +96,16 @@ diff -r 956af17cd6d9 src/eval.c
  #define SP_NOMOVE	0x01	    /* don't move cursor */
  #define SP_REPEAT	0x02	    /* repeat to find outer pair */
  #define SP_RETCOUNT	0x04	    /* return matchcount */
-diff -r 956af17cd6d9 src/misc2.c
---- a/src/misc2.c	Sun Sep 01 13:41:30 2013 +0900
-+++ b/src/misc2.c	Sun Sep 01 13:44:28 2013 +0900
+diff -r 54d16fd0043e src/misc2.c
+--- a/src/misc2.c	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/misc2.c	Mon Sep 02 23:16:53 2013 +0900
 @@ -6641,3 +6641,70 @@
      return FALSE;
  }
  #endif
 +
 +/*
-+ * List up entries in the directory into garray_T, for internal usage.
++ * List entries in the directory into garray_T, for internal usage.
 + *
 + * Return OK or FAIL.
 + */
@@ -170,9 +170,9 @@ diff -r 956af17cd6d9 src/misc2.c
 +
 +    return mch_rmdir(path) == 0 ? 0 : -1;
 +}
-diff -r 956af17cd6d9 src/os_win32.c
---- a/src/os_win32.c	Sun Sep 01 13:41:30 2013 +0900
-+++ b/src/os_win32.c	Sun Sep 01 13:44:28 2013 +0900
+diff -r 54d16fd0043e src/os_win32.c
+--- a/src/os_win32.c	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/os_win32.c	Mon Sep 02 23:16:53 2013 +0900
 @@ -5721,6 +5721,35 @@
  }
  
@@ -209,18 +209,18 @@ diff -r 956af17cd6d9 src/os_win32.c
   * Get the default shell for the current hardware platform
   */
      char *
-diff -r 956af17cd6d9 src/proto/misc2.pro
---- a/src/proto/misc2.pro	Sun Sep 01 13:41:30 2013 +0900
-+++ b/src/proto/misc2.pro	Sun Sep 01 13:44:28 2013 +0900
+diff -r 54d16fd0043e src/proto/misc2.pro
+--- a/src/proto/misc2.pro	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/proto/misc2.pro	Mon Sep 02 23:16:53 2013 +0900
 @@ -117,4 +117,5 @@
  int put_bytes __ARGS((FILE *fd, long_u nr, int len));
  void put_time __ARGS((FILE *fd, time_t the_time));
  int has_non_ascii __ARGS((char_u *s));
 +int vim_remove_r __ARGS((char_u *path));
  /* vim: set ft=c : */
-diff -r 956af17cd6d9 src/proto/os_win32.pro
---- a/src/proto/os_win32.pro	Sun Sep 01 13:41:30 2013 +0900
-+++ b/src/proto/os_win32.pro	Sun Sep 01 13:44:28 2013 +0900
+diff -r 54d16fd0043e src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro	Sun Sep 01 21:56:38 2013 +0900
++++ b/src/proto/os_win32.pro	Mon Sep 02 23:16:53 2013 +0900
 @@ -44,6 +44,7 @@
  void mch_breakcheck __ARGS((void));
  int mch_wrename __ARGS((WCHAR *wold, WCHAR *wnew));
