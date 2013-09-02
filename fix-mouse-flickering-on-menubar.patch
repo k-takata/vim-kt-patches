@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent 60871bd6c71fa4bfc420af2d5c7aa6662bfc4e73
+diff --git a/src/gui_w48.c b/src/gui_w48.c
+--- a/src/gui_w48.c
++++ b/src/gui_w48.c
+@@ -1008,7 +1008,7 @@
+     static LPARAM last_lParam = 0L;
+ 
+     /* We sometimes get a mousemove when the mouse didn't move... */
+-    if (uMsg == WM_MOUSEMOVE)
++    if (uMsg == WM_MOUSEMOVE || uMsg == WM_NCMOUSEMOVE)
+     {
+ 	if (lParam == last_lParam)
+ 	    return;

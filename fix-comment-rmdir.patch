@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent bdbcfd553725865a41251ed6e51441960bbfcfd9
+diff --git a/src/misc2.c b/src/misc2.c
+--- a/src/misc2.c
++++ b/src/misc2.c
+@@ -6643,7 +6643,7 @@
+ #endif
+ 
+ /*
+- * List up entries in the directory into garray_T, for internal usage.
++ * List entries in the directory into garray_T, for internal usage.
+  *
+  * Return OK or FAIL.
+  */
