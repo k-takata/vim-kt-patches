@@ -1,0 +1,45 @@
+# HG changeset patch
+# Parent aaa51c265ea51354f7f754e6df1a7b9dd2f862c4
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
+@@ -751,6 +751,7 @@
+ 'regexpengine'	options.txt	/*'regexpengine'*
+ 'relativenumber'	options.txt	/*'relativenumber'*
+ 'remap'	options.txt	/*'remap'*
++'renderoptions'	options.txt	/*'renderoptions'*
+ 'report'	options.txt	/*'report'*
+ 'restorescreen'	options.txt	/*'restorescreen'*
+ 'revins'	options.txt	/*'revins'*
+@@ -761,6 +762,7 @@
+ 'rlc'	options.txt	/*'rlc'*
+ 'rnu'	options.txt	/*'rnu'*
+ 'ro'	options.txt	/*'ro'*
++'rop'	options.txt	/*'rop'*
+ 'rs'	options.txt	/*'rs'*
+ 'rtp'	options.txt	/*'rtp'*
+ 'ru'	options.txt	/*'ru'*
+@@ -1166,6 +1168,7 @@
+ +dialog_gui	various.txt	/*+dialog_gui*
+ +diff	various.txt	/*+diff*
+ +digraphs	various.txt	/*+digraphs*
+++directx	various.txt	/*+directx*
+ +dnd	various.txt	/*+dnd*
+ +emacs_tags	various.txt	/*+emacs_tags*
+ +eval	various.txt	/*+eval*
+@@ -5197,6 +5200,7 @@
+ cpo-K	options.txt	/*cpo-K*
+ cpo-L	options.txt	/*cpo-L*
+ cpo-M	options.txt	/*cpo-M*
++cpo-N	options.txt	/*cpo-N*
+ cpo-O	options.txt	/*cpo-O*
+ cpo-P	options.txt	/*cpo-P*
+ cpo-R	options.txt	/*cpo-R*
+@@ -7546,6 +7550,7 @@
+ rileft	rileft.txt	/*rileft*
+ rileft.txt	rileft.txt	/*rileft.txt*
+ riscos	os_risc.txt	/*riscos*
++rmdir()	eval.txt	/*rmdir()*
+ rot13	change.txt	/*rot13*
+ round()	eval.txt	/*round()*
+ rst.vim	syntax.txt	/*rst.vim*

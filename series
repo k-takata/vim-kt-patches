@@ -24,3 +24,4 @@ fix-comment-in-os_mac.patch
 fix-mouse-flickering-on-menubar.patch
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
+update-tags.patch
