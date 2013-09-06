@@ -17,7 +17,6 @@ improve_dos_test.diff
 fix-utf8-username.patch
 fix-utf8-hostname.patch
 fix-utf8-msgloop.patch
-support-tcl86.patch
 fix-comments-related-Japanese.patch
 fix-comment-in-os_mac.patch
 fix-mouse-flickering-on-menubar.patch
