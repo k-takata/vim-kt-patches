@@ -941,7 +941,7 @@ diff --git a/src/screen.c b/src/screen.c
 +		    char_attr = 0; /* was: hl_attr(HLF_AT); */
 +		    /* FIXME: why do we need to adjust vcol if showbreak does
 +		     * not?? */
-+		    // vcol += n_extra;
++		    /* vcol += n_extra; */
 +		    /* FIXME: is this relevant here? copied shamelessly from
 +		     * showbreak */
 +		    /* Correct end of highlighted area for 'breakindent',
