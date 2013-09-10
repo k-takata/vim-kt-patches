@@ -400,7 +400,7 @@ diff --git a/src/eval.c b/src/eval.c
  {
      char_u	*s = get_tv_string(&argvars[0]);
      int		col = 0;
-+    int		lnum = 0;
++    linenr_T	lnum = 0;
  
      if (argvars[1].v_type != VAR_UNKNOWN)
 +    {
@@ -408,7 +408,7 @@ diff --git a/src/eval.c b/src/eval.c
 -
 -    rettv->vval.v_number = (varnumber_T)(linetabsize_col(col, s) - col);
 +	if (argvars[2].v_type != VAR_UNKNOWN)
-+	    lnum = get_tv_number(&argvars[2]);
++	    lnum = get_tv_lnum(&argvars[2]);
 +    }
 +
 +    rettv->vval.v_number = (varnumber_T)(linetabsize_col(col, s, lnum) - col);
