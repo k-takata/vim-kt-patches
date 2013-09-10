@@ -1,7 +1,7 @@
-diff -urN '--exclude=*.orig' vim73.orig/runtime/doc/eval.txt vim73/runtime/doc/eval.txt
---- vim73.orig/runtime/doc/eval.txt	2013-06-01 13:59:09.904239768 -0500
-+++ vim73/runtime/doc/eval.txt	2013-06-01 14:48:44.952470044 -0500
-@@ -6342,8 +6342,8 @@
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -6419,8 +6419,8 @@
  keymap			Compiled with 'keymap' support.
  langmap			Compiled with 'langmap' support.
  libcall			Compiled with |libcall()| support.
@@ -12,14 +12,13 @@ diff -urN '--exclude=*.orig' vim73.orig/runtime/doc/eval.txt vim73/runtime/doc/e
  lispindent		Compiled with support for lisp indenting.
  listcmds		Compiled with commands for the buffer list |:files|
  			and the argument list |arglist|.
-diff -urN '--exclude=*.orig' vim73.orig/runtime/doc/options.txt vim73/runtime/doc/options.txt
---- vim73.orig/runtime/doc/options.txt	2013-06-01 13:59:09.907239654 -0500
-+++ vim73/runtime/doc/options.txt	2013-06-01 14:48:44.957469851 -0500
-@@ -1177,6 +1177,39 @@
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -1207,6 +1207,38 @@
  	break if 'linebreak' is on.  Only works for ASCII and also for 8-bit
  	characters when 'encoding' is an 8-bit encoding.
  
-+	
 +						*'breakindent'* *'bri'*
 +'breakindent' 'bri'	boolean (default off)
 +			local to window
@@ -55,7 +54,7 @@ diff -urN '--exclude=*.orig' vim73.orig/runtime/doc/options.txt vim73/runtime/do
  						*'browsedir'* *'bsdir'*
  'browsedir' 'bsdir'	string	(default: "last")
  			global
-@@ -4472,12 +4505,13 @@
+@@ -4585,12 +4617,13 @@
  			{not in Vi}
  			{not available when compiled without the |+linebreak|
  			feature}
@@ -73,9 +72,9 @@ diff -urN '--exclude=*.orig' vim73.orig/runtime/doc/options.txt vim73/runtime/do
  	Note that <Tab> characters after an <EOL> are mostly not displayed
  	with the right amount of white space.
  
-diff -urN '--exclude=*.orig' vim73.orig/runtime/doc/tags vim73/runtime/doc/tags
---- vim73.orig/runtime/doc/tags	2013-06-01 13:59:09.897240038 -0500
-+++ vim73/runtime/doc/tags	2013-06-01 14:48:44.964469584 -0500
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
 @@ -90,6 +90,12 @@
  'bl'	options.txt	/*'bl'*
  'bomb'	options.txt	/*'bomb'*
@@ -89,10 +88,10 @@ diff -urN '--exclude=*.orig' vim73.orig/runtime/doc/tags vim73/runtime/doc/tags
  'brk'	options.txt	/*'brk'*
  'browsedir'	options.txt	/*'browsedir'*
  'bs'	options.txt	/*'bs'*
-diff -urN '--exclude=*.orig' vim73.orig/runtime/optwin.vim vim73/runtime/optwin.vim
---- vim73.orig/runtime/optwin.vim	2013-06-01 13:59:09.895240116 -0500
-+++ vim73/runtime/optwin.vim	2013-06-01 14:48:44.967469470 -0500
-@@ -329,6 +329,15 @@
+diff --git a/runtime/optwin.vim b/runtime/optwin.vim
+--- a/runtime/optwin.vim
++++ b/runtime/optwin.vim
+@@ -324,6 +324,15 @@
  call append("$", "linebreak\twrap long lines at a character in 'breakat'")
  call append("$", "\t(local to window)")
  call <SID>BinOptionL("lbr")
@@ -108,9 +107,9 @@ diff -urN '--exclude=*.orig' vim73.orig/runtime/optwin.vim vim73/runtime/optwin.
  call append("$", "breakat\twhich characters might cause a line break")
  call <SID>OptionG("brk", &brk)
  call append("$", "showbreak\tstring to put before wrapped screen lines")
-diff -urN '--exclude=*.orig' vim73.orig/src/charset.c vim73/src/charset.c
---- vim73.orig/src/charset.c	2013-06-01 13:59:09.867241195 -0500
-+++ vim73/src/charset.c	2013-06-01 14:48:44.970469356 -0500
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
 @@ -852,24 +852,26 @@
   * taking into account the size of a tab.
   */
@@ -289,10 +288,10 @@ diff -urN '--exclude=*.orig' vim73.orig/src/charset.c vim73/src/charset.c
  	    /* make sure we don't go past the end of the line */
  	    if (*ptr == NUL)
  	    {
-diff -urN '--exclude=*.orig' vim73.orig/src/edit.c vim73/src/edit.c
---- vim73.orig/src/edit.c	2013-06-01 13:59:09.868241157 -0500
-+++ vim73/src/edit.c	2013-06-01 14:48:44.973469241 -0500
-@@ -420,7 +420,7 @@
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -428,7 +428,7 @@
  	if (startln)
  	    Insstart.col = 0;
      }
@@ -301,25 +300,27 @@ diff -urN '--exclude=*.orig' vim73.orig/src/edit.c vim73/src/edit.c
      Insstart_blank_vcol = MAXCOL;
      if (!did_ai)
  	ai_col = 0;
-@@ -1943,7 +1943,7 @@
+@@ -1951,7 +1951,8 @@
  	    else
  #endif
  		++new_cursor_col;
 -	    vcol += lbr_chartabsize(ptr + new_cursor_col, (colnr_T)vcol);
-+	    vcol += lbr_chartabsize(ptr + new_cursor_col, (colnr_T)vcol, curwin->w_cursor.lnum);
++	    vcol += lbr_chartabsize(ptr + new_cursor_col, (colnr_T)vcol,
++							curwin->w_cursor.lnum);
  	}
  	vcol = last_vcol;
  
-@@ -6734,7 +6734,7 @@
+@@ -6754,7 +6755,8 @@
  	    ins_need_undo = FALSE;
  	}
  	Insstart = curwin->w_cursor;	/* new insertion starts here */
 -	Insstart_textlen = (colnr_T)linetabsize(ml_get_curline());
-+	Insstart_textlen = (colnr_T)linetabsize(ml_get_curline(), curwin->w_cursor.lnum);
++	Insstart_textlen = (colnr_T)linetabsize(ml_get_curline(),
++							curwin->w_cursor.lnum);
  	ai_col = 0;
  #ifdef FEAT_VREPLACE
  	if (State & VREPLACE_FLAG)
-@@ -7089,9 +7089,10 @@
+@@ -7109,9 +7111,10 @@
  	for (;;)
  	{
  	    coladvance(v - width);
@@ -333,13 +334,14 @@ diff -urN '--exclude=*.orig' vim73.orig/src/edit.c vim73/src/edit.c
  #  ifdef FEAT_MBYTE
  			&& !has_mbyte
  #  endif
-@@ -9726,11 +9727,11 @@
+@@ -9751,11 +9754,11 @@
  	getvcol(curwin, &fpos, &vcol, NULL, NULL);
  	getvcol(curwin, cursor, &want_vcol, NULL, NULL);
  
 -	/* Use as many TABs as possible.  Beware of 'showbreak' and
-+	/* Use as many TABs as possible.  Beware of 'breakindent', 'showbreak' and
- 	 * 'linebreak' adding extra virtual columns. */
+-	 * 'linebreak' adding extra virtual columns. */
++	/* Use as many TABs as possible.  Beware of 'breakindent', 'showbreak'
++	 * and 'linebreak' adding extra virtual columns. */
  	while (vim_iswhite(*ptr))
  	{
 -	    i = lbr_chartabsize((char_u *)"\t", vcol);
@@ -347,7 +349,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/edit.c vim73/src/edit.c
  	    if (vcol + i > want_vcol)
  		break;
  	    if (*ptr != TAB)
-@@ -9756,7 +9757,7 @@
+@@ -9781,7 +9784,7 @@
  	    /* Skip over the spaces we need. */
  	    while (vcol < want_vcol && *ptr == ' ')
  	    {
@@ -356,7 +358,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/edit.c vim73/src/edit.c
  		++ptr;
  		++repl_off;
  	    }
-@@ -10012,7 +10013,7 @@
+@@ -10037,7 +10040,7 @@
      while ((colnr_T)temp < curwin->w_virtcol && *ptr != NUL)
      {
  	prev_ptr = ptr;
@@ -365,26 +367,27 @@ diff -urN '--exclude=*.orig' vim73.orig/src/edit.c vim73/src/edit.c
      }
      if ((colnr_T)temp > curwin->w_virtcol)
  	ptr = prev_ptr;
-diff -urN '--exclude=*.orig' vim73.orig/src/eval.c vim73/src/eval.c
---- vim73.orig/src/eval.c	2013-06-01 13:59:09.871241042 -0500
-+++ vim73/src/eval.c	2013-06-01 14:48:44.978469051 -0500
-@@ -17474,8 +17474,11 @@
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -17631,8 +17631,12 @@
  
      if (argvars[1].v_type != VAR_UNKNOWN)
  	col = get_tv_number(&argvars[1]);
 -
 -    rettv->vval.v_number = (varnumber_T)(linetabsize_col(col, s) - col);
 +    /*
-+     * FIXME: passing 0 as 3rd argument to linetabsize_col, instead of real line number;
-+     * (can we get it from here somehow?); might give incorrect result with breakindent!
++     * FIXME: passing 0 as 3rd argument to linetabsize_col, instead of real
++     * line number; (can we get it from here somehow?); might give incorrect
++     * result with breakindent!
 +     */
-+    rettv->vval.v_number = (varnumber_T)(linetabsize_col(col, s, 0) - col); 
++    rettv->vval.v_number = (varnumber_T)(linetabsize_col(col, s, 0) - col);
  }
  
  /*
-diff -urN '--exclude=*.orig' vim73.orig/src/ex_cmds.c vim73/src/ex_cmds.c
---- vim73.orig/src/ex_cmds.c	2013-06-01 13:59:09.868241157 -0500
-+++ vim73/src/ex_cmds.c	2013-06-01 14:48:44.981468936 -0500
+diff --git a/src/ex_cmds.c b/src/ex_cmds.c
+--- a/src/ex_cmds.c
++++ b/src/ex_cmds.c
 @@ -261,7 +261,7 @@
  	;
      save = *last;
@@ -394,21 +397,22 @@ diff -urN '--exclude=*.orig' vim73.orig/src/ex_cmds.c vim73/src/ex_cmds.c
      if (has_tab != NULL)		/* check for embedded TAB */
  	*has_tab = (vim_strrchr(first, TAB) != NULL);
      *last = save;
-diff -urN '--exclude=*.orig' vim73.orig/src/getchar.c vim73/src/getchar.c
---- vim73.orig/src/getchar.c	2013-06-01 13:59:09.848241929 -0500
-+++ vim73/src/getchar.c	2013-06-01 14:48:44.983468860 -0500
-@@ -2631,7 +2631,7 @@
+diff --git a/src/getchar.c b/src/getchar.c
+--- a/src/getchar.c
++++ b/src/getchar.c
+@@ -2633,7 +2633,8 @@
  				    if (!vim_iswhite(ptr[col]))
  					curwin->w_wcol = vcol;
  				    vcol += lbr_chartabsize(ptr + col,
 -							       (colnr_T)vcol);
-+							       (colnr_T)vcol, curwin->w_cursor.lnum);
++						       (colnr_T)vcol,
++						       curwin->w_cursor.lnum);
  #ifdef FEAT_MBYTE
  				    if (has_mbyte)
  					col += (*mb_ptr2len)(ptr + col);
-diff -urN '--exclude=*.orig' vim73.orig/src/gui_beval.c vim73/src/gui_beval.c
---- vim73.orig/src/gui_beval.c	2013-06-01 13:59:09.849241889 -0500
-+++ vim73/src/gui_beval.c	2013-06-01 14:48:44.984468822 -0500
+diff --git a/src/gui_beval.c b/src/gui_beval.c
+--- a/src/gui_beval.c
++++ b/src/gui_beval.c
 @@ -335,7 +335,7 @@
  	{
  	    /* Not past end of the file. */
@@ -418,16 +422,16 @@ diff -urN '--exclude=*.orig' vim73.orig/src/gui_beval.c vim73/src/gui_beval.c
  	    {
  		/* Not past end of line. */
  		if (getword)
-diff -urN '--exclude=*.orig' vim73.orig/src/misc1.c vim73/src/misc1.c
---- vim73.orig/src/misc1.c	2013-06-01 13:59:09.877240810 -0500
-+++ vim73/src/misc1.c	2013-06-01 14:48:44.987468707 -0500
-@@ -465,6 +465,44 @@
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -468,6 +468,45 @@
      return (int)col;
  }
  
 +#ifdef FEAT_LINEBREAK
-+/* 
-+ * Return appropriate space number for breakindent, taking influencing 
++/*
++ * Return appropriate space number for breakindent, taking influencing
 + * parameters into account. Window must be specified, since it is not
 + * necessarily always the current one. If lnum==0, current line is calculated,
 + * specified line otherwise.
@@ -443,13 +447,14 @@ diff -urN '--exclude=*.orig' vim73.orig/src/misc1.c vim73/src/misc1.c
 +	- (wp->w_p_nu && !vim_strchr(p_cpo,CPO_NUMCOL)?number_width(wp):0);
 +	/* - (*p_sbr == NUL ? 0 : vim_strsize(p_sbr)); */
 +
-+    bri = get_indent_buf(wp->w_buffer,lnum?lnum:wp->w_cursor.lnum) + wp->w_p_brishift;
++    bri = get_indent_buf(wp->w_buffer,lnum?lnum:wp->w_cursor.lnum)
++							    + wp->w_p_brishift;
 +
 +    /* if numbering and 'c' in 'cpoptions', cancel it out effectively */
 +    /* (this could be replaced by an equivalent call to win_col_off2()) */
 +    if (curwin->w_p_nu && vim_strchr(p_cpo, CPO_NUMCOL))
 +	bri += number_width(wp);
-+    
++
 +    /* never indent past left window margin */
 +    if (bri < 0)
 +	bri = 0;
@@ -466,7 +471,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/misc1.c vim73/src/misc1.c
  #if defined(FEAT_CINDENT) || defined(FEAT_SMARTINDENT)
  
  static int cin_is_cinword __ARGS((char_u *line));
-@@ -1947,7 +1985,7 @@
+@@ -1950,7 +1989,7 @@
      s = ml_get_buf(wp->w_buffer, lnum, FALSE);
      if (*s == NUL)		/* empty line */
  	return 1;
@@ -475,7 +480,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/misc1.c vim73/src/misc1.c
  
      /*
       * If list mode is on, then the '$' at the end of the line may take up one
-@@ -2003,7 +2041,7 @@
+@@ -2006,7 +2045,7 @@
      col = 0;
      while (*s != NUL && --column >= 0)
      {
@@ -484,7 +489,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/misc1.c vim73/src/misc1.c
  	mb_ptr_adv(s);
      }
  
-@@ -2015,7 +2053,7 @@
+@@ -2018,7 +2057,7 @@
       * 'ts') -- webb.
       */
      if (*s == TAB && (State & NORMAL) && (!wp->w_p_list || lcs_tab1))
@@ -493,45 +498,50 @@ diff -urN '--exclude=*.orig' vim73.orig/src/misc1.c vim73/src/misc1.c
  
      /*
       * Add column offset for 'number', 'relativenumber', 'foldcolumn', etc.
-@@ -9045,7 +9083,7 @@
+@@ -9049,7 +9088,8 @@
  		amount = 0;
  		while (*that && col)
  		{
 -		    amount += lbr_chartabsize_adv(&that, (colnr_T)amount);
-+		    amount += lbr_chartabsize_adv(&that, (colnr_T)amount, pos->lnum);
++		    amount += lbr_chartabsize_adv(&that, (colnr_T)amount,
++								    pos->lnum);
  		    col--;
  		}
  
-@@ -9068,7 +9106,7 @@
+@@ -9072,7 +9112,8 @@
  
  		    while (vim_iswhite(*that))
  		    {
 -			amount += lbr_chartabsize(that, (colnr_T)amount);
-+			amount += lbr_chartabsize(that, (colnr_T)amount, pos->lnum);
++			amount += lbr_chartabsize(that, (colnr_T)amount,
++								    pos->lnum);
  			++that;
  		    }
  
-@@ -9107,14 +9145,14 @@
+@@ -9111,14 +9152,17 @@
  				    --parencount;
  				if (*that == '\\' && *(that+1) != NUL)
  				    amount += lbr_chartabsize_adv(&that,
 -							     (colnr_T)amount);
-+							     (colnr_T)amount, pos->lnum);
++							     (colnr_T)amount,
++							     pos->lnum);
  				amount += lbr_chartabsize_adv(&that,
 -							     (colnr_T)amount);
-+							     (colnr_T)amount, pos->lnum);
++							     (colnr_T)amount,
++							     pos->lnum);
  			    }
  			}
  			while (vim_iswhite(*that))
  			{
 -			    amount += lbr_chartabsize(that, (colnr_T)amount);
-+			    amount += lbr_chartabsize(that, (colnr_T)amount, pos->lnum);
++			    amount += lbr_chartabsize(that, (colnr_T)amount,
++							    pos->lnum);
  			    that++;
  			}
  			if (!*that || *that == ';')
-diff -urN '--exclude=*.orig' vim73.orig/src/misc2.c vim73/src/misc2.c
---- vim73.orig/src/misc2.c	2013-06-01 13:59:09.892240231 -0500
-+++ vim73/src/misc2.c	2013-06-01 14:48:44.989468631 -0500
+diff --git a/src/misc2.c b/src/misc2.c
+--- a/src/misc2.c
++++ b/src/misc2.c
 @@ -166,7 +166,7 @@
  #ifdef FEAT_VIRTUALEDIT
  	    if ((addspaces || finetune) && !VIsual_active)
@@ -563,10 +573,10 @@ diff -urN '--exclude=*.orig' vim73.orig/src/misc2.c vim73/src/misc2.c
  #endif
  	    col += csize;
  	}
-diff -urN '--exclude=*.orig' vim73.orig/src/normal.c vim73/src/normal.c
---- vim73.orig/src/normal.c	2013-06-01 13:59:09.874240925 -0500
-+++ vim73/src/normal.c	2013-06-01 14:48:44.992468516 -0500
-@@ -4534,7 +4534,7 @@
+diff --git a/src/normal.c b/src/normal.c
+--- a/src/normal.c
++++ b/src/normal.c
+@@ -4535,7 +4535,7 @@
      int		dir;
      long	dist;
  {
@@ -575,7 +585,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/normal.c vim73/src/normal.c
      int		retval = OK;
      int		atend = FALSE;
      int		n;
-@@ -4607,7 +4607,7 @@
+@@ -4608,7 +4608,7 @@
  		    (void)hasFolding(curwin->w_cursor.lnum,
  						&curwin->w_cursor.lnum, NULL);
  #endif
@@ -584,7 +594,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/normal.c vim73/src/normal.c
  		if (linelen > width1)
  		    curwin->w_curswant += (((linelen - width1 - 1) / width2)
  								+ 1) * width2;
-@@ -4637,7 +4637,7 @@
+@@ -4638,7 +4638,7 @@
  		}
  		curwin->w_cursor.lnum++;
  		curwin->w_curswant %= width2;
@@ -593,37 +603,40 @@ diff -urN '--exclude=*.orig' vim73.orig/src/normal.c vim73/src/normal.c
  	    }
  	}
        }
-diff -urN '--exclude=*.orig' vim73.orig/src/ops.c vim73/src/ops.c
---- vim73.orig/src/ops.c	2013-06-01 13:59:09.870241080 -0500
-+++ vim73/src/ops.c	2013-06-01 14:48:44.994468440 -0500
-@@ -431,7 +431,7 @@
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -435,7 +435,8 @@
  	}
  	for ( ; vim_iswhite(*bd.textstart); )
  	{
 -	    incr = lbr_chartabsize_adv(&bd.textstart, (colnr_T)(bd.start_vcol));
-+	    incr = lbr_chartabsize_adv(&bd.textstart, (colnr_T)(bd.start_vcol), curwin->w_cursor.lnum);
++	    incr = lbr_chartabsize_adv(&bd.textstart, (colnr_T)(bd.start_vcol),
++							curwin->w_cursor.lnum);
  	    total += incr;
  	    bd.start_vcol += incr;
  	}
-@@ -491,7 +491,7 @@
+@@ -495,7 +496,8 @@
  
  	while (vim_iswhite(*non_white))
  	{
 -	    incr = lbr_chartabsize_adv(&non_white, non_white_col);
-+	    incr = lbr_chartabsize_adv(&non_white, non_white_col, curwin->w_cursor.lnum);
++	    incr = lbr_chartabsize_adv(&non_white, non_white_col,
++							curwin->w_cursor.lnum);
  	    non_white_col += incr;
  	}
  
-@@ -516,7 +516,7 @@
+@@ -520,7 +522,8 @@
  	    verbatim_copy_width -= bd.start_char_vcols;
  	while (verbatim_copy_width < destination_col)
  	{
 -	    incr = lbr_chartabsize(verbatim_copy_end, verbatim_copy_width);
-+	    incr = lbr_chartabsize(verbatim_copy_end, verbatim_copy_width, curwin->w_cursor.lnum);
++	    incr = lbr_chartabsize(verbatim_copy_end, verbatim_copy_width,
++							curwin->w_cursor.lnum);
  	    if (verbatim_copy_width + incr > destination_col)
  		break;
  	    verbatim_copy_width += incr;
-@@ -3612,7 +3612,7 @@
+@@ -3623,7 +3626,7 @@
  	    for (ptr = oldp; vcol < col && *ptr; )
  	    {
  		/* Count a tab for what it's worth (if list mode not on) */
@@ -632,7 +645,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/ops.c vim73/src/ops.c
  		vcol += incr;
  	    }
  	    bd.textcol = (colnr_T)(ptr - oldp);
-@@ -3646,7 +3646,7 @@
+@@ -3657,7 +3660,7 @@
  	    /* calculate number of spaces required to fill right side of block*/
  	    spaces = y_width + 1;
  	    for (j = 0; j < yanklen; j++)
@@ -641,7 +654,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/ops.c vim73/src/ops.c
  	    if (spaces < 0)
  		spaces = 0;
  
-@@ -5163,7 +5163,7 @@
+@@ -5174,7 +5177,7 @@
      while (bdp->start_vcol < oap->start_vcol && *pstart)
      {
  	/* Count a tab for what it's worth (if list mode not on) */
@@ -650,7 +663,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/ops.c vim73/src/ops.c
  	bdp->start_vcol += incr;
  #ifdef FEAT_VISUALEXTRA
  	if (vim_iswhite(*pstart))
-@@ -5232,7 +5232,7 @@
+@@ -5243,7 +5246,7 @@
  	    {
  		/* Count a tab for what it's worth (if list mode not on) */
  		prev_pend = pend;
@@ -659,18 +672,19 @@ diff -urN '--exclude=*.orig' vim73.orig/src/ops.c vim73/src/ops.c
  		bdp->end_vcol += incr;
  	    }
  	    if (bdp->end_vcol <= oap->end_vcol
-@@ -6745,7 +6745,7 @@
+@@ -6756,7 +6759,8 @@
  	    validate_virtcol();
  	    col_print(buf1, sizeof(buf1), (int)curwin->w_cursor.col + 1,
  		    (int)curwin->w_virtcol + 1);
 -	    col_print(buf2, sizeof(buf2), (int)STRLEN(p), linetabsize(p));
-+	    col_print(buf2, sizeof(buf2), (int)STRLEN(p), linetabsize(p, curwin->w_cursor.lnum));
++	    col_print(buf2, sizeof(buf2), (int)STRLEN(p),
++					linetabsize(p, curwin->w_cursor.lnum));
  
  	    if (char_count_cursor == byte_count_cursor
  		    && char_count == byte_count)
-diff -urN '--exclude=*.orig' vim73.orig/src/option.c vim73/src/option.c
---- vim73.orig/src/option.c	2013-06-01 13:59:09.893240193 -0500
-+++ vim73/src/option.c	2013-06-01 14:48:44.998468287 -0500
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
 @@ -187,6 +187,11 @@
  #ifdef FEAT_ARABIC
  # define PV_ARAB	OPT_WIN(WV_ARAB)
@@ -717,7 +731,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/option.c vim73/src/option.c
      {"browsedir",   "bsdir",P_STRING|P_VI_DEF,
  #ifdef FEAT_BROWSE
  			    (char_u *)&p_bsdir, PV_NONE,
-@@ -8485,6 +8517,16 @@
+@@ -8501,6 +8533,16 @@
  	}
  	curwin->w_nrwidth_line_count = 0;
      }
@@ -734,7 +748,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/option.c vim73/src/option.c
  #endif
  
      else if (pp == &curbuf->b_p_tw)
-@@ -9934,6 +9976,9 @@
+@@ -9954,6 +9996,9 @@
  	case PV_WRAP:	return (char_u *)&(curwin->w_p_wrap);
  #ifdef FEAT_LINEBREAK
  	case PV_LBR:	return (char_u *)&(curwin->w_p_lbr);
@@ -744,8 +758,8 @@ diff -urN '--exclude=*.orig' vim73.orig/src/option.c vim73/src/option.c
  #endif
  #ifdef FEAT_SCROLLBIND
  	case PV_SCBIND: return (char_u *)&(curwin->w_p_scb);
-@@ -10120,6 +10165,8 @@
-     to->wo_wrap = from->wo_wrap;
+@@ -10143,6 +10188,8 @@
+ #endif
  #ifdef FEAT_LINEBREAK
      to->wo_lbr = from->wo_lbr;
 +    to->wo_bri = from->wo_bri;
@@ -753,10 +767,10 @@ diff -urN '--exclude=*.orig' vim73.orig/src/option.c vim73/src/option.c
  #endif
  #ifdef FEAT_SCROLLBIND
      to->wo_scb = from->wo_scb;
-diff -urN '--exclude=*.orig' vim73.orig/src/option.h vim73/src/option.h
---- vim73.orig/src/option.h	2013-06-01 13:59:09.855241658 -0500
-+++ vim73/src/option.h	2013-06-01 14:48:44.999468249 -0500
-@@ -1050,6 +1050,11 @@
+diff --git a/src/option.h b/src/option.h
+--- a/src/option.h
++++ b/src/option.h
+@@ -1057,6 +1057,11 @@
  #ifdef FEAT_CURSORBIND
      , WV_CRBIND
  #endif
@@ -768,9 +782,9 @@ diff -urN '--exclude=*.orig' vim73.orig/src/option.h vim73/src/option.h
  #ifdef FEAT_DIFF
      , WV_DIFF
  #endif
-diff -urN '--exclude=*.orig' vim73.orig/src/proto/charset.pro vim73/src/proto/charset.pro
---- vim73.orig/src/proto/charset.pro	2013-06-01 13:59:09.863241350 -0500
-+++ vim73/src/proto/charset.pro	2013-06-01 14:48:45.002468135 -0500
+diff --git a/src/proto/charset.pro b/src/proto/charset.pro
+--- a/src/proto/charset.pro
++++ b/src/proto/charset.pro
 @@ -14,9 +14,9 @@
  int vim_strsize __ARGS((char_u *s));
  int vim_strnsize __ARGS((char_u *s, int len));
@@ -797,9 +811,9 @@ diff -urN '--exclude=*.orig' vim73.orig/src/proto/charset.pro vim73/src/proto/ch
  int in_win_border __ARGS((win_T *wp, colnr_T vcol));
  void getvcol __ARGS((win_T *wp, pos_T *pos, colnr_T *start, colnr_T *cursor, colnr_T *end));
  colnr_T getvcol_nolist __ARGS((pos_T *posp));
-diff -urN '--exclude=*.orig' vim73.orig/src/proto/misc1.pro vim73/src/proto/misc1.pro
---- vim73.orig/src/proto/misc1.pro	2013-06-01 13:59:09.863241350 -0500
-+++ vim73/src/proto/misc1.pro	2013-06-01 14:49:33.028635921 -0500
+diff --git a/src/proto/misc1.pro b/src/proto/misc1.pro
+--- a/src/proto/misc1.pro
++++ b/src/proto/misc1.pro
 @@ -5,6 +5,7 @@
  int get_indent_str __ARGS((char_u *ptr, int ts));
  int set_indent __ARGS((int size, int flags));
@@ -808,31 +822,46 @@ diff -urN '--exclude=*.orig' vim73.orig/src/proto/misc1.pro vim73/src/proto/misc
  int open_line __ARGS((int dir, int flags, int second_line_indent));
  int get_leader_len __ARGS((char_u *line, char_u **flags, int backward, int include_space));
  int get_last_leader_offset __ARGS((char_u *line, char_u **flags));
-diff -urN '--exclude=*.orig' vim73.orig/src/regexp.c vim73/src/regexp.c
---- vim73.orig/src/regexp.c	2013-06-01 13:59:09.875240887 -0500
-+++ vim73/src/regexp.c	2013-06-01 14:48:45.004468058 -0500
-@@ -4269,7 +4269,7 @@
- 		    if (top.col == MAXCOL || bot.col == MAXCOL)
- 			end = MAXCOL;
- 		    cols = win_linetabsize(wp,
--				      regline, (colnr_T)(reginput - regline));
-+				      regline, (colnr_T)(reginput - regline), reglnum + reg_firstlnum);
- 		    if (cols < start || cols > end - (*p_sel == 'e'))
- 			status = RA_NOMATCH;
- 		}
-@@ -4293,7 +4293,7 @@
+diff --git a/src/regexp.c b/src/regexp.c
+--- a/src/regexp.c
++++ b/src/regexp.c
+@@ -4252,7 +4252,8 @@
+ 	    end = end2;
+ 	if (top.col == MAXCOL || bot.col == MAXCOL)
+ 	    end = MAXCOL;
+-	cols = win_linetabsize(wp, regline, (colnr_T)(reginput - regline));
++	cols = win_linetabsize(wp, regline, (colnr_T)(reginput - regline),
++						    reglnum + reg_firstlnum);
+ 	if (cols < start || cols > end - (*p_sel == 'e'))
+ 	    return FALSE;
+     }
+@@ -4460,7 +4461,8 @@
  	  case RE_VCOL:
  	    if (!re_num_cmp((long_u)win_linetabsize(
  			    reg_win == NULL ? curwin : reg_win,
 -			    regline, (colnr_T)(reginput - regline)) + 1, scan))
-+			    regline, (colnr_T)(reginput - regline), reglnum + reg_firstlnum ) + 1, scan))
++			    regline, (colnr_T)(reginput - regline),
++			    reglnum + reg_firstlnum) + 1, scan))
  		status = RA_NOMATCH;
  	    break;
  
-diff -urN '--exclude=*.orig' vim73.orig/src/screen.c vim73/src/screen.c
---- vim73.orig/src/screen.c	2013-06-01 13:59:09.881240656 -0500
-+++ vim73/src/screen.c	2013-06-01 14:48:45.007467944 -0500
-@@ -2828,10 +2828,15 @@
+diff --git a/src/regexp_nfa.c b/src/regexp_nfa.c
+--- a/src/regexp_nfa.c
++++ b/src/regexp_nfa.c
+@@ -6055,7 +6055,8 @@
+ 		result = nfa_re_num_cmp(t->state->val, t->state->c - NFA_VCOL,
+ 		    (long_u)win_linetabsize(
+ 			    reg_win == NULL ? curwin : reg_win,
+-			    regline, (colnr_T)(reginput - regline)) + 1);
++			    regline, (colnr_T)(reginput - regline),
++			    reglnum + reg_firstlnum) + 1);
+ 		if (result)
+ 		{
+ 		    add_here = TRUE;
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -2974,10 +2974,15 @@
  # define WL_SIGN	WL_FOLD		/* column for signs */
  #endif
  #define WL_NR		WL_SIGN + 1	/* line number */
@@ -850,7 +879,7 @@ diff -urN '--exclude=*.orig' vim73.orig/src/screen.c vim73/src/screen.c
  #endif
  #define WL_LINE		WL_SBR + 1	/* text in the line */
      int		draw_state = WL_START;	/* what to draw next */
-@@ -3162,7 +3167,7 @@
+@@ -3316,7 +3321,7 @@
  #endif
  	while (vcol < v && *ptr != NUL)
  	{
@@ -859,25 +888,29 @@ diff -urN '--exclude=*.orig' vim73.orig/src/screen.c vim73/src/screen.c
  	    vcol += c;
  #ifdef FEAT_MBYTE
  	    prev_ptr = ptr;
-@@ -3541,6 +3546,30 @@
+@@ -3698,6 +3703,34 @@
  		}
  	    }
  
-+#ifdef FEAT_LINEBREAK 
++#ifdef FEAT_LINEBREAK
 +	    /* draw 'breakindent': indent wrapped text accordingly */
 +	    if (draw_state == WL_BRI -1 && n_extra == 0){
 +		draw_state = WL_BRI;
 +# ifdef FEAT_DIFF
-+		/* FIXME: handle (filler_todo > 0): or modify showbreak so that ---- lines are shorter by the amount needed? */
++		/* FIXME: handle (filler_todo > 0): or modify showbreak so that
++		 * ---- lines are shorter by the amount needed? */
 +# endif
-+		if (wp->w_p_bri && row != startrow){ /* FIXME: what is startrow? Don't we need it as well?? */
++		if (wp->w_p_bri && row != startrow) {
++		    /* FIXME: what is startrow? Don't we need it as well?? */
 +		    p_extra = NUL;
 +		    c_extra = ' ';
 +		    n_extra = get_breakindent_win(wp,lnum);
 +		    char_attr = 0; /* was: hl_attr(HLF_AT); */
-+		    /* FIXME: why do we need to adjust vcol if showbreak does not?? */
++		    /* FIXME: why do we need to adjust vcol if showbreak does
++		     * not?? */
 +		    // vcol += n_extra;
-+		    /* FIXME: is this relevant here? copied shamelessly from showbreak */
++		    /* FIXME: is this relevant here? copied shamelessly from
++		     * showbreak */
 +		    /* Correct end of highlighted area for 'breakindent',
 +		     * required when 'linebreak' is also set. */
 +		    if (tocol == vcol)
@@ -885,12 +918,12 @@ diff -urN '--exclude=*.orig' vim73.orig/src/screen.c vim73/src/screen.c
 +		}
 +	    }
 +#endif
-+	    
++
 +
  #if defined(FEAT_LINEBREAK) || defined(FEAT_DIFF)
  	    if (draw_state == WL_SBR - 1 && n_extra == 0)
  	    {
-@@ -4247,7 +4276,7 @@
+@@ -4409,7 +4442,7 @@
  # ifdef FEAT_MBYTE
  				has_mbyte ? mb_l :
  # endif
@@ -898,11 +931,11 @@ diff -urN '--exclude=*.orig' vim73.orig/src/screen.c vim73/src/screen.c
 +				1), (colnr_T)vcol, NULL, lnum) - 1;
  		    c_extra = ' ';
  		    if (vim_iswhite(c))
- 			c = ' ';
-diff -urN '--exclude=*.orig' vim73.orig/src/structs.h vim73/src/structs.h
---- vim73.orig/src/structs.h	2013-06-01 13:59:09.874240925 -0500
-+++ vim73/src/structs.h	2013-06-01 14:48:45.008467906 -0500
-@@ -133,6 +133,14 @@
+ 		    {
+diff --git a/src/structs.h b/src/structs.h
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -134,6 +134,14 @@
      int		wo_arab;
  # define w_p_arab w_onebuf_opt.wo_arab	/* 'arabic' */
  #endif
@@ -917,10 +950,10 @@ diff -urN '--exclude=*.orig' vim73.orig/src/structs.h vim73/src/structs.h
  #ifdef FEAT_DIFF
      int		wo_diff;
  # define w_p_diff w_onebuf_opt.wo_diff	/* 'diff' */
-diff -urN '--exclude=*.orig' vim73.orig/src/ui.c vim73/src/ui.c
---- vim73.orig/src/ui.c	2013-06-01 13:59:09.849241889 -0500
-+++ vim73/src/ui.c	2013-06-01 14:48:45.012467754 -0500
-@@ -3168,7 +3168,7 @@
+diff --git a/src/ui.c b/src/ui.c
+--- a/src/ui.c
++++ b/src/ui.c
+@@ -3175,7 +3175,7 @@
      start = ptr = ml_get_buf(wp->w_buffer, lnum, FALSE);
      while (count < vcol && *ptr != NUL)
      {
