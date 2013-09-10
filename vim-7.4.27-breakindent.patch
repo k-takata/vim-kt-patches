@@ -258,7 +258,7 @@ diff --git a/src/charset.c b/src/charset.c
 +	    if (*p_sbr != NUL)
 +		added += vim_strsize(p_sbr);
 +	    if (wp->w_p_bri)
-+		added += get_breakindent_win(wp,lnum);
++		added += get_breakindent_win(wp, lnum);
 +
  	    if (tab_corr)
  		size += (added / wp->w_buffer->b_p_ts) * wp->w_buffer->b_p_ts;
@@ -425,7 +425,7 @@ diff --git a/src/gui_beval.c b/src/gui_beval.c
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -468,6 +468,45 @@
+@@ -468,6 +468,46 @@
      return (int)col;
  }
  
@@ -436,18 +436,19 @@ diff --git a/src/misc1.c b/src/misc1.c
 + * necessarily always the current one. If lnum==0, current line is calculated,
 + * specified line otherwise.
 + */
-+   int
-+get_breakindent_win (wp,lnum)
++    int
++get_breakindent_win(wp, lnum)
 +    win_T*	wp;
 +    linenr_T	lnum;
 +{
 +    int bri;
 +    /* window width minus barren space, i.e. what rests for text */
 +    const int eff_wwidth = W_WIDTH(wp)
-+	- (wp->w_p_nu && !vim_strchr(p_cpo,CPO_NUMCOL)?number_width(wp):0);
++	- ((wp->w_p_nu && !vim_strchr(p_cpo, CPO_NUMCOL))
++						    ? number_width(wp) : 0);
 +	/* - (*p_sbr == NUL ? 0 : vim_strsize(p_sbr)); */
 +
-+    bri = get_indent_buf(wp->w_buffer,lnum?lnum:wp->w_cursor.lnum)
++    bri = get_indent_buf(wp->w_buffer, lnum ? lnum : wp->w_cursor.lnum)
 +							    + wp->w_p_brishift;
 +
 +    /* if numbering and 'c' in 'cpoptions', cancel it out effectively */
@@ -461,17 +462,17 @@ diff --git a/src/misc1.c b/src/misc1.c
 +    /* always leave at least bri_min characters on the left,
 +     * if text width is sufficient */
 +    else if (bri > eff_wwidth - wp->w_p_brimin)
-+	bri = eff_wwidth - wp->w_p_brimin < 0 ? 0 : eff_wwidth - wp->w_p_brimin;
++	bri = (eff_wwidth - wp->w_p_brimin < 0)
++					    ? 0 : eff_wwidth - wp->w_p_brimin;
 +
 +    return bri;
 +}
 +#endif
 +
-+
  #if defined(FEAT_CINDENT) || defined(FEAT_SMARTINDENT)
  
  static int cin_is_cinword __ARGS((char_u *line));
-@@ -1950,7 +1989,7 @@
+@@ -1950,7 +1990,7 @@
      s = ml_get_buf(wp->w_buffer, lnum, FALSE);
      if (*s == NUL)		/* empty line */
  	return 1;
@@ -480,7 +481,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  
      /*
       * If list mode is on, then the '$' at the end of the line may take up one
-@@ -2006,7 +2045,7 @@
+@@ -2006,7 +2046,7 @@
      col = 0;
      while (*s != NUL && --column >= 0)
      {
@@ -489,7 +490,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  	mb_ptr_adv(s);
      }
  
-@@ -2018,7 +2057,7 @@
+@@ -2018,7 +2058,7 @@
       * 'ts') -- webb.
       */
      if (*s == TAB && (State & NORMAL) && (!wp->w_p_list || lcs_tab1))
@@ -498,7 +499,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  
      /*
       * Add column offset for 'number', 'relativenumber', 'foldcolumn', etc.
-@@ -9049,7 +9088,8 @@
+@@ -9049,7 +9089,8 @@
  		amount = 0;
  		while (*that && col)
  		{
@@ -508,7 +509,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  		    col--;
  		}
  
-@@ -9072,7 +9112,8 @@
+@@ -9072,7 +9113,8 @@
  
  		    while (vim_iswhite(*that))
  		    {
@@ -518,7 +519,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  			++that;
  		    }
  
-@@ -9111,14 +9152,17 @@
+@@ -9111,14 +9153,17 @@
  				    --parencount;
  				if (*that == '\\' && *(that+1) != NUL)
  				    amount += lbr_chartabsize_adv(&that,
@@ -888,23 +889,25 @@ diff --git a/src/screen.c b/src/screen.c
  	    vcol += c;
  #ifdef FEAT_MBYTE
  	    prev_ptr = ptr;
-@@ -3698,6 +3703,34 @@
+@@ -3698,6 +3703,35 @@
  		}
  	    }
  
 +#ifdef FEAT_LINEBREAK
 +	    /* draw 'breakindent': indent wrapped text accordingly */
-+	    if (draw_state == WL_BRI -1 && n_extra == 0){
++	    if (draw_state == WL_BRI - 1 && n_extra == 0)
++	    {
 +		draw_state = WL_BRI;
 +# ifdef FEAT_DIFF
 +		/* FIXME: handle (filler_todo > 0): or modify showbreak so that
 +		 * ---- lines are shorter by the amount needed? */
 +# endif
-+		if (wp->w_p_bri && row != startrow) {
-+		    /* FIXME: what is startrow? Don't we need it as well?? */
++		/* FIXME: what is startrow? Don't we need it as well?? */
++		if (wp->w_p_bri && row != startrow)
++		{
 +		    p_extra = NUL;
 +		    c_extra = ' ';
-+		    n_extra = get_breakindent_win(wp,lnum);
++		    n_extra = get_breakindent_win(wp, lnum);
 +		    char_attr = 0; /* was: hl_attr(HLF_AT); */
 +		    /* FIXME: why do we need to adjust vcol if showbreak does
 +		     * not?? */
@@ -919,11 +922,10 @@ diff --git a/src/screen.c b/src/screen.c
 +	    }
 +#endif
 +
-+
  #if defined(FEAT_LINEBREAK) || defined(FEAT_DIFF)
  	    if (draw_state == WL_SBR - 1 && n_extra == 0)
  	    {
-@@ -4409,7 +4442,7 @@
+@@ -4409,7 +4443,7 @@
  # ifdef FEAT_MBYTE
  				has_mbyte ? mb_l :
  # endif
