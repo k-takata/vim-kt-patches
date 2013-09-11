@@ -1,7 +1,17 @@
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -5612,12 +5612,13 @@
+@@ -1958,7 +1958,8 @@
+ str2float( {expr})		Float	convert String to Float
+ str2nr( {expr} [, {base}])	Number	convert String to Number
+ strchars( {expr})		Number	character length of the String {expr}
+-strdisplaywidth( {expr} [, {col}]) Number display length of the String {expr}
++strdisplaywidth( {expr} [, {col} [, {lnum}]])
++				Number	display length of the String {expr}
+ strftime( {format}[, {time}])	String	time in specified format
+ stridx( {haystack}, {needle}[, {start}])
+ 				Number	index of {needle} in {haystack}
+@@ -5612,12 +5613,13 @@
  		separately.
  		Also see |strlen()|, |strdisplaywidth()| and |strwidth()|.
  
@@ -18,7 +28,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		The option settings of the current window are used.  This
  		matters for anything that's displayed differently, such as
  		'tabstop' and 'display'.
-@@ -6419,8 +6420,8 @@
+@@ -6419,8 +6421,8 @@
  keymap			Compiled with 'keymap' support.
  langmap			Compiled with 'langmap' support.
  libcall			Compiled with |libcall()| support.
