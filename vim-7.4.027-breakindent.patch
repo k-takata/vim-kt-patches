@@ -22,9 +22,9 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		When {col} is omitted zero is used.  Otherwise it is the
 -		screen column where to start.  This matters for Tab
 -		characters.
-+		screen column where to start.  When {lnum} is omitted zero is
-+		used.  Otherwise it is the line number where to start. These
-+		matter for Tab characters.
++		screen column where to start.  When {lnum} is omitted zero
++		(the current line) is used.  Otherwise it is the line number
++		where to start. These matter for Tab characters.
  		The option settings of the current window are used.  This
  		matters for anything that's displayed differently, such as
  		'tabstop' and 'display'.
