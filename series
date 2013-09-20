@@ -18,6 +18,7 @@ fix-utf8-msgloop.patch
 fix-comments-related-Japanese.patch
 fix-comment-in-os_mac.patch
 fix-mouse-flickering-on-menubar.patch
+fix-vc10-vim_stat.patch
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
 update-tags.patch
