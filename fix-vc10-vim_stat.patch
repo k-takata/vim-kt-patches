@@ -13,7 +13,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +{
 +#if defined(_MSC_VER) && _MSC_VER < 1700
 +    /* Work around for VC10 or earlier. stat() can't handle symlinks properly.
-+     * VC8 or earlier: stat() doesn't support a symlink at all. It retrieves
++     * VC9 or earlier: stat() doesn't support a symlink at all. It retrieves
 +     * status of a symlink itself.
 +     * VC10: stat() supports a symlink to a normal file, but it doesn't support
 +     * a symlink to a directory (always returns an error). */
@@ -59,7 +59,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +{
 +# if defined(_MSC_VER) && _MSC_VER < 1700
 +    /* Work around for VC10 or earlier. _wstat() can't handle symlinks properly.
-+     * VC8 or earlier: _wstat() doesn't support a symlink at all. It retrieves
++     * VC9 or earlier: _wstat() doesn't support a symlink at all. It retrieves
 +     * status of a symlink itself.
 +     * VC10: _wstat() supports a symlink to a normal file, but it doesn't
 +     * support a symlink to a directory (always returns an error). */
