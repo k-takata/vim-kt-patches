@@ -64,7 +64,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +			feature}
 +	Minimum text width that will be kept after applying 'breakindent',
 +	even if the resulting text should normally be narrower. This prevents
-+	text indented almost to the right window border oocupying lot of
++	text indented almost to the right window border occupying lot of
 +	vertical space when broken.
 +
 +						*'breakindentshift'* *'brishift'*
@@ -695,7 +695,7 @@ diff --git a/src/ops.c b/src/ops.c
  	    if (spaces < 0)
  		spaces = 0;
  
-@@ -5174,7 +5177,7 @@
+@@ -5191,7 +5194,7 @@
      while (bdp->start_vcol < oap->start_vcol && *pstart)
      {
  	/* Count a tab for what it's worth (if list mode not on) */
@@ -704,7 +704,7 @@ diff --git a/src/ops.c b/src/ops.c
  	bdp->start_vcol += incr;
  #ifdef FEAT_VISUALEXTRA
  	if (vim_iswhite(*pstart))
-@@ -5243,7 +5246,7 @@
+@@ -5260,7 +5263,7 @@
  	    {
  		/* Count a tab for what it's worth (if list mode not on) */
  		prev_pend = pend;
@@ -713,7 +713,7 @@ diff --git a/src/ops.c b/src/ops.c
  		bdp->end_vcol += incr;
  	    }
  	    if (bdp->end_vcol <= oap->end_vcol
-@@ -6756,7 +6759,8 @@
+@@ -6773,7 +6776,8 @@
  	    validate_virtcol();
  	    col_print(buf1, sizeof(buf1), (int)curwin->w_cursor.col + 1,
  		    (int)curwin->w_virtcol + 1);
@@ -889,7 +889,7 @@ diff --git a/src/regexp.c b/src/regexp.c
 diff --git a/src/regexp_nfa.c b/src/regexp_nfa.c
 --- a/src/regexp_nfa.c
 +++ b/src/regexp_nfa.c
-@@ -6055,7 +6055,8 @@
+@@ -6307,7 +6307,8 @@
  		result = nfa_re_num_cmp(t->state->val, t->state->c - NFA_VCOL,
  		    (long_u)win_linetabsize(
  			    reg_win == NULL ? curwin : reg_win,
