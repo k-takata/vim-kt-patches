@@ -22,3 +22,4 @@ X004_01-rmdir_support_symlinks.diff
 update-tags.patch
 redraw-after-undo.patch
 vim-7.4.035-breakindent.patch
+fix-doc-dl.patch
