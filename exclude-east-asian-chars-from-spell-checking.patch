@@ -1,0 +1,47 @@
+# HG changeset patch
+# Parent ad7931afec33910fd8a1573bb6b353516012d37a
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -2490,8 +2490,8 @@
+     /* sorted list of non-overlapping intervals */
+     static struct clinterval
+     {
+-	unsigned short first;
+-	unsigned short last;
++	unsigned int   first;
++	unsigned int   last;
+ 	unsigned short class;
+     } classes[] =
+     {
+@@ -2557,6 +2557,10 @@
+ 	{0xff1a, 0xff20, 1},		/* half/fullwidth ASCII */
+ 	{0xff3b, 0xff40, 1},		/* half/fullwidth ASCII */
+ 	{0xff5b, 0xff65, 1},		/* half/fullwidth ASCII */
++	{0x20000, 0x2a6df, 0x4e00},	/* CJK Ideographs */
++	{0x2a700, 0x2b73f, 0x4e00},	/* CJK Ideographs */
++	{0x2b740, 0x2b81f, 0x4e00},	/* CJK Ideographs */
++	{0x2f800, 0x2fa1f, 0x4e00},	/* CJK Ideographs */
+     };
+     int bot = 0;
+     int top = sizeof(classes) / sizeof(struct clinterval) - 1;
+diff --git a/src/spell.c b/src/spell.c
+--- a/src/spell.c
++++ b/src/spell.c
+@@ -9942,12 +9942,15 @@
+  * Return TRUE if word class indicates a word character.
+  * Only for characters above 255.
+  * Unicode subscript and superscript are not considered word characters.
++ * East Asian characters are not considered word characters, because spell
++ * checking for those characters is not currently supported.
+  */
+     static int
+ spell_mb_isword_class(cl)
+     int cl;
+ {
+-    return cl >= 2 && cl != 0x2070 && cl != 0x2080;
++    /* return cl >= 2 && cl != 0x2070 && cl != 0x2080; */
++    return cl >= 2 && cl <= 3;
+ }
+ 
+ /*
