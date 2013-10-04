@@ -1,5 +1,6 @@
 # HG changeset patch
-# Parent ad7931afec33910fd8a1573bb6b353516012d37a
+# Parent b7a11149f3943eded9abaad5d10b3e34d6e8dd97
+
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
@@ -28,12 +29,13 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 diff --git a/src/spell.c b/src/spell.c
 --- a/src/spell.c
 +++ b/src/spell.c
-@@ -9942,12 +9942,15 @@
+@@ -9942,12 +9942,16 @@
   * Return TRUE if word class indicates a word character.
   * Only for characters above 255.
   * Unicode subscript and superscript are not considered word characters.
 + * East Asian characters are not considered word characters, because spell
 + * checking for those characters is not currently supported.
++ * See also dbcs_class() and utf_class() in mbyte.c.
   */
      static int
  spell_mb_isword_class(cl)
@@ -41,7 +43,7 @@ diff --git a/src/spell.c b/src/spell.c
  {
 -    return cl >= 2 && cl != 0x2070 && cl != 0x2080;
 +    /* return cl >= 2 && cl != 0x2070 && cl != 0x2080; */
-+    return cl >= 2 && cl <= 3;
++    return cl == 2;
  }
  
  /*
