@@ -4,17 +4,19 @@
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -2490,8 +2490,8 @@
+@@ -2490,9 +2490,9 @@
      /* sorted list of non-overlapping intervals */
      static struct clinterval
      {
 -	unsigned short first;
 -	unsigned short last;
-+	unsigned int   first;
-+	unsigned int   last;
- 	unsigned short class;
+-	unsigned short class;
++	unsigned int first;
++	unsigned int last;
++	unsigned int class;
      } classes[] =
      {
+ 	{0x037e, 0x037e, 1},		/* Greek question mark */
 @@ -2557,6 +2557,10 @@
  	{0xff1a, 0xff20, 1},		/* half/fullwidth ASCII */
  	{0xff3b, 0xff40, 1},		/* half/fullwidth ASCII */
