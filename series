@@ -27,5 +27,4 @@ update-tags.patch
 add-smsg_attr_keep.patch
 vim-7.4.035-breakindent.patch
 breakindent-mark.diff
-fix-doc-dl.patch
 exclude-east-asian-chars-from-spell-checking.patch
