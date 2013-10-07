@@ -772,7 +772,7 @@ diff --git a/src/option.c b/src/option.c
      {"browsedir",   "bsdir",P_STRING|P_VI_DEF,
  #ifdef FEAT_BROWSE
  			    (char_u *)&p_bsdir, PV_NONE,
-@@ -8501,6 +8533,16 @@
+@@ -8501,5 +8533,15 @@
  	}
  	curwin->w_nrwidth_line_count = 0;
      }
@@ -788,7 +788,6 @@ diff --git a/src/option.c b/src/option.c
 +    }
  #endif
  
-     else if (pp == &curbuf->b_p_tw)
 @@ -9954,6 +9996,9 @@
  	case PV_WRAP:	return (char_u *)&(curwin->w_p_wrap);
  #ifdef FEAT_LINEBREAK
