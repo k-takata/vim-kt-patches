@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent b7a11149f3943eded9abaad5d10b3e34d6e8dd97
+# Parent f7b74dbc56302abc7b7d3f470fa87a4800ada1bf
 
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
@@ -28,6 +28,18 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      };
      int bot = 0;
      int top = sizeof(classes) / sizeof(struct clinterval) - 1;
+@@ -2576,9 +2580,9 @@
+     while (top >= bot)
+     {
+ 	mid = (bot + top) / 2;
+-	if (classes[mid].last < c)
++	if (classes[mid].last < (unsigned int)c)
+ 	    bot = mid + 1;
+-	else if (classes[mid].first > c)
++	else if (classes[mid].first > (unsigned int)c)
+ 	    top = mid - 1;
+ 	else
+ 	    return (int)classes[mid].class;
 diff --git a/src/spell.c b/src/spell.c
 --- a/src/spell.c
 +++ b/src/spell.c
