@@ -30,3 +30,4 @@ breakindent-mark.diff
 exclude-east-asian-chars-from-spell-checking.patch
 strikethrough.diff
 update-strikethrough.patch
+strikethrough-mark.diff
