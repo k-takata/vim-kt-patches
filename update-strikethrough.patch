@@ -1,0 +1,57 @@
+# HG changeset patch
+# Parent 99b320cbcb396eaa6e4c9ec079b9b07614e058e7
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -3927,6 +3927,7 @@
+ 		s	standout	(termcap entry "so" and "se")
+ 		u	underline	(termcap entry "us" and "ue")
+ 		c	undercurl	(termcap entry "Cs" and "Ce")
++		t	strikethrough	(termcap entry "??" and "??")
+ 		n	no highlighting
+ 		-	no highlighting
+ 		:	use a highlight group
+diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
+--- a/runtime/doc/term.txt
++++ b/runtime/doc/term.txt
+@@ -274,6 +274,8 @@
+ 	t_us	underline mode					*t_us* *'t_us'*
+ 	t_Ce	undercurl end					*t_Ce* *'t_Ce'*
+ 	t_Cs	undercurl mode					*t_Cs* *'t_Cs'*
++	t_??	strikethrough end				*t_??* *'t_??'*
++	t_??	strikethrough mode				*t_??* *'t_??'*
+ 	t_ut	clearing uses the current background color	*t_ut* *'t_ut'*
+ 	t_vb	visual bell					*t_vb* *'t_vb'*
+ 	t_ve	cursor visible					*t_ve* *'t_ve'*
+diff --git a/src/syntax.c b/src/syntax.c
+--- a/src/syntax.c
++++ b/src/syntax.c
+@@ -9534,6 +9534,8 @@
+ 				break;
+ 		    case 'c':	attr |= HL_UNDERCURL;
+ 				break;
++		    case 't':	attr |= HL_STRIKETHROUGH;
++				break;
+ 		    case ':':	++p;		    /* highlight group name */
+ 				if (attr || *p == NUL)	 /* no combinations */
+ 				    return FAIL;
+diff --git a/src/term.c b/src/term.c
+--- a/src/term.c
++++ b/src/term.c
+@@ -1207,6 +1207,8 @@
+     {(int)KS_US,	"[US]"},
+     {(int)KS_UCE,	"[UCE]"},
+     {(int)KS_UCS,	"[UCS]"},
++    {(int)KS_STE,	"[STE]"},
++    {(int)KS_STS,	"[STS]"},
+     {(int)KS_MS,	"[MS]"},
+     {(int)KS_UT,	"[UT]"},
+ #  ifdef TERMINFO
+@@ -1603,6 +1605,7 @@
+ 				{KS_MD, "md"}, {KS_SE, "se"}, {KS_SO, "so"},
+ 				{KS_CZH,"ZH"}, {KS_CZR,"ZR"}, {KS_UE, "ue"},
+ 				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
++				{KS_STE, "??"}, {KS_STS, "??"},
+ 				{KS_CM, "cm"}, {KS_SR, "sr"},
+ 				{KS_CRI,"RI"}, {KS_VB, "vb"}, {KS_KS, "ks"},
+ 				{KS_KE, "ke"}, {KS_TI, "ti"}, {KS_TE, "te"},
