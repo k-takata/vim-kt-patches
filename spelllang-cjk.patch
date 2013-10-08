@@ -1,16 +1,15 @@
 # HG changeset patch
-# Parent b104364ea755739835cde6817fded8609eed3482
+# Parent 6bd6b1784b04ccab2f30d0e3b1d7ff1613788911
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6639,6 +6639,9 @@
+@@ -6672,6 +6672,8 @@
  	region by listing them: "en_us,en_ca" supports both US and Canadian
  	English, but not words specific for Australia, New Zealand or Great
  	Britain.
-+	If this option includes "nocjk", East Asian characters are excluded
-+	from spell checking.  It is useful when editing mixed Asian and latin
-+	text.
++	If this option includes "cjk", East Asian characters are excluded from
++	spell checking.  It is useful when editing mixed Asian and latin text.
  							*E757*
  	As a special case the name of a .spl file can be given as-is.  The
  	first "_xx" in the name is removed and used as the region name
@@ -21,11 +20,11 @@ diff --git a/runtime/doc/spell.txt b/runtime/doc/spell.txt
  	latin1		yi		transliterated Yiddish
  	utf-8		yi-tr		transliterated Yiddish
  
-+							*spell-nocjk*
++							*spell-cjk*
 +Chinese, Japanese or other East Asian characters are marked as error, because
 +spell checking of these characters are not supported currently. If 'spelllang'
-+includes "nocjk", these characters are not marked as error.  It is useful when
-+editing mixed Asian and latin text.
++includes "cjk", these characters are marked as OK.  It is useful when editing
++mixed Asian and latin text.
 +
  
  SPELL FILES						*spell-load*
@@ -83,19 +82,19 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -7119,6 +7119,11 @@
+@@ -7151,6 +7151,11 @@
  	if (varp == &(curwin->w_s->b_p_spl))
  	{
  	    char_u	fname[200];
 +	    char_u	*q = curwin->w_s->b_p_spl;
 +
-+	    /* Skip if the first name is "nocjk". */
-+	    if (STRNCMP(q, "nocjk,", 6) == 0)
-+		q += 6;
++	    /* Skip if the first name is "cjk". */
++	    if (STRNCMP(q, "cjk,", 4) == 0)
++		q += 4;
  
  	    /*
  	     * Source the spell/LANG.vim in 'runtimepath'.
-@@ -7126,11 +7131,11 @@
+@@ -7158,11 +7163,11 @@
  	     * Use the first name in 'spelllang' up to '_region' or
  	     * '.encoding'.
  	     */
@@ -147,7 +146,7 @@ diff --git a/src/spell.c b/src/spell.c
      if (spl_copy == NULL)
  	goto theend;
  
-+    wp->w_s->b_nocjk = 0;
++    wp->w_s->b_cjk = 0;
 +
      /* loop over comma separated language names. */
      for (splp = spl_copy; *splp != NUL; )
@@ -156,9 +155,9 @@ diff --git a/src/spell.c b/src/spell.c
  	region = NULL;
  	len = (int)STRLEN(lang);
  
-+	if (STRCMP(lang, "nocjk") == 0)
++	if (STRCMP(lang, "cjk") == 0)
 +	{
-+	    wp->w_s->b_nocjk = 1;
++	    wp->w_s->b_cjk = 1;
 +	    continue;
 +	}
 +
@@ -229,7 +228,7 @@ diff --git a/src/spell.c b/src/spell.c
 +    int		cl;
 +    win_T	*wp;
 +{
-+    if (wp->w_s->b_nocjk)
++    if (wp->w_s->b_cjk)
 +	/* East Asian characters are not considered word characters. */
 +	return cl == 2 || cl == 0x2800;
 +    else
@@ -325,12 +324,12 @@ diff --git a/src/spell.c b/src/spell.c
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -1309,6 +1309,9 @@
+@@ -1317,6 +1317,9 @@
      regprog_T	*b_cap_prog;	/* program for 'spellcapcheck' */
      char_u	*b_p_spf;	/* 'spellfile' */
      char_u	*b_p_spl;	/* 'spelllang' */
 +# ifdef FEAT_MBYTE
-+    int		b_nocjk;	/* exclude CJK chars from spell checking */
++    int		b_cjk;		/* all CJK letters as OK */
 +# endif
  #endif
  #if !defined(FEAT_SYN_HL) && !defined(FEAT_SPELL)
