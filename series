@@ -18,7 +18,6 @@ improve_dos_test.diff
 fix-utf8-username.patch
 fix-utf8-hostname.patch
 fix-utf8-msgloop.patch
-fix-comments-related-Japanese.patch
 fix-comment-in-os_mac.patch
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
@@ -27,7 +26,7 @@ update-tags.patch
 add-smsg_attr_keep.patch
 vim-7.4.035-breakindent.patch
 breakindent-mark.diff
-exclude-east-asian-chars-from-spell-checking.patch
+spelllang-nocjk.patch
 strikethrough.diff
 update-strikethrough.patch
 strikethrough-mark.diff
