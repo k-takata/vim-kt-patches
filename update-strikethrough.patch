@@ -69,17 +69,11 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_MS,	"[MS]"},
      {(int)KS_UT,	"[UT]"},
  #  ifdef TERMINFO
-@@ -1602,7 +1604,12 @@
- 				{KS_VS, "vs"}, {KS_ME, "me"}, {KS_MR, "mr"},
+@@ -1603,6 +1605,7 @@
  				{KS_MD, "md"}, {KS_SE, "se"}, {KS_SO, "so"},
  				{KS_CZH,"ZH"}, {KS_CZR,"ZR"}, {KS_UE, "ue"},
--				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
-+				{KS_US, "us"},
-+				/* termcap doesn't support undercurl and
-+				 * strikethrough attributes.
-+				{KS_UCE,"Ce"}, {KS_UCS,"Cs"},
+ 				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
 +				{KS_STE,"Te"}, {KS_STS,"Ts"},
-+				*/
  				{KS_CM, "cm"}, {KS_SR, "sr"},
  				{KS_CRI,"RI"}, {KS_VB, "vb"}, {KS_KS, "ks"},
  				{KS_KE, "ke"}, {KS_TI, "ti"}, {KS_TE, "te"},
