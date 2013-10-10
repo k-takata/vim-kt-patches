@@ -1,5 +1,6 @@
 # HG changeset patch
-# Parent 99b320cbcb396eaa6e4c9ec079b9b07614e058e7
+# Parent 7680166acd856c62791fdbcd2461a9462e16a925
+
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
@@ -7,7 +8,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  		s	standout	(termcap entry "so" and "se")
  		u	underline	(termcap entry "us" and "ue")
  		c	undercurl	(termcap entry "Cs" and "Ce")
-+		t	strikethrough	(termcap entry "??" and "??")
++		t	strikethrough	(termcap entry "Ts" and "Te")
  		n	no highlighting
  		-	no highlighting
  		:	use a highlight group
@@ -18,11 +19,32 @@ diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
  	t_us	underline mode					*t_us* *'t_us'*
  	t_Ce	undercurl end					*t_Ce* *'t_Ce'*
  	t_Cs	undercurl mode					*t_Cs* *'t_Cs'*
-+	t_??	strikethrough end				*t_??* *'t_??'*
-+	t_??	strikethrough mode				*t_??* *'t_??'*
++	t_Te	strikethrough end				*t_Te* *'t_Te'*
++	t_Ts	strikethrough mode				*t_Ts* *'t_Ts'*
  	t_ut	clearing uses the current background color	*t_ut* *'t_ut'*
  	t_vb	visual bell					*t_vb* *'t_vb'*
  	t_ve	cursor visible					*t_ve* *'t_ve'*
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -2942,6 +2942,8 @@
+     p_term("t_cl", T_CL)
+     p_term("t_cm", T_CM)
+     p_term("t_Co", T_CCO)
++    p_term("t_Ce", T_UCE)
++    p_term("t_Cs", T_UCS)
+     p_term("t_CS", T_CCS)
+     p_term("t_cs", T_CS)
+ #ifdef FEAT_VERTSPLIT
+@@ -2973,6 +2975,8 @@
+     p_term("t_se", T_SE)
+     p_term("t_so", T_SO)
+     p_term("t_sr", T_SR)
++    p_term("t_Te", T_STE)
++    p_term("t_Ts", T_STS)
+     p_term("t_ts", T_TS)
+     p_term("t_te", T_TE)
+     p_term("t_ti", T_TI)
 diff --git a/src/syntax.c b/src/syntax.c
 --- a/src/syntax.c
 +++ b/src/syntax.c
@@ -47,11 +69,17 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_MS,	"[MS]"},
      {(int)KS_UT,	"[UT]"},
  #  ifdef TERMINFO
-@@ -1603,6 +1605,7 @@
+@@ -1602,7 +1604,12 @@
+ 				{KS_VS, "vs"}, {KS_ME, "me"}, {KS_MR, "mr"},
  				{KS_MD, "md"}, {KS_SE, "se"}, {KS_SO, "so"},
  				{KS_CZH,"ZH"}, {KS_CZR,"ZR"}, {KS_UE, "ue"},
- 				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
-+				{KS_STE, "??"}, {KS_STS, "??"},
+-				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
++				{KS_US, "us"},
++				/* termcap doesn't support undercurl and
++				 * strikethrough attributes.
++				{KS_UCE,"Ce"}, {KS_UCS,"Cs"},
++				{KS_STE,"Te"}, {KS_STS,"Ts"},
++				*/
  				{KS_CM, "cm"}, {KS_SR, "sr"},
  				{KS_CRI,"RI"}, {KS_VB, "vb"}, {KS_KS, "ks"},
  				{KS_KE, "ke"}, {KS_TI, "ti"}, {KS_TE, "te"},
