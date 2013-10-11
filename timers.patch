@@ -1,0 +1,1428 @@
+diff --git a/Filelist b/Filelist
+index b324933..6a12c05 100644
+--- a/Filelist
++++ b/Filelist
+@@ -7,6 +7,7 @@ SRC_ALL =	\
+ 		src/arabic.c \
+ 		src/arabic.h \
+ 		src/ascii.h \
++		src/timers.c \
+ 		src/blowfish.c \
+ 		src/buffer.c \
+ 		src/charset.c \
+@@ -94,6 +95,7 @@ SRC_ALL =	\
+ 		src/testdir/python_after/*.py \
+ 		src/testdir/python_before/*.py \
+ 		src/proto.h \
++		src/proto/timers.pro \
+ 		src/proto/blowfish.pro \
+ 		src/proto/buffer.pro \
+ 		src/proto/charset.pro \
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+index 60b01a8..55c19ad 100644
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1,4 +1,4 @@
+-*eval.txt*	For Vim version 7.4.  Last change: 2013 Aug 24
++*eval.txt*	For Vim version 7.4.  Last change: 2013 Sep 10
+ 
+ 
+ 		  VIM REFERENCE MANUAL	  by Bram Moolenaar
+@@ -1926,6 +1926,7 @@ server2client( {clientid}, {string})
+ serverlist()			String	get a list of available servers
+ setbufvar( {expr}, {varname}, {val})	set {varname} in buffer {expr} to {val}
+ setcmdpos( {pos})		Number	set cursor position in command-line
++setinterval( {nr},{string})   Number  evaluate the expression {string} every {nr} milliseconds
+ setline( {lnum}, {line})	Number	set line {lnum} to {line}
+ setloclist( {nr}, {list}[, {action}])
+ 				Number	modify location list using {list}
+@@ -1936,6 +1937,7 @@ setreg( {n}, {v}[, {opt}])	Number	set register to value and type
+ settabvar( {nr}, {varname}, {val})	set {varname} in tab page {nr} to {val}
+ settabwinvar( {tabnr}, {winnr}, {varname}, {val})    set {varname} in window
+ 					{winnr} in tab page {tabnr} to {val}
++settimeout(	{nr}, {string})	Number  evaluate the expression {string} after {nr} milliseconds
+ setwinvar( {nr}, {varname}, {val})	set {varname} in window {nr} to {val}
+ sha256( {string})		String	SHA256 checksum of {string}
+ shellescape( {string} [, {special}])
+@@ -2281,6 +2283,15 @@ call({func}, {arglist} [, {dict}])			*call()* *E699*
+ 		{dict} is for functions with the "dict" attribute.  It will be
+ 		used to set the local variable "self". |Dictionary-function|
+ 
++canceltimeout({nr})					*canceltimeout()*
++		Cancel the timeout or interval with id, {nr}, preventing it 
++		from every firing.
++		Also see |settimeout()| and |setinterval()|.
++		{only available when compiled with the |+timers| feature}
++		Examples: >
++			let timeout_id = settimeout(5000, 'echo(2)')
++			echo canceltimeout(timeout_id)
++
+ ceil({expr})							*ceil()*
+ 		Return the smallest integral value greater than or equal to
+ 		{expr} as a |Float| (round up).
+@@ -5187,6 +5198,23 @@ setcmdpos({pos})					*setcmdpos()*
+ 		Returns 0 when successful, 1 when not editing the command
+ 		line.
+ 
++setinterval({nr}, {string})				*setinterval()* *E881*
++		Immediately returns an interval id and evaluate the expression, 
++		{string}, every {nr} milliseconds. Intervals do not pile up.  
++		The timer's resolution defaults to 100ms and can be changed by 
++		setting |ticktime|.  Intervals can be canceled by calling 
++		|canceltimeout({interval_id})|.
++		NOTE: Vim is single-threaded and all expressions are run within 
++		the main thread.  Therefore, expressions should return control 
++		flow within	a short amount of time.
++		Also see |settimeout()| and |canceltimeout()|.
++		{only available when compiled with the |+timers| feature}
++		Examples: >
++			:call setinterval(1000, "call echo(2)")
++<		2
++		2
++		2
++
+ setline({lnum}, {text})					*setline()*
+ 		Set line {lnum} of the current buffer to {text}.  To insert
+ 		lines use |append()|.
+@@ -5356,6 +5384,21 @@ settabwinvar({tabnr}, {winnr}, {varname}, {val})	*settabwinvar()*
+ 			:call settabwinvar(3, 2, "myvar", "foobar")
+ <		This function is not available in the |sandbox|.
+ 
++settimeout({nr}, {string})				*settimeout()*
++		Immediately returns an interval id and evaluate the expression, 
++		{string}, once after {nr} milliseconds. The timer's
++		resolution defaults to 100ms and can be changed by setting 
++		|ticktime|.  Timeouts can be canceled by calling 
++		|canceltimeout({interval_id})|.
++		NOTE: Vim is single-threaded and all expressions are run within 
++		the main thread.  Therefore, expressions should return control 
++		flow within	a short amount of time.  
++		Also see |setinterval()| and |canceltimeout()|.
++		{only available when compiled with the |+timers| feature}
++		Examples: >
++			:call settimeout(1000, "call echo(2)")
++<		2
++
+ setwinvar({nr}, {varname}, {val})			*setwinvar()*
+ 		Like |settabwinvar()| for the current tab page.
+ 		Examples: >
+diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
+index 91b7208..db6e3bb 100644
+--- a/runtime/doc/index.txt
++++ b/runtime/doc/index.txt
+@@ -1544,6 +1544,7 @@ tag	      command	      action ~
+ |:tearoff|	:te[aroff]	tear-off a menu
+ |:tfirst|	:tf[irst]	jump to first matching tag
+ |:throw|	:th[row]	throw an exception
++|:timers|	:ti[mers]	show all pending timers
+ |:tjump|	:tj[ump]	like ":tselect", but jump directly when there
+ 				is only one match
+ |:tlast|	:tl[ast]	jump to last matching tag
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+index 0688fcc..e7174ff 100644
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -7253,6 +7253,17 @@ A jump table for the options with a short description can be found at |Q_op|.
+ 	uses another default.
+ 	Backticks cannot be used in this option for security reasons.
+ 
++						*'ticktime'* *'tt'*
++'ticktime' 'tt'	number	(default 100)
++			global
++			{not in Vi}
++	This is the resolution for all timers set with |setinterval()| and 
++	|settimeout()|.  Decreasing this number will make the timers
++	more accurate but will also make Vim less efficient.  To globally
++	disable all timers for debugging, set |ticktime| to -1.
++	Also see |setinterval()|, |settimeout()|, and |canceltimeout()|.
++	{only available when compiled with the |+async| feature}
++
+ 			     *'tildeop'* *'top'* *'notildeop'* *'notop'*
+ 'tildeop' 'top'		boolean	(default off)
+ 			global
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+index f32ea6f..dce540d 100644
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
+@@ -1014,6 +1014,7 @@ $VIMRUNTIME	starting.txt	/*$VIMRUNTIME*
+ 'tf'	options.txt	/*'tf'*
+ 'tgst'	options.txt	/*'tgst'*
+ 'thesaurus'	options.txt	/*'thesaurus'*
++'ticktime'	options.txt	/*'ticktime'*
+ 'tildeop'	options.txt	/*'tildeop'*
+ 'timeout'	options.txt	/*'timeout'*
+ 'timeoutlen'	options.txt	/*'timeoutlen'*
+@@ -1032,6 +1033,7 @@ $VIMRUNTIME	starting.txt	/*$VIMRUNTIME*
+ 'ts'	options.txt	/*'ts'*
+ 'tsl'	options.txt	/*'tsl'*
+ 'tsr'	options.txt	/*'tsr'*
++'tt'	options.txt	/*'tt'*
+ 'ttimeout'	options.txt	/*'ttimeout'*
+ 'ttimeoutlen'	options.txt	/*'ttimeoutlen'*
+ 'ttm'	options.txt	/*'ttm'*
+@@ -4296,6 +4298,7 @@ E878	pattern.txt	/*E878*
+ E879	syntax.txt	/*E879*
+ E88	windows.txt	/*E88*
+ E880	if_pyth.txt	/*E880*
++E881	eval.txt	/*E881*
+ E89	message.txt	/*E89*
+ E90	message.txt	/*E90*
+ E91	options.txt	/*E91*
+@@ -4987,6 +4990,7 @@ c_Up	cmdline.txt	/*c_Up*
+ c_digraph	cmdline.txt	/*c_digraph*
+ c_wildchar	cmdline.txt	/*c_wildchar*
+ call()	eval.txt	/*call()*
++canceltimeout()	eval.txt	/*canceltimeout()*
+ carriage-return	intro.txt	/*carriage-return*
+ case	change.txt	/*case*
+ catch-all	eval.txt	/*catch-all*
+@@ -7653,6 +7657,7 @@ set-option	options.txt	/*set-option*
+ set-spc-auto	spell.txt	/*set-spc-auto*
+ setbufvar()	eval.txt	/*setbufvar()*
+ setcmdpos()	eval.txt	/*setcmdpos()*
++setinterval()	eval.txt	/*setinterval()*
+ setline()	eval.txt	/*setline()*
+ setloclist()	eval.txt	/*setloclist()*
+ setmatches()	eval.txt	/*setmatches()*
+@@ -7661,6 +7666,7 @@ setqflist()	eval.txt	/*setqflist()*
+ setreg()	eval.txt	/*setreg()*
+ settabvar()	eval.txt	/*settabvar()*
+ settabwinvar()	eval.txt	/*settabwinvar()*
++settimeout()	eval.txt	/*settimeout()*
+ setting-guifont	gui.txt	/*setting-guifont*
+ setting-guitablabel	tabpage.txt	/*setting-guitablabel*
+ setting-tabline	tabpage.txt	/*setting-tabline*
+diff --git a/src/Make_bc3.mak b/src/Make_bc3.mak
+index 54c42ac..d7a8431 100644
+--- a/src/Make_bc3.mak
++++ b/src/Make_bc3.mak
+@@ -91,6 +91,7 @@ EXE_dependencies = \
+ 	syntax.obj \
+ 	tag.obj \
+ 	term.obj \
++	timers.obj \
+ 	ui.obj \
+ 	undo.obj \
+ 	window.obj
+diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
+index 8172c1f..f4386ee 100644
+--- a/src/Make_bc5.mak
++++ b/src/Make_bc5.mak
+@@ -617,6 +617,7 @@ vimobj =  \
+ 	$(OBJDIR)\syntax.obj \
+ 	$(OBJDIR)\tag.obj \
+ 	$(OBJDIR)\term.obj \
++	$(OBJDIR)\timers.obj \
+ 	$(OBJDIR)\ui.obj \
+ 	$(OBJDIR)\undo.obj \
+ 	$(OBJDIR)\version.obj \
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+index f955b4d..ee704d5 100644
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
+@@ -527,6 +527,7 @@ RCFLAGS = -O coff $(DEFINES)
+ 
+ OBJ = \
+ 	$(OUTDIR)/blowfish.o \
++	$(OUTDIR)/timers.o \
+ 	$(OUTDIR)/buffer.o \
+ 	$(OUTDIR)/charset.o \
+ 	$(OUTDIR)/diff.o \
+diff --git a/src/Make_dice.mak b/src/Make_dice.mak
+index e3a8b9e..9df7666 100644
+--- a/src/Make_dice.mak
++++ b/src/Make_dice.mak
+@@ -67,12 +67,14 @@ SRC = \
+ 	syntax.c \
+ 	tag.c \
+ 	term.c \
++	timers.c \
+ 	ui.c \
+ 	undo.c \
+ 	window.c \
+ 	version.c
+ 
+-OBJ =	o/blowfish.o \
++OBJ =	o/timers.o \
++	o/blowfish.o \
+ 	o/buffer.o \
+ 	o/charset.o \
+ 	o/diff.o \
+@@ -226,6 +228,8 @@ o/term.o:	term.c  $(SYMS) term.h
+ 
+ o/termlib.o:	termlib.c $(SYMS)
+ 
++o/timers.o:	timers.c  $(SYMS)
++
+ o/ui.o: ui.c	$(SYMS)
+ 
+ o/undo.o: undo.c	$(SYMS)
+diff --git a/src/Make_djg.mak b/src/Make_djg.mak
+index f2e7c82..76f1848 100644
+--- a/src/Make_djg.mak
++++ b/src/Make_djg.mak
+@@ -19,6 +19,7 @@ INCL = vim.h globals.h option.h keymap.h macros.h ascii.h term.h os_msdos.h stru
+ CFLAGS = -O2 -DMSDOS -Iproto $(DEFINES) -Wall -Dinterrupt= -Dfar= -DMAXMEM=512 -D_NAIVE_DOS_REGS
+ 
+ OBJ = \
++	obj/timers.o \
+ 	obj/blowfish.o \
+ 	obj/buffer.o \
+ 	obj/charset.o \
+diff --git a/src/Make_ivc.mak b/src/Make_ivc.mak
+index 16589ea..6ee03f3 100644
+--- a/src/Make_ivc.mak
++++ b/src/Make_ivc.mak
+@@ -253,6 +253,7 @@ LINK32_OBJS= \
+ 	"$(INTDIR)/syntax.obj" \
+ 	"$(INTDIR)/tag.obj" \
+ 	"$(INTDIR)/term.obj" \
++	"$(INTDIR)/timers.obj" \
+ 	"$(INTDIR)/ui.obj" \
+ 	"$(INTDIR)/undo.obj" \
+ 	"$(INTDIR)/version.obj" \
+@@ -649,6 +650,10 @@ SOURCE=.\term.c
+ # End Source File
+ # Begin Source File
+ 
++SOURCE=.\timers.c
++# End Source File
++# Begin Source File
++
+ SOURCE=.\ui.c
+ # End Source File
+ # Begin Source File
+diff --git a/src/Make_manx.mak b/src/Make_manx.mak
+index 101c5c6..7c47d60 100644
+--- a/src/Make_manx.mak
++++ b/src/Make_manx.mak
+@@ -75,6 +75,7 @@ SRC =	blowfish.c \
+ 	syntax.c \
+ 	tag.c \
+ 	term.c \
++	timers.c \
+ 	ui.c \
+ 	undo.c \
+ 	window.c \
+@@ -82,7 +83,8 @@ SRC =	blowfish.c \
+ 
+ INCL = vim.h feature.h keymap.h macros.h ascii.h term.h structs.h os_amiga.h
+ 
+-OBJ =	obj/blowfish.o \
++OBJ =	obj/timers.o \
++	obj/blowfish.o \
+ 	obj/buffer.o \
+ 	obj/charset.o \
+ 	obj/diff.o \
+@@ -170,6 +172,7 @@ PRO =	proto/blowfish.pro \
+ 	proto/tag.pro \
+ 	proto/term.pro \
+ 	proto/termlib.pro \
++	proto/timers.pro \
+ 	proto/ui.pro \
+ 	proto/undo.pro \
+ 	proto/window.pro
+@@ -348,6 +351,9 @@ obj/term.o:	term.c term.h
+ obj/termlib.o:	termlib.c
+ 	$(CCSYM) $@ termlib.c
+ 
++obj/timers.o:	timers.c
++	$(CCSYM) $@ timers.c
++
+ obj/ui.o:	ui.c
+ 	$(CCSYM) $@ ui.c
+ 
+diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+index 7aa3994..267ae31 100644
+--- a/src/Make_ming.mak
++++ b/src/Make_ming.mak
+@@ -502,6 +502,7 @@ endif
+ LIB = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomdlg32 -lcomctl32 -lversion
+ GUIOBJ =  $(OUTDIR)/gui.o $(OUTDIR)/gui_w32.o $(OUTDIR)/gui_beval.o $(OUTDIR)/os_w32exe.o
+ OBJ = \
++	$(OUTDIR)/timers.o \
+ 	$(OUTDIR)/blowfish.o \
+ 	$(OUTDIR)/buffer.o \
+ 	$(OUTDIR)/charset.o \
+diff --git a/src/Make_morph.mak b/src/Make_morph.mak
+index aa8fbd9..bd4e5fb 100644
+--- a/src/Make_morph.mak
++++ b/src/Make_morph.mak
+@@ -65,6 +65,7 @@ SRC =	blowfish.c						\
+ 	syntax.c						\
+ 	tag.c							\
+ 	term.c							\
++	timers.c						\
+ 	ui.c							\
+ 	undo.c							\
+ 	version.c						\
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+index f23258b..7f03d17 100644
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -569,6 +569,7 @@ OBJ = \
+ 	$(OUTDIR)\syntax.obj \
+ 	$(OUTDIR)\tag.obj \
+ 	$(OUTDIR)\term.obj \
++	$(OUTDIR)\timers.obj \
+ 	$(OUTDIR)\ui.obj \
+ 	$(OUTDIR)\undo.obj \
+ 	$(OUTDIR)\window.obj \
+@@ -1192,6 +1193,8 @@ $(OUTDIR)/tag.obj:	$(OUTDIR) tag.c  $(INCL)
+ 
+ $(OUTDIR)/term.obj:	$(OUTDIR) term.c  $(INCL)
+ 
++$(OUTDIR)/timers.obj:	$(OUTDIR) timers.c  $(INCL)
++
+ $(OUTDIR)/ui.obj:	$(OUTDIR) ui.c  $(INCL)
+ 
+ $(OUTDIR)/undo.obj:	$(OUTDIR) undo.c  $(INCL)
+diff --git a/src/Make_os2.mak b/src/Make_os2.mak
+index 42dbdb3..da3347f 100644
+--- a/src/Make_os2.mak
++++ b/src/Make_os2.mak
+@@ -39,6 +39,7 @@ INCL = vim.h globals.h option.h keymap.h macros.h ascii.h term.h os_unix.h struc
+ CFLAGS = -O2 -fno-strength-reduce -DOS2 -Wall -Iproto $(DEFINES)
+ 
+ OBJ = \
++	timers.o \
+ 	blowfish.o \
+ 	buffer.o \
+ 	charset.o \
+diff --git a/src/Make_sas.mak b/src/Make_sas.mak
+index bf57c0d..ae54c9c 100644
+--- a/src/Make_sas.mak
++++ b/src/Make_sas.mak
+@@ -136,6 +136,7 @@ SRC = \
+ 	version.c
+ 
+ OBJ = \
++	timers.o \
+ 	blowfish.o \
+ 	buffer.o \
+ 	charset.o \
+@@ -182,8 +183,7 @@ OBJ = \
+ 	window.o \
+ 	$(TERMLIB)
+ 
+-PRO = \
+-	proto/blowfish.pro \
++PRO = 	proto/blowfish.pro \
+ 	proto/buffer.pro \
+ 	proto/charset.pro \
+ 	proto/diff.pro \
+@@ -225,6 +225,7 @@ PRO = \
+ 	proto/tag.pro \
+ 	proto/term.pro \
+ 	proto/termlib.pro \
++	proto/timers.pro \
+ 	proto/ui.pro \
+ 	proto/undo.pro \
+ 	proto/window.pro
+@@ -368,6 +369,8 @@ term.o:			term.c
+ proto/term.pro:		term.c
+ termlib.o:		termlib.c
+ proto/termlib.pro:	termlib.c
++timers.o:		timers.c
++proto/timers.pro:	timers.c
+ ui.o:			ui.c
+ proto/ui.pro:		ui.c
+ undo.o:			undo.c
+diff --git a/src/Make_vms.mms b/src/Make_vms.mms
+index 86b61d6..bcca156 100644
+--- a/src/Make_vms.mms
++++ b/src/Make_vms.mms
+@@ -308,7 +308,7 @@ SRC =	blowfish.c buffer.c charset.c diff.c digraph.c edit.c eval.c ex_cmds.c ex_
+ 	ex_docmd.c ex_eval.c ex_getln.c if_xcmdsrv.c fileio.c fold.c getchar.c \
+ 	hardcopy.c hashtab.c main.c mark.c menu.c mbyte.c memfile.c memline.c message.c misc1.c \
+ 	misc2.c move.c normal.c ops.c option.c popupmnu.c quickfix.c regexp.c search.c sha256.c\
+-	spell.c syntax.c tag.c term.c termlib.c ui.c undo.c version.c screen.c \
++	spell.c syntax.c tag.c term.c termlib.c timers.c ui.c undo.c version.c screen.c \
+ 	window.c os_unix.c os_vms.c pathdef.c \
+ 	$(GUI_SRC) $(PERL_SRC) $(PYTHON_SRC) $(TCL_SRC) $(SNIFF_SRC) \
+ 	$(RUBY_SRC) $(HANGULIN_SRC) $(MZSCH_SRC)
+@@ -319,7 +319,7 @@ OBJ =	blowfish.obj buffer.obj charset.obj diff.obj digraph.obj edit.obj eval.obj
+ 	menu.obj memfile.obj memline.obj message.obj misc1.obj misc2.obj \
+ 	move.obj mbyte.obj normal.obj ops.obj option.obj popupmnu.obj quickfix.obj \
+ 	regexp.obj search.obj sha256.obj spell.obj syntax.obj tag.obj term.obj termlib.obj \
+-	ui.obj undo.obj screen.obj version.obj window.obj os_unix.obj \
++	timers.obj ui.obj undo.obj screen.obj version.obj window.obj os_unix.obj \
+ 	os_vms.obj pathdef.obj if_mzsch.obj\
+ 	$(GUI_OBJ) $(PERL_OBJ) $(PYTHON_OBJ) $(TCL_OBJ) $(SNIFF_OBJ) \
+ 	$(RUBY_OBJ) $(HANGULIN_OBJ) $(MZSCH_OBJ)
+diff --git a/src/Makefile b/src/Makefile
+index c830378..eec9d02 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -1468,6 +1468,7 @@ BASIC_SRC = \
+ 	syntax.c \
+ 	tag.c \
+ 	term.c \
++	timers.c \
+ 	ui.c \
+ 	undo.c \
+ 	version.c \
+@@ -1513,6 +1514,7 @@ LINT_SRC = $(BASIC_SRC) $(GUI_SRC) $(HANGULIN_SRC) $(PYTHON_SRC) $(PYTHON3_SRC)
+ #LINT_SRC = $(BASIC_SRC)
+ 
+ OBJ_COMMON = \
++	objects/timers.o \
+ 	objects/buffer.o \
+ 	objects/blowfish.o \
+ 	objects/charset.o \
+@@ -1630,6 +1632,7 @@ PRO_AUTO = \
+ 	tag.pro \
+ 	term.pro \
+ 	termlib.pro \
++	timers.pro \
+ 	ui.pro \
+ 	undo.pro \
+ 	version.pro \
+@@ -2723,6 +2726,9 @@ objects/tag.o: tag.c
+ objects/term.o: term.c
+ 	$(CCC) -o $@ term.c
+ 
++objects/timers.o: timers.c
++	$(CCC) -o $@ timers.c
++
+ objects/ui.o: ui.c
+ 	$(CCC) -o $@ ui.c
+ 
+@@ -3004,6 +3010,9 @@ objects/term.o: term.c vim.h auto/config.h feature.h os_unix.h auto/osdef.h \
+  ascii.h keymap.h term.h macros.h option.h structs.h regexp.h gui.h \
+  gui_beval.h proto/gui_beval.pro ex_cmds.h proto.h globals.h farsi.h \
+  arabic.h
++objects/timers.o: timers.c vim.h auto/config.h feature.h os_unix.h os_mac.h ascii.h \
++  keymap.h term.h macros.h option.h structs.h regexp.h gui.h ex_cmds.h \
++  proto.h proto/timers.pro globals.h farsi.h arabic.h auto/osdef.h
+ objects/ui.o: ui.c vim.h auto/config.h feature.h os_unix.h auto/osdef.h ascii.h \
+  keymap.h term.h macros.h option.h structs.h regexp.h gui.h gui_beval.h \
+  proto/gui_beval.pro ex_cmds.h proto.h globals.h farsi.h arabic.h
+diff --git a/src/auto/configure b/src/auto/configure
+index a9755a0..64ec51e 100755
+--- a/src/auto/configure
++++ b/src/auto/configure
+@@ -11072,6 +11072,57 @@ if test "x$vim_cv_getcwd_broken" = "xyes" ; then
+ 
+ fi
+ 
++
++for ac_func in clock_gettime
++do :
++  ac_fn_c_check_func "$LINENO" "clock_gettime" "ac_cv_func_clock_gettime"
++if test "x$ac_cv_func_clock_gettime" = xyes; then :
++  cat >>confdefs.h <<_ACEOF
++#define HAVE_CLOCK_GETTIME 1
++_ACEOF
++else
++  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for clock_gettime in -lrt" >&5
++$as_echo_n "checking for clock_gettime in -lrt... " >&6; }
++if ${ac_cv_lib_rt_clock_gettime+:} false; then :
++  $as_echo_n "(cached) " >&6
++else
++  ac_check_lib_save_LIBS=$LIBS
++LIBS="-lrt  $LIBS"
++cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++
++/* Override any GCC internal prototype to avoid an error.
++   Use char because int might match the return type of a GCC
++   builtin and then its argument prototype would still apply.  */
++#ifdef __cplusplus
++extern "C"
++#endif
++char clock_gettime ();
++int
++main ()
++{
++return clock_gettime ();
++  ;
++  return 0;
++}
++_ACEOF
++if ac_fn_c_try_link "$LINENO"; then :
++  ac_cv_lib_rt_clock_gettime=yes
++else
++  ac_cv_lib_rt_clock_gettime=no
++fi
++rm -f core conftest.err conftest.$ac_objext \
++    conftest$ac_exeext conftest.$ac_ext
++LIBS=$ac_check_lib_save_LIBS
++fi
++{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_rt_clock_gettime" >&5
++$as_echo "$ac_cv_lib_rt_clock_gettime" >&6; }
++if test "x$ac_cv_lib_rt_clock_gettime" = xyes; then :
++     LIBS="$LIBS -lrt"
++fi
++fi
++done
++
+ for ac_func in bcmp fchdir fchown fsync getcwd getpseudotty \
+ 	getpwent getpwnam getpwuid getrlimit gettimeofday getwd lstat memcmp \
+ 	memset mkdtemp nanosleep opendir putenv qsort readlink select setenv \
+diff --git a/src/configure.in b/src/configure.in
+index ed30bed..5f47547 100644
+--- a/src/configure.in
++++ b/src/configure.in
+@@ -3240,6 +3240,13 @@ if test "x$vim_cv_getcwd_broken" = "xyes" ; then
+   AC_DEFINE(BAD_GETCWD)
+ fi
+ 
++AC_CHECK_FUNCS(clock_gettime, [], [
++  AC_CHECK_LIB(rt, clock_gettime, [
++     LIBS="$LIBS -lrt"
++   ])
++])
++
++
+ dnl Check for functions in one big call, to reduce the size of configure.
+ dnl Can only be used for functions that do not require any include.
+ AC_CHECK_FUNCS(bcmp fchdir fchown fsync getcwd getpseudotty \
+diff --git a/src/eval.c b/src/eval.c
+index 807efe2..ceb9968 100644
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -674,6 +674,11 @@ static void f_setline __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_setloclist __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_setmatches __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_setpos __ARGS((typval_T *argvars, typval_T *rettv));
++#ifdef FEAT_TIMERS
++static void f_canceltimeout __ARGS((typval_T *argvars, typval_T *rettv));
++static void f_setinterval __ARGS((typval_T *argvars, typval_T *rettv));
++static void f_settimeout __ARGS((typval_T *argvars, typval_T *rettv));
++#endif
+ static void f_setqflist __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_setreg __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_settabvar __ARGS((typval_T *argvars, typval_T *rettv));
+@@ -7861,6 +7866,9 @@ static struct fst
+     {"byte2line",	1, 1, f_byte2line},
+     {"byteidx",		2, 2, f_byteidx},
+     {"call",		2, 3, f_call},
++#ifdef FEAT_TIMERS
++    {"canceltimeout", 1, 1, f_canceltimeout},
++#endif
+ #ifdef FEAT_FLOAT
+     {"ceil",		1, 1, f_ceil},
+ #endif
+@@ -8059,6 +8067,9 @@ static struct fst
+     {"serverlist",	0, 0, f_serverlist},
+     {"setbufvar",	3, 3, f_setbufvar},
+     {"setcmdpos",	1, 1, f_setcmdpos},
++#ifdef FEAT_TIMERS
++    {"setinterval",    2, 2, f_setinterval},
++#endif
+     {"setline",		2, 2, f_setline},
+     {"setloclist",	2, 3, f_setloclist},
+     {"setmatches",	1, 1, f_setmatches},
+@@ -8067,6 +8078,9 @@ static struct fst
+     {"setreg",		2, 3, f_setreg},
+     {"settabvar",	3, 3, f_settabvar},
+     {"settabwinvar",	4, 4, f_settabwinvar},
++#ifdef FEAT_TIMERS
++    {"settimeout",    2, 2, f_settimeout},
++#endif
+     {"setwinvar",	3, 3, f_setwinvar},
+ #ifdef FEAT_CRYPT
+     {"sha256",		1, 1, f_sha256},
+@@ -12485,6 +12499,9 @@ f_has(argvars, rettv)
+ #ifdef FEAT_TEXTOBJ
+ 	"textobjects",
+ #endif
++#ifdef FEAT_TIMERS
++    "timers",
++#endif
+ #ifdef HAVE_TGETENT
+ 	"tgetent",
+ #endif
+@@ -16589,6 +16606,103 @@ f_setmatches(argvars, rettv)
+ #endif
+ }
+ 
++#ifdef FEAT_TIMERS
++static int timeout_id = 0;
++
++    static void
++set_timeout(argvars, rettv, interval)
++    typval_T    *argvars;
++    typval_T    *rettv;
++    int interval;
++{
++    long i = get_tv_number(&argvars[0]);
++    char_u *cmd = get_tv_string(&argvars[1]);
++    rettv->v_type = VAR_NUMBER;
++
++    if (i < 0) {
++        rettv->vval.v_number = -1;
++        EMSG2(_(e_invarg2), "Interval cannot be negative.");
++        return;
++    }
++
++    timeout_T *to = malloc(sizeof(timeout_T));
++    to->id = timeout_id++;
++    to->tm = get_monotonic_time() + i;
++    if (sourcing_name)
++    {
++        to->sourcing_name = (char_u*)strdup((char *)sourcing_name);
++        to->sourcing_lnum = sourcing_lnum;
++    } 
++    else
++    {
++        to->sourcing_name = (char_u*)strdup((char*)cmd);
++        to->sourcing_lnum = 0;
++    }
++
++
++    rettv->vval.v_number = to->id;
++    to->cmd = (char_u*)strdup((char*)cmd);
++    to->interval = interval ? i : -1;
++    to->next = NULL;
++
++    insert_timeout(to);
++}
++
++    static void
++f_setinterval(argvars, rettv)
++    typval_T    *argvars;
++    typval_T    *rettv;
++{
++    set_timeout(argvars, rettv, TRUE);
++}
++
++    static void
++f_settimeout(argvars, rettv)
++    typval_T    *argvars;
++    typval_T    *rettv;
++{
++    set_timeout(argvars, rettv, FALSE);
++}
++
++    static void
++f_canceltimeout(argvars, rettv)
++    typval_T    *argvars;
++    typval_T    *rettv;
++{
++    long id = get_tv_number(&argvars[0]);
++    if (id < 0) {
++        rettv->vval.v_number = -1;
++        EMSG2(_(e_invarg2), "Timeout id cannot be negative.");
++        return;
++    }
++
++    timeout_T *tmp = timeouts;
++    timeout_T *prev = NULL;
++    timeout_T *next;
++    while (tmp != NULL) {
++        next = tmp->next;
++        if (tmp->id == id) {
++            if (prev) {
++                prev->next = next;
++            } else {
++                timeouts = next;
++            }
++            free(tmp->cmd);
++            free(tmp);
++            rettv->vval.v_number = 0;
++            rettv->v_type = VAR_NUMBER;
++            return;
++        } else {
++            prev = tmp;
++        }
++        tmp = next;
++    }
++    rettv->vval.v_number = 1;
++    rettv->v_type = VAR_NUMBER;
++    EMSG2(_(e_invarg2), "Timeout id not found.");
++}
++#endif
++
+ /*
+  * "setpos()" function
+  */
+diff --git a/src/ex_cmds.h b/src/ex_cmds.h
+index 86bcead..cd82b4f 100644
+--- a/src/ex_cmds.h
++++ b/src/ex_cmds.h
+@@ -979,6 +979,8 @@ EX(CMD_tfirst,		"tfirst",	ex_tag,
+ 			RANGE|NOTADR|BANG|TRLBAR|ZEROR),
+ EX(CMD_throw,		"throw",	ex_throw,
+ 			EXTRA|NEEDARG|SBOXOK|CMDWIN),
++EX(CMD_timers,		"timers",	ex_timers,
++			SBOXOK|CMDWIN),
+ EX(CMD_tjump,		"tjump",	ex_tag,
+ 			BANG|TRLBAR|WORD1),
+ EX(CMD_tlast,		"tlast",	ex_tag,
+diff --git a/src/ex_docmd.c b/src/ex_docmd.c
+index 24f80fb..bbff9f4 100644
+--- a/src/ex_docmd.c
++++ b/src/ex_docmd.c
+@@ -470,6 +470,12 @@ static void	ex_folddo __ARGS((exarg_T *eap));
+ # define ex_nbstart		ex_ni
+ #endif
+ 
++#ifdef FEAT_TIMERS
++static void	ex_timers __ARGS((exarg_T *eap));
++#else
++# define ex_timers		ex_ni
++#endif
++
+ #ifndef FEAT_EVAL
+ # define ex_debug		ex_ni
+ # define ex_breakadd		ex_ni
+@@ -11508,3 +11514,53 @@ ex_folddo(eap)
+     ml_clearmarked();	   /* clear rest of the marks */
+ }
+ #endif
++
++#ifdef FEAT_TIMERS
++
++	static void
++ex_timers(eap)
++	exarg_T *eap;
++{
++	int		msg_save = msg_scroll;
++	timeout_T *tm;
++	char num_str[20];
++	unsigned long long now = get_monotonic_time();
++
++	msg_start();
++	MSG_PUTS_TITLE(_("\n--- Timers ---\n"));
++	msg_puts((char_u *)"ID        Next (ms)     Interval (ms)   Source                             Command\n");
++	for (tm = timeouts; tm != NULL; tm = tm->next)
++	{
++		sprintf(num_str, "%i", tm->id);
++		msg_puts((char_u *)num_str);
++		msg_col = 10;
++
++		sprintf(num_str, "%llu", tm->tm - now);
++		msg_puts((char_u *)num_str);
++		msg_col = 24;
++
++		if (tm->interval != -1) {
++			sprintf(num_str, "%i", tm->interval);
++			msg_puts((char_u *)num_str);
++		}
++		msg_col = 40;
++
++		msg_puts_long_attr(tm->sourcing_name, 30);
++		if (tm->sourcing_lnum)
++		{
++			sprintf(num_str, ":%li", tm->sourcing_lnum);
++			msg_puts_long_attr((char_u *)num_str, 5);
++		}
++
++		msg_col = 75;
++		MSG_PUTS_TITLE(tm->cmd);
++		msg_putchar('\n');
++
++		msg_col = 0;
++	}
++
++	msg_clr_eos();
++	msg_end();
++	msg_scroll = msg_save;
++}
++#endif
+diff --git a/src/feature.h b/src/feature.h
+index d4b9aea..ad326d8 100644
+--- a/src/feature.h
++++ b/src/feature.h
+@@ -467,6 +467,14 @@
+ #endif
+ 
+ /*
++ * +timers		settimeout and setinterval functions.
++ */
++#if defined(FEAT_NORMAL) && defined(MSWIN) || defined(MACOS_X) || \
++	defined(HAVE_GETTIMEOFDAY) && defined(HAVE_SYS_TIME_H)
++# define FEAT_TIMERS
++#endif
++
++/*
+  * +diff		Displaying diffs in a nice way.
+  *			Requires +windows and +autocmd.
+  */
+diff --git a/src/globals.h b/src/globals.h
+index feb1dd4..a9262d7 100644
+--- a/src/globals.h
++++ b/src/globals.h
+@@ -1626,3 +1626,10 @@ EXTERN char *ignoredp;
+ #ifdef FEAT_ARABIC
+ # include "arabic.h"
+ #endif
++
++#ifdef FEAT_TIMERS
++/*
++ * For keeping track of timeouts.
++ */
++EXTERN timeout_T *timeouts INIT(= NULL);
++#endif
+\ No newline at end of file
+diff --git a/src/gui.c b/src/gui.c
+index b667ba3..221f0f3 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -2862,7 +2862,9 @@ gui_insert_lines(row, count)
+ gui_wait_for_chars(wtime)
+     long    wtime;
+ {
+-    int	    retval;
++    int 	retval;
++    long	i = 0;
++    long	time_to_wait;
+ 
+ #ifdef FEAT_MENU
+     /*
+@@ -2887,7 +2889,19 @@ gui_wait_for_chars(wtime)
+ 	/* Blink when waiting for a character.	Probably only does something
+ 	 * for showmatch() */
+ 	gui_mch_start_blink();
+-	retval = gui_mch_wait_for_chars(wtime);
++    while (i < wtime) {
++#ifdef FEAT_TIMERS
++		time_to_wait = call_timeouts(wtime - i);
++		i += time_to_wait;
++		retval = gui_mch_wait_for_chars(time_to_wait);
++#else
++		retval = gui_mch_wait_for_chars(wtime);
++		i += wtime;
++#endif
++		if (retval == OK) {
++			break;
++		}
++    }
+ 	gui_mch_stop_blink();
+ 	return retval;
+     }
+@@ -2898,18 +2912,30 @@ gui_wait_for_chars(wtime)
+     gui_mch_start_blink();
+ 
+     retval = FAIL;
++
++    while (i < p_ut) {
++#ifdef FEAT_TIMERS
++		time_to_wait = call_timeouts(p_ut - i);
++		i += time_to_wait;
++		retval = gui_mch_wait_for_chars(time_to_wait);
++#else
++		retval = gui_mch_wait_for_chars(p_ut);
++		i += p_ut;
++#endif
++		if (retval == OK) {
++			break;
++		}
++    }
++
++#ifdef FEAT_AUTOCMD
+     /*
+      * We may want to trigger the CursorHold event.  First wait for
+      * 'updatetime' and if nothing is typed within that time put the
+      * K_CURSORHOLD key in the input buffer.
+      */
+-    if (gui_mch_wait_for_chars(p_ut) == OK)
+-	retval = OK;
+-#ifdef FEAT_AUTOCMD
+-    else if (trigger_cursorhold())
++    if (retval == FAIL && trigger_cursorhold())
+     {
+ 	char_u	buf[3];
+-
+ 	/* Put K_CURSORHOLD in the input buffer. */
+ 	buf[0] = CSI;
+ 	buf[1] = KS_EXTRA;
+@@ -2920,13 +2946,6 @@ gui_wait_for_chars(wtime)
+     }
+ #endif
+ 
+-    if (retval == FAIL)
+-    {
+-	/* Blocking wait. */
+-	before_blocking();
+-	retval = gui_mch_wait_for_chars(-1L);
+-    }
+-
+     gui_mch_stop_blink();
+     return retval;
+ }
+diff --git a/src/main.aap b/src/main.aap
+index 3c91d39..277a949 100644
+--- a/src/main.aap
++++ b/src/main.aap
+@@ -334,6 +334,7 @@ Source =
+         syntax.c
+         tag.c
+         term.c
++        timers.c
+         ui.c
+         undo.c
+         window.c
+diff --git a/src/option.c b/src/option.c
+index bf65556..cb15760 100644
+--- a/src/option.c
++++ b/src/option.c
+@@ -2590,6 +2590,13 @@ static struct vimoption
+ 			    (char_u *)NULL, PV_NONE,
+ #endif
+ 			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
++    {"ticktime",  "tt",   P_NUM|P_VI_DEF,
++#ifdef FEAT_TIMERS
++				(char_u *)&p_tt, PV_NONE,
++#else
++			    (char_u *)NULL, PV_NONE,
++#endif
++			    {(char_u *)20L, (char_u *)0L} SCRIPTID_INIT},
+     {"tildeop",	    "top",  P_BOOL|P_VI_DEF|P_VIM,
+ 			    (char_u *)&p_to, PV_NONE,
+ 			    {(char_u *)FALSE, (char_u *)0L} SCRIPTID_INIT},
+diff --git a/src/option.h b/src/option.h
+index 167b562..044a4c8 100644
+--- a/src/option.h
++++ b/src/option.h
+@@ -795,6 +795,9 @@ EXTERN char_u	*p_titlestring;	/* 'titlestring' */
+ #ifdef FEAT_INS_EXPAND
+ EXTERN char_u	*p_tsr;		/* 'thesaurus' */
+ #endif
++#ifdef FEAT_TIMERS
++EXTERN long	p_tt;		/* 'ticktime' */
++#endif
+ EXTERN int	p_ttimeout;	/* 'ttimeout' */
+ EXTERN long	p_ttm;		/* 'ttimeoutlen' */
+ EXTERN int	p_tbi;		/* 'ttybuiltin' */
+diff --git a/src/os_macosx.m b/src/os_macosx.m
+index d919f63..1b8c5b5 100644
+--- a/src/os_macosx.m
++++ b/src/os_macosx.m
+@@ -23,6 +23,22 @@
+ #include "vim.h"
+ #import <Cocoa/Cocoa.h>
+ 
++#include <mach/mach.h>
++#include <mach/mach_time.h>
++
++
++#define MCH_MONOTONIC_TIME
++	unsigned long long
++mch_monotonic_time(void)
++{
++	mach_timebase_info_data_t info;
++
++	if (mach_timebase_info(&info) != KERN_SUCCESS)
++		abort();
++
++	return (mach_absolute_time() * info.numer / info.denom) / 1000000;
++}
++
+ 
+ /*
+  * Clipboard support for the console.
+diff --git a/src/os_unix.c b/src/os_unix.c
+index cc02653..af50a1d 100644
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -892,6 +892,17 @@ catch_sigpwr SIGDEFARG(sigarg)
+ }
+ #endif
+ 
++#if !defined(MACOS_X_UNIX)
++#define MCH_MONOTONIC_TIME
++	unsigned long long
++mch_monotonic_time(void)
++{
++	struct timespec ts;
++	clock_gettime(CLOCK_MONOTONIC, &ts);
++	return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
++}
++#endif
++
+ #ifdef SET_SIG_ALARM
+ /*
+  * signal function for alarm().
+@@ -5057,9 +5068,12 @@ RealWaitForChar(fd, msec, check_for_gpm)
+ #ifdef FEAT_NETBEANS_INTG
+     int		nb_fd = netbeans_filedesc();
+ #endif
+-#if defined(FEAT_XCLIPBOARD) || defined(USE_XSMP) || defined(FEAT_MZSCHEME)
++#if defined(FEAT_XCLIPBOARD) || defined(USE_XSMP) || defined(FEAT_MZSCHEME) || defined(FEAT_TIMERS)
+     static int	busy = FALSE;
+ 
++#ifdef FEAT_TIMERS
++    unsigned long long now;
++#endif
+     /* May retry getting characters after an event was handled. */
+ # define MAY_LOOP
+ 
+@@ -5072,18 +5086,24 @@ RealWaitForChar(fd, msec, check_for_gpm)
+     if (msec > 0 && (
+ #  ifdef FEAT_XCLIPBOARD
+ 	    xterm_Shell != (Widget)0
+-#   if defined(USE_XSMP) || defined(FEAT_MZSCHEME)
++#   if defined(USE_XSMP) || defined(FEAT_MZSCHEME) || defined(FEAT_TIMERS)
+ 	    ||
+ #   endif
+ #  endif
+ #  ifdef USE_XSMP
+ 	    xsmp_icefd != -1
+-#   ifdef FEAT_MZSCHEME
++#   if defined(FEAT_MZSCHEME) || defined(FEAT_TIMERS)
+ 	    ||
+ #   endif
+ #  endif
+ #  ifdef FEAT_MZSCHEME
+ 	(mzthreads_allowed() && p_mzq > 0)
++#   ifdef FEAT_TIMERS
++	    ||
++#   endif
++#  endif
++#  ifdef FEAT_TIMERS
++	TRUE
+ #  endif
+ 	    ))
+ 	gettimeofday(&start_tv, NULL);
+@@ -5130,6 +5150,9 @@ RealWaitForChar(fd, msec, check_for_gpm)
+ 	    mzquantum_used = TRUE;
+ 	}
+ # endif
++# ifdef FEAT_TIMERS
++	towait = call_timeouts(msec);
++# endif
+ 	fds[0].fd = fd;
+ 	fds[0].events = POLLIN;
+ 	nfd = 1;
+@@ -5257,6 +5280,9 @@ RealWaitForChar(fd, msec, check_for_gpm)
+ 	    mzquantum_used = TRUE;
+ 	}
+ # endif
++# ifdef FEAT_TIMERS
++	towait = call_timeouts(msec);
++# endif
+ # ifdef __EMX__
+ 	/* don't check for incoming chars if not in raw mode, because select()
+ 	 * always returns TRUE then (in some version of emx.dll) */
+@@ -5369,6 +5395,10 @@ select_eintr:
+ 	    /* loop if MzThreads must be scheduled and timeout occurred */
+ 	    finished = FALSE;
+ # endif
++# ifdef FEAT_TIMERS
++	if (ret == 0 && msec > p_tt)
++	    finished = FALSE;
++# endif
+ 
+ # ifdef FEAT_SNIFF
+ 	if (ret < 0 )
+@@ -7367,5 +7397,4 @@ char CtrlCharTable[]=
+       0,  0,229,  0,  0,  0,  0,196,  0,  0,  0,  0,227,228,  0,233,
+ };
+ 
+-
+ #endif
+diff --git a/src/os_win32.c b/src/os_win32.c
+index f36dfb3..335bbc1 100644
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -29,6 +29,7 @@
+ #include <sys/types.h>
+ #include <signal.h>
+ #include <limits.h>
++#include <math.h>
+ 
+ /* cproto fails on missing include files */
+ #ifndef PROTO
+@@ -634,6 +635,52 @@ PlatformId(void)
+     }
+ }
+ 
++	unsigned long long
++mch_monotonic_time(void)
++{	
++	static ULONGLONG (*GetTickCount64) (void) = NULL;
++	static ULONGLONG (CALLBACK *_GetTickCount64)(void);
++	static int has_getickcount64 = -1;
++	ULONGLONG result;
++	OSVERSIONINFO ovi;
++
++	ovi.dwOSVersionInfoSize = sizeof(ovi);
++	GetVersionEx(&ovi);
++
++	if (has_getickcount64 == -1)
++	{
++	    /* GetTickCount64() was added to Windows Vista */
++	    if (ovi.dwMajorVersion >= 6)
++	    {
++	        HINSTANCE hKernel32 = GetModuleHandleW(L"KERNEL32");
++	        *(FARPROC*)&_GetTickCount64 = GetProcAddress(hKernel32,
++	                                                       "GetTickCount64");
++	        has_getickcount64 = (_GetTickCount64 != NULL);
++	    }
++	    else
++	        has_getickcount64 = 0;
++	}
++
++	if (has_getickcount64)
++	{
++	    result = _GetTickCount64();
++	}
++	else
++	{
++	    static DWORD last_ticks = 0;
++	    static DWORD n_overflow = 0;
++	    DWORD ticks;
++
++	    ticks = GetTickCount();
++	    if (ticks < last_ticks)
++	        n_overflow++;
++	    last_ticks = ticks;
++
++	    result = (unsigned long long)ldexp(n_overflow, 32);
++	    result += ticks;
++	}
++    return result;
++}
+ /*
+  * Return TRUE when running on Windows 95 (or 98 or ME).
+  * Only to be used after mch_init().
+diff --git a/src/os_win32.h b/src/os_win32.h
+index 58b179f..2779bb5 100644
+--- a/src/os_win32.h
++++ b/src/os_win32.h
+@@ -56,6 +56,7 @@
+ #define HAVE_ST_MODE		/* have stat.st_mode */
+ 
+ #define FEAT_SHORTCUT		/* resolve shortcuts */
++#define MCH_MONOTONIC_TIME	/* for timers */
+ 
+ #if (!defined(__BORLANDC__) || __BORLANDC__ >= 0x550) \
+ 	&& (!defined(_MSC_VER) || _MSC_VER > 1020)
+diff --git a/src/proto.h b/src/proto.h
+index 191ecd8..3f1a993 100644
+--- a/src/proto.h
++++ b/src/proto.h
+@@ -293,3 +293,7 @@ void clip_mch_set_selection(VimClipboard *cbd);
+ # define _PROTO_H
+ #endif
+ #endif /* !PROTO && !NOPROTO */
++
++#ifdef FEAT_TIMERS
++# include "timers.pro"
++#endif
+\ No newline at end of file
+diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
+index e4cad51..632179e 100644
+--- a/src/proto/os_unix.pro
++++ b/src/proto/os_unix.pro
+@@ -6,6 +6,7 @@ int mch_char_avail __ARGS((void));
+ long_u mch_total_mem __ARGS((int special));
+ void mch_delay __ARGS((long msec, int ignoreinput));
+ int mch_stackcheck __ARGS((char *p));
++unsigned long long mch_monotonic_time __ARGS((void));
+ void mch_startjmp __ARGS((void));
+ void mch_endjmp __ARGS((void));
+ void mch_didjmp __ARGS((void));
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+index a4c590f..5db7ba2 100644
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -55,4 +55,5 @@ void free_cmd_argsW __ARGS((void));
+ void used_file_arg __ARGS((char *name, int literal, int full_path, int diff_mode));
+ void set_alist_count __ARGS((void));
+ void fix_arg_enc __ARGS((void));
++unsigned long long mch_monotonic_time __ARGS((void));
+ /* vim: set ft=c : */
+diff --git a/src/proto/timers.pro b/src/proto/timers.pro
+new file mode 100644
+index 0000000..d22d6e4
+--- /dev/null
++++ b/src/proto/timers.pro
+@@ -0,0 +1,5 @@
++/* timers.c */
++unsigned long long get_monotonic_time __ARGS((void));
++void insert_timeout __ARGS((timeout_T *to));
++long call_timeouts __ARGS((long max_wait));
++/* vim: set ft=c : */
+diff --git a/src/structs.h b/src/structs.h
+index f74d218..95ebadd 100644
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -2540,3 +2540,19 @@ typedef struct {
+   UINT32_T state[8];
+   char_u   buffer[64];
+ } context_sha256_T;
++
++#ifdef FEAT_TIMERS
++/*
++ * Used for +timers settimeout/interval.
++ */
++struct timeout_T {
++    int id;                     /* timeout/interval id */
++    int interval;               /* interval period if interval, otherwise -1 */
++    unsigned long long tm;           /* time to fire (epoch milliseconds) */
++    char_u *cmd;                /* vim command to run */
++    char_u *sourcing_name;
++    linenr_T sourcing_lnum;
++    struct timeout_T *next;     /* pointer to next timeout in linked list */
++};
++typedef struct timeout_T timeout_T;
++#endif
+diff --git a/src/timers.c b/src/timers.c
+new file mode 100644
+index 0000000..0435603
+--- /dev/null
++++ b/src/timers.c
+@@ -0,0 +1,143 @@
++#include "vim.h"
++
++#ifdef FEAT_TIMERS
++
++/*
++ * Avoid recursive calls to call_timeouts
++ */
++static int calling_timeouts = FALSE;
++
++/*
++ * Return monotonic time, if available. Fall back to gettimeofday otherwise.
++ */
++	unsigned long long
++get_monotonic_time(void)
++{
++	unsigned long long tm;
++#ifdef MCH_MONOTONIC_TIME
++	tm = mch_monotonic_time();
++#else
++	struct timeval now;
++	gettimeofday(&now, NULL);
++	tm = now.tv_sec * 1000 + now.tv_usec/1000;
++#endif
++	return tm;
++}
++
++
++/*
++ * Insert a new timeout into the timeout linked list.
++ * This is called by set_timeout() in eval.c
++ */
++	void
++insert_timeout(to)
++	timeout_T *to;  /* timeout to insert */
++{
++	timeout_T *cur = timeouts;
++	timeout_T *prev = NULL;
++
++	if (timeouts == NULL)
++	{
++		timeouts = to;
++		return;
++	}
++
++	while (cur != NULL) 
++	{
++		if (cur->tm > to->tm)
++		{
++			if (prev)
++			{
++				prev->next = to;
++			}
++			else 
++			{
++				timeouts = to;
++			}
++			to->next = cur;
++			return;
++		}
++		prev = cur;
++		cur = cur->next;
++	}
++	prev->next = to;
++	to->next = NULL;
++}
++
++/*
++ * Execute timeouts that are due.
++ * Return the amount of time before call_timeouts() should be run again.
++ */
++	long
++call_timeouts(max_to_wait)
++	long max_to_wait;
++{
++	unsigned long long now = get_monotonic_time();
++	unsigned long long towait = p_tt;
++	timeout_T *tmp;
++	int retval;
++
++	if (calling_timeouts)
++	{
++		return max_to_wait;
++	}
++
++	calling_timeouts = TRUE;
++
++	while (timeouts != NULL && timeouts->tm < now)
++	{
++		retval = do_cmdline_cmd(timeouts->cmd);
++		tmp = timeouts;
++		timeouts = timeouts->next;
++		if (tmp->interval == -1 || retval == FAIL || did_throw || did_emsg)
++		{	
++			if (got_int) 
++			{
++				if (tmp->sourcing_lnum) 
++				{
++					EMSG(_("E881: An interval was canceled because of an interrupt"));
++					EMSG3(_("%s:%s"), tmp->sourcing_name, tmp->sourcing_lnum);
++				} 
++				else 
++				{
++					EMSG(_("E881: An interval was canceled because of an interrupt"));
++					EMSG2(_("%s"), tmp->sourcing_name);
++				}
++			}
++			free(tmp->cmd);
++			free(tmp->sourcing_name);
++			free(tmp);
++		} 
++		else
++		{
++			tmp->tm = now + tmp->interval;
++			insert_timeout(tmp);
++		}
++	}
++
++	calling_timeouts = FALSE;
++
++	/* if there is not a timer, change towait so that it will get called */
++	if (timeouts != NULL && max_to_wait != 0)
++	{
++		now = get_monotonic_time();
++		if (now > timeouts->tm)
++			return p_tt;
++
++		towait = timeouts->tm - now;
++
++		/* don't wake up every 1 ms ... limit to p_tt */
++		if (towait < p_tt)
++			towait = p_tt;
++
++		/* don't overshoot the wait time */
++		if (max_to_wait > 0 && towait > max_to_wait)
++			towait = max_to_wait;
++
++        return towait;
++	}
++
++	return max_to_wait;
++}
++
++#endif
+diff --git a/src/version.c b/src/version.c
+index ef3f9b1..308edc0 100644
+--- a/src/version.c
++++ b/src/version.c
+@@ -617,6 +617,11 @@ static char *(features[]) =
+ #else
+ 	"-textobjects",
+ #endif
++#ifdef FEAT_TIMERS
++	"+timers",
++#else
++	"-timers",
++#endif
+ #ifdef FEAT_TITLE
+ 	"+title",
+ #else
