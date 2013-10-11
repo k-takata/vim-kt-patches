@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 7680166acd856c62791fdbcd2461a9462e16a925
+# Parent 032baf1bbd4122f82f4127e3bbc4fb1ad83c9102
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
@@ -27,7 +27,7 @@ diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2942,6 +2942,8 @@
+@@ -2949,6 +2949,8 @@
      p_term("t_cl", T_CL)
      p_term("t_cm", T_CM)
      p_term("t_Co", T_CCO)
@@ -36,7 +36,7 @@ diff --git a/src/option.c b/src/option.c
      p_term("t_CS", T_CCS)
      p_term("t_cs", T_CS)
  #ifdef FEAT_VERTSPLIT
-@@ -2973,6 +2975,8 @@
+@@ -2980,6 +2982,8 @@
      p_term("t_se", T_SE)
      p_term("t_so", T_SO)
      p_term("t_sr", T_SR)
@@ -45,6 +45,41 @@ diff --git a/src/option.c b/src/option.c
      p_term("t_ts", T_TS)
      p_term("t_te", T_TE)
      p_term("t_ti", T_TI)
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -225,7 +225,7 @@
+     else
+ #endif
+ 	/* Use attributes that is very unlikely to appear in text. */
+-	screen_attr = HL_BOLD | HL_UNDERLINE | HL_INVERSE;
++	screen_attr = HL_BOLD | HL_UNDERLINE | HL_INVERSE | HL_STRIKETHROUGH;
+ }
+ 
+ /*
+@@ -7557,6 +7557,8 @@
+ 		out_str(T_CZH);
+ 	    if ((attr & HL_INVERSE) && T_MR != NULL)	/* inverse (reverse) */
+ 		out_str(T_MR);
++	    if ((attr & HL_STRIKETHROUGH) && T_STS != NULL)	/* strike */
++		out_str(T_STS);
+ 
+ 	    /*
+ 	     * Output the color or start string after bold etc., in case the
+@@ -7660,6 +7662,13 @@
+ 		else
+ 		    out_str(T_CZR);
+ 	    }
++	    if (screen_attr & HL_STRIKETHROUGH)
++	    {
++		if (STRCMP(T_STE, T_ME) == 0)
++		    do_ME = TRUE;
++		else
++		    out_str(T_STE);
++	    }
+ 	    if (do_ME || (screen_attr & (HL_BOLD | HL_INVERSE)))
+ 		out_str(T_ME);
+ 
 diff --git a/src/syntax.c b/src/syntax.c
 --- a/src/syntax.c
 +++ b/src/syntax.c
@@ -77,3 +112,15 @@ diff --git a/src/term.c b/src/term.c
  				{KS_CM, "cm"}, {KS_SR, "sr"},
  				{KS_CRI,"RI"}, {KS_VB, "vb"}, {KS_KS, "ks"},
  				{KS_KE, "ke"}, {KS_TI, "ti"}, {KS_TE, "te"},
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -678,7 +678,7 @@
+ #define HL_UNDERCURL		0x10
+ #define HL_STANDOUT		0x20
+ #define HL_STRIKETHROUGH	0x40
+-#define HL_ALL			0x4f
++#define HL_ALL			0x7f
+ 
+ /* special attribute addition: Put message in history */
+ #define MSG_HIST		0x1000
