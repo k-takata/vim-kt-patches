@@ -122,6 +122,14 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  setwinvar({nr}, {varname}, {val})			*setwinvar()*
  		Like |settabwinvar()| for the current tab page.
  		Examples: >
+@@ -6479,6 +6525,7 @@
+ textobjects		Compiled with support for |text-objects|.
+ tgetent			Compiled with tgetent support, able to use a termcap
+ 			or terminfo file.
++timers			Compiled with support for timer funtions.
+ title			Compiled with window title support |'title'|.
+ toolbar			Compiled with support for |gui-toolbar|.
+ unix			Unix version of Vim.
 diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
 --- a/runtime/doc/index.txt
 +++ b/runtime/doc/index.txt
@@ -205,6 +213,17 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  setting-guifont	gui.txt	/*setting-guifont*
  setting-guitablabel	tabpage.txt	/*setting-guitablabel*
  setting-tabline	tabpage.txt	/*setting-tabline*
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -412,6 +412,7 @@
+ N  *+termresponse*	support for |t_RV| and |v:termresponse|
+ N  *+textobjects*	|text-objects| selection
+    *+tgetent*		non-Unix only: able to use external termcap
++   *+timers*		timer functions
+ N  *+title*		Setting the window 'title' and 'icon'
+ N  *+toolbar*		|gui-toolbar|
+ N  *+user_commands*	User-defined commands. |user-commands|
 diff --git a/src/Make_bc3.mak b/src/Make_bc3.mak
 --- a/src/Make_bc3.mak
 +++ b/src/Make_bc3.mak
@@ -608,7 +627,7 @@ diff --git a/src/eval.c b/src/eval.c
      {"setwinvar",	3, 3, f_setwinvar},
  #ifdef FEAT_CRYPT
      {"sha256",		1, 1, f_sha256},
-@@ -12486,6 +12500,9 @@
+@@ -12486,9 +12500,15 @@
  #ifdef FEAT_TEXTOBJ
  	"textobjects",
  #endif
@@ -618,7 +637,13 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef HAVE_TGETENT
  	"tgetent",
  #endif
-@@ -16599,6 +16616,117 @@
++#ifdef FEAT_TIMERS
++	"timers",
++#endif
+ #ifdef FEAT_TITLE
+ 	"title",
+ #endif
+@@ -16599,6 +16619,119 @@
  #endif
  }
  
@@ -631,8 +656,10 @@ diff --git a/src/eval.c b/src/eval.c
 +    typval_T	*rettv;
 +    int		interval;
 +{
++    timeout_T *to;
 +    long i = get_tv_number(&argvars[0]);
 +    char_u *cmd = get_tv_string(&argvars[1]);
++
 +    rettv->v_type = VAR_NUMBER;
 +
 +    if (i < 0)
@@ -642,7 +669,7 @@ diff --git a/src/eval.c b/src/eval.c
 +	return;
 +    }
 +
-+    timeout_T *to = malloc(sizeof(timeout_T));
++    to = malloc(sizeof(timeout_T));
 +    to->id = timeout_id++;
 +    to->tm = get_monotonic_time() + i;
 +    if (sourcing_name)
@@ -694,6 +721,9 @@ diff --git a/src/eval.c b/src/eval.c
 +    typval_T	*argvars;
 +    typval_T	*rettv;
 +{
++    timeout_T *tmp = timeouts;
++    timeout_T *prev = NULL;
++    timeout_T *next;
 +    long id = get_tv_number(&argvars[0]);
 +
 +    if (id < 0)
@@ -703,9 +733,6 @@ diff --git a/src/eval.c b/src/eval.c
 +	return;
 +    }
 +
-+    timeout_T *tmp = timeouts;
-+    timeout_T *prev = NULL;
-+    timeout_T *next;
 +    while (tmp != NULL)
 +    {
 +	next = tmp->next;
@@ -1227,22 +1254,31 @@ diff --git a/src/structs.h b/src/structs.h
 +/*
 + * Used for +timers settimeout/interval.
 + */
-+struct timeout_T {
++typedef struct timeout_S timeout_T;
++struct timeout_S {
 +    int id;			/* timeout/interval id */
 +    int interval;		/* interval period if interval, otherwise -1 */
 +    unsigned long long tm;	/* time to fire (epoch milliseconds) */
 +    char_u *cmd;		/* vim command to run */
 +    char_u *sourcing_name;
 +    linenr_T sourcing_lnum;
-+    struct timeout_T *next;	/* pointer to next timeout in linked list */
++    timeout_T *next;		/* pointer to next timeout in linked list */
 +};
-+typedef struct timeout_T timeout_T;
 +#endif
 diff --git a/src/timers.c b/src/timers.c
 new file mode 100644
 --- /dev/null
 +++ b/src/timers.c
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,152 @@
++/* vi:set ts=8 sts=4 sw=4:
++ *
++ * VIM - Vi IMproved	by Bram Moolenaar
++ *
++ * Do ":help uganda"  in Vim to read copying and usage conditions.
++ * Do ":help credits" in Vim to see a list of people who contributed.
++ * See README.txt for an overview of the Vim source code.
++ */
++
 +#include "vim.h"
 +
 +#ifdef FEAT_TIMERS
@@ -1379,7 +1415,7 @@ new file mode 100644
 +	if (max_to_wait > 0 && towait > max_to_wait)
 +	    towait = max_to_wait;
 +
-+        return towait;
++        return (long)towait;
 +    }
 +
 +    return max_to_wait;
