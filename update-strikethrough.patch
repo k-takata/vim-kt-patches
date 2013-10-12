@@ -15,15 +15,26 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
 --- a/runtime/doc/term.txt
 +++ b/runtime/doc/term.txt
-@@ -274,6 +274,8 @@
+@@ -272,8 +272,8 @@
+ 	t_ts	set window title start (to status line)		*t_ts* *'t_ts'*
+ 	t_ue	underline end					*t_ue* *'t_ue'*
  	t_us	underline mode					*t_us* *'t_us'*
- 	t_Ce	undercurl end					*t_Ce* *'t_Ce'*
- 	t_Cs	undercurl mode					*t_Cs* *'t_Cs'*
+-	t_Ce	undercurl end					*t_Ce* *'t_Ce'*
+-	t_Cs	undercurl mode					*t_Cs* *'t_Cs'*
 +	t_Te	strikethrough end				*t_Te* *'t_Te'*
 +	t_Ts	strikethrough mode				*t_Ts* *'t_Ts'*
  	t_ut	clearing uses the current background color	*t_ut* *'t_ut'*
  	t_vb	visual bell					*t_vb* *'t_vb'*
  	t_ve	cursor visible					*t_ve* *'t_ve'*
+@@ -285,6 +285,8 @@
+ 	t_ZR	italics end					*t_ZR* *'t_ZR'*
+ 
+ Added by Vim (there are no standard codes for these):
++	t_Ce	undercurl end					*t_Ce* *'t_Ce'*
++	t_Cs	undercurl mode					*t_Cs* *'t_Cs'*
+ 	t_IS	set icon text start				*t_IS* *'t_IS'*
+ 	t_IE	set icon text end				*t_IE* *'t_IE'*
+ 	t_WP	set window position (Y, X) in pixels		*t_WP* *'t_WP'*
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
