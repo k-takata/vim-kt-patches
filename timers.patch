@@ -1,23 +1,15 @@
 diff --git a/Filelist b/Filelist
 --- a/Filelist
 +++ b/Filelist
-@@ -7,6 +7,7 @@
- 		src/arabic.c \
- 		src/arabic.h \
- 		src/ascii.h \
-+		src/timers.c \
- 		src/blowfish.c \
- 		src/buffer.c \
- 		src/charset.c \
-@@ -69,6 +70,7 @@
+@@ -69,6 +69,7 @@
  		src/term.c \
  		src/term.h \
  		src/termlib.c \
-+		src/timer.c \
++		src/timers.c \
  		src/ui.c \
  		src/undo.c \
  		src/version.c \
-@@ -94,6 +96,7 @@
+@@ -94,6 +95,7 @@
  		src/testdir/python_after/*.py \
  		src/testdir/python_before/*.py \
  		src/proto.h \
