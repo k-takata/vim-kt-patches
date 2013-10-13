@@ -118,7 +118,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  textobjects		Compiled with support for |text-objects|.
  tgetent			Compiled with tgetent support, able to use a termcap
  			or terminfo file.
-+timers			Compiled with support for timer funtions.
++timers			Compiled with support for timer functions.
  title			Compiled with window title support |'title'|.
  toolbar			Compiled with support for |gui-toolbar|.
  unix			Unix version of Vim.
