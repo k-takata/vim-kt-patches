@@ -1,7 +1,7 @@
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
 backout-7.3.638.patch #+linux
-timers.patch #+timers
+timers2.patch #+timers
 timers-mark.diff #+timers
 ignore-bcc-files.patch
 disable-warning8060-with-bcc.patch

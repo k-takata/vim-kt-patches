@@ -1,7 +1,8 @@
 diff --git a/Filelist b/Filelist
+index b324933..285aa86 100644
 --- a/Filelist
 +++ b/Filelist
-@@ -69,6 +69,7 @@
+@@ -69,6 +69,7 @@ SRC_ALL =	\
  		src/term.c \
  		src/term.h \
  		src/termlib.c \
@@ -9,7 +10,7 @@ diff --git a/Filelist b/Filelist
  		src/ui.c \
  		src/undo.c \
  		src/version.c \
-@@ -94,6 +95,7 @@
+@@ -94,6 +95,7 @@ SRC_ALL =	\
  		src/testdir/python_after/*.py \
  		src/testdir/python_before/*.py \
  		src/proto.h \
@@ -18,6 +19,7 @@ diff --git a/Filelist b/Filelist
  		src/proto/buffer.pro \
  		src/proto/charset.pro \
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+index 60b01a8..fefefc0 100644
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
 @@ -1,4 +1,4 @@
@@ -26,7 +28,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  
  		  VIM REFERENCE MANUAL	  by Bram Moolenaar
-@@ -1715,6 +1715,7 @@
+@@ -1715,6 +1715,7 @@ byte2line( {byte})		Number	line number at byte count {byte}
  byteidx( {expr}, {nr})		Number	byte index of {nr}'th char in {expr}
  call( {func}, {arglist} [, {dict}])
  				any	call {func} with arguments {arglist}
@@ -34,7 +36,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  ceil( {expr})			Float	round {expr} up
  changenr()			Number	current change number
  char2nr( {expr}[, {utf8}])	Number	ASCII/UTF8 value of first char in {expr}
-@@ -1926,6 +1927,8 @@
+@@ -1926,6 +1927,8 @@ server2client( {clientid}, {string})
  serverlist()			String	get a list of available servers
  setbufvar( {expr}, {varname}, {val})	set {varname} in buffer {expr} to {val}
  setcmdpos( {pos})		Number	set cursor position in command-line
@@ -43,16 +45,18 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  setline( {lnum}, {line})	Number	set line {lnum} to {line}
  setloclist( {nr}, {list}[, {action}])
  				Number	modify location list using {list}
-@@ -1936,6 +1939,8 @@
+@@ -1936,6 +1939,10 @@ setreg( {n}, {v}[, {opt}])	Number	set register to value and type
  settabvar( {nr}, {varname}, {val})	set {varname} in tab page {nr} to {val}
  settabwinvar( {tabnr}, {winnr}, {varname}, {val})    set {varname} in window
  					{winnr} in tab page {tabnr} to {val}
-+settimeout( {nr}, {string})	Number	evaluate the expression {string} after
++settimeout( {nr}, {string})	Number	execute the command {string} after
 +					{nr} milliseconds
++setinterval( {nr}, {string})	Number	execute the command {string} after
++					{nr} milliseconds every {nr} milliseconds
  setwinvar( {nr}, {varname}, {val})	set {varname} in window {nr} to {val}
  sha256( {string})		String	SHA256 checksum of {string}
  shellescape( {string} [, {special}])
-@@ -2281,6 +2286,15 @@
+@@ -2281,6 +2288,15 @@ call({func}, {arglist} [, {dict}])			*call()* *E699*
  		{dict} is for functions with the "dict" attribute.  It will be
  		used to set the local variable "self". |Dictionary-function|
  
@@ -68,14 +72,14 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  ceil({expr})							*ceil()*
  		Return the smallest integral value greater than or equal to
  		{expr} as a |Float| (round up).
-@@ -5187,6 +5201,23 @@
+@@ -5187,6 +5203,23 @@ setcmdpos({pos})					*setcmdpos()*
  		Returns 0 when successful, 1 when not editing the command
  		line.
  
 +setinterval({nr}, {string})				*setinterval()* *E881*
-+		Immediately returns an interval id and evaluate the expression,
++		Immediately returns an interval id and execute the command,
 +		{string}, every {nr} milliseconds. Intervals do not pile up.
-+		The timer's resolution defaults to 100ms and can be changed by
++		The timer's resolution defaults to 20ms and can be changed by
 +		setting |ticktime|.  Intervals can be canceled by calling
 +		|canceltimeout({interval_id})|.
 +		NOTE: Vim is single-threaded and all expressions are run
@@ -92,12 +96,12 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  setline({lnum}, {text})					*setline()*
  		Set line {lnum} of the current buffer to {text}.  To insert
  		lines use |append()|.
-@@ -5356,6 +5387,21 @@
+@@ -5356,6 +5389,21 @@ settabwinvar({tabnr}, {winnr}, {varname}, {val})	*settabwinvar()*
  			:call settabwinvar(3, 2, "myvar", "foobar")
  <		This function is not available in the |sandbox|.
  
 +settimeout({nr}, {string})				*settimeout()*
-+		Immediately returns an interval id and evaluate the expression,
++		Immediately returns an interval id and evaluate the command,
 +		{string}, once after {nr} milliseconds. The timer's
 +		resolution defaults to 100ms and can be changed by setting
 +		|ticktime|.  Timeouts can be canceled by calling
@@ -108,13 +112,13 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +		Also see |setinterval()| and |canceltimeout()|.
 +		{only available when compiled with the |+timers| feature}
 +		Examples: >
-+			:call settimeout(1000, "call echo(2)")
++			:call settimeout(1000, "echo(2)")
 +<		2
 +
  setwinvar({nr}, {varname}, {val})			*setwinvar()*
  		Like |settabwinvar()| for the current tab page.
  		Examples: >
-@@ -6479,6 +6525,7 @@
+@@ -6479,6 +6527,7 @@ termresponse		Compiled with support for |t_RV| and |v:termresponse|.
  textobjects		Compiled with support for |text-objects|.
  tgetent			Compiled with tgetent support, able to use a termcap
  			or terminfo file.
@@ -123,9 +127,10 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  toolbar			Compiled with support for |gui-toolbar|.
  unix			Unix version of Vim.
 diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
+index 91b7208..db6e3bb 100644
 --- a/runtime/doc/index.txt
 +++ b/runtime/doc/index.txt
-@@ -1544,6 +1544,7 @@
+@@ -1544,6 +1544,7 @@ tag	      command	      action ~
  |:tearoff|	:te[aroff]	tear-off a menu
  |:tfirst|	:tf[irst]	jump to first matching tag
  |:throw|	:th[row]	throw an exception
@@ -134,14 +139,15 @@ diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
  				is only one match
  |:tlast|	:tl[ast]	jump to last matching tag
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+index 0688fcc..1ee989c 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -7253,6 +7253,17 @@
+@@ -7253,6 +7253,17 @@ A jump table for the options with a short description can be found at |Q_op|.
  	uses another default.
  	Backticks cannot be used in this option for security reasons.
  
 +						*'ticktime'* *'tt'*
-+'ticktime' 'tt'		number	(default 100)
++'ticktime' 'tt'		number	(default 20)
 +			global
 +			{not in Vi}
 +	This is the resolution for all timers set with |setinterval()| and
@@ -155,9 +161,10 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  'tildeop' 'top'		boolean	(default off)
  			global
 diff --git a/runtime/doc/tags b/runtime/doc/tags
+index f32ea6f..dce540d 100644
 --- a/runtime/doc/tags
 +++ b/runtime/doc/tags
-@@ -1014,6 +1014,7 @@
+@@ -1014,6 +1014,7 @@ $VIMRUNTIME	starting.txt	/*$VIMRUNTIME*
  'tf'	options.txt	/*'tf'*
  'tgst'	options.txt	/*'tgst'*
  'thesaurus'	options.txt	/*'thesaurus'*
@@ -165,7 +172,7 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  'tildeop'	options.txt	/*'tildeop'*
  'timeout'	options.txt	/*'timeout'*
  'timeoutlen'	options.txt	/*'timeoutlen'*
-@@ -1032,6 +1033,7 @@
+@@ -1032,6 +1033,7 @@ $VIMRUNTIME	starting.txt	/*$VIMRUNTIME*
  'ts'	options.txt	/*'ts'*
  'tsl'	options.txt	/*'tsl'*
  'tsr'	options.txt	/*'tsr'*
@@ -173,7 +180,7 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  'ttimeout'	options.txt	/*'ttimeout'*
  'ttimeoutlen'	options.txt	/*'ttimeoutlen'*
  'ttm'	options.txt	/*'ttm'*
-@@ -4296,6 +4298,7 @@
+@@ -4296,6 +4298,7 @@ E878	pattern.txt	/*E878*
  E879	syntax.txt	/*E879*
  E88	windows.txt	/*E88*
  E880	if_pyth.txt	/*E880*
@@ -181,7 +188,7 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  E89	message.txt	/*E89*
  E90	message.txt	/*E90*
  E91	options.txt	/*E91*
-@@ -4987,6 +4990,7 @@
+@@ -4987,6 +4990,7 @@ c_Up	cmdline.txt	/*c_Up*
  c_digraph	cmdline.txt	/*c_digraph*
  c_wildchar	cmdline.txt	/*c_wildchar*
  call()	eval.txt	/*call()*
@@ -189,7 +196,7 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  carriage-return	intro.txt	/*carriage-return*
  case	change.txt	/*case*
  catch-all	eval.txt	/*catch-all*
-@@ -7653,6 +7657,7 @@
+@@ -7653,6 +7657,7 @@ set-option	options.txt	/*set-option*
  set-spc-auto	spell.txt	/*set-spc-auto*
  setbufvar()	eval.txt	/*setbufvar()*
  setcmdpos()	eval.txt	/*setcmdpos()*
@@ -197,7 +204,7 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  setline()	eval.txt	/*setline()*
  setloclist()	eval.txt	/*setloclist()*
  setmatches()	eval.txt	/*setmatches()*
-@@ -7661,6 +7666,7 @@
+@@ -7661,6 +7666,7 @@ setqflist()	eval.txt	/*setqflist()*
  setreg()	eval.txt	/*setreg()*
  settabvar()	eval.txt	/*settabvar()*
  settabwinvar()	eval.txt	/*settabwinvar()*
@@ -206,9 +213,10 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  setting-guitablabel	tabpage.txt	/*setting-guitablabel*
  setting-tabline	tabpage.txt	/*setting-tabline*
 diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+index 4a1c64a..80cd9e1 100644
 --- a/runtime/doc/various.txt
 +++ b/runtime/doc/various.txt
-@@ -412,6 +412,7 @@
+@@ -412,6 +412,7 @@ m  *+tcl/dyn*		Tcl interface |tcl-dynamic| |/dyn|
  N  *+termresponse*	support for |t_RV| and |v:termresponse|
  N  *+textobjects*	|text-objects| selection
     *+tgetent*		non-Unix only: able to use external termcap
@@ -217,9 +225,10 @@ diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
  N  *+toolbar*		|gui-toolbar|
  N  *+user_commands*	User-defined commands. |user-commands|
 diff --git a/src/Make_bc3.mak b/src/Make_bc3.mak
+index 54c42ac..d7a8431 100644
 --- a/src/Make_bc3.mak
 +++ b/src/Make_bc3.mak
-@@ -91,6 +91,7 @@
+@@ -91,6 +91,7 @@ EXE_dependencies = \
  	syntax.obj \
  	tag.obj \
  	term.obj \
@@ -228,9 +237,10 @@ diff --git a/src/Make_bc3.mak b/src/Make_bc3.mak
  	undo.obj \
  	window.obj
 diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
+index 8172c1f..f4386ee 100644
 --- a/src/Make_bc5.mak
 +++ b/src/Make_bc5.mak
-@@ -617,6 +617,7 @@
+@@ -617,6 +617,7 @@ vimobj =  \
  	$(OBJDIR)\syntax.obj \
  	$(OBJDIR)\tag.obj \
  	$(OBJDIR)\term.obj \
@@ -239,9 +249,10 @@ diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
  	$(OBJDIR)\undo.obj \
  	$(OBJDIR)\version.obj \
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+index f955b4d..6bfffdb 100644
 --- a/src/Make_cyg.mak
 +++ b/src/Make_cyg.mak
-@@ -568,6 +568,7 @@
+@@ -570,6 +570,7 @@ OBJ = \
  	$(OUTDIR)/syntax.o \
  	$(OUTDIR)/tag.o \
  	$(OUTDIR)/term.o \
@@ -250,9 +261,10 @@ diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
  	$(OUTDIR)/undo.o \
  	$(OUTDIR)/version.o \
 diff --git a/src/Make_dice.mak b/src/Make_dice.mak
+index e3a8b9e..acd0437 100644
 --- a/src/Make_dice.mak
 +++ b/src/Make_dice.mak
-@@ -67,6 +67,7 @@
+@@ -67,6 +67,7 @@ SRC = \
  	syntax.c \
  	tag.c \
  	term.c \
@@ -260,7 +272,7 @@ diff --git a/src/Make_dice.mak b/src/Make_dice.mak
  	ui.c \
  	undo.c \
  	window.c \
-@@ -113,6 +114,7 @@
+@@ -113,6 +114,7 @@ OBJ =	o/blowfish.o \
  	o/syntax.o \
  	o/tag.o \
  	o/term.o \
@@ -268,7 +280,7 @@ diff --git a/src/Make_dice.mak b/src/Make_dice.mak
  	o/ui.o \
  	o/undo.o \
  	o/window.o \
-@@ -226,6 +228,8 @@
+@@ -226,6 +228,8 @@ o/term.o:	term.c  $(SYMS) term.h
  
  o/termlib.o:	termlib.c $(SYMS)
  
@@ -278,9 +290,10 @@ diff --git a/src/Make_dice.mak b/src/Make_dice.mak
  
  o/undo.o: undo.c	$(SYMS)
 diff --git a/src/Make_djg.mak b/src/Make_djg.mak
+index f2e7c82..0314ad3 100644
 --- a/src/Make_djg.mak
 +++ b/src/Make_djg.mak
-@@ -60,6 +60,7 @@
+@@ -60,6 +60,7 @@ OBJ = \
  	obj/syntax.o \
  	obj/tag.o \
  	obj/term.o \
@@ -289,9 +302,10 @@ diff --git a/src/Make_djg.mak b/src/Make_djg.mak
  	obj/undo.o \
  	obj/window.o \
 diff --git a/src/Make_ivc.mak b/src/Make_ivc.mak
+index 16589ea..6ee03f3 100644
 --- a/src/Make_ivc.mak
 +++ b/src/Make_ivc.mak
-@@ -253,6 +253,7 @@
+@@ -253,6 +253,7 @@ LINK32_OBJS= \
  	"$(INTDIR)/syntax.obj" \
  	"$(INTDIR)/tag.obj" \
  	"$(INTDIR)/term.obj" \
@@ -299,7 +313,7 @@ diff --git a/src/Make_ivc.mak b/src/Make_ivc.mak
  	"$(INTDIR)/ui.obj" \
  	"$(INTDIR)/undo.obj" \
  	"$(INTDIR)/version.obj" \
-@@ -649,6 +650,10 @@
+@@ -649,6 +650,10 @@ SOURCE=.\term.c
  # End Source File
  # Begin Source File
  
@@ -311,9 +325,10 @@ diff --git a/src/Make_ivc.mak b/src/Make_ivc.mak
  # End Source File
  # Begin Source File
 diff --git a/src/Make_manx.mak b/src/Make_manx.mak
+index 101c5c6..4da0696 100644
 --- a/src/Make_manx.mak
 +++ b/src/Make_manx.mak
-@@ -75,6 +75,7 @@
+@@ -75,6 +75,7 @@ SRC =	blowfish.c \
  	syntax.c \
  	tag.c \
  	term.c \
@@ -321,7 +336,7 @@ diff --git a/src/Make_manx.mak b/src/Make_manx.mak
  	ui.c \
  	undo.c \
  	window.c \
-@@ -123,6 +124,7 @@
+@@ -123,6 +124,7 @@ OBJ =	obj/blowfish.o \
  	obj/syntax.o \
  	obj/tag.o \
  	obj/term.o \
@@ -329,7 +344,7 @@ diff --git a/src/Make_manx.mak b/src/Make_manx.mak
  	obj/ui.o \
  	obj/undo.o \
  	obj/window.o \
-@@ -170,6 +172,7 @@
+@@ -170,6 +172,7 @@ PRO =	proto/blowfish.pro \
  	proto/tag.pro \
  	proto/term.pro \
  	proto/termlib.pro \
@@ -337,7 +352,7 @@ diff --git a/src/Make_manx.mak b/src/Make_manx.mak
  	proto/ui.pro \
  	proto/undo.pro \
  	proto/window.pro
-@@ -348,6 +351,9 @@
+@@ -348,6 +351,9 @@ obj/term.o:	term.c term.h
  obj/termlib.o:	termlib.c
  	$(CCSYM) $@ termlib.c
  
@@ -348,9 +363,10 @@ diff --git a/src/Make_manx.mak b/src/Make_manx.mak
  	$(CCSYM) $@ ui.c
  
 diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+index 7aa3994..bf87983 100644
 --- a/src/Make_ming.mak
 +++ b/src/Make_ming.mak
-@@ -546,6 +546,7 @@
+@@ -546,6 +546,7 @@ OBJ = \
  	$(OUTDIR)/syntax.o \
  	$(OUTDIR)/tag.o \
  	$(OUTDIR)/term.o \
@@ -359,9 +375,10 @@ diff --git a/src/Make_ming.mak b/src/Make_ming.mak
  	$(OUTDIR)/undo.o \
  	$(OUTDIR)/version.o \
 diff --git a/src/Make_morph.mak b/src/Make_morph.mak
+index aa8fbd9..bd4e5fb 100644
 --- a/src/Make_morph.mak
 +++ b/src/Make_morph.mak
-@@ -65,6 +65,7 @@
+@@ -65,6 +65,7 @@ SRC =	blowfish.c						\
  	syntax.c						\
  	tag.c							\
  	term.c							\
@@ -370,9 +387,10 @@ diff --git a/src/Make_morph.mak b/src/Make_morph.mak
  	undo.c							\
  	version.c						\
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+index f23258b..7f03d17 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -569,6 +569,7 @@
+@@ -569,6 +569,7 @@ OBJ = \
  	$(OUTDIR)\syntax.obj \
  	$(OUTDIR)\tag.obj \
  	$(OUTDIR)\term.obj \
@@ -380,7 +398,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  	$(OUTDIR)\ui.obj \
  	$(OUTDIR)\undo.obj \
  	$(OUTDIR)\window.obj \
-@@ -1192,6 +1193,8 @@
+@@ -1192,6 +1193,8 @@ $(OUTDIR)/tag.obj:	$(OUTDIR) tag.c  $(INCL)
  
  $(OUTDIR)/term.obj:	$(OUTDIR) term.c  $(INCL)
  
@@ -390,9 +408,10 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  
  $(OUTDIR)/undo.obj:	$(OUTDIR) undo.c  $(INCL)
 diff --git a/src/Make_os2.mak b/src/Make_os2.mak
+index 42dbdb3..31b106d 100644
 --- a/src/Make_os2.mak
 +++ b/src/Make_os2.mak
-@@ -79,6 +79,7 @@
+@@ -79,6 +79,7 @@ OBJ = \
  	syntax.o \
  	tag.o \
  	term.o \
@@ -401,9 +420,10 @@ diff --git a/src/Make_os2.mak b/src/Make_os2.mak
  	undo.o \
  	window.o \
 diff --git a/src/Make_sas.mak b/src/Make_sas.mak
+index bf57c0d..f69b0fb 100644
 --- a/src/Make_sas.mak
 +++ b/src/Make_sas.mak
-@@ -177,6 +177,7 @@
+@@ -177,6 +177,7 @@ OBJ = \
  	syntax.o \
  	tag.o \
  	term.o \
@@ -411,7 +431,7 @@ diff --git a/src/Make_sas.mak b/src/Make_sas.mak
  	ui.o \
  	undo.o \
  	window.o \
-@@ -225,6 +226,7 @@
+@@ -225,6 +226,7 @@ PRO = \
  	proto/tag.pro \
  	proto/term.pro \
  	proto/termlib.pro \
@@ -419,7 +439,7 @@ diff --git a/src/Make_sas.mak b/src/Make_sas.mak
  	proto/ui.pro \
  	proto/undo.pro \
  	proto/window.pro
-@@ -368,6 +370,8 @@
+@@ -368,6 +370,8 @@ term.o:			term.c
  proto/term.pro:		term.c
  termlib.o:		termlib.c
  proto/termlib.pro:	termlib.c
@@ -429,9 +449,10 @@ diff --git a/src/Make_sas.mak b/src/Make_sas.mak
  proto/ui.pro:		ui.c
  undo.o:			undo.c
 diff --git a/src/Make_vms.mms b/src/Make_vms.mms
+index 86b61d6..bcca156 100644
 --- a/src/Make_vms.mms
 +++ b/src/Make_vms.mms
-@@ -308,7 +308,7 @@
+@@ -308,7 +308,7 @@ SRC =	blowfish.c buffer.c charset.c diff.c digraph.c edit.c eval.c ex_cmds.c ex_
  	ex_docmd.c ex_eval.c ex_getln.c if_xcmdsrv.c fileio.c fold.c getchar.c \
  	hardcopy.c hashtab.c main.c mark.c menu.c mbyte.c memfile.c memline.c message.c misc1.c \
  	misc2.c move.c normal.c ops.c option.c popupmnu.c quickfix.c regexp.c search.c sha256.c\
@@ -440,7 +461,7 @@ diff --git a/src/Make_vms.mms b/src/Make_vms.mms
  	window.c os_unix.c os_vms.c pathdef.c \
  	$(GUI_SRC) $(PERL_SRC) $(PYTHON_SRC) $(TCL_SRC) $(SNIFF_SRC) \
  	$(RUBY_SRC) $(HANGULIN_SRC) $(MZSCH_SRC)
-@@ -319,7 +319,7 @@
+@@ -319,7 +319,7 @@ OBJ =	blowfish.obj buffer.obj charset.obj diff.obj digraph.obj edit.obj eval.obj
  	menu.obj memfile.obj memline.obj message.obj misc1.obj misc2.obj \
  	move.obj mbyte.obj normal.obj ops.obj option.obj popupmnu.obj quickfix.obj \
  	regexp.obj search.obj sha256.obj spell.obj syntax.obj tag.obj term.obj termlib.obj \
@@ -450,9 +471,10 @@ diff --git a/src/Make_vms.mms b/src/Make_vms.mms
  	$(GUI_OBJ) $(PERL_OBJ) $(PYTHON_OBJ) $(TCL_OBJ) $(SNIFF_OBJ) \
  	$(RUBY_OBJ) $(HANGULIN_OBJ) $(MZSCH_OBJ)
 diff --git a/src/Makefile b/src/Makefile
+index c830378..c4fec0f 100644
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1468,6 +1468,7 @@
+@@ -1468,6 +1468,7 @@ BASIC_SRC = \
  	syntax.c \
  	tag.c \
  	term.c \
@@ -460,7 +482,7 @@ diff --git a/src/Makefile b/src/Makefile
  	ui.c \
  	undo.c \
  	version.c \
-@@ -1557,6 +1558,7 @@
+@@ -1557,6 +1558,7 @@ OBJ_COMMON = \
  	$(SNIFF_OBJ) \
  	objects/tag.o \
  	objects/term.o \
@@ -468,7 +490,7 @@ diff --git a/src/Makefile b/src/Makefile
  	objects/ui.o \
  	objects/undo.o \
  	objects/version.o \
-@@ -1630,6 +1632,7 @@
+@@ -1630,6 +1632,7 @@ PRO_AUTO = \
  	tag.pro \
  	term.pro \
  	termlib.pro \
@@ -476,7 +498,7 @@ diff --git a/src/Makefile b/src/Makefile
  	ui.pro \
  	undo.pro \
  	version.pro \
-@@ -2723,6 +2726,9 @@
+@@ -2723,6 +2726,9 @@ objects/tag.o: tag.c
  objects/term.o: term.c
  	$(CCC) -o $@ term.c
  
@@ -486,7 +508,7 @@ diff --git a/src/Makefile b/src/Makefile
  objects/ui.o: ui.c
  	$(CCC) -o $@ ui.c
  
-@@ -3004,6 +3010,9 @@
+@@ -3004,6 +3010,9 @@ objects/term.o: term.c vim.h auto/config.h feature.h os_unix.h auto/osdef.h \
   ascii.h keymap.h term.h macros.h option.h structs.h regexp.h gui.h \
   gui_beval.h proto/gui_beval.pro ex_cmds.h proto.h globals.h farsi.h \
   arabic.h
@@ -497,9 +519,10 @@ diff --git a/src/Makefile b/src/Makefile
   keymap.h term.h macros.h option.h structs.h regexp.h gui.h gui_beval.h \
   proto/gui_beval.pro ex_cmds.h proto.h globals.h farsi.h arabic.h
 diff --git a/src/auto/configure b/src/auto/configure
+index a9755a0..64ec51e 100755
 --- a/src/auto/configure
 +++ b/src/auto/configure
-@@ -11090,6 +11090,57 @@
+@@ -11072,6 +11072,57 @@ if test "x$vim_cv_getcwd_broken" = "xyes" ; then
  
  fi
  
@@ -558,9 +581,10 @@ diff --git a/src/auto/configure b/src/auto/configure
  	getpwent getpwnam getpwuid getrlimit gettimeofday getwd lstat memcmp \
  	memset mkdtemp nanosleep opendir putenv qsort readlink select setenv \
 diff --git a/src/configure.in b/src/configure.in
+index ed30bed..5f47547 100644
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -3263,6 +3263,13 @@
+@@ -3240,6 +3240,13 @@ if test "x$vim_cv_getcwd_broken" = "xyes" ; then
    AC_DEFINE(BAD_GETCWD)
  fi
  
@@ -575,9 +599,10 @@ diff --git a/src/configure.in b/src/configure.in
  dnl Can only be used for functions that do not require any include.
  AC_CHECK_FUNCS(bcmp fchdir fchown fsync getcwd getpseudotty \
 diff --git a/src/eval.c b/src/eval.c
+index 807efe2..c45543c 100644
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -674,6 +674,11 @@
+@@ -674,6 +674,11 @@ static void f_setline __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setloclist __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setmatches __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setpos __ARGS((typval_T *argvars, typval_T *rettv));
@@ -589,7 +614,7 @@ diff --git a/src/eval.c b/src/eval.c
  static void f_setqflist __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setreg __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_settabvar __ARGS((typval_T *argvars, typval_T *rettv));
-@@ -7862,6 +7867,9 @@
+@@ -7861,6 +7866,9 @@ static struct fst
      {"byte2line",	1, 1, f_byte2line},
      {"byteidx",		2, 2, f_byteidx},
      {"call",		2, 3, f_call},
@@ -599,7 +624,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_FLOAT
      {"ceil",		1, 1, f_ceil},
  #endif
-@@ -8060,6 +8068,9 @@
+@@ -8059,6 +8067,9 @@ static struct fst
      {"serverlist",	0, 0, f_serverlist},
      {"setbufvar",	3, 3, f_setbufvar},
      {"setcmdpos",	1, 1, f_setcmdpos},
@@ -609,7 +634,7 @@ diff --git a/src/eval.c b/src/eval.c
      {"setline",		2, 2, f_setline},
      {"setloclist",	2, 3, f_setloclist},
      {"setmatches",	1, 1, f_setmatches},
-@@ -8068,6 +8079,9 @@
+@@ -8067,6 +8078,9 @@ static struct fst
      {"setreg",		2, 3, f_setreg},
      {"settabvar",	3, 3, f_settabvar},
      {"settabwinvar",	4, 4, f_settabwinvar},
@@ -619,7 +644,7 @@ diff --git a/src/eval.c b/src/eval.c
      {"setwinvar",	3, 3, f_setwinvar},
  #ifdef FEAT_CRYPT
      {"sha256",		1, 1, f_sha256},
-@@ -12486,9 +12500,15 @@
+@@ -12485,9 +12499,15 @@ f_has(argvars, rettv)
  #ifdef FEAT_TEXTOBJ
  	"textobjects",
  #endif
@@ -635,7 +660,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_TITLE
  	"title",
  #endif
-@@ -16599,6 +16619,119 @@
+@@ -16589,6 +16609,128 @@ f_setmatches(argvars, rettv)
  #endif
  }
  
@@ -730,11 +755,20 @@ diff --git a/src/eval.c b/src/eval.c
 +	next = tmp->next;
 +	if (tmp->id == id)
 +	{
++	    /* We can't free a timeout from within that timeout ... just wait for it to end */
++	    if (calling_timeouts == TRUE && timeouts == tmp)
++	    {
++	    	tmp->interval = -1;
++	    	return;
++	    }
++
 +	    if (prev)
 +		prev->next = next;
 +	    else
 +		timeouts = next;
++
 +	    free(tmp->cmd);
++            free(tmp->sourcing_name);
 +	    free(tmp);
 +	    rettv->vval.v_number = 0;
 +	    rettv->v_type = VAR_NUMBER;
@@ -756,9 +790,10 @@ diff --git a/src/eval.c b/src/eval.c
   * "setpos()" function
   */
 diff --git a/src/ex_cmds.h b/src/ex_cmds.h
+index 86bcead..cd82b4f 100644
 --- a/src/ex_cmds.h
 +++ b/src/ex_cmds.h
-@@ -979,6 +979,8 @@
+@@ -979,6 +979,8 @@ EX(CMD_tfirst,		"tfirst",	ex_tag,
  			RANGE|NOTADR|BANG|TRLBAR|ZEROR),
  EX(CMD_throw,		"throw",	ex_throw,
  			EXTRA|NEEDARG|SBOXOK|CMDWIN),
@@ -768,9 +803,10 @@ diff --git a/src/ex_cmds.h b/src/ex_cmds.h
  			BANG|TRLBAR|WORD1),
  EX(CMD_tlast,		"tlast",	ex_tag,
 diff --git a/src/ex_docmd.c b/src/ex_docmd.c
+index 24f80fb..dc7f232 100644
 --- a/src/ex_docmd.c
 +++ b/src/ex_docmd.c
-@@ -470,6 +470,12 @@
+@@ -470,6 +470,12 @@ static void	ex_folddo __ARGS((exarg_T *eap));
  # define ex_nbstart		ex_ni
  #endif
  
@@ -783,7 +819,7 @@ diff --git a/src/ex_docmd.c b/src/ex_docmd.c
  #ifndef FEAT_EVAL
  # define ex_debug		ex_ni
  # define ex_breakadd		ex_ni
-@@ -11508,3 +11514,54 @@
+@@ -11508,3 +11514,55 @@ ex_folddo(eap)
      ml_clearmarked();	   /* clear rest of the marks */
  }
  #endif
@@ -799,6 +835,7 @@ diff --git a/src/ex_docmd.c b/src/ex_docmd.c
 +    char		num_str[20];
 +    unsigned long long	now = get_monotonic_time();
 +
++    (void)eap;
 +    msg_start();
 +    MSG_PUTS_TITLE(_("\n--- Timers ---\n"));
 +    msg_puts((char_u *)"ID        Next (ms)     Interval (ms)   Source                             Command\n");
@@ -839,6 +876,7 @@ diff --git a/src/ex_docmd.c b/src/ex_docmd.c
 +}
 +#endif
 diff --git a/src/feature.h b/src/feature.h
+index d4b9aea..ffb7cc9 100644
 --- a/src/feature.h
 +++ b/src/feature.h
 @@ -467,6 +467,14 @@
@@ -857,9 +895,10 @@ diff --git a/src/feature.h b/src/feature.h
   *			Requires +windows and +autocmd.
   */
 diff --git a/src/globals.h b/src/globals.h
+index feb1dd4..29b8589 100644
 --- a/src/globals.h
 +++ b/src/globals.h
-@@ -1626,3 +1626,10 @@
+@@ -1626,3 +1626,14 @@ EXTERN char *ignoredp;
  #ifdef FEAT_ARABIC
  # include "arabic.h"
  #endif
@@ -869,11 +908,16 @@ diff --git a/src/globals.h b/src/globals.h
 + * For keeping track of timeouts.
 + */
 +EXTERN timeout_T *timeouts INIT(= NULL);
++/*
++ * Avoid trouble from recursive and self referential calls to call_timeouts
++ */
++EXTERN int calling_timeouts INIT(= FALSE);
 +#endif
 diff --git a/src/gui.c b/src/gui.c
+index b667ba3..aa3e94b 100644
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -2862,7 +2862,9 @@
+@@ -2862,7 +2862,9 @@ gui_insert_lines(row, count)
  gui_wait_for_chars(wtime)
      long    wtime;
  {
@@ -884,7 +928,7 @@ diff --git a/src/gui.c b/src/gui.c
  
  #ifdef FEAT_MENU
      /*
-@@ -2887,7 +2889,19 @@
+@@ -2887,7 +2889,19 @@ gui_wait_for_chars(wtime)
  	/* Blink when waiting for a character.	Probably only does something
  	 * for showmatch() */
  	gui_mch_start_blink();
@@ -905,7 +949,7 @@ diff --git a/src/gui.c b/src/gui.c
  	gui_mch_stop_blink();
  	return retval;
      }
-@@ -2898,18 +2912,29 @@
+@@ -2898,18 +2912,29 @@ gui_wait_for_chars(wtime)
      gui_mch_start_blink();
  
      retval = FAIL;
@@ -940,7 +984,7 @@ diff --git a/src/gui.c b/src/gui.c
  	/* Put K_CURSORHOLD in the input buffer. */
  	buf[0] = CSI;
  	buf[1] = KS_EXTRA;
-@@ -2920,13 +2945,6 @@
+@@ -2920,13 +2945,6 @@ gui_wait_for_chars(wtime)
      }
  #endif
  
@@ -955,9 +999,10 @@ diff --git a/src/gui.c b/src/gui.c
      return retval;
  }
 diff --git a/src/main.aap b/src/main.aap
+index 3c91d39..277a949 100644
 --- a/src/main.aap
 +++ b/src/main.aap
-@@ -334,6 +334,7 @@
+@@ -334,6 +334,7 @@ Source =
          syntax.c
          tag.c
          term.c
@@ -966,9 +1011,10 @@ diff --git a/src/main.aap b/src/main.aap
          undo.c
          window.c
 diff --git a/src/option.c b/src/option.c
+index bf65556..60f4438 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2590,6 +2590,13 @@
+@@ -2590,6 +2590,13 @@ static struct vimoption
  			    (char_u *)NULL, PV_NONE,
  #endif
  			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
@@ -983,9 +1029,10 @@ diff --git a/src/option.c b/src/option.c
  			    (char_u *)&p_to, PV_NONE,
  			    {(char_u *)FALSE, (char_u *)0L} SCRIPTID_INIT},
 diff --git a/src/option.h b/src/option.h
+index 167b562..044a4c8 100644
 --- a/src/option.h
 +++ b/src/option.h
-@@ -795,6 +795,9 @@
+@@ -795,6 +795,9 @@ EXTERN char_u	*p_titlestring;	/* 'titlestring' */
  #ifdef FEAT_INS_EXPAND
  EXTERN char_u	*p_tsr;		/* 'thesaurus' */
  #endif
@@ -995,10 +1042,22 @@ diff --git a/src/option.h b/src/option.h
  EXTERN int	p_ttimeout;	/* 'ttimeout' */
  EXTERN long	p_ttm;		/* 'ttimeoutlen' */
  EXTERN int	p_tbi;		/* 'ttybuiltin' */
+diff --git a/src/os_mac.h b/src/os_mac.h
+index 78b79c2..03ea238 100644
+--- a/src/os_mac.h
++++ b/src/os_mac.h
+@@ -299,3 +299,5 @@
+ 
+ /* A Mac constant causing big problem to syntax highlighting */
+ #define UNKNOWN_CREATOR '\?\?\?\?'
++
++#define MCH_MONOTONIC_TIME
+\ No newline at end of file
 diff --git a/src/os_macosx.m b/src/os_macosx.m
+index d919f63..3fd4742 100644
 --- a/src/os_macosx.m
 +++ b/src/os_macosx.m
-@@ -23,6 +23,22 @@
+@@ -23,6 +23,21 @@
  #include "vim.h"
  #import <Cocoa/Cocoa.h>
  
@@ -1006,7 +1065,6 @@ diff --git a/src/os_macosx.m b/src/os_macosx.m
 +#include <mach/mach_time.h>
 +
 +
-+#define MCH_MONOTONIC_TIME
 +	unsigned long long
 +mch_monotonic_time(void)
 +{
@@ -1022,14 +1080,14 @@ diff --git a/src/os_macosx.m b/src/os_macosx.m
  /*
   * Clipboard support for the console.
 diff --git a/src/os_unix.c b/src/os_unix.c
+index cc02653..bc920a9 100644
 --- a/src/os_unix.c
 +++ b/src/os_unix.c
-@@ -892,6 +892,17 @@
+@@ -892,6 +892,16 @@ catch_sigpwr SIGDEFARG(sigarg)
  }
  #endif
  
 +#if !defined(MACOS_X_UNIX)
-+# define MCH_MONOTONIC_TIME
 +	unsigned long long
 +mch_monotonic_time(void)
 +{
@@ -1042,7 +1100,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  #ifdef SET_SIG_ALARM
  /*
   * signal function for alarm().
-@@ -5057,9 +5068,13 @@
+@@ -5057,9 +5067,9 @@ RealWaitForChar(fd, msec, check_for_gpm)
  #ifdef FEAT_NETBEANS_INTG
      int		nb_fd = netbeans_filedesc();
  #endif
@@ -1050,14 +1108,11 @@ diff --git a/src/os_unix.c b/src/os_unix.c
 +#if defined(FEAT_XCLIPBOARD) || defined(USE_XSMP) || defined(FEAT_MZSCHEME) \
 +						    || defined(FEAT_TIMERS)
      static int	busy = FALSE;
- 
-+# ifdef FEAT_TIMERS
-+    unsigned long long now;
-+# endif
+-
      /* May retry getting characters after an event was handled. */
  # define MAY_LOOP
  
-@@ -5072,18 +5087,24 @@
+@@ -5072,18 +5082,24 @@ RealWaitForChar(fd, msec, check_for_gpm)
      if (msec > 0 && (
  #  ifdef FEAT_XCLIPBOARD
  	    xterm_Shell != (Widget)0
@@ -1084,7 +1139,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  #  endif
  	    ))
  	gettimeofday(&start_tv, NULL);
-@@ -5130,6 +5151,9 @@
+@@ -5130,6 +5146,9 @@ RealWaitForChar(fd, msec, check_for_gpm)
  	    mzquantum_used = TRUE;
  	}
  # endif
@@ -1094,7 +1149,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  	fds[0].fd = fd;
  	fds[0].events = POLLIN;
  	nfd = 1;
-@@ -5257,6 +5281,9 @@
+@@ -5257,6 +5276,9 @@ RealWaitForChar(fd, msec, check_for_gpm)
  	    mzquantum_used = TRUE;
  	}
  # endif
@@ -1104,7 +1159,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  # ifdef __EMX__
  	/* don't check for incoming chars if not in raw mode, because select()
  	 * always returns TRUE then (in some version of emx.dll) */
-@@ -5369,6 +5396,10 @@
+@@ -5369,6 +5391,10 @@ select_eintr:
  	    /* loop if MzThreads must be scheduled and timeout occurred */
  	    finished = FALSE;
  # endif
@@ -1115,7 +1170,20 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  
  # ifdef FEAT_SNIFF
  	if (ret < 0 )
+diff --git a/src/os_unix.h b/src/os_unix.h
+index 02eeafc..763fac7 100644
+--- a/src/os_unix.h
++++ b/src/os_unix.h
+@@ -568,3 +568,7 @@ int mch_rename __ARGS((const char *src, const char *dest));
+ 
+ /* We have three kinds of ACL support. */
+ #define HAVE_ACL (HAVE_POSIX_ACL || HAVE_SOLARIS_ACL || HAVE_AIX_ACL)
++
++#if !defined(MACOS_X_UNIX)
++# define MCH_MONOTONIC_TIME
++#endif
 diff --git a/src/os_win32.c b/src/os_win32.c
+index f36dfb3..6e309ed 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
 @@ -29,6 +29,7 @@
@@ -1126,7 +1194,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /* cproto fails on missing include files */
  #ifndef PROTO
-@@ -624,6 +625,52 @@
+@@ -634,6 +635,52 @@ PlatformId(void)
      }
  }
  
@@ -1180,6 +1248,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
   * Return TRUE when running on Windows 95 (or 98 or ME).
   * Only to be used after mch_init().
 diff --git a/src/os_win32.h b/src/os_win32.h
+index 58b179f..2779bb5 100644
 --- a/src/os_win32.h
 +++ b/src/os_win32.h
 @@ -56,6 +56,7 @@
@@ -1191,9 +1260,10 @@ diff --git a/src/os_win32.h b/src/os_win32.h
  #if (!defined(__BORLANDC__) || __BORLANDC__ >= 0x550) \
  	&& (!defined(_MSC_VER) || _MSC_VER > 1020)
 diff --git a/src/proto.h b/src/proto.h
+index 191ecd8..fe33bb2 100644
 --- a/src/proto.h
 +++ b/src/proto.h
-@@ -289,6 +289,10 @@
+@@ -289,6 +289,10 @@ void clip_mch_request_selection(VimClipboard *cbd);
  void clip_mch_set_selection(VimClipboard *cbd);
  #endif
  
@@ -1205,9 +1275,10 @@ diff --git a/src/proto.h b/src/proto.h
  # define _PROTO_H
  #endif
 diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
+index e4cad51..632179e 100644
 --- a/src/proto/os_unix.pro
 +++ b/src/proto/os_unix.pro
-@@ -6,6 +6,7 @@
+@@ -6,6 +6,7 @@ int mch_char_avail __ARGS((void));
  long_u mch_total_mem __ARGS((int special));
  void mch_delay __ARGS((long msec, int ignoreinput));
  int mch_stackcheck __ARGS((char *p));
@@ -1216,9 +1287,10 @@ diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
  void mch_endjmp __ARGS((void));
  void mch_didjmp __ARGS((void));
 diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+index a4c590f..5db7ba2 100644
 --- a/src/proto/os_win32.pro
 +++ b/src/proto/os_win32.pro
-@@ -55,4 +55,5 @@
+@@ -55,4 +55,5 @@ void free_cmd_argsW __ARGS((void));
  void used_file_arg __ARGS((char *name, int literal, int full_path, int diff_mode));
  void set_alist_count __ARGS((void));
  void fix_arg_enc __ARGS((void));
@@ -1226,6 +1298,7 @@ diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
  /* vim: set ft=c : */
 diff --git a/src/proto/timers.pro b/src/proto/timers.pro
 new file mode 100644
+index 0000000..d22d6e4
 --- /dev/null
 +++ b/src/proto/timers.pro
 @@ -0,0 +1,5 @@
@@ -1235,9 +1308,10 @@ new file mode 100644
 +long call_timeouts __ARGS((long max_wait));
 +/* vim: set ft=c : */
 diff --git a/src/structs.h b/src/structs.h
+index f74d218..6c44182 100644
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -2540,3 +2540,19 @@
+@@ -2540,3 +2540,19 @@ typedef struct {
    UINT32_T state[8];
    char_u   buffer[64];
  } context_sha256_T;
@@ -1259,9 +1333,10 @@ diff --git a/src/structs.h b/src/structs.h
 +#endif
 diff --git a/src/timers.c b/src/timers.c
 new file mode 100644
+index 0000000..3f839f0
 --- /dev/null
 +++ b/src/timers.c
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,151 @@
 +/* vi:set ts=8 sts=4 sw=4:
 + *
 + * VIM - Vi IMproved	by Bram Moolenaar
@@ -1274,11 +1349,6 @@ new file mode 100644
 +#include "vim.h"
 +
 +#ifdef FEAT_TIMERS
-+
-+/*
-+ * Avoid recursive calls to call_timeouts
-+ */
-+static int calling_timeouts = FALSE;
 +
 +/*
 + * Return monotonic time, if available. Fall back to gettimeofday otherwise.
@@ -1355,6 +1425,10 @@ new file mode 100644
 +	return max_to_wait;
 +    }
 +
++    if (p_tt == -1)
++    {
++	return max_to_wait;
++    }
 +    calling_timeouts = TRUE;
 +
 +    while (timeouts != NULL && timeouts->tm < now)
@@ -1400,11 +1474,11 @@ new file mode 100644
 +	towait = timeouts->tm - now;
 +
 +	/* don't wake up every 1 ms ... limit to p_tt */
-+	if (towait < p_tt)
++	if (towait < (unsigned long long)p_tt)
 +	    towait = p_tt;
 +
 +	/* don't overshoot the wait time */
-+	if (max_to_wait > 0 && towait > max_to_wait)
++	if (max_to_wait > 0 && towait > (unsigned long long)max_to_wait)
 +	    towait = max_to_wait;
 +
 +        return (long)towait;
@@ -1415,9 +1489,10 @@ new file mode 100644
 +
 +#endif
 diff --git a/src/version.c b/src/version.c
+index ef3f9b1..308edc0 100644
 --- a/src/version.c
 +++ b/src/version.c
-@@ -617,6 +617,11 @@
+@@ -617,6 +617,11 @@ static char *(features[]) =
  #else
  	"-textobjects",
  #endif
