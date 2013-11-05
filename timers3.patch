@@ -20,21 +20,15 @@ diff --git a/Filelist b/Filelist
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1,4 +1,4 @@
--*eval.txt*	For Vim version 7.4.  Last change: 2013 Aug 24
-+*eval.txt*	For Vim version 7.4.  Last change: 2013 Sep 10
- 
- 
- 		  VIM REFERENCE MANUAL	  by Bram Moolenaar
-@@ -1715,6 +1715,7 @@
- byteidx( {expr}, {nr})		Number	byte index of {nr}'th char in {expr}
+@@ -1716,6 +1716,7 @@
+ byteidxcomp( {expr}, {nr})	Number	byte index of {nr}'th char in {expr}
  call( {func}, {arglist} [, {dict}])
  				any	call {func} with arguments {arglist}
 +canceltimeout( {nr})		Number	cancel the timeout or interval
  ceil( {expr})			Float	round {expr} up
  changenr()			Number	current change number
  char2nr( {expr}[, {utf8}])	Number	ASCII/UTF8 value of first char in {expr}
-@@ -1926,6 +1927,8 @@
+@@ -1927,6 +1928,8 @@
  serverlist()			String	get a list of available servers
  setbufvar( {expr}, {varname}, {val})	set {varname} in buffer {expr} to {val}
  setcmdpos( {pos})		Number	set cursor position in command-line
@@ -43,7 +37,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  setline( {lnum}, {line})	Number	set line {lnum} to {line}
  setloclist( {nr}, {list}[, {action}])
  				Number	modify location list using {list}
-@@ -1936,6 +1939,8 @@
+@@ -1937,6 +1940,8 @@
  settabvar( {nr}, {varname}, {val})	set {varname} in tab page {nr} to {val}
  settabwinvar( {tabnr}, {winnr}, {varname}, {val})    set {varname} in window
  					{winnr} in tab page {tabnr} to {val}
@@ -52,7 +46,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  setwinvar( {nr}, {varname}, {val})	set {varname} in window {nr} to {val}
  sha256( {string})		String	SHA256 checksum of {string}
  shellescape( {string} [, {special}])
-@@ -2281,6 +2286,15 @@
+@@ -2298,6 +2303,15 @@
  		{dict} is for functions with the "dict" attribute.  It will be
  		used to set the local variable "self". |Dictionary-function|
  
@@ -68,7 +62,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  ceil({expr})							*ceil()*
  		Return the smallest integral value greater than or equal to
  		{expr} as a |Float| (round up).
-@@ -5187,6 +5201,23 @@
+@@ -5204,6 +5218,23 @@
  		Returns 0 when successful, 1 when not editing the command
  		line.
  
@@ -92,7 +86,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  setline({lnum}, {text})					*setline()*
  		Set line {lnum} of the current buffer to {text}.  To insert
  		lines use |append()|.
-@@ -5356,6 +5387,21 @@
+@@ -5373,6 +5404,21 @@
  			:call settabwinvar(3, 2, "myvar", "foobar")
  <		This function is not available in the |sandbox|.
  
@@ -114,7 +108,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  setwinvar({nr}, {varname}, {val})			*setwinvar()*
  		Like |settabwinvar()| for the current tab page.
  		Examples: >
-@@ -6479,6 +6525,7 @@
+@@ -6496,6 +6542,7 @@
  textobjects		Compiled with support for |text-objects|.
  tgetent			Compiled with tgetent support, able to use a termcap
  			or terminfo file.
@@ -499,7 +493,7 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/auto/configure b/src/auto/configure
 --- a/src/auto/configure
 +++ b/src/auto/configure
-@@ -11090,6 +11090,57 @@
+@@ -11103,6 +11103,57 @@
  
  fi
  
@@ -560,7 +554,7 @@ diff --git a/src/auto/configure b/src/auto/configure
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -3263,6 +3263,13 @@
+@@ -3268,6 +3268,13 @@
    AC_DEFINE(BAD_GETCWD)
  fi
  
@@ -577,7 +571,7 @@ diff --git a/src/configure.in b/src/configure.in
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -674,6 +674,11 @@
+@@ -676,6 +676,11 @@
  static void f_setloclist __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setmatches __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setpos __ARGS((typval_T *argvars, typval_T *rettv));
@@ -589,9 +583,9 @@ diff --git a/src/eval.c b/src/eval.c
  static void f_setqflist __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_setreg __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_settabvar __ARGS((typval_T *argvars, typval_T *rettv));
-@@ -7862,6 +7867,9 @@
-     {"byte2line",	1, 1, f_byte2line},
+@@ -7865,6 +7870,9 @@
      {"byteidx",		2, 2, f_byteidx},
+     {"byteidxcomp",	2, 2, f_byteidxcomp},
      {"call",		2, 3, f_call},
 +#ifdef FEAT_TIMERS
 +    {"canceltimeout",	1, 1, f_canceltimeout},
@@ -599,7 +593,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_FLOAT
      {"ceil",		1, 1, f_ceil},
  #endif
-@@ -8060,6 +8068,9 @@
+@@ -8063,6 +8071,9 @@
      {"serverlist",	0, 0, f_serverlist},
      {"setbufvar",	3, 3, f_setbufvar},
      {"setcmdpos",	1, 1, f_setcmdpos},
@@ -609,7 +603,7 @@ diff --git a/src/eval.c b/src/eval.c
      {"setline",		2, 2, f_setline},
      {"setloclist",	2, 3, f_setloclist},
      {"setmatches",	1, 1, f_setmatches},
-@@ -8068,6 +8079,9 @@
+@@ -8071,6 +8082,9 @@
      {"setreg",		2, 3, f_setreg},
      {"settabvar",	3, 3, f_settabvar},
      {"settabwinvar",	4, 4, f_settabwinvar},
@@ -619,7 +613,7 @@ diff --git a/src/eval.c b/src/eval.c
      {"setwinvar",	3, 3, f_setwinvar},
  #ifdef FEAT_CRYPT
      {"sha256",		1, 1, f_sha256},
-@@ -12489,6 +12503,9 @@
+@@ -12515,6 +12529,9 @@
  #ifdef HAVE_TGETENT
  	"tgetent",
  #endif
@@ -629,7 +623,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_TITLE
  	"title",
  #endif
-@@ -16599,6 +16616,128 @@
+@@ -16625,6 +16642,128 @@
  #endif
  }
  
@@ -1006,7 +1000,7 @@ diff --git a/src/option.h b/src/option.h
 diff --git a/src/os_mac.h b/src/os_mac.h
 --- a/src/os_mac.h
 +++ b/src/os_mac.h
-@@ -299,3 +299,5 @@
+@@ -304,3 +304,5 @@
  
  /* A Mac constant causing big problem to syntax highlighting */
  #define UNKNOWN_CREATOR '\?\?\?\?'
@@ -1040,7 +1034,7 @@ diff --git a/src/os_macosx.m b/src/os_macosx.m
 diff --git a/src/os_unix.c b/src/os_unix.c
 --- a/src/os_unix.c
 +++ b/src/os_unix.c
-@@ -892,6 +892,16 @@
+@@ -896,6 +896,16 @@
  }
  #endif
  
@@ -1057,7 +1051,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  #ifdef SET_SIG_ALARM
  /*
   * signal function for alarm().
-@@ -5057,9 +5067,9 @@
+@@ -5061,9 +5071,9 @@
  #ifdef FEAT_NETBEANS_INTG
      int		nb_fd = netbeans_filedesc();
  #endif
@@ -1069,7 +1063,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
      /* May retry getting characters after an event was handled. */
  # define MAY_LOOP
  
-@@ -5072,18 +5082,24 @@
+@@ -5076,18 +5086,24 @@
      if (msec > 0 && (
  #  ifdef FEAT_XCLIPBOARD
  	    xterm_Shell != (Widget)0
@@ -1096,7 +1090,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  #  endif
  	    ))
  	gettimeofday(&start_tv, NULL);
-@@ -5130,6 +5146,9 @@
+@@ -5134,6 +5150,9 @@
  	    mzquantum_used = TRUE;
  	}
  # endif
@@ -1106,7 +1100,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  	fds[0].fd = fd;
  	fds[0].events = POLLIN;
  	nfd = 1;
-@@ -5257,6 +5276,9 @@
+@@ -5261,6 +5280,9 @@
  	    mzquantum_used = TRUE;
  	}
  # endif
@@ -1116,7 +1110,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
  # ifdef __EMX__
  	/* don't check for incoming chars if not in raw mode, because select()
  	 * always returns TRUE then (in some version of emx.dll) */
-@@ -5369,6 +5391,10 @@
+@@ -5373,6 +5395,10 @@
  	    /* loop if MzThreads must be scheduled and timeout occurred */
  	    finished = FALSE;
  # endif
@@ -1260,7 +1254,7 @@ new file mode 100644
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -2540,3 +2540,19 @@
+@@ -2579,3 +2579,19 @@
    UINT32_T state[8];
    char_u   buffer[64];
  } context_sha256_T;
