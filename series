@@ -20,7 +20,6 @@ improve_dos_test.diff
 fix-utf8-username.patch
 fix-utf8-hostname.patch
 fix-utf8-msgloop.patch
-fix-comment-in-os_mac.patch
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
 rmdir-mark.diff
