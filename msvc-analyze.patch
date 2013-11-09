@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent d36944d7ac3612b15fa93768cfe06018914cb735
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -501,7 +501,7 @@
+ !endif
+ 
+ # Static code analysis generally available starting with VS2012
+-!if ("$(ANALYZE)" == "yes") && ("$(MSVCVER)" == "11.0") && ("$(MSVCVER)" == "12.0")
++!if ("$(ANALYZE)" == "yes") && (("$(MSVCVER)" == "10.0") || ("$(MSVCVER)" == "11.0") || ("$(MSVCVER)" == "12.0"))
+ CFLAGS=$(CFLAGS) /analyze
+ !endif
+ 

@@ -32,3 +32,4 @@ spelllang-cjk-mark.diff
 strikethrough.diff
 strikethrough-mark.diff
 tab-xyz.diff
+msvc-analyze.patch
