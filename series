@@ -27,8 +27,6 @@ update-tags.patch
 add-smsg_attr_keep.patch
 vim-7.4.035-breakindent.patch
 breakindent-mark.diff
-spelllang-cjk.patch
-spelllang-cjk-mark.diff
 strikethrough.diff
 strikethrough-mark.diff
 tab-xyz.diff
