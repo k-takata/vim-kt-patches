@@ -30,3 +30,4 @@ breakindent-mark.diff
 strikethrough.diff
 strikethrough-mark.diff
 tab-xyz.diff
+fix-spell-cjk-mbyte.patch
