@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent e1c279fc53c1945155cba3b64ec7a568b601a21d
+
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
+@@ -5207,6 +5207,7 @@
+ cpo-K	options.txt	/*cpo-K*
+ cpo-L	options.txt	/*cpo-L*
+ cpo-M	options.txt	/*cpo-M*
++cpo-N	options.txt	/*cpo-N*
+ cpo-O	options.txt	/*cpo-O*
+ cpo-P	options.txt	/*cpo-P*
+ cpo-R	options.txt	/*cpo-R*

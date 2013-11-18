@@ -1,0 +1,32 @@
+# HG changeset patch
+# Parent 34e7bd7bd3eb7dba46a996f695262cbb41b22fcb
+
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
+@@ -933,6 +933,8 @@
+ 't_SI'	term.txt	/*'t_SI'*
+ 't_Sb'	term.txt	/*'t_Sb'*
+ 't_Sf'	term.txt	/*'t_Sf'*
++'t_Te'	term.txt	/*'t_Te'*
++'t_Ts'	term.txt	/*'t_Ts'*
+ 't_WP'	term.txt	/*'t_WP'*
+ 't_WS'	term.txt	/*'t_WS'*
+ 't_ZH'	term.txt	/*'t_ZH'*
+@@ -7896,6 +7898,7 @@
+ strdisplaywidth()	eval.txt	/*strdisplaywidth()*
+ strftime()	eval.txt	/*strftime()*
+ stridx()	eval.txt	/*stridx()*
++strikethrough	syntax.txt	/*strikethrough*
+ string()	eval.txt	/*string()*
+ string-functions	usr_41.txt	/*string-functions*
+ string-match	eval.txt	/*string-match*
+@@ -8016,6 +8019,8 @@
+ t_SI	term.txt	/*t_SI*
+ t_Sb	term.txt	/*t_Sb*
+ t_Sf	term.txt	/*t_Sf*
++t_Te	term.txt	/*t_Te*
++t_Ts	term.txt	/*t_Ts*
+ t_WP	term.txt	/*t_WP*
+ t_WS	term.txt	/*t_WS*
+ t_ZH	term.txt	/*t_ZH*

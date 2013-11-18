@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent 11a79c1b3b31728d59d0c70dd2625c29b3ebf33c
+
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
+@@ -7558,6 +7558,7 @@
+ rileft	rileft.txt	/*rileft*
+ rileft.txt	rileft.txt	/*rileft.txt*
+ riscos	os_risc.txt	/*riscos*
++rmdir()	eval.txt	/*rmdir()*
+ rot13	change.txt	/*rot13*
+ round()	eval.txt	/*round()*
+ rst.vim	syntax.txt	/*rst.vim*

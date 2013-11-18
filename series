@@ -13,8 +13,10 @@ support-alt-gettext-dll.patch
 X001-direct_write-r3.diff
 direct_write-use-proto.diff
 directwrite-mark.diff
+directwrite-update-tags.patch
 cpo-N.diff
 cpo-N-mark.diff
+cpo-N-update-tags.patch
 if_perl-use-output.patch
 improve_dos_test.diff
 fix-utf8-username.patch
@@ -23,10 +25,11 @@ fix-utf8-msgloop.patch
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
 rmdir-mark.diff
-update-tags.patch
+rmdir-update-tags.patch
 add-smsg_attr_keep.patch
 vim-7.4.035-breakindent.patch
 breakindent-mark.diff
 strikethrough.diff
 strikethrough-mark.diff
+strikethrough-update-tags.patch
 tab-xyz.diff
