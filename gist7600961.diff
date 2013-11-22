@@ -1,21 +1,23 @@
 # HG changeset patch
 # Parent 5cd1f2cbe452f47f1563aff427412558b9c4ecae
+
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4431,6 +4431,34 @@
+@@ -4431,6 +4431,35 @@
  # endif
  }
  
 +/*
-+ * Get tabpage_T from POINT
++ * Get tabpage_T from POINT.
 + */
 +    static tabpage_T *
 +GetTabFromPoint(
 +    HWND    hWnd,
 +    POINT   pt)
 +{
-+    tabpage_T *ptp = NULL;
++    tabpage_T	*ptp = NULL;
++
 +    if (gui_mch_showing_tabline())
 +    {
 +	TCHITTESTINFO htinfo;
@@ -38,17 +40,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      static LRESULT CALLBACK
  tabline_wndproc(
      HWND hwnd,
-@@ -4439,6 +4467,74 @@
+@@ -4438,7 +4467,75 @@
+     WPARAM wParam,
      LPARAM lParam)
  {
-     HandleMouseHide(uMsg, lParam);
-+
 +    POINT	pt;
 +    tabpage_T	*tp;
 +    RECT	rect;
 +    int		nCenter;
 +    int		idx0;
 +    int		idx1;
++
+     HandleMouseHide(uMsg, lParam);
 +
 +    switch (uMsg)
 +    {
@@ -72,7 +75,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +
 +		pt.x = GET_X_LPARAM(lParam);
 +		pt.y = s_pt.y;
-+		if ( abs(pt.x - s_pt.x) > GetSystemMetrics(SM_CXDRAG) )
++		if (abs(pt.x - s_pt.x) > GetSystemMetrics(SM_CXDRAG))
 +		{
 +		    tp = GetTabFromPoint(hwnd, pt);
 +		    if (s_tp != NULL && tp != NULL
@@ -85,9 +88,9 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +			nCenter = rect.left + (rect.right - rect.left) / 2;
 +
 +			/*    move rightward & over the center
-+			   or move leftward  & over the center */
++			 * or move leftward  & over the center */
 +			if (       ((idx0 < idx1) && (nCenter < pt.x))
-+				|| ((idx1 < idx0) && (pt.x < nCenter)) )
++				|| ((idx1 < idx0) && (pt.x < nCenter)))
 +			{
 +			    tabpage_move(idx1);
 +			    update_screen(0);
