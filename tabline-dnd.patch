@@ -1,6 +1,58 @@
 # HG changeset patch
 # Parent 5cd1f2cbe452f47f1563aff427412558b9c4ecae
 
+diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
+--- a/src/gui_gtk_x11.c
++++ b/src/gui_gtk_x11.c
+@@ -2942,6 +2942,22 @@
+ }
+ 
+ /*
++ * Handle reordering the tabs (using D&D).
++ */
++    static void
++on_tab_reordered(
++	GtkNotebook	*notebook UNUSED,
++	GtkNotebookPage *page UNUSED,
++	gint		idx,
++	gpointer	data UNUSED)
++{
++    if (!ignore_tabline_evt)
++    {
++	tabpage_move(idx);
++    }
++}
++
++/*
+  * Show or hide the tabline.
+  */
+     void
+@@ -3016,6 +3032,9 @@
+ 		    page,
+ 		    event_box,
+ 		    nr++);
++	    gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(gui.tabline),
++		    page,
++		    TRUE);
+ 	}
+ 
+ 	event_box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(gui.tabline), page);
+@@ -3379,11 +3398,15 @@
+ 	gtk_misc_set_padding(GTK_MISC(label), 2, 2);
+ 	gtk_container_add(GTK_CONTAINER(event_box), label);
+ 	gtk_notebook_set_tab_label(GTK_NOTEBOOK(gui.tabline), page, event_box);
++	gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(gui.tabline), page, TRUE);
+     }
+ 
+     gtk_signal_connect(GTK_OBJECT(gui.tabline), "switch_page",
+ 		       GTK_SIGNAL_FUNC(on_select_tab), NULL);
+ 
++    gtk_signal_connect(GTK_OBJECT(gui.tabline), "page-reordered",
++		       GTK_SIGNAL_FUNC(on_tab_reordered), NULL);
++
+     /* Create a popup menu for the tab line and connect it. */
+     tabline_menu = create_tabline_menu();
+     gtk_signal_connect_object(GTK_OBJECT(gui.tabline), "button_press_event",
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c

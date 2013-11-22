@@ -34,5 +34,4 @@ strikethrough-mark.diff
 strikethrough-update-tags.patch
 tab-xyz.diff
 spell-delete-wordlist.patch
-gist7600961.diff
-tabline-dnd-linux.patch
+tabline-dnd.patch
