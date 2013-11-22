@@ -139,8 +139,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +			TabCtrl_GetItemRect(hwnd, idx1, &rect);
 +			nCenter = rect.left + (rect.right - rect.left) / 2;
 +
-+			/*    move rightward & over the center
-+			 * or move leftward  & over the center */
++			/* Check if the mouse cursor goes over the center of
++			 * the next tab to prevent "flickering". */
 +			if (       ((idx0 < idx1) && (nCenter < pt.x))
 +				|| ((idx1 < idx0) && (pt.x < nCenter)))
 +			{
