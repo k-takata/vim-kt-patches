@@ -4,10 +4,12 @@
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -2941,6 +2941,19 @@
-     }
+@@ -2942,6 +2942,22 @@
  }
  
+ /*
++ * Handle reordering the tags (using D&D).
++ */
 +    static void
 +on_tab_reordered(
 +	GtkNotebook	*notebook UNUSED,
@@ -21,10 +23,11 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 +    }
 +}
 +
- /*
++/*
   * Show or hide the tabline.
   */
-@@ -3016,6 +3029,9 @@
+     void
+@@ -3016,6 +3032,9 @@
  		    page,
  		    event_box,
  		    nr++);
@@ -34,7 +37,13 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	}
  
  	event_box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(gui.tabline), page);
-@@ -3384,6 +3400,9 @@
+@@ -3379,11 +3398,15 @@
+ 	gtk_misc_set_padding(GTK_MISC(label), 2, 2);
+ 	gtk_container_add(GTK_CONTAINER(event_box), label);
+ 	gtk_notebook_set_tab_label(GTK_NOTEBOOK(gui.tabline), page, event_box);
++	gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(gui.tabline), page, TRUE);
+     }
+ 
      gtk_signal_connect(GTK_OBJECT(gui.tabline), "switch_page",
  		       GTK_SIGNAL_FUNC(on_select_tab), NULL);
  
