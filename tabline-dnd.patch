@@ -121,7 +121,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	    }
 +	case WM_MOUSEMOVE:
 +	    if (GetCapture() == hwnd
-+		    && (0 != (wParam & MK_LBUTTON)))
++		    && ((wParam & MK_LBUTTON)) != 0)
 +	    {
 +		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
 +
