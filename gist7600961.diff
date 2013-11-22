@@ -1,24 +1,19 @@
 # HG changeset patch
-# Parent b17702d731e5ac3022284e7cb62ce69339162576
+# Parent 5cd1f2cbe452f47f1563aff427412558b9c4ecae
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4413,6 +4413,35 @@
- #endif
+@@ -4431,6 +4431,34 @@
+ # endif
+ }
  
- #if defined(FEAT_GUI_TABLINE) || defined(PROTO)
-+static LONG      DefTabControlProc;
-+static tabpage_T *s_tp = NULL;
-+static HCURSOR   s_hCursor = NULL;
-+static POINT     s_pt = {0, 0};
-+
 +/*
 + * Get tabpage_T from POINT
 + */
 +    static tabpage_T *
 +GetTabFromPoint(
-+    HWND hWnd,
-+    POINT pt)
++    HWND    hWnd,
++    POINT   pt)
 +{
 +    tabpage_T *ptp = NULL;
 +    if (gui_mch_showing_tabline())
@@ -36,20 +31,25 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    return ptp;
 +}
 +
-     static void
- initialise_tabline(void)
- {
-@@ -4438,6 +4467,71 @@
-     WPARAM wParam,
++static tabpage_T    *s_tp = NULL;
++static POINT	    s_pt = {0, 0};
++static HCURSOR      s_hCursor = NULL;
++
+     static LRESULT CALLBACK
+ tabline_wndproc(
+     HWND hwnd,
+@@ -4439,6 +4467,74 @@
      LPARAM lParam)
  {
-+    POINT pt;
-+    tabpage_T *tp;
-+    int nDragXth = GetSystemMetrics(SM_CXDRAG);
-+    RECT rect;
-+    int nCenter, leftmargin, rightmargin;
-+    int idx0;
-+    int idx1;
+     HandleMouseHide(uMsg, lParam);
++
++    POINT	pt;
++    tabpage_T	*tp;
++    RECT	rect;
++    int		nCenter;
++    int		idx0;
++    int		idx1;
++
 +    switch (uMsg)
 +    {
 +	case WM_LBUTTONDOWN:
@@ -68,13 +68,13 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	    if (GetCapture() == hwnd
 +		    && (0 != (wParam & MK_LBUTTON)))
 +	    {
++		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
++
 +		pt.x = GET_X_LPARAM(lParam);
 +		pt.y = s_pt.y;
-+		tp = GetTabFromPoint(hwnd, pt);
-+		if ( abs(pt.x - s_pt.x) > nDragXth )
++		if ( abs(pt.x - s_pt.x) > GetSystemMetrics(SM_CXDRAG) )
 +		{
-+		    SetCursor(LoadCursor(0, IDC_SIZEWE));
-+
++		    tp = GetTabFromPoint(hwnd, pt);
 +		    if (s_tp != NULL && tp != NULL
 +			    && tp != s_tp) /* ignore if the same tabpage */
 +		    {
@@ -84,8 +84,10 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +			TabCtrl_GetItemRect(hwnd, idx1, &rect);
 +			nCenter = rect.left + (rect.right - rect.left) / 2;
 +
-+			if ( ((idx0 < idx1) && (nCenter < pt.x))      /* move rightward & over the center */
-+				|| (idx1 < idx0) && (pt.x < nCenter)) /* move leftward & over the center */
++			/*    move rightward & over the center
++			   or move leftward  & over the center */
++			if (       ((idx0 < idx1) && (nCenter < pt.x))
++				|| ((idx1 < idx0) && (pt.x < nCenter)) )
 +			{
 +			    tabpage_move(idx1);
 +			    update_screen(0);
@@ -108,6 +110,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	    break;
 +    }
 +
-     HandleMouseHide(uMsg, lParam);
      return CallWindowProc(s_tabline_wndproc, hwnd, uMsg, wParam, lParam);
  }
+ #endif
