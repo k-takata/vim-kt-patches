@@ -19,7 +19,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 +{
 +    if (!ignore_tabline_evt)
 +    {
-+	tabpage_move(idx - 1);
++	tabpage_move(idx);
 +    }
 +}
 +
