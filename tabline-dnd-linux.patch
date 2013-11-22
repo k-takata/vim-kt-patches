@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 3f7de55bb3ee2b98c1abef31b199cfbf27df01ce
+# Parent 3174d8e4864c08863104e5e749d8248e2158259a
 
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
@@ -8,7 +8,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  }
  
  /*
-+ * Handle reordering the tags (using D&D).
++ * Handle reordering the tabs (using D&D).
 + */
 +    static void
 +on_tab_reordered(
