@@ -35,3 +35,4 @@ strikethrough-update-tags.patch
 tab-xyz.diff
 fix-7.4.085.patch
 spell-delete-wordlist.patch
+tabline-dnd-windows.patch
