@@ -123,12 +123,12 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	    if (GetCapture() == hwnd
 +		    && ((wParam & MK_LBUTTON)) != 0)
 +	    {
-+		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-+
 +		pt.x = GET_X_LPARAM(lParam);
 +		pt.y = s_pt.y;
 +		if (abs(pt.x - s_pt.x) > GetSystemMetrics(SM_CXDRAG))
 +		{
++		    SetCursor(LoadCursor(NULL, IDC_SIZEWE));
++
 +		    tp = GetTabFromPoint(hwnd, pt);
 +		    if (s_tp != NULL && tp != NULL
 +			    && tp != s_tp) /* ignore if the same tabpage */
