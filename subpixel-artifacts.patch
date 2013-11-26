@@ -1,0 +1,67 @@
+diff -r 7adbbf32444e -r 55ccd8a77b7b src/screen.c
+--- a/src/screen.c	Thu Nov 21 18:13:38 2013 +0100
++++ b/src/screen.c	Sat Nov 23 12:52:58 2013 -0600
+@@ -5591,6 +5591,10 @@
+ #else
+ # define CHAR_CELLS 1
+ #endif
++#ifdef FEAT_GUI
++    int		    changed_this;   /* bool: is character changed? */
++    int		    changed_next;   /* bool: changed_this for next character */
++#endif
+ 
+     /* Check for illegal row and col, just in case. */
+     if (row >= Rows)
+@@ -5637,6 +5641,9 @@
+ #endif /* FEAT_RIGHTLEFT */
+ 
+     redraw_next = char_needs_redraw(off_from, off_to, endcol - col);
++#ifdef FEAT_GUI
++    changed_next = redraw_next;
++#endif
+ 
+     while (col < endcol)
+     {
+@@ -5649,21 +5656,18 @@
+ 
+ 	redraw_this = redraw_next;
+ 	redraw_next = force || char_needs_redraw(off_from + CHAR_CELLS,
+-			      off_to + CHAR_CELLS, endcol - col - CHAR_CELLS);
+-
++		 	      off_to + CHAR_CELLS, endcol - col - CHAR_CELLS);
+ #ifdef FEAT_GUI
+-	/* If the next character was bold, then redraw the current character to
+-	 * remove any pixels that might have spilt over into us.  This only
+-	 * happens in the GUI.
++	changed_this = changed_next;
++	changed_next = redraw_next;
++
++	/* Redraw the current character to remove any pixels that might have
++	 * spilt over into us.  This only happens in the GUI, and only when
++	 * subpixel rendering is used. We can only detect if the GUI is used, so
++	 * we should always redraw.
+ 	 */
+ 	if (redraw_next && gui.in_use)
+-	{
+-	    hl = ScreenAttrs[off_to + CHAR_CELLS];
+-	    if (hl > HL_ALL)
+-		hl = syn_attr2attr(hl);
+-	    if (hl & HL_BOLD)
+-		redraw_this = TRUE;
+-	}
++	    redraw_this = TRUE;
+ #endif
+ 
+ 	if (redraw_this)
+@@ -5796,6 +5800,11 @@
+ 		    redraw_next = TRUE;
+ 	    }
+ #endif
++
++#ifdef FEAT_GUI
++	    if (gui.in_use && changed_this)
++		redraw_next = TRUE;
++#endif
+ 	    ScreenAttrs[off_to] = ScreenAttrs[off_from];
+ #ifdef FEAT_MBYTE
+ 	    /* For simplicity set the attributes of second half of a
