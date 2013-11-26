@@ -1,0 +1,19 @@
+# HG changeset patch
+# Parent c691be54e7f9118609e1a74ef456c3a28809cc1c
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -920,11 +920,13 @@
+ #
+ # Uncomment the next line to install Vim in your home directory.
+ #prefix = $(HOME)
++prefix = $(HOME)/opt/vim
+ 
+ ### exec_prefix	is the top directory for the executable (default $(prefix))
+ #
+ # Uncomment the next line to install the Vim executable in "/usr/machine/bin"
+ #exec_prefix = /usr/machine
++exec_prefix = $(HOME)
+ 
+ ### BINDIR	dir for the executable	 (default "$(exec_prefix)/bin")
+ ### MANDIR	dir for the manual pages (default "$(prefix)/man")

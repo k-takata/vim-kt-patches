@@ -1,5 +1,6 @@
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
+myconfiguration-private-install.patch #+private-install
 backout-7.3.638.patch #+linux
 timers3.patch #+timers
 timers-mark.diff #+timers
