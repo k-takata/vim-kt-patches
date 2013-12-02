@@ -37,3 +37,5 @@ tab-xyz.diff
 tabline-dnd.patch
 tabline-dnd-mark.diff
 subpixel-artifacts.patch
+support-perl5.18.patch
+fix-indent-in-if_perl.patch

@@ -1,0 +1,60 @@
+# HG changeset patch
+# Parent 0c7f80ded4aa721dab0f8a9322dcce8993e977e6
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -124,17 +124,17 @@
+ #endif
+ 
+ #ifndef WIN3264
+-#include <dlfcn.h>
+-#define HANDLE void*
+-#define PERL_PROC void*
+-#define load_dll(n) dlopen((n), RTLD_LAZY|RTLD_GLOBAL)
+-#define symbol_from_dll dlsym
+-#define close_dll dlclose
++# include <dlfcn.h>
++# define HANDLE void*
++# define PERL_PROC void*
++# define load_dll(n) dlopen((n), RTLD_LAZY|RTLD_GLOBAL)
++# define symbol_from_dll dlsym
++# define close_dll dlclose
+ #else
+-#define PERL_PROC FARPROC
+-#define load_dll vimLoadLib
+-#define symbol_from_dll GetProcAddress
+-#define close_dll FreeLibrary
++# define PERL_PROC FARPROC
++# define load_dll vimLoadLib
++# define symbol_from_dll GetProcAddress
++# define close_dll FreeLibrary
+ #endif
+ /*
+  * Wrapper defines
+@@ -174,10 +174,10 @@
+ # define Perl_stack_grow dll_Perl_stack_grow
+ # define Perl_set_context dll_Perl_set_context
+ # if (PERL_REVISION == 5) && (PERL_VERSION >= 14)
+-# define Perl_sv_2bool_flags dll_Perl_sv_2bool_flags
+-# define Perl_xs_apiversion_bootcheck dll_Perl_xs_apiversion_bootcheck
++#  define Perl_sv_2bool_flags dll_Perl_sv_2bool_flags
++#  define Perl_xs_apiversion_bootcheck dll_Perl_xs_apiversion_bootcheck
+ # else
+-# define Perl_sv_2bool dll_Perl_sv_2bool
++#  define Perl_sv_2bool dll_Perl_sv_2bool
+ # endif
+ # define Perl_sv_2iv dll_Perl_sv_2iv
+ # define Perl_sv_2mortal dll_Perl_sv_2mortal
+@@ -193,10 +193,10 @@
+ # else
+ #  define Perl_sv_catpvn dll_Perl_sv_catpvn
+ # endif
+-#ifdef PERL589_OR_LATER
++# ifdef PERL589_OR_LATER
+ #  define Perl_sv_2iv_flags dll_Perl_sv_2iv_flags
+ #  define Perl_newXS_flags dll_Perl_newXS_flags
+-#endif
++# endif
+ # define Perl_sv_free dll_Perl_sv_free
+ # if (PERL_REVISION == 5) && (PERL_VERSION >= 10)
+ #  define Perl_sv_free2 dll_Perl_sv_free2
