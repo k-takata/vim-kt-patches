@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent 486655e0c5a21469364d3cf895535137f09b3724
+
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -23,6 +23,17 @@
+ # define _USE_32BIT_TIME_T
+ #endif
+ 
++/*
++ * Prevent including winsock.h.  perl.h tries to detect whether winsock.h is
++ * already included before including winsock2.h, because winsock2.h isn't
++ * compatible with winsock.h.  However the detection doesn't work with some
++ * versions of MinGW.  If WIN32_LEAN_AND_MEAN is defined, windows.h will not
++ * include winsock.h.
++ */
++#ifdef WIN32
++# define WIN32_LEAN_AND_MEAN
++#endif
++
+ #include "vim.h"
+ 
+ #include <EXTERN.h>

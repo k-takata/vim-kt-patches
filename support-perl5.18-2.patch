@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 486655e0c5a21469364d3cf895535137f09b3724
+# Parent a6d22413d40e92c88b23ed7bdd7254eaeeeb4096
 
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 --- a/src/Make_cyg.mak
 +++ b/src/Make_cyg.mak
-@@ -155,7 +155,7 @@
+@@ -160,7 +160,7 @@
  ifeq (yes, $(DYNAMIC_PERL))
  DEFINES += -DDYNAMIC_PERL -DDYNAMIC_PERL_DLL=\"perl$(PERL_VER).dll\"
  else
@@ -26,8 +26,8 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
   * (http://community.activestate.com/faq/windows-compilers-perl-modules)
   * It means that time_t should be 32-bit. However the default size of
   * time_t is 64-bit since VC8. So we have to define _USE_32BIT_TIME_T.
-@@ -23,6 +24,11 @@
- # define _USE_32BIT_TIME_T
+@@ -34,6 +35,11 @@
+ # define WIN32_LEAN_AND_MEAN
  #endif
  
 +/* Work around for perl-5.18.
@@ -38,7 +38,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  #include "vim.h"
  
  #include <EXTERN.h>
-@@ -81,10 +87,6 @@
+@@ -92,10 +98,6 @@
  # define PERL5101_OR_LATER
  #endif
  
@@ -49,7 +49,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  #ifndef pTHX
  #    define pTHX void
  #    define pTHX_
-@@ -145,11 +147,9 @@
+@@ -156,11 +158,9 @@
  # define perl_free dll_perl_free
  # define Perl_get_context dll_Perl_get_context
  # define Perl_croak dll_Perl_croak
@@ -61,7 +61,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  # ifndef PROTO
  #  define Perl_croak_nocontext dll_Perl_croak_nocontext
  #  define Perl_call_argv dll_Perl_call_argv
-@@ -262,10 +262,13 @@
+@@ -273,10 +273,13 @@
  static int (*perl_parse)(PerlInterpreter*, XSINIT_t, int, char**, char**);
  static void* (*Perl_get_context)(void);
  static void (*Perl_croak)(pTHX_ const char*, ...);
@@ -77,7 +77,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  #endif
  static void (*Perl_croak_nocontext)(const char*, ...);
  static I32 (*Perl_dowantarray)(pTHX);
-@@ -337,7 +340,12 @@
+@@ -348,7 +351,12 @@
  static XPV** (*Perl_TXpv_ptr)(register PerlInterpreter*);
  static STRLEN* (*Perl_Tna_ptr)(register PerlInterpreter*);
  #else
@@ -90,7 +90,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  static void (*Perl_sys_init)(int* argc, char*** argv);
  static void (*Perl_sys_term)(void);
  static void (*Perl_call_list)(pTHX_ I32, AV*);
-@@ -384,11 +392,9 @@
+@@ -395,11 +403,9 @@
      {"perl_parse", (PERL_PROC*)&perl_parse},
      {"Perl_get_context", (PERL_PROC*)&Perl_get_context},
      {"Perl_croak", (PERL_PROC*)&Perl_croak},
@@ -102,7 +102,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
      {"Perl_croak_nocontext", (PERL_PROC*)&Perl_croak_nocontext},
      {"Perl_dowantarray", (PERL_PROC*)&Perl_dowantarray},
      {"Perl_free_tmps", (PERL_PROC*)&Perl_free_tmps},
-@@ -492,6 +498,14 @@
+@@ -503,6 +509,14 @@
      {"", NULL},
  };
  
