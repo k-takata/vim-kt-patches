@@ -1,0 +1,41 @@
+# HG changeset patch
+# Parent 486655e0c5a21469364d3cf895535137f09b3724
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -2509,7 +2509,7 @@
+     WCHAR		*porig, *porigPrev;
+     int			flen;
+     WIN32_FIND_DATAW	fb;
+-    HANDLE		hFind;
++    HANDLE		hFind = INVALID_HANDLE_VALUE;
+     int			c;
+     int			slen;
+ 
+@@ -2531,6 +2531,8 @@
+ 	*ptrue = NUL;	    /* in case nothing follows */
+     }
+ 
++    szTrueName[0] = NUL;
++
+     while (*porig != NUL)
+     {
+ 	/* copy \ characters */
+@@ -2676,6 +2678,8 @@
+ 	*ptrue = NUL;	    /* in case nothing follows */
+     }
+ 
++    szTrueName[0] = NUL;
++
+     while (*porig != NUL)
+     {
+ 	/* copy \ characters */
+@@ -6272,6 +6276,7 @@
+ 		    while (i > 0)
+ 			free(argv[--i]);
+ 		    free(argv);
++		    argv = NULL;
+ 		    argc = 0;
+ 		}
+ 	    }
