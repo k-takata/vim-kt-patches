@@ -37,6 +37,4 @@ tab-xyz.diff
 tabline-dnd.patch
 tabline-dnd-mark.diff
 subpixel-artifacts.patch
-fix-if_perl-mingw-winsock.patch
-support-perl5.18-2.patch
 fix-indent-in-if_perl.patch
