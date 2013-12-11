@@ -20,7 +20,6 @@ cpo-N-mark.diff
 cpo-N-update-tags.patch
 if_perl-use-output.patch
 improve_dos_test.diff
-fix-utf8-hostname.patch
 fix-utf8-msgloop.patch
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
