@@ -35,4 +35,3 @@ tabline-dnd.patch
 tabline-dnd-mark.diff
 subpixel-artifacts.patch
 fix-indent-in-if_perl.patch
-support-perl518-with-msvc.patch
