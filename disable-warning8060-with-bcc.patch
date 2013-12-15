@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent aa77364a865310e87f6a1c8215b5b1fa5ffce65e
+# Parent f2d6a1d37f8979d0b56b9cc7304c6e0fd69fcf57
 
 diff --git a/src/if_py_both.h b/src/if_py_both.h
 --- a/src/if_py_both.h
@@ -10,7 +10,7 @@ diff --git a/src/if_py_both.h b/src/if_py_both.h
  
 +#ifdef __BORLANDC__
 +/* Disable Warning W8060: Possibly incorrect assignment in function ... */
-+#pragma warn -8060
++# pragma warn -8060
 +#endif
 +
  static char_u e_py_systemexit[]	= "E880: Can't handle SystemExit of %s exception in vim";
