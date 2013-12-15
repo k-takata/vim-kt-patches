@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent c7bcb04f613e5bb4cdc3aff9084242ded6066029
+diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
+--- a/src/Make_bc5.mak
++++ b/src/Make_bc5.mak
+@@ -419,7 +419,7 @@
+ ALIGNARG = -a$(ALIGN)
+ #
+ !if ("$(DEBUG)"=="yes")
+-DEFINES=$(DEFINES) -DDEBUG
++DEFINES=$(DEFINES) -DDEBUG -D_DEBUG
+ !endif
+ #
+ !if ("$(OLE)"=="yes")
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -2894,7 +2894,7 @@
+ 	/* UNC path */
+ 	return (long)win32_getattrs(name);
+     n = mch_stat(name, &st);
+-    return n == 0 ? (long)st.st_mode : -1L;
++    return n == 0 ? (long)(unsigned short)st.st_mode : -1L;
+ }
+ 
+ 

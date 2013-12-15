@@ -4,6 +4,7 @@ myconfiguration-private-install.patch #+private-install
 backout-7.3.638.patch #+linux
 timers3.patch #+timers
 timers-mark.diff #+timers
+fix-bcc-issues.patch
 ignore-bcc-files.patch
 disable-warning8060-with-bcc.patch
 merge-Make_cyg-into-Make_ming.patch
