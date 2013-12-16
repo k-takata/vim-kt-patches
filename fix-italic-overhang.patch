@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent 2f856c7c1d43693687a9a49b03937574556641c7
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -7108,7 +7108,8 @@
+ 	    /* The bold trick makes a single row of pixels appear in the next
+ 	     * character.  When a bold character is removed, the next
+ 	     * character should be redrawn too.  This happens for our own GUI
+-	     * and for some xterms. */
++	     * and for some xterms.  The next character to an italic character
++	     * should be redrawn too. */
+ 	    if (need_redraw && ScreenLines[off] != ' ' && (
+ # ifdef FEAT_GUI
+ 		    gui.in_use
+@@ -7125,7 +7126,7 @@
+ 
+ 		if (n > HL_ALL)
+ 		    n = syn_attr2attr(n);
+-		if (n & HL_BOLD)
++		if (n & (HL_BOLD | HL_ITALIC))
+ 		    force_redraw_next = TRUE;
+ 	    }
+ #endif
