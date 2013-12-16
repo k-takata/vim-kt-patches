@@ -1,9 +1,28 @@
 # HG changeset patch
-# Parent 2f856c7c1d43693687a9a49b03937574556641c7
+# Parent 9f9587558f5be0397eec9319c490597398af9fbc
+
 diff --git a/src/screen.c b/src/screen.c
 --- a/src/screen.c
 +++ b/src/screen.c
-@@ -7108,7 +7108,8 @@
+@@ -5839,7 +5839,7 @@
+ 		hl = ScreenAttrs[off_to];
+ 		if (hl > HL_ALL)
+ 		    hl = syn_attr2attr(hl);
+-		if (hl & HL_BOLD)
++		if (hl & (HL_BOLD | HL_ITALIC))
+ 		    redraw_next = TRUE;
+ 	    }
+ #endif
+@@ -5930,7 +5930,7 @@
+ 	    if (gui.in_use && (col > startCol || !redraw_this))
+ 	    {
+ 		hl = ScreenAttrs[off_to];
+-		if (hl > HL_ALL || (hl & HL_BOLD))
++		if (hl > HL_ALL || (hl & (HL_BOLD | HL_ITALIC)))
+ 		{
+ 		    int prev_cells = 1;
+ # ifdef FEAT_MBYTE
+@@ -7160,7 +7160,8 @@
  	    /* The bold trick makes a single row of pixels appear in the next
  	     * character.  When a bold character is removed, the next
  	     * character should be redrawn too.  This happens for our own GUI
@@ -13,7 +32,7 @@ diff --git a/src/screen.c b/src/screen.c
  	    if (need_redraw && ScreenLines[off] != ' ' && (
  # ifdef FEAT_GUI
  		    gui.in_use
-@@ -7125,7 +7126,7 @@
+@@ -7177,7 +7178,7 @@
  
  		if (n > HL_ALL)
  		    n = syn_attr2attr(n);
@@ -22,3 +41,12 @@ diff --git a/src/screen.c b/src/screen.c
  		    force_redraw_next = TRUE;
  	    }
  #endif
+@@ -8083,7 +8084,7 @@
+ 		{
+ 		    if (ScreenLines[off] != ' '
+ 			    && (ScreenAttrs[off] > HL_ALL
+-				|| ScreenAttrs[off] & HL_BOLD))
++				|| ScreenAttrs[off] & (HL_BOLD | HL_ITALIC)))
+ 			force_next = TRUE;
+ 		    else
+ 			force_next = FALSE;
