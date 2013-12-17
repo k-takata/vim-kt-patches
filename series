@@ -37,3 +37,4 @@ tabline-dnd-mark.diff
 subpixel-artifacts.patch
 fix-indent-in-if_perl.patch
 fix-italic-overhang.patch
+fix-utf8-fontname.patch
