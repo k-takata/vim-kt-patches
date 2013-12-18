@@ -1,9 +1,10 @@
 # HG changeset patch
-# Parent 6d71b38fff4d0b1d1aedb80fcde66cf5f2fe4f16
+# Parent d734601ebe4e473ed956b2527ad50700f3be7dab
+
 diff --git a/src/gui_w48.c b/src/gui_w48.c
 --- a/src/gui_w48.c
 +++ b/src/gui_w48.c
-@@ -3090,15 +3090,23 @@
+@@ -3090,15 +3090,25 @@
      char	*p;
      char	*res;
      char	*charset_name;
@@ -12,6 +13,8 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
      charset_name = charset_id2name((int)lf.lfCharSet);
 -    res = alloc((unsigned)(strlen(lf.lfFaceName) + 20
 +#ifdef FEAT_MBYTE
++    /* Convert a font name from the current codepage to 'encoding'.
++     * TODO: Use Wide APIs (including LOGFONTW) instead of ANSI APIs. */
 +    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +    {
 +	int	len;
@@ -29,7 +32,7 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
  			 lf.lfHeight < 0 ? -lf.lfHeight : lf.lfHeight, TRUE));
  	while (*p)
  	{
-@@ -3123,6 +3131,10 @@
+@@ -3123,6 +3133,10 @@
  	}
      }
  
@@ -43,7 +46,7 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -2854,12 +2854,24 @@
+@@ -2854,12 +2854,27 @@
  {
      char_u	*p;
      int		i;
@@ -58,6 +61,9 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	return OK;
  
 +#ifdef FEAT_MBYTE
++    /* Convert 'name' from 'encoding' to the current codepage, because
++     * lf->lfFaceName uses the current codepage.
++     * TODO: Use Wide APIs instead of ANSI APIs. */
 +    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +    {
 +	int	len;
@@ -68,7 +74,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      if (STRCMP(name, "*") == 0)
      {
  #if defined(FEAT_GUI_W32)
-@@ -2874,10 +2886,9 @@
+@@ -2874,10 +2889,9 @@
  	cf.lpLogFont = lf;
  	cf.nFontType = 0 ; //REGULAR_FONTTYPE;
  	if (ChooseFont(&cf))
@@ -81,7 +87,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      }
  
      /*
-@@ -2886,7 +2897,7 @@
+@@ -2886,7 +2900,7 @@
      for (p = name; *p && *p != ':'; p++)
      {
  	if (p - name + 1 > LF_FACESIZE)
@@ -90,7 +96,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	lf->lfFaceName[p - name] = *p;
      }
      if (p != name)
-@@ -2914,7 +2925,7 @@
+@@ -2914,7 +2928,7 @@
  		did_replace = TRUE;
  	    }
  	if (!did_replace || init_logfont(lf) == FAIL)
@@ -99,7 +105,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      }
  
      while (*p == ':')
-@@ -2975,25 +2986,27 @@
+@@ -2975,25 +2989,27 @@
  			    p[-1], name);
  		    EMSG(IObuff);
  		}
