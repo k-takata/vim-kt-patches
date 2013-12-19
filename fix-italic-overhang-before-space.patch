@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent 0d562ac6a11939a577c936226c816a3387acbd03
+diff --git a/src/gui.c b/src/gui.c
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -2706,7 +2706,11 @@
+ 	 * is.  Needed for when the bold trick is used */
+ 	for (back = 0; back < col1; ++back)
+ 	    if (ScreenAttrs[off - 1 - back] != ScreenAttrs[off]
+-		    || ScreenLines[off - 1 - back] == ' ')
++		    || (ScreenLines[off - 1 - back] == ' '
++			&& (off - 2 - back < 0
++			    || ScreenLines[off - 2 - back] == ' ')
++			&& (off - 3 - back < 0
++			    || ScreenLines[off - 3 - back] == ' ')))
+ 		break;
+ 	retval = (col1 > 0 && ScreenAttrs[off - 1] != 0 && back == 0
+ 					      && ScreenLines[off - 1] != ' ');
