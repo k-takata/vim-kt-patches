@@ -38,4 +38,3 @@ subpixel-artifacts.patch
 fix-indent-in-if_perl.patch
 fix-utf8-fontname.patch
 fix-italic-overhang-before-space.patch
-fix-if_perl-warnings.patch
