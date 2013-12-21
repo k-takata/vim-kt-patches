@@ -1,0 +1,113 @@
+# HG changeset patch
+# Parent 30d1299ed1e45968e16fe866751a1de167d0c459
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -1158,7 +1158,7 @@
+ 
+ void
+ DESTROY(win)
+-    VIWIN win
++    VIWIN win = NULL;
+ 
+     CODE:
+     if (win_valid(win))
+@@ -1166,7 +1166,7 @@
+ 
+ SV *
+ Buffer(win)
+-    VIWIN win
++    VIWIN win = NULL;
+ 
+     CODE:
+     if (!win_valid(win))
+@@ -1177,7 +1177,7 @@
+ 
+ void
+ SetHeight(win, height)
+-    VIWIN win
++    VIWIN win = NULL;
+     int height;
+ 
+     PREINIT:
+@@ -1193,7 +1193,7 @@
+ 
+ void
+ Cursor(win, ...)
+-    VIWIN win
++    VIWIN win = NULL;
+ 
+     PPCODE:
+     if (items == 1)
+@@ -1222,7 +1222,7 @@
+ 
+ void
+ DESTROY(vimbuf)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     CODE:
+     if (buf_valid(vimbuf))
+@@ -1230,7 +1230,7 @@
+ 
+ void
+ Name(vimbuf)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     PPCODE:
+     if (!buf_valid(vimbuf))
+@@ -1243,7 +1243,7 @@
+ 
+ void
+ Number(vimbuf)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     PPCODE:
+     if (!buf_valid(vimbuf))
+@@ -1252,7 +1252,7 @@
+ 
+ void
+ Count(vimbuf)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     PPCODE:
+     if (!buf_valid(vimbuf))
+@@ -1261,7 +1261,7 @@
+ 
+ void
+ Get(vimbuf, ...)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     PREINIT:
+     char_u *line;
+@@ -1283,7 +1283,7 @@
+ 
+ void
+ Set(vimbuf, ...)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     PREINIT:
+     int i;
+@@ -1321,7 +1321,7 @@
+ 
+ void
+ Delete(vimbuf, ...)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     PREINIT:
+     long i, lnum = 0, count = 0;
+@@ -1375,7 +1375,7 @@
+ 
+ void
+ Append(vimbuf, ...)
+-    VIBUF vimbuf;
++    VIBUF vimbuf = NULL;
+ 
+     PREINIT:
+     int		i;
