@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent 1c3d3d287af5cdc7882b32e2190deafc6bbd7704
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -3835,8 +3835,8 @@
+     static BOOL
+ vim_create_process(
+     char		*cmd,
++    BOOL		inherit_handles,
+     DWORD		flags,
+-    BOOL		inherit_handles,
+     STARTUPINFO		*si,
+     PROCESS_INFORMATION *pi)
+ {
