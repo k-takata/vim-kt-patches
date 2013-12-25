@@ -25,7 +25,8 @@ X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
 rmdir-mark.diff
 rmdir-update-tags.patch
-add-smsg_attr_keep.patch
+redraw-after-undo.patch #-undo1
+add-smsg_attr_keep.patch #+undo1
 vim-7.4.035-breakindent.patch
 breakindent-mark.diff
 strikethrough.diff
