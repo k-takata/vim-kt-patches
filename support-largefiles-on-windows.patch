@@ -1,5 +1,6 @@
 # HG changeset patch
 # Parent ad5a0c56e4b9f2d019089eed17d33935ade1a621
+
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
@@ -57,7 +58,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  				    && (read_buffer
 -					|| lseek(fd, (off_t)0L, SEEK_SET) == 0))
 +					|| vim_lseek(fd, (off_T)0L, SEEK_SET)
-+									== 0))
++									  == 0))
  				{
  				    fileformat = EOL_UNIX;
  				    if (set_options)
