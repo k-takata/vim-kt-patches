@@ -445,7 +445,7 @@ diff --git a/src/tag.c b/src/tag.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -434,6 +434,36 @@
+@@ -434,6 +434,35 @@
  #endif
  
  /*
@@ -475,7 +475,6 @@ diff --git a/src/vim.h b/src/vim.h
 +#  define vim_ftell ftell
 +#  define vim_fseek(a, b, c)	fseek(a, (long)b, c)
 +# endif
-+
 +#endif
 +
 +/*
