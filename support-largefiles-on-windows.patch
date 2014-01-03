@@ -1,0 +1,483 @@
+# HG changeset patch
+# Parent ad5a0c56e4b9f2d019089eed17d33935ade1a621
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -11516,7 +11516,7 @@
+ 	    rettv->vval.v_number = (varnumber_T)st.st_size;
+ 
+ 	    /* non-perfect check for overflow */
+-	    if ((off_t)rettv->vval.v_number != (off_t)st.st_size)
++	    if ((off_T)rettv->vval.v_number != (off_T)st.st_size)
+ 		rettv->vval.v_number = -2;
+ 	}
+     }
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -56,7 +56,7 @@
+ #endif
+ #ifdef FEAT_CRYPT
+ static int crypt_method_from_magic __ARGS((char *ptr, int len));
+-static char_u *check_for_cryptkey __ARGS((char_u *cryptkey, char_u *ptr, long *sizep, off_t *filesizep, int newfile, char_u *fname, int *did_ask));
++static char_u *check_for_cryptkey __ARGS((char_u *cryptkey, char_u *ptr, long *sizep, off_T *filesizep, int newfile, char_u *fname, int *did_ask));
+ #endif
+ #ifdef UNIX
+ static void set_file_time __ARGS((char_u *fname, time_t atime, time_t mtime));
+@@ -245,7 +245,7 @@
+     colnr_T	len;
+     long	size = 0;
+     char_u	*p;
+-    off_t	filesize = 0;
++    off_T	filesize = 0;
+     int		skip_read = FALSE;
+ #ifdef FEAT_CRYPT
+     char_u	*cryptkey = NULL;
+@@ -882,7 +882,7 @@
+ 		/* Read the first line (and a bit more).  Immediately rewind to
+ 		 * the start of the file.  If the read() fails "len" is -1. */
+ 		len = read_eintr(fd, firstline, 80);
+-		lseek(fd, (off_t)0L, SEEK_SET);
++		vim_lseek(fd, (off_T)0L, SEEK_SET);
+ 		for (p = firstline; p < firstline + len; ++p)
+ 		    if (*p >= 0x80)
+ 		    {
+@@ -946,7 +946,7 @@
+ 	    read_buf_lnum = 1;
+ 	    read_buf_col = 0;
+ 	}
+-	else if (read_stdin || lseek(fd, (off_t)0L, SEEK_SET) != 0)
++	else if (read_stdin || vim_lseek(fd, (off_T)0L, SEEK_SET) != 0)
+ 	{
+ 	    /* Can't rewind the file, give up. */
+ 	    error = TRUE;
+@@ -2184,7 +2184,8 @@
+ 				if (   try_unix
+ 				    && !read_stdin
+ 				    && (read_buffer
+-					|| lseek(fd, (off_t)0L, SEEK_SET) == 0))
++					|| vim_lseek(fd, (off_T)0L, SEEK_SET)
++									== 0))
+ 				{
+ 				    fileformat = EOL_UNIX;
+ 				    if (set_options)
+@@ -2919,7 +2920,7 @@
+     char_u	*cryptkey;	/* previous encryption key or NULL */
+     char_u	*ptr;		/* pointer to read bytes */
+     long	*sizep;		/* length of read bytes */
+-    off_t	*filesizep;	/* nr of bytes used from file */
++    off_T	*filesizep;	/* nr of bytes used from file */
+     int		newfile;	/* editing a new buffer */
+     char_u	*fname;		/* file name to display */
+     int		*did_ask;	/* flag: whether already asked for key */
+@@ -5283,7 +5284,7 @@
+ msg_add_lines(insert_space, lnum, nchars)
+     int	    insert_space;
+     long    lnum;
+-    off_t   nchars;
++    off_T   nchars;
+ {
+     char_u  *p;
+ 
+@@ -6863,7 +6864,7 @@
+ #if defined(FEAT_CON_DIALOG) || defined(FEAT_GUI_DIALOG)
+     int		can_reload = FALSE;
+ #endif
+-    off_t	orig_size = buf->b_orig_size;
++    off_T	orig_size = buf->b_orig_size;
+     int		orig_mode = buf->b_orig_mode;
+ #ifdef FEAT_GUI
+     int		save_mouse_correct = need_mouse_correct;
+diff --git a/src/memfile.c b/src/memfile.c
+--- a/src/memfile.c
++++ b/src/memfile.c
+@@ -81,7 +81,7 @@
+ static bhdr_T *mf_rem_free __ARGS((memfile_T *));
+ static int  mf_read __ARGS((memfile_T *, bhdr_T *));
+ static int  mf_write __ARGS((memfile_T *, bhdr_T *));
+-static int  mf_write_block __ARGS((memfile_T *mfp, bhdr_T *hp, off_t offset, unsigned size));
++static int  mf_write_block __ARGS((memfile_T *mfp, bhdr_T *hp, off_T offset, unsigned size));
+ static int  mf_trans_add __ARGS((memfile_T *, bhdr_T *));
+ static void mf_do_open __ARGS((memfile_T *, char_u *, int));
+ static void mf_hash_init __ARGS((mf_hashtab_T *));
+@@ -126,7 +126,7 @@
+     int		flags;
+ {
+     memfile_T		*mfp;
+-    off_t		size;
++    off_T		size;
+ #if defined(STATFS) && defined(UNIX) && !defined(__QNX__) && !defined(__minix)
+ # define USE_FSTATFS
+     struct STATFS	stf;
+@@ -181,7 +181,7 @@
+ #endif
+ 
+     if (mfp->mf_fd < 0 || (flags & (O_TRUNC|O_EXCL))
+-		      || (size = lseek(mfp->mf_fd, (off_t)0L, SEEK_END)) <= 0)
++		  || (size = vim_lseek(mfp->mf_fd, (off_T)0L, SEEK_END)) <= 0)
+ 	mfp->mf_blocknr_max = 0;	/* no file or empty file */
+     else
+ 	mfp->mf_blocknr_max = (blocknr_T)((size + mfp->mf_page_size - 1)
+@@ -1007,7 +1007,7 @@
+     memfile_T	*mfp;
+     bhdr_T	*hp;
+ {
+-    off_t	offset;
++    off_T	offset;
+     unsigned	page_size;
+     unsigned	size;
+ 
+@@ -1015,9 +1015,9 @@
+ 	return FAIL;
+ 
+     page_size = mfp->mf_page_size;
+-    offset = (off_t)page_size * hp->bh_bnum;
++    offset = (off_T)page_size * hp->bh_bnum;
+     size = page_size * hp->bh_page_count;
+-    if (lseek(mfp->mf_fd, offset, SEEK_SET) != offset)
++    if (vim_lseek(mfp->mf_fd, offset, SEEK_SET) != offset)
+     {
+ 	PERROR(_("E294: Seek error in swap file read"));
+ 	return FAIL;
+@@ -1047,7 +1047,7 @@
+     memfile_T	*mfp;
+     bhdr_T	*hp;
+ {
+-    off_t	offset;	    /* offset in the file */
++    off_T	offset;	    /* offset in the file */
+     blocknr_T	nr;	    /* block nr which is being written */
+     bhdr_T	*hp2;
+     unsigned	page_size;  /* number of bytes in a page */
+@@ -1080,8 +1080,8 @@
+ 	else
+ 	    hp2 = hp;
+ 
+-	offset = (off_t)page_size * nr;
+-	if (lseek(mfp->mf_fd, offset, SEEK_SET) != offset)
++	offset = (off_T)page_size * nr;
++	if (vim_lseek(mfp->mf_fd, offset, SEEK_SET) != offset)
+ 	{
+ 	    PERROR(_("E296: Seek error in swap file write"));
+ 	    return FAIL;
+@@ -1125,7 +1125,7 @@
+ mf_write_block(mfp, hp, offset, size)
+     memfile_T	*mfp;
+     bhdr_T	*hp;
+-    off_t	offset UNUSED;
++    off_T	offset UNUSED;
+     unsigned	size;
+ {
+     char_u	*data = hp->bh_data;
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -256,7 +256,7 @@
+ static char_u *make_percent_swname __ARGS((char_u *dir, char_u *name));
+ #endif
+ #ifdef FEAT_CRYPT
+-static void ml_crypt_prepare __ARGS((memfile_T *mfp, off_t offset, int reading));
++static void ml_crypt_prepare __ARGS((memfile_T *mfp, off_T offset, int reading));
+ #endif
+ #ifdef FEAT_BYTEOFF
+ static void ml_updatechunk __ARGS((buf_T *buf, long line, long len, int updtype));
+@@ -1088,7 +1088,7 @@
+     int		idx;
+     int		top;
+     int		txt_start;
+-    off_t	size;
++    off_T	size;
+     int		called_from_main;
+     int		serious_error = TRUE;
+     long	mtime;
+@@ -1286,7 +1286,7 @@
+ 	    msg_end();
+ 	    goto theend;
+ 	}
+-	if ((size = lseek(mfp->mf_fd, (off_t)0L, SEEK_END)) <= 0)
++	if ((size = vim_lseek(mfp->mf_fd, (off_T)0L, SEEK_END)) <= 0)
+ 	    mfp->mf_blocknr_max = 0;	    /* no file or empty file */
+ 	else
+ 	    mfp->mf_blocknr_max = (blocknr_T)(size / mfp->mf_page_size);
+@@ -4805,7 +4805,7 @@
+ ml_encrypt_data(mfp, data, offset, size)
+     memfile_T	*mfp;
+     char_u	*data;
+-    off_t	offset;
++    off_T	offset;
+     unsigned	size;
+ {
+     DATA_BL	*dp = (DATA_BL *)data;
+@@ -4847,7 +4847,7 @@
+ ml_decrypt_data(mfp, data, offset, size)
+     memfile_T	*mfp;
+     char_u	*data;
+-    off_t	offset;
++    off_T	offset;
+     unsigned	size;
+ {
+     DATA_BL	*dp = (DATA_BL *)data;
+@@ -4879,7 +4879,7 @@
+     static void
+ ml_crypt_prepare(mfp, offset, reading)
+     memfile_T	*mfp;
+-    off_t	offset;
++    off_T	offset;
+     int		reading;
+ {
+     buf_T	*buf = mfp->mf_buffer;
+diff --git a/src/netbeans.c b/src/netbeans.c
+--- a/src/netbeans.c
++++ b/src/netbeans.c
+@@ -945,7 +945,7 @@
+ 			char_u *tooltip, char_u *glyphfile,
+ 			char_u *fg, char_u *bg));
+ static void print_read_msg __ARGS((nbbuf_T *buf));
+-static void print_save_msg __ARGS((nbbuf_T *buf, off_t nchars));
++static void print_save_msg __ARGS((nbbuf_T *buf, off_T nchars));
+ 
+ static int curPCtype = -1;
+ 
+@@ -3860,7 +3860,7 @@
+     nbbuf_T	*buf;
+ {
+     int	    lnum = buf->bufp->b_ml.ml_line_count;
+-    off_t   nchars = buf->bufp->b_orig_size;
++    off_T   nchars = buf->bufp->b_orig_size;
+     char_u  c;
+ 
+     msg_add_fname(buf->bufp, buf->bufp->b_ffname);
+@@ -3896,7 +3896,7 @@
+     static void
+ print_save_msg(buf, nchars)
+     nbbuf_T	*buf;
+-    off_t	nchars;
++    off_T	nchars;
+ {
+     char_u	c;
+     char_u	*p;
+diff --git a/src/proto/fileio.pro b/src/proto/fileio.pro
+--- a/src/proto/fileio.pro
++++ b/src/proto/fileio.pro
+@@ -9,7 +9,7 @@
+ int check_file_readonly __ARGS((char_u *fname, int perm));
+ int buf_write __ARGS((buf_T *buf, char_u *fname, char_u *sfname, linenr_T start, linenr_T end, exarg_T *eap, int append, int forceit, int reset_changed, int filtering));
+ void msg_add_fname __ARGS((buf_T *buf, char_u *fname));
+-void msg_add_lines __ARGS((int insert_space, long lnum, off_t nchars));
++void msg_add_lines __ARGS((int insert_space, long lnum, off_T nchars));
+ char_u *shorten_fname1 __ARGS((char_u *full_path));
+ char_u *shorten_fname __ARGS((char_u *full_path, char_u *dir_name));
+ void shorten_fnames __ARGS((int force));
+diff --git a/src/proto/memline.pro b/src/proto/memline.pro
+--- a/src/proto/memline.pro
++++ b/src/proto/memline.pro
+@@ -30,8 +30,8 @@
+ char_u *makeswapname __ARGS((char_u *fname, char_u *ffname, buf_T *buf, char_u *dir_name));
+ char_u *get_file_in_dir __ARGS((char_u *fname, char_u *dname));
+ void ml_setflags __ARGS((buf_T *buf));
+-char_u *ml_encrypt_data __ARGS((memfile_T *mfp, char_u *data, off_t offset, unsigned size));
+-void ml_decrypt_data __ARGS((memfile_T *mfp, char_u *data, off_t offset, unsigned size));
++char_u *ml_encrypt_data __ARGS((memfile_T *mfp, char_u *data, off_T offset, unsigned size));
++void ml_decrypt_data __ARGS((memfile_T *mfp, char_u *data, off_T offset, unsigned size));
+ long ml_find_line_or_offset __ARGS((buf_T *buf, linenr_T lnum, long *offp));
+ void goto_byte __ARGS((long cnt));
+ /* vim: set ft=c : */
+diff --git a/src/structs.h b/src/structs.h
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -1404,7 +1404,7 @@
+ 
+     long	b_mtime;	/* last change time of original file */
+     long	b_mtime_read;	/* last change time when reading */
+-    off_t	b_orig_size;	/* size of original file in bytes */
++    off_T	b_orig_size;	/* size of original file in bytes */
+     int		b_orig_mode;	/* mode of original file */
+ 
+     pos_T	b_namedm[NMARKS]; /* current named marks (mark.c) */
+diff --git a/src/tag.c b/src/tag.c
+--- a/src/tag.c
++++ b/src/tag.c
+@@ -83,15 +83,6 @@
+ 
+ static char_u	*tagmatchname = NULL;	/* name of last used tag */
+ 
+-/*
+- * We use ftello() here, if available.  It returns off_t instead of long,
+- * which helps if long is 32 bit and off_t is 64 bit.
+- * We assume that when fseeko() is available then ftello() is too.
+- */
+-#ifdef HAVE_FSEEKO
+-# define ftell ftello
+-#endif
+-
+ #if defined(FEAT_WINDOWS) && defined(FEAT_QUICKFIX)
+ /*
+  * Tag for preview window is remembered separately, to avoid messing up the
+@@ -1295,19 +1286,19 @@
+     int		tag_file_sorted = NUL;	/* !_TAG_FILE_SORTED value */
+     struct tag_search_info	/* Binary search file offsets */
+     {
+-	off_t	low_offset;	/* offset for first char of first line that
++	off_T	low_offset;	/* offset for first char of first line that
+ 				   could match */
+-	off_t	high_offset;	/* offset of char after last line that could
++	off_T	high_offset;	/* offset of char after last line that could
+ 				   match */
+-	off_t	curr_offset;	/* Current file offset in search range */
+-	off_t	curr_offset_used; /* curr_offset used when skipping back */
+-	off_t	match_offset;	/* Where the binary search found a tag */
++	off_T	curr_offset;	/* Current file offset in search range */
++	off_T	curr_offset_used; /* curr_offset used when skipping back */
++	off_T	match_offset;	/* Where the binary search found a tag */
+ 	int	low_char;	/* first char at low_offset */
+ 	int	high_char;	/* first char at high_offset */
+     } search_info;
+-    off_t	filesize;
++    off_T	filesize;
+     int		tagcmp;
+-    off_t	offset;
++    off_T	offset;
+     int		round;
+ #endif
+     enum
+@@ -1626,25 +1617,17 @@
+ 	    {
+ 		/* Adjust the search file offset to the correct position */
+ 		search_info.curr_offset_used = search_info.curr_offset;
+-#ifdef HAVE_FSEEKO
+-		fseeko(fp, search_info.curr_offset, SEEK_SET);
+-#else
+-		fseek(fp, (long)search_info.curr_offset, SEEK_SET);
+-#endif
++		vim_fseek(fp, search_info.curr_offset, SEEK_SET);
+ 		eof = tag_fgets(lbuf, LSIZE, fp);
+ 		if (!eof && search_info.curr_offset != 0)
+ 		{
+ 		    /* The explicit cast is to work around a bug in gcc 3.4.2
+ 		     * (repeated below). */
+-		    search_info.curr_offset = ftell(fp);
++		    search_info.curr_offset = vim_ftell(fp);
+ 		    if (search_info.curr_offset == search_info.high_offset)
+ 		    {
+ 			/* oops, gone a bit too far; try from low offset */
+-#ifdef HAVE_FSEEKO
+-			fseeko(fp, search_info.low_offset, SEEK_SET);
+-#else
+-			fseek(fp, (long)search_info.low_offset, SEEK_SET);
+-#endif
++			vim_fseek(fp, search_info.low_offset, SEEK_SET);
+ 			search_info.curr_offset = search_info.low_offset;
+ 		    }
+ 		    eof = tag_fgets(lbuf, LSIZE, fp);
+@@ -1652,14 +1635,14 @@
+ 		/* skip empty and blank lines */
+ 		while (!eof && vim_isblankline(lbuf))
+ 		{
+-		    search_info.curr_offset = ftell(fp);
++		    search_info.curr_offset = vim_ftell(fp);
+ 		    eof = tag_fgets(lbuf, LSIZE, fp);
+ 		}
+ 		if (eof)
+ 		{
+ 		    /* Hit end of file.  Skip backwards. */
+ 		    state = TS_SKIP_BACK;
+-		    search_info.match_offset = ftell(fp);
++		    search_info.match_offset = vim_ftell(fp);
+ 		    search_info.curr_offset = search_info.curr_offset_used;
+ 		    continue;
+ 		}
+@@ -1885,12 +1868,12 @@
+ 		{
+ 		    /* Get the tag file size (don't use mch_fstat(), it's not
+ 		     * portable). */
+-		    if ((filesize = lseek(fileno(fp),
+-						   (off_t)0L, SEEK_END)) <= 0)
++		    if ((filesize = vim_lseek(fileno(fp),
++						   (off_T)0L, SEEK_END)) <= 0)
+ 			state = TS_LINEAR;
+ 		    else
+ 		    {
+-			lseek(fileno(fp), (off_t)0L, SEEK_SET);
++			vim_lseek(fileno(fp), (off_T)0L, SEEK_SET);
+ 
+ 			/* Calculate the first read offset in the file.  Start
+ 			 * the search in the middle of the file. */
+@@ -1942,11 +1925,7 @@
+ 			    /* Avoid getting stuck. */
+ 			    linear = TRUE;
+ 			    state = TS_LINEAR;
+-# ifdef HAVE_FSEEKO
+-			    fseeko(fp, search_info.low_offset, SEEK_SET);
+-# else
+-			    fseek(fp, (long)search_info.low_offset, SEEK_SET);
+-# endif
++			    vim_fseek(fp, search_info.low_offset, SEEK_SET);
+ 			}
+ #endif
+ 			continue;
+@@ -2044,7 +2023,7 @@
+ 		    }
+ 		    if (tagcmp < 0)
+ 		    {
+-			search_info.curr_offset = ftell(fp);
++			search_info.curr_offset = vim_ftell(fp);
+ 			if (search_info.curr_offset < search_info.high_offset)
+ 			{
+ 			    search_info.low_offset = search_info.curr_offset;
+@@ -2085,7 +2064,7 @@
+ 		{
+ 		    if (MB_STRNICMP(tagp.tagname, orgpat.head, cmplen) != 0)
+ 		    {
+-			if ((off_t)ftell(fp) > search_info.match_offset)
++			if ((off_T)vim_ftell(fp) > search_info.match_offset)
+ 			    break;	/* past last match */
+ 			else
+ 			    continue;	/* before first match */
+@@ -2428,7 +2407,7 @@
+ #ifdef FEAT_CSCOPE
+ 	    if (!use_cscope)
+ #endif
+-		EMSGN(_("Before byte %ld"), (long)ftell(fp));
++		EMSGN(_("Before byte %ld"), (long)vim_ftell(fp));
+ 	    stop_searching = TRUE;
+ 	    line_error = FALSE;
+ 	}
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -434,6 +434,36 @@
+ #endif
+ 
+ /*
++ * We use ftello() here, if available.  It returns off_t instead of long,
++ * which helps if long is 32 bit and off_t is 64 bit.
++ * We assume that when fseeko() is available then ftello() is too.
++ */
++#if (defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)
++typedef __int64 off_T;
++# ifdef __MINGW32__
++#  define vim_lseek lseek64
++#  define vim_fseek fseeko64
++#  define vim_ftell ftello64
++# else
++#  define vim_lseek _lseeki64
++#  define vim_fseek _fseeki64
++#  define vim_ftell _ftelli64
++# endif
++#else
++typedef off_t off_T;
++# ifdef HAVE_FSEEKO
++#  define vim_lseek lseek
++#  define vim_ftell ftello
++#  define vim_fseek fseeko
++# else
++#  define vim_lseek lseek
++#  define vim_ftell ftell
++#  define vim_fseek(a, b, c)	fseek(a, (long)b, c)
++# endif
++
++#endif
++
++/*
+  * The characters and attributes cached for the screen.
+  */
+ typedef char_u schar_T;
