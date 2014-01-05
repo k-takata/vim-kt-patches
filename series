@@ -39,5 +39,4 @@ subpixel-artifacts.patch
 fix-indent-in-if_perl.patch
 fix-utf8-fontname.patch
 fix-italic-overhang-before-space.patch
-fix-7.4.122-param-order.patch
 support-largefiles-on-windows.patch
