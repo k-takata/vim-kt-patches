@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent ad5a0c56e4b9f2d019089eed17d33935ade1a621
+# Parent 6f3d13645e6ee38b97e84582b859a31583610dc4
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -445,13 +445,14 @@ diff --git a/src/tag.c b/src/tag.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -434,6 +434,35 @@
+@@ -434,6 +434,36 @@
  #endif
  
  /*
-+ * We use ftello() here, if available.  It returns off_t instead of long,
-+ * which helps if long is 32 bit and off_t is 64 bit.
++ * We use 64-bit file functions here, if available.  E.g. ftello() returns
++ * off_t instead of long, which helps if long is 32 bit and off_t is 64 bit.
 + * We assume that when fseeko() is available then ftello() is too.
++ * Note that Windows has different function names.
 + */
 +#if (defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)
 +typedef __int64 off_T;
@@ -481,3 +482,22 @@ diff --git a/src/vim.h b/src/vim.h
   * The characters and attributes cached for the screen.
   */
  typedef char_u schar_T;
+@@ -1965,6 +1995,18 @@
+ # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
+ #endif
+ 
++/* Use 64-bit stat functions if available. */
++#if (defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)
++# undef stat
++# undef _stat
++# undef _wstat
++# undef _fstat
++# define stat _stat64
++# define _stat _stat64
++# define _wstat _wstat64
++# define _fstat _fstat64
++#endif
++
+ #include "ex_cmds.h"	    /* Ex command defines */
+ #include "proto.h"	    /* function prototypes */
+ 
