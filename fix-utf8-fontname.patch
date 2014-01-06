@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent d734601ebe4e473ed956b2527ad50700f3be7dab
+# Parent 21728c86c34920c171585a8a994832e800786c0e
 
 diff --git a/src/gui_w48.c b/src/gui_w48.c
 --- a/src/gui_w48.c
 +++ b/src/gui_w48.c
-@@ -3090,15 +3090,25 @@
+@@ -3090,15 +3090,26 @@
      char	*p;
      char	*res;
      char	*charset_name;
@@ -18,7 +18,8 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
 +    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +    {
 +	int	len;
-+	acp_to_enc(lf.lfFaceName, strlen(lf.lfFaceName), &font_name, &len);
++	acp_to_enc(lf.lfFaceName, strlen(lf.lfFaceName),
++						(char_u **)&font_name, &len);
 +    }
 +#endif
 +    res = alloc((unsigned)(strlen(font_name) + 20
@@ -32,7 +33,7 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
  			 lf.lfHeight < 0 ? -lf.lfHeight : lf.lfHeight, TRUE));
  	while (*p)
  	{
-@@ -3123,6 +3133,10 @@
+@@ -3123,6 +3134,10 @@
  	}
      }
  
