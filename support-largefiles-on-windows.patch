@@ -482,12 +482,13 @@ diff --git a/src/vim.h b/src/vim.h
   * The characters and attributes cached for the screen.
   */
  typedef char_u schar_T;
-@@ -1965,6 +1995,18 @@
+@@ -1965,6 +1995,19 @@
  # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
  #endif
  
 +/* Use 64-bit stat functions if available. */
-+#if (defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)
++#if ((defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)) \
++					&& !defined(IN_PERL_FILE)
 +# undef stat
 +# undef _stat
 +# undef _wstat
