@@ -1,0 +1,944 @@
+# HG changeset patch
+# Parent 6a3c080dc19d67cee35c1fe5ea12e601731a2903
+diff --git a/src/buffer.c b/src/buffer.c
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -35,9 +35,9 @@
+ static void	buflist_setfpos __ARGS((buf_T *buf, win_T *win, linenr_T lnum, colnr_T col, int copy_options));
+ static wininfo_T *find_wininfo __ARGS((buf_T *buf, int skip_diff_buffer));
+ #ifdef UNIX
+-static buf_T	*buflist_findname_stat __ARGS((char_u *ffname, struct stat *st));
+-static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname, struct stat *stp));
+-static int	buf_same_ino __ARGS((buf_T *buf, struct stat *stp));
++static buf_T	*buflist_findname_stat __ARGS((char_u *ffname, stat_T *st));
++static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname, stat_T *stp));
++static int	buf_same_ino __ARGS((buf_T *buf, stat_T *stp));
+ #else
+ static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname));
+ #endif
+@@ -1622,7 +1622,7 @@
+ {
+     buf_T	*buf;
+ #ifdef UNIX
+-    struct stat	st;
++    stat_T	st;
+ #endif
+ 
+     fname_expand(curbuf, &ffname, &sfname);	/* will allocate ffname */
+@@ -2122,7 +2122,7 @@
+     char_u	*ffname;
+ {
+ #ifdef UNIX
+-    struct stat st;
++    stat_T	st;
+ 
+     if (mch_stat((char *)ffname, &st) < 0)
+ 	st.st_dev = (dev_T)-1;
+@@ -2137,7 +2137,7 @@
+     static buf_T *
+ buflist_findname_stat(ffname, stp)
+     char_u	*ffname;
+-    struct stat	*stp;
++    stat_T	*stp;
+ {
+ #endif
+     buf_T	*buf;
+@@ -2773,7 +2773,7 @@
+ {
+     buf_T	*obuf = NULL;
+ #ifdef UNIX
+-    struct stat st;
++    stat_T	st;
+ #endif
+ 
+     if (ffname == NULL || *ffname == NUL)
+@@ -3023,7 +3023,7 @@
+     buf_T	*buf;
+     char_u	*ffname;
+ #ifdef UNIX
+-    struct stat	*stp;
++    stat_T	*stp;
+ #endif
+ {
+     /* no name is different */
+@@ -3033,9 +3033,9 @@
+ 	return FALSE;
+ #ifdef UNIX
+     {
+-	struct stat	st;
+-
+-	/* If no struct stat given, get it now */
++	stat_T	    st;
++
++	/* If no stat_T given, get it now */
+ 	if (stp == NULL)
+ 	{
+ 	    if (!buf->b_dev_valid || mch_stat((char *)ffname, &st) < 0)
+@@ -3071,7 +3071,7 @@
+ buf_setino(buf)
+     buf_T	*buf;
+ {
+-    struct stat	st;
++    stat_T	st;
+ 
+     if (buf->b_fname != NULL && mch_stat((char *)buf->b_fname, &st) >= 0)
+     {
+@@ -3089,7 +3089,7 @@
+     static int
+ buf_same_ino(buf, stp)
+     buf_T	*buf;
+-    struct stat *stp;
++    stat_T	*stp;
+ {
+     return (buf->b_dev_valid
+ 	    && stp->st_dev == buf->b_dev
+diff --git a/src/diff.c b/src/diff.c
+--- a/src/diff.c
++++ b/src/diff.c
+@@ -904,7 +904,7 @@
+     char_u	*browseFile = NULL;
+     int		browse_flag = cmdmod.browse;
+ #endif
+-    struct stat st;
++    stat_T	st;
+ 
+ #ifdef FEAT_BROWSE
+     if (cmdmod.browse)
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -11469,7 +11469,7 @@
+     typval_T	*rettv;
+ {
+     char_u	*fname;
+-    struct stat st;
++    stat_T	st;
+     char_u	*perm = NULL;
+     char_u	flags[] = "rwx";
+     int		i;
+@@ -11501,7 +11501,7 @@
+     typval_T	*rettv;
+ {
+     char_u	*fname;
+-    struct stat	st;
++    stat_T	st;
+ 
+     fname = get_tv_string(&argvars[0]);
+ 
+@@ -11533,7 +11533,7 @@
+     typval_T	*rettv;
+ {
+     char_u	*fname;
+-    struct stat	st;
++    stat_T	st;
+ 
+     fname = get_tv_string(&argvars[0]);
+ 
+@@ -11552,7 +11552,7 @@
+     typval_T	*rettv;
+ {
+     char_u	*fname;
+-    struct stat st;
++    stat_T	st;
+     char_u	*type = NULL;
+     char	*t;
+ 
+diff --git a/src/ex_cmds.c b/src/ex_cmds.c
+--- a/src/ex_cmds.c
++++ b/src/ex_cmds.c
+@@ -1741,14 +1741,14 @@
+     FILE	*fp_in = NULL;	/* input viminfo file, if any */
+     FILE	*fp_out = NULL;	/* output viminfo file */
+     char_u	*tempname = NULL;	/* name of temp viminfo file */
+-    struct stat	st_new;		/* mch_stat() of potential new file */
++    stat_T	st_new;		/* mch_stat() of potential new file */
+     char_u	*wp;
+ #if defined(UNIX) || defined(VMS)
+     mode_t	umask_save;
+ #endif
+ #ifdef UNIX
+     int		shortname = FALSE;	/* use 8.3 file name */
+-    struct stat	st_old;		/* mch_stat() of existing viminfo file */
++    stat_T	st_old;		/* mch_stat() of existing viminfo file */
+ #endif
+ #ifdef WIN3264
+     long	perm = -1;
+@@ -2973,7 +2973,7 @@
+     int		*forceit;
+     buf_T	*buf;
+ {
+-    struct stat	st;
++    stat_T	st;
+ 
+     /* Handle a file being readonly when the 'readonly' option is set or when
+      * the file exists and permissions are read-only.
+diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
+--- a/src/ex_cmds2.c
++++ b/src/ex_cmds2.c
+@@ -3046,7 +3046,7 @@
+     int			    save_debug_break_level = debug_break_level;
+     scriptitem_T	    *si = NULL;
+ # ifdef UNIX
+-    struct stat		    st;
++    stat_T		    st;
+     int			    stat_ok;
+ # endif
+ #endif
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -64,7 +64,7 @@
+ static int set_rw_fname __ARGS((char_u *fname, char_u *sfname));
+ static int msg_add_fileformat __ARGS((int eol_type));
+ static void msg_add_eol __ARGS((void));
+-static int check_mtime __ARGS((buf_T *buf, struct stat *s));
++static int check_mtime __ARGS((buf_T *buf, stat_T *s));
+ static int time_differs __ARGS((long t1, long t2));
+ #ifdef FEAT_AUTOCMD
+ static int apply_autocmds_exarg __ARGS((event_T event, char_u *fname, char_u *fname_io, int force, buf_T *buf, exarg_T *eap));
+@@ -270,7 +270,7 @@
+ #endif
+     int		fileformat = 0;		/* end-of-line format */
+     int		keep_fileformat = FALSE;
+-    struct stat	st;
++    stat_T	st;
+     int		file_readonly;
+     linenr_T	skip_count = 0;
+     linenr_T	read_count = 0;
+@@ -3192,7 +3192,7 @@
+     int		    overwriting;	    /* TRUE if writing over original */
+     int		    no_eol = FALSE;	    /* no end-of-line written */
+     int		    device = FALSE;	    /* writing to a device */
+-    struct stat	    st_old;
++    stat_T	    st_old;
+     int		    prev_got_int = got_int;
+     int		    file_readonly = FALSE;  /* overwritten file is read-only */
+     static char	    *err_readonly = "is read-only (cannot override: \"W\" in 'cpoptions')";
+@@ -3720,7 +3720,7 @@
+     if (!(append && *p_pm == NUL) && !filtering && perm >= 0 && dobackup)
+     {
+ #if defined(UNIX) || defined(WIN32)
+-	struct stat st;
++	stat_T	    st;
+ #endif
+ 
+ 	if ((bkc_flags & BKC_YES) || append)	/* "yes" */
+@@ -3859,7 +3859,7 @@
+ 	    int		bfd;
+ 	    char_u	*copybuf, *wp;
+ 	    int		some_error = FALSE;
+-	    struct stat	st_new;
++	    stat_T	st_new;
+ 	    char_u	*dirp;
+ 	    char_u	*rootname;
+ #if defined(UNIX) && !defined(SHORT_FNAME)
+@@ -4401,7 +4401,7 @@
+ 	if (errmsg == NULL)
+ 	{
+ #ifdef UNIX
+-	    struct stat	st;
++	    stat_T	st;
+ 
+ 	    /* Don't delete the file when it's a hard or symbolic link. */
+ 	    if ((!newfile && st_old.st_nlink > 1)
+@@ -4434,7 +4434,7 @@
+ 
+ restore_backup:
+ 	{
+-	    struct stat st;
++	    stat_T	st;
+ 
+ 	    /*
+ 	     * If we failed to open the file, we don't need a backup. Throw it
+@@ -4731,7 +4731,7 @@
+     if (backup != NULL && !backup_copy)
+     {
+ # ifdef HAVE_FCHOWN
+-	struct stat	st;
++	stat_T	st;
+ 
+ 	/* don't change the owner when it's already OK, some systems remove
+ 	 * permission or ACL stuff */
+@@ -4987,7 +4987,7 @@
+ 
+ 	if (backup != NULL)
+ 	{
+-	    struct stat st;
++	    stat_T	st;
+ 
+ 	    /*
+ 	     * If the original file does not exist yet
+@@ -5339,7 +5339,7 @@
+     static int
+ check_mtime(buf, st)
+     buf_T		*buf;
+-    struct stat		*st;
++    stat_T		*st;
+ {
+     if (buf->b_mtime_read != 0
+ 	    && time_differs((long)st->st_mtime, buf->b_mtime_read))
+@@ -6523,7 +6523,7 @@
+ #ifdef AMIGA
+     BPTR	flock;
+ #endif
+-    struct stat	st;
++    stat_T	st;
+     long	perm;
+ #ifdef HAVE_ACL
+     vim_acl_T	acl;		/* ACL from original file */
+@@ -6551,7 +6551,7 @@
+ 
+ #ifdef UNIX
+     {
+-	struct stat	st_to;
++	stat_T	st_to;
+ 
+ 	/* It's possible for the source and destination to be the same file.
+ 	 * This happens when "from" and "to" differ in case and are on a FAT32
+@@ -6852,7 +6852,7 @@
+     buf_T	*buf;
+     int		focus UNUSED;	/* called for GUI focus event */
+ {
+-    struct stat	st;
++    stat_T	st;
+     int		stat_res;
+     int		retval = 0;
+     char_u	*path;
+@@ -7296,7 +7296,7 @@
+     void
+ buf_store_time(buf, st, fname)
+     buf_T	*buf;
+-    struct stat	*st;
++    stat_T	*st;
+     char_u	*fname UNUSED;
+ {
+     buf->b_mtime = (long)st->st_mtime;
+@@ -7403,7 +7403,7 @@
+     static char	*(tempdirs[]) = {TEMPDIRNAMES};
+     int		i;
+ # ifndef EEXIST
+-    struct stat	st;
++    stat_T	st;
+ # endif
+ 
+     /*
+diff --git a/src/gui.c b/src/gui.c
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -573,7 +573,7 @@
+ 	    {
+ #ifdef UNIX
+ 		{
+-		    struct stat s;
++		    stat_T s;
+ 
+ 		    /* if ".gvimrc" file is not owned by user, set 'secure'
+ 		     * mode */
+diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
+--- a/src/gui_at_fs.c
++++ b/src/gui_at_fs.c
+@@ -183,7 +183,7 @@
+ static void SFbuttonPressList __ARGS((Widget w, int n, XButtonPressedEvent *event));
+ static void SFbuttonReleaseList __ARGS((Widget w, int n, XButtonReleasedEvent *event));
+ static void SFdirModTimer __ARGS((XtPointer cl, XtIntervalId *id));
+-static char SFstatChar __ARGS((struct stat *statBuf));
++static char SFstatChar __ARGS((stat_T *statBuf));
+ static void SFdrawStrings __ARGS((Window w, SFDir *dir, int from, int to));
+ static int SFnewInvertEntry __ARGS((int n, XMotionEvent *event));
+ static void SFinvertEntry __ARGS((int n));
+@@ -889,7 +889,7 @@
+     int		n;
+     SFDir		*dir;
+ {
+-    struct stat	statBuf;
++    stat_T	statBuf;
+     int		i;
+ 
+     if ((!mch_stat(".", &statBuf)) && (statBuf.st_mtime != dir->mtime))
+@@ -960,7 +960,7 @@
+     int		i;
+     char	*str;
+     int		last;
+-    struct stat	statBuf;
++    stat_T	statBuf;
+ 
+     result = 0;
+ 
+@@ -1037,7 +1037,7 @@
+ 
+     static char
+ SFstatChar(statBuf)
+-    struct stat *statBuf;
++    stat_T *statBuf;
+ {
+     if (S_ISDIR (statBuf->st_mode))
+ 	return '/';
+@@ -1337,13 +1337,13 @@
+ #endif
+ }
+ 
+-static void SFwriteStatChar __ARGS((char *name, int last, struct stat *statBuf));
++static void SFwriteStatChar __ARGS((char *name, int last, stat_T *statBuf));
+ 
+     static void
+ SFwriteStatChar(name, last, statBuf)
+     char	*name;
+     int		last;
+-    struct stat	*statBuf;
++    stat_T	*statBuf;
+ {
+     name[last] = SFstatChar(statBuf);
+ }
+@@ -1355,7 +1355,7 @@
+     SFDir	*dir;
+     SFEntry	*entry;
+ {
+-    struct stat	statBuf;
++    stat_T	statBuf;
+     char	save;
+     int		last;
+ 
+@@ -2119,7 +2119,7 @@
+     char		*str;
+     int			len;
+     int			maxChars;
+-    struct stat		statBuf;
++    stat_T		statBuf;
+ 
+     maxChars = strlen(dir->dir) - 1;
+ 
+diff --git a/src/if_cscope.c b/src/if_cscope.c
+--- a/src/if_cscope.c
++++ b/src/if_cscope.c
+@@ -42,7 +42,7 @@
+ static int	    cs_help __ARGS((exarg_T *eap));
+ static void	    clear_csinfo __ARGS((int i));
+ static int	    cs_insert_filelist __ARGS((char *, char *, char *,
+-			struct stat *));
++			stat_T *));
+ static int	    cs_kill __ARGS((exarg_T *eap));
+ static void	    cs_kill_execute __ARGS((int, char *));
+ static cscmd_T *    cs_lookup_cmd __ARGS((exarg_T *eap));
+@@ -533,7 +533,7 @@
+     char *arg2;	    /* prepend path - may contain environment variables */
+     char *flags;
+ {
+-    struct stat statbuf;
++    stat_T	statbuf;
+     int		ret;
+     char	*fname = NULL;
+     char	*fname2 = NULL;
+@@ -560,7 +560,7 @@
+     fname = (char *)vim_strnsave((char_u *)fname, len);
+     vim_free(fbuf);
+ #endif
+-    ret = stat(fname, &statbuf);
++    ret = mch_stat(fname, &statbuf);
+     if (ret < 0)
+     {
+ staterr:
+@@ -572,13 +572,13 @@
+     /* get the prepend path (arg2), expand it, and try to stat it */
+     if (arg2 != NULL)
+     {
+-	struct stat statbuf2;
++	stat_T	    statbuf2;
+ 
+ 	if ((ppath = (char *)alloc(MAXPATHL + 1)) == NULL)
+ 	    goto add_err;
+ 
+ 	expand_env((char_u *)arg2, (char_u *)ppath, MAXPATHL);
+-	ret = stat(ppath, &statbuf2);
++	ret = mch_stat(ppath, &statbuf2);
+ 	if (ret < 0)
+ 	    goto staterr;
+     }
+@@ -605,7 +605,7 @@
+ 	else
+ 	    (void)sprintf(fname2, "%s/%s", fname, CSCOPE_DBFILE);
+ 
+-	ret = stat(fname2, &statbuf);
++	ret = mch_stat(fname2, &statbuf);
+ 	if (ret < 0)
+ 	{
+ 	    if (p_csverbose)
+@@ -1431,7 +1431,7 @@
+     char *fname;
+     char *ppath;
+     char *flags;
+-    struct stat *sb UNUSED;
++    stat_T *sb UNUSED;
+ {
+     short	i, j;
+ #ifndef UNIX
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -3141,7 +3141,7 @@
+ file_owned(fname)
+     char	*fname;
+ {
+-    struct stat s;
++    stat_T	s;
+ # ifdef UNIX
+     uid_t	uid = getuid();
+ # else	 /* VMS */
+diff --git a/src/memfile.c b/src/memfile.c
+--- a/src/memfile.c
++++ b/src/memfile.c
+@@ -1296,7 +1296,7 @@
+     int		flags;		/* flags for open() */
+ {
+ #ifdef HAVE_LSTAT
+-    struct stat sb;
++    stat_T	sb;
+ #endif
+ 
+     mfp->mf_fname = fname;
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -932,7 +932,7 @@
+     ZERO_BL	*b0p;
+     buf_T	*buf;
+ {
+-    struct stat	st;
++    stat_T	st;
+ 
+     if (buf->b_ffname == NULL)
+ 	b0p->b0_fname[0] = NUL;
+@@ -1075,7 +1075,7 @@
+     infoptr_T	*ip;
+     blocknr_T	bnum;
+     int		page_count;
+-    struct stat	org_stat, swp_stat;
++    stat_T	org_stat, swp_stat;
+     int		len;
+     int		directly;
+     linenr_T	lnum;
+@@ -1871,7 +1871,7 @@
+ 	 */
+ 	if (*dirp == NUL && file_count + num_files == 0 && fname != NULL)
+ 	{
+-	    struct stat	    st;
++	    stat_T	    st;
+ 	    char_u	    *swapname;
+ 
+ 	    swapname = modname(fname_res,
+@@ -2015,7 +2015,7 @@
+ swapfile_info(fname)
+     char_u	*fname;
+ {
+-    struct stat	    st;
++    stat_T	    st;
+     int		    fd;
+     struct block0   b0;
+     time_t	    x = (time_t)0;
+@@ -2242,7 +2242,7 @@
+     int	    check_char;
+ {
+     buf_T		*buf;
+-    struct stat		st;
++    stat_T		st;
+ 
+     for (buf = firstbuf; buf != NULL; buf = buf->b_next)
+     {
+@@ -4037,7 +4037,7 @@
+     buf_T   *buf;	/* buffer being edited */
+     char_u  *fname;	/* swap file name */
+ {
+-    struct stat st;
++    stat_T	st;
+     time_t	x, sx;
+     char	*p;
+ 
+@@ -4221,7 +4221,7 @@
+ 	{
+ 	    char_u	    *tail;
+ 	    char_u	    *fname2;
+-	    struct stat	    s1, s2;
++	    stat_T	    s1, s2;
+ 	    int		    f1, f2;
+ 	    int		    created1 = FALSE, created2 = FALSE;
+ 	    int		    same = FALSE;
+@@ -4314,7 +4314,7 @@
+ 	if (mch_getperm(fname) < 0)	/* it does not exist */
+ 	{
+ #ifdef HAVE_LSTAT
+-	    struct stat sb;
++	    stat_T	sb;
+ 
+ 	    /*
+ 	     * Extra security check: When a swap file is a symbolic link, this
+@@ -4684,7 +4684,7 @@
+     char_u	*fname_s;	    /* file name from swap file */
+     long	ino_block0;
+ {
+-    struct stat	st;
++    stat_T	st;
+     ino_t	ino_c = 0;	    /* ino of current file */
+     ino_t	ino_s;		    /* ino of file from swap file */
+     char_u	buf_c[MAXPATHL];    /* full path of fname_c */
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -4067,7 +4067,7 @@
+ 		{
+ 		    char_u	test[MAXPATHL], paths[MAXPATHL];
+ 		    char_u	*path, *next_path, *ptr;
+-		    struct stat	st;
++		    stat_T	st;
+ 
+ 		    STRCPY(paths, USER_HOME);
+ 		    next_path = paths;
+@@ -4773,7 +4773,7 @@
+     char_u	    exp1[MAXPATHL];
+     char_u	    full1[MAXPATHL];
+     char_u	    full2[MAXPATHL];
+-    struct stat	    st1, st2;
++    stat_T	    st1, st2;
+     int		    r1, r2;
+ 
+     expand_env(s1, exp1, MAXPATHL);
+@@ -9218,7 +9218,7 @@
+ vim_fexists(fname)
+     char_u  *fname;
+ {
+-    struct stat st;
++    stat_T st;
+ 
+     if (mch_stat((char *)fname, &st))
+ 	return FALSE;
+diff --git a/src/misc2.c b/src/misc2.c
+--- a/src/misc2.c
++++ b/src/misc2.c
+@@ -5454,7 +5454,7 @@
+ {
+     ff_visited_T	*vp;
+ #ifdef UNIX
+-    struct stat		st;
++    stat_T		st;
+     int			url = FALSE;
+ #endif
+ 
+diff --git a/src/netbeans.c b/src/netbeans.c
+--- a/src/netbeans.c
++++ b/src/netbeans.c
+@@ -445,7 +445,7 @@
+     char_u *lp;
+     char_u *nlp;
+ #ifdef UNIX
+-    struct stat	st;
++    stat_T	st;
+ 
+     /*
+      * For Unix only accept the file when it's not accessible by others.
+@@ -2150,7 +2150,7 @@
+ 		buf->bufp->b_changed = TRUE;
+ 	    else
+ 	    {
+-		struct stat	st;
++		stat_T	st;
+ 
+ 		/* Assume NetBeans stored the file.  Reset the timestamp to
+ 		 * avoid "file changed" warnings. */
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -498,14 +498,23 @@
+     }
+ }
+ 
+-#if (_MSC_VER >= 1300)
++/* Use 64-bit stat functions if available. */
++#if ((defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__))
++# undef stat
++# undef _stat
++# undef _wstat
++# undef _fstat
++# define stat _stat64
++# define _stat _stat64
++# define _wstat _wstat64
++# define _fstat _fstat64
+ # define OPEN_OH_ARGTYPE intptr_t
+ #else
+ # define OPEN_OH_ARGTYPE long
+ #endif
+ 
+     static int
+-stat_symlink_aware(const char *name, struct stat *stp)
++stat_symlink_aware(const char *name, stat_T *stp)
+ {
+ #if defined(_MSC_VER) && _MSC_VER < 1700
+     /* Work around for VC10 or earlier. stat() can't handle symlinks properly.
+@@ -551,7 +560,7 @@
+ 
+ #ifdef FEAT_MBYTE
+     static int
+-wstat_symlink_aware(const WCHAR *name, struct _stat *stp)
++wstat_symlink_aware(const WCHAR *name, stat_T *stp)
+ {
+ # if defined(_MSC_VER) && _MSC_VER < 1700
+     /* Work around for VC10 or earlier. _wstat() can't handle symlinks properly.
+@@ -587,13 +596,13 @@
+ 	    int	    fd;
+ 
+ 	    fd = _open_osfhandle((OPEN_OH_ARGTYPE)h, _O_RDONLY);
+-	    n = _fstat(fd, stp);
++	    n = _fstat(fd, (struct _stat*)stp);
+ 	    _close(fd);
+ 	    return n;
+ 	}
+     }
+ # endif
+-    return _wstat(name, stp);
++    return _wstat(name, (struct _stat*)stp);
+ }
+ #endif
+ 
+@@ -601,7 +610,7 @@
+  * stat() can't handle a trailing '/' or '\', remove it first.
+  */
+     int
+-vim_stat(const char *name, struct stat *stp)
++vim_stat(const char *name, stat_T *stp)
+ {
+ #ifdef FEAT_MBYTE
+     /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
+@@ -632,7 +641,7 @@
+ 
+ 	if (wp != NULL)
+ 	{
+-	    n = wstat_symlink_aware(wp, (struct _stat *)stp);
++	    n = wstat_symlink_aware(wp, stp);
+ 	    vim_free(wp);
+ 	    if (n >= 0)
+ 		return n;
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -2628,7 +2628,7 @@
+     char_u	*name;
+     int		len UNUSED;  /* buffer size, only used when name gets longer */
+ {
+-    struct stat st;
++    stat_T	st;
+     char_u	*slash, *tail;
+     DIR		*dirp;
+     struct dirent *dp;
+@@ -2660,7 +2660,7 @@
+ 			&& STRLEN(tail) == STRLEN(dp->d_name))
+ 		{
+ 		    char_u	newname[MAXPATHL + 1];
+-		    struct stat st2;
++		    stat_T	st2;
+ 
+ 		    /* Verify the inode is equal. */
+ 		    vim_strncpy(newname, name, MAXPATHL);
+@@ -2690,7 +2690,7 @@
+ mch_getperm(name)
+     char_u *name;
+ {
+-    struct stat statb;
++    stat_T	statb;
+ 
+     /* Keep the #ifdef outside of stat(), it may be a macro. */
+ #ifdef VMS
+@@ -2939,7 +2939,7 @@
+ mch_isdir(name)
+     char_u *name;
+ {
+-    struct stat statb;
++    stat_T	statb;
+ 
+     if (*name == NUL)	    /* Some stat()s don't flag "" as an error. */
+ 	return FALSE;
+@@ -2961,7 +2961,7 @@
+ mch_is_symbolic_link(name)
+     char_u *name;
+ {
+-    struct stat statb;
++    stat_T	statb;
+ 
+     if (*name == NUL)	    /* Some lstat()s don't flag "" as an error. */
+ 	return FALSE;
+@@ -2983,7 +2983,7 @@
+ executable_file(name)
+     char_u	*name;
+ {
+-    struct stat	st;
++    stat_T	st;
+ 
+     if (stat((char *)name, &st))
+ 	return 0;
+@@ -3054,7 +3054,7 @@
+ mch_nodetype(name)
+     char_u	*name;
+ {
+-    struct stat	st;
++    stat_T	st;
+ 
+     if (stat((char *)name, &st))
+ 	return NODE_NORMAL;
+@@ -6258,7 +6258,7 @@
+ mch_rename(src, dest)
+     const char *src, *dest;
+ {
+-    struct stat	    st;
++    stat_T	    st;
+ 
+     if (stat(dest, &st) >= 0)	    /* fail if destination exists */
+ 	return -1;
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -2890,7 +2890,7 @@
+     long
+ mch_getperm(char_u *name)
+ {
+-    struct stat st;
++    stat_T	st;
+     int		n;
+ 
+     if (name[0] == '\\' && name[1] == '\\')
+diff --git a/src/proto/fileio.pro b/src/proto/fileio.pro
+--- a/src/proto/fileio.pro
++++ b/src/proto/fileio.pro
+@@ -22,7 +22,7 @@
+ int check_timestamps __ARGS((int focus));
+ int buf_check_timestamp __ARGS((buf_T *buf, int focus));
+ void buf_reload __ARGS((buf_T *buf, int orig_mode));
+-void buf_store_time __ARGS((buf_T *buf, struct stat *st, char_u *fname));
++void buf_store_time __ARGS((buf_T *buf, stat_T *st, char_u *fname));
+ void write_lnum_adjust __ARGS((linenr_T offset));
+ void vim_deltempdir __ARGS((void));
+ char_u *vim_tempname __ARGS((int extra_char));
+diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
+--- a/src/proto/os_mswin.pro
++++ b/src/proto/os_mswin.pro
+@@ -9,7 +9,7 @@
+ int mch_FullName __ARGS((char_u *fname, char_u *buf, int len, int force));
+ int mch_isFullName __ARGS((char_u *fname));
+ void slash_adjust __ARGS((char_u *p));
+-int vim_stat __ARGS((const char *name, struct stat *stp));
++int vim_stat __ARGS((const char *name, stat_T *stp));
+ void mch_settmode __ARGS((int tmode));
+ int mch_get_shellsize __ARGS((void));
+ void mch_set_shellsize __ARGS((void));
+diff --git a/src/pty.c b/src/pty.c
+--- a/src/pty.c
++++ b/src/pty.c
+@@ -253,7 +253,7 @@
+     char **ttyn;
+ {
+     int		f;
+-    struct stat buf;
++    stat_T	buf;
+     /* used for opening a new pty-pair: */
+     static char TtyName[32];
+ 
+diff --git a/src/quickfix.c b/src/quickfix.c
+--- a/src/quickfix.c
++++ b/src/quickfix.c
+@@ -2910,7 +2910,7 @@
+     static int	start = -1;
+     static int	off = 0;
+ #ifdef HAVE_LSTAT
+-    struct stat	sb;
++    stat_T	sb;
+ #endif
+ 
+     if (*p_mef == NUL)
+diff --git a/src/spell.c b/src/spell.c
+--- a/src/spell.c
++++ b/src/spell.c
+@@ -9121,7 +9121,7 @@
+     afffile_T	*(afile[8]);
+     int		i;
+     int		len;
+-    struct stat	st;
++    stat_T	st;
+     int		error = FALSE;
+     spellinfo_T spin;
+ 
+diff --git a/src/tag.c b/src/tag.c
+--- a/src/tag.c
++++ b/src/tag.c
+@@ -3513,7 +3513,7 @@
+ 	    {
+ 		int		do_strip = FALSE;
+ 		char_u		saved_char;
+-		struct stat	st;
++		stat_T		st;
+ 
+ 		/* Don't strip for an erroneous file name. */
+ 		if (!stripping_disabled)
+@@ -3558,7 +3558,7 @@
+ #ifdef UNIX
+ 			if (do_strip)
+ 			{
+-			    struct stat	new_st;
++			    stat_T	new_st;
+ 
+ 			    /* On Unix, the check for the unstripped file name
+ 			     * above works also for a symbolic link pointing to
+diff --git a/src/undo.c b/src/undo.c
+--- a/src/undo.c
++++ b/src/undo.c
+@@ -760,7 +760,7 @@
+     char_u	*undo_file_name = NULL;
+     int		dir_len;
+     char_u	*p;
+-    struct stat st;
++    stat_T	st;
+     char_u	*ffname = buf_ffname;
+ #ifdef HAVE_READLINK
+     char_u	fname_buf[MAXPATHL];
+@@ -1321,8 +1321,8 @@
+     int		write_ok = FALSE;
+ #ifdef UNIX
+     int		st_old_valid = FALSE;
+-    struct stat	st_old;
+-    struct stat	st_new;
++    stat_T	st_old;
++    stat_T	st_new;
+ #endif
+ #ifdef FEAT_CRYPT
+     int		do_crypt = FALSE;
+@@ -1602,8 +1602,8 @@
+     int		*uhp_table_used;
+ #endif
+ #ifdef UNIX
+-    struct stat	st_orig;
+-    struct stat	st_undo;
++    stat_T	st_orig;
++    stat_T	st_undo;
+ #endif
+ #ifdef FEAT_CRYPT
+     int		do_decrypt = FALSE;
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -1995,17 +1995,11 @@
+ # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
+ #endif
+ 
+-/* Use 64-bit stat functions if available. */
+-#if ((defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)) \
+-					&& !defined(IN_PERL_FILE)
+-# undef stat
+-# undef _stat
+-# undef _wstat
+-# undef _fstat
+-# define stat _stat64
+-# define _stat _stat64
+-# define _wstat _wstat64
+-# define _fstat _fstat64
++/* Use 64-bit stat structure if available. */
++#if ((defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__))
++typedef struct _stat64 stat_T;
++#else
++typedef struct stat stat_T;
+ #endif
+ 
+ #include "ex_cmds.h"	    /* Ex command defines */

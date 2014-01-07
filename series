@@ -40,3 +40,4 @@ fix-indent-in-if_perl.patch
 fix-utf8-fontname.patch
 fix-italic-overhang-before-space.patch
 support-largefiles-on-windows.patch
+use-stat_T.patch
