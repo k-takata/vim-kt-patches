@@ -1,0 +1,35 @@
+# HG changeset patch
+# Parent 469cbc5adff9dad48757d6932f11adcedb6f7875
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -643,7 +643,7 @@
+ 	{
+ 	    n = wstat_symlink_aware(wp, stp);
+ 	    vim_free(wp);
+-	    if (n >= 0)
++	    if ((g_PlatformId == VER_PLATFORM_WIN32_NT) || (n >= 0))
+ 		return n;
+ 	    /* Retry with non-wide function (for Windows 98). Can't use
+ 	     * GetLastError() here and it's unclear what errno gets set to if
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -5999,7 +5999,7 @@
+ 	{
+ 	    f = _wopen(wn, flags, mode);
+ 	    vim_free(wn);
+-	    if (f >= 0)
++	    if ((g_PlatformId == VER_PLATFORM_WIN32_NT) || (f >= 0))
+ 		return f;
+ 	    /* Retry with non-wide function (for Windows 98). Can't use
+ 	     * GetLastError() here and it's unclear what errno gets set to if
+@@ -6050,7 +6050,7 @@
+ 	_set_fmode(oldMode);
+ # endif
+ 
+-	if (f != NULL)
++	if ((g_PlatformId == VER_PLATFORM_WIN32_NT) || (f != NULL))
+ 	    return f;
+ 	/* Retry with non-wide function (for Windows 98). Can't use
+ 	 * GetLastError() here and it's unclear what errno gets set to if
