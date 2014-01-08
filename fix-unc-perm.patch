@@ -35,5 +35,5 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -	/* UNC path */
 -	return (long)win32_getattrs(name);
      n = mch_stat(name, &st);
-     return n == 0 ? (long)(unsigned short)st.st_mode : -1L;
+     return n == 0 ? (long)st.st_mode : -1L;
  }
