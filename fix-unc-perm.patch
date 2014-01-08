@@ -1,9 +1,10 @@
 # HG changeset patch
-# Parent daa86753e97651add1f220d0edbc5ccadd1afab1
+# Parent 55cd783bbc2d69a4baea9125ba53fa787aed3780
+
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -626,8 +626,20 @@
+@@ -617,8 +617,20 @@
      p = buf + strlen(buf);
      if (p > buf)
  	mb_ptr_back(buf, p);
@@ -27,8 +28,8 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -2899,9 +2899,6 @@
-     stat_T	st;
+@@ -2890,9 +2890,6 @@
+     struct stat st;
      int		n;
  
 -    if (name[0] == '\\' && name[1] == '\\')
