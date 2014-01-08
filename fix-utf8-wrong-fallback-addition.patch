@@ -1,0 +1,55 @@
+# HG changeset patch
+# Parent 4f6394f9135cb7eb79770d7fcd64620ad850cc14
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -810,8 +810,8 @@
+ 	{
+ 	    n = _wchdir(p);
+ 	    vim_free(p);
+-	    if (n == 0)
+-		return 0;
++	    if ((g_PlatformId == VER_PLATFORM_WIN32_NT) || (n == 0))
++		return n;
+ 	    /* Retry with non-wide function (for Windows 98). */
+ 	}
+     }
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -2788,6 +2788,8 @@
+ 		return OK;
+ 	    }
+ 	}
++	else if (GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
++	    return FAIL;
+ 	/* Retry with non-wide function (for Windows 98). */
+     }
+ #endif
+@@ -2828,6 +2830,8 @@
+ 		return;
+ 	    }
+ 	}
++	else if (GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
++	    return;
+ 	/* Retry with non-wide function (for Windows 98). */
+     }
+ #endif
+@@ -2877,6 +2881,8 @@
+ 		return OK;
+ 	    }
+ 	}
++	else if (GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
++	    return FAIL;
+ 	/* Retry with non-wide function (for Windows 98). */
+     }
+ #endif
+@@ -2920,7 +2926,7 @@
+ 	{
+ 	    n = _wchmod(p, perm);
+ 	    vim_free(p);
+-	    if (n == -1 && GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
++	    if (n == -1 && g_PlatformId == VER_PLATFORM_WIN32_NT)
+ 		return FAIL;
+ 	    /* Retry with non-wide function (for Windows 98). */
+ 	}

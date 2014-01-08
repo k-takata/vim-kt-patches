@@ -42,3 +42,4 @@ fix-italic-overhang-before-space.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
 fix-utf8-wrong-fallback.patch
+fix-utf8-wrong-fallback-addition.patch
