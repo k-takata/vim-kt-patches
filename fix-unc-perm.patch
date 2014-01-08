@@ -1,0 +1,39 @@
+# HG changeset patch
+# Parent daa86753e97651add1f220d0edbc5ccadd1afab1
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -626,8 +626,20 @@
+     p = buf + strlen(buf);
+     if (p > buf)
+ 	mb_ptr_back(buf, p);
++    /* Remove trailing '\\' except root path. */
+     if (p > buf && (*p == '\\' || *p == '/') && p[-1] != ':')
+ 	*p = NUL;
++    if ((buf[0] == '\\' && buf[1] == '\\') || (buf[0] == '/' && buf[1] == '/'))
++    {
++	/* UNC root path must be followed by '\\'. */
++	p = vim_strpbrk(buf + 2, "\\/");
++	if (p)
++	{
++	    p = vim_strpbrk(p + 1, "\\/");
++	    if (p == NULL)
++		STRCAT(buf, "\\");
++	}
++    }
+ #ifdef FEAT_MBYTE
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage
+ # ifdef __BORLANDC__
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -2899,9 +2899,6 @@
+     stat_T	st;
+     int		n;
+ 
+-    if (name[0] == '\\' && name[1] == '\\')
+-	/* UNC path */
+-	return (long)win32_getattrs(name);
+     n = mch_stat(name, &st);
+     return n == 0 ? (long)(unsigned short)st.st_mode : -1L;
+ }
