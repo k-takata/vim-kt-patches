@@ -1,0 +1,37 @@
+# HG changeset patch
+# Parent 138d6d9cbd2b879ea4e330724af7c6ccea357319
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -6415,7 +6415,7 @@
+ dialog_gui		Compiled with GUI dialog support.
+ diff			Compiled with |vimdiff| and 'diff' support.
+ digraphs		Compiled with support for digraphs.
+-directx			Compiled with support for 'directx'.
++directx			Compiled with support for |directx|.
+ dnd			Compiled with support for the "~ register |quote_~|.
+ dos16			16 bits DOS version of Vim.
+ dos32			32 bits DOS (DJGPP) version of Vim.
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -5678,6 +5678,7 @@
+ 	Currently, only one renderer is available.
+ 
+ 	render	behavior    ~
++						*directx* *directwrite*
+ 	directx	Vim will draw text using DirectX (DirectWrite).  It makes
+ 		drawn glyphs more beautiful than default GDI.
+ 		It requires 'encoding' is "utf-8", and only works on
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -321,7 +321,7 @@
+ N  *+dialog_con_gui*	Support for |:confirm| with GUI and console dialog.
+ N  *+diff*		|vimdiff| and 'diff'
+ N  *+digraphs*		|digraphs| *E196*
+-m  *+directx*		Win32 GUI only: |'directx'|
++m  *+directx*		Win32 GUI only: |directx|
+    *+dnd*		Support for DnD into the "~ register |quote_~|.
+ B  *+emacs_tags*	|emacs-tags| files
+ N  *+eval*		expression evaluation |eval.txt|
