@@ -1,0 +1,54 @@
+Index: src/os_win32.c
+===================================================================
+--- a/src/os_win32.c        (revision 1341)
++++ b/src/os_win32.c        (working copy)
+@@ -1583,6 +1583,8 @@
+ {
+     char	*dum;
+     char	fname[_MAX_PATH];
++    char	*path, *newpath;
++    long	n;
+
+ #ifdef FEAT_MBYTE
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+@@ -1590,11 +1592,18 @@
+ 	WCHAR	*p = enc_to_utf16(name, NULL);
+ 	WCHAR	fnamew[_MAX_PATH];
+ 	WCHAR	*dumw;
+-	long	n;
++	WCHAR	*wpath, *wnewpath;
+
+ 	if (p != NULL)
+ 	{
+-	    n = (long)SearchPathW(NULL, p, NULL, _MAX_PATH, fnamew, &dumw);
++	    wpath = _wgetenv(L"PATH");
++	    wnewpath = (WCHAR*)alloc((unsigned)(wcslen(wpath) + 4) * sizeof(WCHAR));
++	    if (wnewpath == NULL)
++		return FALSE;
++	    wcscpy(wnewpath, L";.;");
++	    wcscat(wnewpath, wpath);
++	    n = (long)SearchPathW(wnewpath, p, NULL, _MAX_PATH, fnamew, &dumw);
++	    vim_free(wnewpath);
+ 	    vim_free(p);
+ 	    if (n > 0 || GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
+ 	    {
+@@ -1608,8 +1617,17 @@
+
+ 	}
+     }
+ #endif
+-    if (SearchPath(NULL, name, NULL, _MAX_PATH, fname, &dum) == 0)
++
++    path = getenv("PATH");
++    newpath = (char*)alloc((unsigned)(STRLEN(path) + 4));
++    if (newpath == NULL)
+ 	return FALSE;
++    STRCPY(newpath, ";.;");
++    STRCAT(newpath, path);
++    n = (long)SearchPath(newpath, name, NULL, _MAX_PATH, fname, &dum);
++    vim_free(newpath);
++    if (n == 0)
++	return FALSE;
+     if (mch_isdir(fname))
+ 	return FALSE;
+     return TRUE;
