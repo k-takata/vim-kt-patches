@@ -39,6 +39,7 @@ subpixel-artifacts.patch
 fix-indent-in-if_perl.patch
 fix-utf8-fontname.patch
 fix-italic-overhang-before-space.patch
+mingw-7.4.044.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
 fix-utf8-wrong-fallback.patch

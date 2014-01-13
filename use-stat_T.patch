@@ -1,5 +1,6 @@
 # HG changeset patch
-# Parent 6a3c080dc19d67cee35c1fe5ea12e601731a2903
+# Parent 4375f547ff56df21bf760f3b64a4112fd93ef895
+
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
@@ -16,7 +17,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #else
  static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname));
  #endif
-@@ -1622,7 +1622,7 @@
+@@ -1650,7 +1650,7 @@
  {
      buf_T	*buf;
  #ifdef UNIX
@@ -25,7 +26,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      fname_expand(curbuf, &ffname, &sfname);	/* will allocate ffname */
-@@ -2122,7 +2122,7 @@
+@@ -2150,7 +2150,7 @@
      char_u	*ffname;
  {
  #ifdef UNIX
@@ -34,7 +35,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  
      if (mch_stat((char *)ffname, &st) < 0)
  	st.st_dev = (dev_T)-1;
-@@ -2137,7 +2137,7 @@
+@@ -2165,7 +2165,7 @@
      static buf_T *
  buflist_findname_stat(ffname, stp)
      char_u	*ffname;
@@ -43,7 +44,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  {
  #endif
      buf_T	*buf;
-@@ -2773,7 +2773,7 @@
+@@ -2801,7 +2801,7 @@
  {
      buf_T	*obuf = NULL;
  #ifdef UNIX
@@ -52,7 +53,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      if (ffname == NULL || *ffname == NUL)
-@@ -3023,7 +3023,7 @@
+@@ -3051,7 +3051,7 @@
      buf_T	*buf;
      char_u	*ffname;
  #ifdef UNIX
@@ -61,7 +62,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  {
      /* no name is different */
-@@ -3033,9 +3033,9 @@
+@@ -3061,9 +3061,9 @@
  	return FALSE;
  #ifdef UNIX
      {
@@ -74,7 +75,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  	if (stp == NULL)
  	{
  	    if (!buf->b_dev_valid || mch_stat((char *)ffname, &st) < 0)
-@@ -3071,7 +3071,7 @@
+@@ -3099,7 +3099,7 @@
  buf_setino(buf)
      buf_T	*buf;
  {
@@ -83,7 +84,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  
      if (buf->b_fname != NULL && mch_stat((char *)buf->b_fname, &st) >= 0)
      {
-@@ -3089,7 +3089,7 @@
+@@ -3117,7 +3117,7 @@
      static int
  buf_same_ino(buf, stp)
      buf_T	*buf;
@@ -649,9 +650,8 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      }
  }
  
--#if (_MSC_VER >= 1300)
 +/* Use 64-bit stat functions if available. */
-+#if ((defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__))
+ #if ((defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__))
 +# undef stat
 +# undef _stat
 +# undef _wstat
@@ -705,7 +705,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  #ifdef FEAT_MBYTE
      /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
-@@ -632,7 +641,7 @@
+@@ -646,7 +655,7 @@
  
  	if (wp != NULL)
  	{
@@ -792,7 +792,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -2890,7 +2890,7 @@
+@@ -2944,7 +2944,7 @@
      long
  mch_getperm(char_u *name)
  {
@@ -800,7 +800,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +    stat_T	st;
      int		n;
  
-     if (name[0] == '\\' && name[1] == '\\')
+     n = mch_stat(name, &st);
 diff --git a/src/proto/fileio.pro b/src/proto/fileio.pro
 --- a/src/proto/fileio.pro
 +++ b/src/proto/fileio.pro
