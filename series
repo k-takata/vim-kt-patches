@@ -16,6 +16,7 @@ fix-dwrite-italic-overhang.patch
 directwrite-update-docs.patch
 directwrite-mark.diff
 directwrite-update-tags.patch
+directwrite-update-tags2.patch
 cpo-N.diff
 cpo-N-mark.diff
 cpo-N-update-tags.patch
