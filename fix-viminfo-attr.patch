@@ -1,0 +1,69 @@
+# HG changeset patch
+# Parent 95c6a81b37ae38d6c4d3213610a28193f6b0274a
+
+diff --git a/src/ex_cmds.c b/src/ex_cmds.c
+--- a/src/ex_cmds.c
++++ b/src/ex_cmds.c
+@@ -1751,7 +1751,7 @@
+     struct stat	st_old;		/* mch_stat() of existing viminfo file */
+ #endif
+ #ifdef WIN3264
+-    long	perm = -1;
++    int		hidden = FALSE;
+ #endif
+ 
+     if (no_viminfo())
+@@ -1814,7 +1814,7 @@
+ #endif
+ #ifdef WIN3264
+ 	/* Get the file attributes of the existing viminfo file. */
+-	perm = mch_getperm(fname);
++	hidden = mch_ishidden(fname);
+ #endif
+ 
+ 	/*
+@@ -1986,7 +1986,7 @@
+ 
+ #ifdef WIN3264
+ 	/* If the viminfo file was hidden then also hide the new file. */
+-	if (perm > 0 && (perm & FILE_ATTRIBUTE_HIDDEN))
++	if (hidden)
+ 	    mch_hide(fname);
+ #endif
+     }
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -3002,6 +3002,21 @@
+ }
+ 
+ /*
++ * return TRUE if "name" is hidden
++ * return FALSE if "name" is not hidden upon error
++ */
++    int
++mch_ishidden(char_u *name)
++{
++    int f = win32_getattrs(name);
++
++    if (f == -1)
++	return FALSE;		    /* file does not exist at all */
++
++    return (f & FILE_ATTRIBUTE_HIDDEN) != 0;
++}
++
++/*
+  * return TRUE if "name" is a directory
+  * return FALSE if "name" is not a directory or upon error
+  */
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -19,6 +19,7 @@
+ long mch_getperm __ARGS((char_u *name));
+ int mch_setperm __ARGS((char_u *name, long perm));
+ void mch_hide __ARGS((char_u *name));
++int mch_ishidden __ARGS((char_u *name));
+ int mch_isdir __ARGS((char_u *name));
+ int mch_mkdir __ARGS((char_u *name));
+ int mch_is_hard_link __ARGS((char_u *fname));
