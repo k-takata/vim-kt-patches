@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent 6fa3e2b7d29ca07d221825d6f721d5cf08f6429c
+diff --git a/runtime/doc/motion.txt b/runtime/doc/motion.txt
+--- a/runtime/doc/motion.txt
++++ b/runtime/doc/motion.txt
+@@ -343,7 +343,7 @@
+ 			See also 'startofline' option.  {not in Vi}
+ 
+ :[range]go[to] [count]					*:go* *:goto* *go*
+-[count]go		Go to {count} byte in the buffer.  Default [count] is
++[count]go		Go to [count] byte in the buffer.  Default [count] is
+ 			one, start of the file.  When giving [range], the
+ 			last number in it used as the byte count.  End-of-line
+ 			characters are counted depending on the current
