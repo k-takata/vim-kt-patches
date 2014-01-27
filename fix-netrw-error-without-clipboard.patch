@@ -1,0 +1,16 @@
+# HG changeset patch
+# Parent 0b3c53eac2492f5bfae74914edf8f9a500061fc8
+diff --git a/runtime/autoload/netrw.vim b/runtime/autoload/netrw.vim
+--- a/runtime/autoload/netrw.vim
++++ b/runtime/autoload/netrw.vim
+@@ -647,7 +647,9 @@
+   if exists("{a:vt}netrw_rokeep")   |let &l:ro     = {a:vt}netrw_rokeep      |unlet {a:vt}netrw_rokeep   |endif
+   if exists("{a:vt}netrw_selkeep")  |let &l:sel    = {a:vt}netrw_selkeep     |unlet {a:vt}netrw_selkeep  |endif
+   if exists("{a:vt}netrw_spellkeep")|let &l:spell  = {a:vt}netrw_spellkeep   |unlet {a:vt}netrw_spellkeep|endif
+-  if exists("{a:vt}netrw_starkeep") |let @*        = {a:vt}netrw_starkeep    |unlet {a:vt}netrw_starkeep |endif
++  if has('clipboard')
++    if exists("{a:vt}netrw_starkeep") |let @*        = {a:vt}netrw_starkeep    |unlet {a:vt}netrw_starkeep |endif
++  endif
+   " Problem: start with liststyle=0; press <i> : result, following line resets l:ts.
+ "  if exists("{a:vt}netrw_tskeep")   |let &l:ts     = {a:vt}netrw_tskeep      |unlet {a:vt}netrw_tskeep   |endif
+   if exists("{a:vt}netrw_twkeep")   |let &l:tw     = {a:vt}netrw_twkeep      |unlet {a:vt}netrw_twkeep   |endif

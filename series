@@ -47,3 +47,4 @@ fix-utf8-wrong-fallback.patch
 fix-utf8-wrong-fallback-addition.patch
 searchpath.patch
 fix-doc-goto.patch
+fix-netrw-error-without-clipboard.patch
