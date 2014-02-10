@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 461d5074c6a71848757c499fb1facb5d0acb1117
+# Parent 15d21ff11851ad1625e9931760510cb06e91d57e
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -579,6 +579,47 @@
+@@ -579,6 +579,27 @@
      return (os_version.dwPlatformId == VER_PLATFORM_WIN32s);
  }
  
@@ -14,25 +14,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    static int
 +is_visual_style_enabled(void)
 +{
-+#if 0
-+    HKEY    hkey;
-+    DWORD   regtype;
-+    DWORD   size;
-+    BYTE    val[10] = "0";
-+
-+    if (RegOpenKey(HKEY_CURRENT_USER,
-+		"Software\\Microsoft\\Windows\\CurrentVersion\\ThemeManager",
-+		&hkey) == 0) {
-+	size = sizeof(val);
-+	if (RegQueryValueEx(hkey, "ThemeActive", 0, &regtype, val, &size)
-+		== 0) {
-+	}
-+	RegCloseKey(hkey);
-+    }
-+    if (STRCMP(val, "0") != 0)
-+	return TRUE;
-+    return FALSE;
-+#else
 +    HANDLE hUxtheme;
 +    static BOOL (WINAPI *pIsThemeActive)(void) = NULL;
 +    static BOOL loaded = FALSE;
@@ -46,13 +27,12 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    if (pIsThemeActive)
 +	return pIsThemeActive();
 +    return FALSE;
-+#endif
 +}
 +
  #ifdef FEAT_MENU
  /*
   * Figure out how high the menu bar is at the moment.
-@@ -1655,7 +1696,7 @@
+@@ -1655,7 +1676,7 @@
  	    return FAIL;
      }
      s_textArea = CreateWindowEx(
@@ -61,7 +41,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	szTextAreaClass, "Vim text area",
  	WS_CHILD | WS_VISIBLE, 0, 0,
  	100,				/* Any value will do for now */
-@@ -1704,7 +1745,9 @@
+@@ -1704,7 +1725,9 @@
      /*
       * Start out by adding the configured border width into the border offset
       */
