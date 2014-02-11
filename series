@@ -43,8 +43,6 @@ fix-italic-overhang-before-space.patch
 fix-viminfo-attr.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
-fix-utf8-wrong-fallback.patch
-fix-utf8-wrong-fallback-addition.patch
 searchpath.patch
 fix-doc-goto.patch
 fix-netrw-error-without-clipboard.patch
