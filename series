@@ -46,3 +46,4 @@ use-stat_T.patch
 searchpath.patch
 fix-netrw-error-without-clipboard.patch
 remove-client-edge.patch
+update-help-vim.patch

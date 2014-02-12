@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent 6713cfbead7442a6bf737498a9ba788998c70209
+diff --git a/runtime/syntax/help.vim b/runtime/syntax/help.vim
+--- a/runtime/syntax/help.vim
++++ b/runtime/syntax/help.vim
+@@ -40,7 +40,7 @@
+ syn match helpNormal		"|.*====*|"
+ syn match helpNormal		"|||"
+ syn match helpNormal		":|vim:|"	" for :help modeline
+-syn match helpVim		"Vim version [0-9.a-z]\+"
++syn match helpVim		"\<Vim version [0-9][0-9.a-z]*"
+ syn match helpVim		"VIM REFERENCE.*"
+ syn match helpOption		"'[a-z]\{2,\}'"
+ syn match helpOption		"'t_..'"
