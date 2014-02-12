@@ -712,7 +712,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 -	    n = wstat_symlink_aware(wp, (struct _stat *)stp);
 +	    n = wstat_symlink_aware(wp, stp);
  	    vim_free(wp);
- 	    if (n >= 0)
+ 	    if (n >= 0 || g_PlatformId == VER_PLATFORM_WIN32_NT)
  		return n;
 diff --git a/src/os_unix.c b/src/os_unix.c
 --- a/src/os_unix.c
