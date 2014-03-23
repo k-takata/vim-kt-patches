@@ -43,5 +43,4 @@ fix-viminfo-attr.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
 searchpath.patch
-fix-netrw-error-without-clipboard.patch
 remove-client-edge.patch
