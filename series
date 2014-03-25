@@ -44,3 +44,4 @@ support-largefiles-on-windows.patch
 use-stat_T.patch
 searchpath.patch
 remove-client-edge.patch
+fix-make-clean.patch
