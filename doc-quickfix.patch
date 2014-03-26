@@ -1,0 +1,23 @@
+# HG changeset patch
+# Parent 14951fef9fb10625d4b7cb07ec2e035bcc8e00d3
+diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
+--- a/runtime/doc/quickfix.txt
++++ b/runtime/doc/quickfix.txt
+@@ -203,7 +203,7 @@
+ 			list.
+ 
+ 							*:cad* *:caddbuffer*
+-:caddb[uffer] [bufnr]	Read the error list from the current buffer and add
++:cad[dbuffer] [bufnr]	Read the error list from the current buffer and add
+ 			the errors to the current quickfix list.  If a
+ 			quickfix list is not present, then a new list is
+ 			created. Otherwise, same as ":cbuffer".
+@@ -241,7 +241,7 @@
+ 			current window is used instead of the quickfix list.
+ 
+ 							*:cadde* *:caddexpr*
+-:cad[dexpr] {expr}	Evaluate {expr} and add the resulting lines to the
++:cadde[xpr] {expr}	Evaluate {expr} and add the resulting lines to the
+ 			current quickfix list. If a quickfix list is not
+ 			present, then a new list is created. The current
+ 			cursor position will not be changed. See |:cexpr| for
