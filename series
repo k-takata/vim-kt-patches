@@ -44,3 +44,4 @@ support-largefiles-on-windows.patch
 use-stat_T.patch
 searchpath.patch
 remove-client-edge.patch
+fix-7.4.225-with-ruby18.patch
