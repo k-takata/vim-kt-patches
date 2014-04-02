@@ -139,6 +139,6 @@ diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
  void mch_hide __ARGS((char_u *name));
  int mch_isdir __ARGS((char_u *name));
 +int mch_is_symbolic_link __ARGS((char_u *name));
- int mch_can_exe __ARGS((char_u *name));
+ int mch_can_exe __ARGS((char_u *name, char_u **path));
  int mch_nodetype __ARGS((char_u *name));
  void mch_early_init __ARGS((void));
