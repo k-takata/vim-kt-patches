@@ -1,0 +1,74 @@
+# HG changeset patch
+# Parent a2ef855a9411ae0f452bb7d8c2ce136cb0b1a39c
+diff --git a/src/if_tcl.c b/src/if_tcl.c
+--- a/src/if_tcl.c
++++ b/src/if_tcl.c
+@@ -160,6 +160,20 @@
+ typedef int HANDLE;
+ # endif
+ 
++# ifndef WIN3264
++#  include <dlfcn.h>
++#  define HANDLE void*
++#  define TCL_PROC void*
++#  define load_dll(n) dlopen((n), RTLD_LAZY|RTLD_GLOBAL)
++#  define symbol_from_dll dlsym
++#  define close_dll dlclose
++# else
++#  define TCL_PROC FARPROC
++#  define load_dll vimLoadLib
++#  define symbol_from_dll GetProcAddress
++#  define close_dll FreeLibrary
++# endif
++
+ /*
+  * Declare HANDLE for tcl.dll and function pointers.
+  */
+@@ -170,7 +184,6 @@
+ /*
+  * Table of name to function pointer of tcl.
+  */
+-#define TCL_PROC FARPROC
+ static struct {
+     char* name;
+     TCL_PROC* ptr;
+@@ -197,7 +210,7 @@
+ 
+     if (hTclLib)
+ 	return OK;
+-    if (!(hTclLib = vimLoadLib(libname)))
++    if (!(hTclLib = load_dll(libname)))
+     {
+ 	if (verbose)
+ 	    EMSG2(_(e_loadlib), libname);
+@@ -205,10 +218,10 @@
+     }
+     for (i = 0; tcl_funcname_table[i].ptr; ++i)
+     {
+-	if (!(*tcl_funcname_table[i].ptr = GetProcAddress(hTclLib,
++	if (!(*tcl_funcname_table[i].ptr = symbol_from_dll(hTclLib,
+ 			tcl_funcname_table[i].name)))
+ 	{
+-	    FreeLibrary(hTclLib);
++	    close_dll(hTclLib);
+ 	    hTclLib = NULL;
+ 	    if (verbose)
+ 		EMSG2(_(e_loadfunc), tcl_funcname_table[i].name);
+@@ -252,7 +265,7 @@
+ 
+ 	dll_Tcl_FindExecutable(find_executable_arg);
+ 
+-	if (interp = dll_Tcl_CreateInterp())
++	if ((interp = dll_Tcl_CreateInterp()) != NULL)
+ 	{
+ 	    if (Tcl_InitStubs(interp, DYNAMIC_TCL_VER, 0))
+ 	    {
+@@ -272,7 +285,7 @@
+ #ifdef DYNAMIC_TCL
+     if (hTclLib)
+     {
+-	FreeLibrary(hTclLib);
++	close_dll(hTclLib);
+ 	hTclLib = NULL;
+     }
+ #endif
