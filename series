@@ -45,3 +45,5 @@ use-stat_T.patch
 searchpath.patch
 remove-client-edge.patch
 support-tcl-dyn-on-unix.patch
+remove-useless-STRCPY.patch
+use-correct-struct-size.patch
