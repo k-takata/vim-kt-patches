@@ -1,5 +1,110 @@
 # HG changeset patch
-# Parent a2ef855a9411ae0f452bb7d8c2ce136cb0b1a39c
+# Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
+
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -439,7 +439,9 @@
+ 
+ # TCL
+ # Uncomment this when you want to include the Tcl interface.
++# First one is for static linking, second one for dynamic loading.
+ #CONF_OPT_TCL = --enable-tclinterp
++#CONF_OPT_TCL = --enable-tclinterp=dynamic
+ #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
+ 
+ # CSCOPE
+@@ -1340,7 +1342,7 @@
+ .SUFFIXES: .c .o .pro
+ 
+ PRE_DEFS = -Iproto $(DEFS) $(GUI_DEFS) $(GUI_IPATH) $(CPPFLAGS) $(EXTRA_IPATHS)
+-POST_DEFS = $(X_CFLAGS) $(MZSCHEME_CFLAGS) $(TCL_CFLAGS) $(EXTRA_DEFS)
++POST_DEFS = $(X_CFLAGS) $(MZSCHEME_CFLAGS) $(EXTRA_DEFS)
+ 
+ ALL_CFLAGS = $(PRE_DEFS) $(CFLAGS) $(PROFILE_CFLAGS) $(LEAK_CFLAGS) $(POST_DEFS)
+ 
+@@ -1348,7 +1350,7 @@
+ # with "-E".
+ OSDEF_CFLAGS = $(PRE_DEFS) $(POST_DEFS)
+ 
+-LINT_CFLAGS = -DLINT -I. $(PRE_DEFS) $(POST_DEFS) $(RUBY_CFLAGS) $(LUA_CFLAGS) $(PERL_CFLAGS) $(PYTHON_CFLAGS) $(PYTHON3_CFLAGS) -Dinline= -D__extension__= -Dalloca=alloca
++LINT_CFLAGS = -DLINT -I. $(PRE_DEFS) $(POST_DEFS) $(RUBY_CFLAGS) $(LUA_CFLAGS) $(PERL_CFLAGS) $(PYTHON_CFLAGS) $(PYTHON3_CFLAGS) $(TCL_CFLAGS) -Dinline= -D__extension__= -Dalloca=alloca
+ 
+ LINT_EXTRA = -DUSE_SNIFF -DHANGUL_INPUT -D"__attribute__(x)="
+ 
+@@ -2629,7 +2631,7 @@
+ 	$(CCC) -o $@ if_sniff.c
+ 
+ objects/if_tcl.o: if_tcl.c
+-	$(CCC) -o $@ if_tcl.c
++	$(CCC) $(TCL_CFLAGS) -o $@ if_tcl.c
+ 
+ objects/integration.o: integration.c
+ 	$(CCC) -o $@ integration.c
+diff --git a/src/config.h.in b/src/config.h.in
+--- a/src/config.h.in
++++ b/src/config.h.in
+@@ -360,6 +360,9 @@
+ /* Define if you want to include the Tcl interpreter. */
+ #undef FEAT_TCL
+ 
++/* Define for linking via dlopen() or LoadLibrary() */
++#undef DYNAMIC_TCL
++
+ /* Define if you want to include the Sniff interface. */
+ #undef FEAT_SNIFF
+ 
+diff --git a/src/configure.in b/src/configure.in
+--- a/src/configure.in
++++ b/src/configure.in
+@@ -1560,11 +1560,11 @@
+ 
+ AC_MSG_CHECKING(--enable-tclinterp argument)
+ AC_ARG_ENABLE(tclinterp,
+-	[  --enable-tclinterp      Include Tcl interpreter.], ,
++	[  --enable-tclinterp[=OPTS]      Include Tcl interpreter. [default=no] [OPTS=no/yes/dynamic]], ,
+ 	[enable_tclinterp="no"])
+ AC_MSG_RESULT($enable_tclinterp)
+ 
+-if test "$enable_tclinterp" = "yes"; then
++if test "$enable_tclinterp" = "yes" -o "$enable_tclinterp" = "dynamic"; then
+ 
+   dnl on FreeBSD tclsh is a silly script, look for tclsh8.[5420]
+   AC_MSG_CHECKING(--with-tclsh argument)
+@@ -1598,6 +1598,7 @@
+       tclver=`echo 'puts [[info tclversion]]' | $vi_cv_path_tcl -`
+       AC_MSG_RESULT($tclver - OK);
+       tclloc=`echo 'set l [[info library]];set i [[string last lib $l]];incr i -2;puts [[string range $l 0 $i]]' | $vi_cv_path_tcl -`
++      tcldll=`echo 'puts libtcl[[info tclversion]][[info sharedlibextension]]' | $vi_cv_path_tcl -`
+ 
+       AC_MSG_CHECKING(for location of Tcl include)
+       if test "x$MACOSX" != "xyes"; then
+@@ -1632,7 +1633,11 @@
+ 	    AC_MSG_RESULT($try/tclConfig.sh)
+ 	    . $try/tclConfig.sh
+ 	    dnl use eval, because tcl 8.2 includes ${TCL_DBGX}
+-	    TCL_LIBS=`eval echo "$TCL_LIB_SPEC $TCL_LIBS"`
++	    if test "$enable_tclinterp" = "dynamic"; then
++	      TCL_LIBS=`eval echo "$TCL_STUB_LIB_SPEC $TCL_LIBS"`
++	    else
++	      TCL_LIBS=`eval echo "$TCL_LIB_SPEC $TCL_LIBS"`
++	    fi
+ 	    dnl Use $TCL_DEFS for -D_THREAD_SAFE et al.  But only use the
+ 	    dnl "-D_ABC" items.  Watch out for -DFOO=long\ long.
+ 	    TCL_DEFS=`echo $TCL_DEFS | sed -e 's/\\\\ /\\\\X/g' | tr ' ' '\012' | sed -e '/^[[^-]]/d' -e '/^-[[^D]]/d' -e '/-D[[^_]]/d' -e 's/-D_/ -D_/' | tr '\012' ' ' | sed -e 's/\\\\X/\\\\ /g'`
+@@ -1677,6 +1682,12 @@
+       AC_MSG_RESULT(too old; need Tcl version 8.0 or later)
+     fi
+   fi
++  if test "$enable_tclinterp" = "dynamic"; then
++    if test "X$TCL_SRC" != "X" -a "X$tcldll" != "X"; then
++      AC_DEFINE(DYNAMIC_TCL)
++      TCL_CFLAGS="-DDYNAMIC_TCL_DLL=\\\"$tcldll\\\" $TCL_CFLAGS"
++    fi
++  fi
+   if test "$fail_if_missing" = "yes" -a -z "$TCL_SRC"; then
+     AC_MSG_ERROR([could not configure Tcl])
+   fi
 diff --git a/src/if_tcl.c b/src/if_tcl.c
 --- a/src/if_tcl.c
 +++ b/src/if_tcl.c
