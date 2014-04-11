@@ -1,6 +1,30 @@
 # HG changeset patch
 # Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
 
+diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
+--- a/runtime/doc/if_tcl.txt
++++ b/runtime/doc/if_tcl.txt
+@@ -515,12 +515,15 @@
+ ==============================================================================
+ 9. Dynamic loading					*tcl-dynamic*
+ 
+-On MS-Windows the Tcl library can be loaded dynamically.  The |:version|
+-output then includes |+tcl/dyn|.
++On MS-Windows and Unix the Tcl library can be loaded dynamically.  The
++|:version| output then includes |+tcl/dyn|.
+ 
+-This means that Vim will search for the Tcl DLL file only when needed.  When
+-you don't use the Tcl interface you don't need it, thus you can use Vim
+-without this DLL file.
++This means that Vim will search for the Tcl DLL or shared library file only
++when needed.  When you don't use the Tcl interface you don't need it, thus you
++can use Vim without this file.
++
++
++MS-Windows ~
+ 
+ To use the Tcl interface the Tcl DLL must be in your search path.  In a
+ console window type "path" to see what directories are used.
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
@@ -99,7 +123,7 @@ diff --git a/src/configure.in b/src/configure.in
 +  if test "$enable_tclinterp" = "dynamic"; then
 +    if test "X$TCL_SRC" != "X" -a "X$tcldll" != "X"; then
 +      AC_DEFINE(DYNAMIC_TCL)
-+      TCL_CFLAGS="-DDYNAMIC_TCL_DLL=\\\"$tcldll\\\" $TCL_CFLAGS"
++      TCL_CFLAGS="-DDYNAMIC_TCL_DLL=\\\"$tcldll\\\" -DDYNAMIC_TCL_VER=\\\"$tclver\\\" $TCL_CFLAGS"
 +    fi
 +  fi
    if test "$fail_if_missing" = "yes" -a -z "$TCL_SRC"; then
