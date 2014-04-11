@@ -1,0 +1,39 @@
+# HG changeset patch
+# Parent 655b74e20f72b15f112378a81010752fe03d7a32
+diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
+--- a/runtime/doc/if_pyth.txt
++++ b/runtime/doc/if_pyth.txt
+@@ -679,12 +679,15 @@
+ ==============================================================================
+ 9. Dynamic loading					*python-dynamic*
+ 
+-On MS-Windows the Python library can be loaded dynamically.  The |:version|
+-output then includes |+python/dyn|.
++On MS-Windows and Unix the Python library can be loaded dynamically.  The
++|:version| output then includes |+python/dyn|.
+ 
+-This means that Vim will search for the Python DLL file only when needed.
+-When you don't use the Python interface you don't need it, thus you can use
+-Vim without this DLL file.
++This means that Vim will search for the Python DLL or shared library file only
++when needed.  When you don't use the Python interface you don't need it, thus
++you can use Vim without this file.
++
++
++MS-Windows ~
+ 
+ To use the Python interface the Python DLL must be in your search path.  In a
+ console window type "path" to see what directories are used.
+diff --git a/runtime/doc/if_ruby.txt b/runtime/doc/if_ruby.txt
+--- a/runtime/doc/if_ruby.txt
++++ b/runtime/doc/if_ruby.txt
+@@ -195,6 +195,9 @@
+ when needed.  When you don't use the Ruby interface you don't need it, thus
+ you can use Vim even though this library file is not on your system.
+ 
++
++MS-Windows ~
++
+ You need to install the right version of Ruby for this to work.  You can find
+ the package to download from:
+ http://www.garbagecollect.jp/ruby/mswin32/en/download/release.html

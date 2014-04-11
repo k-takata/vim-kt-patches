@@ -45,6 +45,7 @@ use-stat_T.patch
 searchpath.patch
 remove-client-edge.patch
 support-tcl-dyn-on-unix.patch
+update-if_ruby-pyth.patch
 skip-configure-for-autoconf-and-reconfig.patch
 remove-useless-STRCPY.patch
 use-correct-struct-size.patch
