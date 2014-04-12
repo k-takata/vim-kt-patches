@@ -13,12 +13,3 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_GUI = --enable-gui=gnome2 --disable-gtktest
  #CONF_OPT_GUI = --enable-gui=motif
  #CONF_OPT_GUI = --enable-gui=motif --with-motif-lib="-static -lXm -shared"
-@@ -439,7 +439,7 @@
- 
- # TCL
- # Uncomment this when you want to include the Tcl interface.
--#CONF_OPT_TCL = --enable-tclinterp
-+CONF_OPT_TCL = --enable-tclinterp
- #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
- 
- # CSCOPE

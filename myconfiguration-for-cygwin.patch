@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 42bf9264e64efa2d7ea02fc4ff03d4a7aa05fde8
+# Parent 39963f43b4750a843318de4a5243dae55e86bd76
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
@@ -22,7 +22,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  # PYTHON
  # Uncomment this when you want to include the Python interface.
-@@ -425,16 +425,16 @@
+@@ -425,23 +425,23 @@
  # However, this may still cause problems, such as "import termios" failing.
  # Build two separate versions of Vim in that case.
  #CONF_OPT_PYTHON = --enable-pythoninterp
@@ -42,7 +42,15 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_RUBY = --enable-rubyinterp --with-ruby-command=ruby1.9.1
  
  # TCL
-@@ -503,7 +503,7 @@
+ # Uncomment this when you want to include the Tcl interface.
+ # First one is for static linking, second one for dynamic loading.
+ #CONF_OPT_TCL = --enable-tclinterp
+-#CONF_OPT_TCL = --enable-tclinterp=dynamic
++CONF_OPT_TCL = --enable-tclinterp=dynamic
+ #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
+ 
+ # CSCOPE
+@@ -505,7 +505,7 @@
  #CONF_OPT_FEAT = --with-features=small
  #CONF_OPT_FEAT = --with-features=normal
  #CONF_OPT_FEAT = --with-features=big
