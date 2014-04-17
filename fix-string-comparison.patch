@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent c3bb03759c1dc6fd43a235962f4b749168e5a681
+diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
+--- a/src/gui_gtk_x11.c
++++ b/src/gui_gtk_x11.c
+@@ -3163,7 +3163,7 @@
+ # if defined(FEAT_FLOAT) && defined(LC_NUMERIC)
+ 	/* Make sure strtod() uses a decimal point, not a comma. Gnome init
+ 	 * may change it. */
+-	if (setlocale(LC_NUMERIC, NULL) != (char *) "C")
++	if (strcmp(setlocale(LC_NUMERIC, NULL), "C") != 0)
+ 	   setlocale(LC_NUMERIC, "C");
+ # endif
+     }
