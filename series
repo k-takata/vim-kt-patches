@@ -50,4 +50,3 @@ update-if_ruby-pyth.patch
 skip-configure-for-autoconf-and-reconfig.patch
 remove-useless-STRCPY.patch
 use-correct-struct-size.patch
-fix-string-comparison.patch
