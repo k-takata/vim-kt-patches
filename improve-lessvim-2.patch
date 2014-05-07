@@ -1,0 +1,50 @@
+# HG changeset patch
+# Parent aef16ae1a562934b6d284ec3723593d7166ca2fc
+
+diff --git a/runtime/macros/less.vim b/runtime/macros/less.vim
+--- a/runtime/macros/less.vim
++++ b/runtime/macros/less.vim
+@@ -87,6 +87,8 @@
+ map <C-V> <Space>
+ map f <Space>
+ map <C-F> <Space>
++map <PageDown> <Space>
++map <S-Down> <Space>
+ map z <Space>
+ map <Esc><Space> <Space>
+ fun! s:NextPage()
+@@ -116,10 +118,13 @@
+ map <C-E> <CR>
+ map j <CR>
+ map <C-J> <CR>
++map <Down> <CR>
+ 
+ " Scroll one page backward
+ noremap <script> b <C-B><SID>L
+ map <C-B> b
++map <PageUp> b
++map <S-Up> b
+ map w b
+ map <Esc>v b
+ 
+@@ -133,6 +138,7 @@
+ map <C-Y> k
+ map <C-P> k
+ map <C-K> k
++map <Up> k
+ 
+ " Redraw
+ noremap <script> r <C-L><SID>L
+@@ -241,6 +247,12 @@
+   unmap v
+   unmap /
+   unmap ?
++  unmap <Up>
++  unmap <Down>
++  unmap <PageDown>
++  unmap <PageUp>
++  unmap <S-Down>
++  unmap <S-Up>
+ endfun
+ 
+ " vim: sw=2

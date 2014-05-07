@@ -49,3 +49,5 @@ remove-client-edge.patch
 update-if_ruby-pyth.patch
 remove-useless-STRCPY.patch
 use-correct-struct-size.patch
+improve-lessvim-1.patch
+improve-lessvim-2.patch
