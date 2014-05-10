@@ -30,7 +30,7 @@ rmdir-mark.diff
 rmdir-update-tags.patch
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
-vim-7.4.178-breakindent.patch
+breakindent_patch.diff
 breakindent-mark.diff
 strikethrough.diff
 strikethrough-mark.diff
