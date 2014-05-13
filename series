@@ -51,3 +51,4 @@ remove-useless-STRCPY.patch
 use-correct-struct-size.patch
 improve-lessvim-1.patch
 improve-lessvim-2.patch
+Make_mvc.mak.patch
