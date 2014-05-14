@@ -1,0 +1,158 @@
+# HG changeset patch
+# Parent eaf818bcacdb97792fb7bcb37436794c0faa520e
+
+diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
+--- a/src/testdir/Make_amiga.mak
++++ b/src/testdir/Make_amiga.mak
+@@ -35,7 +35,7 @@
+ 		test89.out test90.out test91.out test92.out test93.out \
+ 		test94.out test95.out test96.out test97.out test98.out \
+ 		test99.out test100.out test101.out test102.out test103.out \
+-		test104.out test105.out test106.out \
++		test104.out test105.out test106.out test107.out \
+ 		test_autoformat_join.out \
+ 		test_eval.out \
+ 		test_options.out
+@@ -161,6 +161,7 @@
+ test104.out: test104.in
+ test105.out: test105.in
+ test106.out: test106.in
++test107.out: test107.in
+ test_autoformat_join.out: test_autoformat_join.in
+ test_eval.out: test_eval.in
+ test_options.out: test_options.in
+diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
+--- a/src/testdir/Make_dos.mak
++++ b/src/testdir/Make_dos.mak
+@@ -34,7 +34,7 @@
+ 		test89.out test90.out test91.out test92.out test93.out \
+ 		test94.out test95.out test96.out test98.out test99.out \
+ 		test100.out test101.out test102.out test103.out test104.out \
+-		test105.out test106.out \
++		test105.out test106.out test107.out \
+ 		test_autoformat_join.out \
+ 		test_eval.out \
+ 		test_options.out
+diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
+--- a/src/testdir/Make_ming.mak
++++ b/src/testdir/Make_ming.mak
+@@ -54,7 +54,7 @@
+ 		test89.out test90.out test91.out test92.out test93.out \
+ 		test94.out test95.out test96.out test98.out test99.out \
+ 		test100.out test101.out test102.out test103.out test104.out \
+-		test105.out test106.out \
++		test105.out test106.out test107.out \
+ 		test_autoformat_join.out \
+ 		test_eval.out \
+ 		test_options.out
+diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
+--- a/src/testdir/Make_os2.mak
++++ b/src/testdir/Make_os2.mak
+@@ -36,7 +36,7 @@
+ 		test89.out test90.out test91.out test92.out test93.out \
+ 		test94.out test95.out test96.out test98.out test99.out \
+ 		test100.out test101.out test102.out test103.out test104.out \
+-		test105.out test106.out \
++		test105.out test106.out test107.out \
+ 		test_autoformat_join.out \
+ 		test_eval.out \
+ 		test_options.out
+diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
+--- a/src/testdir/Make_vms.mms
++++ b/src/testdir/Make_vms.mms
+@@ -95,7 +95,7 @@
+ 	 test90.out test91.out test92.out test93.out test94.out \
+ 	 test95.out test96.out test98.out test99.out \
+ 	 test100.out test101.out test103.out test104.out \
+-	 test105.out test106.out \
++	 test105.out test106.out test107.out \
+ 	 test_autoformat_join.out \
+ 	 test_eval.out \
+ 	 test_options.out
+diff --git a/src/testdir/Makefile b/src/testdir/Makefile
+--- a/src/testdir/Makefile
++++ b/src/testdir/Makefile
+@@ -32,7 +32,7 @@
+ 		test89.out test90.out test91.out test92.out test93.out \
+ 		test94.out test95.out test96.out test97.out test98.out \
+ 		test99.out test100.out test101.out test102.out test103.out \
+-		test104.out test105.out test106.out \
++		test104.out test105.out test106.out test107.out \
+ 		test_autoformat_join.out \
+ 		test_eval.out \
+ 		test_options.out
+diff --git a/src/testdir/test107.in b/src/testdir/test107.in
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test107.in
+@@ -0,0 +1,48 @@
++Tests for stat functions and checktime     vim: set ft=vim :
++
++STARTTEST
++:so small.vim
++:bwipe!
++:w! test.out
++:let fname='Xtest.tmp'
++:let ts=localtime()
++:sleep 1
++:let fl=['Hello World!']
++:call writefile(fl, fname)
++:let tf=getftime(fname)
++:sleep 1
++:let te=localtime()
++:$put ='Existent file:'
++:"$put =ts
++:"$put =tf
++:"$put =te
++:$put ='getftime: ' . ((ts <= tf && tf <= te) ? 1 : 0)
++:$put ='getfsize: ' . getfsize(fname)
++:$put ='getftype: ' . getftype(fname)
++:$put ='getfperm: ' . getfperm(fname)[0:2]
++:$put ='Existent directory:'
++:$put ='getfsize: ' . getfsize('.')
++:$put ='getftype: ' . getftype('.')
++:$put ='getfperm: ' . getfperm('.')[0:2]
++:$put ='Test for checktime:'
++:w
++:set autoread
++:exec 'e' fname
++:sleep 2
++:let fl=readfile(fname)
++:let fl[0] .= ' - checktime'
++:call writefile(fl, fname)
++:checktime
++:y a
++:bp!
++:$put a
++:call delete(fname)
++:$put ='Nonexistent file:'
++:$put ='getftime: ' . getftime(fname)
++:$put ='getfsize: ' . getfsize(fname)
++:$put ='getftype: ' . getftype(fname)
++:$put ='getfperm: ' . getfperm(fname)
++:w
++:qa!
++ENDTEST
++
+diff --git a/src/testdir/test107.ok b/src/testdir/test107.ok
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test107.ok
+@@ -0,0 +1,17 @@
++
++Existent file:
++getftime: 1
++getfsize: 13
++getftype: file
++getfperm: rw-
++Existent directory:
++getfsize: 0
++getftype: dir
++getfperm: rwx
++Test for checktime:
++Hello World! - checktime
++Nonexistent file:
++getftime: -1
++getfsize: -1
++getftype: 
++getfperm: 

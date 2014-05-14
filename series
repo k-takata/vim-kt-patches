@@ -50,3 +50,4 @@ update-if_ruby-pyth.patch
 remove-useless-STRCPY.patch
 use-correct-struct-size.patch
 Make_mvc.mak.patch
+add-stat-test.patch
