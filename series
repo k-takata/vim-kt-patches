@@ -53,3 +53,4 @@ Make_mvc.mak.patch
 add-stat-test.patch
 fix-config_cache-removal.patch
 fix-configure-python-soname.patch
+configure2.patch
