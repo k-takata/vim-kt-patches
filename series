@@ -51,6 +51,6 @@ remove-useless-STRCPY.patch
 use-correct-struct-size.patch
 Make_mvc.mak.patch
 add-stat-test.patch
-fix-config_cache-removal.patch
+fix-config_cache-removal.patch #+rejected
 fix-configure-python-soname.patch
 configure2.patch

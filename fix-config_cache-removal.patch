@@ -1,14 +1,20 @@
 # HG changeset patch
-# Parent 179f7a86d0d9984da21d4c5907f0001fa3de49c1
+# Parent 8548b737e3662d1cd9a85322d4d132f2c68d8357
+
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1671,7 +1671,7 @@
+@@ -1670,7 +1670,12 @@
+ # are very hard to figure out.
+ #
  config auto/config.mk: auto/configure config.mk.in config.h.in
- 	if test -f auto/config.cache && \
- 	    grep '^ac_cv_env_CFLAGS_value=' auto/config.cache > /dev/null && \
--	    ! grep -x -F 'ac_cv_env_CFLAGS_value=$(CFLAGS)' auto/config.cache > /dev/null; then \
-+	    ! grep -x -F "ac_cv_env_CFLAGS_value='$(CFLAGS)'" auto/config.cache > /dev/null; then \
- 		rm auto/config.cache; \
- 	fi
+-	-rm -f auto/config.cache
++	if test -f auto/config.cache && \
++	    grep '^ac_cv_env_CFLAGS_value=' auto/config.cache > /dev/null && \
++	    ! grep -x -F 'ac_cv_env_CFLAGS_value=$(CFLAGS)' auto/config.cache > dev/null; then \
++	    ! grep -x -F "ac_cv_env_CFLAGS_value='$(CFLAGS)'" auto/config.cache  /dev/null; then \
++		rm auto/config.cache; \
++	fi
  	if test "X$(MAKECMDGOALS)" != "Xclean" \
+ 		-a "X$(MAKECMDGOALS)" != "Xdistclean" \
+ 		-a "X$(MAKECMDGOALS)" != "Xautoconf" \
