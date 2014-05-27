@@ -1,0 +1,25 @@
+diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
+--- a/nsis/gvim.nsi
++++ b/nsis/gvim.nsi
+@@ -33,9 +33,10 @@
+ Name "Vim ${VER_MAJOR}.${VER_MINOR}"
+ OutFile gvim${VER_MAJOR}${VER_MINOR}.exe
+ CRCCheck force
+-SetCompressor lzma
++SetCompressor /SOLID lzma
+ SetDatablockOptimize on
+ RequestExecutionLevel highest
++XPStyle on
+ 
+ ComponentText "This will install Vim ${VER_MAJOR}.${VER_MINOR} on your computer."
+ DirText "Choose a directory to install Vim (must end in 'vim')"
+@@ -56,9 +57,6 @@
+   !packhdr temp.dat "upx --best --compress-icons=1 temp.dat"
+ !endif
+ 
+-SetCompressor /SOLID lzma
+-XPStyle on
+-
+ # This adds '\vim' to the user choice automagically.  The actual value is
+ # obtained below with ReadINIStr.
+ InstallDir "$PROGRAMFILES\Vim"

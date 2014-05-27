@@ -51,4 +51,5 @@ remove-useless-STRCPY.patch
 use-correct-struct-size.patch
 Make_mvc.mak.patch
 add-stat-test.patch
+gvim-nsi.patch
 fix-config_cache-removal.patch #+rejected
