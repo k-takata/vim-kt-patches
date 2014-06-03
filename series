@@ -52,4 +52,5 @@ use-correct-struct-size.patch
 Make_mvc.mak.patch
 add-stat-test.patch
 gvim-nsi.patch
+support-perl-5.20.patch
 fix-config_cache-removal.patch #+rejected
