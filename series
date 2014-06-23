@@ -30,7 +30,7 @@ rmdir-mark.diff
 rmdir-update-tags.patch
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
-breakindent_patch.diff
+breakindent_updated.diff
 breakindent-mark.diff
 strikethrough.diff
 strikethrough-mark.diff
