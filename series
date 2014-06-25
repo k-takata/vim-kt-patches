@@ -50,5 +50,4 @@ use-correct-struct-size.patch
 Make_mvc.mak.patch
 add-stat-test.patch
 gvim-nsi.patch
-fix-doc-7.4.237.patch
 fix-config_cache-removal.patch #+rejected
