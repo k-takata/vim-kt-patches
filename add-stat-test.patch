@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 8b435e2d4b7f4a8e99985e245e08af0017287076
+# Parent e42a369431cedf465e149fd350bf489dec7dae29
 
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
@@ -12,15 +12,15 @@ diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 +		test104.out test105.out test106.out test107.out test108.out \
  		test_autoformat_join.out \
  		test_breakindent.out \
- 		test_eval.out \
-@@ -163,6 +163,7 @@ test104.out: test104.in
+ 		test_listlbr.out \
+@@ -164,6 +164,7 @@ test104.out: test104.in
  test105.out: test105.in
  test106.out: test106.in
  test107.out: test107.in
 +test108.out: test108.in
  test_autoformat_join.out: test_autoformat_join.in
  test_breakindent.out: test_breakindent.in
- test_eval.out: test_eval.in
+ test_listlbr.out: test_listlbr.in
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 --- a/src/testdir/Make_dos.mak
 +++ b/src/testdir/Make_dos.mak
@@ -32,7 +32,7 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 +		test105.out test106.out test107.out test108.out \
  		test_autoformat_join.out \
  		test_breakindent.out \
- 		test_eval.out \
+ 		test_listlbr \
 diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 --- a/src/testdir/Make_ming.mak
 +++ b/src/testdir/Make_ming.mak
@@ -44,7 +44,7 @@ diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 +		test105.out test106.out test107.out test108.out \
  		test_autoformat_join.out \
  		test_breakindent.out \
- 		test_eval.out \
+ 		test_listlbr.out \
 diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 --- a/src/testdir/Make_os2.mak
 +++ b/src/testdir/Make_os2.mak
@@ -68,7 +68,7 @@ diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 +	 test105.out test106.out test107.out test108.out \
  	 test_autoformat_join.out \
  	 test_breakindent.out \
- 	 test_eval.out \
+ 	 test_listlbr.out \
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
@@ -80,7 +80,7 @@ diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 +		test104.out test105.out test106.out test107.out test108.out \
  		test_autoformat_join.out \
  		test_breakindent.out \
- 		test_eval.out \
+ 		test_listlbr.out \
 diff --git a/src/testdir/test108.in b/src/testdir/test108.in
 new file mode 100644
 --- /dev/null
