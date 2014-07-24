@@ -10,7 +10,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Static Code Analysis: ANALYZE=yes (works with VS2012 only)
  #
  # You can combine any of these interfaces
-@@ -376,88 +374,25 @@
+@@ -376,88 +374,29 @@ DEL_TREE = deltree /y
  INTDIR=$(OBJDIR)
  OUTDIR=$(OBJDIR)
  
@@ -100,7 +100,11 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 -!message version of Visual C, you can either set MSVCVER or update this makefile
 -!message to handle the new value for _NMAKE_VER, "$(_NMAKE_VER)".
 -!error Make aborted.
++!if $(MSVCVER) < 1900
 +MSVC_MAJOR = ($(MSVCVER) / 100 - 6)
++!else
++MSVC_MAJOR = ($(MSVCVER) / 100 - 5)
++!endif
 +
 +!if $(MSVC_MAJOR) == 6
 +CPU = ix86
@@ -112,7 +116,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !if "$(CPUNR)" == "i386"
  CPUARG = /G3
  !elseif "$(CPUNR)" == "i486"
-@@ -491,7 +426,7 @@
+@@ -491,7 +430,7 @@ OPTFLAG = /O2
  OPTFLAG = /Ox
  !endif
  
@@ -121,7 +125,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  # Use link time code generation if not worried about size
  !if "$(OPTIMIZE)" != "SPACE"
  OPTFLAG = $(OPTFLAG) /GL
-@@ -499,12 +434,13 @@
+@@ -499,12 +438,13 @@ OPTFLAG = $(OPTFLAG) /GL
  !endif
  
  # (/Wp64 is deprecated in VC9 and generates an obnoxious warning.)
@@ -138,7 +142,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  CFLAGS=$(CFLAGS) /analyze
  !endif
  
-@@ -525,7 +461,7 @@
+@@ -525,7 +465,7 @@ DEBUGINFO = /ZI
  CFLAGS = $(CFLAGS) -D_DEBUG -DDEBUG /Od
  RCFLAGS = $(rcflags) $(rcvars) -D_DEBUG -DDEBUG
  # The /fixed:no is needed for Quantify. Assume not 4.? as unsupported in VC4.0.
@@ -147,7 +151,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  LIBC =
  ! else
  LIBC = /fixed:no
-@@ -973,7 +909,7 @@
+@@ -973,7 +913,7 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(LIBC
  
  # Report link time code generation progress if used. 
  !ifdef NODEBUG
@@ -156,7 +160,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !if "$(OPTIMIZE)" != "SPACE"
  LINKARGS1 = $(LINKARGS1) /LTCG:STATUS
  !endif
-@@ -1069,7 +1005,7 @@
+@@ -1070,7 +1010,7 @@ testclean:
  
  # Create a default rule for transforming .c files to .obj files in $(OUTDIR)
  # Batch compilation is supported by nmake 1.62 (part of VS 5.0) and later)
@@ -165,7 +169,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  .c{$(OUTDIR)/}.obj:
  !ELSE
  .c{$(OUTDIR)/}.obj::
-@@ -1078,7 +1014,7 @@
+@@ -1079,7 +1019,7 @@ testclean:
  
  # Create a default rule for transforming .cpp files to .obj files in $(OUTDIR)
  # Batch compilation is supported by nmake 1.62 (part of VS 5.0) and later)
