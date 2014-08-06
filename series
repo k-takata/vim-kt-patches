@@ -12,13 +12,8 @@ merge-Make_cyg-into-Make_ming.patch
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
 support-alt-gettext-dll.patch
-X001-direct_write-r3.diff
-direct_write-use-proto.diff
 fix-dwrite-italic-overhang.patch
-directwrite-update-docs.patch
-directwrite-mark.diff
 directwrite-update-tags.patch
-directwrite-update-tags2.patch
 cpo-N.diff
 cpo-N-mark.diff
 cpo-N-update-tags.patch
