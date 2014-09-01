@@ -26,7 +26,8 @@ add-smsg_attr_keep.patch #+undo1
 strikethrough.diff
 strikethrough-mark.diff
 strikethrough-update-tags.patch
-tab-xyz.diff
+tab-xyz-pragmb.diff #-tab-xyz
+tab-xyz.diff #+tab-xyz
 tabline-dnd.patch
 tabline-dnd-mark.diff
 subpixel-artifacts.patch
