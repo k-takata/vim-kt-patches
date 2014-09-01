@@ -35,7 +35,6 @@ fix-italic-overhang-before-space.patch
 fix-viminfo-attr.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
-searchpath.patch
 remove-client-edge.patch
 update-if_ruby-pyth.patch
 remove-useless-STRCPY.patch
