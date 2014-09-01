@@ -42,4 +42,5 @@ use-correct-struct-size.patch
 Make_mvc.mak.patch
 add-stat-test.patch
 gvim-nsi.patch
+mingw_lua_dir.patch
 fix-config_cache-removal.patch #+rejected
