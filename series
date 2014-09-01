@@ -43,4 +43,5 @@ Make_mvc.mak.patch
 add-stat-test.patch
 gvim-nsi.patch
 mingw_lua_dir.patch
+bmp-rle.patch
 fix-config_cache-removal.patch #+rejected
