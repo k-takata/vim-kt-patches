@@ -17,6 +17,7 @@ cpo-N-mark.diff
 cpo-N-update-tags.patch
 if_perl-use-output.patch
 improve_dos_test.diff
+improve_dos_test-addition.diff
 X004-eval_rmdir.diff
 X004_01-rmdir_support_symlinks.diff
 rmdir-mark.diff
@@ -48,5 +49,4 @@ bmp-rle.patch
 fix-clang-cygwin-perl.patch
 fix-test11-on-windows.patch
 workaround-test100.patch
-improve_dos_test-addition.diff
 fix-config_cache-removal.patch #+rejected
