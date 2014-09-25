@@ -47,4 +47,6 @@ mingw_lua_dir.patch
 bmp-rle.patch
 fix-clang-cygwin-perl.patch
 fix-test11-on-windows.patch
+workaround-test100.patch
+improve_dos_test-addition.diff
 fix-config_cache-removal.patch #+rejected

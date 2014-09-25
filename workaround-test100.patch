@@ -1,0 +1,19 @@
+diff --git a/src/testdir/test100.in b/src/testdir/test100.in
+--- a/src/testdir/test100.in
++++ b/src/testdir/test100.in
+@@ -17,6 +17,7 @@ STARTTEST
+ :0put ='ONE: expecting global undolevels: 5, local undolevels: -123456 (default)'
+ :call FillBuffer()
+ :call feedkeys(":earlier 10\n", 't')
++:
+ :call UndoLevel()
+ :set ff=unix
+ :%w! test.out
+@@ -25,6 +26,7 @@ STARTTEST
+ :setlocal ul=2
+ :call FillBuffer()
+ :call feedkeys(":earlier 10\n", 't')
++:
+ :call UndoLevel()
+ :setlocal ul=10
+ :call UndoLevel()
