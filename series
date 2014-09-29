@@ -49,5 +49,4 @@ bmp-rle.patch
 fix-clang-cygwin-perl.patch
 fix-test11-on-windows.patch
 workaround-test100.patch
-fix-test86-87-on-windows.patch
 fix-config_cache-removal.patch #+rejected
