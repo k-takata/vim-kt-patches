@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent aceade2553bea8c3ba3b65e1cebdc8a43c9fe7fd
+diff --git a/runtime/syntax/python.vim b/runtime/syntax/python.vim
+--- a/runtime/syntax/python.vim
++++ b/runtime/syntax/python.vim
+@@ -160,7 +160,7 @@ if !exists("python_no_number_highlight")
+   syn match   pythonNumber
+ 	\ "\<\d\+\.\%([eE][+-]\=\d\+\)\=[jJ]\=\%(\W\|$\)\@="
+   syn match   pythonNumber
+-	\ "\%(^\|\W\)\@<=\d*\.\d\+\%([eE][+-]\=\d\+\)\=[jJ]\=\>"
++	\ "\%(^\|\W\)\zs\d*\.\d\+\%([eE][+-]\=\d\+\)\=[jJ]\=\>"
+ endif
+ 
+ " Group the built-ins in the order in the 'Python Library Reference' for
