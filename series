@@ -51,4 +51,5 @@ fix-test11-on-windows.patch
 workaround-test100.patch
 fix-issue-239.patch
 fix-7.4.016-crash-with-long-fname.patch
+fix-7.4.459-warnings.patch
 fix-config_cache-removal.patch #+rejected
