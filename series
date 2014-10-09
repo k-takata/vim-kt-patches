@@ -47,7 +47,5 @@ gvim-nsi.patch
 mingw_lua_dir.patch
 bmp-rle.patch
 fix-clang-cygwin-perl.patch
-fix-test11-on-windows.patch
-workaround-test100.patch
 fix-issue-239.patch
 fix-config_cache-removal.patch #+rejected
