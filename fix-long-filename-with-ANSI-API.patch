@@ -1,29 +1,31 @@
 # HG changeset patch
-# Parent c976ebef4d84e6bd43f3a92075151976a80340c4
+# Parent d62740f5eda33e309f0e68c95d6d8451cc691c1b
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -6164,6 +6164,12 @@ mch_open(char *name, int flags, int mode
+@@ -6164,6 +6164,13 @@ mch_open(char *name, int flags, int mode
      }
  # endif
  
-+    /* open() might open a file which name is longer than _MAX_PATH bytes
-+     * successfully, but sometimes it causes unexpected error in another
-+     * part. We make it error explicitly at here. */
++    /* open() can open a file which name is longer than _MAX_PATH bytes
++     * and shorter than _MAX_PATH characters successfully, but sometimes it
++     * causes unexpected error in another part. We make it error explicitly
++     * at here. */
 +    if (strlen(name) >= _MAX_PATH)
 +	return -1;
 +
      return open(name, flags, mode);
  }
  
-@@ -6213,6 +6219,12 @@ mch_fopen(char *name, char *mode)
+@@ -6213,6 +6220,13 @@ mch_fopen(char *name, char *mode)
  	 * the _wfopen() fails for missing wide functions. */
      }
  
-+    /* fopen() might open a file which name is longer than _MAX_PATH bytes
-+     * successfully, but sometimes it causes unexpected error in another
-+     * part. We make it error explicitly at here. */
++    /* fopen() can open a file which name is longer than _MAX_PATH bytes
++     * and shorter than _MAX_PATH characters successfully, but sometimes it
++     * causes unexpected error in another part. We make it error explicitly
++     * at here. */
 +    if (strlen(name) >= _MAX_PATH)
 +	return NULL;
 +
