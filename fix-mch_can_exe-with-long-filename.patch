@@ -1,0 +1,43 @@
+# HG changeset patch
+# Parent 6ee3a815113c128147fa9831c2004916a7daba86
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -3396,11 +3396,18 @@ mch_writable(char_u *name)
+     int
+ mch_can_exe(char_u *name, char_u **path)
+ {
++#ifdef FEAT_MBYTE
++    /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
++     * means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
++     * UTF-8. */
++    char_u	buf[_MAX_PATH * 3];
++#else
+     char_u	buf[_MAX_PATH];
++#endif
+     int		len = (int)STRLEN(name);
+     char_u	*p;
+ 
+-    if (len >= _MAX_PATH)	/* safety check */
++    if (len >= sizeof(buf))	/* safety check */
+ 	return FALSE;
+ 
+     /* If there already is an extension try using the name directly.  Also do
+@@ -3413,7 +3420,7 @@ mch_can_exe(char_u *name, char_u **path)
+     /*
+      * Loop over all extensions in $PATHEXT.
+      */
+-    vim_strncpy(buf, name, _MAX_PATH - 1);
++    vim_strncpy(buf, name, sizeof(buf) - 1);
+     p = mch_getenv("PATHEXT");
+     if (p == NULL)
+ 	p = (char_u *)".com;.exe;.bat;.cmd";
+@@ -3428,7 +3435,7 @@ mch_can_exe(char_u *name, char_u **path)
+ 		++p;
+ 	}
+ 	else
+-	    copy_option_part(&p, buf + len, _MAX_PATH - len, ";");
++	    copy_option_part(&p, buf + len, sizeof(buf) - len, ";");
+ 	if (executable_exists((char *)buf, path))
+ 	    return TRUE;
+     }
