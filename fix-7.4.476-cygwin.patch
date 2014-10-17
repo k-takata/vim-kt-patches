@@ -1,0 +1,38 @@
+# HG changeset patch
+# Parent f76f3d19a3291dbb7a3e163e990053b48d6f6455
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
+@@ -485,6 +485,24 @@ USE_STDCPLUS = yes
+ endif
+ 
+ ##############################
++ifndef XPM
++ifeq ($(ARCH),i386)
++XPM = xpm/x86
++endif
++ifeq ($(ARCH),i486)
++XPM = xpm/x86
++endif
++ifeq ($(ARCH),i586)
++XPM = xpm/x86
++endif
++ifeq ($(ARCH),i686)
++XPM = xpm/x86
++endif
++ifeq ($(ARCH),x86-64)
++XPM = xpm/x64
++endif
++endif
++ifdef XPM
+ ifneq ($(XPM),no)
+ # Only allow XPM for a GUI build.
+ DEFINES += -DFEAT_XPM_W32
+@@ -492,6 +510,7 @@ INCLUDES += -I$(XPM)/include
+ EXTRA_OBJS += $(OUTDIR)/xpm_w32.o
+ EXTRA_LIBS += -L$(XPM)/lib -lXpm
+ endif
++endif
+ 
+ ##############################
+ EXE = gvim$(DEBUG_SUFFIX).exe
