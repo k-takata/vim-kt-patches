@@ -49,4 +49,5 @@ bmp-rle.patch
 fix-clang-cygwin-perl.patch
 fix-issue-239.patch
 fix-long-filename-with-ANSI-API.patch
+fix-opening-259-chars-filename.patch
 fix-config_cache-removal.patch #+rejected
