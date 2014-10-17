@@ -1,9 +1,10 @@
 # HG changeset patch
 # Parent f76f3d19a3291dbb7a3e163e990053b48d6f6455
+
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 --- a/src/Make_cyg.mak
 +++ b/src/Make_cyg.mak
-@@ -485,6 +485,24 @@ USE_STDCPLUS = yes
+@@ -485,13 +485,32 @@ USE_STDCPLUS = yes
  endif
  
  ##############################
@@ -28,7 +29,8 @@ diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
  ifneq ($(XPM),no)
  # Only allow XPM for a GUI build.
  DEFINES += -DFEAT_XPM_W32
-@@ -492,6 +510,7 @@ INCLUDES += -I$(XPM)/include
+-INCLUDES += -I$(XPM)/include
++INCLUDES += -I$(XPM)/include -I$(XPM)/../include
  EXTRA_OBJS += $(OUTDIR)/xpm_w32.o
  EXTRA_LIBS += -L$(XPM)/lib -lXpm
  endif
