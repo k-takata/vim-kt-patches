@@ -1,0 +1,469 @@
+# HG changeset patch
+# Parent 563214ffe0f89cb295ec69003be9a9033dcbb814
+
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -228,11 +228,15 @@ at:
+ 
+     http://www.mingw.org/
+ 
++or you can use 'MinGW-w64' compiler.
++
++    http://mingw-w64.sourceforge.net/
++
+ Once you have downloaded the compiler binaries, unpack them on your hard disk
+ somewhere, and put them on your PATH.  If you are on Win95/98 you can edit
+ your AUTOEXEC.BAT file with a line like:
+ 
+-    set PATH=C:\GCC-2.95.2\BIN;%PATH%
++    set PATH=C:\MinGW\bin;%PATH%
+ 
+ or on NT/2000/XP, go to the Control Panel, (Performance and Maintenance),
+ System, Advanced, and edit the environment from there.
+@@ -240,10 +244,10 @@ System, Advanced, and edit the environme
+ Test if gcc is on your path.  From a CMD (or COMMAND on '95/98) window:
+ 
+     C:\> gcc --version
+-    2.95.2
++    gcc (GCC) 4.8.1
+ 
+-    C:\> make --version
+-    GNU Make version 3.77 (...etc...)
++    C:\> mingw32-make --version
++    GNU Make 3.82.90 (...etc...)
+ 
+ Now you are ready to rock 'n' roll.  Unpack the vim sources (look on
+ www.vim.org for exactly which version of the vim files you need).
+@@ -255,7 +259,7 @@ Change directory to 'vim\src':
+ 
+ and you type:
+ 
+-    make -f Make_ming.mak gvim.exe
++    mingw32-make -f Make_ming.mak gvim.exe
+ 
+ After churning for a while, you will end up with 'gvim.exe' in the 'vim\src'
+ directory.
+@@ -264,7 +268,7 @@ You should not need to do *any* editing 
+ way.  If, for some reason, you want the console-mode-only version of vim (this
+ is NOT recommended on Win32, especially on '95/'98!!!), you can use:
+ 
+-    make -f Make_ming.mak GUI=no vim.exe
++    mingw32-make -f Make_ming.mak GUI=no vim.exe
+ 
+ If you are dismayed by how big the EXE is, I strongly recommend you get 'UPX'
+ (also free!) and compress the file (typical compression is 50%). UPX can be
+@@ -291,8 +295,7 @@ 3. Cygwin
+ Use Make_cyg.mak with Cygwin's GCC. See
+     http://users.skynet.be/antoine.mechelynck/vim/compile.htm
+ 
+-The Cygnus one many not fully work yet.
+-With Cygnus gcc you can use the Unix Makefile instead (you need to get the
++With Cygnus gcc you should use the Unix Makefile instead (you need to get the
+ Unix archive then).  Then you get a Cygwin application (feels like Vim is
+ running on Unix), while with Make_cyg.mak you get a Windows application (like
+ with the other makefiles).
+@@ -316,8 +319,8 @@ your Linux (or other unix) box.  To do t
+ 	http://www.mingw.org/wiki/LinuxCrossMinGW
+ 	http://www.libsdl.org/extras/win32/cross/README.txt
+     2) Get and unpack both the Unix sources and the extra archive
+-    3) in 'Make_ming.mak', set 'CROSS' to 'yes' instead of 'no'.
+-       Make further changes to 'Make_ming.mak' as you wish.
++    3) in 'cyg_ming.mak', set 'CROSS' to 'yes' instead of 'no'.
++       Make further changes to 'cyg_ming.mak' and 'Make_ming.mak' as you wish.
+        If your cross-compiler prefix differs from the predefined value,
+        set 'CROSS_COMPILE' corresponding.
+     4) make -f Make_ming.mak gvim.exe
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+new file mode 100644
+--- /dev/null
++++ b/src/Make_cyg.mak
+@@ -0,0 +1,52 @@
++#
++# Makefile for VIM on Win32, using MinGW cross compiler on Cygwin
++#
++# Also read INSTALLpc.txt!
++#
++# This compiles Vim as a Windows application.  If you want Vim to run as a
++# Cygwin application use the Makefile (just like on Unix).
++#
++# The old Make_cyg.mak (maintained by Dan Sharp et al.) was merged into
++# cyg_ming.mak.  Note: USEDLL option was removed.
++# This file contains Cygwin specific settings. Common settings are contained
++# in cyg_ming.mak.
++#
++# Last updated by Ken Takata.
++# Last Change: 2014 Oct 21
++
++
++# uncomment 'PERL' if you want a perl-enabled version
++#PERL=/cygdrive/c/perl
++
++# uncomment 'LUA' if you want a Lua-enabled version
++#LUA=/cygdrive/c/lua
++
++# uncomment 'MZSCHEME' if you want a MzScheme-enabled version
++#MZSCHEME=/cygdrive/d/plt
++
++# uncomment 'PYTHON' if you want a python-enabled version
++#PYTHON=/cygdrive/c/python20
++
++# uncomment 'PYTHON3' if you want a python3-enabled version
++#PYTHON3=/cygdrive/c/python31
++
++# uncomment 'TCL' if you want a Tcl-enabled version
++#TCL=/cygdrive/c/tcl
++
++# uncomment 'RUBY' if you want a Ruby-enabled version
++#RUBY=/cygdribe/c/ruby
++
++
++# Use MinGW(-w64) cross compiler.
++# There are three MinGW packages in Cygwin:
++#   32-bit: mingw-gcc-g++ and mingw64-i686-gcc-g++
++#   64-bit: mingw64-x86_64-gcc-g++
++# You may also need to set 'ARCH' in cyg_ming.mak.
++CROSS_COMPILE = i686-pc-mingw32-
++#CROSS_COMPILE = i686-w64-mingw32-
++#CROSS_COMPILE = x86_64-w64-mingw32-
++
++
++# Do not change this.
++UNDER_CYGWIN = yes
++include cyg_ming.mak
+diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+new file mode 100644
+--- /dev/null
++++ b/src/Make_ming.mak
+@@ -0,0 +1,49 @@
++#
++# Makefile for VIM on Win32, using MinGW
++#
++# Also read INSTALLpc.txt!
++#
++# The old Make_ming.mak (maintained by Ron Aaron et al.) was merged into
++# cyg_ming.mak.
++# This file contains MinGW specific settings. Common settings are contained
++# in cyg_ming.mak.
++#
++# Last updated by Ken Takata.
++# Last Change: 2014 Oct 21
++
++
++# uncomment 'PERL' if you want a perl-enabled version
++#PERL=c:/perl
++
++# uncomment 'LUA' if you want a Lua-enabled version
++#LUA=c:/lua
++
++# uncomment 'MZSCHEME' if you want a MzScheme-enabled version
++#MZSCHEME=d:/plt
++
++# uncomment 'PYTHON' if you want a python-enabled version
++# Put the path to the python distro here.  If cross compiling from Linux, you
++# will also need to convert the header files to unix instead of dos format:
++#   for fil in *.h ; do vim -e -c 'set ff=unix|w|q' $fil
++# and also, you will need to make a mingw32 'libpython20.a' to link with:
++#   cd $PYTHON/libs
++#   pexports python20.dll > python20.def
++#   dlltool -d python20.def -l libpython20.a
++# on my Linux box, I put the Python stuff here:
++#PYTHON=/home/ron/ActivePython-2.0.0-202/src/Core
++# on my NT box, it's here:
++#PYTHON=c:/python20
++
++# uncomment 'PYTHON3' if you want a python3-enabled version
++#PYTHON3=c:/python31
++
++# uncomment 'TCL' if you want a Tcl-enabled version
++#TCL=c:/tcl
++
++# uncomment 'RUBY' if you want a Ruby-enabled version
++#RUBY=c:/ruby
++
++
++# Do not change this.
++UNDER_CYGWIN = no
++include cyg_ming.mak
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -50,13 +50,14 @@
+ #	Perl interface:
+ #	  PERL=[Path to Perl directory]
+ #	  DYNAMIC_PERL=yes (to load the Perl DLL dynamically)
+-#	  PERL_VER=[Perl version, in the form 55 (5.005), 56 (5.6.x), etc]
++#	  PERL_VER=[Perl version, in the form 55 (5.005), 56 (5.6.x),
++#		    510 (5.10.x), etc]
+ #	  (default is 56)
+ #
+ #	Python interface:
+ #	  PYTHON=[Path to Python directory]
+ #	  DYNAMIC_PYTHON=yes (to load the Python DLL dynamically)
+-#	  PYTHON_VER=[Python version, eg 15, 20]  (default is 22)
++#	  PYTHON_VER=[Python version, eg 22, 23, ..., 27]  (default is 22)
+ #
+ #	Python3 interface:
+ #	  PYTHON3=[Path to Python3 directory]
+@@ -66,11 +67,13 @@
+ #	Ruby interface:
+ #	  RUBY=[Path to Ruby directory]
+ #	  DYNAMIC_RUBY=yes (to load the Ruby DLL dynamically)
+-#	  RUBY_VER=[Ruby version, eg 16, 17] (default is 18)
+-#	  RUBY_VER_LONG=[Ruby version, eg 1.6, 1.7] (default is 1.8)
++#	  RUBY_VER=[Ruby version, eg 18, 19, 20] (default is 18)
++#	  RUBY_VER_LONG=[Ruby version, eg 1.8, 1.9.1, 2.0.0] (default is 1.8)
+ #	    You must set RUBY_VER_LONG when change RUBY_VER.
+-#	    You must set RUBY_API_VER to RUBY_VER_LONG.
+-#	    Don't set ruby API version to RUBY_VER like 191.
++#	    RUBY_API_VER is derived from RUBY_VER_LONG.
++#	    Note: If you use Ruby 1.9.3, set as follows:
++#	      RUBY_VER=19
++#	      RUBY_VER_LONG=1.9.1 (not 1.9.3, because the API version is 1.9.1.)
+ #
+ #	Tcl interface:
+ #	  TCL=[Path to Tcl directory]
+diff --git a/src/cyg_ming.mak b/src/cyg_ming.mak
+--- a/src/cyg_ming.mak
++++ b/src/cyg_ming.mak
+@@ -1,4 +1,7 @@
+-# Makefile for VIM on Win32
++# Makefile for VIM on Win32 (Cygwin and MinGW)
++#
++# This file contains common part for Cygwin and MinGW and it is included
++# from Make_cyg.mak and Make_ming.mak.
+ #
+ # Info at http://www.mingw.org
+ # Alternative x86 and 64-builds: http://mingw-w64.sourceforge.net
+@@ -32,14 +35,15 @@ OPTIMIZE=MAXSPEED
+ # set to yes to make gvim, no for vim
+ GUI=yes
+ # set to yes if you want to use DirectWrite (DirectX)
++# MinGW-w64 is needed, and ARCH should be set to i686 or x86-64.
+ DIRECTX=no
+-# FEATURES=[TINY | SMALL  | NORMAL | BIG | HUGE]
++# FEATURES=[TINY | SMALL | NORMAL | BIG | HUGE]
+ # Set to TINY to make minimal version (few features).
+ FEATURES=BIG
+ # Set to one of i386, i486, i586, i686 as the minimum target processor.
+ # For amd64/x64 architecture set ARCH=x86-64 .
+ ARCH=i386
+-# Set to yes to cross-compile from unix; no=native Windows.
++# Set to yes to cross-compile from unix; no=native Windows (and Cygwin).
+ CROSS=no
+ # Set to path to iconv.h and libiconv.a to enable using 'iconv.dll'.
+ #ICONV="."
+@@ -102,8 +106,10 @@ INTLLIB=gnu_gettext
+ #INTLPATH=$(GETTEXT)/lib
+ #INTLLIB=intl
+ 
+-# uncomment 'PERL' if you want a perl-enabled version
+-#PERL=C:/perl
++#	Perl interface:
++#	  PERL=[Path to Perl directory] (Set inside Make_cyg.mak or Make_ming.mak)
++#	  DYNAMIC_PERL=yes (to load the Perl DLL dynamically)
++#	  PERL_VER=[Perl version, eg 56, 58, 510] (default is 56)
+ ifdef PERL
+ ifndef PERL_VER
+ PERL_VER=56
+@@ -114,19 +120,28 @@ endif
+ # on Linux, for cross-compile, it's here:
+ #PERLLIB=/home/ron/ActivePerl/lib
+ # on NT, it's here:
++PERLEXE=$(PERL)/bin/perl
+ PERLLIB=$(PERL)/lib
+ PERLLIBS=$(PERLLIB)/Core
++ifeq ($(UNDER_CYGWIN),yes)
++PERLTYPEMAP:=$(shell cygpath -m $(PERLLIB)/ExtUtils/typemap)
++XSUBPPTRY:=$(shell cygpath -m $(PERLLIB)/ExtUtils/xsubpp)
++else
++PERLTYPEMAP=$(PERLLIB)/ExtUtils/typemap
+ XSUBPPTRY=$(PERLLIB)/ExtUtils/xsubpp
+-XSUBPP_EXISTS=$(shell perl -e "print 1 unless -e '$(XSUBPPTRY)'")
++endif
++XSUBPP_EXISTS=$(shell $(PERLEXE) -e "print 1 unless -e '$(XSUBPPTRY)'")
+ ifeq "$(XSUBPP_EXISTS)" ""
+-XSUBPP=perl $(XSUBPPTRY)
++XSUBPP=$(PERLEXE) "$(XSUBPPTRY)"
+ else
+ XSUBPP=xsubpp
+ endif
+ endif
+ 
+-# uncomment 'LUA' if you want a Lua-enabled version
+-#LUA=/usr/local
++#	Lua interface:
++#	  LUA=[Path to Lua directory] (Set inside Make_cyg.mak or Make_ming.mak)
++#	  DYNAMIC_LUA=yes (to load the Lua DLL dynamically)
++#	  LUA_VER=[Lua version, eg 51, 52] (default is 51)
+ ifdef LUA
+ ifndef DYNAMIC_LUA
+ DYNAMIC_LUA=yes
+@@ -142,8 +157,11 @@ endif
+ 
+ endif
+ 
+-# uncomment 'MZSCHEME' if you want a MzScheme-enabled version
+-#MZSCHEME=d:/plt
++#	MzScheme interface:
++#	  MZSCHEME=[Path to MzScheme directory] (Set inside Make_cyg.mak or Make_ming.mak)
++#	  DYNAMIC_MZSCHEME=yes (to load the MzScheme DLL dynamically)
++#	  MZSCHEME_VER=[MzScheme version] (default is 205_000)
++#	  MZSCHEME_DEBUG=no
+ ifdef MZSCHEME
+ ifndef DYNAMIC_MZSCHEME
+ DYNAMIC_MZSCHEME=yes
+@@ -184,22 +202,10 @@ endif
+ 
+ endif
+ 
+-# Python support -- works with the ActiveState python 2.0 release (and others
+-# too, probably)
+-#
+-# uncomment 'PYTHON' to make python-enabled version
+-# Put the path to the python distro here.  If cross compiling from Linux, you
+-# will also need to convert the header files to unix instead of dos format:
+-#   for fil in *.h ; do vim -e -c 'set ff=unix|w|q' $fil
+-# and also, you will need to make a mingw32 'libpython20.a' to link with:
+-#   cd $PYTHON/libs
+-#   pexports python20.dll > python20.def
+-#   dlltool -d python20.def -l libpython20.a
+-# on my Linux box, I put the Python stuff here:
+-#PYTHON=/home/ron/ActivePython-2.0.0-202/src/Core
+-# on my NT box, it's here:
+-#PYTHON=c:/python20
+-
++#	Python interface:
++#	  PYTHON=[Path to Python directory] (Set inside Make_cyg.mak or Make_ming.mak)
++#	  DYNAMIC_PYTHON=yes (to load the Python DLL dynamically)
++#	  PYTHON_VER=[Python version, eg 22, 23, ..., 27] (default is 22)
+ ifdef PYTHON
+ ifndef DYNAMIC_PYTHON
+ DYNAMIC_PYTHON=yes
+@@ -221,8 +227,10 @@ PYTHONINC=-I $(PYTHON)/win32inc
+ endif
+ endif
+ 
+-#PYTHON3: See comment for Python 2 above
+-
++#	Python3 interface:
++#	  PYTHON3=[Path to Python3 directory] (Set inside Make_cyg.mak or Make_ming.mak)
++#	  DYNAMIC_PYTHON3=yes (to load the Python3 DLL dynamically)
++#	  PYTHON3_VER=[Python3 version, eg 31, 32] (default is 31)
+ ifdef PYTHON3
+ ifndef DYNAMIC_PYTHON3
+ DYNAMIC_PYTHON3=yes
+@@ -244,10 +252,9 @@ endif
+ endif
+ 
+ #	TCL interface:
+-#	  TCL=[Path to TCL directory]
++#	  TCL=[Path to TCL directory] (Set inside Make_cyg.mak or Make_ming.mak)
+ #	  DYNAMIC_TCL=yes (to load the TCL DLL dynamically)
+ #	  TCL_VER=[TCL version, eg 83, 84] (default is 83)
+-#TCL=c:/tcl
+ ifdef TCL
+ ifndef DYNAMIC_TCL
+ DYNAMIC_TCL=yes
+@@ -260,24 +267,25 @@ endif
+ 
+ 
+ #	Ruby interface:
+-#	  RUBY=[Path to Ruby directory]
++#	  RUBY=[Path to Ruby directory] (Set inside Make_cyg.mak or Make_ming.mak)
+ #	  DYNAMIC_RUBY=yes (to load the Ruby DLL dynamically)
+-#	  RUBY_VER=[Ruby version, eg 16, 17] (default is 16)
+-#	  RUBY_VER_LONG=[Ruby version, eg 1.6, 1.7] (default is 1.6)
++#	  RUBY_VER=[Ruby version, eg 18, 19, 20] (default is 18)
++#	  RUBY_VER_LONG=[Ruby version, eg 1.8, 1.9.1, 2.0.0] (default is 1.8)
+ #	    You must set RUBY_VER_LONG when changing RUBY_VER.
+-#	    You must set RUBY_API_VER version to RUBY_VER_LONG.
+-#	    Don't set ruby API version to RUBY_VER like 191.
+-#RUBY=c:/ruby
++#	    RUBY_API_VER is derived from RUBY_VER_LONG.
++#	    Note: If you use Ruby 1.9.3, set as follows:
++#	      RUBY_VER=19
++#	      RUBY_VER_LONG=1.9.1 (not 1.9.3, because the API version is 1.9.1.)
+ ifdef RUBY
+ ifndef DYNAMIC_RUBY
+ DYNAMIC_RUBY=yes
+ endif
+ #  Set default value
+ ifndef RUBY_VER
+-RUBY_VER = 16
++RUBY_VER = 18
+ endif
+ ifndef RUBY_VER_LONG
+-RUBY_VER_LONG = 1.6
++RUBY_VER_LONG = 1.8
+ endif
+ ifndef RUBY_API_VER
+ RUBY_API_VER = $(subst .,,$(RUBY_VER_LONG))
+@@ -335,13 +343,17 @@ DEFINES+=-DMS_WIN64
+ endif
+ ifeq ($(CROSS),yes)
+ # cross-compiler prefix:
++ifndef CROSS_COMPILE
+ CROSS_COMPILE = i586-pc-mingw32msvc-
++endif
+ DEL = rm
+ MKDIR = mkdir -p
+ DIRSLASH = /
+ else
+ # normal (Windows) compilation:
++ifndef CROSS_COMPILE
+ CROSS_COMPILE =
++endif
+ ifneq (sh.exe, $(SHELL))
+ DEL = rm
+ MKDIR = mkdir -p
+@@ -353,6 +365,7 @@ DIRSLASH = \\
+ endif
+ endif
+ CC := $(CROSS_COMPILE)gcc
++CXX := $(CROSS_COMPILE)g++
+ WINDRES := $(CROSS_COMPILE)windres
+ WINDRES_CC = $(CC)
+ 
+@@ -388,7 +401,7 @@ endif
+ endif
+ 
+ ifdef LUA
+-CFLAGS += -I$(LUA)/include -DFEAT_LUA
++CFLAGS += -I$(LUA)/include -I$(LUA) -DFEAT_LUA
+ ifeq (yes, $(DYNAMIC_LUA))
+ CFLAGS += -DDYNAMIC_LUA -DDYNAMIC_LUA_DLL=\"lua$(LUA_VER).dll\"
+ endif
+@@ -410,6 +423,10 @@ ifeq (yes, $(DYNAMIC_RUBY))
+ CFLAGS += -DDYNAMIC_RUBY -DDYNAMIC_RUBY_DLL=\"$(RUBY_INSTALL_NAME).dll\"
+ CFLAGS += -DDYNAMIC_RUBY_VER=$(RUBY_VER)
+ endif
++ifneq ($(findstring w64-mingw32,$(CC)),)
++# A workaround for MinGW-w64
++CFLAGS += -DHAVE_STRUCT_TIMESPEC -DHAVE_STRUCT_TIMEZONE
++endif
+ endif
+ 
+ ifdef PYTHON
+@@ -725,10 +742,10 @@ mpress: exes
+ 	mpress vim.exe
+ 
+ xxd/xxd.exe: xxd/xxd.c
+-	$(MAKE) -C xxd -f Make_ming.mak CC=$(CC)
++	$(MAKE) -C xxd -f Make_ming.mak CC='$(CC)'
+ 
+ GvimExt/gvimext.dll: GvimExt/gvimext.cpp GvimExt/gvimext.rc GvimExt/gvimext.h
+-	$(MAKE) -C GvimExt -f Make_ming.mak CROSS=$(CROSS) CROSS_COMPILE=$(CROSS_COMPILE)
++	$(MAKE) -C GvimExt -f Make_ming.mak CROSS=$(CROSS) CROSS_COMPILE=$(CROSS_COMPILE) CXX='$(CXX)' STATIC_STDCPLUS=$(STATIC_STDCPLUS)
+ 
+ clean:
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.o
+@@ -792,7 +809,7 @@ endif
+ 
+ if_perl.c: if_perl.xs typemap
+ 	$(XSUBPP) -prototypes -typemap \
+-	     $(PERLLIB)/ExtUtils/typemap if_perl.xs > $@
++	     "$(PERLTYPEMAP)" if_perl.xs > $@
+ 
+ $(OUTDIR)/netbeans.o:	netbeans.c $(INCL) $(NBDEBUG_INCL) $(NBDEBUG_SRC)
+ 	$(CC) -c $(CFLAGS) netbeans.c -o $(OUTDIR)/netbeans.o
