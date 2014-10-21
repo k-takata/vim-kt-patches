@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 563214ffe0f89cb295ec69003be9a9033dcbb814
+# Parent 6c830c6f3bc34b1e134ab6619273e0689cb7205a
 
 diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
 --- a/src/INSTALLpc.txt
@@ -130,102 +130,12 @@ new file mode 100644
 +
 +# Do not change this.
 +UNDER_CYGWIN = yes
-+include cyg_ming.mak
-diff --git a/src/Make_ming.mak b/src/Make_ming.mak
-new file mode 100644
---- /dev/null
-+++ b/src/Make_ming.mak
-@@ -0,0 +1,49 @@
-+#
-+# Makefile for VIM on Win32, using MinGW
-+#
-+# Also read INSTALLpc.txt!
-+#
-+# The old Make_ming.mak (maintained by Ron Aaron et al.) was merged into
-+# cyg_ming.mak.
-+# This file contains MinGW specific settings. Common settings are contained
-+# in cyg_ming.mak.
-+#
-+# Last updated by Ken Takata.
-+# Last Change: 2014 Oct 21
-+
-+
-+# uncomment 'PERL' if you want a perl-enabled version
-+#PERL=c:/perl
-+
-+# uncomment 'LUA' if you want a Lua-enabled version
-+#LUA=c:/lua
-+
-+# uncomment 'MZSCHEME' if you want a MzScheme-enabled version
-+#MZSCHEME=d:/plt
-+
-+# uncomment 'PYTHON' if you want a python-enabled version
-+# Put the path to the python distro here.  If cross compiling from Linux, you
-+# will also need to convert the header files to unix instead of dos format:
-+#   for fil in *.h ; do vim -e -c 'set ff=unix|w|q' $fil
-+# and also, you will need to make a mingw32 'libpython20.a' to link with:
-+#   cd $PYTHON/libs
-+#   pexports python20.dll > python20.def
-+#   dlltool -d python20.def -l libpython20.a
-+# on my Linux box, I put the Python stuff here:
-+#PYTHON=/home/ron/ActivePython-2.0.0-202/src/Core
-+# on my NT box, it's here:
-+#PYTHON=c:/python20
-+
-+# uncomment 'PYTHON3' if you want a python3-enabled version
-+#PYTHON3=c:/python31
-+
-+# uncomment 'TCL' if you want a Tcl-enabled version
-+#TCL=c:/tcl
-+
-+# uncomment 'RUBY' if you want a Ruby-enabled version
-+#RUBY=c:/ruby
-+
-+
-+# Do not change this.
-+UNDER_CYGWIN = no
-+include cyg_ming.mak
-diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
---- a/src/Make_mvc.mak
-+++ b/src/Make_mvc.mak
-@@ -50,13 +50,14 @@
- #	Perl interface:
- #	  PERL=[Path to Perl directory]
- #	  DYNAMIC_PERL=yes (to load the Perl DLL dynamically)
--#	  PERL_VER=[Perl version, in the form 55 (5.005), 56 (5.6.x), etc]
-+#	  PERL_VER=[Perl version, in the form 55 (5.005), 56 (5.6.x),
-+#		    510 (5.10.x), etc]
- #	  (default is 56)
- #
- #	Python interface:
- #	  PYTHON=[Path to Python directory]
- #	  DYNAMIC_PYTHON=yes (to load the Python DLL dynamically)
--#	  PYTHON_VER=[Python version, eg 15, 20]  (default is 22)
-+#	  PYTHON_VER=[Python version, eg 22, 23, ..., 27]  (default is 22)
- #
- #	Python3 interface:
- #	  PYTHON3=[Path to Python3 directory]
-@@ -66,11 +67,13 @@
- #	Ruby interface:
- #	  RUBY=[Path to Ruby directory]
- #	  DYNAMIC_RUBY=yes (to load the Ruby DLL dynamically)
--#	  RUBY_VER=[Ruby version, eg 16, 17] (default is 18)
--#	  RUBY_VER_LONG=[Ruby version, eg 1.6, 1.7] (default is 1.8)
-+#	  RUBY_VER=[Ruby version, eg 18, 19, 20] (default is 18)
-+#	  RUBY_VER_LONG=[Ruby version, eg 1.8, 1.9.1, 2.0.0] (default is 1.8)
- #	    You must set RUBY_VER_LONG when change RUBY_VER.
--#	    You must set RUBY_API_VER to RUBY_VER_LONG.
--#	    Don't set ruby API version to RUBY_VER like 191.
-+#	    RUBY_API_VER is derived from RUBY_VER_LONG.
-+#	    Note: If you use Ruby 1.9.3, set as follows:
-+#	      RUBY_VER=19
-+#	      RUBY_VER_LONG=1.9.1 (not 1.9.3, because the API version is 1.9.1.)
- #
- #	Tcl interface:
- #	  TCL=[Path to Tcl directory]
-diff --git a/src/cyg_ming.mak b/src/cyg_ming.mak
++include Make_cyg_ming.mak
+diff --git a/src/cyg_ming.mak b/src/Make_cyg_ming.mak
+rename from src/cyg_ming.mak
+rename to src/Make_cyg_ming.mak
 --- a/src/cyg_ming.mak
-+++ b/src/cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
 @@ -1,4 +1,7 @@
 -# Makefile for VIM on Win32
 +# Makefile for VIM on Win32 (Cygwin and MinGW)
@@ -467,3 +377,95 @@ diff --git a/src/cyg_ming.mak b/src/cyg_ming.mak
  
  $(OUTDIR)/netbeans.o:	netbeans.c $(INCL) $(NBDEBUG_INCL) $(NBDEBUG_SRC)
  	$(CC) -c $(CFLAGS) netbeans.c -o $(OUTDIR)/netbeans.o
+diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+new file mode 100644
+--- /dev/null
++++ b/src/Make_ming.mak
+@@ -0,0 +1,49 @@
++#
++# Makefile for VIM on Win32, using MinGW
++#
++# Also read INSTALLpc.txt!
++#
++# The old Make_ming.mak (maintained by Ron Aaron et al.) was merged into
++# cyg_ming.mak.
++# This file contains MinGW specific settings. Common settings are contained
++# in cyg_ming.mak.
++#
++# Last updated by Ken Takata.
++# Last Change: 2014 Oct 21
++
++
++# uncomment 'PERL' if you want a perl-enabled version
++#PERL=c:/perl
++
++# uncomment 'LUA' if you want a Lua-enabled version
++#LUA=c:/lua
++
++# uncomment 'MZSCHEME' if you want a MzScheme-enabled version
++#MZSCHEME=d:/plt
++
++# uncomment 'PYTHON' if you want a python-enabled version
++# Put the path to the python distro here.  If cross compiling from Linux, you
++# will also need to convert the header files to unix instead of dos format:
++#   for fil in *.h ; do vim -e -c 'set ff=unix|w|q' $fil
++# and also, you will need to make a mingw32 'libpython20.a' to link with:
++#   cd $PYTHON/libs
++#   pexports python20.dll > python20.def
++#   dlltool -d python20.def -l libpython20.a
++# on my Linux box, I put the Python stuff here:
++#PYTHON=/home/ron/ActivePython-2.0.0-202/src/Core
++# on my NT box, it's here:
++#PYTHON=c:/python20
++
++# uncomment 'PYTHON3' if you want a python3-enabled version
++#PYTHON3=c:/python31
++
++# uncomment 'TCL' if you want a Tcl-enabled version
++#TCL=c:/tcl
++
++# uncomment 'RUBY' if you want a Ruby-enabled version
++#RUBY=c:/ruby
++
++
++# Do not change this.
++UNDER_CYGWIN = no
++include Make_cyg_ming.mak
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -50,13 +50,14 @@
+ #	Perl interface:
+ #	  PERL=[Path to Perl directory]
+ #	  DYNAMIC_PERL=yes (to load the Perl DLL dynamically)
+-#	  PERL_VER=[Perl version, in the form 55 (5.005), 56 (5.6.x), etc]
++#	  PERL_VER=[Perl version, in the form 55 (5.005), 56 (5.6.x),
++#		    510 (5.10.x), etc]
+ #	  (default is 56)
+ #
+ #	Python interface:
+ #	  PYTHON=[Path to Python directory]
+ #	  DYNAMIC_PYTHON=yes (to load the Python DLL dynamically)
+-#	  PYTHON_VER=[Python version, eg 15, 20]  (default is 22)
++#	  PYTHON_VER=[Python version, eg 22, 23, ..., 27]  (default is 22)
+ #
+ #	Python3 interface:
+ #	  PYTHON3=[Path to Python3 directory]
+@@ -66,11 +67,13 @@
+ #	Ruby interface:
+ #	  RUBY=[Path to Ruby directory]
+ #	  DYNAMIC_RUBY=yes (to load the Ruby DLL dynamically)
+-#	  RUBY_VER=[Ruby version, eg 16, 17] (default is 18)
+-#	  RUBY_VER_LONG=[Ruby version, eg 1.6, 1.7] (default is 1.8)
++#	  RUBY_VER=[Ruby version, eg 18, 19, 20] (default is 18)
++#	  RUBY_VER_LONG=[Ruby version, eg 1.8, 1.9.1, 2.0.0] (default is 1.8)
+ #	    You must set RUBY_VER_LONG when change RUBY_VER.
+-#	    You must set RUBY_API_VER to RUBY_VER_LONG.
+-#	    Don't set ruby API version to RUBY_VER like 191.
++#	    RUBY_API_VER is derived from RUBY_VER_LONG.
++#	    Note: If you use Ruby 1.9.3, set as follows:
++#	      RUBY_VER=19
++#	      RUBY_VER_LONG=1.9.1 (not 1.9.3, because the API version is 1.9.1.)
+ #
+ #	Tcl interface:
+ #	  TCL=[Path to Tcl directory]
