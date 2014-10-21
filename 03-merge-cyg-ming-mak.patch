@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 6c830c6f3bc34b1e134ab6619273e0689cb7205a
+# Parent 3a4bb26413b3b5d8e1fb5864a1d1438f43c2607d
 
 diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
 --- a/src/INSTALLpc.txt
@@ -63,17 +63,19 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  Unix archive then).  Then you get a Cygwin application (feels like Vim is
  running on Unix), while with Make_cyg.mak you get a Windows application (like
  with the other makefiles).
-@@ -316,8 +319,8 @@ your Linux (or other unix) box.  To do t
+@@ -316,9 +319,9 @@ your Linux (or other unix) box.  To do t
  	http://www.mingw.org/wiki/LinuxCrossMinGW
  	http://www.libsdl.org/extras/win32/cross/README.txt
      2) Get and unpack both the Unix sources and the extra archive
 -    3) in 'Make_ming.mak', set 'CROSS' to 'yes' instead of 'no'.
 -       Make further changes to 'Make_ming.mak' as you wish.
-+    3) in 'cyg_ming.mak', set 'CROSS' to 'yes' instead of 'no'.
-+       Make further changes to 'cyg_ming.mak' and 'Make_ming.mak' as you wish.
-        If your cross-compiler prefix differs from the predefined value,
+-       If your cross-compiler prefix differs from the predefined value,
++    3) in 'Make_cyg_ming.mak', set 'CROSS' to 'yes' instead of 'no'.
++       Make further changes to 'Make_cyg_ming.mak' and 'Make_ming.mak' as you
++       wish.  If your cross-compiler prefix differs from the predefined value,
         set 'CROSS_COMPILE' corresponding.
      4) make -f Make_ming.mak gvim.exe
+ 
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 new file mode 100644
 --- /dev/null
@@ -88,9 +90,9 @@ new file mode 100644
 +# Cygwin application use the Makefile (just like on Unix).
 +#
 +# The old Make_cyg.mak (maintained by Dan Sharp et al.) was merged into
-+# cyg_ming.mak.  Note: USEDLL option was removed.
++# Make_cyg_ming.mak.  Note: USEDLL option was removed.
 +# This file contains Cygwin specific settings. Common settings are contained
-+# in cyg_ming.mak.
++# in Make_cyg_ming.mak.
 +#
 +# Last updated by Ken Takata.
 +# Last Change: 2014 Oct 21
@@ -122,7 +124,7 @@ new file mode 100644
 +# There are three MinGW packages in Cygwin:
 +#   32-bit: mingw-gcc-g++ and mingw64-i686-gcc-g++
 +#   64-bit: mingw64-x86_64-gcc-g++
-+# You may also need to set 'ARCH' in cyg_ming.mak.
++# You may also need to set 'ARCH' in Make_cyg_ming.mak.
 +CROSS_COMPILE = i686-pc-mingw32-
 +#CROSS_COMPILE = i686-w64-mingw32-
 +#CROSS_COMPILE = x86_64-w64-mingw32-
@@ -386,9 +388,9 @@ new file mode 100644
 +# Also read INSTALLpc.txt!
 +#
 +# The old Make_ming.mak (maintained by Ron Aaron et al.) was merged into
-+# cyg_ming.mak.
++# Make_cyg_ming.mak.
 +# This file contains MinGW specific settings. Common settings are contained
-+# in cyg_ming.mak.
++# in Make_cyg_ming.mak.
 +#
 +# Last updated by Ken Takata.
 +# Last Change: 2014 Oct 21
