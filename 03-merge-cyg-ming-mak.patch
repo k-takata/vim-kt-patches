@@ -131,10 +131,8 @@ new file mode 100644
 +# Do not change this.
 +UNDER_CYGWIN = yes
 +include Make_cyg_ming.mak
-diff --git a/src/cyg_ming.mak b/src/Make_cyg_ming.mak
-rename from src/cyg_ming.mak
-rename to src/Make_cyg_ming.mak
---- a/src/cyg_ming.mak
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
 @@ -1,4 +1,7 @@
 -# Makefile for VIM on Win32

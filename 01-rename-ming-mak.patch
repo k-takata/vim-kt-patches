@@ -1,5 +1,5 @@
 # HG changeset patch
 # Parent 575e8caa46a23a700ef41276995a348bd502d3c2
-diff --git a/src/Make_ming.mak b/src/cyg_ming.mak
+diff --git a/src/Make_ming.mak b/src/Make_cyg_ming.mak
 rename from src/Make_ming.mak
-rename to src/cyg_ming.mak
+rename to src/Make_cyg_ming.mak
