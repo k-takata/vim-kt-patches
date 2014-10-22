@@ -1,0 +1,13 @@
+# HG changeset patch
+# Parent d39a687766e4be809723041e07ab52c7dbfa6bfb
+diff --git a/src/testdir/test_mapping.in b/src/testdir/test_mapping.in
+--- a/src/testdir/test_mapping.in
++++ b/src/testdir/test_mapping.in
+@@ -3,6 +3,7 @@ Test for mappings and abbreviations
+ STARTTEST
+ :so small.vim
+ :so mbyte.vim
++:set encoding=utf-8
+ : " abbreviations with р (0x80) should work
+ :inoreab чкпр   vim
+ GAчкпр 
