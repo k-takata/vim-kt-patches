@@ -35,6 +35,7 @@ subpixel-artifacts.patch
 fix-indent-in-if_perl.patch
 fix-italic-overhang-before-space.patch
 fix-viminfo-attr.patch
+fix-7.4.039-S_IFDIR.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
 remove-client-edge.patch
