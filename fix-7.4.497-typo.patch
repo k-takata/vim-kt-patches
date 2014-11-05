@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent 2d289a3a611d95d444aa185174268572a9c73857
+diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
+--- a/src/testdir/Make_dos.mak
++++ b/src/testdir/Make_dos.mak
+@@ -87,7 +87,7 @@ clean:
+ 	-if exist Xfind rd /s /q Xfind
+ 	-if exist viminfo del viminfo
+ 	-del test.log
+-	-if exists benchmark.out del benchmark.out
++	-if exist benchmark.out del benchmark.out
+ 
+ .in.out:
+ 	-if exist $*.failed del $*.failed
