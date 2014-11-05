@@ -1,20 +1,21 @@
 # HG changeset patch
-# Parent 0d4e0cde36e15e6cc585b839fe1685e7030d129e
+# Parent a3c4bdc712bab885d59b17fa456b818a4f54310c
 
-diff -r 0d4e0cde36e1 .hgignore
---- a/.hgignore	Fri Jul 05 21:01:22 2013 +0200
-+++ b/.hgignore	Sat Jul 06 12:29:02 2013 +0900
-@@ -58,4 +58,6 @@
- src/testdir/small.vim 
- src/testdir/tiny.vim 
+diff --git a/.hgignore b/.hgignore
+--- a/.hgignore
++++ b/.hgignore
+@@ -71,5 +71,7 @@ src/testdir/lua.vim
+ src/testdir/small.vim
+ src/testdir/tiny.vim
  src/testdir/test*.out
 +src/testdir/test*.failed
  src/testdir/test.log
 +src/testdir/dostmp/*
-diff -r 0d4e0cde36e1 src/testdir/Make_dos.mak
---- a/src/testdir/Make_dos.mak	Fri Jul 05 21:01:22 2013 +0200
-+++ b/src/testdir/Make_dos.mak	Sat Jul 06 12:29:02 2013 +0900
-@@ -36,17 +36,53 @@
+ src/memfile_test
+diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
+--- a/src/testdir/Make_dos.mak
++++ b/src/testdir/Make_dos.mak
+@@ -50,17 +50,53 @@ SCRIPTS =	test3.out test4.out test5.out 
  
  SCRIPTS32 =	test50.out test70.out
  
@@ -73,8 +74,8 @@ diff -r 0d4e0cde36e1 src/testdir/Make_dos.mak
  
  fixff:
  	-$(VIMPROG) -u dos.vim --noplugin "+argdo set ff=dos|upd" +q *.in *.ok
-@@ -54,38 +90,27 @@
- 		dotest.in test60.ok test71.ok test74.ok
+@@ -68,47 +104,36 @@ fixff:
+ 		dotest.in test60.ok test71.ok test74.ok test100.ok
  
  report:
 -	@echo ""
@@ -99,6 +100,7 @@ diff -r 0d4e0cde36e1 src/testdir/Make_dos.mak
 -	-if exist Xfind rd /s /q Xfind
 -	-if exist viminfo del viminfo
 -	-del test.log
+-	-if exists benchmark.out del benchmark.out
 -
 -.in.out:
 -	-if exist $*.failed del $*.failed
@@ -127,7 +129,18 @@ diff -r 0d4e0cde36e1 src/testdir/Make_dos.mak
 +	-IF EXIST Xdir1 RD /s /q Xdir1
 +	-IF EXIST Xfind RD /s /q Xfind
 +	-IF EXIST viminfo DEL viminfo
++	-IF EXIST benchmark.out DEL benchmark.out
  
  nolog:
 -	-del test.log
 +	-DEL test.log
+ 
+ benchmark:
+ 	bench_re_freeze.out
+ 
+ bench_re_freeze.out: bench_re_freeze.vim
+-	-if exist benchmark.out del benchmark.out
++	-IF EXIST benchmark.out DEL benchmark.out
+ 	$(VIMPROG) -u dos.vim -U NONE --noplugin $*.in
+-	@IF EXIST benchmark.out ( type benchmark.out )
++	@IF EXIST benchmark.out ( TYPE benchmark.out )
