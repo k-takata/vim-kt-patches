@@ -1,4 +1,3 @@
-fix-7.4.497-typo.patch
 disable-regexp-debug-log.patch #+noregexplog
 support-tcl-dyn-on-unix.patch
 configure.patch
