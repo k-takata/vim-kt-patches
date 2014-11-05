@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 7f8532ea34c7d59db270a883fe55e1126eed16c6
+# Parent 91adde2d209d301b1e834460fb1479ecb6c9951b
 
 diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
 --- a/src/Make_bc5.mak
 +++ b/src/Make_bc5.mak
-@@ -1004,7 +1004,7 @@
+@@ -1006,7 +1006,7 @@ test:
  
  if_perl.c: if_perl.xs typemap
  	$(PERL)\bin\perl.exe $(PERL)\lib\ExtUtils\xsubpp -prototypes -typemap \
@@ -13,34 +13,22 @@ diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
  
  $(OBJDIR)\if_python.obj: if_python.c if_py_both.h python.lib
  	$(CC) -I$(PYTHON)\include $(CCARG) $(CC1) $(CC2)$@ -pc if_python.c
-diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
---- a/src/Make_cyg.mak
-+++ b/src/Make_cyg.mak
-@@ -679,7 +679,7 @@
- if_perl.c: if_perl.xs typemap
- 	$(PERL)/bin/perl `cygpath -d $(PERL)/lib/ExtUtils/xsubpp` \
- 		-prototypes -typemap \
--		`cygpath -d $(PERL)/lib/ExtUtils/typemap` if_perl.xs > $@
-+		`cygpath -d $(PERL)/lib/ExtUtils/typemap` if_perl.xs -output $@
- 
- $(OUTDIR)/if_perl.o:	if_perl.c $(INCL)
- ifeq (yes, $(USEDLL))
-diff --git a/src/Make_ming.mak b/src/Make_ming.mak
---- a/src/Make_ming.mak
-+++ b/src/Make_ming.mak
-@@ -803,7 +803,7 @@
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -809,7 +809,7 @@ endif
  
  if_perl.c: if_perl.xs typemap
  	$(XSUBPP) -prototypes -typemap \
--	     '$(PERLTYPEMAP)' if_perl.xs > $@
-+	     '$(PERLTYPEMAP)' if_perl.xs -output $@
+-	     "$(PERLTYPEMAP)" if_perl.xs > $@
++	     "$(PERLTYPEMAP)" if_perl.xs -output $@
  
  $(OUTDIR)/netbeans.o:	netbeans.c $(INCL) $(NBDEBUG_INCL) $(NBDEBUG_SRC)
  	$(CC) -c $(CFLAGS) netbeans.c -o $(OUTDIR)/netbeans.o
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1120,7 +1120,7 @@
+@@ -1148,7 +1148,7 @@ testclean:
  
  if_perl.c : if_perl.xs typemap
  	$(XSUBPP) -prototypes -typemap $(XSUBPP_TYPEMAP) \

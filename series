@@ -44,7 +44,6 @@ use-correct-struct-size.patch
 Make_mvc.mak.patch
 add-stat-test.patch
 gvim-nsi.patch
-mingw_lua_dir.patch
 bmp-rle.patch
 fix-clang-cygwin-perl.patch
 fix-issue-239.patch
