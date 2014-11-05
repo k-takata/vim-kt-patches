@@ -52,6 +52,5 @@ fix-issue-239.patch
 fix-long-filename-with-ANSI-API.patch
 fix-opening-259-chars-filename.patch
 fix-mch_can_exe-with-long-filename.patch
-fix-7.4.476-cygwin.patch
 fix-test72-on-windows.patch
 fix-config_cache-removal.patch #+rejected
