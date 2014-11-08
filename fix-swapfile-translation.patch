@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent d509e3f8d5d82d1d48d1299fbd629518b27c64ef
+diff --git a/src/po/ja.po b/src/po/ja.po
+--- a/src/po/ja.po
++++ b/src/po/ja.po
+@@ -3551,7 +3551,7 @@ msgid ""
+ "\n"
+ msgstr ""
+ "\n"
+-"それから.swpファイルを削除してください\n"
++"元の.swpファイルは削除しても構いません\n"
+ "\n"
+ 
+ msgid "Using crypt key from swap file for the text file.\n"

@@ -48,4 +48,5 @@ bmp-rle.patch
 fix-clang-cygwin-perl.patch
 fix-issue-239.patch
 fix-mch_can_exe-with-long-filename.patch
+fix-swapfile-translation.patch
 fix-config_cache-removal.patch #+rejected
