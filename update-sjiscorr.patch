@@ -1,0 +1,16 @@
+# HG changeset patch
+# Parent d9377ab8b4b1781a4c4f422ec2ffc62e4735d573
+diff --git a/src/po/sjiscorr.c b/src/po/sjiscorr.c
+--- a/src/po/sjiscorr.c
++++ b/src/po/sjiscorr.c
+@@ -23,9 +23,8 @@ main(argc, argv)
+ 				fputs("charset=cp932", stdout);
+ 				p += 12;
+ 			}
+-			else if (strncmp(p, "ja.po - Japanese message file", 29) == 0)
++			else if (strncmp(p, "# Original translations", 23) == 0)
+ 			{
+-				fputs("ja.sjis.po - Japanese message file for Vim (version 6.x)\n", stdout);
+ 				fputs("# generated from ja.po, DO NOT EDIT", stdout);
+ 				while (p[1] != '\n')
+ 					++p;
