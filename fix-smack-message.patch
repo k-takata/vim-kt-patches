@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 83bf5615a5a331d54c327f71ed98a1e9fdc19219
+# Parent 9858fc59b4864edc915acf89b348c1badc0a8272
 
 diff --git a/src/os_unix.c b/src/os_unix.c
 --- a/src/os_unix.c
@@ -16,7 +16,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
 +		vim_snprintf((char *)IObuff, IOSIZE,
 +			_("Could not set security context %s for %s\n"),
 +			name, to_file);
-+		msg_outtrans(IObuff);
++		MSG_PUTS(IObuff);
  	    }
  	}
  	else
@@ -32,7 +32,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
 +		    vim_snprintf((char *)IObuff, IOSIZE,
 +			    _("Could not get security context %s for %s. Removing it!\n"),
 +			    name, from_file);
-+		    msg_outtrans(IObuff);
++		    MSG_PUTS(IObuff);
  		    /* FALLTHROUGH to remove the attribute */
  
  		case ENODATA:
