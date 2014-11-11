@@ -1,0 +1,38 @@
+# HG changeset patch
+# Parent 83bf5615a5a331d54c327f71ed98a1e9fdc19219
+
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -2848,11 +2848,10 @@ mch_copy_sec(from_file, to_file)
+ 	    ret = setxattr((char*)to_file, name, buffer, (size_t)size, 0);
+ 	    if (ret < 0)
+ 	    {
+-		MSG_PUTS(_("Could not set security context "));
+-		MSG_PUTS(name);
+-		MSG_PUTS(_(" for "));
+-		msg_outtrans(to_file);
+-		msg_putchar('\n');
++		vim_snprintf((char *)IObuff, IOSIZE,
++			_("Could not set security context %s for %s\n"),
++			name, to_file);
++		msg_outtrans(IObuff);
+ 	    }
+ 	}
+ 	else
+@@ -2868,11 +2867,10 @@ mch_copy_sec(from_file, to_file)
+ 		case ERANGE:
+ 		default:
+ 		    /* no enough size OR unexpected error */
+-		    MSG_PUTS(_("Could not get security context "));
+-		    MSG_PUTS(name);
+-		    MSG_PUTS(_(" for "));
+-		    msg_outtrans(from_file);
+-		    MSG_PUTS(_(". Removing it!\n"));
++		    vim_snprintf((char *)IObuff, IOSIZE,
++			    _("Could not get security context %s for %s. Removing it!\n"),
++			    name, from_file);
++		    msg_outtrans(IObuff);
+ 		    /* FALLTHROUGH to remove the attribute */
+ 
+ 		case ENODATA:
