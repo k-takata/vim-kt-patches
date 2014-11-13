@@ -50,4 +50,5 @@ fix-issue-239.patch
 fix-mch_can_exe-with-long-filename.patch
 fix-swapfile-translation.patch
 fix-smack-message.patch
+if_ruby-warning.patch
 fix-config_cache-removal.patch #+rejected
