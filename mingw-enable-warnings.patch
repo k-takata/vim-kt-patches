@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent d6158470706d2ce4d1ed508b2c252b4be708e230
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -372,7 +372,7 @@ WINDRES_CC = $(CC)
+ #>>>>> end of choices
+ ###########################################################################
+ 
+-CFLAGS = -Iproto $(DEFINES) -pipe -w -march=$(ARCH) -Wall
++CFLAGS = -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall
+ WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
+ EXTRA_LIBS =
+ 
