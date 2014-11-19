@@ -54,5 +54,4 @@ fix-smack-message.patch
 if_ruby-warning.patch
 mingw-enable-warnings.patch
 clean-up-todo.txt.patch
-fix-buffersize-in-modify_fname.patch
 fix-config_cache-removal.patch #+rejected
