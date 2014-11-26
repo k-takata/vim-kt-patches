@@ -1,0 +1,41 @@
+diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
+--- a/src/gui_gtk_x11.c
++++ b/src/gui_gtk_x11.c
+@@ -5163,6 +5163,12 @@ skipitall:
+     return column_offset;
+ }
+ 
++/* force a redraw of the gtk2 widgets */
++void gui_gtk2_force_redraw()
++{
++    gtk_widget_queue_draw(gui.drawarea);
++}
++
+ /*
+  * Return OK if the key with the termcap name "name" is supported.
+  */
+diff --git a/src/proto/gui_gtk_x11.pro b/src/proto/gui_gtk_x11.pro
+--- a/src/proto/gui_gtk_x11.pro
++++ b/src/proto/gui_gtk_x11.pro
+@@ -38,6 +38,7 @@ void gui_mch_set_fg_color __ARGS((guicol
+ void gui_mch_set_bg_color __ARGS((guicolor_T color));
+ void gui_mch_set_sp_color __ARGS((guicolor_T color));
+ int gui_gtk2_draw_string __ARGS((int row, int col, char_u *s, int len, int flags));
++void gui_gtk2_force_redraw __ARGS((void));
+ int gui_mch_haskey __ARGS((char_u *name));
+ int gui_get_x11_windis __ARGS((Window *win, Display **dis));
+ Display *gui_mch_get_display __ARGS((void));
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -728,6 +728,10 @@ update_screen(type)
+ 	if (did_one)
+ 	    gui_update_cursor(FALSE, FALSE);
+ 	gui_update_scrollbars(FALSE);
++#ifdef FEAT_GUI_GTK
++	if (type >= NOT_VALID)
++	    gui_gtk2_force_redraw();
++#endif
+     }
+ #endif
+ }

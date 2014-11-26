@@ -4,7 +4,8 @@ configure.patch
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
 myconfiguration-private-install.patch #+private-install
-backout-7.3.638.patch #+linux
+backout-7.3.638.patch #+disabled
+gtk2_force_redraw.diff #+linux
 timers3.patch #+timers
 timers-mark.diff #+timers
 0000-kaoriya_marks.diff
