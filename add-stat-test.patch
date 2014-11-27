@@ -1,26 +1,23 @@
 # HG changeset patch
-# Parent e42a369431cedf465e149fd350bf489dec7dae29
+# Parent da44dcf320f08e4d877273864173767df557292b
 
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
 +++ b/src/testdir/Make_amiga.mak
-@@ -35,7 +35,7 @@ SCRIPTS = test1.out test3.out test4.out 
- 		test89.out test90.out test91.out test92.out test93.out \
- 		test94.out test95.out test96.out test97.out test98.out \
- 		test99.out test100.out test101.out test102.out test103.out \
--		test104.out test105.out test106.out test107.out \
-+		test104.out test105.out test106.out test107.out test108.out \
- 		test_autoformat_join.out \
- 		test_breakindent.out \
- 		test_listlbr.out \
-@@ -164,6 +164,7 @@ test104.out: test104.in
- test105.out: test105.in
- test106.out: test106.in
- test107.out: test107.in
-+test108.out: test108.in
- test_autoformat_join.out: test_autoformat_join.in
- test_breakindent.out: test_breakindent.in
- test_listlbr.out: test_listlbr.in
+@@ -49,6 +49,7 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_options.out \
+ 		test_qf_title.out \
+ 		test_signs.out \
++		test_stat.out \
+ 		test_utf8.out
+ 
+ .SUFFIXES: .in .out
+@@ -185,4 +186,5 @@ test_listlbr_utf8.out: test_listlbr_utf8
+ test_options.out: test_options.in
+ test_qf_title.out: test_qf_title.in
+ test_signs.out: test_signs.in
++test_stat.out: test_stat.in
+ test_utf8.out: test_utf8.in
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 --- a/src/testdir/Make_dos.mak
 +++ b/src/testdir/Make_dos.mak
@@ -29,62 +26,66 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
  		test94.out test95.out test96.out test98.out test99.out \
  		test100.out test101.out test102.out test103.out test104.out \
 -		test105.out test106.out  test107.out\
-+		test105.out test106.out test107.out test108.out \
++		test105.out test106.out test107.out\
+ 		test_argument_count.out \
  		test_autoformat_join.out \
  		test_breakindent.out \
- 		test_listlbr \
+@@ -48,6 +48,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_options.out \
+ 		test_qf_title.out \
+ 		test_signs.out \
++		test_stat.out \
+ 		test_utf8.out
+ 
+ SCRIPTS32 =	test50.out test70.out
 diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 --- a/src/testdir/Make_ming.mak
 +++ b/src/testdir/Make_ming.mak
-@@ -54,7 +54,7 @@ SCRIPTS =	test3.out test4.out test5.out 
- 		test89.out test90.out test91.out test92.out test93.out \
- 		test94.out test95.out test96.out test98.out test99.out \
- 		test100.out test101.out test102.out test103.out test104.out \
--		test105.out test106.out test107.out \
-+		test105.out test106.out test107.out test108.out \
- 		test_autoformat_join.out \
- 		test_breakindent.out \
- 		test_listlbr.out \
+@@ -70,6 +70,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_options.out \
+ 		test_qf_title.out \
+ 		test_signs.out \
++		test_stat.out \
+ 		test_utf8.out
+ 
+ SCRIPTS32 =	test50.out test70.out
 diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 --- a/src/testdir/Make_os2.mak
 +++ b/src/testdir/Make_os2.mak
-@@ -36,7 +36,7 @@ SCRIPTS = test1.out test3.out test4.out 
- 		test89.out test90.out test91.out test92.out test93.out \
- 		test94.out test95.out test96.out test98.out test99.out \
- 		test100.out test101.out test102.out test103.out test104.out \
--		test105.out test106.out test107.out \
-+		test105.out test106.out test107.out test108.out \
- 		test_autoformat_join.out \
- 		test_eval.out \
- 		test_breakindent.out \
+@@ -50,6 +50,7 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_options.out \
+ 		test_qf_title.out \
+ 		test_signs.out \
++		test_stat.out \
+ 		test_utf8.out
+ 
+ SCRIPTS_BENCH = bench_re_freeze.out
 diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 --- a/src/testdir/Make_vms.mms
 +++ b/src/testdir/Make_vms.mms
-@@ -95,7 +95,7 @@ SCRIPT = test1.out  test2.out  test3.out
- 	 test90.out test91.out test92.out test93.out test94.out \
- 	 test95.out test96.out test98.out test99.out \
- 	 test100.out test101.out test103.out test104.out \
--	 test105.out test106.out test107.out \
-+	 test105.out test106.out test107.out test108.out \
- 	 test_autoformat_join.out \
- 	 test_breakindent.out \
- 	 test_listlbr.out \
+@@ -109,6 +109,7 @@ SCRIPT = test1.out  test2.out  test3.out
+ 	 test_options.out \
+ 	 test_qf_title.out \
+ 	 test_signs.out \
++	 test_stat.out \
+ 	 test_utf8.out
+ 
+ # Known problems:
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
-@@ -32,7 +32,7 @@ SCRIPTS = test1.out test2.out test3.out 
- 		test89.out test90.out test91.out test92.out test93.out \
- 		test94.out test95.out test96.out test97.out test98.out \
- 		test99.out test100.out test101.out test102.out test103.out \
--		test104.out test105.out test106.out test107.out \
-+		test104.out test105.out test106.out test107.out test108.out \
- 		test_autoformat_join.out \
- 		test_breakindent.out \
- 		test_listlbr.out \
-diff --git a/src/testdir/test108.in b/src/testdir/test108.in
+@@ -46,6 +46,7 @@ SCRIPTS = test1.out test2.out test3.out 
+ 		test_options.out \
+ 		test_qf_title.out \
+ 		test_signs.out \
++		test_stat.out \
+ 		test_utf8.out
+ 
+ SCRIPTS_GUI = test16.out
+diff --git a/src/testdir/test_stat.in b/src/testdir/test_stat.in
 new file mode 100644
 --- /dev/null
-+++ b/src/testdir/test108.in
++++ b/src/testdir/test_stat.in
 @@ -0,0 +1,48 @@
 +Tests for stat functions and checktime     vim: set ft=vim :
 +
@@ -134,10 +135,10 @@ new file mode 100644
 +:qa!
 +ENDTEST
 +
-diff --git a/src/testdir/test108.ok b/src/testdir/test108.ok
+diff --git a/src/testdir/test_stat.ok b/src/testdir/test_stat.ok
 new file mode 100644
 --- /dev/null
-+++ b/src/testdir/test108.ok
++++ b/src/testdir/test_stat.ok
 @@ -0,0 +1,17 @@
 +
 +Existent file:
