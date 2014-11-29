@@ -12,8 +12,8 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
 +XPStyle on
  
  ComponentText "This will install Vim ${VER_MAJOR}.${VER_MINOR} on your computer."
- DirText "Choose a directory to install Vim (must end in 'vim')"
-@@ -56,9 +57,6 @@
+ DirText "Choose a directory to install Vim (should contain 'vim')"
+@@ -56,9 +57,6 @@ LicenseData ${VIMRT}\doc\uganda.nsis.txt
    !packhdr temp.dat "upx --best --compress-icons=1 temp.dat"
  !endif
  
