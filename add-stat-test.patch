@@ -1,6 +1,17 @@
 # HG changeset patch
-# Parent da44dcf320f08e4d877273864173767df557292b
+# Parent 3406c8e2bb1115abda86330e6ac3282e92b6847f
 
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -1906,6 +1906,7 @@ test1 \
+ 	test_options \
+ 	test_qf_title \
+ 	test_signs \
++	test_stat \
+ 	test_utf8 \
+ 	test_writefile \
+ 	test2 test3 test4 test5 test6 test7 test8 test9 \
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
 +++ b/src/testdir/Make_amiga.mak
