@@ -53,4 +53,5 @@ fix-mch_can_exe-with-long-filename.patch
 fix-swapfile-translation.patch
 fix-smack-message.patch
 mingw-enable-warnings.patch
+fix-mingw-64bit-windres.patch
 fix-config_cache-removal.patch #+rejected
