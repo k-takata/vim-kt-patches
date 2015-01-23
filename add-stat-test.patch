@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent 3406c8e2bb1115abda86330e6ac3282e92b6847f
+# Parent 404e8a31640c8a821bc505513c0583b7840d8bcf
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1906,6 +1906,7 @@ test1 \
+@@ -1907,6 +1907,7 @@ test1 \
  	test_options \
  	test_qf_title \
  	test_signs \
@@ -15,7 +15,7 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
 +++ b/src/testdir/Make_amiga.mak
-@@ -49,6 +49,7 @@ SCRIPTS = test1.out test3.out test4.out 
+@@ -52,6 +52,7 @@ SCRIPTS = test1.out test3.out test4.out 
  		test_options.out \
  		test_qf_title.out \
  		test_signs.out \
@@ -23,7 +23,7 @@ diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
  		test_utf8.out
  
  .SUFFIXES: .in .out
-@@ -185,4 +186,5 @@ test_listlbr_utf8.out: test_listlbr_utf8
+@@ -192,4 +193,5 @@ test_nested_function.out: test_nested_fu
  test_options.out: test_options.in
  test_qf_title.out: test_qf_title.in
  test_signs.out: test_signs.in
@@ -38,10 +38,10 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
  		test100.out test101.out test102.out test103.out test104.out \
 -		test105.out test106.out  test107.out\
 +		test105.out test106.out test107.out\
+ 		test_argument_0count.out \
  		test_argument_count.out \
  		test_autoformat_join.out \
- 		test_breakindent.out \
-@@ -48,6 +48,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+@@ -51,6 +51,7 @@ SCRIPTS =	test3.out test4.out test5.out 
  		test_options.out \
  		test_qf_title.out \
  		test_signs.out \
@@ -52,7 +52,7 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 --- a/src/testdir/Make_ming.mak
 +++ b/src/testdir/Make_ming.mak
-@@ -70,6 +70,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+@@ -73,6 +73,7 @@ SCRIPTS =	test3.out test4.out test5.out 
  		test_options.out \
  		test_qf_title.out \
  		test_signs.out \
@@ -63,7 +63,7 @@ diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 --- a/src/testdir/Make_os2.mak
 +++ b/src/testdir/Make_os2.mak
-@@ -50,6 +50,7 @@ SCRIPTS = test1.out test3.out test4.out 
+@@ -53,6 +53,7 @@ SCRIPTS = test1.out test3.out test4.out 
  		test_options.out \
  		test_qf_title.out \
  		test_signs.out \
@@ -74,7 +74,7 @@ diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 --- a/src/testdir/Make_vms.mms
 +++ b/src/testdir/Make_vms.mms
-@@ -109,6 +109,7 @@ SCRIPT = test1.out  test2.out  test3.out
+@@ -112,6 +112,7 @@ SCRIPT = test1.out  test2.out  test3.out
  	 test_options.out \
  	 test_qf_title.out \
  	 test_signs.out \
@@ -85,7 +85,7 @@ diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
-@@ -46,6 +46,7 @@ SCRIPTS = test1.out test2.out test3.out 
+@@ -49,6 +49,7 @@ SCRIPTS = test1.out test2.out test3.out 
  		test_options.out \
  		test_qf_title.out \
  		test_signs.out \
