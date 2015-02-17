@@ -12,9 +12,9 @@ timers-mark.diff #+timers
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
 support-alt-gettext-dll.patch
-cpo-N.diff
-cpo-N-mark.diff
-cpo-N-update-tags.patch
+cpo-N.diff #+rejected
+cpo-N-mark.diff #+rejected
+cpo-N-update-tags.patch #+rejected
 if_perl-use-output.patch
 improve_dos_test.diff
 improve_dos_test-addition.diff
