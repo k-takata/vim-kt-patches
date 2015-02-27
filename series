@@ -16,8 +16,6 @@ cpo-N.diff #+rejected
 cpo-N-mark.diff #+rejected
 cpo-N-update-tags.patch #+rejected
 if_perl-use-output.patch
-improve_dos_test.diff
-improve_dos_test-addition.diff
 X004-eval_rmdir.diff
 X004-eval_rmdir-fix-warning.diff
 X004_01-rmdir_support_symlinks.diff
