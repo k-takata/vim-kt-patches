@@ -1,0 +1,13 @@
+# HG changeset patch
+# Parent 9da5e1baf1589eaaa748baf71c434f2dda19bc4e
+diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
+--- a/src/testdir/Make_dos.mak
++++ b/src/testdir/Make_dos.mak
+@@ -85,7 +85,6 @@ win32:	nolog $(SCRIPTS16) $(SCRIPTS) $(S
+ $(TEST_OUTFILES): $(DOSTMP)\$(*B).in
+ 	-@if exist test.out DEL test.out
+ 	move $(*B).in $(*B).in.bak
+-	copy $*.in $(*B).in
+ 	copy $(DOSTMP)\$(*B).in $(*B).in
+ 	copy $(*B).ok test.ok
+ 	$(VIMPROG) -u dos.vim -U NONE --noplugin -s dotest.in $(*B).in
