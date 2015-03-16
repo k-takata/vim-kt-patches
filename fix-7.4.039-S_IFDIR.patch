@@ -1,12 +1,13 @@
 # HG changeset patch
 # Parent 8bb4ca7fba402830d8b7f05de44651dfbe23a048
+# Parent  66221e31823be98f317b981bfda691785d38b612
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -503,12 +503,14 @@ slash_adjust(p)
+@@ -515,12 +515,14 @@ slash_adjust(p)
      static int
- stat_symlink_aware(const char *name, struct stat *stp)
+ stat_symlink_aware(const char *name, stat_T *stp)
  {
 -#if defined(_MSC_VER) && _MSC_VER < 1700
 -    /* Work around for VC10 or earlier. stat() can't handle symlinks properly.
@@ -22,7 +23,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      WIN32_FIND_DATA	findData;
      HANDLE		hFind, h;
      DWORD		attr = 0;
-@@ -537,11 +539,12 @@ stat_symlink_aware(const char *name, str
+@@ -549,11 +551,12 @@ stat_symlink_aware(const char *name, sta
  
  	    fd = _open_osfhandle((OPEN_OH_ARGTYPE)h, _O_RDONLY);
  	    n = _fstat(fd, (struct _stat*)stp);
@@ -36,9 +37,9 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      return stat(name, stp);
  }
  
-@@ -549,12 +552,14 @@ stat_symlink_aware(const char *name, str
+@@ -561,12 +564,14 @@ stat_symlink_aware(const char *name, sta
      static int
- wstat_symlink_aware(const WCHAR *name, struct _stat *stp)
+ wstat_symlink_aware(const WCHAR *name, stat_T *stp)
  {
 -# if defined(_MSC_VER) && _MSC_VER < 1700
 -    /* Work around for VC10 or earlier. _wstat() can't handle symlinks properly.
@@ -54,10 +55,10 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      int			n;
      BOOL		is_symlink = FALSE;
      HANDLE		hFind, h;
-@@ -584,11 +589,12 @@ wstat_symlink_aware(const WCHAR *name, s
+@@ -596,11 +601,12 @@ wstat_symlink_aware(const WCHAR *name, s
  
  	    fd = _open_osfhandle((OPEN_OH_ARGTYPE)h, _O_RDONLY);
- 	    n = _fstat(fd, stp);
+ 	    n = _fstat(fd, (struct _stat *)stp);
 +	    if ((n == 0) && (attr & FILE_ATTRIBUTE_DIRECTORY))
 +		stp->st_mode = (stp->st_mode & ~S_IFREG) | S_IFDIR;
  	    _close(fd);
@@ -65,6 +66,6 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	}
      }
 -# endif
-     return _wstat(name, stp);
+     return _wstat(name, (struct _stat *)stp);
  }
  #endif

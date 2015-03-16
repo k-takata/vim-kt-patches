@@ -1,5 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
+# Parent  1faae9df76a910a7b63eddbc5380442b1d343211
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -108,7 +109,7 @@ diff --git a/src/diff.c b/src/diff.c
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -11752,7 +11752,7 @@ f_getfperm(argvars, rettv)
+@@ -11750,7 +11750,7 @@ f_getfperm(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -117,7 +118,7 @@ diff --git a/src/eval.c b/src/eval.c
      char_u	*perm = NULL;
      char_u	flags[] = "rwx";
      int		i;
-@@ -11784,7 +11784,7 @@ f_getfsize(argvars, rettv)
+@@ -11782,7 +11782,7 @@ f_getfsize(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -126,7 +127,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -11816,7 +11816,7 @@ f_getftime(argvars, rettv)
+@@ -11814,7 +11814,7 @@ f_getftime(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -135,7 +136,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -11835,7 +11835,7 @@ f_getftype(argvars, rettv)
+@@ -11833,7 +11833,7 @@ f_getftype(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -163,7 +164,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 +    stat_T	st_old;		/* mch_stat() of existing viminfo file */
  #endif
  #ifdef WIN3264
-     int		hidden = FALSE;
+     long	perm = -1;
 @@ -3004,7 +3004,7 @@ check_readonly(forceit, buf)
      int		*forceit;
      buf_T	*buf;
@@ -690,35 +691,34 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 -stat_symlink_aware(const char *name, struct stat *stp)
 +stat_symlink_aware(const char *name, stat_T *stp)
  {
-     /* stat() can't handle symlinks properly.
-      * VC9 or earlier: stat() doesn't support a symlink at all. It retrieves
-@@ -550,7 +562,7 @@ stat_symlink_aware(const char *name, str
+ #if defined(_MSC_VER) && _MSC_VER < 1700
+     /* Work around for VC10 or earlier. stat() can't handle symlinks properly.
+@@ -547,7 +559,7 @@ stat_symlink_aware(const char *name, str
  
  #ifdef FEAT_MBYTE
      static int
 -wstat_symlink_aware(const WCHAR *name, struct _stat *stp)
 +wstat_symlink_aware(const WCHAR *name, stat_T *stp)
  {
-     /* _wstat() can't handle symlinks properly.
-      * VC9 or earlier: _wstat() doesn't support a symlink at all. It retrieves
-@@ -588,14 +600,14 @@ wstat_symlink_aware(const WCHAR *name, s
+ # if defined(_MSC_VER) && _MSC_VER < 1700
+     /* Work around for VC10 or earlier. _wstat() can't handle symlinks properly.
+@@ -583,13 +595,13 @@ wstat_symlink_aware(const WCHAR *name, s
  	    int	    fd;
  
  	    fd = _open_osfhandle((OPEN_OH_ARGTYPE)h, _O_RDONLY);
 -	    n = _fstat(fd, stp);
 +	    n = _fstat(fd, (struct _stat *)stp);
- 	    if ((n == 0) && (attr & FILE_ATTRIBUTE_DIRECTORY))
- 		stp->st_mode = (stp->st_mode & ~S_IFREG) | S_IFDIR;
  	    _close(fd);
  	    return n;
  	}
      }
+ # endif
 -    return _wstat(name, stp);
 +    return _wstat(name, (struct _stat *)stp);
  }
  #endif
  
-@@ -603,7 +615,7 @@ wstat_symlink_aware(const WCHAR *name, s
+@@ -597,7 +609,7 @@ wstat_symlink_aware(const WCHAR *name, s
   * stat() can't handle a trailing '/' or '\', remove it first.
   */
      int
@@ -727,7 +727,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  #ifdef FEAT_MBYTE
      /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
-@@ -648,7 +660,7 @@ vim_stat(const char *name, struct stat *
+@@ -642,7 +654,7 @@ vim_stat(const char *name, struct stat *
  
  	if (wp != NULL)
  	{
@@ -739,7 +739,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3039,7 +3039,7 @@ mch_dirname(
+@@ -3036,7 +3036,7 @@ mch_dirname(
      long
  mch_getperm(char_u *name)
  {
@@ -866,7 +866,7 @@ diff --git a/src/undo.c b/src/undo.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2007,17 +2007,12 @@ typedef int VimClipboard;	/* This is req
+@@ -1998,17 +1998,12 @@ typedef int VimClipboard;	/* This is req
  # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
  #endif
  
