@@ -1,11 +1,12 @@
 # HG changeset patch
 # Parent 54d16fd0043efd5d2228090ba2d4627df5d54dc0
+# Parent  3bd553b9e4bfe949cdbece3b59cc8b7b2ef1c624
 implement a new vim script function rmdir()
 
-diff -r 54d16fd0043e runtime/doc/eval.txt
---- a/runtime/doc/eval.txt	Sun Sep 01 21:56:38 2013 +0900
-+++ b/runtime/doc/eval.txt	Mon Sep 02 23:16:53 2013 +0900
-@@ -1905,6 +1905,7 @@
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1934,6 +1934,7 @@ rename( {from}, {to})		Number	rename (mo
  repeat( {expr}, {count})	String	repeat {expr} {count} times
  resolve( {filename})		String	get filename a shortcut points to
  reverse( {list})		List	reverse {list} in-place
@@ -13,7 +14,7 @@ diff -r 54d16fd0043e runtime/doc/eval.txt
  round( {expr})			Float	round off {expr}
  screenattr( {row}, {col})	Number	attribute at screen position
  screenchar( {row}, {col})	Number	character at screen position
-@@ -4879,6 +4880,14 @@
+@@ -5066,6 +5067,14 @@ reverse({list})	Reverse the order of ite
  		If you want a list to remain unmodified make a copy first: >
  			:let revlist = reverse(copy(mylist))
  
@@ -28,10 +29,10 @@ diff -r 54d16fd0043e runtime/doc/eval.txt
  round({expr})							*round()*
  		Round off {expr} to the nearest integral value and return it
  		as a |Float|.  If {expr} lies halfway between two integral
-diff -r 54d16fd0043e src/eval.c
---- a/src/eval.c	Sun Sep 01 21:56:38 2013 +0900
-+++ b/src/eval.c	Mon Sep 02 23:16:53 2013 +0900
-@@ -654,6 +654,7 @@
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -667,6 +667,7 @@ static void f_rename __ARGS((typval_T *a
  static void f_repeat __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_resolve __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_reverse __ARGS((typval_T *argvars, typval_T *rettv));
@@ -39,7 +40,7 @@ diff -r 54d16fd0043e src/eval.c
  #ifdef FEAT_FLOAT
  static void f_round __ARGS((typval_T *argvars, typval_T *rettv));
  #endif
-@@ -8043,6 +8044,7 @@
+@@ -8237,6 +8238,7 @@ static struct fst
      {"repeat",		2, 2, f_repeat},
      {"resolve",		1, 1, f_resolve},
      {"reverse",		1, 1, f_reverse},
@@ -47,7 +48,7 @@ diff -r 54d16fd0043e src/eval.c
  #ifdef FEAT_FLOAT
      {"round",		1, 1, f_round},
  #endif
-@@ -15654,6 +15656,48 @@
+@@ -16173,6 +16175,48 @@ f_reverse(argvars, rettv)
      }
  }
  
@@ -96,10 +97,10 @@ diff -r 54d16fd0043e src/eval.c
  #define SP_NOMOVE	0x01	    /* don't move cursor */
  #define SP_REPEAT	0x02	    /* repeat to find outer pair */
  #define SP_RETCOUNT	0x04	    /* return matchcount */
-diff -r 54d16fd0043e src/misc2.c
---- a/src/misc2.c	Sun Sep 01 21:56:38 2013 +0900
-+++ b/src/misc2.c	Mon Sep 02 23:16:53 2013 +0900
-@@ -6641,3 +6641,70 @@
+diff --git a/src/misc2.c b/src/misc2.c
+--- a/src/misc2.c
++++ b/src/misc2.c
+@@ -6353,3 +6353,70 @@ has_non_ascii(s)
      return FALSE;
  }
  #endif
@@ -170,10 +171,10 @@ diff -r 54d16fd0043e src/misc2.c
 +
 +    return mch_rmdir(path) == 0 ? 0 : -1;
 +}
-diff -r 54d16fd0043e src/os_win32.c
---- a/src/os_win32.c	Sun Sep 01 21:56:38 2013 +0900
-+++ b/src/os_win32.c	Mon Sep 02 23:16:53 2013 +0900
-@@ -5721,6 +5721,35 @@
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -5962,6 +5962,35 @@ mch_rename(
  }
  
  /*
@@ -209,19 +210,19 @@ diff -r 54d16fd0043e src/os_win32.c
   * Get the default shell for the current hardware platform
   */
      char *
-diff -r 54d16fd0043e src/proto/misc2.pro
---- a/src/proto/misc2.pro	Sun Sep 01 21:56:38 2013 +0900
-+++ b/src/proto/misc2.pro	Mon Sep 02 23:16:53 2013 +0900
-@@ -117,4 +117,5 @@
- int put_bytes __ARGS((FILE *fd, long_u nr, int len));
+diff --git a/src/proto/misc2.pro b/src/proto/misc2.pro
+--- a/src/proto/misc2.pro
++++ b/src/proto/misc2.pro
+@@ -108,4 +108,5 @@ int put_bytes __ARGS((FILE *fd, long_u n
  void put_time __ARGS((FILE *fd, time_t the_time));
+ void time_to_bytes __ARGS((time_t the_time, char_u *buf));
  int has_non_ascii __ARGS((char_u *s));
 +int vim_remove_r __ARGS((char_u *path));
  /* vim: set ft=c : */
-diff -r 54d16fd0043e src/proto/os_win32.pro
---- a/src/proto/os_win32.pro	Sun Sep 01 21:56:38 2013 +0900
-+++ b/src/proto/os_win32.pro	Mon Sep 02 23:16:53 2013 +0900
-@@ -44,6 +44,7 @@
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -44,6 +44,7 @@ int mch_remove __ARGS((char_u *name));
  void mch_breakcheck __ARGS((void));
  int mch_wrename __ARGS((WCHAR *wold, WCHAR *wnew));
  int mch_rename __ARGS((const char *pszOldFile, const char *pszNewFile));
