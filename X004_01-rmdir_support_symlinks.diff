@@ -1,10 +1,11 @@
 # HG changeset patch
 # Parent 2251d9deea28204f3d9ef9a65d7fe232e2fc4e31
+# Parent  b97d1ec31ec2a398889955886036e1a20e354235
 
 diff --git a/src/os_unix.c b/src/os_unix.c
 --- a/src/os_unix.c
 +++ b/src/os_unix.c
-@@ -2950,6 +2950,28 @@
+@@ -3067,6 +3067,28 @@ mch_isdir(name)
  #endif
  }
  
@@ -36,7 +37,7 @@ diff --git a/src/os_unix.c b/src/os_unix.c
 diff --git a/src/os_unix.h b/src/os_unix.h
 --- a/src/os_unix.h
 +++ b/src/os_unix.h
-@@ -568,3 +568,5 @@
+@@ -572,3 +572,5 @@ int mch_rename __ARGS((const char *src, 
  
  /* We have three kinds of ACL support. */
  #define HAVE_ACL (HAVE_POSIX_ACL || HAVE_SOLARIS_ACL || HAVE_AIX_ACL)
@@ -45,7 +46,7 @@ diff --git a/src/os_unix.h b/src/os_unix.h
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3000,10 +3000,10 @@
+@@ -3148,10 +3148,10 @@ mch_is_hard_link(char_u *fname)
  }
  
  /*
@@ -58,7 +59,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      HANDLE		hFind;
      int			res = FALSE;
-@@ -3014,7 +3014,7 @@
+@@ -3162,7 +3162,7 @@ mch_is_symbolic_link(char_u *fname)
      WIN32_FIND_DATAW	findDataW;
  
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
@@ -67,7 +68,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (wn != NULL)
      {
  	hFind = FindFirstFileW(wn, &findDataW);
-@@ -3023,7 +3023,7 @@
+@@ -3171,7 +3171,7 @@ mch_is_symbolic_link(char_u *fname)
  		&& GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
  	{
  	    /* Retry with non-wide function (for Windows 98). */
@@ -76,7 +77,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    if (hFind != INVALID_HANDLE_VALUE)
  	    {
  		fileFlags = findDataA.dwFileAttributes;
-@@ -3039,7 +3039,7 @@
+@@ -3187,7 +3187,7 @@ mch_is_symbolic_link(char_u *fname)
      else
  #endif
      {
@@ -85,7 +86,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (hFind != INVALID_HANDLE_VALUE)
  	{
  	    fileFlags = findDataA.dwFileAttributes;
-@@ -3051,7 +3051,8 @@
+@@ -3199,7 +3199,8 @@ mch_is_symbolic_link(char_u *fname)
  	FindClose(hFind);
  
      if ((fileFlags & FILE_ATTRIBUTE_REPARSE_POINT)
@@ -95,7 +96,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	res = TRUE;
  
      return res;
-@@ -5533,7 +5534,8 @@
+@@ -5744,7 +5745,8 @@ mch_delay(
  
  
  /*
@@ -105,7 +106,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
   * Return 0 for success, -1 for failure.
   */
      int
-@@ -5544,6 +5546,13 @@
+@@ -5755,6 +5757,13 @@ mch_remove(char_u *name)
      int		n;
  #endif
  
@@ -134,11 +135,11 @@ diff --git a/src/os_win32.h b/src/os_win32.h
 diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
 --- a/src/proto/os_unix.pro
 +++ b/src/proto/os_unix.pro
-@@ -42,6 +42,7 @@
+@@ -42,6 +42,7 @@ void mch_set_acl __ARGS((char_u *fname, 
  void mch_free_acl __ARGS((vim_acl_T aclent));
  void mch_hide __ARGS((char_u *name));
  int mch_isdir __ARGS((char_u *name));
 +int mch_is_symbolic_link __ARGS((char_u *name));
- int mch_can_exe __ARGS((char_u *name, char_u **path));
+ int mch_can_exe __ARGS((char_u *name, char_u **path, int use_path));
  int mch_nodetype __ARGS((char_u *name));
  void mch_early_init __ARGS((void));
