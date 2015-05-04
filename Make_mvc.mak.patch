@@ -1,7 +1,10 @@
+# HG changeset patch
+# Parent  5a0ee014391de700648fd4073346156f86ed3e2b
+
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -114,8 +114,6 @@
+@@ -117,8 +117,6 @@
  #	Netbeans Debugging Support: NBDEBUG=[yes or no] (should be no, yes
  #	doesn't work)
  #
@@ -10,7 +13,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Static Code Analysis: ANALYZE=yes (works with VS2012 only)
  #
  # You can combine any of these interfaces
-@@ -376,88 +374,29 @@ DEL_TREE = deltree /y
+@@ -379,91 +377,29 @@ DEL_TREE = deltree /y
  INTDIR=$(OBJDIR)
  OUTDIR=$(OBJDIR)
  
@@ -80,6 +83,9 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 -!endif
 -!if "$(_NMAKE_VER)" == "12.00.21005.1"
 -MSVCVER = 12.0
+-!endif
+-!if "$(_NMAKE_VER)" == "14.00.22609.0"
+-MSVCVER = 14.0
 +!if [echo MSVCVER=_MSC_VER> msvcver.c && $(CC) /EP msvcver.c > msvcver.~ 2> nul]
 +!message *** ERROR
 +!message Cannot run Visual C to determine its version.
@@ -111,12 +117,21 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Convert processor ID to MVC-compatible number
--!if ("$(MSVCVER)" != "8.0") && ("$(MSVCVER)" != "9.0") && ("$(MSVCVER)" != "10.0") && ("$(MSVCVER)" != "11.0") && ("$(MSVCVER)" != "12.0")
+-!if ("$(MSVCVER)" != "8.0") && ("$(MSVCVER)" != "9.0") && ("$(MSVCVER)" != "10.0") && ("$(MSVCVER)" != "11.0") && ("$(MSVCVER)" != "12.0") && ("$(MSVCVER)" != "14.0")
 +!if $(MSVC_MAJOR) < 8
  !if "$(CPUNR)" == "i386"
  CPUARG = /G3
  !elseif "$(CPUNR)" == "i486"
-@@ -491,7 +430,7 @@ OPTFLAG = /O2
+@@ -488,7 +424,7 @@ LIBC =
+ DEBUGINFO = /Zi
+ 
+ # Don't use /nodefaultlib on MSVC 14
+-!if "$(MSVCVER)" == "14.0"
++!if $(MSVC_MAJOR) >= 14
+ NODEFAULTLIB =
+ !else
+ NODEFAULTLIB = /nodefaultlib
+@@ -504,7 +440,7 @@ OPTFLAG = /O2
  OPTFLAG = /Ox
  !endif
  
@@ -125,7 +140,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  # Use link time code generation if not worried about size
  !if "$(OPTIMIZE)" != "SPACE"
  OPTFLAG = $(OPTFLAG) /GL
-@@ -499,12 +438,13 @@ OPTFLAG = $(OPTFLAG) /GL
+@@ -512,12 +448,13 @@ OPTFLAG = $(OPTFLAG) /GL
  !endif
  
  # (/Wp64 is deprecated in VC9 and generates an obnoxious warning.)
@@ -142,7 +157,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  CFLAGS=$(CFLAGS) /analyze
  !endif
  
-@@ -525,7 +465,7 @@ DEBUGINFO = /ZI
+@@ -538,7 +475,7 @@ DEBUGINFO = /ZI
  CFLAGS = $(CFLAGS) -D_DEBUG -DDEBUG /Od
  RCFLAGS = $(rcflags) $(rcvars) -D_DEBUG -DDEBUG
  # The /fixed:no is needed for Quantify. Assume not 4.? as unsupported in VC4.0.
@@ -151,7 +166,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  LIBC =
  ! else
  LIBC = /fixed:no
-@@ -973,7 +913,7 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(LIBC
+@@ -992,7 +929,7 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODE
  
  # Report link time code generation progress if used. 
  !ifdef NODEBUG
@@ -160,7 +175,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !if "$(OPTIMIZE)" != "SPACE"
  LINKARGS1 = $(LINKARGS1) /LTCG:STATUS
  !endif
-@@ -1070,7 +1010,7 @@ testclean:
+@@ -1089,7 +1026,7 @@ testclean:
  
  # Create a default rule for transforming .c files to .obj files in $(OUTDIR)
  # Batch compilation is supported by nmake 1.62 (part of VS 5.0) and later)
@@ -169,7 +184,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  .c{$(OUTDIR)/}.obj:
  !ELSE
  .c{$(OUTDIR)/}.obj::
-@@ -1079,7 +1019,7 @@ testclean:
+@@ -1098,7 +1035,7 @@ testclean:
  
  # Create a default rule for transforming .cpp files to .obj files in $(OUTDIR)
  # Batch compilation is supported by nmake 1.62 (part of VS 5.0) and later)
