@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  5a0ee014391de700648fd4073346156f86ed3e2b
+# Parent  34f06556bdce1f8c45743d1437ad1cd43106044e
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
@@ -84,7 +84,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 -!if "$(_NMAKE_VER)" == "12.00.21005.1"
 -MSVCVER = 12.0
 -!endif
--!if "$(_NMAKE_VER)" == "14.00.22609.0"
+-!if ("$(_NMAKE_VER)" == "14.00.22609.0") || ("$(_NMAKE_VER)" == "14.00.22816.0")
 -MSVCVER = 14.0
 +!if [echo MSVCVER=_MSC_VER> msvcver.c && $(CC) /EP msvcver.c > msvcver.~ 2> nul]
 +!message *** ERROR
