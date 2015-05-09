@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  49e7c4a9e9484483298e791562734c9a72d0ec4b
+
+diff --git a/runtime/macros/matchit.vim b/runtime/macros/matchit.vim
+--- a/runtime/macros/matchit.vim
++++ b/runtime/macros/matchit.vim
+@@ -303,7 +303,10 @@ fun! s:CleanUp(options, mode, startline,
+       let regexp = s:Wholematch(matchline, a:1, currcol-1)
+       let endcol = matchend(matchline, regexp)
+       if endcol > currcol  " This is NOT off by one!
+-	execute "normal!" . (endcol - currcol) . "l"
++	let charcount = strlen(substitute(matchline[currcol-1 : endcol-1], ".", "x", "g"))
++	if charcount > 1
++	  execute "normal!" . (charcount - 1) . "l"
++	endif
+       endif
+     endif " a:0
+   endif " a:mode != "o" && etc.
