@@ -1,12 +1,18 @@
+# HG changeset patch
+# Parent  c4c88ac6ffc59442dba23f851bfe20a5d19ec840
+
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -943,7 +943,7 @@
+@@ -942,8 +942,10 @@ if test "$enable_perlinterp" = "yes" -o 
+       done
        AC_SUBST(vi_cv_perl_xsubpp)
        dnl Remove "-fno-something", it breaks using cproto.
++      dnl Remove "-fdebug-prefix-map", it isn't supported by clang.
        perlcppflags=`$vi_cv_path_perl -Mlib=$srcdir -MExtUtils::Embed \
 -	      -e 'ccflags;perl_inc;print"\n"' | sed -e 's/-fno[[^ ]]*//'`
-+	      -e 'ccflags;perl_inc;print"\n"' | sed -e 's/-fno[[^ ]]*//' | sed -e 's/-fdebug-prefix-map[[^ ]]*//g'`
++	      -e 'ccflags;perl_inc;print"\n"' | sed -e 's/-fno[[^ ]]*//' \
++			-e 's/-fdebug-prefix-map[[^ ]]*//g'`
        dnl Remove "-lc", it breaks on FreeBSD when using "-pthread".
        perllibs=`cd $srcdir; $vi_cv_path_perl -MExtUtils::Embed -e 'ldopts' | \
  		sed -e '/Warning/d' -e '/Note (probably harmless)/d' \
