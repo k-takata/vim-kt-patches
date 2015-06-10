@@ -53,4 +53,5 @@ fix-swapfile-translation.patch
 fix-smack-message.patch
 mingw-enable-warnings.patch
 matchit-multibyte.patch
+fix-typo-in-insert.txt.patch
 fix-config_cache-removal.patch #+rejected
