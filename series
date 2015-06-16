@@ -54,4 +54,5 @@ fix-smack-message.patch
 mingw-enable-warnings.patch
 matchit-multibyte.patch
 fix-typo-in-insert.txt.patch
+if_ruby-use_typeddata.patch
 fix-config_cache-removal.patch #+rejected
