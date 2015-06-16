@@ -1,0 +1,17 @@
+# HG changeset patch
+# Parent  7546ccd84a8aef12a3d8a805d76287dc3d5bd2f1
+
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -53,6 +53,10 @@
+ #include <perl.h>
+ #include <XSUB.h>
+ 
++/* Disable API version checking on Perl 5.22. */
++#undef dXSBOOTARGSXSAPIVERCHK
++#define dXSBOOTARGSXSAPIVERCHK dXSBOOTARGSNOVERCHK
++
+ 
+ /*
+  * Work around clashes between Perl and Vim namespace.	proto.h doesn't
