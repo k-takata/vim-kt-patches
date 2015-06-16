@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  5a9993bff1a5f20c73ced8c27c450b7211464ebd
+# Parent  2c4ffcc9fdc7488c8e55b9f2828c68b2b4fdafa0
 
 diff --git a/src/if_ruby.c b/src/if_ruby.c
 --- a/src/if_ruby.c
@@ -28,7 +28,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
   * Backward compatibility for Ruby 1.8 and earlier.
   * Ruby 1.9 does not provide STR2CSTR, instead StringValuePtr is provided.
   * Ruby 1.9 does not provide RXXX(s)->len and RXXX(s)->ptr, instead
-@@ -184,11 +192,20 @@ static void ruby_vim_init(void);
+@@ -184,11 +192,16 @@ static void ruby_vim_init(void);
   */
  # define rb_assoc_new			dll_rb_assoc_new
  # define rb_cObject			(*dll_rb_cObject)
@@ -41,18 +41,14 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  # define rb_class_path			dll_rb_class_path
 -# define rb_data_object_alloc		dll_rb_data_object_alloc
 +# ifdef USE_TYPEDDATA
-+#  if defined(DYNAMIC_RUBY_VER) && DYNAMIC_RUBY_VER >= 23
-+#   define rb_data_typed_object_wrap	dll_rb_data_typed_object_wrap
-+#  else
-+#   define rb_data_typed_object_alloc	dll_rb_data_typed_object_alloc
-+#  endif
++#  define rb_data_typed_object_alloc	dll_rb_data_typed_object_alloc
 +# else
 +#  define rb_data_object_alloc		dll_rb_data_object_alloc
 +# endif
  # define rb_define_class_under		dll_rb_define_class_under
  # define rb_define_const			dll_rb_define_const
  # define rb_define_global_function	dll_rb_define_global_function
-@@ -297,8 +314,19 @@ static VALUE *dll_rb_cObject;
+@@ -297,8 +310,15 @@ static VALUE *dll_rb_cObject;
  VALUE *dll_rb_cSymbol;
  VALUE *dll_rb_cTrueClass;
  static void (*dll_rb_check_type) (VALUE,int);
@@ -61,18 +57,14 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
 +# endif
  static VALUE (*dll_rb_class_path) (VALUE);
 +# ifdef USE_TYPEDDATA
-+#  if defined(DYNAMIC_RUBY_VER) && DYNAMIC_RUBY_VER >= 23
-+static VALUE (*dll_rb_data_typed_object_wrap) (VALUE, void*, const rb_data_type_t *);
-+#  else
 +static VALUE (*dll_rb_data_typed_object_alloc) (VALUE, void*, const rb_data_type_t *);
-+#  endif
 +# else
  static VALUE (*dll_rb_data_object_alloc) (VALUE, void*, RUBY_DATA_FUNC, RUBY_DATA_FUNC);
 +# endif
  static VALUE (*dll_rb_define_class_under) (VALUE, const char*, VALUE);
  static void (*dll_rb_define_const) (VALUE,const char*,VALUE);
  static void (*dll_rb_define_global_function) (const char*,VALUE(*)(),int);
-@@ -451,13 +479,6 @@ void rb_gc_writebarrier_unprotect_stub(V
+@@ -451,13 +471,6 @@ void rb_gc_writebarrier_unprotect_stub(V
  #  endif
  # endif
  
@@ -86,7 +78,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  static HINSTANCE hinstRuby = NULL; /* Instance of ruby.dll */
  
  /*
-@@ -480,8 +501,19 @@ static struct
+@@ -480,8 +493,15 @@ static struct
      {"rb_cSymbol", (RUBY_PROC*)&dll_rb_cSymbol},
      {"rb_cTrueClass", (RUBY_PROC*)&dll_rb_cTrueClass},
      {"rb_check_type", (RUBY_PROC*)&dll_rb_check_type},
@@ -95,18 +87,14 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
 +# endif
      {"rb_class_path", (RUBY_PROC*)&dll_rb_class_path},
 +# ifdef USE_TYPEDDATA
-+#  if defined(DYNAMIC_RUBY_VER) && DYNAMIC_RUBY_VER >= 23
-+    {"rb_data_typed_object_wrap", (RUBY_PROC*)&dll_rb_data_typed_object_wrap},
-+#  else
 +    {"rb_data_typed_object_alloc", (RUBY_PROC*)&dll_rb_data_typed_object_alloc},
-+#  endif
 +# else
      {"rb_data_object_alloc", (RUBY_PROC*)&dll_rb_data_object_alloc},
 +# endif
      {"rb_define_class_under", (RUBY_PROC*)&dll_rb_define_class_under},
      {"rb_define_const", (RUBY_PROC*)&dll_rb_define_const},
      {"rb_define_global_function", (RUBY_PROC*)&dll_rb_define_global_function},
-@@ -1021,6 +1053,24 @@ static VALUE vim_evaluate(VALUE self UNU
+@@ -1021,6 +1041,24 @@ static VALUE vim_evaluate(VALUE self UNU
  #endif
  }
  
@@ -131,7 +119,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  static VALUE buffer_new(buf_T *buf)
  {
      if (buf->b_ruby_ref)
-@@ -1029,7 +1079,11 @@ static VALUE buffer_new(buf_T *buf)
+@@ -1029,7 +1067,11 @@ static VALUE buffer_new(buf_T *buf)
      }
      else
      {
@@ -143,7 +131,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  	buf->b_ruby_ref = (void *) obj;
  	rb_hash_aset(objtbl, rb_obj_id(obj), obj);
  	return obj;
-@@ -1040,7 +1094,11 @@ static buf_T *get_buf(VALUE obj)
+@@ -1040,7 +1082,11 @@ static buf_T *get_buf(VALUE obj)
  {
      buf_T *buf;
  
@@ -155,7 +143,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      if (buf == NULL)
  	rb_raise(eDeletedBufferError, "attempt to refer to deleted buffer");
      return buf;
-@@ -1237,6 +1295,24 @@ static VALUE buffer_append(VALUE self, V
+@@ -1237,6 +1283,24 @@ static VALUE buffer_append(VALUE self, V
      return str;
  }
  
@@ -180,7 +168,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  static VALUE window_new(win_T *win)
  {
      if (win->w_ruby_ref)
-@@ -1245,7 +1321,11 @@ static VALUE window_new(win_T *win)
+@@ -1245,7 +1309,11 @@ static VALUE window_new(win_T *win)
      }
      else
      {
@@ -192,7 +180,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  	win->w_ruby_ref = (void *) obj;
  	rb_hash_aset(objtbl, rb_obj_id(obj), obj);
  	return obj;
-@@ -1256,7 +1336,11 @@ static win_T *get_win(VALUE obj)
+@@ -1256,7 +1324,11 @@ static win_T *get_win(VALUE obj)
  {
      win_T *win;
  
