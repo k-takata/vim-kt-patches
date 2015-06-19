@@ -1,0 +1,158 @@
+# HG changeset patch
+# Parent  6ae7a41c29448910c9e96c5a6d3f09faa8072268
+
+diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
+--- a/src/testdir/Make_amiga.mak
++++ b/src/testdir/Make_amiga.mak
+@@ -53,7 +53,9 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_marks.out \
+ 		test_nested_function.out \
+ 		test_options.out \
++		test_perl.out \
+ 		test_qf_title.out \
++		test_ruby.out \
+ 		test_signs.out \
+ 		test_stat.out \
+ 		test_textobjects.out \
+diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
+--- a/src/testdir/Make_dos.mak
++++ b/src/testdir/Make_dos.mak
+@@ -52,7 +52,9 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_marks.out \
+ 		test_nested_function.out \
+ 		test_options.out \
++		test_perl.out \
+ 		test_qf_title.out \
++		test_ruby.out \
+ 		test_signs.out \
+ 		test_stat.out \
+ 		test_textobjects.out \
+diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
+--- a/src/testdir/Make_ming.mak
++++ b/src/testdir/Make_ming.mak
+@@ -74,7 +74,9 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_marks.out \
+ 		test_nested_function.out \
+ 		test_options.out \
++		test_perl.out \
+ 		test_qf_title.out \
++		test_ruby.out \
+ 		test_signs.out \
+ 		test_stat.out \
+ 		test_textobjects.out \
+diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
+--- a/src/testdir/Make_os2.mak
++++ b/src/testdir/Make_os2.mak
+@@ -54,7 +54,9 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_marks.out \
+ 		test_nested_function.out \
+ 		test_options.out \
++		test_perl.out \
+ 		test_qf_title.out \
++		test_ruby.out \
+ 		test_signs.out \
+ 		test_stat.out \
+ 		test_textobjects.out \
+diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
+--- a/src/testdir/Make_vms.mms
++++ b/src/testdir/Make_vms.mms
+@@ -113,7 +113,9 @@ SCRIPT = test1.out  test2.out  test3.out
+ 	 test_marks.out \
+ 	 test_nested_function.out \
+ 	 test_options.out \
++	 test_perl.out \
+ 	 test_qf_title.out \
++	 test_ruby.out \
+ 	 test_signs.out \
+ 	 test_stat.out \
+ 	 test_textobjects.out \
+diff --git a/src/testdir/Makefile b/src/testdir/Makefile
+--- a/src/testdir/Makefile
++++ b/src/testdir/Makefile
+@@ -50,7 +50,9 @@ SCRIPTS = test1.out test2.out test3.out 
+ 		test_marks.out \
+ 		test_nested_function.out \
+ 		test_options.out \
++		test_perl.out \
+ 		test_qf_title.out \
++		test_ruby.out \
+ 		test_signs.out \
+ 		test_stat.out \
+ 		test_textobjects.out \
+diff --git a/src/testdir/test_perl.in b/src/testdir/test_perl.in
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_perl.in
+@@ -0,0 +1,26 @@
++Tests for perl interface.     vim: set ft=vim :
++
++STARTTEST
++:so small.vim
++:set nocompatible viminfo+=nviminfo
++:if !has('perl') | e! test.ok | wq! test.out | endif
++:" change buffer contents
++:perl VIM::DoCommand("normal /^1\n")
++:perl $curline = VIM::Eval("line('.')")
++:perl $curbuf->Set($curline, "1 changed line 1")
++:" evaluate a List
++:perl VIM::DoCommand("normal /^2\n")
++:perl $curline = VIM::Eval("line('.')")
++:let l = ["abc", "def"]
++:perl << EOF
++$l = VIM::Eval("l");
++$curbuf->Append($curline, $l);
++EOF
++:normal j
++:.perldo s|\n|/|g
++:?^1?,$w! test.out
++:qa!
++ENDTEST
++
++1 line 1
++2 line 2
+diff --git a/src/testdir/test_perl.ok b/src/testdir/test_perl.ok
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_perl.ok
+@@ -0,0 +1,3 @@
++1 changed line 1
++2 line 2
++abc/def/
+diff --git a/src/testdir/test_ruby.in b/src/testdir/test_ruby.in
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_ruby.in
+@@ -0,0 +1,25 @@
++Tests for ruby interface.     vim: set ft=vim :
++
++STARTTEST
++:so small.vim
++:set nocompatible viminfo+=nviminfo
++:if !has('ruby') | e! test.ok | wq! test.out | endif
++:" change buffer contents
++:ruby VIM.command("normal /^1\n")
++:ruby $curbuf.line = "1 changed line 1"
++:" evaluate a List
++:ruby VIM.command("normal /^2\n")
++:let l = ["abc", "def"]
++:ruby << EOF
++curline = $curbuf.line_number
++l = VIM.evaluate("l");
++$curbuf.append(curline, l.join("\n"))
++EOF
++:normal j
++:.rubydo $_ = $_.gsub(/\n/, '/')
++:?^1?,$w! test.out
++:qa!
++ENDTEST
++
++1 line 1
++2 line 2
+diff --git a/src/testdir/test_ruby.ok b/src/testdir/test_ruby.ok
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_ruby.ok
+@@ -0,0 +1,3 @@
++1 changed line 1
++2 line 2
++abc/def

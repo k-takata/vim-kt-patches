@@ -58,4 +58,5 @@ if_ruby-use_typeddata.patch
 if_ruby23-use_typeddata.patch
 if_perl522.patch
 if_perl522-workaround.patch
+add-perl-and-ruby-test.patch
 fix-config_cache-removal.patch #+rejected
