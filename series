@@ -57,5 +57,4 @@ fix-typo-in-insert.txt.patch
 if_ruby-use_typeddata.patch
 if_ruby23-use_typeddata.patch
 if_perl522.patch
-if_perl522-workaround.patch
 fix-config_cache-removal.patch #+rejected
