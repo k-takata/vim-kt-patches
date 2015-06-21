@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a146c0976eab1ca452c9d6ea09e0cd53b0476ff9
+# Parent  e1227b101125fd6c3160200b6b03f625157f72f7
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -16,7 +16,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -811,7 +811,7 @@ PERL_LIB = $(PERL_INCDIR)\libperl$(PERL_
+@@ -874,7 +874,7 @@ PERL_LIB = $(PERL_INCDIR)\libperl$(PERL_
  !endif
  !endif
  
@@ -28,17 +28,22 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/if_perl.xs b/src/if_perl.xs
 --- a/src/if_perl.xs
 +++ b/src/if_perl.xs
-@@ -198,7 +198,9 @@ typedef int perl_key;
+@@ -197,10 +197,12 @@ typedef int perl_key;
+ # define Perl_stack_grow dll_Perl_stack_grow
  # define Perl_set_context dll_Perl_set_context
  # if (PERL_REVISION == 5) && (PERL_VERSION >= 14)
- #  define Perl_sv_2bool_flags dll_Perl_sv_2bool_flags
--#  define Perl_xs_apiversion_bootcheck dll_Perl_xs_apiversion_bootcheck
+-# define Perl_sv_2bool_flags dll_Perl_sv_2bool_flags
+-# define Perl_xs_apiversion_bootcheck dll_Perl_xs_apiversion_bootcheck
++#  define Perl_sv_2bool_flags dll_Perl_sv_2bool_flags
 +#  if (PERL_REVISION == 5) && (PERL_VERSION < 22)
 +#   define Perl_xs_apiversion_bootcheck dll_Perl_xs_apiversion_bootcheck
 +#  endif
  # else
- #  define Perl_sv_2bool dll_Perl_sv_2bool
+-# define Perl_sv_2bool dll_Perl_sv_2bool
++#  define Perl_sv_2bool dll_Perl_sv_2bool
  # endif
+ # define Perl_sv_2iv dll_Perl_sv_2iv
+ # define Perl_sv_2mortal dll_Perl_sv_2mortal
 @@ -268,6 +270,10 @@ typedef int perl_key;
  # define Perl_call_list dll_Perl_call_list
  # define Perl_Iscopestack_ix_ptr dll_Perl_Iscopestack_ix_ptr

@@ -1,9 +1,11 @@
 # HG changeset patch
 # Parent 0c7f80ded4aa721dab0f8a9322dcce8993e977e6
+# Parent  88623d3012b4ac082c623b02175b2672af1ae4ed
+
 diff --git a/src/if_perl.xs b/src/if_perl.xs
 --- a/src/if_perl.xs
 +++ b/src/if_perl.xs
-@@ -124,17 +124,17 @@
+@@ -144,17 +144,17 @@ typedef int perl_key;
  #endif
  
  #ifndef WIN3264
@@ -31,21 +33,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  #endif
  /*
   * Wrapper defines
-@@ -174,10 +174,10 @@
- # define Perl_stack_grow dll_Perl_stack_grow
- # define Perl_set_context dll_Perl_set_context
- # if (PERL_REVISION == 5) && (PERL_VERSION >= 14)
--# define Perl_sv_2bool_flags dll_Perl_sv_2bool_flags
--# define Perl_xs_apiversion_bootcheck dll_Perl_xs_apiversion_bootcheck
-+#  define Perl_sv_2bool_flags dll_Perl_sv_2bool_flags
-+#  define Perl_xs_apiversion_bootcheck dll_Perl_xs_apiversion_bootcheck
- # else
--# define Perl_sv_2bool dll_Perl_sv_2bool
-+#  define Perl_sv_2bool dll_Perl_sv_2bool
- # endif
- # define Perl_sv_2iv dll_Perl_sv_2iv
- # define Perl_sv_2mortal dll_Perl_sv_2mortal
-@@ -193,10 +193,10 @@
+@@ -218,10 +218,10 @@ typedef int perl_key;
  # else
  #  define Perl_sv_catpvn dll_Perl_sv_catpvn
  # endif
