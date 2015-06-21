@@ -1,31 +1,32 @@
 # HG changeset patch
 # Parent 7656647da44ed09b242c32cf1d95c9d4ca0df086
+# Parent  4228fb9f98ffd19ececa553e1d9f65e1c1583410
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1907,6 +1907,7 @@ test1 \
- 	test_options \
- 	test_qf_title \
+@@ -1924,6 +1924,7 @@ test1 \
+ 	test_ruby \
+ 	test_set \
  	test_signs \
 +	test_stat \
+ 	test_textobjects \
  	test_utf8 \
  	test_writefile \
- 	test2 test3 test4 test5 test6 test7 test8 test9 \
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
 +++ b/src/testdir/Make_amiga.mak
-@@ -53,6 +53,7 @@ SCRIPTS = test1.out test3.out test4.out 
- 		test_options.out \
- 		test_qf_title.out \
+@@ -58,6 +58,7 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_ruby.out \
+ 		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_textobjects.out \
  		test_utf8.out
  
-@@ -195,5 +196,6 @@ test_nested_function.out: test_nested_fu
- test_options.out: test_options.in
- test_qf_title.out: test_qf_title.in
+@@ -205,5 +206,6 @@ test_qf_title.out: test_qf_title.in
+ test_ruby.out: test_ruby.in
+ test_set.out: test_set.in
  test_signs.out: test_signs.in
 +test_stat.out: test_stat.in
  test_textobjects.out: test_textobjects.in
@@ -42,9 +43,9 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
  		test_argument_0count.out \
  		test_argument_count.out \
  		test_autoformat_join.out \
-@@ -52,6 +52,7 @@ SCRIPTS =	test3.out test4.out test5.out 
- 		test_options.out \
- 		test_qf_title.out \
+@@ -57,6 +57,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_ruby.out \
+ 		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_textobjects.out \
@@ -53,9 +54,9 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 --- a/src/testdir/Make_ming.mak
 +++ b/src/testdir/Make_ming.mak
-@@ -74,6 +74,7 @@ SCRIPTS =	test3.out test4.out test5.out 
- 		test_options.out \
- 		test_qf_title.out \
+@@ -79,6 +79,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_ruby.out \
+ 		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_textobjects.out \
@@ -64,9 +65,9 @@ diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 --- a/src/testdir/Make_os2.mak
 +++ b/src/testdir/Make_os2.mak
-@@ -54,6 +54,7 @@ SCRIPTS = test1.out test3.out test4.out 
- 		test_options.out \
- 		test_qf_title.out \
+@@ -59,6 +59,7 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_ruby.out \
+ 		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_textobjects.out \
@@ -75,9 +76,9 @@ diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 --- a/src/testdir/Make_vms.mms
 +++ b/src/testdir/Make_vms.mms
-@@ -113,6 +113,7 @@ SCRIPT = test1.out  test2.out  test3.out
- 	 test_options.out \
- 	 test_qf_title.out \
+@@ -118,6 +118,7 @@ SCRIPT = test1.out  test2.out  test3.out
+ 	 test_ruby.out \
+ 	 test_set.out \
  	 test_signs.out \
 +	 test_stat.out \
  	 test_textobjects.out \
@@ -86,9 +87,9 @@ diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
-@@ -50,6 +50,7 @@ SCRIPTS = test1.out test2.out test3.out 
- 		test_options.out \
- 		test_qf_title.out \
+@@ -55,6 +55,7 @@ SCRIPTS = test1.out test2.out test3.out 
+ 		test_ruby.out \
+ 		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_textobjects.out \
