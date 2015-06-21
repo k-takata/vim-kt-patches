@@ -1,0 +1,48 @@
+# HG changeset patch
+# Parent  6fcb283d30347d46be40cc30ccdda27bda8d3ae0
+
+diff --git a/src/if_ruby.c b/src/if_ruby.c
+--- a/src/if_ruby.c
++++ b/src/if_ruby.c
+@@ -192,6 +192,7 @@ static void ruby_vim_init(void);
+  */
+ # define rb_assoc_new			dll_rb_assoc_new
+ # define rb_cObject			(*dll_rb_cObject)
++# define rb_cData			(*dll_rb_cData)
+ # define rb_check_type			dll_rb_check_type
+ # ifdef USE_TYPEDDATA
+ #  define rb_check_typeddata		dll_rb_check_typeddata
+@@ -307,6 +308,7 @@ VALUE *dll_rb_cFloat;
+ # endif
+ VALUE *dll_rb_cNilClass;
+ static VALUE *dll_rb_cObject;
++static VALUE *dll_rb_cData;
+ VALUE *dll_rb_cSymbol;
+ VALUE *dll_rb_cTrueClass;
+ static void (*dll_rb_check_type) (VALUE,int);
+@@ -490,6 +492,7 @@ static struct
+ # endif
+     {"rb_cNilClass", (RUBY_PROC*)&dll_rb_cNilClass},
+     {"rb_cObject", (RUBY_PROC*)&dll_rb_cObject},
++    {"rb_cData", (RUBY_PROC*)&dll_rb_cData},
+     {"rb_cSymbol", (RUBY_PROC*)&dll_rb_cSymbol},
+     {"rb_cTrueClass", (RUBY_PROC*)&dll_rb_cTrueClass},
+     {"rb_check_type", (RUBY_PROC*)&dll_rb_check_type},
+@@ -1513,7 +1516,7 @@ static void ruby_vim_init(void)
+     eDeletedWindowError = rb_define_class_under(mVIM, "DeletedWindowError",
+ 						rb_eStandardError);
+ 
+-    cBuffer = rb_define_class_under(mVIM, "Buffer", rb_cObject);
++    cBuffer = rb_define_class_under(mVIM, "Buffer", rb_cData);
+     rb_define_singleton_method(cBuffer, "current", buffer_s_current, 0);
+     rb_define_singleton_method(cBuffer, "count", buffer_s_count, 0);
+     rb_define_singleton_method(cBuffer, "[]", buffer_s_aref, 1);
+@@ -1533,7 +1536,7 @@ static void ruby_vim_init(void)
+     rb_define_method(cBuffer, "line=", set_current_line, 1);
+ 
+ 
+-    cVimWindow = rb_define_class_under(mVIM, "Window", rb_cObject);
++    cVimWindow = rb_define_class_under(mVIM, "Window", rb_cData);
+     rb_define_singleton_method(cVimWindow, "current", window_s_current, 0);
+     rb_define_singleton_method(cVimWindow, "count", window_s_count, 0);
+     rb_define_singleton_method(cVimWindow, "[]", window_s_aref, 1);
