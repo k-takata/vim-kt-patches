@@ -57,4 +57,5 @@ if_ruby-remove-allocate-method.patch
 if_ruby23-use_typeddata.patch
 if_perl522.patch
 fix-indent-in-if_perl.patch
+improve-strchars.patch
 fix-config_cache-removal.patch #+rejected

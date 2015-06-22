@@ -1,0 +1,71 @@
+# HG changeset patch
+# Parent  1b5e36f631fd56ec12869507c276f1473a60bd36
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1986,7 +1986,7 @@
+ sqrt( {expr})			Float	square root of {expr}
+ str2float( {expr})		Float	convert String to Float
+ str2nr( {expr} [, {base}])	Number	convert String to Number
+-strchars( {expr})		Number	character length of the String {expr}
++strchars( {expr} [, {compose}])	Number	character length of the String {expr}
+ strdisplaywidth( {expr} [, {col}]) Number display length of the String {expr}
+ strftime( {format}[, {time}])	String	time in specified format
+ stridx( {haystack}, {needle}[, {start}])
+@@ -5848,10 +5848,11 @@
+ 		Text after the number is silently ignored.
+ 
+ 
+-strchars({expr})					*strchars()*
++strchars({expr} [, {compose}])				*strchars()*
+ 		The result is a Number, which is the number of characters
+-		String {expr} occupies.  Composing characters are counted
+-		separately.
++		String {expr} occupies.  If {compose} is 0 or omitted
++		composing characters are counted separately.  Otherwise
++		composing characters are not counted separately.
+ 		Also see |strlen()|, |strdisplaywidth()| and |strwidth()|.
+ 
+ strdisplaywidth({expr}[, {col}])			*strdisplaywidth()*
+@@ -5926,6 +5927,9 @@
+ 		counting composing characters) use something like this: >
+ 
+ 			:let len = strlen(substitute(str, ".", "x", "g"))
++
++<		Or: >
++			:let len = strchars(str, 1)
+ <
+ 		If the argument is a Number it is first converted to a String.
+ 		For other types an error is given.
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -8311,7 +8311,7 @@
+     {"str2float",	1, 1, f_str2float},
+ #endif
+     {"str2nr",		1, 2, f_str2nr},
+-    {"strchars",	1, 1, f_strchars},
++    {"strchars",	1, 2, f_strchars},
+     {"strdisplaywidth",	1, 2, f_strdisplaywidth},
+ #ifdef HAVE_STRFTIME
+     {"strftime",	1, 2, f_strftime},
+@@ -18419,10 +18419,17 @@
+     char_u		*s = get_tv_string(&argvars[0]);
+ #ifdef FEAT_MBYTE
+     varnumber_T		len = 0;
++    int			composing = 0;
++
++    if (argvars[1].v_type != VAR_UNKNOWN)
++	composing = get_tv_number(&argvars[1]);
+ 
+     while (*s != NUL)
+     {
+-	mb_cptr2char_adv(&s);
++	if (composing)
++	    mb_ptr2char_adv(&s);
++	else
++	    mb_cptr2char_adv(&s);
+ 	++len;
+     }
+     rettv->vval.v_number = len;
