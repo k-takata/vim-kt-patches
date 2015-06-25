@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  3bd553b9e4bfe949cdbece3b59cc8b7b2ef1c624
+# Parent  18a079f240f375894e18958a2356be01b2910289
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -6066,6 +6066,7 @@ synIDattr({synID}, {what} [, {mode}])			
+@@ -6082,6 +6082,7 @@ synIDattr({synID}, {what} [, {mode}])			
  		"standout"	"1" if standout
  		"underline"	"1" if underlined
  		"undercurl"	"1" if undercurled
@@ -15,7 +15,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -3921,6 +3921,7 @@ A jump table for the options with a shor
+@@ -3929,6 +3929,7 @@ A jump table for the options with a shor
  		s	standout	(termcap entry "so" and "se")
  		u	underline	(termcap entry "us" and "ue")
  		c	undercurl	(termcap entry "Cs" and "Ce")
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/syntax.txt b/runtime/doc/syntax.txt
 --- a/runtime/doc/syntax.txt
 +++ b/runtime/doc/syntax.txt
-@@ -4533,12 +4533,14 @@ 1. highlight arguments for normal termin
+@@ -4559,12 +4559,14 @@ 1. highlight arguments for normal termin
  
  					*bold* *underline* *undercurl*
  					*inverse* *italic* *standout*
@@ -41,7 +41,7 @@ diff --git a/runtime/doc/syntax.txt b/runtime/doc/syntax.txt
  		reverse
  		inverse		same as reverse
  		italic
-@@ -4548,8 +4550,8 @@ term={attr-list}			*attr-list* *highligh
+@@ -4574,8 +4576,8 @@ term={attr-list}			*attr-list* *highligh
  	Note that "bold" can be used here and by using a bold font.  They
  	have the same effect.
  	"undercurl" is a curly underline.  When "undercurl" is not possible
@@ -52,7 +52,7 @@ diff --git a/runtime/doc/syntax.txt b/runtime/doc/syntax.txt
  
  start={term-list}				*highlight-start* *E422*
  stop={term-list}				*term-list* *highlight-stop*
-@@ -4707,7 +4709,8 @@ guifg={color-name}					*highlight-guifg*
+@@ -4735,7 +4737,8 @@ guifg={color-name}					*highlight-guifg*
  guibg={color-name}					*highlight-guibg*
  guisp={color-name}					*highlight-guisp*
  	These give the foreground (guifg), background (guibg) and special
@@ -88,7 +88,7 @@ diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -18585,6 +18585,10 @@ f_synIDattr(argvars, rettv)
+@@ -18745,6 +18745,10 @@ f_synIDattr(argvars, rettv)
  	case 's':
  		if (TOLOWER_ASC(what[1]) == 'p')	/* sp[#] */
  		    p = highlight_color(id, what, modec);
@@ -135,7 +135,7 @@ diff --git a/src/gui.h b/src/gui.h
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -4891,6 +4891,15 @@ draw_under(int flags, int row, int col, 
+@@ -4893,6 +4893,15 @@ draw_under(int flags, int row, int col, 
  		      FILL_X(col), y,
  		      FILL_X(col + cells) - 1, y);
      }
@@ -169,7 +169,7 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -2670,6 +2670,18 @@ gui_mch_draw_string(
+@@ -2678,6 +2678,18 @@ gui_mch_draw_string(
  	DeleteObject(SelectObject(s_hdc, old_pen));
      }
  
@@ -211,15 +211,17 @@ diff --git a/src/gui_x11.c b/src/gui_x11.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2965,6 +2965,8 @@ static struct vimoption
-     p_term("t_se", T_SE)
+@@ -2981,8 +2981,10 @@ static struct vimoption
      p_term("t_so", T_SO)
+     p_term("t_SR", T_CSR)
      p_term("t_sr", T_SR)
 +    p_term("t_Te", T_STE)
-+    p_term("t_Ts", T_STS)
-     p_term("t_ts", T_TS)
      p_term("t_te", T_TE)
      p_term("t_ti", T_TI)
++    p_term("t_Ts", T_STS)
+     p_term("t_ts", T_TS)
+     p_term("t_u7", T_U7)
+     p_term("t_ue", T_UE)
 diff --git a/src/screen.c b/src/screen.c
 --- a/src/screen.c
 +++ b/src/screen.c
@@ -232,7 +234,7 @@ diff --git a/src/screen.c b/src/screen.c
  }
  
  /*
-@@ -7812,6 +7812,8 @@ screen_start_highlight(attr)
+@@ -7849,6 +7849,8 @@ screen_start_highlight(attr)
  		out_str(T_CZH);
  	    if ((attr & HL_INVERSE) && T_MR != NULL)	/* inverse (reverse) */
  		out_str(T_MR);
@@ -241,7 +243,7 @@ diff --git a/src/screen.c b/src/screen.c
  
  	    /*
  	     * Output the color or start string after bold etc., in case the
-@@ -7915,6 +7917,13 @@ screen_stop_highlight()
+@@ -7952,6 +7954,13 @@ screen_stop_highlight()
  		else
  		    out_str(T_CZR);
  	    }
@@ -271,7 +273,7 @@ diff --git a/src/syntax.c b/src/syntax.c
  
  static int get_attr_entry  __ARGS((garray_T *table, attrentry_T *aep));
  static void syn_unadd_group __ARGS((void));
-@@ -9561,6 +9561,8 @@ highlight_changed()
+@@ -9567,6 +9567,8 @@ highlight_changed()
  				break;
  		    case 'c':	attr |= HL_UNDERCURL;
  				break;
@@ -283,7 +285,7 @@ diff --git a/src/syntax.c b/src/syntax.c
 diff --git a/src/term.c b/src/term.c
 --- a/src/term.c
 +++ b/src/term.c
-@@ -195,6 +195,8 @@ static struct builtin_term builtin_termc
+@@ -200,6 +200,8 @@ static struct builtin_term builtin_termc
      {(int)KS_US,	IF_EB("\033|8h", ESC_STR "|8h")},   /* HL_UNDERLINE */
      {(int)KS_UCE,	IF_EB("\033|8C", ESC_STR "|8C")},   /* HL_UNDERCURL */
      {(int)KS_UCS,	IF_EB("\033|8c", ESC_STR "|8c")},   /* HL_UNDERCURL */
@@ -292,7 +294,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_CZR,	IF_EB("\033|4H", ESC_STR "|4H")},   /* HL_ITALIC */
      {(int)KS_CZH,	IF_EB("\033|4h", ESC_STR "|4h")},   /* HL_ITALIC */
      {(int)KS_VB,	IF_EB("\033|f", ESC_STR "|f")},
-@@ -1208,6 +1210,8 @@ static struct builtin_term builtin_termc
+@@ -1214,6 +1216,8 @@ static struct builtin_term builtin_termc
      {(int)KS_US,	"[US]"},
      {(int)KS_UCE,	"[UCE]"},
      {(int)KS_UCS,	"[UCS]"},
@@ -301,7 +303,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_MS,	"[MS]"},
      {(int)KS_UT,	"[UT]"},
      {(int)KS_XN,	"[XN]"},
-@@ -1605,6 +1609,7 @@ set_termname(term)
+@@ -1612,6 +1616,7 @@ set_termname(term)
  				{KS_MD, "md"}, {KS_SE, "se"}, {KS_SO, "so"},
  				{KS_CZH,"ZH"}, {KS_CZR,"ZR"}, {KS_UE, "ue"},
  				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
@@ -321,7 +323,7 @@ diff --git a/src/term.h b/src/term.h
      KS_MS,	/* save to move cur in reverse mode */
      KS_CM,	/* cursor motion */
      KS_SR,	/* scroll reverse (backward) */
-@@ -130,6 +132,8 @@ extern char_u *(term_strings[]);    /* c
+@@ -132,6 +134,8 @@ extern char_u *(term_strings[]);    /* c
  #define T_US	(term_str(KS_US))	/* underscore (underline) mode */
  #define T_UCE	(term_str(KS_UCE))	/* exit undercurl mode */
  #define T_UCS	(term_str(KS_UCS))	/* undercurl mode */
@@ -333,7 +335,7 @@ diff --git a/src/term.h b/src/term.h
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -673,7 +673,8 @@ extern char *(*dyn_libintl_textdomain)(c
+@@ -711,7 +711,8 @@ extern char *(*dyn_libintl_textdomain)(c
  #define HL_UNDERLINE		0x08
  #define HL_UNDERCURL		0x10
  #define HL_STANDOUT		0x20
