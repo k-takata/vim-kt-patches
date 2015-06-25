@@ -44,7 +44,6 @@ use-correct-struct-size.patch
 Make_mvc.mak.patch
 gvim-nsi.patch
 bmp-rle.patch
-fix-clang-cygwin-perl.patch #+disabled
 fix-issue-239.patch
 fix-mch_can_exe-with-long-filename.patch
 fix-swapfile-translation.patch
