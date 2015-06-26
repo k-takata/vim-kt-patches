@@ -50,7 +50,6 @@ fix-swapfile-translation.patch
 fix-smack-message.patch
 mingw-enable-warnings.patch
 matchit-multibyte.patch
-fix-typo-in-insert.txt.patch
 if_ruby-use_typeddata.patch
 if_ruby-remove-allocate-method.patch
 if_ruby23-use_typeddata.patch
