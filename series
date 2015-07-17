@@ -55,5 +55,4 @@ if_ruby-remove-allocate-method.patch
 if_ruby23-use_typeddata.patch
 fix-indent-in-if_perl.patch
 add-teraterm-syntaxfile.patch
-fix-7.4.786.patch
 fix-config_cache-removal.patch #+rejected
