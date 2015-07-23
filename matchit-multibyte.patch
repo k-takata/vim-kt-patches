@@ -1,41 +1,15 @@
 # HG changeset patch
-# Parent  7227464a30240001f982c1d07d6f6306b5a55450
+# Parent  e645a4c5020356d0621ea999c9e1083c2e92943b
 
 diff --git a/runtime/macros/matchit.vim b/runtime/macros/matchit.vim
 --- a/runtime/macros/matchit.vim
 +++ b/runtime/macros/matchit.vim
-@@ -281,6 +281,22 @@ function! s:Match_wrapper(word, forward,
-   return s:CleanUp(restore_options, a:mode, startline, startcol, mid.'\|'.fin)
- endfun
- 
-+" Count the number of characters in a string.
-+" strchars() doesn't have the skipcc argument before 7.4.755.
-+if has("patch-7.4.755")
-+  fun! s:Strchars(str, skipcc)
-+    return strchars(a:str, a:skipcc)
-+  endfun
-+else
-+  fun! s:Strchars(str, skipcc)
-+    if a:skipcc
-+      return strlen(substitute(a:str, ".", "x", "g"))
-+    else
-+      return strchars(a:str)
-+    endif
-+  endfun
-+endif
-+
- " Restore options and do some special handling for Operator-pending mode.
- " The optional argument is the tail of the matching group.
- fun! s:CleanUp(options, mode, startline, startcol, ...)
-@@ -303,7 +319,10 @@ fun! s:CleanUp(options, mode, startline,
+@@ -303,7 +303,7 @@ fun! s:CleanUp(options, mode, startline,
        let regexp = s:Wholematch(matchline, a:1, currcol-1)
        let endcol = matchend(matchline, regexp)
        if endcol > currcol  " This is NOT off by one!
 -	execute "normal!" . (endcol - currcol) . "l"
-+	let charcount = s:Strchars(matchline[currcol-1 : endcol-1], 1)
-+	if charcount > 1
-+	  execute "normal!" . (charcount - 1) . "l"
-+	endif
++	call cursor(0, endcol)
        endif
      endif " a:0
    endif " a:mode != "o" && etc.
