@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  01c709a0aa6740a94c9eed023f1ed72321e7096d
+# Parent  ef3a0777611909a644632527aba4f6bdc5b94208
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -139,7 +139,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      /*
       * Before restoring the buffer contents, clear the current buffer, and
       * restore the cursor position and window information.  Doing this now
-@@ -2328,6 +2411,7 @@ RestoreConsoleBuffer(
+@@ -2328,11 +2411,12 @@ RestoreConsoleBuffer(
  	    return FALSE;
  	}
      }
@@ -147,7 +147,13 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      return TRUE;
  }
-@@ -2497,8 +2581,13 @@ mch_init(void)
+ 
+-#define FEAT_RESTORE_ORIG_SCREEN
++//#define FEAT_RESTORE_ORIG_SCREEN
+ #ifdef FEAT_RESTORE_ORIG_SCREEN
+ static ConsoleBuffer g_cbOrig = { 0 };
+ #endif
+@@ -2497,12 +2581,18 @@ mch_init(void)
      else
  	create_conin();
      g_hConOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -161,7 +167,12 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      /* Save the initial console buffer for later restoration */
      SaveConsoleBuffer(&g_cbOrig);
      g_attrCurrent = g_attrDefault = g_cbOrig.Info.wAttributes;
-@@ -2606,6 +2695,8 @@ mch_exit(int r)
+ #else
++    SaveConsoleBuffer(&g_cbNonTermcap);
+     /* Get current text attributes */
+     GetConsoleScreenBufferInfo(g_hConOut, &csbi);
+     g_attrCurrent = g_attrDefault = csbi.wAttributes;
+@@ -2606,6 +2696,8 @@ mch_exit(int r)
      SetConsoleMode(g_hConIn,  g_cmodein);
      SetConsoleMode(g_hConOut, g_cmodeout);
  
@@ -170,7 +181,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #ifdef DYNAMIC_GETTEXT
      dyn_libintl_end();
  #endif
-@@ -5001,6 +5092,8 @@ termcap_mode_start(void)
+@@ -5001,6 +5093,8 @@ termcap_mode_start(void)
  	 * screen buffer, and resize the buffer to match the current window
  	 * size.  We will use this as the size of our editing environment.
  	 */
@@ -179,19 +190,3 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	ClearConsoleBuffer(g_attrCurrent);
  	ResizeConBufAndWindow(g_hConOut, Columns, Rows);
      }
-@@ -5044,11 +5137,11 @@ termcap_mode_end(void)
-     cmodein &= ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
-     SetConsoleMode(g_hConIn, cmodein);
- 
--#ifdef FEAT_RESTORE_ORIG_SCREEN
--    cb = exiting ? &g_cbOrig : &g_cbNonTermcap;
--#else
-+//#ifdef FEAT_RESTORE_ORIG_SCREEN
-+//    cb = exiting ? &g_cbOrig : &g_cbNonTermcap;
-+//#else
-     cb = &g_cbNonTermcap;
--#endif
-+//#endif
-     RestoreConsoleBuffer(cb, p_rs);
-     SetConsoleCursorInfo(g_hConOut, &g_cci);
- 
