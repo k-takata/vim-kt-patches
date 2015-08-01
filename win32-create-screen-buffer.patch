@@ -139,7 +139,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      /*
       * Before restoring the buffer contents, clear the current buffer, and
       * restore the cursor position and window information.  Doing this now
-@@ -2328,11 +2411,12 @@ RestoreConsoleBuffer(
+@@ -2328,11 +2411,14 @@ RestoreConsoleBuffer(
  	    return FALSE;
  	}
      }
@@ -148,12 +148,22 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      return TRUE;
  }
  
--#define FEAT_RESTORE_ORIG_SCREEN
-+//#define FEAT_RESTORE_ORIG_SCREEN
++#if 0
+ #define FEAT_RESTORE_ORIG_SCREEN
++#endif
  #ifdef FEAT_RESTORE_ORIG_SCREEN
  static ConsoleBuffer g_cbOrig = { 0 };
  #endif
-@@ -2497,12 +2581,18 @@ mch_init(void)
+@@ -2474,7 +2560,7 @@ static DWORD g_cmodeout = 0;
+     void
+ mch_init(void)
+ {
+-#ifndef FEAT_RESTORE_ORIG_SCREEN
++#if 0
+     CONSOLE_SCREEN_BUFFER_INFO csbi;
+ #endif
+ #ifndef __MINGW32__
+@@ -2497,15 +2583,20 @@ mch_init(void)
      else
  	create_conin();
      g_hConOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -168,11 +178,15 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      SaveConsoleBuffer(&g_cbOrig);
      g_attrCurrent = g_attrDefault = g_cbOrig.Info.wAttributes;
  #else
-+    SaveConsoleBuffer(&g_cbNonTermcap);
      /* Get current text attributes */
-     GetConsoleScreenBufferInfo(g_hConOut, &csbi);
-     g_attrCurrent = g_attrDefault = csbi.wAttributes;
-@@ -2606,6 +2696,8 @@ mch_exit(int r)
+-    GetConsoleScreenBufferInfo(g_hConOut, &csbi);
+-    g_attrCurrent = g_attrDefault = csbi.wAttributes;
++    SaveConsoleBuffer(&g_cbNonTermcap);
++    g_attrCurrent = g_attrDefault = g_cbNonTermcap.Info.wAttributes;
+ #endif
+     if (cterm_normal_fg_color == 0)
+ 	cterm_normal_fg_color = (g_attrCurrent & 0xf) + 1;
+@@ -2606,6 +2697,8 @@ mch_exit(int r)
      SetConsoleMode(g_hConIn,  g_cmodein);
      SetConsoleMode(g_hConOut, g_cmodeout);
  
@@ -181,7 +195,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #ifdef DYNAMIC_GETTEXT
      dyn_libintl_end();
  #endif
-@@ -5001,6 +5093,8 @@ termcap_mode_start(void)
+@@ -5001,6 +5094,8 @@ termcap_mode_start(void)
  	 * screen buffer, and resize the buffer to match the current window
  	 * size.  We will use this as the size of our editing environment.
  	 */
