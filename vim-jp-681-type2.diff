@@ -1,0 +1,96 @@
+# HG changeset patch
+# Parent  1701a0eefce10947d99b6d35d3a44f4d5fe26e3d
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -213,7 +213,7 @@ static void standout(void);
+ static void standend(void);
+ static void visual_bell(void);
+ static void cursor_visible(BOOL fVisible);
+-static BOOL write_chars(LPCSTR pchBuf, DWORD cchToWrite);
++static BOOL write_chars(char_u *pchBuf, DWORD cbToWrite);
+ static char_u tgetch(int *pmodifiers, char_u *pch2);
+ static void create_conin(void);
+ static int s_cursor_visible = TRUE;
+@@ -5365,27 +5365,66 @@ cursor_visible(BOOL fVisible)
+ 
+ 
+ /*
+- * write `cchToWrite' characters in `pchBuf' to the screen
+- * Returns the number of characters actually written (at least one).
++ * write `cbToWrite' bytes in `pchBuf' to the screen
++ * Returns the number of bytes actually written (at least one).
+  */
+     static BOOL
+ write_chars(
+-    LPCSTR pchBuf,
+-    DWORD  cchToWrite)
++    char_u *pchBuf,
++    DWORD  cbToWrite)
+ {
+     COORD coord = g_coord;
+     DWORD written;
+ 
+-    FillConsoleOutputAttribute(g_hConOut, g_attrCurrent, cchToWrite,
+-				coord, &written);
+-    /* When writing fails or didn't write a single character, pretend one
+-     * character was written, otherwise we get stuck. */
+-    if (WriteConsoleOutputCharacter(g_hConOut, pchBuf, cchToWrite,
+-				coord, &written) == 0
+-	    || written == 0)
+-	written = 1;
+-
+-    g_coord.X += (SHORT) written;
++#ifdef FEAT_MBYTE
++    if (enc_utf8)
++    {
++	WCHAR	*ret;
++	int	length;
++	DWORD	n, cchwritten, cells;
++
++	MultiByteToWideChar_alloc(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite,
++				    &ret, &length);
++
++	cells = mb_string2cells(pchBuf, cbToWrite);
++	FillConsoleOutputAttribute(g_hConOut, g_attrCurrent, cells,
++				    coord, &written);
++	/* When writing fails or didn't write a single character, pretend one
++	 * character was written, otherwise we get stuck. */
++	if (WriteConsoleOutputCharacterW(g_hConOut, ret, length,
++		    coord, &cchwritten) == 0
++		|| cchwritten == 0)
++	    cchwritten = 1;
++	vim_free(ret);
++
++	if (cchwritten == length)
++	{
++	    written = cbToWrite;
++	    g_coord.X += (SHORT)cells;
++	}
++	else
++	{
++	    char_u *p = pchBuf;
++	    for (n = 0; n < cchwritten; n++)
++		mb_cptr_adv(p);
++	    written = p - pchBuf;
++	    g_coord.X += (SHORT)mb_string2cells(pchBuf, written);
++	}
++    }
++    else
++#endif
++    {
++	FillConsoleOutputAttribute(g_hConOut, g_attrCurrent, cbToWrite,
++				    coord, &written);
++	/* When writing fails or didn't write a single character, pretend one
++	 * character was written, otherwise we get stuck. */
++	if (WriteConsoleOutputCharacter(g_hConOut, (LPCSTR)pchBuf, cbToWrite,
++		    coord, &written) == 0
++		|| written == 0)
++	    written = 1;
++
++	g_coord.X += (SHORT) written;
++    }
+ 
+     while (g_coord.X > g_srScrollRegion.Right)
+     {
