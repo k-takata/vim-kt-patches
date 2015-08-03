@@ -9,7 +9,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  static void visual_bell(void);
  static void cursor_visible(BOOL fVisible);
 -static BOOL write_chars(LPCSTR pchBuf, DWORD cchToWrite);
-+static BOOL write_chars(char_u *pchBuf, DWORD cbToWrite);
++static DWORD write_chars(char_u *pchBuf, DWORD cbToWrite);
  static char_u tgetch(int *pmodifiers, char_u *pch2);
  static void create_conin(void);
  static int s_cursor_visible = TRUE;
@@ -22,7 +22,8 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 + * write `cbToWrite' bytes in `pchBuf' to the screen
 + * Returns the number of bytes actually written (at least one).
   */
-     static BOOL
+-    static BOOL
++    static DWORD
  write_chars(
 -    LPCSTR pchBuf,
 -    DWORD  cchToWrite)
