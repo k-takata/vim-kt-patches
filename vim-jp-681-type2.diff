@@ -13,7 +13,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  static char_u tgetch(int *pmodifiers, char_u *pch2);
  static void create_conin(void);
  static int s_cursor_visible = TRUE;
-@@ -5365,27 +5365,75 @@ cursor_visible(BOOL fVisible)
+@@ -5365,27 +5365,73 @@ cursor_visible(BOOL fVisible)
  
  
  /*
@@ -32,7 +32,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      COORD coord = g_coord;
      DWORD written;
--
+ 
 -    FillConsoleOutputAttribute(g_hConOut, g_attrCurrent, cchToWrite,
 -				coord, &written);
 -    /* When writing fails or didn't write a single character, pretend one
@@ -44,18 +44,15 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -
 -    g_coord.X += (SHORT) written;
 +#ifdef FEAT_MBYTE
-+    static WCHAR *unicodebuf = NULL;
-+    static int	unibuflen = 0;
-+#endif
-+
-+#ifdef FEAT_MBYTE
 +    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +    {
-+	int	length;
-+	DWORD	n, cchwritten, cells;
++	static WCHAR	*unicodebuf = NULL;
++	static int	unibuflen = 0;
++	int		length;
++	DWORD		n, cchwritten, cells;
 +
 +	length = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite, 0, 0);
-+	if (unicodebuf == NULL || (DWORD)length > unibuflen)
++	if (unicodebuf == NULL || length > unibuflen)
 +	{
 +	    vim_free(unicodebuf);
 +	    unicodebuf = (WCHAR *)lalloc(length * sizeof(WCHAR), FALSE);
