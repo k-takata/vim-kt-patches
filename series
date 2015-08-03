@@ -56,4 +56,5 @@ fix-indent-in-if_perl.patch
 win32-create-screen-buffer.patch
 win32-create-screen-buffer_remove-unused-part.patch
 fix-winclip-comment.patch
+vim-jp-681.diff
 fix-config_cache-removal.patch #+rejected
