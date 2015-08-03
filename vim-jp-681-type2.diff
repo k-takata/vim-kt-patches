@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  1701a0eefce10947d99b6d35d3a44f4d5fe26e3d
+# Parent  a563525ede0d856f7a1cf52d117c25eb9ec065b8
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -13,7 +13,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  static char_u tgetch(int *pmodifiers, char_u *pch2);
  static void create_conin(void);
  static int s_cursor_visible = TRUE;
-@@ -5365,27 +5365,66 @@ cursor_visible(BOOL fVisible)
+@@ -5365,27 +5365,75 @@ cursor_visible(BOOL fVisible)
  
  
  /*
@@ -31,7 +31,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      COORD coord = g_coord;
      DWORD written;
- 
+-
 -    FillConsoleOutputAttribute(g_hConOut, g_attrCurrent, cchToWrite,
 -				coord, &written);
 -    /* When writing fails or didn't write a single character, pretend one
@@ -43,25 +43,35 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -
 -    g_coord.X += (SHORT) written;
 +#ifdef FEAT_MBYTE
-+    if (enc_utf8)
++    static WCHAR *unicodebuf = NULL;
++    static int	unibuflen = 0;
++#endif
++
++#ifdef FEAT_MBYTE
++    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +    {
-+	WCHAR	*ret;
 +	int	length;
 +	DWORD	n, cchwritten, cells;
 +
-+	MultiByteToWideChar_alloc(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite,
-+				    &ret, &length);
++	length = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite, 0, 0);
++	if (unicodebuf == NULL || (DWORD)length > unibuflen)
++	{
++	    vim_free(unicodebuf);
++	    unicodebuf = (WCHAR *)lalloc(length * sizeof(WCHAR), FALSE);
++	    unibuflen = length;
++	}
++	MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite,
++			    unicodebuf, unibuflen);
 +
 +	cells = mb_string2cells(pchBuf, cbToWrite);
 +	FillConsoleOutputAttribute(g_hConOut, g_attrCurrent, cells,
 +				    coord, &written);
 +	/* When writing fails or didn't write a single character, pretend one
 +	 * character was written, otherwise we get stuck. */
-+	if (WriteConsoleOutputCharacterW(g_hConOut, ret, length,
++	if (WriteConsoleOutputCharacterW(g_hConOut, unicodebuf, length,
 +		    coord, &cchwritten) == 0
 +		|| cchwritten == 0)
 +	    cchwritten = 1;
-+	vim_free(ret);
 +
 +	if (cchwritten == length)
 +	{
