@@ -1,0 +1,188 @@
+# HG changeset patch
+# Parent  ce6864369dddd25618489482e407a4b03e837289
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -214,7 +214,7 @@ static void standend(void);
+ static void visual_bell(void);
+ static void cursor_visible(BOOL fVisible);
+ static DWORD write_chars(char_u *pchBuf, DWORD cbToWrite);
+-static char_u tgetch(int *pmodifiers, char_u *pch2);
++static WCHAR tgetch(int *pmodifiers, WCHAR *pch2);
+ static void create_conin(void);
+ static int s_cursor_visible = TRUE;
+ static int did_create_conin = FALSE;
+@@ -262,15 +262,15 @@ read_console_input(
+     if (!win8_or_later)
+     {
+ 	if (nLength == -1)
+-	    return PeekConsoleInput(hInput, lpBuffer, 1, lpEvents);
+-	return ReadConsoleInput(hInput, lpBuffer, 1, &dwEvents);
++	    return PeekConsoleInputW(hInput, lpBuffer, 1, lpEvents);
++	return ReadConsoleInputW(hInput, lpBuffer, 1, &dwEvents);
+     }
+ 
+     if (s_dwMax == 0)
+     {
+ 	if (nLength == -1)
+-	    return PeekConsoleInput(hInput, lpBuffer, 1, lpEvents);
+-	if (!ReadConsoleInput(hInput, s_irCache, IRSIZE, &dwEvents))
++	    return PeekConsoleInputW(hInput, lpBuffer, 1, lpEvents);
++	if (!ReadConsoleInputW(hInput, s_irCache, IRSIZE, &dwEvents))
+ 	    return FALSE;
+ 	s_dwIndex = 0;
+ 	s_dwMax = dwEvents;
+@@ -845,8 +845,10 @@ static const struct
+ 
+ #if defined(__GNUC__) && !defined(__MINGW32__)  && !defined(__CYGWIN__)
+ # define AChar AsciiChar
++# define UChar UnicodeChar
+ #else
+ # define AChar uChar.AsciiChar
++# define UChar uChar.UnicodeChar
+ #endif
+ 
+ /* The return code indicates key code size. */
+@@ -865,12 +867,12 @@ win32_kbd_patch_key(
+ 
+     if (s_iIsDead == 2)
+     {
+-	pker->AChar = (CHAR) awAnsiCode[1];
++	pker->UChar = (WCHAR) awAnsiCode[1];
+ 	s_iIsDead = 0;
+ 	return 1;
+     }
+ 
+-    if (pker->AChar != 0)
++    if (pker->UChar != 0)
+ 	return 1;
+ 
+     vim_memset(abKeystate, 0, sizeof (abKeystate));
+@@ -885,7 +887,7 @@ win32_kbd_patch_key(
+     }
+ 
+     /* Clear any pending dead keys */
+-    ToAscii(VK_SPACE, MapVirtualKey(VK_SPACE, 0), abKeystate, awAnsiCode, 0);
++    ToUnicode(VK_SPACE, MapVirtualKey(VK_SPACE, 0), abKeystate, awAnsiCode, 2, 0);
+ 
+     if (uMods & SHIFT_PRESSED)
+ 	abKeystate[VK_SHIFT] = 0x80;
+@@ -898,11 +900,11 @@ win32_kbd_patch_key(
+ 	    abKeystate[VK_MENU] = abKeystate[VK_RMENU] = 0x80;
+     }
+ 
+-    s_iIsDead = ToAscii(pker->wVirtualKeyCode, pker->wVirtualScanCode,
+-			abKeystate, awAnsiCode, 0);
++    s_iIsDead = ToUnicode(pker->wVirtualKeyCode, pker->wVirtualScanCode,
++			abKeystate, awAnsiCode, 2, 0);
+ 
+     if (s_iIsDead > 0)
+-	pker->AChar = (CHAR) awAnsiCode[0];
++	pker->UChar = (WCHAR) awAnsiCode[0];
+ 
+     return s_iIsDead;
+ }
+@@ -929,8 +931,8 @@ static BOOL g_fJustGotFocus = FALSE;
+     static BOOL
+ decode_key_event(
+     KEY_EVENT_RECORD	*pker,
+-    char_u		*pch,
+-    char_u		*pch2,
++    WCHAR		*pch,
++    WCHAR		*pch2,
+     int			*pmodifiers,
+     BOOL		fDoPost)
+ {
+@@ -958,7 +960,7 @@ decode_key_event(
+     }
+ 
+     /* special cases */
+-    if ((nModifs & CTRL) != 0 && (nModifs & ~CTRL) == 0 && pker->AChar == NUL)
++    if ((nModifs & CTRL) != 0 && (nModifs & ~CTRL) == 0 && pker->UChar == NUL)
+     {
+ 	/* Ctrl-6 is Ctrl-^ */
+ 	if (pker->wVirtualKeyCode == '6')
+@@ -1020,7 +1022,7 @@ decode_key_event(
+ 	*pch = NUL;
+     else
+     {
+-	*pch = (i > 0) ? pker->AChar : NUL;
++	*pch = (i > 0) ? pker->UChar : NUL;
+ 
+ 	if (pmodifiers != NULL)
+ 	{
+@@ -1412,7 +1414,7 @@ WaitForChar(long msec)
+     DWORD	    dwNow = 0, dwEndTime = 0;
+     INPUT_RECORD    ir;
+     DWORD	    cRecords;
+-    char_u	    ch, ch2;
++    WCHAR	    ch, ch2;
+ 
+     if (msec > 0)
+ 	/* Wait until the specified time has elapsed. */
+@@ -1562,10 +1564,10 @@ create_conin(void)
+ /*
+  * Get a keystroke or a mouse event
+  */
+-    static char_u
+-tgetch(int *pmodifiers, char_u *pch2)
++    static WCHAR
++tgetch(int *pmodifiers, WCHAR *pch2)
+ {
+-    char_u ch;
++    WCHAR ch;
+ 
+     for (;;)
+     {
+@@ -1737,7 +1739,7 @@ mch_inchar(
+ 	else
+ #endif
+ 	{
+-	    char_u	ch2 = NUL;
++	    WCHAR	ch2 = NUL;
+ 	    int		modifiers = 0;
+ 
+ 	    c = tgetch(&modifiers, &ch2);
+@@ -1792,14 +1794,37 @@ mch_inchar(
+ 		int	n = 1;
+ 		int     conv = FALSE;
+ 
+-		typeahead[typeaheadlen] = c;
++#ifdef FEAT_MBYTE
++		if (ch2 == NUL)
++		{
++		    int	    i;
++		    char_u  *p;
++		    WCHAR   ch[2];
++
++		    ch[0] = c;
++		    if (c >= 0xD800 && c <= 0xDBFF)	/* High surrogate */
++		    {
++			ch[1] = tgetch(&modifiers, &ch2);
++			n++;
++		    }
++		    p = utf16_to_enc(ch, &n);
++		    if (p != NULL)
++		    {
++			for (i = 0; i < n; i++)
++			    typeahead[typeaheadlen + i] = p[i];
++			vim_free(p);
++		    }
++		}
++		else
++#endif
++		    typeahead[typeaheadlen] = c;
+ 		if (ch2 != NUL)
+ 		{
+-		    typeahead[typeaheadlen + 1] = 3;
+-		    typeahead[typeaheadlen + 2] = ch2;
++		    typeahead[typeaheadlen + n] = 3;
++		    typeahead[typeaheadlen + n + 1] = (char_u)ch2;
+ 		    n += 2;
+ 		}
+-#ifdef FEAT_MBYTE
++#if 0
+ 		/* Only convert normal characters, not special keys.  Need to
+ 		 * convert before applying ALT, otherwise mapping <M-x> breaks
+ 		 * when 'tenc' is set. */
