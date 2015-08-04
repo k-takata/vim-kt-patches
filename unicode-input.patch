@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  ce6864369dddd25618489482e407a4b03e837289
+# Parent  a517dfda2d00435d855d277e460e2a40601c01ea
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -13,7 +13,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  static void create_conin(void);
  static int s_cursor_visible = TRUE;
  static int did_create_conin = FALSE;
-@@ -262,15 +262,15 @@ read_console_input(
+@@ -265,15 +265,15 @@ read_console_input(
      if (!win8_or_later)
      {
  	if (nLength == -1)
@@ -33,7 +33,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    return FALSE;
  	s_dwIndex = 0;
  	s_dwMax = dwEvents;
-@@ -845,8 +845,10 @@ static const struct
+@@ -872,8 +872,10 @@ static const struct
  
  #if defined(__GNUC__) && !defined(__MINGW32__)  && !defined(__CYGWIN__)
  # define AChar AsciiChar
@@ -44,7 +44,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  
  /* The return code indicates key code size. */
-@@ -865,12 +867,12 @@ win32_kbd_patch_key(
+@@ -892,12 +894,12 @@ win32_kbd_patch_key(
  
      if (s_iIsDead == 2)
      {
@@ -59,7 +59,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	return 1;
  
      vim_memset(abKeystate, 0, sizeof (abKeystate));
-@@ -885,7 +887,7 @@ win32_kbd_patch_key(
+@@ -912,7 +914,7 @@ win32_kbd_patch_key(
      }
  
      /* Clear any pending dead keys */
@@ -68,7 +68,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (uMods & SHIFT_PRESSED)
  	abKeystate[VK_SHIFT] = 0x80;
-@@ -898,11 +900,11 @@ win32_kbd_patch_key(
+@@ -925,11 +927,11 @@ win32_kbd_patch_key(
  	    abKeystate[VK_MENU] = abKeystate[VK_RMENU] = 0x80;
      }
  
@@ -83,7 +83,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      return s_iIsDead;
  }
-@@ -929,8 +931,8 @@ static BOOL g_fJustGotFocus = FALSE;
+@@ -956,8 +958,8 @@ static BOOL g_fJustGotFocus = FALSE;
      static BOOL
  decode_key_event(
      KEY_EVENT_RECORD	*pker,
@@ -94,7 +94,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      int			*pmodifiers,
      BOOL		fDoPost)
  {
-@@ -958,7 +960,7 @@ decode_key_event(
+@@ -985,7 +987,7 @@ decode_key_event(
      }
  
      /* special cases */
@@ -103,7 +103,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	/* Ctrl-6 is Ctrl-^ */
  	if (pker->wVirtualKeyCode == '6')
-@@ -1020,7 +1022,7 @@ decode_key_event(
+@@ -1047,7 +1049,7 @@ decode_key_event(
  	*pch = NUL;
      else
      {
@@ -112,7 +112,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  	if (pmodifiers != NULL)
  	{
-@@ -1412,7 +1414,7 @@ WaitForChar(long msec)
+@@ -1439,7 +1441,7 @@ WaitForChar(long msec)
      DWORD	    dwNow = 0, dwEndTime = 0;
      INPUT_RECORD    ir;
      DWORD	    cRecords;
@@ -121,7 +121,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (msec > 0)
  	/* Wait until the specified time has elapsed. */
-@@ -1562,10 +1564,10 @@ create_conin(void)
+@@ -1589,10 +1591,10 @@ create_conin(void)
  /*
   * Get a keystroke or a mouse event
   */
@@ -135,7 +135,16 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      for (;;)
      {
-@@ -1737,7 +1739,7 @@ mch_inchar(
+@@ -1661,7 +1663,7 @@ mch_inchar(
+ #define TYPEAHEADLEN 20
+     static char_u   typeahead[TYPEAHEADLEN];	/* previously typed bytes. */
+     static int	    typeaheadlen = 0;
+-#ifdef FEAT_MBYTE
++#if 0
+     static char_u   *rest = NULL;	/* unconverted rest of previous read */
+     static int	    restlen = 0;
+     int		    unconverted;
+@@ -1764,12 +1766,12 @@ mch_inchar(
  	else
  #endif
  	{
@@ -144,7 +153,13 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    int		modifiers = 0;
  
  	    c = tgetch(&modifiers, &ch2);
-@@ -1792,14 +1794,37 @@ mch_inchar(
+ 
+-#ifdef FEAT_MBYTE
++#if 0
+ 	    /* stolen from fill_input_buf() in ui.c */
+ 	    if (rest != NULL)
+ 	    {
+@@ -1819,14 +1821,37 @@ mch_inchar(
  		int	n = 1;
  		int     conv = FALSE;
  
