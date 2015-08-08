@@ -58,5 +58,6 @@ win32console-create-screen-buffer_remove-unused-part.patch
 fix-winclip-comment.patch
 win32console-unicode-display.patch
 win32console-unicode-input.patch
+win32console-unicode-input_remove-unused-part.patch
 vim-jp-681.diff #+disabled
 fix-config_cache-removal.patch #+rejected

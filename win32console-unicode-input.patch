@@ -33,18 +33,19 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    return FALSE;
  	s_dwIndex = 0;
  	s_dwMax = dwEvents;
-@@ -872,8 +872,10 @@ static const struct
+@@ -871,9 +871,9 @@ static const struct
+ #endif
  
  #if defined(__GNUC__) && !defined(__MINGW32__)  && !defined(__CYGWIN__)
- # define AChar AsciiChar
+-# define AChar AsciiChar
 +# define UChar UnicodeChar
  #else
- # define AChar uChar.AsciiChar
+-# define AChar uChar.AsciiChar
 +# define UChar uChar.UnicodeChar
  #endif
  
  /* The return code indicates key code size. */
-@@ -892,12 +894,12 @@ win32_kbd_patch_key(
+@@ -892,12 +892,12 @@ win32_kbd_patch_key(
  
      if (s_iIsDead == 2)
      {
@@ -59,7 +60,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	return 1;
  
      vim_memset(abKeystate, 0, sizeof (abKeystate));
-@@ -912,7 +914,7 @@ win32_kbd_patch_key(
+@@ -912,7 +912,7 @@ win32_kbd_patch_key(
      }
  
      /* Clear any pending dead keys */
@@ -68,7 +69,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (uMods & SHIFT_PRESSED)
  	abKeystate[VK_SHIFT] = 0x80;
-@@ -925,11 +927,11 @@ win32_kbd_patch_key(
+@@ -925,11 +925,11 @@ win32_kbd_patch_key(
  	    abKeystate[VK_MENU] = abKeystate[VK_RMENU] = 0x80;
      }
  
@@ -83,7 +84,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      return s_iIsDead;
  }
-@@ -956,8 +958,8 @@ static BOOL g_fJustGotFocus = FALSE;
+@@ -956,8 +956,8 @@ static BOOL g_fJustGotFocus = FALSE;
      static BOOL
  decode_key_event(
      KEY_EVENT_RECORD	*pker,
@@ -94,7 +95,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      int			*pmodifiers,
      BOOL		fDoPost)
  {
-@@ -985,7 +987,7 @@ decode_key_event(
+@@ -985,7 +985,7 @@ decode_key_event(
      }
  
      /* special cases */
@@ -103,7 +104,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	/* Ctrl-6 is Ctrl-^ */
  	if (pker->wVirtualKeyCode == '6')
-@@ -1047,7 +1049,7 @@ decode_key_event(
+@@ -1047,7 +1047,7 @@ decode_key_event(
  	*pch = NUL;
      else
      {
@@ -112,7 +113,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  	if (pmodifiers != NULL)
  	{
-@@ -1439,7 +1441,7 @@ WaitForChar(long msec)
+@@ -1439,7 +1439,7 @@ WaitForChar(long msec)
      DWORD	    dwNow = 0, dwEndTime = 0;
      INPUT_RECORD    ir;
      DWORD	    cRecords;
@@ -121,7 +122,16 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (msec > 0)
  	/* Wait until the specified time has elapsed. */
-@@ -1589,10 +1591,10 @@ create_conin(void)
+@@ -1526,7 +1526,7 @@ WaitForChar(long msec)
+ #ifdef FEAT_MBYTE_IME
+ 		/* Windows IME sends two '\n's with only one 'ENTER'.  First:
+ 		 * wVirtualKeyCode == 13. second: wVirtualKeyCode == 0 */
+-		if (ir.Event.KeyEvent.uChar.UnicodeChar == 0
++		if (ir.Event.KeyEvent.UChar == 0
+ 			&& ir.Event.KeyEvent.wVirtualKeyCode == 13)
+ 		{
+ 		    read_console_input(g_hConIn, &ir, 1, &cRecords);
+@@ -1589,10 +1589,10 @@ create_conin(void)
  /*
   * Get a keystroke or a mouse event
   */
@@ -135,7 +145,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      for (;;)
      {
-@@ -1661,7 +1663,7 @@ mch_inchar(
+@@ -1661,7 +1661,7 @@ mch_inchar(
  #define TYPEAHEADLEN 20
      static char_u   typeahead[TYPEAHEADLEN];	/* previously typed bytes. */
      static int	    typeaheadlen = 0;
@@ -144,7 +154,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      static char_u   *rest = NULL;	/* unconverted rest of previous read */
      static int	    restlen = 0;
      int		    unconverted;
-@@ -1764,12 +1766,12 @@ mch_inchar(
+@@ -1764,12 +1764,12 @@ mch_inchar(
  	else
  #endif
  	{
@@ -159,7 +169,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    /* stolen from fill_input_buf() in ui.c */
  	    if (rest != NULL)
  	    {
-@@ -1819,14 +1821,37 @@ mch_inchar(
+@@ -1819,14 +1819,37 @@ mch_inchar(
  		int	n = 1;
  		int     conv = FALSE;
  

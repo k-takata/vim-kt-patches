@@ -1,0 +1,73 @@
+# HG changeset patch
+# Parent  ed4c653c108199726b5d37c8baa56f2ecc400cce
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -1663,11 +1663,6 @@ mch_inchar(
+ #define TYPEAHEADLEN 20
+     static char_u   typeahead[TYPEAHEADLEN];	/* previously typed bytes. */
+     static int	    typeaheadlen = 0;
+-#if 0
+-    static char_u   *rest = NULL;	/* unconverted rest of previous read */
+-    static int	    restlen = 0;
+-    int		    unconverted;
+-#endif
+ 
+     /* First use any typeahead that was kept because "buf" was too small. */
+     if (typeaheadlen > 0)
+@@ -1771,33 +1766,6 @@ mch_inchar(
+ 
+ 	    c = tgetch(&modifiers, &ch2);
+ 
+-#if 0
+-	    /* stolen from fill_input_buf() in ui.c */
+-	    if (rest != NULL)
+-	    {
+-		/* Use remainder of previous call, starts with an invalid
+-		 * character that may become valid when reading more. */
+-		if (restlen > TYPEAHEADLEN - typeaheadlen)
+-		    unconverted = TYPEAHEADLEN - typeaheadlen;
+-		else
+-		    unconverted = restlen;
+-		mch_memmove(typeahead + typeaheadlen, rest, unconverted);
+-		if (unconverted == restlen)
+-		{
+-		    vim_free(rest);
+-		    rest = NULL;
+-		}
+-		else
+-		{
+-		    restlen -= unconverted;
+-		    mch_memmove(rest, rest + unconverted, restlen);
+-		}
+-		typeaheadlen += unconverted;
+-	    }
+-	    else
+-		unconverted = 0;
+-#endif
+-
+ 	    if (typebuf_changed(tb_change_cnt))
+ 	    {
+ 		/* "buf" may be invalid now if a client put something in the
+@@ -1851,20 +1819,6 @@ mch_inchar(
+ 		    typeahead[typeaheadlen + n + 1] = (char_u)ch2;
+ 		    n += 2;
+ 		}
+-#if 0
+-		/* Only convert normal characters, not special keys.  Need to
+-		 * convert before applying ALT, otherwise mapping <M-x> breaks
+-		 * when 'tenc' is set. */
+-		if (input_conv.vc_type != CONV_NONE
+-						&& (ch2 == NUL || c != K_NUL))
+-		{
+-		    conv = TRUE;
+-		    typeaheadlen -= unconverted;
+-		    n = convert_input_safe(typeahead + typeaheadlen,
+-				n + unconverted, TYPEAHEADLEN - typeaheadlen,
+-				rest == NULL ? &rest : NULL, &restlen);
+-		}
+-#endif
+ 
+ 		if (conv)
+ 		{
