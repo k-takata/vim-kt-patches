@@ -8,7 +8,7 @@ Some of the patches are already sent to [vim_dev](https://groups.google.com/foru
 ## How to use ##
 ### First time ###
 ```sh
-$ hg qclone https://vim.googlecode.com/hg/ -p https://bitbucket.org/k_takata/vim-ktakata-mq vim
+$ hg qclone https://bitbucket.org/vim-mirror/vim -p https://bitbucket.org/k_takata/vim-ktakata-mq vim
 $ cd vim
 $ hg qselect linux    # if needed
 $ hg qpush -a
