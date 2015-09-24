@@ -1,10 +1,8 @@
-# HG changeset patch
-# Parent 5cd1f2cbe452f47f1563aff427412558b9c4ecae
-
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
+index 97ad6b0..e03295c 100644
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -2942,6 +2942,22 @@
+@@ -2946,6 +2946,29 @@ on_select_tab(
  }
  
  /*
@@ -19,7 +17,14 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 +{
 +    if (!ignore_tabline_evt)
 +    {
-+	tabpage_move(idx);
++	if ((tabpage_index(curtab) - 1) < idx)
++	{
++	    tabpage_move(idx + 1);
++	}
++	else
++	{
++	    tabpage_move(idx);
++	}
 +    }
 +}
 +
@@ -27,7 +32,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
   * Show or hide the tabline.
   */
      void
-@@ -3016,6 +3032,9 @@
+@@ -3020,6 +3043,9 @@ gui_mch_update_tabline(void)
  		    page,
  		    event_box,
  		    nr++);
@@ -37,7 +42,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	}
  
  	event_box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(gui.tabline), page);
-@@ -3379,11 +3398,15 @@
+@@ -3387,11 +3413,15 @@ gui_mch_init(void)
  	gtk_misc_set_padding(GTK_MISC(label), 2, 2);
  	gtk_container_add(GTK_CONTAINER(event_box), label);
  	gtk_notebook_set_tab_label(GTK_NOTEBOOK(gui.tabline), page, event_box);
@@ -54,9 +59,10 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      tabline_menu = create_tabline_menu();
      gtk_signal_connect_object(GTK_OBJECT(gui.tabline), "button_press_event",
 diff --git a/src/gui_w32.c b/src/gui_w32.c
+index 4fbf70e..4b8f5c6 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4431,6 +4431,35 @@
+@@ -4427,6 +4427,34 @@ initialise_tabline(void)
  # endif
  }
  
@@ -85,14 +91,13 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    return ptp;
 +}
 +
-+static tabpage_T    *s_tp = NULL;
 +static POINT	    s_pt = {0, 0};
 +static HCURSOR      s_hCursor = NULL;
 +
      static LRESULT CALLBACK
  tabline_wndproc(
      HWND hwnd,
-@@ -4438,7 +4467,75 @@
+@@ -4434,7 +4462,73 @@ tabline_wndproc(
      WPARAM wParam,
      LPARAM lParam)
  {
@@ -111,12 +116,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	    {
 +		s_pt.x = GET_X_LPARAM(lParam);
 +		s_pt.y = GET_Y_LPARAM(lParam);
-+		s_tp = GetTabFromPoint(hwnd, s_pt);
-+		if (s_tp != NULL)
-+		{
-+		    SetCapture(hwnd);
-+		    s_hCursor = GetCursor(); /* backup default cursor */
-+		}
++		SetCapture(hwnd);
++		s_hCursor = GetCursor(); /* backup default cursor */
 +		break;
 +	    }
 +	case WM_MOUSEMOVE:
@@ -130,19 +131,22 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +		    SetCursor(LoadCursor(NULL, IDC_SIZEWE));
 +
 +		    tp = GetTabFromPoint(hwnd, pt);
-+		    if (s_tp != NULL && tp != NULL
-+			    && tp != s_tp) /* ignore if the same tabpage */
++		    if (tp != NULL)
 +		    {
-+			idx0 = tabpage_index(s_tp) - 1;
-+
++			idx0 = tabpage_index(curtab) - 1;
 +			idx1 = tabpage_index(tp) - 1;
++
 +			TabCtrl_GetItemRect(hwnd, idx1, &rect);
 +			nCenter = rect.left + (rect.right - rect.left) / 2;
 +
 +			/* Check if the mouse cursor goes over the center of
 +			 * the next tab to prevent "flickering". */
-+			if (       ((idx0 < idx1) && (nCenter < pt.x))
-+				|| ((idx1 < idx0) && (pt.x < nCenter)))
++			if ((idx0 < idx1) && (nCenter < pt.x))
++			{
++			    tabpage_move(idx1 + 1);
++			    update_screen(0);
++			}
++			else if ((idx1 < idx0) && (pt.x < nCenter))
 +			{
 +			    tabpage_move(idx1);
 +			    update_screen(0);
@@ -157,7 +161,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +		{
 +		    SetCursor(s_hCursor);
 +		    ReleaseCapture();
-+		    s_tp = NULL;
 +		}
 +		break;
 +	    }
