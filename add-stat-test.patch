@@ -1,12 +1,12 @@
 # HG changeset patch
 # Parent 7656647da44ed09b242c32cf1d95c9d4ca0df086
-# Parent  4228fb9f98ffd19ececa553e1d9f65e1c1583410
+# Parent  3604669faa5abc12ad46fce6217f6ccc4f7dccc8
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1924,6 +1924,7 @@ test1 \
- 	test_ruby \
+@@ -1930,6 +1930,7 @@ test1 \
+ 	test_search_mbyte \
  	test_set \
  	test_signs \
 +	test_stat \
@@ -16,16 +16,16 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
 +++ b/src/testdir/Make_amiga.mak
-@@ -58,6 +58,7 @@ SCRIPTS = test1.out test3.out test4.out 
- 		test_ruby.out \
+@@ -66,6 +66,7 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_textobjects.out \
  		test_utf8.out
  
-@@ -205,5 +206,6 @@ test_qf_title.out: test_qf_title.in
- test_ruby.out: test_ruby.in
+@@ -221,5 +222,6 @@ test_ruby.out: test_ruby.in
+ test_search_mbyte.out: test_search_mbyte.in
  test_set.out: test_set.in
  test_signs.out: test_signs.in
 +test_stat.out: test_stat.in
@@ -42,9 +42,9 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 +		test105.out test106.out test107.out\
  		test_argument_0count.out \
  		test_argument_count.out \
- 		test_autoformat_join.out \
-@@ -57,6 +57,7 @@ SCRIPTS =	test3.out test4.out test5.out 
- 		test_ruby.out \
+ 		test_autocmd_option.out \
+@@ -65,6 +65,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
@@ -54,8 +54,8 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 --- a/src/testdir/Make_ming.mak
 +++ b/src/testdir/Make_ming.mak
-@@ -79,6 +79,7 @@ SCRIPTS =	test3.out test4.out test5.out 
- 		test_ruby.out \
+@@ -87,6 +87,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
@@ -65,8 +65,8 @@ diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 --- a/src/testdir/Make_os2.mak
 +++ b/src/testdir/Make_os2.mak
-@@ -59,6 +59,7 @@ SCRIPTS = test1.out test3.out test4.out 
- 		test_ruby.out \
+@@ -67,6 +67,7 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
@@ -76,8 +76,8 @@ diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 --- a/src/testdir/Make_vms.mms
 +++ b/src/testdir/Make_vms.mms
-@@ -118,6 +118,7 @@ SCRIPT = test1.out  test2.out  test3.out
- 	 test_ruby.out \
+@@ -126,6 +126,7 @@ SCRIPT = test1.out  test2.out  test3.out
+ 	 test_search_mbyte.out \
  	 test_set.out \
  	 test_signs.out \
 +	 test_stat.out \
@@ -87,8 +87,8 @@ diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
-@@ -55,6 +55,7 @@ SCRIPTS = test1.out test2.out test3.out 
- 		test_ruby.out \
+@@ -63,6 +63,7 @@ SCRIPTS = test1.out test2.out test3.out 
+ 		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
