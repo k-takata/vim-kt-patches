@@ -1,11 +1,13 @@
 # HG changeset patch
 # Parent 6ee3a815113c128147fa9831c2004916a7daba86
+# Parent  1cc062c18ba99d25154a19f5e79ef75e74569935
+
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3396,11 +3396,18 @@ mch_writable(char_u *name)
+@@ -3364,11 +3364,18 @@ mch_writable(char_u *name)
      int
- mch_can_exe(char_u *name, char_u **path)
+ mch_can_exe(char_u *name, char_u **path, int use_path)
  {
 +#ifdef FEAT_MBYTE
 +    /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
@@ -21,9 +23,9 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -    if (len >= _MAX_PATH)	/* safety check */
 +    if (len >= sizeof(buf))	/* safety check */
  	return FALSE;
- 
-     /* If there already is an extension try using the name directly.  Also do
-@@ -3413,7 +3420,7 @@ mch_can_exe(char_u *name, char_u **path)
+     if (!use_path)
+     {
+@@ -3386,7 +3393,7 @@ mch_can_exe(char_u *name, char_u **path,
      /*
       * Loop over all extensions in $PATHEXT.
       */
@@ -32,7 +34,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      p = mch_getenv("PATHEXT");
      if (p == NULL)
  	p = (char_u *)".com;.exe;.bat;.cmd";
-@@ -3428,7 +3435,7 @@ mch_can_exe(char_u *name, char_u **path)
+@@ -3401,7 +3408,7 @@ mch_can_exe(char_u *name, char_u **path,
  		++p;
  	}
  	else
