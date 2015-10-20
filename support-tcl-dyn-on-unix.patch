@@ -1,10 +1,11 @@
 # HG changeset patch
 # Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
+# Parent  a5d79d05bf946cf428220fefb38fcabe99f20199
 
 diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 --- a/runtime/doc/if_tcl.txt
 +++ b/runtime/doc/if_tcl.txt
-@@ -515,12 +515,15 @@
+@@ -515,12 +515,15 @@ startup file (usually "~/.vimrc" on Unix
  ==============================================================================
  9. Dynamic loading					*tcl-dynamic*
  
@@ -28,7 +29,7 @@ diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -439,7 +439,9 @@
+@@ -439,7 +439,9 @@ CClink = $(CC)
  
  # TCL
  # Uncomment this when you want to include the Tcl interface.
@@ -38,16 +39,16 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
  
  # CSCOPE
-@@ -1340,7 +1342,7 @@
+@@ -1348,7 +1350,7 @@ SHELL = /bin/sh
  .SUFFIXES: .c .o .pro
  
  PRE_DEFS = -Iproto $(DEFS) $(GUI_DEFS) $(GUI_IPATH) $(CPPFLAGS) $(EXTRA_IPATHS)
 -POST_DEFS = $(X_CFLAGS) $(MZSCHEME_CFLAGS) $(TCL_CFLAGS) $(EXTRA_DEFS)
 +POST_DEFS = $(X_CFLAGS) $(MZSCHEME_CFLAGS) $(EXTRA_DEFS)
  
- ALL_CFLAGS = $(PRE_DEFS) $(CFLAGS) $(PROFILE_CFLAGS) $(LEAK_CFLAGS) $(POST_DEFS)
+ ALL_CFLAGS = $(PRE_DEFS) $(CFLAGS) $(PROFILE_CFLAGS) $(SANITIZER_CFLAGS) $(LEAK_CFLAGS) $(POST_DEFS)
  
-@@ -1348,7 +1350,7 @@
+@@ -1356,7 +1358,7 @@ ALL_CFLAGS = $(PRE_DEFS) $(CFLAGS) $(PRO
  # with "-E".
  OSDEF_CFLAGS = $(PRE_DEFS) $(POST_DEFS)
  
@@ -56,7 +57,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  LINT_EXTRA = -DUSE_SNIFF -DHANGUL_INPUT -D"__attribute__(x)="
  
-@@ -2629,7 +2631,7 @@
+@@ -2685,7 +2687,7 @@ objects/if_sniff.o: if_sniff.c
  	$(CCC) -o $@ if_sniff.c
  
  objects/if_tcl.o: if_tcl.c
@@ -81,7 +82,7 @@ diff --git a/src/config.h.in b/src/config.h.in
 diff --git a/src/configure.in b/src/configure.in
 --- a/src/configure.in
 +++ b/src/configure.in
-@@ -1560,11 +1560,11 @@
+@@ -1622,11 +1622,11 @@ fi
  
  AC_MSG_CHECKING(--enable-tclinterp argument)
  AC_ARG_ENABLE(tclinterp,
@@ -95,7 +96,7 @@ diff --git a/src/configure.in b/src/configure.in
  
    dnl on FreeBSD tclsh is a silly script, look for tclsh8.[5420]
    AC_MSG_CHECKING(--with-tclsh argument)
-@@ -1598,6 +1598,7 @@
+@@ -1660,6 +1660,7 @@ if test "$enable_tclinterp" = "yes"; the
        tclver=`echo 'puts [[info tclversion]]' | $vi_cv_path_tcl -`
        AC_MSG_RESULT($tclver - OK);
        tclloc=`echo 'set l [[info library]];set i [[string last lib $l]];incr i -2;puts [[string range $l 0 $i]]' | $vi_cv_path_tcl -`
@@ -103,7 +104,7 @@ diff --git a/src/configure.in b/src/configure.in
  
        AC_MSG_CHECKING(for location of Tcl include)
        if test "x$MACOSX" != "xyes"; then
-@@ -1632,7 +1633,11 @@
+@@ -1694,7 +1695,11 @@ if test "$enable_tclinterp" = "yes"; the
  	    AC_MSG_RESULT($try/tclConfig.sh)
  	    . $try/tclConfig.sh
  	    dnl use eval, because tcl 8.2 includes ${TCL_DBGX}
@@ -116,7 +117,7 @@ diff --git a/src/configure.in b/src/configure.in
  	    dnl Use $TCL_DEFS for -D_THREAD_SAFE et al.  But only use the
  	    dnl "-D_ABC" items.  Watch out for -DFOO=long\ long.
  	    TCL_DEFS=`echo $TCL_DEFS | sed -e 's/\\\\ /\\\\X/g' | tr ' ' '\012' | sed -e '/^[[^-]]/d' -e '/^-[[^D]]/d' -e '/-D[[^_]]/d' -e 's/-D_/ -D_/' | tr '\012' ' ' | sed -e 's/\\\\X/\\\\ /g'`
-@@ -1677,6 +1682,12 @@
+@@ -1739,6 +1744,12 @@ if test "$enable_tclinterp" = "yes"; the
        AC_MSG_RESULT(too old; need Tcl version 8.0 or later)
      fi
    fi
@@ -132,7 +133,7 @@ diff --git a/src/configure.in b/src/configure.in
 diff --git a/src/if_tcl.c b/src/if_tcl.c
 --- a/src/if_tcl.c
 +++ b/src/if_tcl.c
-@@ -160,6 +160,20 @@
+@@ -160,6 +160,20 @@ static struct ref refsdeleted;	/* dummy 
  typedef int HANDLE;
  # endif
  
@@ -153,7 +154,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  /*
   * Declare HANDLE for tcl.dll and function pointers.
   */
-@@ -170,7 +184,6 @@
+@@ -170,7 +184,6 @@ void (*dll_Tcl_FindExecutable)(const voi
  /*
   * Table of name to function pointer of tcl.
   */
@@ -161,7 +162,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  static struct {
      char* name;
      TCL_PROC* ptr;
-@@ -197,7 +210,7 @@
+@@ -197,7 +210,7 @@ tcl_runtime_link_init(char *libname, int
  
      if (hTclLib)
  	return OK;
@@ -170,7 +171,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
      {
  	if (verbose)
  	    EMSG2(_(e_loadlib), libname);
-@@ -205,10 +218,10 @@
+@@ -205,10 +218,10 @@ tcl_runtime_link_init(char *libname, int
      }
      for (i = 0; tcl_funcname_table[i].ptr; ++i)
      {
@@ -183,7 +184,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  	    hTclLib = NULL;
  	    if (verbose)
  		EMSG2(_(e_loadfunc), tcl_funcname_table[i].name);
-@@ -252,7 +265,7 @@
+@@ -252,7 +265,7 @@ tcl_enabled(verbose)
  
  	dll_Tcl_FindExecutable(find_executable_arg);
  
@@ -192,7 +193,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  	{
  	    if (Tcl_InitStubs(interp, DYNAMIC_TCL_VER, 0))
  	    {
-@@ -272,7 +285,7 @@
+@@ -272,7 +285,7 @@ tcl_end()
  #ifdef DYNAMIC_TCL
      if (hTclLib)
      {
