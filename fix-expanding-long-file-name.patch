@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  aa557124c9a5d3456f803c19e716d0a54b50a466
+
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -9941,7 +9941,7 @@ dos_expandpath(
+     }
+ 
+     /* make room for file name */
+-    buf = alloc((int)STRLEN(path) + BASENAMELEN + 5);
++    buf = alloc(MAXPATHL);
+     if (buf == NULL)
+ 	return 0;
+ 
