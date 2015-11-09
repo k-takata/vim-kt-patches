@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
-# Parent  a5d79d05bf946cf428220fefb38fcabe99f20199
+# Parent  6f8f4e4f5925a066b1494b1fac6423e954b26557
 
 diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 --- a/runtime/doc/if_tcl.txt
@@ -26,6 +26,40 @@ diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
  
  To use the Tcl interface the Tcl DLL must be in your search path.  In a
  console window type "path" to see what directories are used.
+@@ -529,5 +532,12 @@ The name of the DLL must match the Tcl v
+ Currently the name is "tcl83.dll".  That is for Tcl 8.3.  To know for sure
+ edit "gvim.exe" and search for "tcl\d*.dll\c".
+ 
++
++Unix ~
++
++The 'tcldll' option can be used to specify the Tcl shared library file instead
++of DYNAMIC_TCL_DLL file what was specified at compile time.  The version of
++the shared library must match the Tcl version Vim was compiled with.
++
+ ==============================================================================
+  vim:tw=78:ts=8:ft=help:norl:
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -7416,6 +7416,17 @@ A jump table for the options with a shor
+ 	Resetting this option is useful when using a ":tag" command in a
+ 	mapping which should not change the tagstack.
+ 
++						*'tcldll'*
++'tcldll' 		string	(default empty)
++			global
++			{not in Vi} {only for Unix}
++			{only available when compiled with the |+tcl/dyn|
++			feature}
++	Specifies the path of the Tcl shared library instead of DYNAMIC_TCL_DLL
++	what was specified at compile time.
++	This option cannot be set from a |modeline| or in the |sandbox|, for
++	security reasons.
++
+ 						*'term'* *E529* *E530* *E531*
+ 'term'			string	(default is $TERM, if that fails:
+ 				      in the GUI: "builtin_gui"
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
@@ -57,7 +91,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  LINT_EXTRA = -DUSE_SNIFF -DHANGUL_INPUT -D"__attribute__(x)="
  
-@@ -2685,7 +2687,7 @@ objects/if_sniff.o: if_sniff.c
+@@ -2692,7 +2694,7 @@ objects/if_sniff.o: if_sniff.c
  	$(CCC) -o $@ if_sniff.c
  
  objects/if_tcl.o: if_tcl.c
@@ -184,7 +218,21 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  	    hTclLib = NULL;
  	    if (verbose)
  		EMSG2(_(e_loadfunc), tcl_funcname_table[i].name);
-@@ -252,7 +265,7 @@ tcl_enabled(verbose)
+@@ -245,14 +258,20 @@ static int stubs_initialized = FALSE;
+ tcl_enabled(verbose)
+     int		verbose;
+ {
++#ifdef WIN3264
++    char *dll = DYNAMIC_TCL_DLL;
++#else
++    char *dll = *p_tcldll ? (char *)p_tcldll : DYNAMIC_TCL_DLL;
++#endif
++
+     if (!stubs_initialized && find_executable_arg != NULL
+-	    && tcl_runtime_link_init(DYNAMIC_TCL_DLL, verbose) == OK)
++	    && tcl_runtime_link_init(dll, verbose) == OK)
+     {
+ 	Tcl_Interp *interp;
  
  	dll_Tcl_FindExecutable(find_executable_arg);
  
@@ -193,7 +241,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  	{
  	    if (Tcl_InitStubs(interp, DYNAMIC_TCL_VER, 0))
  	    {
-@@ -272,7 +285,7 @@ tcl_end()
+@@ -272,7 +291,7 @@ tcl_end()
  #ifdef DYNAMIC_TCL
      if (hTclLib)
      {
@@ -201,4 +249,32 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
 +	close_dll(hTclLib);
  	hTclLib = NULL;
      }
+ #endif
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -2620,6 +2620,11 @@ static struct vimoption
+     {"tagstack",    "tgst", P_BOOL|P_VI_DEF,
+ 			    (char_u *)&p_tgst, PV_NONE,
+ 			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
++#if defined(DYNAMIC_TCL) && !defined(WIN3264)
++    {"tcldll",      NULL,   P_STRING|P_VI_DEF|P_SECURE,
++			    (char_u *)&p_tcldll, PV_NONE,
++			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
++#endif
+     {"term",	    NULL,   P_STRING|P_EXPAND|P_NODEFAULT|P_NO_MKRC|P_VI_DEF|P_RALL,
+ 			    (char_u *)&T_NAME, PV_NONE,
+ 			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
+diff --git a/src/option.h b/src/option.h
+--- a/src/option.h
++++ b/src/option.h
+@@ -823,6 +823,9 @@ EXTERN long	p_tl;		/* 'taglength' */
+ EXTERN int	p_tr;		/* 'tagrelative' */
+ EXTERN char_u	*p_tags;	/* 'tags' */
+ EXTERN int	p_tgst;		/* 'tagstack' */
++#if defined(DYNAMIC_TCL) && !defined(WIN3264)
++EXTERN char_u	*p_tcldll;	/* 'tcldll' */
++#endif
+ #ifdef FEAT_ARABIC
+ EXTERN int	p_tbidi;	/* 'termbidi' */
  #endif
