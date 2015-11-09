@@ -1,0 +1,25 @@
+# HG changeset patch
+# Parent 655b74e20f72b15f112378a81010752fe03d7a32
+# Parent  b4015e4d80ae31a747d16437275b087622667505
+
+diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
+--- a/runtime/doc/if_pyth.txt
++++ b/runtime/doc/if_pyth.txt
+@@ -686,6 +686,8 @@ This means that Vim will search for the 
+ when needed.  When you don't use the Python interface you don't need it, thus
+ you can use Vim without this file.
+ 
++MS-Windows ~
++
+ On MS-Windows to use the Python interface the Python DLL must be in your search
+ path.  In a console window type "path" to see what directories are used.
+ 
+@@ -693,6 +695,8 @@ The name of the DLL must match the Pytho
+ Currently the name is "python24.dll".  That is for Python 2.4.  To know for
+ sure edit "gvim.exe" and search for "python\d*.dll\c".
+ 
++Unix ~
++
+ On Unix the 'pythondll' or 'python3dll' option can be used to specify the
+ Python shared library file instead of DYNAMIC_PYTHON_DLL or
+ DYNAMIC_PYTHON3_DLL file what were specified at compile time.  The version of
