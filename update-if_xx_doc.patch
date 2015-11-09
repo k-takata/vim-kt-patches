@@ -1,0 +1,86 @@
+# HG changeset patch
+# Parent 655b74e20f72b15f112378a81010752fe03d7a32
+# Parent  90f32b550a2cd5272a7a6ec9467ceab02d4c8dec
+
+diff --git a/runtime/doc/if_lua.txt b/runtime/doc/if_lua.txt
+--- a/runtime/doc/if_lua.txt
++++ b/runtime/doc/if_lua.txt
+@@ -410,13 +410,19 @@ This means that Vim will search for the 
+ when needed.  When you don't use the Lua interface you don't need it, thus
+ you can use Vim without this file.
+ 
+-On MS-Windows to use the Lua interface the Lua DLL must be in your search path.
+-In a console window type "path" to see what directories are used.  The version
+-of the DLL must match the Lua version Vim was compiled with.
+ 
+-On Unix the 'luadll' option can be used to specify the Lua shared library file
+-instead of DYNAMIC_LUA_DLL file what was specified at compile time.  The
+-version of the shared library must match the Lua version Vim was compiled with.
++MS-Windows ~
++
++To use the Lua interface the Lua DLL must be in your search path.  In a
++console window type "path" to see what directories are used.  The version of
++the DLL must match the Lua version Vim was compiled with.
++
++
++Unix ~
++
++The 'luadll' option can be used to specify the Lua shared library file instead
++of DYNAMIC_LUA_DLL file what was specified at compile time.  The version of
++the shared library must match the Lua version Vim was compiled with.
+ 
+ 
+ ==============================================================================
+diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
+--- a/runtime/doc/if_pyth.txt
++++ b/runtime/doc/if_pyth.txt
+@@ -686,18 +686,23 @@ This means that Vim will search for the 
+ when needed.  When you don't use the Python interface you don't need it, thus
+ you can use Vim without this file.
+ 
+-On MS-Windows to use the Python interface the Python DLL must be in your search
+-path.  In a console window type "path" to see what directories are used.
++
++MS-Windows ~
++
++To use the Python interface the Python DLL must be in your search path.  In a
++console window type "path" to see what directories are used.
+ 
+ The name of the DLL must match the Python version Vim was compiled with.
+ Currently the name is "python24.dll".  That is for Python 2.4.  To know for
+ sure edit "gvim.exe" and search for "python\d*.dll\c".
+ 
+-On Unix the 'pythondll' or 'python3dll' option can be used to specify the
+-Python shared library file instead of DYNAMIC_PYTHON_DLL or
+-DYNAMIC_PYTHON3_DLL file what were specified at compile time.  The version of
+-the shared library must match the Python 2.x or Python 3 version Vim was
+-compiled with.
++
++Unix ~
++
++The 'pythondll' or 'python3dll' option can be used to specify the Python
++shared library file instead of DYNAMIC_PYTHON_DLL or DYNAMIC_PYTHON3_DLL file
++what were specified at compile time.  The version of the shared library must
++match the Python 2.x or Python 3 version Vim was compiled with.
+ 
+ ==============================================================================
+ 10. Python 3						*python3*
+diff --git a/runtime/doc/if_ruby.txt b/runtime/doc/if_ruby.txt
+--- a/runtime/doc/if_ruby.txt
++++ b/runtime/doc/if_ruby.txt
+@@ -199,6 +199,7 @@ This means that Vim will search for the 
+ when needed.  When you don't use the Ruby interface you don't need it, thus
+ you can use Vim even though this library file is not on your system.
+ 
++
+ MS-Windows ~
+ 
+ You need to install the right version of Ruby for this to work.  You can find
+@@ -218,6 +219,7 @@ and comment-out the check for _MSC_VER.
+ You may also need to rename the include directory name to match the version,
+ strangely for Ruby 1.9.3 the directory is called 1.9.1.
+ 
++
+ Unix ~
+ 
+ The 'rubydll' option can be used to specify the Ruby shared library file

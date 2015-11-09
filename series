@@ -37,7 +37,7 @@ subpixel-artifacts.patch
 fix-italic-overhang-before-space.patch
 fix-7.4.039-S_IFDIR.patch
 remove-client-edge.patch
-update-if_pyth.patch
+update-if_xx_doc.patch
 remove-useless-STRCPY.patch
 use-correct-struct-size.patch
 Make_mvc.mak.patch
