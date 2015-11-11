@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
-# Parent  6f8f4e4f5925a066b1494b1fac6423e954b26557
+# Parent  bccd3bbc70774f723074b06bbc6168ce2cb4a400
 
 diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 --- a/runtime/doc/if_tcl.txt
@@ -60,6 +60,31 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  						*'term'* *E529* *E530* *E531*
  'term'			string	(default is $TERM, if that fails:
  				      in the GUI: "builtin_gui"
+diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
+--- a/runtime/doc/quickref.txt
++++ b/runtime/doc/quickref.txt
+@@ -908,6 +908,7 @@ Short explanation of each option:		*opti
+ 'tagrelative'	  'tr'	    file names in tag file are relative
+ 'tags'		  'tag'     list of file names used by the tag command
+ 'tagstack'	  'tgst'    push tags onto the tag stack
++'tcldll'		    name of the Tcl dynamic library
+ 'term'			    name of the terminal
+ 'termbidi'	  'tbidi'   terminal takes care of bi-directionality
+ 'termencoding'	  'tenc'    character encoding used by the terminal
+diff --git a/runtime/optwin.vim b/runtime/optwin.vim
+--- a/runtime/optwin.vim
++++ b/runtime/optwin.vim
+@@ -1327,6 +1327,10 @@ if exists("&rubydll")
+   call append("$", "rubydll\tname of the Ruby dynamic library")
+   call <SID>OptionG("rubydll", &rubydll)
+ endif
++if exists("&tcldll")
++  call append("$", "tcldll\tname of the Tcl dynamic library")
++  call <SID>OptionG("tcldll", &tcldll)
++endif
+ 
+ set cpo&vim
+ 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
