@@ -50,7 +50,7 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
  Currently the name is "python24.dll".  That is for Python 2.4.  To know for
  sure edit "gvim.exe" and search for "python\d*.dll\c".
  
--On Unix the 'pythondll' or 'python3dll' option can be used to specify the
+-On Unix the 'pythondll' or 'pythonthreedll' option can be used to specify the
 -Python shared library file instead of DYNAMIC_PYTHON_DLL or
 -DYNAMIC_PYTHON3_DLL file what were specified at compile time.  The version of
 -the shared library must match the Python 2.x or Python 3 version Vim was
@@ -58,7 +58,7 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +
 +Unix ~
 +
-+The 'pythondll' or 'python3dll' option can be used to specify the Python
++The 'pythondll' or 'pythonthreedll' option can be used to specify the Python
 +shared library file instead of DYNAMIC_PYTHON_DLL or DYNAMIC_PYTHON3_DLL file
 +what were specified at compile time.  The version of the shared library must
 +match the Python 2.x or Python 3 version Vim was compiled with.
