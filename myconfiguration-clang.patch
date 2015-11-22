@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f85ebd0e7c7a2f5d398c29cd115b6b2c801c6cfb
+# Parent  e0117ece79634edb55f6884eb4c9bf82fdfb3319
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
@@ -13,3 +13,11 @@ diff --git a/src/Makefile b/src/Makefile
  
  # COMPILER FLAGS - change as you please. Either before running {{{1
  # configure or afterwards. For examples see below.
+@@ -557,6 +557,7 @@ CONF_OPT_FEAT = --with-features=huge
+ # When not defined, configure will try to use -O2 -g for gcc and -O for cc.
+ #CFLAGS = -g
+ #CFLAGS = -O
++CFLAGS = -g -O2 -Wall -Wmissing-prototypes -D_INTL_REDIRECT_MACROS
+ 
+ # Optimization limits - depends on the compiler.  Automatic check in configure
+ # doesn't work very well, because many compilers only give a warning for
