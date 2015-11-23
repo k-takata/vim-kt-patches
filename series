@@ -4,6 +4,7 @@ configure.patch
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
 myconfiguration-private-install.patch #+private-install
+myconfiguration-clang.patch #+clang
 backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+linux
 support-largefiles-on-windows.patch
