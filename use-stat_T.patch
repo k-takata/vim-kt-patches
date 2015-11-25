@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  e09ef19c4a58b5326248b7f73df665188e42087e
+# Parent  2e7ff41c6beb0193817b8d1b2b5266f66dbb4b10
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -18,7 +18,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #else
  static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname));
  #endif
-@@ -1661,7 +1661,7 @@ buflist_new(ffname, sfname, lnum, flags)
+@@ -1660,7 +1660,7 @@ buflist_new(ffname, sfname, lnum, flags)
  {
      buf_T	*buf;
  #ifdef UNIX
@@ -27,7 +27,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      fname_expand(curbuf, &ffname, &sfname);	/* will allocate ffname */
-@@ -2181,7 +2181,7 @@ buflist_findname(ffname)
+@@ -2180,7 +2180,7 @@ buflist_findname(ffname)
      char_u	*ffname;
  {
  #ifdef UNIX
@@ -36,7 +36,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  
      if (mch_stat((char *)ffname, &st) < 0)
  	st.st_dev = (dev_T)-1;
-@@ -2196,7 +2196,7 @@ buflist_findname(ffname)
+@@ -2195,7 +2195,7 @@ buflist_findname(ffname)
      static buf_T *
  buflist_findname_stat(ffname, stp)
      char_u	*ffname;
@@ -45,7 +45,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  {
  #endif
      buf_T	*buf;
-@@ -2848,7 +2848,7 @@ setfname(buf, ffname, sfname, message)
+@@ -2847,7 +2847,7 @@ setfname(buf, ffname, sfname, message)
  {
      buf_T	*obuf = NULL;
  #ifdef UNIX
@@ -54,7 +54,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      if (ffname == NULL || *ffname == NUL)
-@@ -3098,7 +3098,7 @@ otherfile_buf(buf, ffname
+@@ -3097,7 +3097,7 @@ otherfile_buf(buf, ffname
      buf_T	*buf;
      char_u	*ffname;
  #ifdef UNIX
@@ -63,7 +63,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  {
      /* no name is different */
-@@ -3108,9 +3108,9 @@ otherfile_buf(buf, ffname
+@@ -3107,9 +3107,9 @@ otherfile_buf(buf, ffname
  	return FALSE;
  #ifdef UNIX
      {
@@ -76,7 +76,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  	if (stp == NULL)
  	{
  	    if (!buf->b_dev_valid || mch_stat((char *)ffname, &st) < 0)
-@@ -3146,7 +3146,7 @@ otherfile_buf(buf, ffname
+@@ -3145,7 +3145,7 @@ otherfile_buf(buf, ffname
  buf_setino(buf)
      buf_T	*buf;
  {
@@ -85,7 +85,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  
      if (buf->b_fname != NULL && mch_stat((char *)buf->b_fname, &st) >= 0)
      {
-@@ -3164,7 +3164,7 @@ buf_setino(buf)
+@@ -3163,7 +3163,7 @@ buf_setino(buf)
      static int
  buf_same_ino(buf, stp)
      buf_T	*buf;
@@ -164,7 +164,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 +    stat_T	st_old;		/* mch_stat() of existing viminfo file */
  #endif
  #ifdef WIN3264
-     long	perm = -1;
+     int		hidden = FALSE;
 @@ -3020,7 +3020,7 @@ check_readonly(forceit, buf)
      int		*forceit;
      buf_T	*buf;
@@ -602,7 +602,7 @@ diff --git a/src/misc1.c b/src/misc1.c
      int		    r1, r2;
  
      expand_env(s1, exp1, MAXPATHL);
-@@ -9607,7 +9607,7 @@ preserve_exit()
+@@ -9642,7 +9642,7 @@ preserve_exit()
  vim_fexists(fname)
      char_u  *fname;
  {
@@ -611,7 +611,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  
      if (mch_stat((char *)fname, &st))
  	return FALSE;
-@@ -10367,7 +10367,7 @@ unix_expandpath(gap, path, wildoff, flag
+@@ -10403,7 +10403,7 @@ unix_expandpath(gap, path, wildoff, flag
  		}
  		else
  		{
@@ -620,7 +620,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  
  		    /* no more wildcards, check if there is a match */
  		    /* remove backslashes for the remaining components only */
-@@ -11137,7 +11137,7 @@ addfile(gap, f, flags)
+@@ -11173,7 +11173,7 @@ addfile(gap, f, flags)
  {
      char_u	*p;
      int		isdir;
@@ -632,7 +632,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/misc2.c b/src/misc2.c
 --- a/src/misc2.c
 +++ b/src/misc2.c
-@@ -5111,7 +5111,7 @@ ff_check_visited(visited_list, fname
+@@ -5107,7 +5107,7 @@ ff_check_visited(visited_list, fname
  {
      ff_visited_T	*vp;
  #ifdef UNIX
@@ -665,7 +665,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -494,6 +494,18 @@ slash_adjust(p)
+@@ -497,6 +497,18 @@ slash_adjust(p)
      }
  }
  
@@ -684,7 +684,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  #if (defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)
  # define OPEN_OH_ARGTYPE intptr_t
  #else
-@@ -501,7 +513,7 @@ slash_adjust(p)
+@@ -504,7 +516,7 @@ slash_adjust(p)
  #endif
  
      static int
@@ -693,7 +693,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  #if defined(_MSC_VER) && _MSC_VER < 1700
      /* Work around for VC10 or earlier. stat() can't handle symlinks properly.
-@@ -547,7 +559,7 @@ stat_symlink_aware(const char *name, str
+@@ -550,7 +562,7 @@ stat_symlink_aware(const char *name, str
  
  #ifdef FEAT_MBYTE
      static int
@@ -702,7 +702,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  # if defined(_MSC_VER) && _MSC_VER < 1700
      /* Work around for VC10 or earlier. _wstat() can't handle symlinks properly.
-@@ -583,13 +595,13 @@ wstat_symlink_aware(const WCHAR *name, s
+@@ -586,13 +598,13 @@ wstat_symlink_aware(const WCHAR *name, s
  	    int	    fd;
  
  	    fd = _open_osfhandle((OPEN_OH_ARGTYPE)h, _O_RDONLY);
@@ -718,7 +718,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  }
  #endif
  
-@@ -597,7 +609,7 @@ wstat_symlink_aware(const WCHAR *name, s
+@@ -600,7 +612,7 @@ wstat_symlink_aware(const WCHAR *name, s
   * stat() can't handle a trailing '/' or '\', remove it first.
   */
      int
@@ -727,7 +727,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  #ifdef FEAT_MBYTE
      /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
-@@ -642,7 +654,7 @@ vim_stat(const char *name, struct stat *
+@@ -645,7 +657,7 @@ vim_stat(const char *name, struct stat *
  
  	if (wp != NULL)
  	{
@@ -739,7 +739,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -2993,7 +2993,7 @@ mch_dirname(
+@@ -3040,7 +3040,7 @@ mch_dirname(
      long
  mch_getperm(char_u *name)
  {

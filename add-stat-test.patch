@@ -10,9 +10,9 @@ diff --git a/src/Makefile b/src/Makefile
  	test_set \
  	test_signs \
 +	test_stat \
+ 	test_tagcase \
  	test_textobjects \
  	test_utf8 \
- 	test_writefile \
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
 +++ b/src/testdir/Make_amiga.mak
@@ -21,14 +21,15 @@ diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
+ 		test_tagcase.out \
  		test_textobjects.out \
  		test_utf8.out
- 
 @@ -221,5 +222,6 @@ test_ruby.out: test_ruby.in
  test_search_mbyte.out: test_search_mbyte.in
  test_set.out: test_set.in
  test_signs.out: test_signs.in
 +test_stat.out: test_stat.in
+ test_tagcase.out: test_tagcase.in
  test_textobjects.out: test_textobjects.in
  test_utf8.out: test_utf8.in
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
@@ -48,9 +49,9 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
+ 		test_tagcase.out \
  		test_textobjects.out \
  		test_utf8.out
- 
 diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 --- a/src/testdir/Make_ming.mak
 +++ b/src/testdir/Make_ming.mak
@@ -59,9 +60,9 @@ diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
+ 		test_tagcase.out \
  		test_textobjects.out \
  		test_utf8.out
- 
 diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 --- a/src/testdir/Make_os2.mak
 +++ b/src/testdir/Make_os2.mak
@@ -70,9 +71,9 @@ diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
+ 		test_tagcase.out \
  		test_textobjects.out \
  		test_utf8.out
- 
 diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 --- a/src/testdir/Make_vms.mms
 +++ b/src/testdir/Make_vms.mms
@@ -81,9 +82,9 @@ diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
  	 test_set.out \
  	 test_signs.out \
 +	 test_stat.out \
+ 	 test_tagcase.out \
  	 test_textobjects.out \
  	 test_utf8.out
- 
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
@@ -92,9 +93,9 @@ diff --git a/src/testdir/Makefile b/src/testdir/Makefile
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
+ 		test_tagcase.out \
  		test_textobjects.out \
  		test_utf8.out
- 
 diff --git a/src/testdir/test_stat.in b/src/testdir/test_stat.in
 new file mode 100644
 --- /dev/null
