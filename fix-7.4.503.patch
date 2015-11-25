@@ -1,0 +1,86 @@
+# HG changeset patch
+# Parent  99b4cacd13bd4a416568eb26f6acab87dd886cfa
+
+diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
+--- a/src/testdir/Make_amiga.mak
++++ b/src/testdir/Make_amiga.mak
+@@ -68,7 +68,8 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_signs.out \
+ 		test_tagcase.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_writefile.out
+ 
+ .SUFFIXES: .in .out
+ 
+@@ -225,3 +226,4 @@ test_signs.out: test_signs.in
+ test_tagcase.out: test_tagcase.in
+ test_textobjects.out: test_textobjects.in
+ test_utf8.out: test_utf8.in
++test_writefile.out: test_writefile.in
+diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
+--- a/src/testdir/Make_dos.mak
++++ b/src/testdir/Make_dos.mak
+@@ -67,7 +67,8 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_signs.out \
+ 		test_tagcase.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_writefile.out
+ 
+ SCRIPTS32 =	test50.out test70.out
+ 
+diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
+--- a/src/testdir/Make_ming.mak
++++ b/src/testdir/Make_ming.mak
+@@ -89,7 +89,8 @@ SCRIPTS =	test3.out test4.out test5.out 
+ 		test_signs.out \
+ 		test_tagcase.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_writefile.out
+ 
+ SCRIPTS32 =	test50.out test70.out
+ 
+diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
+--- a/src/testdir/Make_os2.mak
++++ b/src/testdir/Make_os2.mak
+@@ -69,7 +69,8 @@ SCRIPTS = test1.out test3.out test4.out 
+ 		test_signs.out \
+ 		test_tagcase.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_writefile.out
+ 
+ SCRIPTS_BENCH = bench_re_freeze.out
+ 
+diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
+--- a/src/testdir/Make_vms.mms
++++ b/src/testdir/Make_vms.mms
+@@ -128,7 +128,8 @@ SCRIPT = test1.out  test2.out  test3.out
+ 	 test_signs.out \
+ 	 test_tagcase.out \
+ 	 test_textobjects.out \
+-	 test_utf8.out
++	 test_utf8.out \
++	 test_writefile.out
+ 
+ # Known problems:
+ # test17: ?
+diff --git a/src/testdir/Makefile b/src/testdir/Makefile
+--- a/src/testdir/Makefile
++++ b/src/testdir/Makefile
+@@ -65,7 +65,8 @@ SCRIPTS = test1.out test2.out test3.out 
+ 		test_signs.out \
+ 		test_tagcase.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_writefile.out
+ 
+ SCRIPTS_GUI = test16.out
+ 
