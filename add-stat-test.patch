@@ -16,14 +16,13 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/testdir/Make_amiga.mak b/src/testdir/Make_amiga.mak
 --- a/src/testdir/Make_amiga.mak
 +++ b/src/testdir/Make_amiga.mak
-@@ -66,6 +66,7 @@ SCRIPTS = test1.out test3.out test4.out 
+@@ -66,5 +66,6 @@ SCRIPTS = test1.out test3.out test4.out 
  		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_tagcase.out \
  		test_textobjects.out \
- 		test_utf8.out
 @@ -221,5 +222,6 @@ test_ruby.out: test_ruby.in
  test_search_mbyte.out: test_search_mbyte.in
  test_set.out: test_set.in
@@ -44,58 +43,53 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
  		test_argument_0count.out \
  		test_argument_count.out \
  		test_autocmd_option.out \
-@@ -65,6 +65,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+@@ -65,5 +65,6 @@ SCRIPTS =	test3.out test4.out test5.out 
  		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_tagcase.out \
  		test_textobjects.out \
- 		test_utf8.out
 diff --git a/src/testdir/Make_ming.mak b/src/testdir/Make_ming.mak
 --- a/src/testdir/Make_ming.mak
 +++ b/src/testdir/Make_ming.mak
-@@ -87,6 +87,7 @@ SCRIPTS =	test3.out test4.out test5.out 
+@@ -87,5 +87,6 @@ SCRIPTS =	test3.out test4.out test5.out 
  		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_tagcase.out \
  		test_textobjects.out \
- 		test_utf8.out
 diff --git a/src/testdir/Make_os2.mak b/src/testdir/Make_os2.mak
 --- a/src/testdir/Make_os2.mak
 +++ b/src/testdir/Make_os2.mak
-@@ -67,6 +67,7 @@ SCRIPTS = test1.out test3.out test4.out 
+@@ -67,5 +67,6 @@ SCRIPTS = test1.out test3.out test4.out 
  		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_tagcase.out \
  		test_textobjects.out \
- 		test_utf8.out
 diff --git a/src/testdir/Make_vms.mms b/src/testdir/Make_vms.mms
 --- a/src/testdir/Make_vms.mms
 +++ b/src/testdir/Make_vms.mms
-@@ -126,6 +126,7 @@ SCRIPT = test1.out  test2.out  test3.out
+@@ -126,5 +126,6 @@ SCRIPT = test1.out  test2.out  test3.out
  	 test_search_mbyte.out \
  	 test_set.out \
  	 test_signs.out \
 +	 test_stat.out \
  	 test_tagcase.out \
  	 test_textobjects.out \
- 	 test_utf8.out
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
-@@ -63,6 +63,7 @@ SCRIPTS = test1.out test2.out test3.out 
+@@ -63,5 +63,6 @@ SCRIPTS = test1.out test2.out test3.out 
  		test_search_mbyte.out \
  		test_set.out \
  		test_signs.out \
 +		test_stat.out \
  		test_tagcase.out \
  		test_textobjects.out \
- 		test_utf8.out
 diff --git a/src/testdir/test_stat.in b/src/testdir/test_stat.in
 new file mode 100644
 --- /dev/null
