@@ -4,7 +4,7 @@
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -215,8 +215,12 @@ ASSEMBLY_ARCHITECTURE=$(CPU)
+@@ -215,11 +215,18 @@ ASSEMBLY_ARCHITECTURE=$(CPU)
  ASSEMBLY_ARCHITECTURE = x86
  !  endif
  ! else
@@ -18,3 +18,9 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !  if ("$(CPU)" == "x86") || ("$(CPU)" == "X86")
  CPU = i386
  !  endif
++!  if ("$(CPU)" == "x64") || ("$(CPU)" == "X64")
++CPU = AMD64
++!  endif
+ ! endif
+ !else  # !PROCESSOR_ARCHITECTURE
+ # We're on Windows 95
