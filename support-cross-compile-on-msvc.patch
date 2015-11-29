@@ -1,0 +1,20 @@
+# HG changeset patch
+# Parent  b8470833438905ba9f9678f893ba43f943d3bf82
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -215,8 +215,12 @@ ASSEMBLY_ARCHITECTURE=$(CPU)
+ ASSEMBLY_ARCHITECTURE = x86
+ !  endif
+ ! else
++!  ifdef Platform
++CPU = $(Platform)
++!  else
+ CPU = $(PROCESSOR_ARCHITECTURE)
+-ASSEMBLY_ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
++!  endif
++ASSEMBLY_ARCHITECTURE = $(CPU)
+ !  if ("$(CPU)" == "x86") || ("$(CPU)" == "X86")
+ CPU = i386
+ !  endif
