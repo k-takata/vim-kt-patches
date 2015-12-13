@@ -1,9 +1,11 @@
 # HG changeset patch
 # Parent cec355df2183389967ce1f67ec8447e815f30464
+# Parent  7bdf52a20ad4d1345ac3c6b46fcf0422638c0832
+
 diff --git a/src/auto/configure b/src/auto/configure
 --- a/src/auto/configure
 +++ b/src/auto/configure
-@@ -1463,7 +1463,7 @@
+@@ -1464,7 +1464,7 @@ Optional Features:
    --enable-perlinterp=OPTS     Include Perl interpreter.  default=no OPTS=no/yes/dynamic
    --enable-pythoninterp=OPTS   Include Python interpreter. default=no OPTS=no/yes/dynamic
    --enable-python3interp=OPTS   Include Python3 interpreter. default=no OPTS=no/yes/dynamic
@@ -12,7 +14,7 @@ diff --git a/src/auto/configure b/src/auto/configure
    --enable-rubyinterp=OPTS     Include Ruby interpreter.  default=no OPTS=no/yes/dynamic
    --enable-cscope         Include cscope interface.
    --enable-workshop       Include Sun Visual Workshop support.
-@@ -6559,7 +6559,7 @@
+@@ -6612,7 +6612,7 @@ fi
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_tclinterp" >&5
  $as_echo "$enable_tclinterp" >&6; }
  
@@ -21,7 +23,7 @@ diff --git a/src/auto/configure b/src/auto/configure
  
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking --with-tclsh argument" >&5
  $as_echo_n "checking --with-tclsh argument... " >&6; }
-@@ -6795,6 +6795,7 @@
+@@ -6848,6 +6848,7 @@ fi
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tclver - OK" >&5
  $as_echo "$tclver - OK" >&6; };
        tclloc=`echo 'set l [info library];set i [string last lib $l];incr i -2;puts [string range $l 0 $i]' | $vi_cv_path_tcl -`
@@ -29,10 +31,10 @@ diff --git a/src/auto/configure b/src/auto/configure
  
        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for location of Tcl include" >&5
  $as_echo_n "checking for location of Tcl include... " >&6; }
-@@ -6831,7 +6832,11 @@
+@@ -6884,7 +6885,11 @@ fi
  	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $try/tclConfig.sh" >&5
  $as_echo "$try/tclConfig.sh" >&6; }
- 	    . $try/tclConfig.sh
+ 	    . "$try/tclConfig.sh"
 -	    	    TCL_LIBS=`eval echo "$TCL_LIB_SPEC $TCL_LIBS"`
 +	    	    if test "$enable_tclinterp" = "dynamic"; then
 +	      TCL_LIBS=`eval echo "$TCL_STUB_LIB_SPEC $TCL_LIBS"`
@@ -42,7 +44,7 @@ diff --git a/src/auto/configure b/src/auto/configure
  	    	    	    TCL_DEFS=`echo $TCL_DEFS | sed -e 's/\\\\ /\\\\X/g' | tr ' ' '\012' | sed -e '/^[^-]/d' -e '/^-[^D]/d' -e '/-D[^_]/d' -e 's/-D_/ -D_/' | tr '\012' ' ' | sed -e 's/\\\\X/\\\\ /g'`
  	    break
  	  fi
-@@ -6880,6 +6885,13 @@
+@@ -6933,6 +6938,13 @@ fi
  $as_echo "too old; need Tcl version 8.0 or later" >&6; }
      fi
    fi
