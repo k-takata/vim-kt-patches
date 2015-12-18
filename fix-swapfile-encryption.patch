@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  731ab9d1c664a6b159fea09f765c9bdb27088c5a
+# Parent  e8f584e711b28b84353a03855e039e8ea29ac727
 
 diff --git a/src/memfile.c b/src/memfile.c
 --- a/src/memfile.c
 +++ b/src/memfile.c
-@@ -1033,7 +1033,7 @@
+@@ -1033,7 +1033,7 @@ mf_read(mfp, hp)
  
  #ifdef FEAT_CRYPT
      /* Decrypt if 'key' is set and this is a data block. */
@@ -13,12 +13,3 @@ diff --git a/src/memfile.c b/src/memfile.c
  	ml_decrypt_data(mfp, hp->bh_data, offset, size);
  #endif
  
-@@ -1136,7 +1136,7 @@
- 
- #ifdef FEAT_CRYPT
-     /* Encrypt if 'key' is set and this is a data block. */
--    if (*mfp->mf_buffer->b_p_key != NUL)
-+    if (*mfp->mf_buffer->b_p_key != NUL || mfp->mf_old_key != NULL)
-     {
- 	data = ml_encrypt_data(mfp, data, offset, size);
- 	if (data == NULL)
