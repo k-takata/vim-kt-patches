@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
-# Parent  bccd3bbc70774f723074b06bbc6168ce2cb4a400
+# Parent  f2709b3604528ed3dcfbe7f7a6808bf46f86c674
 
 diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 --- a/runtime/doc/if_tcl.txt
@@ -42,7 +42,7 @@ diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -7416,6 +7416,17 @@ A jump table for the options with a shor
+@@ -7430,6 +7430,17 @@ A jump table for the options with a shor
  	Resetting this option is useful when using a ":tag" command in a
  	mapping which should not change the tagstack.
  
@@ -63,7 +63,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
 --- a/runtime/doc/quickref.txt
 +++ b/runtime/doc/quickref.txt
-@@ -908,6 +908,7 @@ Short explanation of each option:		*opti
+@@ -909,6 +909,7 @@ Short explanation of each option:		*opti
  'tagrelative'	  'tr'	    file names in tag file are relative
  'tags'		  'tag'     list of file names used by the tag command
  'tagstack'	  'tgst'    push tags onto the tag stack
@@ -74,7 +74,7 @@ diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
 diff --git a/runtime/optwin.vim b/runtime/optwin.vim
 --- a/runtime/optwin.vim
 +++ b/runtime/optwin.vim
-@@ -1327,6 +1327,10 @@ if exists("&rubydll")
+@@ -1331,6 +1331,10 @@ if exists("&rubydll")
    call append("$", "rubydll\tname of the Ruby dynamic library")
    call <SID>OptionG("rubydll", &rubydll)
  endif
@@ -116,7 +116,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  LINT_EXTRA = -DUSE_SNIFF -DHANGUL_INPUT -D"__attribute__(x)="
  
-@@ -2692,7 +2694,7 @@ objects/if_sniff.o: if_sniff.c
+@@ -2702,7 +2704,7 @@ objects/if_sniff.o: if_sniff.c
  	$(CCC) -o $@ if_sniff.c
  
  objects/if_tcl.o: if_tcl.c
@@ -165,7 +165,7 @@ diff --git a/src/configure.in b/src/configure.in
        if test "x$MACOSX" != "xyes"; then
 @@ -1694,7 +1695,11 @@ if test "$enable_tclinterp" = "yes"; the
  	    AC_MSG_RESULT($try/tclConfig.sh)
- 	    . $try/tclConfig.sh
+ 	    . "$try/tclConfig.sh"
  	    dnl use eval, because tcl 8.2 includes ${TCL_DBGX}
 -	    TCL_LIBS=`eval echo "$TCL_LIB_SPEC $TCL_LIBS"`
 +	    if test "$enable_tclinterp" = "dynamic"; then
@@ -278,7 +278,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2620,6 +2620,11 @@ static struct vimoption
+@@ -2624,6 +2624,11 @@ static struct vimoption
      {"tagstack",    "tgst", P_BOOL|P_VI_DEF,
  			    (char_u *)&p_tgst, PV_NONE,
  			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
@@ -293,7 +293,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/option.h b/src/option.h
 --- a/src/option.h
 +++ b/src/option.h
-@@ -823,6 +823,9 @@ EXTERN long	p_tl;		/* 'taglength' */
+@@ -832,6 +832,9 @@ EXTERN long	p_tl;		/* 'taglength' */
  EXTERN int	p_tr;		/* 'tagrelative' */
  EXTERN char_u	*p_tags;	/* 'tags' */
  EXTERN int	p_tgst;		/* 'tagstack' */
