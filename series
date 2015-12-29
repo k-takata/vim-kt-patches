@@ -49,6 +49,5 @@ mingw-enable-warnings.patch
 if_ruby-remove-allocate-method.patch
 fix-indent-in-if_perl.patch
 if_perl_vc2012.patch
-update-po-makefiles.patch
 fix-test-dependency.patch
 fix-config_cache-removal.patch #+rejected
