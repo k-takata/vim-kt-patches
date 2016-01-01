@@ -48,6 +48,5 @@ fix-smack-message.patch
 mingw-enable-warnings.patch
 if_ruby-remove-allocate-method.patch
 fix-indent-in-if_perl.patch
-if_perl_vc2012.patch
 make-tests-silent.patch
 fix-config_cache-removal.patch #+rejected
