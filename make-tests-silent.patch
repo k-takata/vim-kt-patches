@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a1fd0378a3e9a9be16ad917ef19de44fd3dc5d83
+# Parent  88a584d7d1a9d412a8ddaab850c827dc5a842be1
 
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 --- a/src/testdir/Make_dos.mak
@@ -19,9 +19,9 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 -	-@if exist $(*B).in.bak move /y $(*B).in.bak $(*B).in
 +	-@if exist test.out MOVE /y test.out $(DOSTMP)\$(*B).out > nul
 +	-@if exist $(*B).in.bak move /y $(*B).in.bak $(*B).in > nul
- 	-@del X*
  	-@if exist test.ok del test.ok
  	-@if exist Xdir1 rd /s /q Xdir1
+ 	-@if exist Xfind rd /s /q Xfind
 @@ -59,10 +59,10 @@ win32:	nolog $(SCRIPTS_FIRST) $(SCRIPTS)
  	$(VIMPROG) -u dos.vim --noplugin "+set ff=unix|f test.out|wq" \
  		$(DOSTMP)\$(*B).out
@@ -34,4 +34,4 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 +		else ( move /y test.out $*.out > nul )
  
  # Must run test1 first to create small.vim.
- $(SCRIPTS) $(SCRIPTS_GUI) $(SCRIPTS_WIN32) $(NEW_TESTS): $(SCRIPTS_FIRST)
+ # This rule must come after the one that copies the input files to dostmp to
