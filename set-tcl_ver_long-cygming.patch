@@ -1,0 +1,34 @@
+# HG changeset patch
+# Parent  40c3587a7a309abf4c9f51c5c29cdc8ecef3877b
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -263,6 +263,8 @@
+ #	  TCL=[Path to TCL directory] (Set inside Make_cyg.mak or Make_ming.mak)
+ #	  DYNAMIC_TCL=yes (to load the TCL DLL dynamically)
+ #	  TCL_VER=[TCL version, eg 83, 84] (default is 83)
++#	  TCL_VER_LONG=[Tcl version, eg 8.3] (default is 8.3)
++#	    You must set TCL_VER_LONG when you set TCL_VER.
+ ifdef TCL
+ ifndef DYNAMIC_TCL
+ DYNAMIC_TCL=yes
+@@ -270,6 +272,9 @@
+ ifndef TCL_VER
+ TCL_VER = 83
+ endif
++ifndef TCL_VER_LONG
++TCL_VER_LONG = 8.3
++endif
+ TCLINC += -I$(TCL)/include
+ endif
+ 
+@@ -462,7 +467,7 @@
+ ifdef TCL
+ CFLAGS += -DFEAT_TCL $(TCLINC)
+ ifeq (yes, $(DYNAMIC_TCL))
+-CFLAGS += -DDYNAMIC_TCL -DDYNAMIC_TCL_DLL=\"tcl$(TCL_VER).dll\"
++CFLAGS += -DDYNAMIC_TCL -DDYNAMIC_TCL_DLL=\"tcl$(TCL_VER).dll\" -DDYNAMIC_TCL_VER=\"$(TCL_VER_LONG)\"
+ endif
+ endif
+ 

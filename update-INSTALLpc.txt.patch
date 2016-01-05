@@ -1,0 +1,27 @@
+# HG changeset patch
+# Parent  b4082d79ea255e33421306750cc221f45497d6da
+
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -42,8 +42,9 @@
+ Visual Studio
+ -------------
+ 
+-Building with Visual Studio (VS 98, VS .NET, VS .NET 2003, VS 2005, and VS 2008)
+-is straightforward. (These instructions should also work for VS 4 and VS 5.)
++Building with Visual Studio (VS 98, VS .NET, VS .NET 2003, VS 2005, VS 2008,
++VS2010, VS2012, VS2013 and VS2015) is straightforward. (These instructions
++should also work for VS 4 and VS 5.)
+ 
+ Using VS C++ 2008 Express is recommended, the binaries build with that run on
+ nearly all platforms.  Binaries from later versions may not run on Windows 95
+@@ -195,7 +196,7 @@
+ Targeting Windows XP with new MSVC      *new-msvc-windows-xp*
+ ----------------------------------
+ 
+-Beginning with Visual C++ 2010, Microsoft changed the behavior of LINK.EXE
++Beginning with Visual C++ 2012, Microsoft changed the behavior of LINK.EXE
+ so that it targets Windows 6.0 (Vista) by default.  In order to override
+ this, the target Windows version number needs to be passed to LINK like
+ follows:
