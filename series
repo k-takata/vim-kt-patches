@@ -50,6 +50,7 @@ if_ruby-remove-allocate-method.patch
 fix-indent-in-if_perl.patch
 make-tests-silent.patch
 fix-ruby_install_name.patch
+update-rubyinc-dir.patch
 set-tcl_ver_long-cygming.patch
 update-INSTALLpc.txt.patch
 fix-config_cache-removal.patch #+rejected
