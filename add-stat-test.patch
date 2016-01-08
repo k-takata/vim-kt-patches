@@ -1,13 +1,13 @@
 # HG changeset patch
 # Parent 7656647da44ed09b242c32cf1d95c9d4ca0df086
-# Parent  11359ed83c3443a93d3bc60e9bcad0b4e4c45ee6
+# Parent  66c78b5e7fb0489d4b7611c333e677a8b1b5ae82
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1932,6 +1932,7 @@ test1 \
+@@ -1961,6 +1961,7 @@ test1 \
+ 	test_ruby \
  	test_search_mbyte \
- 	test_set \
  	test_signs \
 +	test_stat \
  	test_tagcase \
@@ -16,9 +16,9 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -118,6 +118,7 @@ SCRIPTS_ALL = \
+@@ -117,6 +117,7 @@ SCRIPTS_ALL = \
+ 	test_ruby.out \
  	test_search_mbyte.out \
- 	test_set.out \
  	test_signs.out \
 +	test_stat.out \
  	test_tagcase.out \

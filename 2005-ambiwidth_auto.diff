@@ -1,11 +1,12 @@
 # HG changeset patch
 # Parent b310fc3abf0bd107728295980e4090a7573dea3d
+# Parent  086fa2bd7cde70e6b8b271b86fa9d51d43269724
 add 'auto' for 'ambiwidth'
 
-diff -r b310fc3abf0b -r 5a2d7f302b1d runtime/doc/options.txt
---- a/runtime/doc/options.txt	Sat Apr 13 22:05:04 2013 +0900
-+++ b/runtime/doc/options.txt	Sat Apr 13 22:11:26 2013 +0900
-@@ -680,6 +680,9 @@
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -693,6 +693,9 @@ A jump table for the options with a shor
  	"single":	Use the same width as characters in US-ASCII.  This is
  			expected by most users.
  	"double":	Use twice the width of ASCII characters.
@@ -15,7 +16,7 @@ diff -r b310fc3abf0b -r 5a2d7f302b1d runtime/doc/options.txt
  							*E834* *E835*
  	The value "double" cannot be used if 'listchars' or 'fillchars'
  	contains a character that would be double width.
-@@ -703,6 +706,10 @@
+@@ -716,6 +719,10 @@ A jump table for the options with a shor
  	compiled with the |+termresponse| feature and if |t_u7| is set to the
  	escape sequence to request cursor position report.
  
@@ -26,10 +27,10 @@ diff -r b310fc3abf0b -r 5a2d7f302b1d runtime/doc/options.txt
  			*'antialias'* *'anti'* *'noantialias'* *'noanti'*
  'antialias' 'anti'	boolean (default: off)
  			global
-diff -r b310fc3abf0b -r 5a2d7f302b1d src/gui_w32.c
---- a/src/gui_w32.c	Sat Apr 13 22:05:04 2013 +0900
-+++ b/src/gui_w32.c	Sat Apr 13 22:11:26 2013 +0900
-@@ -4924,3 +4924,54 @@
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -5064,3 +5064,54 @@ netbeans_init_winsock()
  	WSInitialized = TRUE;
  }
  #endif
@@ -84,10 +85,10 @@ diff -r b310fc3abf0b -r 5a2d7f302b1d src/gui_w32.c
 +	return 0;
 +}
 +#endif
-diff -r b310fc3abf0b -r 5a2d7f302b1d src/mbyte.c
---- a/src/mbyte.c	Sat Apr 13 22:05:04 2013 +0900
-+++ b/src/mbyte.c	Sat Apr 13 22:11:26 2013 +0900
-@@ -1460,6 +1460,19 @@
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -1459,6 +1459,19 @@ utf_char2cells(c)
  	{0x100000, 0x10fffd}
      };
  
@@ -107,10 +108,10 @@ diff -r b310fc3abf0b -r 5a2d7f302b1d src/mbyte.c
      if (c >= 0x100)
      {
  #ifdef USE_WCHAR_FUNCTIONS
-diff -r b310fc3abf0b -r 5a2d7f302b1d src/option.c
---- a/src/option.c	Sat Apr 13 22:05:04 2013 +0900
-+++ b/src/option.c	Sat Apr 13 22:11:26 2013 +0900
-@@ -2954,7 +2954,11 @@
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -3033,7 +3033,11 @@ static struct vimoption
  #define PARAM_COUNT (sizeof(options) / sizeof(struct vimoption))
  
  #ifdef FEAT_MBYTE
@@ -122,11 +123,11 @@ diff -r b310fc3abf0b -r 5a2d7f302b1d src/option.c
 +    NULL};
  #endif
  static char *(p_bg_values[]) = {"light", "dark", NULL};
- static char *(p_nf_values[]) = {"octal", "hex", "alpha", NULL};
-diff -r b310fc3abf0b -r 5a2d7f302b1d src/proto/gui_w32.pro
---- a/src/proto/gui_w32.pro	Sat Apr 13 22:05:04 2013 +0900
-+++ b/src/proto/gui_w32.pro	Sat Apr 13 22:11:26 2013 +0900
-@@ -76,6 +76,7 @@
+ static char *(p_nf_values[]) = {"bin", "octal", "hex", "alpha", NULL};
+diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
+--- a/src/proto/gui_w32.pro
++++ b/src/proto/gui_w32.pro
+@@ -76,6 +76,7 @@ void im_set_active __ARGS((int active));
  int im_get_status __ARGS((void));
  void gui_mch_draw_string __ARGS((int row, int col, char_u *text, int len, int flags));
  void gui_mch_flush __ARGS((void));
@@ -134,10 +135,10 @@ diff -r b310fc3abf0b -r 5a2d7f302b1d src/proto/gui_w32.pro
  void gui_mch_get_screen_dimensions __ARGS((int *screen_w, int *screen_h));
  void gui_mch_add_menu __ARGS((vimmenu_T *menu, int pos));
  void gui_mch_show_popupmenu __ARGS((vimmenu_T *menu));
-diff -r b310fc3abf0b -r 5a2d7f302b1d src/vim.h
---- a/src/vim.h	Sat Apr 13 22:05:04 2013 +0900
-+++ b/src/vim.h	Sat Apr 13 22:11:26 2013 +0900
-@@ -553,6 +553,14 @@
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -605,6 +605,14 @@ typedef unsigned long u8char_T;	    /* l
  #endif
  
  /*

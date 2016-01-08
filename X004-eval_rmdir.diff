@@ -1,12 +1,12 @@
 # HG changeset patch
 # Parent 54d16fd0043efd5d2228090ba2d4627df5d54dc0
-# Parent  a5258775f47d4a670db582f14cd644d2b6bc1b3c
+# Parent  bc247509cfa51e0c4cd38a7f4d4e222ea34a4b39
 implement a new vim script function rmdir()
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1953,6 +1953,7 @@ rename( {from}, {to})		Number	rename (mo
+@@ -1969,6 +1969,7 @@ rename( {from}, {to})		Number	rename (mo
  repeat( {expr}, {count})	String	repeat {expr} {count} times
  resolve( {filename})		String	get filename a shortcut points to
  reverse( {list})		List	reverse {list} in-place
@@ -14,7 +14,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  round( {expr})			Float	round off {expr}
  screenattr( {row}, {col})	Number	attribute at screen position
  screenchar( {row}, {col})	Number	character at screen position
-@@ -5127,6 +5128,14 @@ reverse({list})	Reverse the order of ite
+@@ -5182,6 +5183,14 @@ reverse({list})	Reverse the order of ite
  		If you want a list to remain unmodified make a copy first: >
  			:let revlist = reverse(copy(mylist))
  
@@ -32,7 +32,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -674,6 +674,7 @@ static void f_rename __ARGS((typval_T *a
+@@ -679,6 +679,7 @@ static void f_rename __ARGS((typval_T *a
  static void f_repeat __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_resolve __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_reverse __ARGS((typval_T *argvars, typval_T *rettv));
@@ -40,7 +40,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_FLOAT
  static void f_round __ARGS((typval_T *argvars, typval_T *rettv));
  #endif
-@@ -8276,6 +8277,7 @@ static struct fst
+@@ -8292,6 +8293,7 @@ static struct fst
      {"repeat",		2, 2, f_repeat},
      {"resolve",		1, 1, f_resolve},
      {"reverse",		1, 1, f_reverse},
@@ -48,7 +48,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_FLOAT
      {"round",		1, 1, f_round},
  #endif
-@@ -16317,6 +16319,48 @@ f_reverse(argvars, rettv)
+@@ -16504,6 +16506,48 @@ f_reverse(argvars, rettv)
      }
  }
  
@@ -100,7 +100,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/misc2.c b/src/misc2.c
 --- a/src/misc2.c
 +++ b/src/misc2.c
-@@ -6328,6 +6328,73 @@ has_non_ascii(s)
+@@ -6378,6 +6378,73 @@ has_non_ascii(s)
  }
  #endif
  
@@ -177,7 +177,7 @@ diff --git a/src/misc2.c b/src/misc2.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -6014,6 +6014,35 @@ mch_rename(
+@@ -6096,6 +6096,35 @@ mch_rename(
  }
  
  /*
@@ -216,8 +216,8 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 diff --git a/src/proto/misc2.pro b/src/proto/misc2.pro
 --- a/src/proto/misc2.pro
 +++ b/src/proto/misc2.pro
-@@ -106,5 +106,6 @@ int put_bytes __ARGS((FILE *fd, long_u n
- void put_time __ARGS((FILE *fd, time_t the_time));
+@@ -108,5 +108,6 @@ int put_bytes __ARGS((FILE *fd, long_u n
+ int put_time __ARGS((FILE *fd, time_t the_time));
  void time_to_bytes __ARGS((time_t the_time, char_u *buf));
  int has_non_ascii __ARGS((char_u *s));
 +int vim_remove_r __ARGS((char_u *path));
@@ -226,8 +226,8 @@ diff --git a/src/proto/misc2.pro b/src/proto/misc2.pro
 diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 --- a/src/proto/os_win32.pro
 +++ b/src/proto/os_win32.pro
-@@ -44,6 +44,7 @@ int mch_remove __ARGS((char_u *name));
- void mch_breakcheck __ARGS((void));
+@@ -46,6 +46,7 @@ void mch_breakcheck __ARGS((void));
+ long_u mch_total_mem __ARGS((int special));
  int mch_wrename __ARGS((WCHAR *wold, WCHAR *wnew));
  int mch_rename __ARGS((const char *pszOldFile, const char *pszNewFile));
 +int mch_rmdir __ARGS((const char *dirname));

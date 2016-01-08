@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
-# Parent  f2709b3604528ed3dcfbe7f7a6808bf46f86c674
+# Parent  02d60f6a68744f242e70d01a0da4dc969970ddeb
 
 diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 --- a/runtime/doc/if_tcl.txt
@@ -27,7 +27,7 @@ diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
  To use the Tcl interface the Tcl DLL must be in your search path.  In a
  console window type "path" to see what directories are used.
 @@ -529,5 +532,12 @@ The name of the DLL must match the Tcl v
- Currently the name is "tcl83.dll".  That is for Tcl 8.3.  To know for sure
+ Currently the name is "tcl86.dll".  That is for Tcl 8.6.  To know for sure
  edit "gvim.exe" and search for "tcl\d*.dll\c".
  
 +
@@ -42,7 +42,7 @@ diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -7430,6 +7430,17 @@ A jump table for the options with a shor
+@@ -7434,6 +7434,17 @@ A jump table for the options with a shor
  	Resetting this option is useful when using a ":tag" command in a
  	mapping which should not change the tagstack.
  
@@ -88,7 +88,7 @@ diff --git a/runtime/optwin.vim b/runtime/optwin.vim
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -439,7 +439,9 @@ CClink = $(CC)
+@@ -445,7 +445,9 @@ CClink = $(CC)
  
  # TCL
  # Uncomment this when you want to include the Tcl interface.
@@ -98,7 +98,7 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
  
  # CSCOPE
-@@ -1348,7 +1350,7 @@ SHELL = /bin/sh
+@@ -1375,7 +1377,7 @@ SHELL = /bin/sh
  .SUFFIXES: .c .o .pro
  
  PRE_DEFS = -Iproto $(DEFS) $(GUI_DEFS) $(GUI_IPATH) $(CPPFLAGS) $(EXTRA_IPATHS)
@@ -107,7 +107,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  ALL_CFLAGS = $(PRE_DEFS) $(CFLAGS) $(PROFILE_CFLAGS) $(SANITIZER_CFLAGS) $(LEAK_CFLAGS) $(POST_DEFS)
  
-@@ -1356,7 +1358,7 @@ ALL_CFLAGS = $(PRE_DEFS) $(CFLAGS) $(PRO
+@@ -1383,7 +1385,7 @@ ALL_CFLAGS = $(PRE_DEFS) $(CFLAGS) $(PRO
  # with "-E".
  OSDEF_CFLAGS = $(PRE_DEFS) $(POST_DEFS)
  
@@ -116,7 +116,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  LINT_EXTRA = -DUSE_SNIFF -DHANGUL_INPUT -D"__attribute__(x)="
  
-@@ -2702,7 +2704,7 @@ objects/if_sniff.o: if_sniff.c
+@@ -2756,7 +2758,7 @@ objects/if_sniff.o: if_sniff.c
  	$(CCC) -o $@ if_sniff.c
  
  objects/if_tcl.o: if_tcl.c
@@ -278,7 +278,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2624,6 +2624,11 @@ static struct vimoption
+@@ -2604,6 +2604,11 @@ static struct vimoption
      {"tagstack",    "tgst", P_BOOL|P_VI_DEF,
  			    (char_u *)&p_tgst, PV_NONE,
  			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
