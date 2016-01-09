@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 4c7b85c98937ad81149dab6e89ed4df506600bff
-# Parent  02d60f6a68744f242e70d01a0da4dc969970ddeb
+# Parent  7311ca965f2162a7b168e8b2cfc8209848a22b83
 
 diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 --- a/runtime/doc/if_tcl.txt
@@ -42,18 +42,18 @@ diff --git a/runtime/doc/if_tcl.txt b/runtime/doc/if_tcl.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -7434,6 +7434,17 @@ A jump table for the options with a shor
+@@ -7437,6 +7437,17 @@ A jump table for the options with a shor
  	Resetting this option is useful when using a ":tag" command in a
  	mapping which should not change the tagstack.
  
 +						*'tcldll'*
 +'tcldll' 		string	(default empty)
 +			global
-+			{not in Vi} {only for Unix}
++			{not in Vi}
 +			{only available when compiled with the |+tcl/dyn|
 +			feature}
-+	Specifies the path of the Tcl shared library instead of DYNAMIC_TCL_DLL
-+	what was specified at compile time.
++	Specifies the name of the Tcl shared library. The default is
++	DYNAMIC_TCL_DLL, which was specified at compile time.
 +	This option cannot be set from a |modeline| or in the |sandbox|, for
 +	security reasons.
 +
@@ -243,15 +243,11 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  	    hTclLib = NULL;
  	    if (verbose)
  		EMSG2(_(e_loadfunc), tcl_funcname_table[i].name);
-@@ -245,14 +258,20 @@ static int stubs_initialized = FALSE;
+@@ -245,14 +258,16 @@ static int stubs_initialized = FALSE;
  tcl_enabled(verbose)
      int		verbose;
  {
-+#ifdef WIN3264
-+    char *dll = DYNAMIC_TCL_DLL;
-+#else
 +    char *dll = *p_tcldll ? (char *)p_tcldll : DYNAMIC_TCL_DLL;
-+#endif
 +
      if (!stubs_initialized && find_executable_arg != NULL
 -	    && tcl_runtime_link_init(DYNAMIC_TCL_DLL, verbose) == OK)
@@ -266,7 +262,7 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
  	{
  	    if (Tcl_InitStubs(interp, DYNAMIC_TCL_VER, 0))
  	    {
-@@ -272,7 +291,7 @@ tcl_end()
+@@ -272,7 +287,7 @@ tcl_end()
  #ifdef DYNAMIC_TCL
      if (hTclLib)
      {
@@ -278,11 +274,11 @@ diff --git a/src/if_tcl.c b/src/if_tcl.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2604,6 +2604,11 @@ static struct vimoption
+@@ -2609,6 +2609,11 @@ static struct vimoption
      {"tagstack",    "tgst", P_BOOL|P_VI_DEF,
  			    (char_u *)&p_tgst, PV_NONE,
  			    {(char_u *)TRUE, (char_u *)0L} SCRIPTID_INIT},
-+#if defined(DYNAMIC_TCL) && !defined(WIN3264)
++#if defined(DYNAMIC_TCL)
 +    {"tcldll",      NULL,   P_STRING|P_VI_DEF|P_SECURE,
 +			    (char_u *)&p_tcldll, PV_NONE,
 +			    {(char_u *)"", (char_u *)0L} SCRIPTID_INIT},
@@ -297,7 +293,7 @@ diff --git a/src/option.h b/src/option.h
  EXTERN int	p_tr;		/* 'tagrelative' */
  EXTERN char_u	*p_tags;	/* 'tags' */
  EXTERN int	p_tgst;		/* 'tagstack' */
-+#if defined(DYNAMIC_TCL) && !defined(WIN3264)
++#if defined(DYNAMIC_TCL)
 +EXTERN char_u	*p_tcldll;	/* 'tcldll' */
 +#endif
  #ifdef FEAT_ARABIC
