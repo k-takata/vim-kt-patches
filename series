@@ -1,6 +1,4 @@
 disable-regexp-debug-log.patch #+noregexplog
-support-tcl-dyn-on-unix.patch
-configure.patch
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
 myconfiguration-private-install.patch #+private-install
