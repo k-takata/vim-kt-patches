@@ -48,5 +48,4 @@ if_ruby-remove-allocate-method.patch
 fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
-update-INSTALLpc.txt.patch
 fix-config_cache-removal.patch #+rejected
