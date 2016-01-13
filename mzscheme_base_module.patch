@@ -1,0 +1,33 @@
+# HG changeset patch
+# Parent  227443b1e16a404dbaa58f1791e3e91f982b9aed
+
+diff --git a/src/if_mzsch.c b/src/if_mzsch.c
+--- a/src/if_mzsch.c
++++ b/src/if_mzsch.c
+@@ -1021,7 +1021,7 @@ mzscheme_env_main(Scheme_Env *env, int a
+     static Scheme_Object*
+ load_base_module(void *data)
+ {
+-    scheme_namespace_require(scheme_intern_symbol("scheme/base"));
++    scheme_namespace_require(scheme_intern_symbol((char *)data));
+     return scheme_null;
+ }
+ 
+@@ -1162,9 +1162,15 @@ startup_mzscheme(void)
+     {
+ 	/* use error handler to avoid abort */
+ 	scheme_dynamic_wind(NULL, load_base_module, NULL,
+-					    load_base_module_on_error, NULL);
++				    load_base_module_on_error, "scheme/base");
+ 	if (load_base_module_failed)
+-	    return -1;
++	{
++	    load_base_module_failed = FALSE;
++	    scheme_dynamic_wind(NULL, load_base_module, NULL,
++				    load_base_module_on_error, "racket/base");
++	    if (load_base_module_failed)
++		return -1;
++	}
+     }
+ 
+     register_vim_exn();
