@@ -50,4 +50,5 @@ make-tests-silent.patch
 update-rubyinc-dir.patch
 fix-for-winsdk71.patch
 if_mzscheme4.diff
+mzscheme_collects_and_mingw.patch
 fix-config_cache-removal.patch #+rejected
