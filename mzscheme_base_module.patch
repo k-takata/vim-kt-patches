@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  227443b1e16a404dbaa58f1791e3e91f982b9aed
+# Parent  78cb22221188ae3a652d1e34f8ac260ea12d919c
 
 diff --git a/src/if_mzsch.c b/src/if_mzsch.c
 --- a/src/if_mzsch.c
@@ -18,13 +18,13 @@ diff --git a/src/if_mzsch.c b/src/if_mzsch.c
  	/* use error handler to avoid abort */
  	scheme_dynamic_wind(NULL, load_base_module, NULL,
 -					    load_base_module_on_error, NULL);
-+				    load_base_module_on_error, "scheme/base");
++				    load_base_module_on_error, "racket/base");
  	if (load_base_module_failed)
 -	    return -1;
 +	{
 +	    load_base_module_failed = FALSE;
 +	    scheme_dynamic_wind(NULL, load_base_module, NULL,
-+				    load_base_module_on_error, "racket/base");
++				    load_base_module_on_error, "scheme/base");
 +	    if (load_base_module_failed)
 +		return -1;
 +	}
