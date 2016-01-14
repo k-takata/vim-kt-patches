@@ -1,5 +1,5 @@
 diff --git a/runtime/doc/if_mzsch.txt b/runtime/doc/if_mzsch.txt
-index b42570a..0522098 100644
+index b42570a..1da8ccc 100644
 --- a/runtime/doc/if_mzsch.txt
 +++ b/runtime/doc/if_mzsch.txt
 @@ -1,4 +1,4 @@
@@ -26,7 +26,7 @@ index b42570a..0522098 100644
  
  To use the MzScheme interface the MzScheme DLLs must be in your search path.
  In a console window type "path" to see what directories are used.
-@@ -282,5 +286,23 @@ For MzScheme version 209 they will be "libmzsch209_000.dll" and
+@@ -282,5 +286,24 @@ For MzScheme version 209 they will be "libmzsch209_000.dll" and
  command, look for -DDYNAMIC_MZSCH_DLL="something" and
  -DDYNAMIC_MZGC_DLL="something" in the "Compilation" info.
  
@@ -40,21 +40,93 @@ index b42570a..0522098 100644
 +==============================================================================
 +8. MzScheme setup				    *mzscheme-setup*
 +
-+Vim requires "scheme/base" module for if_mzsch core, "r5rs" module for test
-+and "raco ctool" command for building Vim.  If MzScheme did not have them, you
-+can install them with MzScheme's raco command: >
-+
++Vim requires "racket/base" module for if_mzsch core (fallback to "scheme/base"
++if it doesn't exist), "r5rs" module for test and "raco ctool" command for
++building Vim.  If MzScheme did not have them, you can install them with
++MzScheme's raco command:
++>
 +  raco pkg install scheme-lib       # scheme/base module
 +  raco pkg install r5rs-lib         # r5rs module
 +  raco pkg install cext-lib         # raco ctool command
 +<
  ======================================================================
    vim:tw=78:ts=8:sts=4:ft=help:norl:
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+index d89ba29..79628a8 100644
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -171,26 +171,37 @@ ifndef MZSCHEME_VER
+ MZSCHEME_VER=205_000
+ endif
+ 
+-ifndef MZSCHEME_PRECISE_GC
+-MZSCHEME_PRECISE_GC=no
+-endif
+-
+ # for version 4.x we need to generate byte-code for Scheme base
+ ifndef MZSCHEME_GENERATE_BASE
+ MZSCHEME_GENERATE_BASE=no
+ endif
+ 
+-ifndef MZSCHEME_USE_RACKET
++ifneq ($(wildcard $(MZSCHEME)/lib/msvc/libmzsch$(MZSCHEME_VER).lib),)
+ MZSCHEME_MAIN_LIB=mzsch
+ else
+ MZSCHEME_MAIN_LIB=racket
+ endif
+ 
++ifndef MZSCHEME_PRECISE_GC
++MZSCHEME_PRECISE_GC=no
++ifneq ($(wildcard $(MZSCHEME)\lib\lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).dll),)
++ifeq ($(wildcard $(MZSCHEME)\lib\libmzgc$(MZSCHEME_VER).dll),)
++MZSCHEME_PRECISE_GC=yes
++endif
++else
++ifneq ($(wildcard $(MZSCHEME)\lib\msvc\lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).lib),)
++ifeq ($(wildcard $(MZSCHEME)\lib\msvc\libmzgc$(MZSCHEME_VER).lib),)
++MZSCHEME_PRECISE_GC=yes
++endif
++endif
++endif
++endif
++
+ ifeq (no,$(DYNAMIC_MZSCHEME))
+ ifeq (yes,$(MZSCHEME_PRECISE_GC))
+ MZSCHEME_LIB=-l$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER)
+ else
+-MZSCHEME_LIB = -l$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER) -lmzgc$(MZSCHEME_VER)
++MZSCHEME_LIB=-l$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER) -lmzgc$(MZSCHEME_VER)
+ endif
+ # the modern MinGW can dynamically link to dlls directly.
+ # point MZSCHEME_DLLS to where you put libmzschXXXXXXX.dll and libgcXXXXXXX.dll
+@@ -429,10 +440,21 @@ endif
+ endif
+ 
+ ifdef MZSCHEME
+-CFLAGS += -I$(MZSCHEME)/include -DFEAT_MZSCHEME -DMZSCHEME_COLLECTS=\"$(MZSCHEME)/collects\"
++ifndef MZSCHEME_COLLECTS
++MZSCHEME_COLLECTS=$(MZSCHEME)/collects
++ifeq (yes, $(UNDER_CYGWIN))
++MZSCHEME_COLLECTS:=$(shell cygpath -m $(MZSCHEME_COLLECTS) | sed -e 's/ /\\ /g')
++endif
++endif
++CFLAGS += -I$(MZSCHEME)/include -DFEAT_MZSCHEME -DMZSCHEME_COLLECTS=\"$(MZSCHEME_COLLECTS)\"
+ ifeq (yes, $(DYNAMIC_MZSCHEME))
++ifeq (yes, $(MZSCHEME_PRECISE_GC))
++# Precise GC does not use separate dll
++CFLAGS += -DDYNAMIC_MZSCHEME -DDYNAMIC_MZSCH_DLL=\"lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).dll\" -DDYNAMIC_MZGC_DLL=\"lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).dll\"
++else
+ CFLAGS += -DDYNAMIC_MZSCHEME -DDYNAMIC_MZSCH_DLL=\"lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).dll\" -DDYNAMIC_MZGC_DLL=\"libmzgc$(MZSCHEME_VER).dll\"
+ endif
++endif
+ ifeq (yes, "$(MZSCHEME_DEBUG)")
+ CFLAGS += -DMZSCHEME_FORCE_GC
+ endif
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
-index a446015..68b3932 100644
+index f51fbfc..81cd458 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -752,43 +752,49 @@ PYTHON3_LIB = $(PYTHON3)\libs\python$(PYTHON3_VER).lib
+@@ -752,43 +752,52 @@ PYTHON3_LIB = $(PYTHON3)\libs\python$(PYTHON3_VER).lib
  !ifndef MZSCHEME_VER
  MZSCHEME_VER = 205_000
  !endif
@@ -65,7 +137,9 @@ index a446015..68b3932 100644
 -# for MzScheme >= 4 we need to include byte code for basic Scheme stuff
 -MZSCHEME_EXTRA_DEP = mzscheme_base.c
 -CFLAGS = $(CFLAGS) -DINCLUDE_MZSCHEME_BASE
--!endif
++!ifndef MZSCHEME_COLLECTS
++MZSCHEME_COLLECTS=$(MZSCHEME)\collects
+ !endif
 +CFLAGS = $(CFLAGS) -DFEAT_MZSCHEME -I "$(MZSCHEME)\include"
  !if EXIST("$(MZSCHEME)\lib\msvc\libmzsch$(MZSCHEME_VER).lib")
  MZSCHEME_MAIN_LIB=mzsch
@@ -122,7 +196,7 @@ index a446015..68b3932 100644
  !endif
  !endif
  MZSCHEME_OBJ = $(OUTDIR)\if_mzsch.obj
-@@ -1056,7 +1062,6 @@ clean:
+@@ -1056,7 +1065,6 @@ clean:
  	- if exist dimm_i.c del dimm_i.c
  	- if exist dimm.tlb del dimm.tlb
  	- if exist dosinst.exe del dosinst.exe
@@ -130,7 +204,7 @@ index a446015..68b3932 100644
  	cd xxd
  	$(MAKE) /NOLOGO -f Make_mvc.mak clean
  	cd ..
-@@ -1166,13 +1171,10 @@ $(OUTDIR)/if_perlsfio.obj: $(OUTDIR) if_perlsfio.c  $(INCL)
+@@ -1169,13 +1177,10 @@ $(OUTDIR)/if_perlsfio.obj: $(OUTDIR) if_perlsfio.c  $(INCL)
  
  $(OUTDIR)/if_mzsch.obj: $(OUTDIR) if_mzsch.c if_mzsch.h $(INCL) $(MZSCHEME_EXTRA_DEP)
  	$(CC) $(CFLAGS) if_mzsch.c \
@@ -141,7 +215,7 @@ index a446015..68b3932 100644
 -!ELSE
 -	$(MZSCHEME)\mzc --c-mods mzscheme_base.c ++lib scheme/base
 -!ENDIF
-+		-DMZSCHEME_COLLECTS="\"$(MZSCHEME:\=\\)\\collects\""
++		-DMZSCHEME_COLLECTS="\"$(MZSCHEME_COLLECTS:\=\\)\""
 +
 +lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).lib:
 +	lib /DEF:"$(MZSCHEME)\lib\lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).def"
@@ -633,7 +707,7 @@ index 6048e8f..adb30c4 100644
      else
        AC_MSG_RESULT(not needed)
 diff --git a/src/if_mzsch.c b/src/if_mzsch.c
-index 287ab1a..da23353 100644
+index 287ab1a..8ca2c10 100644
 --- a/src/if_mzsch.c
 +++ b/src/if_mzsch.c
 @@ -29,6 +29,25 @@
@@ -943,7 +1017,7 @@ index 287ab1a..da23353 100644
 +    static Scheme_Object*
 +load_base_module(void *data)
 +{
-+    scheme_namespace_require(scheme_intern_symbol("scheme/base"));
++    scheme_namespace_require(scheme_intern_symbol((char *)data));
 +    return scheme_null;
 +}
 +
@@ -998,7 +1072,10 @@ index 287ab1a..da23353 100644
 -	Scheme_Object	*coll_byte_string = NULL;
 -	Scheme_Object	*coll_char_string = NULL;
 -	Scheme_Object	*coll_path = NULL;
--
++	Scheme_Object *coll_path = NULL;
++	int mustfree = FALSE;
++	char_u *s;
+ 
 -	MZ_GC_DECL_REG(3);
 -	MZ_GC_VAR_IN_REG(0, coll_byte_string);
 -	MZ_GC_VAR_IN_REG(1, coll_char_string);
@@ -1021,10 +1098,7 @@ index 287ab1a..da23353 100644
 -	Scheme_Object	*coll_path = NULL;
 -	Scheme_Object	*coll_pair = NULL;
 -	Scheme_Config	*config = NULL;
-+	Scheme_Object *coll_path = NULL;
-+	int mustfree = FALSE;
-+	char_u *s;
- 
+-
 -	MZ_GC_DECL_REG(5);
 -	MZ_GC_VAR_IN_REG(0, coll_byte_string);
 -	MZ_GC_VAR_IN_REG(1, coll_char_string);
@@ -1075,7 +1149,7 @@ index 287ab1a..da23353 100644
      {
  	Scheme_Object	*coll_string = NULL;
  	Scheme_Object	*coll_pair = NULL;
-@@ -1045,6 +1116,65 @@ startup_mzscheme(void)
+@@ -1045,6 +1116,71 @@ startup_mzscheme(void)
      }
  # endif
  #endif
@@ -1125,9 +1199,15 @@ index 287ab1a..da23353 100644
 +    {
 +	/* use error handler to avoid abort */
 +	scheme_dynamic_wind(NULL, load_base_module, NULL,
-+					    load_base_module_on_error, NULL);
++				    load_base_module_on_error, "racket/base");
 +	if (load_base_module_failed)
-+	    return -1;
++	{
++	    load_base_module_failed = FALSE;
++	    scheme_dynamic_wind(NULL, load_base_module, NULL,
++				    load_base_module_on_error, "scheme/base");
++	    if (load_base_module_failed)
++		return -1;
++	}
 +    }
 +
 +    register_vim_exn();
@@ -1141,7 +1221,7 @@ index 287ab1a..da23353 100644
  #ifdef HAVE_SANDBOX
      {
  	Scheme_Object	*make_security_guard = NULL;
-@@ -1118,6 +1248,8 @@ startup_mzscheme(void)
+@@ -1118,6 +1254,8 @@ startup_mzscheme(void)
       * whether thread scheduling is (or not) required
       */
      scheme_notify_multithread = notify_multithread;
@@ -1150,7 +1230,7 @@ index 287ab1a..da23353 100644
  }
  
  /*
-@@ -1130,13 +1262,17 @@ mzscheme_init(void)
+@@ -1130,13 +1268,17 @@ mzscheme_init(void)
      if (!initialized)
      {
  #ifdef DYNAMIC_MZSCHEME
@@ -1164,7 +1244,7 @@ index 287ab1a..da23353 100644
 -	startup_mzscheme();
 +	if (load_base_module_failed || startup_mzscheme())
 +	{
-+	    EMSG(_("Exxx: Sorry, this command is disabled, the MzScheme's scheme/base module could not be loaded."));
++	    EMSG(_("Exxx: Sorry, this command is disabled, the MzScheme's racket/base module could not be loaded."));
 +	    return -1;
 +	}
  	initialized = TRUE;

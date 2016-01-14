@@ -49,7 +49,6 @@ fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
 fix-for-winsdk71.patch
-if_mzscheme4.diff
-mzscheme_collects_and_mingw.patch
-mzscheme_base_module.patch
+if_mzscheme5.diff
+mzscheme_installpc.patch
 fix-config_cache-removal.patch #+rejected

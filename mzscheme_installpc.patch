@@ -1,0 +1,67 @@
+# HG changeset patch
+# Parent  0979a6a8cd2ca1bbf017645b53bb4b12370c054e
+
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -24,7 +24,7 @@ 4. Borland
+ 5. Cross compiling for Win32 from a Linux machine
+ 6. Building with Python support
+ 7. Building with Python3 support
+-8. Building with MzScheme support
++8. Building with MzScheme/Racket support
+ 9. Building with Lua support
+ 10. Building with Perl support
+ 11. Building with Ruby support
+@@ -415,8 +415,10 @@ E.g. When using MSVC (as one line):
+         PYTHON3=C:\Python34 DYNAMIC_PYTHON3=yes PYTHON3_VER=34
+ 
+ 
+-8. Building with MzScheme support
+-=================================
++8. Building with MzScheme/Racket support
++========================================
++
++1) Building with MzScheme support
+ 
+ (written by Sergey Khorev <sergey.khorev@gmail.com>)
+ 
+@@ -451,6 +453,38 @@ After a successful build, these dlls can
+ %WINDOWS%\System32 only.
+ 
+ 
++2) Building with Racket support
++
++MzScheme and PLT Scheme names have been rebranded as Racket.  Vim with Racket
++(https://racket-lang.org/) support can be built with either MSVC or MinGW (or
++Cygwin).
++
++You need to set the following variables:
++
++    MZSCHEME:          Where Racket is installed.
++                       E.g. C:\Program Files (x86)\Racket
++    DYNAMIC_MZSCHEME:  Whether dynamic linking is used. Usually, set to yes.
++    MZSCHEME_VER:      Racket DLL version. E.g. 3m_9z0ds0 for Racket 6.3.
++    MZSCHEME_COLLECTS: (Optional) Path of the collects directory used at
++                       runtime. Default: $(MZSCHEME)\collects
++		       User can override this with the PLTCOLLECTS environment
++		       variable.
++
++E.g. When using MSVC (as one line):
++
++    nmake -f Make_mvc.mak
++        "MZSCHEME=C:\Program Files (x86)\Racket" DYNAMIC_MZSCHEME=yes
++	MZSCHEME_VER=3m_9z0ds0
++
++Or when using MinGW (as one line):
++
++    mingw32-make -f Make_ming.mak
++        MZSCHEME='C:/Program\ Files\ (x86)/Racket' DYNAMIC_MZSCHEME=yes
++	MZSCHEME_VER=3m_9z0ds0
++
++    Spaces should be escaped with '\'.
++
++
+ 9. Building with Lua support
+ ============================
+ 
