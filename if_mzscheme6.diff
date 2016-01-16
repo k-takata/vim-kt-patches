@@ -51,6 +51,71 @@ index b42570a..1da8ccc 100644
 +<
  ======================================================================
    vim:tw=78:ts=8:sts=4:ft=help:norl:
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+index 3777784..8c68895 100644
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -24,7 +24,7 @@ Contents:
+ 5. Cross compiling for Win32 from a Linux machine
+ 6. Building with Python support
+ 7. Building with Python3 support
+-8. Building with MzScheme support
++8. Building with MzScheme/Racket support
+ 9. Building with Lua support
+ 10. Building with Perl support
+ 11. Building with Ruby support
+@@ -415,8 +415,10 @@ E.g. When using MSVC (as one line):
+         PYTHON3=C:\Python34 DYNAMIC_PYTHON3=yes PYTHON3_VER=34
+ 
+ 
+-8. Building with MzScheme support
+-=================================
++8. Building with MzScheme/Racket support
++========================================
++
++1) Building with MzScheme support
+ 
+ (written by Sergey Khorev <sergey.khorev@gmail.com>)
+ 
+@@ -451,6 +453,38 @@ After a successful build, these dlls can be freely removed, leaving them in
+ %WINDOWS%\System32 only.
+ 
+ 
++2) Building with Racket support
++
++MzScheme and PLT Scheme names have been rebranded as Racket.  Vim with Racket
++(https://racket-lang.org/) support can be built with either MSVC or MinGW (or
++Cygwin).
++
++You need to set the following variables:
++
++    MZSCHEME:          Where Racket is installed.
++                       E.g. C:\Program Files (x86)\Racket
++    DYNAMIC_MZSCHEME:  Whether dynamic linking is used. Usually, set to yes.
++    MZSCHEME_VER:      Racket DLL version. E.g. 3m_9z0ds0 for Racket 6.3.
++    MZSCHEME_COLLECTS: (Optional) Path of the collects directory used at
++                       runtime. Default: $(MZSCHEME)\collects
++                       User can override this with the PLTCOLLECTS environment
++                       variable.
++
++E.g. When using MSVC (as one line):
++
++    nmake -f Make_mvc.mak
++        MZSCHEME="C:\Program Files (x86)\Racket" DYNAMIC_MZSCHEME=yes
++        MZSCHEME_VER=3m_9z0ds0
++
++Or when using MinGW (as one line):
++
++    mingw32-make -f Make_ming.mak
++        MZSCHEME='C:/Program\ Files\ (x86)/Racket' DYNAMIC_MZSCHEME=yes
++        MZSCHEME_VER=3m_9z0ds0
++
++    Spaces should be escaped with '\'.
++
++
+ 9. Building with Lua support
+ ============================
+ 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 index d89ba29..79628a8 100644
 --- a/src/Make_cyg_ming.mak
@@ -123,10 +188,10 @@ index d89ba29..79628a8 100644
  CFLAGS += -DMZSCHEME_FORCE_GC
  endif
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
-index f51fbfc..81cd458 100644
+index 6f0b843..df5a748 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -752,43 +752,52 @@ PYTHON3_LIB = $(PYTHON3)\libs\python$(PYTHON3_VER).lib
+@@ -755,43 +755,52 @@ PYTHON3_LIB = $(PYTHON3)\libs\python$(PYTHON3_VER).lib
  !ifndef MZSCHEME_VER
  MZSCHEME_VER = 205_000
  !endif
@@ -196,7 +261,7 @@ index f51fbfc..81cd458 100644
  !endif
  !endif
  MZSCHEME_OBJ = $(OUTDIR)\if_mzsch.obj
-@@ -1056,7 +1065,6 @@ clean:
+@@ -1059,7 +1068,6 @@ clean:
  	- if exist dimm_i.c del dimm_i.c
  	- if exist dimm.tlb del dimm.tlb
  	- if exist dosinst.exe del dosinst.exe
@@ -204,7 +269,7 @@ index f51fbfc..81cd458 100644
  	cd xxd
  	$(MAKE) /NOLOGO -f Make_mvc.mak clean
  	cd ..
-@@ -1169,13 +1177,10 @@ $(OUTDIR)/if_perlsfio.obj: $(OUTDIR) if_perlsfio.c  $(INCL)
+@@ -1172,13 +1180,10 @@ $(OUTDIR)/if_perlsfio.obj: $(OUTDIR) if_perlsfio.c  $(INCL)
  
  $(OUTDIR)/if_mzsch.obj: $(OUTDIR) if_mzsch.c if_mzsch.h $(INCL) $(MZSCHEME_EXTRA_DEP)
  	$(CC) $(CFLAGS) if_mzsch.c \
@@ -707,7 +772,7 @@ index 6048e8f..adb30c4 100644
      else
        AC_MSG_RESULT(not needed)
 diff --git a/src/if_mzsch.c b/src/if_mzsch.c
-index 287ab1a..8ca2c10 100644
+index 287ab1a..d181a7b 100644
 --- a/src/if_mzsch.c
 +++ b/src/if_mzsch.c
 @@ -29,6 +29,25 @@
@@ -965,8 +1030,16 @@ index 287ab1a..8ca2c10 100644
  
  /* global environment */
  static Scheme_Env    *environment = NULL;
-@@ -851,31 +957,24 @@ mzscheme_end(void)
+@@ -846,38 +952,43 @@ notify_multithread(int on)
+     void
+ mzscheme_end(void)
+ {
++    /* We can not unload the DLL.  Racket's thread might be still alive. */
++#if 0
+ #ifdef DYNAMIC_MZSCHEME
+     dynamic_mzscheme_end();
  #endif
++#endif
  }
  
 -/*
@@ -977,9 +1050,10 @@ index 287ab1a..8ca2c10 100644
 -	&& defined(USE_THREAD_LOCAL) && !defined(_WIN64)
 -# define HAVE_TLS_SPACE 1
 +#if HAVE_TLS_SPACE
++# if defined(_MSC_VER)
  static __declspec(thread) void *tls_space;
- #endif
- 
+-#endif
+-
 -/*
 - * Since version 4.x precise GC requires trampolined startup.
 - * Futures and places in version 5.x need it too.
@@ -988,10 +1062,17 @@ index 287ab1a..8ca2c10 100644
 -    || MZSCHEME_VERSION_MAJOR >= 500 && (defined(MZ_USE_FUTURES) || defined(MZ_USE_PLACES))
 -# ifdef DYNAMIC_MZSCHEME
 -#  error Precise GC v.4+ or Racket with futures/places do not support dynamic MzScheme
--# endif
++extern intptr_t _tls_index;
++# elif defined(__MINGW32__)
++static __thread void *tls_space;
++extern intptr_t _tls_index;
++# else
++static THREAD_LOCAL void *tls_space;
++static intptr_t _tls_index = 0;
+ # endif
 -# define TRAMPOLINED_MZVIM_STARTUP
--#endif
--
+ #endif
+ 
      int
  mzscheme_main(int argc, char** argv)
  {
@@ -1007,9 +1088,12 @@ index 287ab1a..8ca2c10 100644
 +    }
 +#endif
  #ifdef HAVE_TLS_SPACE
-     scheme_register_tls_space(&tls_space, 0);
+-    scheme_register_tls_space(&tls_space, 0);
++    scheme_register_tls_space(&tls_space, _tls_index);
  #endif
-@@ -919,7 +1018,21 @@ mzscheme_env_main(Scheme_Env *env, int argc, char **argv)
+ #ifdef TRAMPOLINED_MZVIM_STARTUP
+     return scheme_main_setup(TRUE, mzscheme_env_main, argc, argv);
+@@ -919,7 +1030,21 @@ mzscheme_env_main(Scheme_Env *env, int argc, char **argv)
      return vim_main_result;
  }
  
@@ -1032,7 +1116,7 @@ index 287ab1a..8ca2c10 100644
  startup_mzscheme(void)
  {
  #ifndef TRAMPOLINED_MZVIM_STARTUP
-@@ -942,87 +1055,45 @@ startup_mzscheme(void)
+@@ -942,87 +1067,45 @@ startup_mzscheme(void)
      MZ_GC_CHECK();
  
  #ifdef INCLUDE_MZSCHEME_BASE
@@ -1072,10 +1156,7 @@ index 287ab1a..8ca2c10 100644
 -	Scheme_Object	*coll_byte_string = NULL;
 -	Scheme_Object	*coll_char_string = NULL;
 -	Scheme_Object	*coll_path = NULL;
-+	Scheme_Object *coll_path = NULL;
-+	int mustfree = FALSE;
-+	char_u *s;
- 
+-
 -	MZ_GC_DECL_REG(3);
 -	MZ_GC_VAR_IN_REG(0, coll_byte_string);
 -	MZ_GC_VAR_IN_REG(1, coll_char_string);
@@ -1098,7 +1179,10 @@ index 287ab1a..8ca2c10 100644
 -	Scheme_Object	*coll_path = NULL;
 -	Scheme_Object	*coll_pair = NULL;
 -	Scheme_Config	*config = NULL;
--
++	Scheme_Object *coll_path = NULL;
++	int mustfree = FALSE;
++	char_u *s;
+ 
 -	MZ_GC_DECL_REG(5);
 -	MZ_GC_VAR_IN_REG(0, coll_byte_string);
 -	MZ_GC_VAR_IN_REG(1, coll_char_string);
@@ -1149,7 +1233,7 @@ index 287ab1a..8ca2c10 100644
      {
  	Scheme_Object	*coll_string = NULL;
  	Scheme_Object	*coll_pair = NULL;
-@@ -1045,6 +1116,71 @@ startup_mzscheme(void)
+@@ -1045,6 +1128,71 @@ startup_mzscheme(void)
      }
  # endif
  #endif
@@ -1221,7 +1305,7 @@ index 287ab1a..8ca2c10 100644
  #ifdef HAVE_SANDBOX
      {
  	Scheme_Object	*make_security_guard = NULL;
-@@ -1118,6 +1254,8 @@ startup_mzscheme(void)
+@@ -1118,6 +1266,8 @@ startup_mzscheme(void)
       * whether thread scheduling is (or not) required
       */
      scheme_notify_multithread = notify_multithread;
@@ -1230,7 +1314,7 @@ index 287ab1a..8ca2c10 100644
  }
  
  /*
-@@ -1130,13 +1268,17 @@ mzscheme_init(void)
+@@ -1130,13 +1280,17 @@ mzscheme_init(void)
      if (!initialized)
      {
  #ifdef DYNAMIC_MZSCHEME
