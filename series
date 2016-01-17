@@ -18,9 +18,6 @@ cpo-N.diff #+rejected
 cpo-N-mark.diff #+rejected
 cpo-N-update-tags.patch #+rejected
 if_perl-use-output.patch
-X004-eval_rmdir.diff #+disabled
-X004-eval_rmdir-fix-warning.diff #+disabled
-X004_01-rmdir_support_symlinks.diff #+disabled
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 strikethrough.diff
@@ -45,5 +42,4 @@ if_ruby-remove-allocate-method.patch
 fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
-fix-delete-on-windows.patch
 fix-config_cache-removal.patch #+rejected
