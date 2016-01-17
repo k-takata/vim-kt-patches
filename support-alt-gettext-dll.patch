@@ -1,22 +1,28 @@
 # HG changeset patch
 # Parent aeabcaf55533342e8dfb79dfcbf1d2898ce85c91
+# Parent  e909b3bd91c172bb2dadc2318de2f0c0884311eb
+
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -353,6 +353,7 @@
+@@ -463,7 +463,8 @@ vimLoadLib(char *name)
  #if defined(DYNAMIC_GETTEXT) || defined(PROTO)
  # ifndef GETTEXT_DLL
  #  define GETTEXT_DLL "libintl.dll"
-+#  define GETTEXT_DLL_ALT "intl.dll"
+-#  define GETTEXT_DLL_ALT "libintl-8.dll"
++#  define GETTEXT_DLL_ALT1 "libintl-8.dll"
++#  define GETTEXT_DLL_ALT2 "intl.dll"
  # endif
  /* Dummy functions */
  static char *null_libintl_gettext(const char *);
-@@ -389,6 +390,8 @@
- 	return 1;
+@@ -501,7 +502,9 @@ dyn_libintl_init()
      /* Load gettext library (libintl.dll) */
-     hLibintlDLL = vimLoadLib(libname != NULL ? libname : GETTEXT_DLL);
-+    if (!hLibintlDLL && !libname)   /* sometimes it's called intl.dll */
-+	hLibintlDLL = vimLoadLib(GETTEXT_DLL_ALT);
+     hLibintlDLL = vimLoadLib(GETTEXT_DLL);
+     if (!hLibintlDLL)
+-	hLibintlDLL = vimLoadLib(GETTEXT_DLL_ALT);
++	hLibintlDLL = vimLoadLib(GETTEXT_DLL_ALT1);
++    if (!hLibintlDLL)
++	hLibintlDLL = vimLoadLib(GETTEXT_DLL_ALT2);
      if (!hLibintlDLL)
      {
  	if (p_verbose > 0)

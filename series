@@ -38,7 +38,6 @@ fix-7.4.039-S_IFDIR.patch
 update-if_xx_doc.patch
 remove-useless-STRCPY.patch
 use-correct-struct-size.patch
-gvim-nsi.patch
 bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 fix-swapfile-translation.patch
