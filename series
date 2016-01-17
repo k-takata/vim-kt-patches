@@ -18,11 +18,9 @@ cpo-N.diff #+rejected
 cpo-N-mark.diff #+rejected
 cpo-N-update-tags.patch #+rejected
 if_perl-use-output.patch
-X004-eval_rmdir.diff
-X004-eval_rmdir-fix-warning.diff
-X004_01-rmdir_support_symlinks.diff
-rmdir-mark.diff
-rmdir-update-tags.patch
+X004-eval_rmdir.diff #+disabled
+X004-eval_rmdir-fix-warning.diff #+disabled
+X004_01-rmdir_support_symlinks.diff #+disabled
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 strikethrough.diff
