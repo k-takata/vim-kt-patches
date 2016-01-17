@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  88a584d7d1a9d412a8ddaab850c827dc5a842be1
+# Parent  3c77184c2569829805427ef6c8a7e6e227e54b00
 
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 --- a/src/testdir/Make_dos.mak
 +++ b/src/testdir/Make_dos.mak
-@@ -45,12 +45,12 @@ win32:	nolog $(SCRIPTS_FIRST) $(SCRIPTS)
+@@ -44,12 +44,12 @@ win32:	nolog $(SCRIPTS_FIRST) $(SCRIPTS)
  # This moves test99.in to test99.in.bak temporarily.
  $(TEST_OUTFILES): $(DOSTMP)\$(*B).in
  	-@if exist test.out DEL test.out
@@ -22,8 +22,8 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
  	-@if exist test.ok del test.ok
  	-@if exist Xdir1 rd /s /q Xdir1
  	-@if exist Xfind rd /s /q Xfind
-@@ -59,10 +59,10 @@ win32:	nolog $(SCRIPTS_FIRST) $(SCRIPTS)
- 	$(VIMPROG) -u dos.vim --noplugin "+set ff=unix|f test.out|wq" \
+@@ -58,10 +58,10 @@ win32:	nolog $(SCRIPTS_FIRST) $(SCRIPTS)
+ 	$(VIMPROG) -u dos.vim -U NONE --noplugin "+set ff=unix|f test.out|wq" \
  		$(DOSTMP)\$(*B).out
  	@diff test.out $*.ok & if errorlevel 1 \
 -		( move /y test.out $*.failed \
