@@ -1,101 +1,88 @@
 # HG changeset patch
 # Parent 7656647da44ed09b242c32cf1d95c9d4ca0df086
-# Parent  66c78b5e7fb0489d4b7611c333e677a8b1b5ae82
+# Parent  337b3a0038abd568374e56a0c7a23419c487def6
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -1961,6 +1961,7 @@ test1 \
- 	test_ruby \
- 	test_search_mbyte \
- 	test_signs \
+@@ -1995,6 +1995,7 @@ test_arglist \
+ 	test_searchpos \
+ 	test_set \
+ 	test_sort \
 +	test_stat \
- 	test_tagcase \
- 	test_textobjects \
- 	test_utf8 \
+ 	test_undolevels \
+ 	test_unlet \
+ 	test_viml \
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -117,6 +117,7 @@ SCRIPTS_ALL = \
- 	test_ruby.out \
- 	test_search_mbyte.out \
- 	test_signs.out \
-+	test_stat.out \
- 	test_tagcase.out \
- 	test_textobjects.out \
- 	test_utf8.out \
-diff --git a/src/testdir/test_stat.in b/src/testdir/test_stat.in
+@@ -176,10 +176,11 @@ NEW_TESTS = test_arglist.res \
+ 	    test_cdo.res \
+ 	    test_hardcopy.res \
+ 	    test_increment.res \
++	    test_perl.res \
+ 	    test_quickfix.res \
++	    test_stat.res \
+ 	    test_viml.res \
+-	    test_alot.res \
+-	    test_perl.res
++	    test_alot.res
+ 
+ 
+ # Explicit dependencies.
+diff --git a/src/testdir/test_stat.vim b/src/testdir/test_stat.vim
 new file mode 100644
 --- /dev/null
-+++ b/src/testdir/test_stat.in
-@@ -0,0 +1,48 @@
-+Tests for stat functions and checktime     vim: set ft=vim :
++++ b/src/testdir/test_stat.vim
+@@ -0,0 +1,51 @@
++" Tests for stat functions and checktime
 +
-+STARTTEST
-+:so small.vim
-+:bwipe!
-+:w! test.out
-+:let fname='Xtest.tmp'
-+:let ts=localtime()
-+:sleep 1
-+:let fl=['Hello World!']
-+:call writefile(fl, fname)
-+:let tf=getftime(fname)
-+:sleep 1
-+:let te=localtime()
-+:$put ='Existent file:'
-+:"$put =ts
-+:"$put =tf
-+:"$put =te
-+:$put ='getftime: ' . ((ts <= tf && tf <= te) ? 1 : 0)
-+:$put ='getfsize: ' . getfsize(fname)
-+:$put ='getftype: ' . getftype(fname)
-+:$put ='getfperm: ' . getfperm(fname)[0:2]
-+:$put ='Existent directory:'
-+:$put ='getfsize: ' . getfsize('.')
-+:$put ='getftype: ' . getftype('.')
-+:$put ='getfperm: ' . getfperm('.')[0:2]
-+:$put ='Test for checktime:'
-+:w
-+:set autoread
-+:exec 'e' fname
-+:sleep 2
-+:let fl=readfile(fname)
-+:let fl[0] .= ' - checktime'
-+:call writefile(fl, fname)
-+:checktime
-+:y a
-+:bp!
-+:$put a
-+:call delete(fname)
-+:$put ='Nonexistent file:'
-+:$put ='getftime: ' . getftime(fname)
-+:$put ='getfsize: ' . getfsize(fname)
-+:$put ='getftype: ' . getftype(fname)
-+:$put ='getfperm: ' . getfperm(fname)
-+:w
-+:qa!
-+ENDTEST
++func Test_existent_file()
++  let fname='Xtest.tmp'
 +
-diff --git a/src/testdir/test_stat.ok b/src/testdir/test_stat.ok
-new file mode 100644
---- /dev/null
-+++ b/src/testdir/test_stat.ok
-@@ -0,0 +1,17 @@
++  let ts=localtime()
++  sleep 1
++  let fl=['Hello World!']
++  call writefile(fl, fname)
++  let tf=getftime(fname)
++  sleep 1
++  let te=localtime()
 +
-+Existent file:
-+getftime: 1
-+getfsize: 13
-+getftype: file
-+getfperm: rw-
-+Existent directory:
-+getfsize: 0
-+getftype: dir
-+getfperm: rwx
-+Test for checktime:
-+Hello World! - checktime
-+Nonexistent file:
-+getftime: -1
-+getfsize: -1
-+getftype: 
-+getfperm: 
++  call assert_true(ts <= tf && tf <= te)
++  call assert_equal(strlen(fl[0] . "\n"), getfsize(fname))
++  call assert_equal('file', getftype(fname))
++  call assert_equal('rw-', getfperm(fname)[0:2])
++endfunc
++
++func Test_existent_directory()
++  let dname='.'
++
++  call assert_equal(0, getfsize(dname))
++  call assert_equal('dir', getftype(dname))
++  call assert_equal('rwx', getfperm(dname)[0:2])
++endfunc
++
++func Test_checktime()
++  let fname='Xtest.tmp'
++
++  let fl=['Hello World!']
++  call writefile(fl, fname)
++  set autoread
++  exec 'e' fname
++  sleep 2
++  let fl=readfile(fname)
++  let fl[0] .= ' - checktime'
++  call writefile(fl, fname)
++  checktime
++  call assert_equal(fl[0], getline(1))
++endfunc
++
++func Test_nonexistent_file()
++  let fname='Xtest.tmp'
++
++  call delete(fname)
++  call assert_equal(-1, getftime(fname))
++  call assert_equal(-1, getfsize(fname))
++  call assert_equal('', getftype(fname))
++  call assert_equal('', getfperm(fname))
++endfunc
