@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent b310fc3abf0bd107728295980e4090a7573dea3d
-# Parent  086fa2bd7cde70e6b8b271b86fa9d51d43269724
+# Parent  766b3a454757ca99bc03bc71d7613e70ec45f42c
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
@@ -30,7 +30,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5064,3 +5064,54 @@ netbeans_init_winsock()
+@@ -5066,3 +5066,54 @@ netbeans_init_winsock()
  	WSInitialized = TRUE;
  }
  #endif
@@ -111,7 +111,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -3033,7 +3033,11 @@ static struct vimoption
+@@ -3039,7 +3039,11 @@ static struct vimoption
  #define PARAM_COUNT (sizeof(options) / sizeof(struct vimoption))
  
  #ifdef FEAT_MBYTE
@@ -127,18 +127,18 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 --- a/src/proto/gui_w32.pro
 +++ b/src/proto/gui_w32.pro
-@@ -76,6 +76,7 @@ void im_set_active __ARGS((int active));
- int im_get_status __ARGS((void));
- void gui_mch_draw_string __ARGS((int row, int col, char_u *text, int len, int flags));
- void gui_mch_flush __ARGS((void));
-+int gui_mch_get_charwidth __ARGS((int c));
- void gui_mch_get_screen_dimensions __ARGS((int *screen_w, int *screen_h));
- void gui_mch_add_menu __ARGS((vimmenu_T *menu, int pos));
- void gui_mch_show_popupmenu __ARGS((vimmenu_T *menu));
+@@ -76,6 +76,7 @@ void im_set_active(int active);
+ int im_get_status(void);
+ void gui_mch_draw_string(int row, int col, char_u *text, int len, int flags);
+ void gui_mch_flush(void);
++int gui_mch_get_charwidth(int c);
+ void gui_mch_get_screen_dimensions(int *screen_w, int *screen_h);
+ void gui_mch_add_menu(vimmenu_T *menu, int pos);
+ void gui_mch_show_popupmenu(vimmenu_T *menu);
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -605,6 +605,14 @@ typedef unsigned long u8char_T;	    /* l
+@@ -589,6 +589,14 @@ typedef unsigned long u8char_T;	    /* l
  #endif
  
  /*

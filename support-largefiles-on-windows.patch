@@ -1,10 +1,11 @@
 # HG changeset patch
 # Parent 77eb2adaee0cedf71cd7949557fc841b8e177b4a
+# Parent  666f828f954c4420cd674ced10c8186fe1621258
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -11648,7 +11648,7 @@ f_getfsize(argvars, rettv)
+@@ -12171,7 +12171,7 @@ f_getfsize(argvars, rettv)
  	    rettv->vval.v_number = (varnumber_T)st.st_size;
  
  	    /* non-perfect check for overflow */
@@ -52,7 +53,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  	{
  	    /* Can't rewind the file, give up. */
  	    error = TRUE;
-@@ -2227,7 +2227,8 @@ rewind_retry:
+@@ -2237,7 +2237,8 @@ rewind_retry:
  				if (   try_unix
  				    && !read_stdin
  				    && (read_buffer
@@ -62,7 +63,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  				{
  				    fileformat = EOL_UNIX;
  				    if (set_options)
-@@ -2930,7 +2931,7 @@ check_for_cryptkey(cryptkey, ptr, sizep,
+@@ -2940,7 +2941,7 @@ check_for_cryptkey(cryptkey, ptr, sizep,
      char_u	*cryptkey;	/* previous encryption key or NULL */
      char_u	*ptr;		/* pointer to read bytes */
      long	*sizep;		/* length of read bytes */
@@ -71,7 +72,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      int		newfile;	/* editing a new buffer */
      char_u	*fname;		/* file name to display */
      int		*did_ask;	/* flag: whether already asked for key */
-@@ -5205,7 +5206,7 @@ msg_add_fileformat(eol_type)
+@@ -5225,7 +5226,7 @@ msg_add_fileformat(eol_type)
  msg_add_lines(insert_space, lnum, nchars)
      int	    insert_space;
      long    lnum;
@@ -80,7 +81,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  {
      char_u  *p;
  
-@@ -6803,7 +6804,7 @@ buf_check_timestamp(buf, focus)
+@@ -6823,7 +6824,7 @@ buf_check_timestamp(buf, focus)
  #if defined(FEAT_CON_DIALOG) || defined(FEAT_GUI_DIALOG)
      int		can_reload = FALSE;
  #endif
@@ -119,7 +120,7 @@ diff --git a/src/memfile.c b/src/memfile.c
  	mfp->mf_blocknr_max = 0;	/* no file or empty file */
      else
  	mfp->mf_blocknr_max = (blocknr_T)((size + mfp->mf_page_size - 1)
-@@ -1007,7 +1007,7 @@ mf_read(mfp, hp)
+@@ -1010,7 +1010,7 @@ mf_read(mfp, hp)
      memfile_T	*mfp;
      bhdr_T	*hp;
  {
@@ -128,7 +129,7 @@ diff --git a/src/memfile.c b/src/memfile.c
      unsigned	page_size;
      unsigned	size;
  
-@@ -1015,9 +1015,9 @@ mf_read(mfp, hp)
+@@ -1018,9 +1018,9 @@ mf_read(mfp, hp)
  	return FAIL;
  
      page_size = mfp->mf_page_size;
@@ -140,7 +141,7 @@ diff --git a/src/memfile.c b/src/memfile.c
      {
  	PERROR(_("E294: Seek error in swap file read"));
  	return FAIL;
-@@ -1047,7 +1047,7 @@ mf_write(mfp, hp)
+@@ -1051,7 +1051,7 @@ mf_write(mfp, hp)
      memfile_T	*mfp;
      bhdr_T	*hp;
  {
@@ -149,7 +150,7 @@ diff --git a/src/memfile.c b/src/memfile.c
      blocknr_T	nr;	    /* block nr which is being written */
      bhdr_T	*hp2;
      unsigned	page_size;  /* number of bytes in a page */
-@@ -1080,8 +1080,8 @@ mf_write(mfp, hp)
+@@ -1084,8 +1084,8 @@ mf_write(mfp, hp)
  	else
  	    hp2 = hp;
  
@@ -160,7 +161,7 @@ diff --git a/src/memfile.c b/src/memfile.c
  	{
  	    PERROR(_("E296: Seek error in swap file write"));
  	    return FAIL;
-@@ -1125,7 +1125,7 @@ mf_write(mfp, hp)
+@@ -1129,7 +1129,7 @@ mf_write(mfp, hp)
  mf_write_block(mfp, hp, offset, size)
      memfile_T	*mfp;
      bhdr_T	*hp;
@@ -172,7 +173,7 @@ diff --git a/src/memfile.c b/src/memfile.c
 diff --git a/src/memline.c b/src/memline.c
 --- a/src/memline.c
 +++ b/src/memline.c
-@@ -265,7 +265,7 @@ static long char_to_long __ARGS((char_u 
+@@ -266,7 +266,7 @@ static long char_to_long __ARGS((char_u 
  static char_u *make_percent_swname __ARGS((char_u *dir, char_u *name));
  #endif
  #ifdef FEAT_CRYPT
@@ -181,7 +182,7 @@ diff --git a/src/memline.c b/src/memline.c
  #endif
  #ifdef FEAT_BYTEOFF
  static void ml_updatechunk __ARGS((buf_T *buf, long line, long len, int updtype));
-@@ -1100,7 +1100,7 @@ ml_recover()
+@@ -1151,7 +1151,7 @@ ml_recover()
      int		idx;
      int		top;
      int		txt_start;
@@ -190,7 +191,7 @@ diff --git a/src/memline.c b/src/memline.c
      int		called_from_main;
      int		serious_error = TRUE;
      long	mtime;
-@@ -1296,7 +1296,7 @@ ml_recover()
+@@ -1347,7 +1347,7 @@ ml_recover()
  	    msg_end();
  	    goto theend;
  	}
@@ -199,7 +200,7 @@ diff --git a/src/memline.c b/src/memline.c
  	    mfp->mf_blocknr_max = 0;	    /* no file or empty file */
  	else
  	    mfp->mf_blocknr_max = (blocknr_T)(size / mfp->mf_page_size);
-@@ -4815,7 +4815,7 @@ ml_setflags(buf)
+@@ -4862,7 +4862,7 @@ ml_setflags(buf)
  ml_encrypt_data(mfp, data, offset, size)
      memfile_T	*mfp;
      char_u	*data;
@@ -208,7 +209,7 @@ diff --git a/src/memline.c b/src/memline.c
      unsigned	size;
  {
      DATA_BL	*dp = (DATA_BL *)data;
-@@ -4857,7 +4857,7 @@ ml_encrypt_data(mfp, data, offset, size)
+@@ -4907,7 +4907,7 @@ ml_encrypt_data(mfp, data, offset, size)
  ml_decrypt_data(mfp, data, offset, size)
      memfile_T	*mfp;
      char_u	*data;
@@ -217,7 +218,7 @@ diff --git a/src/memline.c b/src/memline.c
      unsigned	size;
  {
      DATA_BL	*dp = (DATA_BL *)data;
-@@ -4890,7 +4890,7 @@ ml_decrypt_data(mfp, data, offset, size)
+@@ -4943,7 +4943,7 @@ ml_decrypt_data(mfp, data, offset, size)
      static cryptstate_T *
  ml_crypt_prepare(mfp, offset, reading)
      memfile_T	*mfp;
@@ -229,7 +230,7 @@ diff --git a/src/memline.c b/src/memline.c
 diff --git a/src/netbeans.c b/src/netbeans.c
 --- a/src/netbeans.c
 +++ b/src/netbeans.c
-@@ -945,7 +945,7 @@ static void addsigntype __ARGS((nbbuf_T 
+@@ -950,7 +950,7 @@ static void addsigntype __ARGS((nbbuf_T 
  			char_u *tooltip, char_u *glyphfile,
  			char_u *fg, char_u *bg));
  static void print_read_msg __ARGS((nbbuf_T *buf));
@@ -238,7 +239,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
  
  static int curPCtype = -1;
  
-@@ -3858,7 +3858,7 @@ print_read_msg(buf)
+@@ -3892,7 +3892,7 @@ print_read_msg(buf)
      nbbuf_T	*buf;
  {
      int	    lnum = buf->bufp->b_ml.ml_line_count;
@@ -247,7 +248,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
      char_u  c;
  
      msg_add_fname(buf->bufp, buf->bufp->b_ffname);
-@@ -3894,7 +3894,7 @@ print_read_msg(buf)
+@@ -3928,7 +3928,7 @@ print_read_msg(buf)
      static void
  print_save_msg(buf, nchars)
      nbbuf_T	*buf;
@@ -259,33 +260,33 @@ diff --git a/src/netbeans.c b/src/netbeans.c
 diff --git a/src/proto/fileio.pro b/src/proto/fileio.pro
 --- a/src/proto/fileio.pro
 +++ b/src/proto/fileio.pro
-@@ -7,7 +7,7 @@ void set_forced_fenc __ARGS((exarg_T *ea
- int check_file_readonly __ARGS((char_u *fname, int perm));
- int buf_write __ARGS((buf_T *buf, char_u *fname, char_u *sfname, linenr_T start, linenr_T end, exarg_T *eap, int append, int forceit, int reset_changed, int filtering));
- void msg_add_fname __ARGS((buf_T *buf, char_u *fname));
--void msg_add_lines __ARGS((int insert_space, long lnum, off_t nchars));
-+void msg_add_lines __ARGS((int insert_space, long lnum, off_T nchars));
- char_u *shorten_fname1 __ARGS((char_u *full_path));
- char_u *shorten_fname __ARGS((char_u *full_path, char_u *dir_name));
- void shorten_fnames __ARGS((int force));
+@@ -7,7 +7,7 @@ void set_forced_fenc(exarg_T *eap);
+ int check_file_readonly(char_u *fname, int perm);
+ int buf_write(buf_T *buf, char_u *fname, char_u *sfname, linenr_T start, linenr_T end, exarg_T *eap, int append, int forceit, int reset_changed, int filtering);
+ void msg_add_fname(buf_T *buf, char_u *fname);
+-void msg_add_lines(int insert_space, long lnum, off_t nchars);
++void msg_add_lines(int insert_space, long lnum, off_T nchars);
+ char_u *shorten_fname1(char_u *full_path);
+ char_u *shorten_fname(char_u *full_path, char_u *dir_name);
+ void shorten_fnames(int force);
 diff --git a/src/proto/memline.pro b/src/proto/memline.pro
 --- a/src/proto/memline.pro
 +++ b/src/proto/memline.pro
-@@ -30,8 +30,8 @@ int resolve_symlink __ARGS((char_u *fnam
- char_u *makeswapname __ARGS((char_u *fname, char_u *ffname, buf_T *buf, char_u *dir_name));
- char_u *get_file_in_dir __ARGS((char_u *fname, char_u *dname));
- void ml_setflags __ARGS((buf_T *buf));
--char_u *ml_encrypt_data __ARGS((memfile_T *mfp, char_u *data, off_t offset, unsigned size));
--void ml_decrypt_data __ARGS((memfile_T *mfp, char_u *data, off_t offset, unsigned size));
-+char_u *ml_encrypt_data __ARGS((memfile_T *mfp, char_u *data, off_T offset, unsigned size));
-+void ml_decrypt_data __ARGS((memfile_T *mfp, char_u *data, off_T offset, unsigned size));
- long ml_find_line_or_offset __ARGS((buf_T *buf, linenr_T lnum, long *offp));
- void goto_byte __ARGS((long cnt));
+@@ -30,8 +30,8 @@ int resolve_symlink(char_u *fname, char_
+ char_u *makeswapname(char_u *fname, char_u *ffname, buf_T *buf, char_u *dir_name);
+ char_u *get_file_in_dir(char_u *fname, char_u *dname);
+ void ml_setflags(buf_T *buf);
+-char_u *ml_encrypt_data(memfile_T *mfp, char_u *data, off_t offset, unsigned size);
+-void ml_decrypt_data(memfile_T *mfp, char_u *data, off_t offset, unsigned size);
++char_u *ml_encrypt_data(memfile_T *mfp, char_u *data, off_T offset, unsigned size);
++void ml_decrypt_data(memfile_T *mfp, char_u *data, off_T offset, unsigned size);
+ long ml_find_line_or_offset(buf_T *buf, linenr_T lnum, long *offp);
+ void goto_byte(long cnt);
  /* vim: set ft=c : */
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -1425,7 +1425,7 @@ struct file_buffer
+@@ -1441,7 +1441,7 @@ struct file_buffer
  
      long	b_mtime;	/* last change time of original file */
      long	b_mtime_read;	/* last change time when reading */
@@ -313,7 +314,7 @@ diff --git a/src/tag.c b/src/tag.c
  #if defined(FEAT_WINDOWS) && defined(FEAT_QUICKFIX)
  /*
   * Tag for preview window is remembered separately, to avoid messing up the
-@@ -1297,19 +1288,19 @@ find_tags(pat, num_matches, matchesp, fl
+@@ -1296,19 +1287,19 @@ find_tags(pat, num_matches, matchesp, fl
      int		tag_file_sorted = NUL;	/* !_TAG_FILE_SORTED value */
      struct tag_search_info	/* Binary search file offsets */
      {
@@ -340,7 +341,7 @@ diff --git a/src/tag.c b/src/tag.c
      int		round;
  #endif
      enum
-@@ -1628,25 +1619,17 @@ find_tags(pat, num_matches, matchesp, fl
+@@ -1639,25 +1630,17 @@ find_tags(pat, num_matches, matchesp, fl
  	    {
  		/* Adjust the search file offset to the correct position */
  		search_info.curr_offset_used = search_info.curr_offset;
@@ -369,7 +370,7 @@ diff --git a/src/tag.c b/src/tag.c
  			search_info.curr_offset = search_info.low_offset;
  		    }
  		    eof = tag_fgets(lbuf, LSIZE, fp);
-@@ -1654,14 +1637,14 @@ find_tags(pat, num_matches, matchesp, fl
+@@ -1665,14 +1648,14 @@ find_tags(pat, num_matches, matchesp, fl
  		/* skip empty and blank lines */
  		while (!eof && vim_isblankline(lbuf))
  		{
@@ -386,7 +387,7 @@ diff --git a/src/tag.c b/src/tag.c
  		    search_info.curr_offset = search_info.curr_offset_used;
  		    continue;
  		}
-@@ -1887,12 +1870,12 @@ line_read_in:
+@@ -1898,12 +1881,12 @@ line_read_in:
  		{
  		    /* Get the tag file size (don't use mch_fstat(), it's not
  		     * portable). */
@@ -402,7 +403,7 @@ diff --git a/src/tag.c b/src/tag.c
  
  			/* Calculate the first read offset in the file.  Start
  			 * the search in the middle of the file. */
-@@ -1944,11 +1927,7 @@ parse_line:
+@@ -1955,11 +1938,7 @@ parse_line:
  			    /* Avoid getting stuck. */
  			    linear = TRUE;
  			    state = TS_LINEAR;
@@ -415,7 +416,7 @@ diff --git a/src/tag.c b/src/tag.c
  			}
  #endif
  			continue;
-@@ -2046,7 +2025,7 @@ parse_line:
+@@ -2057,7 +2036,7 @@ parse_line:
  		    }
  		    if (tagcmp < 0)
  		    {
@@ -424,7 +425,7 @@ diff --git a/src/tag.c b/src/tag.c
  			if (search_info.curr_offset < search_info.high_offset)
  			{
  			    search_info.low_offset = search_info.curr_offset;
-@@ -2087,7 +2066,7 @@ parse_line:
+@@ -2098,7 +2077,7 @@ parse_line:
  		{
  		    if (MB_STRNICMP(tagp.tagname, orgpat.head, cmplen) != 0)
  		    {
@@ -433,7 +434,7 @@ diff --git a/src/tag.c b/src/tag.c
  			    break;	/* past last match */
  			else
  			    continue;	/* before first match */
-@@ -2430,7 +2409,7 @@ parse_line:
+@@ -2441,7 +2420,7 @@ parse_line:
  #ifdef FEAT_CSCOPE
  	    if (!use_cscope)
  #endif
@@ -445,7 +446,7 @@ diff --git a/src/tag.c b/src/tag.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -438,6 +438,36 @@ typedef		 long __w64     long_i;
+@@ -430,6 +430,36 @@ typedef		 long __w64     long_i;
  #endif
  
  /*
@@ -482,7 +483,7 @@ diff --git a/src/vim.h b/src/vim.h
   * The characters and attributes cached for the screen.
   */
  typedef char_u schar_T;
-@@ -1970,6 +2000,19 @@ typedef int VimClipboard;	/* This is req
+@@ -1977,6 +2007,19 @@ typedef int VimClipboard;	/* This is req
  # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
  #endif
  

@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  9d50a3e8da303cad9ceeb45c49a50b07b9cf9c83
+# Parent  f019fa76c653bb51b4ac21bdcbda3c7fba0f49e4
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -148,7 +148,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 --- a/src/ex_cmds.c
 +++ b/src/ex_cmds.c
-@@ -1802,14 +1802,14 @@ write_viminfo(file, forceit)
+@@ -1803,14 +1803,14 @@ write_viminfo(file, forceit)
      FILE	*fp_in = NULL;	/* input viminfo file, if any */
      FILE	*fp_out = NULL;	/* output viminfo file */
      char_u	*tempname = NULL;	/* name of temp viminfo file */
@@ -165,7 +165,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
  #endif
  #ifdef WIN3264
      int		hidden = FALSE;
-@@ -3037,7 +3037,7 @@ check_readonly(forceit, buf)
+@@ -3060,7 +3060,7 @@ check_readonly(forceit, buf)
      int		*forceit;
      buf_T	*buf;
  {
@@ -632,7 +632,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/misc2.c b/src/misc2.c
 --- a/src/misc2.c
 +++ b/src/misc2.c
-@@ -5161,7 +5161,7 @@ ff_check_visited(visited_list, fname
+@@ -5181,7 +5181,7 @@ ff_check_visited(visited_list, fname
  {
      ff_visited_T	*vp;
  #ifdef UNIX
@@ -750,7 +750,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3043,7 +3043,7 @@ mch_dirname(
+@@ -3044,7 +3044,7 @@ mch_dirname(
      long
  mch_getperm(char_u *name)
  {
@@ -762,27 +762,27 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 diff --git a/src/proto/fileio.pro b/src/proto/fileio.pro
 --- a/src/proto/fileio.pro
 +++ b/src/proto/fileio.pro
-@@ -20,7 +20,7 @@ int vim_rename __ARGS((char_u *from, cha
- int check_timestamps __ARGS((int focus));
- int buf_check_timestamp __ARGS((buf_T *buf, int focus));
- void buf_reload __ARGS((buf_T *buf, int orig_mode));
--void buf_store_time __ARGS((buf_T *buf, struct stat *st, char_u *fname));
-+void buf_store_time __ARGS((buf_T *buf, stat_T *st, char_u *fname));
- void write_lnum_adjust __ARGS((linenr_T offset));
- int delete_recursive __ARGS((char_u *name));
- void vim_deltempdir __ARGS((void));
+@@ -20,7 +20,7 @@ int vim_rename(char_u *from, char_u *to)
+ int check_timestamps(int focus);
+ int buf_check_timestamp(buf_T *buf, int focus);
+ void buf_reload(buf_T *buf, int orig_mode);
+-void buf_store_time(buf_T *buf, struct stat *st, char_u *fname);
++void buf_store_time(buf_T *buf, stat_T *st, char_u *fname);
+ void write_lnum_adjust(linenr_T offset);
+ int delete_recursive(char_u *name);
+ void vim_deltempdir(void);
 diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
 --- a/src/proto/os_mswin.pro
 +++ b/src/proto/os_mswin.pro
-@@ -9,7 +9,7 @@ int mch_can_restore_icon __ARGS((void));
- int mch_FullName __ARGS((char_u *fname, char_u *buf, int len, int force));
- int mch_isFullName __ARGS((char_u *fname));
- void slash_adjust __ARGS((char_u *p));
--int vim_stat __ARGS((const char *name, struct stat *stp));
-+int vim_stat __ARGS((const char *name, stat_T *stp));
- void mch_settmode __ARGS((int tmode));
- int mch_get_shellsize __ARGS((void));
- void mch_set_shellsize __ARGS((void));
+@@ -9,7 +9,7 @@ int mch_can_restore_icon(void);
+ int mch_FullName(char_u *fname, char_u *buf, int len, int force);
+ int mch_isFullName(char_u *fname);
+ void slash_adjust(char_u *p);
+-int vim_stat(const char *name, struct stat *stp);
++int vim_stat(const char *name, stat_T *stp);
+ void mch_settmode(int tmode);
+ int mch_get_shellsize(void);
+ void mch_set_shellsize(void);
 diff --git a/src/pty.c b/src/pty.c
 --- a/src/pty.c
 +++ b/src/pty.c
