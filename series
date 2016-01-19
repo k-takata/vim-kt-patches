@@ -5,7 +5,6 @@ myconfiguration-private-install.patch #+private-install
 myconfiguration-clang.patch #+clang
 backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+linux
-fix-7.4.039-S_IFDIR.patch
 test_largefile.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
