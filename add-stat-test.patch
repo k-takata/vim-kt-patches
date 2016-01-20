@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 7656647da44ed09b242c32cf1d95c9d4ca0df086
-# Parent  d382efd99a5d22fa61153517be4a1869852eff5f
+# Parent  568e8d2f4b0deb1b0bebe15aa5b8fc63e6c8799f
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
@@ -21,9 +21,9 @@ diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
  	    test_perl.res \
  	    test_quickfix.res \
 +	    test_stat.res \
+ 	    test_syntax.res \
  	    test_viminfo.res \
  	    test_viml.res \
- 	    test_alot.res
 diff --git a/src/testdir/test_stat.vim b/src/testdir/test_stat.vim
 new file mode 100644
 --- /dev/null
