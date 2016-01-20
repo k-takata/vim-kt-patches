@@ -9,6 +9,7 @@ test_largefile.patch
 support-largefiles-on-windows.patch
 use-stat_T.patch
 add-stat-test.patch
+msys2-python3.patch
 timers3.patch #+timers
 timers-mark.diff #+timers
 0000-kaoriya_marks.diff
