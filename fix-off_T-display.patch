@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent  8e1a5942d28470b73afa3631e6b129f9b9f1b02a
+
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -5238,6 +5238,8 @@ msg_add_lines(insert_space, lnum, nchars
+ 	sprintf((char *)p,
+ #ifdef LONG_LONG_OFF_T
+ 		"%ldL, %lldC", lnum, (long long)nchars
++#elif defined(WIN3264)
++		"%ldL, %I64dC", lnum, (__int64)nchars
+ #else
+ 		/* Explicit typecast avoids warning on Mac OS X 10.6 */
+ 		"%ldL, %ldC", lnum, (long)nchars
+@@ -5256,6 +5258,8 @@ msg_add_lines(insert_space, lnum, nchars
+ 	    sprintf((char *)p,
+ #ifdef LONG_LONG_OFF_T
+ 		    _("%lld characters"), (long long)nchars
++#elif defined(WIN3264)
++		    _("%I64d characters"), (__int64)nchars
+ #else
+ 		    /* Explicit typecast avoids warning on Mac OS X 10.6 */
+ 		    _("%ld characters"), (long)nchars
