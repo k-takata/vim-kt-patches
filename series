@@ -44,4 +44,5 @@ fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
 msys2-python3.patch
+num64.patch
 fix-config_cache-removal.patch #+rejected
