@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  0060df095935980af1573e9e04bcb4de00ed1bae
+# Parent  463b94074d25d4d847a5b931c4a82d28f3298ffa
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -368,7 +368,7 @@ endif # RUBY
+@@ -376,7 +376,7 @@ endif # RUBY
  # Any other defines can be included here.
  DEF_GUI=-DFEAT_GUI_W32 -DFEAT_CLIPBOARD
  DEFINES=-DWIN32 -DWINVER=$(WINVER) -D_WIN32_WINNT=$(WINVER) \
@@ -31,7 +31,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -1886,14 +1886,14 @@ vim_str2nr(start, prep, len, what, nptr,
+@@ -1897,14 +1897,14 @@ vim_str2nr(start, prep, len, what, nptr,
  				       is bin */
      int			*len;	    /* return: detected length of number */
      int			what;	    /* what numbers to recognize */
@@ -49,7 +49,7 @@ diff --git a/src/charset.c b/src/charset.c
      int		    n;
  
      if (ptr[0] == '-')
-@@ -1962,7 +1962,7 @@ vim_str2nr(start, prep, len, what, nptr,
+@@ -1973,7 +1973,7 @@ vim_str2nr(start, prep, len, what, nptr,
  	/* octal */
  	while ('0' <= *ptr && *ptr <= '7')
  	{
@@ -58,7 +58,7 @@ diff --git a/src/charset.c b/src/charset.c
  	    ++ptr;
  	    if (n++ == maxlen)
  		break;
-@@ -1975,7 +1975,7 @@ vim_str2nr(start, prep, len, what, nptr,
+@@ -1986,7 +1986,7 @@ vim_str2nr(start, prep, len, what, nptr,
  	    n += 2;	    /* skip over "0x" */
  	while (vim_isxdigit(*ptr))
  	{
@@ -67,7 +67,7 @@ diff --git a/src/charset.c b/src/charset.c
  	    ++ptr;
  	    if (n++ == maxlen)
  		break;
-@@ -1986,7 +1986,7 @@ vim_str2nr(start, prep, len, what, nptr,
+@@ -1997,7 +1997,7 @@ vim_str2nr(start, prep, len, what, nptr,
  	/* decimal */
  	while (VIM_ISDIGIT(*ptr))
  	{
@@ -76,7 +76,7 @@ diff --git a/src/charset.c b/src/charset.c
  	    ++ptr;
  	    if (n++ == maxlen)
  		break;
-@@ -2000,9 +2000,9 @@ vim_str2nr(start, prep, len, what, nptr,
+@@ -2011,9 +2011,9 @@ vim_str2nr(start, prep, len, what, nptr,
      if (nptr != NULL)
      {
  	if (negative)   /* account for leading '-' for decimal numbers */
@@ -544,7 +544,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 --- a/src/ex_cmds.c
 +++ b/src/ex_cmds.c
-@@ -294,10 +294,10 @@ typedef struct
+@@ -295,10 +295,10 @@ typedef struct
      union {
  	struct
  	{
@@ -573,7 +573,7 @@ diff --git a/src/ex_getln.c b/src/ex_getln.c
 diff --git a/src/feature.h b/src/feature.h
 --- a/src/feature.h
 +++ b/src/feature.h
-@@ -376,12 +376,16 @@
+@@ -382,12 +382,16 @@
   * +eval		Built-in script language and expression evaluation,
   *			":let", ":if", etc.
   * +float		Floating point variables.
@@ -593,7 +593,7 @@ diff --git a/src/feature.h b/src/feature.h
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -9531,7 +9531,7 @@ apply_autocmds_group(event, fname, fname
+@@ -9535,7 +9535,7 @@ apply_autocmds_group(event, fname, fname
  
  #ifdef FEAT_EVAL
  	/* set v:cmdarg (only when there is a matching pattern) */
@@ -651,99 +651,6 @@ diff --git a/src/message.c b/src/message.c
  	else
  	    EMSG(_("E807: Expected Float argument for printf()"));
      }
-@@ -4232,7 +4232,7 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- 	    /* parse field width */
- 	    if (*p == '*')
- 	    {
--		int j;
-+		varnumber_T j;
- 
- 		p++;
- 		j =
-@@ -4242,13 +4242,13 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- # if defined(FEAT_EVAL)
- 		    tvs != NULL ? tv_nr(tvs, &arg_idx) :
- # endif
--			va_arg(ap, int);
-+			va_arg(ap, varnumber_T);
- #endif
- 		if (j >= 0)
--		    min_field_width = j;
-+		    min_field_width = (size_t) j;
- 		else
- 		{
--		    min_field_width = -j;
-+		    min_field_width = (size_t) -j;
- 		    justify_left = 1;
- 		}
- 	    }
-@@ -4270,7 +4270,7 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- 		precision_specified = 1;
- 		if (*p == '*')
- 		{
--		    int j;
-+		    varnumber_T j;
- 
- 		    j =
- #ifndef HAVE_STDARG_H
-@@ -4279,11 +4279,11 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- # if defined(FEAT_EVAL)
- 			tvs != NULL ? tv_nr(tvs, &arg_idx) :
- # endif
--			    va_arg(ap, int);
-+			    va_arg(ap, varnumber_T);
- #endif
- 		    p++;
- 		    if (j >= 0)
--			precision = j;
-+			precision = (size_t) j;
- 		    else
- 		    {
- 			precision_specified = 0;
-@@ -4346,7 +4346,7 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- 
- 		case 'c':
- 		    {
--			int j;
-+			varnumber_T j;
- 
- 			j =
- #ifndef HAVE_STDARG_H
-@@ -4355,7 +4355,7 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- # if defined(FEAT_EVAL)
- 			    tvs != NULL ? tv_nr(tvs, &arg_idx) :
- # endif
--				va_arg(ap, int);
-+				va_arg(ap, varnumber_T);
- #endif
- 			/* standard demands unsigned char */
- 			uchar_arg = (unsigned char)j;
-@@ -4440,12 +4440,12 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- 
- 		    /* only defined for length modifier h, or for no
- 		     * length modifiers */
--		    int int_arg = 0;
--		    unsigned int uint_arg = 0;
-+		    varnumber_T int_arg = 0;
-+		    uvarnumber_T uint_arg = 0;
- 
- 		    /* only defined for length modifier l */
--		    long int long_arg = 0;
--		    unsigned long int ulong_arg = 0;
-+		    varnumber_T long_arg = 0;
-+		    uvarnumber_T ulong_arg = 0;
- 
- 		    /* pointer argument value -only defined for p
- 		     * conversion */
-@@ -4481,7 +4481,7 @@ vim_snprintf(str, str_m, fmt, a1, a2, a3
- # if defined(FEAT_EVAL)
- 					tvs != NULL ? tv_nr(tvs, &arg_idx) :
- # endif
--					    va_arg(ap, int);
-+					    va_arg(ap, varnumber_T);
- #endif
- 			    if (int_arg > 0)
- 				arg_sign =  1;
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
