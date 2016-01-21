@@ -1,0 +1,36 @@
+# HG changeset patch
+# Parent  f9b24c4116d8139846445ba53ebc649c41a074eb
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -39,7 +39,7 @@ GUI=yes
+ DIRECTX=no
+ # FEATURES=[TINY | SMALL | NORMAL | BIG | HUGE]
+ # Set to TINY to make minimal version (few features).
+-FEATURES=BIG
++FEATURES=HUGE
+ # Set to one of i386, i486, i586, i686 as the minimum target processor.
+ # For amd64/x64 architecture set ARCH=x86-64 .
+ ARCH=i386
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -20,7 +20,7 @@
+ #
+ #	!!!!  After changing features do "nmake clean" first  !!!!
+ #
+-#	Feature Set: FEATURES=[TINY, SMALL, NORMAL, BIG, HUGE] (default is BIG)
++#	Feature Set: FEATURES=[TINY, SMALL, NORMAL, BIG, HUGE] (default is HUGE)
+ #
+ #	GUI interface: GUI=yes (default is no)
+ #
+@@ -957,7 +957,7 @@ CFLAGS = $(CFLAGS) -DMSWINPS
+ # FEATURES: TINY, SMALL, NORMAL, BIG or HUGE
+ #
+ !if "$(FEATURES)"==""
+-FEATURES = BIG
++FEATURES = HUGE
+ !endif
+ CFLAGS = $(CFLAGS) -DFEAT_$(FEATURES)
+ 
