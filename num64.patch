@@ -536,7 +536,7 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	case VAR_NUMBER:
 -	    sprintf((char *)buf, "%ld", (long)varp->vval.v_number);
-+	    sprintf((char *)buf, VARNUMBER_FMT,
++	    sprintf((char *)buf, "%"VARNUMBER_FMT"d",
 +					    (varnumber_T)varp->vval.v_number);
  	    return buf;
  	case VAR_FUNC:
@@ -687,17 +687,6 @@ diff --git a/src/ops.c b/src/ops.c
      if (use_sandbox)
  	--sandbox;
  
-@@ -5475,8 +5475,8 @@ do_addsub(op_type, pos, length, Prenum1)
-     char_u	buf2[NUMBUFLEN];
-     int		pre;		/* 'X'/'x': hex; '0': octal; 'B'/'b': bin */
-     static int	hexupper = FALSE;	/* 0xABC */
--    unsigned long n;
--    long_u	oldn;
-+    uvarnumber_T	n;
-+    uvarnumber_T	oldn;
-     char_u	*ptr;
-     int		c;
-     int		todel;
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
@@ -812,15 +801,15 @@ diff --git a/src/structs.h b/src/structs.h
 +# ifdef HAVE_STDINT_H
 +typedef int64_t		    varnumber_T;
 +typedef uint64_t	    uvarnumber_T;
-+#  define VARNUMBER_FMT	    "%lld"
++#  define VARNUMBER_FMT	    "ll"
 +# elif defined(WIN3264)
 +typedef __int64		    varnumber_T;
 +typedef unsigned __int64    uvarnumber_T;
-+#  define VARNUMBER_FMT	    "%I64d"
++#  define VARNUMBER_FMT	    "I64"
 +# else
 +typedef long		    varnumber_T;
 +typedef unsigned long	    uvarnumber_T;
-+#  define VARNUMBER_FMT	    "%ld"
++#  define VARNUMBER_FMT	    "l"
 +# endif
  #else
 -typedef int	varnumber_T;
@@ -828,11 +817,11 @@ diff --git a/src/structs.h b/src/structs.h
 +# if VIM_SIZEOF_INT <= 3	/* use long if int is smaller than 32 bits */
 +typedef long		    varnumber_T;
 +typedef unsigned long	    uvarnumber_T;
-+#  define VARNUMBER_FMT	    "%ld"
++#  define VARNUMBER_FMT	    "l"
 +# else
 +typedef int		    varnumber_T;
 +typedef unsigned int	    uvarnumber_T;
-+#  define VARNUMBER_FMT	    "%d"
++#  define VARNUMBER_FMT	    ""
 +# endif
  #endif
 +
