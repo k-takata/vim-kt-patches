@@ -614,6 +614,36 @@ diff --git a/src/fold.c b/src/fold.c
      KeyTyped = save_keytyped;
  
      switch (c)
+diff --git a/src/json.c b/src/json.c
+--- a/src/json.c
++++ b/src/json.c
+@@ -340,7 +340,7 @@ json_decode_string(js_read_T *reader, ty
+     int		len;
+     char_u	*p = reader->js_buf + reader->js_used + 1;
+     int		c;
+-    long	nr;
++    varnumber_T	nr;
+     char_u	buf[NUMBUFLEN];
+ 
+     ga_init2(&ga, 1, 200);
+@@ -366,7 +366,7 @@ json_decode_string(js_read_T *reader, ty
+ 		    buf[(*mb_char2bytes)((int)nr, buf)] = NUL;
+ 		    ga_concat(&ga, buf);
+ #else
+-		    ga_append(&ga, nr);
++		    ga_append(&ga, (int)nr);
+ #endif
+ 		    break;
+ 		default: c = p[1]; break;
+@@ -459,7 +459,7 @@ json_decode_item(js_read_T *reader, typv
+ 		else
+ #endif
+ 		{
+-		    long nr;
++		    varnumber_T nr;
+ 
+ 		    res->v_type = VAR_NUMBER;
+ 		    vim_str2nr(reader->js_buf + reader->js_used,
 diff --git a/src/message.c b/src/message.c
 --- a/src/message.c
 +++ b/src/message.c
