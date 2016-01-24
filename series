@@ -44,8 +44,8 @@ fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
 fix-ruby-warning.patch
+fix-test_json.patch
 num64.patch
 incdec64.patch
 support-lld-in-vim_snprintf.patch
-fix-test_json.patch
 fix-config_cache-removal.patch #+rejected
