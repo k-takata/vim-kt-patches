@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  263bd475b75c10533fe152ae3a2230460896d9a3
+
+diff --git a/runtime/doc/if_mzsch.txt b/runtime/doc/if_mzsch.txt
+--- a/runtime/doc/if_mzsch.txt
++++ b/runtime/doc/if_mzsch.txt
+@@ -294,7 +294,7 @@ to set the environment variable as the f
+   PLTCONFIGDIR=C:\Racket63\etc
+ <
+ ==============================================================================
+-8. MzScheme setup				    *mzscheme-setup*
++8. MzScheme setup				    *mzscheme-setup* *E895*
+ 
+ Vim requires "racket/base" module for if_mzsch core (fallback to "scheme/base"
+ if it doesn't exist), "r5rs" module for test and "raco ctool" command for

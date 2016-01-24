@@ -47,4 +47,5 @@ fix-ruby-warning.patch
 fix-test_json.patch
 num64.patch
 incdec64.patch
+update-if_mzsch-help.patch
 fix-config_cache-removal.patch #+rejected
