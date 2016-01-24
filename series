@@ -46,5 +46,4 @@ update-rubyinc-dir.patch
 fix-ruby-warning.patch
 num64.patch
 incdec64.patch
-update-if_mzsch-help.patch
 fix-config_cache-removal.patch #+rejected
