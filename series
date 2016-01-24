@@ -46,4 +46,5 @@ update-rubyinc-dir.patch
 fix-ruby-warning.patch
 num64.patch
 incdec64.patch
+support-lld-in-vim_snprintf.patch
 fix-config_cache-removal.patch #+rejected
