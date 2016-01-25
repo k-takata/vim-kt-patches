@@ -44,6 +44,7 @@ fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
 fix-ruby-warning.patch
+fix-po-msys2.patch
 num64.patch
 incdec64.patch
 num64doc.patch
