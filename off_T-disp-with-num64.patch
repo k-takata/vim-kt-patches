@@ -1,0 +1,46 @@
+# HG changeset patch
+# Parent  9f8f64d6ced0a67699117a4b16a7601b8cf64856
+largefile + num64
+
+This patch is an additional patch for the largefiles patches and the num64
+patches.  Both series of patches must be applied before this patch.
+
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -5235,15 +5235,8 @@ msg_add_lines(insert_space, lnum, nchars
+     if (insert_space)
+ 	*p++ = ' ';
+     if (shortmess(SHM_LINES))
+-	sprintf((char *)p,
+-#ifdef LONG_LONG_OFF_T
+-		"%ldL, %lldC", lnum, (long long)nchars
+-#elif defined(WIN3264)
+-		"%ldL, %I64dC", lnum, (__int64)nchars
+-#else
+-		/* Explicit typecast avoids warning on Mac OS X 10.6 */
+-		"%ldL, %ldC", lnum, (long)nchars
+-#endif
++	vim_snprintf((char *)p, IOSIZE - (p - IObuff),
++		"%ldL, %lldC", lnum, (varnumber_T)nchars
+ 		);
+     else
+     {
+@@ -5255,15 +5248,8 @@ msg_add_lines(insert_space, lnum, nchars
+ 	if (nchars == 1)
+ 	    STRCPY(p, _("1 character"));
+ 	else
+-	    sprintf((char *)p,
+-#ifdef LONG_LONG_OFF_T
+-		    _("%lld characters"), (long long)nchars
+-#elif defined(WIN3264)
+-		    _("%I64d characters"), (__int64)nchars
+-#else
+-		    /* Explicit typecast avoids warning on Mac OS X 10.6 */
+-		    _("%ld characters"), (long)nchars
+-#endif
++	    vim_snprintf((char *)p, IOSIZE - (p - IObuff),
++		    _("%lld characters"), (varnumber_T)nchars
+ 		    );
+     }
+ }

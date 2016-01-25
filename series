@@ -46,4 +46,7 @@ update-rubyinc-dir.patch
 fix-ruby-warning.patch
 num64.patch
 incdec64.patch
+num64doc.patch
+num64-mark.diff
+off_T-disp-with-num64.patch
 fix-config_cache-removal.patch #+rejected
