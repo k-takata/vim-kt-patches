@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  f019fa76c653bb51b4ac21bdcbda3c7fba0f49e4
+# Parent  7d8816400c3447ebe032bc3bc2a52ed466d21e15
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -27,7 +27,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      fname_expand(curbuf, &ffname, &sfname);	/* will allocate ffname */
-@@ -2181,7 +2181,7 @@ buflist_findname(ffname)
+@@ -2182,7 +2182,7 @@ buflist_findname(ffname)
      char_u	*ffname;
  {
  #ifdef UNIX
@@ -36,7 +36,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  
      if (mch_stat((char *)ffname, &st) < 0)
  	st.st_dev = (dev_T)-1;
-@@ -2196,7 +2196,7 @@ buflist_findname(ffname)
+@@ -2197,7 +2197,7 @@ buflist_findname(ffname)
      static buf_T *
  buflist_findname_stat(ffname, stp)
      char_u	*ffname;
@@ -45,7 +45,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  {
  #endif
      buf_T	*buf;
-@@ -2850,7 +2850,7 @@ setfname(buf, ffname, sfname, message)
+@@ -2851,7 +2851,7 @@ setfname(buf, ffname, sfname, message)
  {
      buf_T	*obuf = NULL;
  #ifdef UNIX
@@ -54,7 +54,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      if (ffname == NULL || *ffname == NUL)
-@@ -3100,7 +3100,7 @@ otherfile_buf(buf, ffname
+@@ -3101,7 +3101,7 @@ otherfile_buf(buf, ffname
      buf_T	*buf;
      char_u	*ffname;
  #ifdef UNIX
@@ -63,7 +63,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  {
      /* no name is different */
-@@ -3110,9 +3110,9 @@ otherfile_buf(buf, ffname
+@@ -3111,9 +3111,9 @@ otherfile_buf(buf, ffname
  	return FALSE;
  #ifdef UNIX
      {
@@ -76,7 +76,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  	if (stp == NULL)
  	{
  	    if (!buf->b_dev_valid || mch_stat((char *)ffname, &st) < 0)
-@@ -3148,7 +3148,7 @@ otherfile_buf(buf, ffname
+@@ -3149,7 +3149,7 @@ otherfile_buf(buf, ffname
  buf_setino(buf)
      buf_T	*buf;
  {
@@ -85,7 +85,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  
      if (buf->b_fname != NULL && mch_stat((char *)buf->b_fname, &st) >= 0)
      {
-@@ -3166,7 +3166,7 @@ buf_setino(buf)
+@@ -3167,7 +3167,7 @@ buf_setino(buf)
      static int
  buf_same_ino(buf, stp)
      buf_T	*buf;
@@ -109,7 +109,7 @@ diff --git a/src/diff.c b/src/diff.c
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12124,7 +12124,7 @@ f_getfperm(argvars, rettv)
+@@ -12175,7 +12175,7 @@ f_getfperm(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -118,7 +118,7 @@ diff --git a/src/eval.c b/src/eval.c
      char_u	*perm = NULL;
      char_u	flags[] = "rwx";
      int		i;
-@@ -12156,7 +12156,7 @@ f_getfsize(argvars, rettv)
+@@ -12207,7 +12207,7 @@ f_getfsize(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -127,7 +127,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -12188,7 +12188,7 @@ f_getftime(argvars, rettv)
+@@ -12239,7 +12239,7 @@ f_getftime(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -136,7 +136,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -12207,7 +12207,7 @@ f_getftype(argvars, rettv)
+@@ -12258,7 +12258,7 @@ f_getftype(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -148,7 +148,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 --- a/src/ex_cmds.c
 +++ b/src/ex_cmds.c
-@@ -1803,14 +1803,14 @@ write_viminfo(file, forceit)
+@@ -1853,14 +1853,14 @@ write_viminfo(file, forceit)
      FILE	*fp_in = NULL;	/* input viminfo file, if any */
      FILE	*fp_out = NULL;	/* output viminfo file */
      char_u	*tempname = NULL;	/* name of temp viminfo file */
@@ -165,7 +165,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
  #endif
  #ifdef WIN3264
      int		hidden = FALSE;
-@@ -3060,7 +3060,7 @@ check_readonly(forceit, buf)
+@@ -3110,7 +3110,7 @@ check_readonly(forceit, buf)
      int		*forceit;
      buf_T	*buf;
  {
@@ -177,7 +177,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 --- a/src/ex_cmds2.c
 +++ b/src/ex_cmds2.c
-@@ -3277,7 +3277,7 @@ do_source(fname, check_other, is_vimrc)
+@@ -3287,7 +3287,7 @@ do_source(fname, check_other, is_vimrc)
      int			    save_debug_break_level = debug_break_level;
      scriptitem_T	    *si = NULL;
  # ifdef UNIX
@@ -270,7 +270,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	    /*
  	     * If the original file does not exist yet
-@@ -5281,7 +5281,7 @@ msg_add_eol()
+@@ -5285,7 +5285,7 @@ msg_add_eol()
      static int
  check_mtime(buf, st)
      buf_T		*buf;
@@ -279,7 +279,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  {
      if (buf->b_mtime_read != 0
  	    && time_differs((long)st->st_mtime, buf->b_mtime_read))
-@@ -6483,7 +6483,7 @@ vim_rename(from, to)
+@@ -6487,7 +6487,7 @@ vim_rename(from, to)
  #ifdef AMIGA
      BPTR	flock;
  #endif
@@ -288,7 +288,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      long	perm;
  #ifdef HAVE_ACL
      vim_acl_T	acl;		/* ACL from original file */
-@@ -6511,7 +6511,7 @@ vim_rename(from, to)
+@@ -6515,7 +6515,7 @@ vim_rename(from, to)
  
  #ifdef UNIX
      {
@@ -297,7 +297,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	/* It's possible for the source and destination to be the same file.
  	 * This happens when "from" and "to" differ in case and are on a FAT32
-@@ -6812,7 +6812,7 @@ buf_check_timestamp(buf, focus)
+@@ -6816,7 +6816,7 @@ buf_check_timestamp(buf, focus)
      buf_T	*buf;
      int		focus UNUSED;	/* called for GUI focus event */
  {
@@ -306,7 +306,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      int		stat_res;
      int		retval = 0;
      char_u	*path;
-@@ -7257,7 +7257,7 @@ buf_reload(buf, orig_mode)
+@@ -7261,7 +7261,7 @@ buf_reload(buf, orig_mode)
      void
  buf_store_time(buf, st, fname)
      buf_T	*buf;
@@ -315,7 +315,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      char_u	*fname UNUSED;
  {
      buf->b_mtime = (long)st->st_mtime;
-@@ -7400,7 +7400,7 @@ vim_tempname(extra_char, keep)
+@@ -7404,7 +7404,7 @@ vim_tempname(extra_char, keep)
      static char	*(tempdirs[]) = {TEMPDIRNAMES};
      int		i;
  # ifndef EEXIST
@@ -644,7 +644,7 @@ diff --git a/src/misc2.c b/src/misc2.c
 diff --git a/src/netbeans.c b/src/netbeans.c
 --- a/src/netbeans.c
 +++ b/src/netbeans.c
-@@ -450,7 +450,7 @@ getConnInfo(char *file, char **host, cha
+@@ -412,7 +412,7 @@ getConnInfo(char *file, char **host, cha
      char_u *lp;
      char_u *nlp;
  #ifdef UNIX
@@ -653,7 +653,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
  
      /*
       * For Unix only accept the file when it's not accessible by others.
-@@ -2163,7 +2163,7 @@ nb_do_cmd(
+@@ -2125,7 +2125,7 @@ nb_do_cmd(
  		buf->bufp->b_changed = TRUE;
  	    else
  	    {
@@ -750,7 +750,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3044,7 +3044,7 @@ mch_dirname(
+@@ -3047,7 +3047,7 @@ mch_dirname(
      long
  mch_getperm(char_u *name)
  {
@@ -798,7 +798,7 @@ diff --git a/src/pty.c b/src/pty.c
 diff --git a/src/quickfix.c b/src/quickfix.c
 --- a/src/quickfix.c
 +++ b/src/quickfix.c
-@@ -2942,7 +2942,7 @@ get_mef_name()
+@@ -2941,7 +2941,7 @@ get_mef_name()
      static int	start = -1;
      static int	off = 0;
  #ifdef HAVE_LSTAT
@@ -877,8 +877,8 @@ diff --git a/src/undo.c b/src/undo.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2007,17 +2007,12 @@ typedef int VimClipboard;	/* This is req
- # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
+@@ -2017,17 +2017,12 @@ typedef int sock_T;
+ # endif
  #endif
  
 -/* Use 64-bit stat functions if available. */

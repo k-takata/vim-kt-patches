@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent 77eb2adaee0cedf71cd7949557fc841b8e177b4a
-# Parent  666f828f954c4420cd674ced10c8186fe1621258
+# Parent  b19762a3f5d17c0e42ebc71c8c4217d21c817f34
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12171,7 +12171,7 @@ f_getfsize(argvars, rettv)
+@@ -12222,7 +12222,7 @@ f_getfsize(argvars, rettv)
  	    rettv->vval.v_number = (varnumber_T)st.st_size;
  
  	    /* non-perfect check for overflow */
@@ -230,7 +230,7 @@ diff --git a/src/memline.c b/src/memline.c
 diff --git a/src/netbeans.c b/src/netbeans.c
 --- a/src/netbeans.c
 +++ b/src/netbeans.c
-@@ -950,7 +950,7 @@ static void addsigntype __ARGS((nbbuf_T 
+@@ -912,7 +912,7 @@ static void addsigntype __ARGS((nbbuf_T 
  			char_u *tooltip, char_u *glyphfile,
  			char_u *fg, char_u *bg));
  static void print_read_msg __ARGS((nbbuf_T *buf));
@@ -239,7 +239,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
  
  static int curPCtype = -1;
  
-@@ -3892,7 +3892,7 @@ print_read_msg(buf)
+@@ -3845,7 +3845,7 @@ print_read_msg(buf)
      nbbuf_T	*buf;
  {
      int	    lnum = buf->bufp->b_ml.ml_line_count;
@@ -248,7 +248,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
      char_u  c;
  
      msg_add_fname(buf->bufp, buf->bufp->b_ffname);
-@@ -3928,7 +3928,7 @@ print_read_msg(buf)
+@@ -3881,7 +3881,7 @@ print_read_msg(buf)
      static void
  print_save_msg(buf, nchars)
      nbbuf_T	*buf;
@@ -286,7 +286,7 @@ diff --git a/src/proto/memline.pro b/src/proto/memline.pro
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -1441,7 +1441,7 @@ struct file_buffer
+@@ -1444,7 +1444,7 @@ struct file_buffer
  
      long	b_mtime;	/* last change time of original file */
      long	b_mtime_read;	/* last change time when reading */
@@ -483,8 +483,8 @@ diff --git a/src/vim.h b/src/vim.h
   * The characters and attributes cached for the screen.
   */
  typedef char_u schar_T;
-@@ -1977,6 +2007,19 @@ typedef int VimClipboard;	/* This is req
- # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
+@@ -1987,6 +2017,19 @@ typedef int sock_T;
+ # endif
  #endif
  
 +/* Use 64-bit stat functions if available. */
