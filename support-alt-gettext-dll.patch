@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent aeabcaf55533342e8dfb79dfcbf1d2898ce85c91
-# Parent  2ace661decd01c66a01e8aa68cf0baaf3da609d9
+# Parent  da3d74bc07a63d8af65bb877f64876ba337b2391
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -15,10 +15,10 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  /* Dummy functions */
  static char *null_libintl_gettext(const char *);
-@@ -500,9 +501,13 @@ dyn_libintl_init()
-     if (hLibintlDLL)
+@@ -501,9 +502,13 @@ dyn_libintl_init()
  	return 1;
      /* Load gettext library (libintl.dll) */
+     hLibintlDLL = vimLoadLib(GETTEXT_DLL);
 -#ifdef GETTEXT_DLL_ALT
 +#ifdef GETTEXT_DLL_ALT1
      if (!hLibintlDLL)
@@ -30,4 +30,4 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +	hLibintlDLL = vimLoadLib(GETTEXT_DLL_ALT2);
  #endif
      if (!hLibintlDLL)
- 	hLibintlDLL = vimLoadLib(GETTEXT_DLL);
+     {
