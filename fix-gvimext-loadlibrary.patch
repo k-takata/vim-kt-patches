@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  81ccdf6e25eb5260e90ba4ca2ea328832b7f7005
+# Parent  e2e11e7528bf17eca375320e50bcd46c86cba5ec
 
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 --- a/src/GvimExt/gvimext.cpp
@@ -12,38 +12,60 @@ diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
  # endif
  
  // Dummy functions
-@@ -183,6 +184,7 @@ static char *(*dyn_libintl_bindtextdomai
- dyn_libintl_init(char *dir)
- {
-     int		i;
-+    int		len;
-     static struct
-     {
- 	char	    *name;
-@@ -199,16 +201,20 @@ dyn_libintl_init(char *dir)
+@@ -194,21 +195,36 @@ dyn_libintl_init(char *dir)
+ 	{(char *)"bindtextdomain",	(FARPROC*)&dyn_libintl_bindtextdomain},
+ 	{NULL, NULL}
+     };
++    DWORD	len, len2;
++    LPWSTR	buf = NULL;
++    LPWSTR	buf2 = NULL;
+ 
+     // No need to initialize twice.
      if (hLibintlDLL)
  	return 1;
  
 -    // Load gettext library, first try the Vim runtime directory, then search
 -    // the path.
 -    strcat(dir, GETTEXT_DLL);
-+    // Load gettext library from the Vim runtime directory
-+    len = strlen(dir);
+-    hLibintlDLL = LoadLibrary(dir);
++    // Load gettext library from the Vim runtime directory.
++    // Add the directory to $PATH temporarily.
++    len = GetEnvironmentVariableW(L"PATH", NULL, 0);
++    len2 = len + strlen(dir) + 1;
++    buf = (LPWSTR)malloc(len * sizeof(WCHAR));
++    buf2 = (LPWSTR)malloc(len2 * sizeof(WCHAR));
++    if (buf != NULL && buf2 != NULL)
++    {
++	GetEnvironmentVariableW(L"PATH", buf, len);
++	_snwprintf(buf2, len2, L"%S;%s", dir, buf);
++	SetEnvironmentVariableW(L"PATH", buf2);
++	hLibintlDLL = LoadLibrary(GETTEXT_DLL);
 +#ifdef GETTEXT_DLL_ALT
-+    strcat(dir, GETTEXT_DLL_ALT);
-     hLibintlDLL = LoadLibrary(dir);
++	if (!hLibintlDLL)
++	    hLibintlDLL = LoadLibrary(GETTEXT_DLL_ALT);
 +#endif
++	SetEnvironmentVariableW(L"PATH", buf);
++    }
++    free(buf);
++    free(buf2);
      if (!hLibintlDLL)
-     {
+-    {
 -	hLibintlDLL = LoadLibrary(GETTEXT_DLL);
 -	if (!hLibintlDLL)
 -	    return 0;
-+	dir[len] = '\0';
-+	strcat(dir, GETTEXT_DLL);
-+	hLibintlDLL = LoadLibrary(dir);
-     }
-+    if (!hLibintlDLL)
+-    }
 +	return 0;
  
      // Get the addresses of the functions we need.
      for (i = 0; libintl_entry[i].name != NULL
+diff --git a/src/GvimExt/gvimext.h b/src/GvimExt/gvimext.h
+--- a/src/GvimExt/gvimext.h
++++ b/src/GvimExt/gvimext.h
+@@ -42,6 +42,7 @@
+ #include <windows.h>
+ #include <windowsx.h>
+ #include <shlobj.h>
++#include <wchar.h>
+ 
+ /* Accommodate old versions of VC that don't have a modern Platform SDK */
+ #if (defined(_MSC_VER) && _MSC_VER < 1300) || !defined(MAXULONG_PTR)
