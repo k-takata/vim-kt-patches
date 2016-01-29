@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  e2e11e7528bf17eca375320e50bcd46c86cba5ec
+# Parent  6e832b4c4ce30db8bdd57a705afbff1545b25563
 
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 --- a/src/GvimExt/gvimext.cpp
@@ -31,7 +31,7 @@ diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 +    // Load gettext library from the Vim runtime directory.
 +    // Add the directory to $PATH temporarily.
 +    len = GetEnvironmentVariableW(L"PATH", NULL, 0);
-+    len2 = len + strlen(dir) + 1;
++    len2 = MAX_PATH + 1 + len;
 +    buf = (LPWSTR)malloc(len * sizeof(WCHAR));
 +    buf2 = (LPWSTR)malloc(len2 * sizeof(WCHAR));
 +    if (buf != NULL && buf2 != NULL)
