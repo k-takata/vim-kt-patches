@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent 77eb2adaee0cedf71cd7949557fc841b8e177b4a
-# Parent  b19762a3f5d17c0e42ebc71c8c4217d21c817f34
+# Parent  cbf9c09f368a4bd40af4ead3023603fba93869c2
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12222,7 +12222,7 @@ f_getfsize(argvars, rettv)
+@@ -12362,7 +12362,7 @@ f_getfsize(argvars, rettv)
  	    rettv->vval.v_number = (varnumber_T)st.st_size;
  
  	    /* non-perfect check for overflow */
@@ -17,15 +17,15 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -41,7 +41,7 @@ static char_u *readfile_charconvert __AR
- static void check_marks_read __ARGS((void));
+@@ -41,7 +41,7 @@ static char_u *readfile_charconvert(char
+ static void check_marks_read(void);
  #endif
  #ifdef FEAT_CRYPT
--static char_u *check_for_cryptkey __ARGS((char_u *cryptkey, char_u *ptr, long *sizep, off_t *filesizep, int newfile, char_u *fname, int *did_ask));
-+static char_u *check_for_cryptkey __ARGS((char_u *cryptkey, char_u *ptr, long *sizep, off_T *filesizep, int newfile, char_u *fname, int *did_ask));
+-static char_u *check_for_cryptkey(char_u *cryptkey, char_u *ptr, long *sizep, off_t *filesizep, int newfile, char_u *fname, int *did_ask);
++static char_u *check_for_cryptkey(char_u *cryptkey, char_u *ptr, long *sizep, off_T *filesizep, int newfile, char_u *fname, int *did_ask);
  #endif
  #ifdef UNIX
- static void set_file_time __ARGS((char_u *fname, time_t atime, time_t mtime));
+ static void set_file_time(char_u *fname, time_t atime, time_t mtime);
 @@ -233,7 +233,7 @@ readfile(fname, sfname, from, lines_to_s
      colnr_T	len;
      long	size = 0;
@@ -93,15 +93,15 @@ diff --git a/src/fileio.c b/src/fileio.c
 diff --git a/src/memfile.c b/src/memfile.c
 --- a/src/memfile.c
 +++ b/src/memfile.c
-@@ -81,7 +81,7 @@ static void mf_ins_free __ARGS((memfile_
- static bhdr_T *mf_rem_free __ARGS((memfile_T *));
- static int  mf_read __ARGS((memfile_T *, bhdr_T *));
- static int  mf_write __ARGS((memfile_T *, bhdr_T *));
--static int  mf_write_block __ARGS((memfile_T *mfp, bhdr_T *hp, off_t offset, unsigned size));
-+static int  mf_write_block __ARGS((memfile_T *mfp, bhdr_T *hp, off_T offset, unsigned size));
- static int  mf_trans_add __ARGS((memfile_T *, bhdr_T *));
- static void mf_do_open __ARGS((memfile_T *, char_u *, int));
- static void mf_hash_init __ARGS((mf_hashtab_T *));
+@@ -81,7 +81,7 @@ static void mf_ins_free(memfile_T *, bhd
+ static bhdr_T *mf_rem_free(memfile_T *);
+ static int  mf_read(memfile_T *, bhdr_T *);
+ static int  mf_write(memfile_T *, bhdr_T *);
+-static int  mf_write_block(memfile_T *mfp, bhdr_T *hp, off_t offset, unsigned size);
++static int  mf_write_block(memfile_T *mfp, bhdr_T *hp, off_T offset, unsigned size);
+ static int  mf_trans_add(memfile_T *, bhdr_T *);
+ static void mf_do_open(memfile_T *, char_u *, int);
+ static void mf_hash_init(mf_hashtab_T *);
 @@ -126,7 +126,7 @@ mf_open(fname, flags)
      int		flags;
  {
@@ -173,15 +173,15 @@ diff --git a/src/memfile.c b/src/memfile.c
 diff --git a/src/memline.c b/src/memline.c
 --- a/src/memline.c
 +++ b/src/memline.c
-@@ -266,7 +266,7 @@ static long char_to_long __ARGS((char_u 
- static char_u *make_percent_swname __ARGS((char_u *dir, char_u *name));
+@@ -266,7 +266,7 @@ static long char_to_long(char_u *);
+ static char_u *make_percent_swname(char_u *dir, char_u *name);
  #endif
  #ifdef FEAT_CRYPT
--static cryptstate_T *ml_crypt_prepare __ARGS((memfile_T *mfp, off_t offset, int reading));
-+static cryptstate_T *ml_crypt_prepare __ARGS((memfile_T *mfp, off_T offset, int reading));
+-static cryptstate_T *ml_crypt_prepare(memfile_T *mfp, off_t offset, int reading);
++static cryptstate_T *ml_crypt_prepare(memfile_T *mfp, off_T offset, int reading);
  #endif
  #ifdef FEAT_BYTEOFF
- static void ml_updatechunk __ARGS((buf_T *buf, long line, long len, int updtype));
+ static void ml_updatechunk(buf_T *buf, long line, long len, int updtype);
 @@ -1151,7 +1151,7 @@ ml_recover()
      int		idx;
      int		top;
@@ -230,16 +230,16 @@ diff --git a/src/memline.c b/src/memline.c
 diff --git a/src/netbeans.c b/src/netbeans.c
 --- a/src/netbeans.c
 +++ b/src/netbeans.c
-@@ -912,7 +912,7 @@ static void addsigntype __ARGS((nbbuf_T 
+@@ -553,7 +553,7 @@ static void addsigntype(nbbuf_T *, int l
  			char_u *tooltip, char_u *glyphfile,
- 			char_u *fg, char_u *bg));
- static void print_read_msg __ARGS((nbbuf_T *buf));
--static void print_save_msg __ARGS((nbbuf_T *buf, off_t nchars));
-+static void print_save_msg __ARGS((nbbuf_T *buf, off_T nchars));
+ 			char_u *fg, char_u *bg);
+ static void print_read_msg(nbbuf_T *buf);
+-static void print_save_msg(nbbuf_T *buf, off_t nchars);
++static void print_save_msg(nbbuf_T *buf, off_T nchars);
  
  static int curPCtype = -1;
  
-@@ -3845,7 +3845,7 @@ print_read_msg(buf)
+@@ -3404,7 +3404,7 @@ print_read_msg(buf)
      nbbuf_T	*buf;
  {
      int	    lnum = buf->bufp->b_ml.ml_line_count;
@@ -248,7 +248,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
      char_u  c;
  
      msg_add_fname(buf->bufp, buf->bufp->b_ffname);
-@@ -3881,7 +3881,7 @@ print_read_msg(buf)
+@@ -3440,7 +3440,7 @@ print_read_msg(buf)
      static void
  print_save_msg(buf, nchars)
      nbbuf_T	*buf;
@@ -446,7 +446,7 @@ diff --git a/src/tag.c b/src/tag.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -430,6 +430,36 @@ typedef		 long __w64     long_i;
+@@ -421,6 +421,36 @@ typedef		 long __w64     long_i;
  #endif
  
  /*
@@ -483,7 +483,7 @@ diff --git a/src/vim.h b/src/vim.h
   * The characters and attributes cached for the screen.
   */
  typedef char_u schar_T;
-@@ -1987,6 +2017,19 @@ typedef int sock_T;
+@@ -1980,6 +2010,19 @@ typedef int sock_T;
  # endif
  #endif
  

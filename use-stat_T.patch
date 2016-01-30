@@ -6,17 +6,17 @@ diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
 @@ -35,9 +35,9 @@ static char_u	*fname_match __ARGS((regma
- static void	buflist_setfpos __ARGS((buf_T *buf, win_T *win, linenr_T lnum, colnr_T col, int copy_options));
- static wininfo_T *find_wininfo __ARGS((buf_T *buf, int skip_diff_buffer));
+ static void	buflist_setfpos(buf_T *buf, win_T *win, linenr_T lnum, colnr_T col, int copy_options);
+ static wininfo_T *find_wininfo(buf_T *buf, int skip_diff_buffer);
  #ifdef UNIX
--static buf_T	*buflist_findname_stat __ARGS((char_u *ffname, struct stat *st));
--static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname, struct stat *stp));
--static int	buf_same_ino __ARGS((buf_T *buf, struct stat *stp));
-+static buf_T	*buflist_findname_stat __ARGS((char_u *ffname, stat_T *st));
-+static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname, stat_T *stp));
-+static int	buf_same_ino __ARGS((buf_T *buf, stat_T *stp));
+-static buf_T	*buflist_findname_stat(char_u *ffname, struct stat *st);
+-static int	otherfile_buf(buf_T *buf, char_u *ffname, struct stat *stp);
+-static int	buf_same_ino(buf_T *buf, struct stat *stp);
++static buf_T	*buflist_findname_stat(char_u *ffname, stat_T *st);
++static int	otherfile_buf(buf_T *buf, char_u *ffname, stat_T *stp);
++static int	buf_same_ino(buf_T *buf, stat_T *stp);
  #else
- static int	otherfile_buf __ARGS((buf_T *buf, char_u *ffname));
+ static int	otherfile_buf(buf_T *buf, char_u *ffname);
  #endif
 @@ -1660,7 +1660,7 @@ buflist_new(ffname, sfname, lnum, flags)
  {
@@ -190,14 +190,14 @@ diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
 @@ -49,7 +49,7 @@ static void set_file_time __ARGS((char_u
- static int set_rw_fname __ARGS((char_u *fname, char_u *sfname));
- static int msg_add_fileformat __ARGS((int eol_type));
- static void msg_add_eol __ARGS((void));
--static int check_mtime __ARGS((buf_T *buf, struct stat *s));
-+static int check_mtime __ARGS((buf_T *buf, stat_T *s));
- static int time_differs __ARGS((long t1, long t2));
+ static int set_rw_fname(char_u *fname, char_u *sfname);
+ static int msg_add_fileformat(int eol_type);
+ static void msg_add_eol(void);
+-static int check_mtime(buf_T *buf, struct stat *s);
++static int check_mtime(buf_T *buf, stat_T *s);
+ static int time_differs(long t1, long t2);
  #ifdef FEAT_AUTOCMD
- static int apply_autocmds_exarg __ARGS((event_T event, char_u *fname, char_u *fname_io, int force, buf_T *buf, exarg_T *eap));
+ static int apply_autocmds_exarg(event_T event, char_u *fname, char_u *fname_io, int force, buf_T *buf, exarg_T *eap);
 @@ -257,7 +257,7 @@ readfile(fname, sfname, from, lines_to_s
  #endif
      int		fileformat = 0;		/* end-of-line format */
@@ -340,14 +340,14 @@ diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
 --- a/src/gui_at_fs.c
 +++ b/src/gui_at_fs.c
 @@ -183,7 +183,7 @@ static void SFclearList __ARGS((int n, i
- static void SFbuttonPressList __ARGS((Widget w, int n, XButtonPressedEvent *event));
- static void SFbuttonReleaseList __ARGS((Widget w, int n, XButtonReleasedEvent *event));
- static void SFdirModTimer __ARGS((XtPointer cl, XtIntervalId *id));
--static char SFstatChar __ARGS((struct stat *statBuf));
-+static char SFstatChar __ARGS((stat_T *statBuf));
- static void SFdrawStrings __ARGS((Window w, SFDir *dir, int from, int to));
- static int SFnewInvertEntry __ARGS((int n, XMotionEvent *event));
- static void SFinvertEntry __ARGS((int n));
+ static void SFbuttonPressList(Widget w, int n, XButtonPressedEvent *event);
+ static void SFbuttonReleaseList(Widget w, int n, XButtonReleasedEvent *event);
+ static void SFdirModTimer(XtPointer cl, XtIntervalId *id);
+-static char SFstatChar(struct stat *statBuf);
++static char SFstatChar(stat_T *statBuf);
+ static void SFdrawStrings(Window w, SFDir *dir, int from, int to);
+ static int SFnewInvertEntry(int n, XMotionEvent *event);
+ static void SFinvertEntry(int n);
 @@ -889,7 +889,7 @@ SFcheckDir(n, dir)
      int		n;
      SFDir		*dir;
@@ -379,8 +379,8 @@ diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
  #endif
  }
  
--static void SFwriteStatChar __ARGS((char *name, int last, struct stat *statBuf));
-+static void SFwriteStatChar __ARGS((char *name, int last, stat_T *statBuf));
+-static void SFwriteStatChar(char *name, int last, struct stat *statBuf);
++static void SFwriteStatChar(char *name, int last, stat_T *statBuf);
  
      static void
  SFwriteStatChar(name, last, statBuf)
@@ -413,14 +413,14 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
 --- a/src/if_cscope.c
 +++ b/src/if_cscope.c
 @@ -42,7 +42,7 @@ static int	    cs_find_common __ARGS((ch
- static int	    cs_help __ARGS((exarg_T *eap));
- static void	    clear_csinfo __ARGS((int i));
- static int	    cs_insert_filelist __ARGS((char *, char *, char *,
--			struct stat *));
-+			stat_T *));
- static int	    cs_kill __ARGS((exarg_T *eap));
- static void	    cs_kill_execute __ARGS((int, char *));
- static cscmd_T *    cs_lookup_cmd __ARGS((exarg_T *eap));
+ static int	    cs_help(exarg_T *eap);
+ static void	    clear_csinfo(int i);
+ static int	    cs_insert_filelist(char *, char *, char *,
+-			struct stat *);
++			stat_T *);
+ static int	    cs_kill(exarg_T *eap);
+ static void	    cs_kill_execute(int, char *);
+ static cscmd_T *    cs_lookup_cmd(exarg_T *eap);
 @@ -533,7 +533,7 @@ cs_add_common(arg1, arg2, flags)
      char *arg2;	    /* prepend path - may contain environment variables */
      char *flags;

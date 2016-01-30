@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent b310fc3abf0bd107728295980e4090a7573dea3d
-# Parent  766b3a454757ca99bc03bc71d7613e70ec45f42c
+# Parent  33f896ae96fdebc326b973a1a33f2d9a9c724350
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
@@ -30,8 +30,8 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5066,3 +5066,54 @@ netbeans_init_winsock()
- 	WSInitialized = TRUE;
+@@ -5047,3 +5047,54 @@ netbeans_draw_multisign_indicator(int ro
+     SetPixel(s_hdc, x+2, y, gui.currFgColor);
  }
  #endif
 +
@@ -138,7 +138,7 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -589,6 +589,14 @@ typedef unsigned long u8char_T;	    /* l
+@@ -582,6 +582,14 @@ typedef unsigned long u8char_T;	    /* l
  #endif
  
  /*
