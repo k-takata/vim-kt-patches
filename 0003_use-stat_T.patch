@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  7d8816400c3447ebe032bc3bc2a52ed466d21e15
+# Parent  f9ed6c6c6073a1426c66185370d7a779cb0e5f0b
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
-@@ -35,9 +35,9 @@ static char_u	*fname_match __ARGS((regma
+@@ -35,9 +35,9 @@ static char_u	*fname_match(regmatch_T *r
  static void	buflist_setfpos(buf_T *buf, win_T *win, linenr_T lnum, colnr_T col, int copy_options);
  static wininfo_T *find_wininfo(buf_T *buf, int skip_diff_buffer);
  #ifdef UNIX
@@ -109,7 +109,7 @@ diff --git a/src/diff.c b/src/diff.c
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12175,7 +12175,7 @@ f_getfperm(argvars, rettv)
+@@ -12315,7 +12315,7 @@ f_getfperm(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -118,7 +118,7 @@ diff --git a/src/eval.c b/src/eval.c
      char_u	*perm = NULL;
      char_u	flags[] = "rwx";
      int		i;
-@@ -12207,7 +12207,7 @@ f_getfsize(argvars, rettv)
+@@ -12347,7 +12347,7 @@ f_getfsize(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -127,7 +127,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -12239,7 +12239,7 @@ f_getftime(argvars, rettv)
+@@ -12379,7 +12379,7 @@ f_getftime(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -136,7 +136,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -12258,7 +12258,7 @@ f_getftype(argvars, rettv)
+@@ -12398,7 +12398,7 @@ f_getftype(argvars, rettv)
      typval_T	*rettv;
  {
      char_u	*fname;
@@ -189,7 +189,7 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -49,7 +49,7 @@ static void set_file_time __ARGS((char_u
+@@ -49,7 +49,7 @@ static void set_file_time(char_u *fname,
  static int set_rw_fname(char_u *fname, char_u *sfname);
  static int msg_add_fileformat(int eol_type);
  static void msg_add_eol(void);
@@ -339,7 +339,7 @@ diff --git a/src/gui.c b/src/gui.c
 diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
 --- a/src/gui_at_fs.c
 +++ b/src/gui_at_fs.c
-@@ -183,7 +183,7 @@ static void SFclearList __ARGS((int n, i
+@@ -183,7 +183,7 @@ static void SFclearList(int n, int doScr
  static void SFbuttonPressList(Widget w, int n, XButtonPressedEvent *event);
  static void SFbuttonReleaseList(Widget w, int n, XButtonReleasedEvent *event);
  static void SFdirModTimer(XtPointer cl, XtIntervalId *id);
@@ -412,7 +412,7 @@ diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
 diff --git a/src/if_cscope.c b/src/if_cscope.c
 --- a/src/if_cscope.c
 +++ b/src/if_cscope.c
-@@ -42,7 +42,7 @@ static int	    cs_find_common __ARGS((ch
+@@ -42,7 +42,7 @@ static int	    cs_find_common(char *opt,
  static int	    cs_help(exarg_T *eap);
  static void	    clear_csinfo(int i);
  static int	    cs_insert_filelist(char *, char *, char *,
@@ -644,7 +644,7 @@ diff --git a/src/misc2.c b/src/misc2.c
 diff --git a/src/netbeans.c b/src/netbeans.c
 --- a/src/netbeans.c
 +++ b/src/netbeans.c
-@@ -412,7 +412,7 @@ getConnInfo(char *file, char **host, cha
+@@ -253,7 +253,7 @@ getConnInfo(char *file, char **host, cha
      char_u *lp;
      char_u *nlp;
  #ifdef UNIX
@@ -653,7 +653,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
  
      /*
       * For Unix only accept the file when it's not accessible by others.
-@@ -2125,7 +2125,7 @@ nb_do_cmd(
+@@ -1733,7 +1733,7 @@ nb_do_cmd(
  		buf->bufp->b_changed = TRUE;
  	    else
  	    {
@@ -665,7 +665,7 @@ diff --git a/src/netbeans.c b/src/netbeans.c
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -497,6 +497,18 @@ slash_adjust(p)
+@@ -499,6 +499,18 @@ slash_adjust(p)
      }
  }
  
@@ -684,7 +684,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  #if (defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(__MINGW32__)
  # define OPEN_OH_ARGTYPE intptr_t
  #else
-@@ -504,7 +516,7 @@ slash_adjust(p)
+@@ -506,7 +518,7 @@ slash_adjust(p)
  #endif
  
      static int
@@ -693,7 +693,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  #if (defined(_MSC_VER) && (_MSC_VER < 1900)) || defined(__MINGW32__)
      /* Work around for VC12 or earlier (and MinGW). stat() can't handle
-@@ -543,7 +555,7 @@ stat_symlink_aware(const char *name, str
+@@ -545,7 +557,7 @@ stat_symlink_aware(const char *name, str
  	    int	    fd, n;
  
  	    fd = _open_osfhandle((OPEN_OH_ARGTYPE)h, _O_RDONLY);
@@ -702,7 +702,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	    if ((n == 0) && (attr & FILE_ATTRIBUTE_DIRECTORY))
  		stp->st_mode = (stp->st_mode & ~S_IFREG) | S_IFDIR;
  	    _close(fd);
-@@ -556,7 +568,7 @@ stat_symlink_aware(const char *name, str
+@@ -558,7 +570,7 @@ stat_symlink_aware(const char *name, str
  
  #ifdef FEAT_MBYTE
      static int
@@ -711,7 +711,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  # if (defined(_MSC_VER) && (_MSC_VER < 1900)) || defined(__MINGW32__)
      /* Work around for VC12 or earlier (and MinGW). _wstat() can't handle
-@@ -596,7 +608,7 @@ wstat_symlink_aware(const WCHAR *name, s
+@@ -598,7 +610,7 @@ wstat_symlink_aware(const WCHAR *name, s
  	    int	    fd;
  
  	    fd = _open_osfhandle((OPEN_OH_ARGTYPE)h, _O_RDONLY);
@@ -720,7 +720,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	    if ((n == 0) && (attr & FILE_ATTRIBUTE_DIRECTORY))
  		stp->st_mode = (stp->st_mode & ~S_IFREG) | S_IFDIR;
  	    _close(fd);
-@@ -604,7 +616,7 @@ wstat_symlink_aware(const WCHAR *name, s
+@@ -606,7 +618,7 @@ wstat_symlink_aware(const WCHAR *name, s
  	}
      }
  # endif
@@ -729,7 +729,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  }
  #endif
  
-@@ -612,7 +624,7 @@ wstat_symlink_aware(const WCHAR *name, s
+@@ -614,7 +626,7 @@ wstat_symlink_aware(const WCHAR *name, s
   * stat() can't handle a trailing '/' or '\', remove it first.
   */
      int
@@ -738,7 +738,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  {
  #ifdef FEAT_MBYTE
      /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
-@@ -657,7 +669,7 @@ vim_stat(const char *name, struct stat *
+@@ -659,7 +671,7 @@ vim_stat(const char *name, struct stat *
  
  	if (wp != NULL)
  	{
@@ -750,7 +750,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3047,7 +3047,7 @@ mch_dirname(
+@@ -3065,7 +3065,7 @@ mch_dirname(
      long
  mch_getperm(char_u *name)
  {
@@ -877,7 +877,7 @@ diff --git a/src/undo.c b/src/undo.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2017,17 +2017,12 @@ typedef int sock_T;
+@@ -2010,17 +2010,12 @@ typedef int sock_T;
  # endif
  #endif
  
