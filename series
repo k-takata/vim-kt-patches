@@ -12,7 +12,6 @@ gtk2_force_redraw.diff #+linux
 0005_test_largefile.patch
 timers3.patch #+timers
 timers-mark.diff #+timers
-0000-kaoriya_marks.diff
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
 support-alt-gettext-dll.patch
