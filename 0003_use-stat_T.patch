@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  4ff543cd056d9c5237e7c9515032b6b4f4501888
+# Parent  e43ca7df641d7857095608e2175b13306a6ce0be
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -327,7 +327,7 @@ diff --git a/src/fileio.c b/src/fileio.c
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -573,7 +573,7 @@ gui_init()
+@@ -571,7 +571,7 @@ gui_init(void)
  	    {
  #ifdef UNIX
  		{
@@ -348,16 +348,16 @@ diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
  static void SFdrawStrings(Window w, SFDir *dir, int from, int to);
  static int SFnewInvertEntry(int n, XMotionEvent *event);
  static void SFinvertEntry(int n);
-@@ -889,7 +889,7 @@ SFcheckDir(n, dir)
-     int		n;
-     SFDir		*dir;
+@@ -873,7 +873,7 @@ static int SFcheckDir(int n, SFDir *dir)
+     static int
+ SFcheckDir(int n, SFDir *dir)
  {
 -    struct stat	statBuf;
 +    stat_T	statBuf;
      int		i;
  
      if ((!mch_stat(".", &statBuf)) && (statBuf.st_mtime != dir->mtime))
-@@ -960,7 +960,7 @@ SFcheckFiles(dir)
+@@ -943,7 +943,7 @@ SFcheckFiles(SFDir *dir)
      int		i;
      char	*str;
      int		last;
@@ -366,16 +366,16 @@ diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
  
      result = 0;
  
-@@ -1037,7 +1037,7 @@ SFdirModTimer(cl, id)
+@@ -1017,7 +1017,7 @@ SFdirModTimer(XtPointer cl UNUSED, XtInt
+ /* Return a single character describing what kind of file STATBUF is.  */
  
      static char
- SFstatChar(statBuf)
--    struct stat *statBuf;
-+    stat_T *statBuf;
+-SFstatChar(struct stat *statBuf)
++SFstatChar(stat_T *statBuf)
  {
      if (S_ISDIR (statBuf->st_mode))
  	return '/';
-@@ -1337,13 +1337,13 @@ SFdeleteEntry(dir, entry)
+@@ -1313,13 +1313,13 @@ SFdeleteEntry(SFDir *dir, SFEntry *entry
  #endif
  }
  
@@ -383,24 +383,24 @@ diff --git a/src/gui_at_fs.c b/src/gui_at_fs.c
 +static void SFwriteStatChar(char *name, int last, stat_T *statBuf);
  
      static void
- SFwriteStatChar(name, last, statBuf)
-     char	*name;
-     int		last;
--    struct stat	*statBuf;
-+    stat_T	*statBuf;
+ SFwriteStatChar(
+     char	*name,
+     int		last,
+-    struct stat	*statBuf)
++    stat_T	*statBuf)
  {
      name[last] = SFstatChar(statBuf);
  }
-@@ -1355,7 +1355,7 @@ SFstatAndCheck(dir, entry)
-     SFDir	*dir;
-     SFEntry	*entry;
+@@ -1329,7 +1329,7 @@ static int SFstatAndCheck(SFDir *dir, SF
+     static int
+ SFstatAndCheck(SFDir *dir, SFEntry *entry)
  {
 -    struct stat	statBuf;
 +    stat_T	statBuf;
      char	save;
      int		last;
  
-@@ -2119,7 +2119,7 @@ SFgetDir(dir)
+@@ -2059,7 +2059,7 @@ SFgetDir(
      char		*str;
      int			len;
      int			maxChars;
