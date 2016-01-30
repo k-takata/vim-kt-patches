@@ -5,11 +5,11 @@ myconfiguration-private-install.patch #+private-install
 myconfiguration-clang.patch #+clang
 backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+linux
-test_largefile.patch
-support-largefiles-on-windows.patch
-fix-off_T-display.patch
-use-stat_T.patch
-add-stat-test.patch
+0001_support-largefiles-on-windows.patch
+0002_fix-off_T-display.patch
+0003_use-stat_T.patch
+0004_add-stat-test.patch
+0005_test_largefile.patch
 timers3.patch #+timers
 timers-mark.diff #+timers
 0000-kaoriya_marks.diff
@@ -44,9 +44,9 @@ make-tests-silent.patch
 update-rubyinc-dir.patch
 fix-ruby-warning.patch
 fix-po-msys2.patch
-num64.patch
-incdec64.patch
-num64doc.patch
+01_num64.patch
+02_incdec64.patch
+03_num64doc.patch
 num64-mark.diff
 off_T-disp-with-num64.patch
 fix-gvimext-loadlibrary.patch
