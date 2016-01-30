@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  f9ed6c6c6073a1426c66185370d7a779cb0e5f0b
+# Parent  d88b950f8082dd7bc4fde5356adf3181516af949
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -18,7 +18,7 @@ diff --git a/src/buffer.c b/src/buffer.c
  #else
  static int	otherfile_buf(buf_T *buf, char_u *ffname);
  #endif
-@@ -1660,7 +1660,7 @@ buflist_new(ffname, sfname, lnum, flags)
+@@ -1650,7 +1650,7 @@ buflist_new(
  {
      buf_T	*buf;
  #ifdef UNIX
@@ -27,8 +27,8 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      fname_expand(curbuf, &ffname, &sfname);	/* will allocate ffname */
-@@ -2182,7 +2182,7 @@ buflist_findname(ffname)
-     char_u	*ffname;
+@@ -2170,7 +2170,7 @@ buflist_findname_exp(char_u *fname)
+ buflist_findname(char_u *ffname)
  {
  #ifdef UNIX
 -    struct stat st;
@@ -36,16 +36,16 @@ diff --git a/src/buffer.c b/src/buffer.c
  
      if (mch_stat((char *)ffname, &st) < 0)
  	st.st_dev = (dev_T)-1;
-@@ -2197,7 +2197,7 @@ buflist_findname(ffname)
+@@ -2185,7 +2185,7 @@ buflist_findname(char_u *ffname)
      static buf_T *
- buflist_findname_stat(ffname, stp)
-     char_u	*ffname;
--    struct stat	*stp;
-+    stat_T	*stp;
+ buflist_findname_stat(
+     char_u	*ffname,
+-    struct stat	*stp)
++    stat_T	*stp)
  {
  #endif
      buf_T	*buf;
-@@ -2851,7 +2851,7 @@ setfname(buf, ffname, sfname, message)
+@@ -2834,7 +2834,7 @@ setfname(
  {
      buf_T	*obuf = NULL;
  #ifdef UNIX
@@ -54,16 +54,16 @@ diff --git a/src/buffer.c b/src/buffer.c
  #endif
  
      if (ffname == NULL || *ffname == NUL)
-@@ -3101,7 +3101,7 @@ otherfile_buf(buf, ffname
-     buf_T	*buf;
-     char_u	*ffname;
+@@ -3073,7 +3073,7 @@ otherfile_buf(
+     buf_T		*buf,
+     char_u		*ffname
  #ifdef UNIX
--    struct stat	*stp;
-+    stat_T	*stp;
+-    , struct stat	*stp
++    , stat_T		*stp
  #endif
+     )
  {
-     /* no name is different */
-@@ -3111,9 +3111,9 @@ otherfile_buf(buf, ffname
+@@ -3084,9 +3084,9 @@ otherfile_buf(
  	return FALSE;
  #ifdef UNIX
      {
@@ -76,28 +76,28 @@ diff --git a/src/buffer.c b/src/buffer.c
  	if (stp == NULL)
  	{
  	    if (!buf->b_dev_valid || mch_stat((char *)ffname, &st) < 0)
-@@ -3149,7 +3149,7 @@ otherfile_buf(buf, ffname
- buf_setino(buf)
-     buf_T	*buf;
+@@ -3121,7 +3121,7 @@ otherfile_buf(
+     void
+ buf_setino(buf_T *buf)
  {
 -    struct stat	st;
 +    stat_T	st;
  
      if (buf->b_fname != NULL && mch_stat((char *)buf->b_fname, &st) >= 0)
      {
-@@ -3167,7 +3167,7 @@ buf_setino(buf)
+@@ -3139,7 +3139,7 @@ buf_setino(buf_T *buf)
      static int
- buf_same_ino(buf, stp)
-     buf_T	*buf;
--    struct stat *stp;
-+    stat_T	*stp;
+ buf_same_ino(
+     buf_T	*buf,
+-    struct stat *stp)
++    stat_T	*stp)
  {
      return (buf->b_dev_valid
  	    && stp->st_dev == buf->b_dev
 diff --git a/src/diff.c b/src/diff.c
 --- a/src/diff.c
 +++ b/src/diff.c
-@@ -905,7 +905,7 @@ ex_diffpatch(eap)
+@@ -888,7 +888,7 @@ ex_diffpatch(exarg_T *eap)
      char_u	*browseFile = NULL;
      int		browse_flag = cmdmod.browse;
  #endif
@@ -109,8 +109,8 @@ diff --git a/src/diff.c b/src/diff.c
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12315,7 +12315,7 @@ f_getfperm(argvars, rettv)
-     typval_T	*rettv;
+@@ -11923,7 +11923,7 @@ f_getfontname(typval_T *argvars UNUSED, 
+ f_getfperm(typval_T *argvars, typval_T *rettv)
  {
      char_u	*fname;
 -    struct stat st;
@@ -118,8 +118,8 @@ diff --git a/src/eval.c b/src/eval.c
      char_u	*perm = NULL;
      char_u	flags[] = "rwx";
      int		i;
-@@ -12347,7 +12347,7 @@ f_getfsize(argvars, rettv)
-     typval_T	*rettv;
+@@ -11953,7 +11953,7 @@ f_getfperm(typval_T *argvars, typval_T *
+ f_getfsize(typval_T *argvars, typval_T *rettv)
  {
      char_u	*fname;
 -    struct stat	st;
@@ -127,8 +127,8 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -12379,7 +12379,7 @@ f_getftime(argvars, rettv)
-     typval_T	*rettv;
+@@ -11983,7 +11983,7 @@ f_getfsize(typval_T *argvars, typval_T *
+ f_getftime(typval_T *argvars, typval_T *rettv)
  {
      char_u	*fname;
 -    struct stat	st;
@@ -136,8 +136,8 @@ diff --git a/src/eval.c b/src/eval.c
  
      fname = get_tv_string(&argvars[0]);
  
-@@ -12398,7 +12398,7 @@ f_getftype(argvars, rettv)
-     typval_T	*rettv;
+@@ -12000,7 +12000,7 @@ f_getftime(typval_T *argvars, typval_T *
+ f_getftype(typval_T *argvars, typval_T *rettv)
  {
      char_u	*fname;
 -    struct stat st;
