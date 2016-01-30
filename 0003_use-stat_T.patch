@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  d88b950f8082dd7bc4fde5356adf3181516af949
+# Parent  4ff543cd056d9c5237e7c9515032b6b4f4501888
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -148,7 +148,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 --- a/src/ex_cmds.c
 +++ b/src/ex_cmds.c
-@@ -1853,14 +1853,14 @@ write_viminfo(file, forceit)
+@@ -1838,14 +1838,14 @@ write_viminfo(char_u *file, int forceit)
      FILE	*fp_in = NULL;	/* input viminfo file, if any */
      FILE	*fp_out = NULL;	/* output viminfo file */
      char_u	*tempname = NULL;	/* name of temp viminfo file */
@@ -165,9 +165,9 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
  #endif
  #ifdef WIN3264
      int		hidden = FALSE;
-@@ -3110,7 +3110,7 @@ check_readonly(forceit, buf)
-     int		*forceit;
-     buf_T	*buf;
+@@ -3074,7 +3074,7 @@ not_writing(void)
+     static int
+ check_readonly(int *forceit, buf_T *buf)
  {
 -    struct stat	st;
 +    stat_T	st;
@@ -177,7 +177,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 --- a/src/ex_cmds2.c
 +++ b/src/ex_cmds2.c
-@@ -3287,7 +3287,7 @@ do_source(fname, check_other, is_vimrc)
+@@ -3209,7 +3209,7 @@ do_source(
      int			    save_debug_break_level = debug_break_level;
      scriptitem_T	    *si = NULL;
  # ifdef UNIX
@@ -198,7 +198,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  static int time_differs(long t1, long t2);
  #ifdef FEAT_AUTOCMD
  static int apply_autocmds_exarg(event_T event, char_u *fname, char_u *fname_io, int force, buf_T *buf, exarg_T *eap);
-@@ -257,7 +257,7 @@ readfile(fname, sfname, from, lines_to_s
+@@ -257,7 +257,7 @@ readfile(
  #endif
      int		fileformat = 0;		/* end-of-line format */
      int		keep_fileformat = FALSE;
@@ -207,7 +207,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      int		file_readonly;
      linenr_T	skip_count = 0;
      linenr_T	read_count = 0;
-@@ -3128,7 +3128,7 @@ buf_write(buf, fname, sfname, start, end
+@@ -3121,7 +3121,7 @@ buf_write(
      int		    overwriting;	    /* TRUE if writing over original */
      int		    no_eol = FALSE;	    /* no end-of-line written */
      int		    device = FALSE;	    /* writing to a device */
@@ -216,7 +216,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      int		    prev_got_int = got_int;
      int		    file_readonly = FALSE;  /* overwritten file is read-only */
      static char	    *err_readonly = "is read-only (cannot override: \"W\" in 'cpoptions')";
-@@ -3657,7 +3657,7 @@ buf_write(buf, fname, sfname, start, end
+@@ -3650,7 +3650,7 @@ buf_write(
      if (!(append && *p_pm == NUL) && !filtering && perm >= 0 && dobackup)
      {
  #if defined(UNIX) || defined(WIN32)
@@ -225,7 +225,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  #endif
  
  	if ((bkc & BKC_YES) || append)	/* "yes" */
-@@ -3796,7 +3796,7 @@ buf_write(buf, fname, sfname, start, end
+@@ -3789,7 +3789,7 @@ buf_write(
  	    int		bfd;
  	    char_u	*copybuf, *wp;
  	    int		some_error = FALSE;
@@ -234,7 +234,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  	    char_u	*dirp;
  	    char_u	*rootname;
  #if defined(UNIX) && !defined(SHORT_FNAME)
-@@ -4338,7 +4338,7 @@ buf_write(buf, fname, sfname, start, end
+@@ -4331,7 +4331,7 @@ buf_write(
  	if (errmsg == NULL)
  	{
  #ifdef UNIX
@@ -243,7 +243,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	    /* Don't delete the file when it's a hard or symbolic link. */
  	    if ((!newfile && st_old.st_nlink > 1)
-@@ -4371,7 +4371,7 @@ buf_write(buf, fname, sfname, start, end
+@@ -4364,7 +4364,7 @@ buf_write(
  
  restore_backup:
  	{
@@ -252,7 +252,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	    /*
  	     * If we failed to open the file, we don't need a backup. Throw it
-@@ -4668,7 +4668,7 @@ restore_backup:
+@@ -4661,7 +4661,7 @@ restore_backup:
      if (backup != NULL && !backup_copy)
      {
  # ifdef HAVE_FCHOWN
@@ -261,7 +261,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	/* don't change the owner when it's already OK, some systems remove
  	 * permission or ACL stuff */
-@@ -4929,7 +4929,7 @@ restore_backup:
+@@ -4922,7 +4922,7 @@ restore_backup:
  
  	if (backup != NULL)
  	{
@@ -270,16 +270,16 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	    /*
  	     * If the original file does not exist yet
-@@ -5285,7 +5285,7 @@ msg_add_eol()
+@@ -5271,7 +5271,7 @@ msg_add_eol(void)
+  * using the same timestamp but can't set the size.
+  */
      static int
- check_mtime(buf, st)
-     buf_T		*buf;
--    struct stat		*st;
-+    stat_T		*st;
+-check_mtime(buf_T *buf, struct stat *st)
++check_mtime(buf_T *buf, stat_T *st)
  {
      if (buf->b_mtime_read != 0
  	    && time_differs((long)st->st_mtime, buf->b_mtime_read))
-@@ -6487,7 +6487,7 @@ vim_rename(from, to)
+@@ -6453,7 +6453,7 @@ vim_rename(char_u *from, char_u *to)
  #ifdef AMIGA
      BPTR	flock;
  #endif
@@ -288,7 +288,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      long	perm;
  #ifdef HAVE_ACL
      vim_acl_T	acl;		/* ACL from original file */
-@@ -6515,7 +6515,7 @@ vim_rename(from, to)
+@@ -6481,7 +6481,7 @@ vim_rename(char_u *from, char_u *to)
  
  #ifdef UNIX
      {
@@ -297,25 +297,25 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	/* It's possible for the source and destination to be the same file.
  	 * This happens when "from" and "to" differ in case and are on a FAT32
-@@ -6816,7 +6816,7 @@ buf_check_timestamp(buf, focus)
-     buf_T	*buf;
-     int		focus UNUSED;	/* called for GUI focus event */
+@@ -6780,7 +6780,7 @@ buf_check_timestamp(
+     buf_T	*buf,
+     int		focus UNUSED)	/* called for GUI focus event */
  {
 -    struct stat	st;
 +    stat_T	st;
      int		stat_res;
      int		retval = 0;
      char_u	*path;
-@@ -7261,7 +7261,7 @@ buf_reload(buf, orig_mode)
+@@ -7221,7 +7221,7 @@ buf_reload(buf_T *buf, int orig_mode)
+ }
+ 
      void
- buf_store_time(buf, st, fname)
-     buf_T	*buf;
--    struct stat	*st;
-+    stat_T	*st;
-     char_u	*fname UNUSED;
+-buf_store_time(buf_T *buf, struct stat *st, char_u *fname UNUSED)
++buf_store_time(buf_T *buf, stat_T *st, char_u *fname UNUSED)
  {
      buf->b_mtime = (long)st->st_mtime;
-@@ -7404,7 +7404,7 @@ vim_tempname(extra_char, keep)
+     buf->b_orig_size = st->st_size;
+@@ -7361,7 +7361,7 @@ vim_tempname(
      static char	*(tempdirs[]) = {TEMPDIRNAMES};
      int		i;
  # ifndef EEXIST

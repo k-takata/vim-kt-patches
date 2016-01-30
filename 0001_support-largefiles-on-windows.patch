@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent 77eb2adaee0cedf71cd7949557fc841b8e177b4a
-# Parent  cbf9c09f368a4bd40af4ead3023603fba93869c2
+# Parent  38d22ab3d9a08194a84ec9d96e0ea2c4a6be6cb5
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12362,7 +12362,7 @@ f_getfsize(argvars, rettv)
+@@ -11968,7 +11968,7 @@ f_getfsize(typval_T *argvars, typval_T *
  	    rettv->vval.v_number = (varnumber_T)st.st_size;
  
  	    /* non-perfect check for overflow */
@@ -26,7 +26,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  #endif
  #ifdef UNIX
  static void set_file_time(char_u *fname, time_t atime, time_t mtime);
-@@ -233,7 +233,7 @@ readfile(fname, sfname, from, lines_to_s
+@@ -233,7 +233,7 @@ readfile(
      colnr_T	len;
      long	size = 0;
      char_u	*p;
@@ -35,7 +35,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      int		skip_read = FALSE;
  #ifdef FEAT_CRYPT
      char_u	*cryptkey = NULL;
-@@ -869,7 +869,7 @@ readfile(fname, sfname, from, lines_to_s
+@@ -869,7 +869,7 @@ readfile(
  		/* Read the first line (and a bit more).  Immediately rewind to
  		 * the start of the file.  If the read() fails "len" is -1. */
  		len = read_eintr(fd, firstline, 80);
@@ -63,25 +63,25 @@ diff --git a/src/fileio.c b/src/fileio.c
  				{
  				    fileformat = EOL_UNIX;
  				    if (set_options)
-@@ -2940,7 +2941,7 @@ check_for_cryptkey(cryptkey, ptr, sizep,
-     char_u	*cryptkey;	/* previous encryption key or NULL */
-     char_u	*ptr;		/* pointer to read bytes */
-     long	*sizep;		/* length of read bytes */
--    off_t	*filesizep;	/* nr of bytes used from file */
-+    off_T	*filesizep;	/* nr of bytes used from file */
-     int		newfile;	/* editing a new buffer */
-     char_u	*fname;		/* file name to display */
-     int		*did_ask;	/* flag: whether already asked for key */
-@@ -5225,7 +5226,7 @@ msg_add_fileformat(eol_type)
- msg_add_lines(insert_space, lnum, nchars)
-     int	    insert_space;
-     long    lnum;
--    off_t   nchars;
-+    off_T   nchars;
+@@ -2933,7 +2934,7 @@ check_for_cryptkey(
+     char_u	*cryptkey,	/* previous encryption key or NULL */
+     char_u	*ptr,		/* pointer to read bytes */
+     long	*sizep,		/* length of read bytes */
+-    off_t	*filesizep,	/* nr of bytes used from file */
++    off_T	*filesizep,	/* nr of bytes used from file */
+     int		newfile,	/* editing a new buffer */
+     char_u	*fname,		/* file name to display */
+     int		*did_ask)	/* flag: whether already asked for key */
+@@ -5213,7 +5214,7 @@ msg_add_fileformat(int eol_type)
+ msg_add_lines(
+     int	    insert_space,
+     long    lnum,
+-    off_t   nchars)
++    off_T   nchars)
  {
      char_u  *p;
  
-@@ -6823,7 +6824,7 @@ buf_check_timestamp(buf, focus)
+@@ -6787,7 +6788,7 @@ buf_check_timestamp(
  #if defined(FEAT_CON_DIALOG) || defined(FEAT_GUI_DIALOG)
      int		can_reload = FALSE;
  #endif
