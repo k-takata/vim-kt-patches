@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  e43ca7df641d7857095608e2175b13306a6ce0be
+# Parent  c1c4a3f7a92841b5718612662ed1528e8ad091f2
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -421,16 +421,16 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
  static int	    cs_kill(exarg_T *eap);
  static void	    cs_kill_execute(int, char *);
  static cscmd_T *    cs_lookup_cmd(exarg_T *eap);
-@@ -533,7 +533,7 @@ cs_add_common(arg1, arg2, flags)
-     char *arg2;	    /* prepend path - may contain environment variables */
-     char *flags;
+@@ -520,7 +520,7 @@ cs_add_common(
+     char *arg2,	    /* prepend path - may contain environment variables */
+     char *flags)
  {
 -    struct stat statbuf;
 +    stat_T	statbuf;
      int		ret;
      char	*fname = NULL;
      char	*fname2 = NULL;
-@@ -560,7 +560,7 @@ cs_add_common(arg1, arg2, flags)
+@@ -547,7 +547,7 @@ cs_add_common(
      fname = (char *)vim_strnsave((char_u *)fname, len);
      vim_free(fbuf);
  #endif
@@ -439,7 +439,7 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
      if (ret < 0)
      {
  staterr:
-@@ -572,13 +572,13 @@ staterr:
+@@ -559,13 +559,13 @@ staterr:
      /* get the prepend path (arg2), expand it, and try to stat it */
      if (arg2 != NULL)
      {
@@ -455,7 +455,7 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
  	if (ret < 0)
  	    goto staterr;
      }
-@@ -605,7 +605,7 @@ staterr:
+@@ -592,7 +592,7 @@ staterr:
  	else
  	    (void)sprintf(fname2, "%s/%s", fname, CSCOPE_DBFILE);
  
@@ -464,12 +464,12 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
  	if (ret < 0)
  	{
  	    if (p_csverbose)
-@@ -1434,7 +1434,7 @@ cs_insert_filelist(fname, ppath, flags, 
-     char *fname;
-     char *ppath;
-     char *flags;
--    struct stat *sb UNUSED;
-+    stat_T *sb UNUSED;
+@@ -1414,7 +1414,7 @@ cs_insert_filelist(
+     char *fname,
+     char *ppath,
+     char *flags,
+-    struct stat *sb UNUSED)
++    stat_T *sb UNUSED)
  {
      short	i, j;
  #ifndef UNIX
