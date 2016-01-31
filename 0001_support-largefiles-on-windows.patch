@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 77eb2adaee0cedf71cd7949557fc841b8e177b4a
-# Parent  38d22ab3d9a08194a84ec9d96e0ea2c4a6be6cb5
+# Parent  e53c47128ccfe447e4ef64f0334457cf94e7eb13
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -102,8 +102,8 @@ diff --git a/src/memfile.c b/src/memfile.c
  static int  mf_trans_add(memfile_T *, bhdr_T *);
  static void mf_do_open(memfile_T *, char_u *, int);
  static void mf_hash_init(mf_hashtab_T *);
-@@ -126,7 +126,7 @@ mf_open(fname, flags)
-     int		flags;
+@@ -124,7 +124,7 @@ static int mf_hash_grow(mf_hashtab_T *);
+ mf_open(char_u *fname, int flags)
  {
      memfile_T		*mfp;
 -    off_t		size;
@@ -111,7 +111,7 @@ diff --git a/src/memfile.c b/src/memfile.c
  #if defined(STATFS) && defined(UNIX) && !defined(__QNX__) && !defined(__minix)
  # define USE_FSTATFS
      struct STATFS	stf;
-@@ -181,7 +181,7 @@ mf_open(fname, flags)
+@@ -179,7 +179,7 @@ mf_open(char_u *fname, int flags)
  #endif
  
      if (mfp->mf_fd < 0 || (flags & (O_TRUNC|O_EXCL))
@@ -120,16 +120,16 @@ diff --git a/src/memfile.c b/src/memfile.c
  	mfp->mf_blocknr_max = 0;	/* no file or empty file */
      else
  	mfp->mf_blocknr_max = (blocknr_T)((size + mfp->mf_page_size - 1)
-@@ -1010,7 +1010,7 @@ mf_read(mfp, hp)
-     memfile_T	*mfp;
-     bhdr_T	*hp;
+@@ -971,7 +971,7 @@ mf_rem_free(memfile_T *mfp)
+     static int
+ mf_read(memfile_T *mfp, bhdr_T *hp)
  {
 -    off_t	offset;
 +    off_T	offset;
      unsigned	page_size;
      unsigned	size;
  
-@@ -1018,9 +1018,9 @@ mf_read(mfp, hp)
+@@ -979,9 +979,9 @@ mf_read(memfile_T *mfp, bhdr_T *hp)
  	return FAIL;
  
      page_size = mfp->mf_page_size;
@@ -141,16 +141,16 @@ diff --git a/src/memfile.c b/src/memfile.c
      {
  	PERROR(_("E294: Seek error in swap file read"));
  	return FAIL;
-@@ -1051,7 +1051,7 @@ mf_write(mfp, hp)
-     memfile_T	*mfp;
-     bhdr_T	*hp;
+@@ -1010,7 +1010,7 @@ mf_read(memfile_T *mfp, bhdr_T *hp)
+     static int
+ mf_write(memfile_T *mfp, bhdr_T *hp)
  {
 -    off_t	offset;	    /* offset in the file */
 +    off_T	offset;	    /* offset in the file */
      blocknr_T	nr;	    /* block nr which is being written */
      bhdr_T	*hp2;
      unsigned	page_size;  /* number of bytes in a page */
-@@ -1084,8 +1084,8 @@ mf_write(mfp, hp)
+@@ -1043,8 +1043,8 @@ mf_write(memfile_T *mfp, bhdr_T *hp)
  	else
  	    hp2 = hp;
  
@@ -161,13 +161,13 @@ diff --git a/src/memfile.c b/src/memfile.c
  	{
  	    PERROR(_("E296: Seek error in swap file write"));
  	    return FAIL;
-@@ -1129,7 +1129,7 @@ mf_write(mfp, hp)
- mf_write_block(mfp, hp, offset, size)
-     memfile_T	*mfp;
-     bhdr_T	*hp;
--    off_t	offset UNUSED;
-+    off_T	offset UNUSED;
-     unsigned	size;
+@@ -1088,7 +1088,7 @@ mf_write(memfile_T *mfp, bhdr_T *hp)
+ mf_write_block(
+     memfile_T	*mfp,
+     bhdr_T	*hp,
+-    off_t	offset UNUSED,
++    off_T	offset UNUSED,
+     unsigned	size)
  {
      char_u	*data = hp->bh_data;
 diff --git a/src/memline.c b/src/memline.c
@@ -182,7 +182,7 @@ diff --git a/src/memline.c b/src/memline.c
  #endif
  #ifdef FEAT_BYTEOFF
  static void ml_updatechunk(buf_T *buf, long line, long len, int updtype);
-@@ -1151,7 +1151,7 @@ ml_recover()
+@@ -1134,7 +1134,7 @@ ml_recover(void)
      int		idx;
      int		top;
      int		txt_start;
@@ -191,7 +191,7 @@ diff --git a/src/memline.c b/src/memline.c
      int		called_from_main;
      int		serious_error = TRUE;
      long	mtime;
-@@ -1347,7 +1347,7 @@ ml_recover()
+@@ -1330,7 +1330,7 @@ ml_recover(void)
  	    msg_end();
  	    goto theend;
  	}
@@ -200,33 +200,33 @@ diff --git a/src/memline.c b/src/memline.c
  	    mfp->mf_blocknr_max = 0;	    /* no file or empty file */
  	else
  	    mfp->mf_blocknr_max = (blocknr_T)(size / mfp->mf_page_size);
-@@ -4862,7 +4862,7 @@ ml_setflags(buf)
- ml_encrypt_data(mfp, data, offset, size)
-     memfile_T	*mfp;
-     char_u	*data;
--    off_t	offset;
-+    off_T	offset;
-     unsigned	size;
+@@ -4804,7 +4804,7 @@ ml_setflags(buf_T *buf)
+ ml_encrypt_data(
+     memfile_T	*mfp,
+     char_u	*data,
+-    off_t	offset,
++    off_T	offset,
+     unsigned	size)
  {
      DATA_BL	*dp = (DATA_BL *)data;
-@@ -4907,7 +4907,7 @@ ml_encrypt_data(mfp, data, offset, size)
- ml_decrypt_data(mfp, data, offset, size)
-     memfile_T	*mfp;
-     char_u	*data;
--    off_t	offset;
-+    off_T	offset;
-     unsigned	size;
+@@ -4849,7 +4849,7 @@ ml_encrypt_data(
+ ml_decrypt_data(
+     memfile_T	*mfp,
+     char_u	*data,
+-    off_t	offset,
++    off_T	offset,
+     unsigned	size)
  {
      DATA_BL	*dp = (DATA_BL *)data;
-@@ -4943,7 +4943,7 @@ ml_decrypt_data(mfp, data, offset, size)
+@@ -4883,7 +4883,7 @@ ml_decrypt_data(
+  * Return an allocated cryptstate_T *.
+  */
      static cryptstate_T *
- ml_crypt_prepare(mfp, offset, reading)
-     memfile_T	*mfp;
--    off_t	offset;
-+    off_T	offset;
-     int		reading;
+-ml_crypt_prepare(memfile_T *mfp, off_t offset, int reading)
++ml_crypt_prepare(memfile_T *mfp, off_T offset, int reading)
  {
      buf_T	*buf = mfp->mf_buffer;
+     char_u	salt[50];
 diff --git a/src/netbeans.c b/src/netbeans.c
 --- a/src/netbeans.c
 +++ b/src/netbeans.c
@@ -239,8 +239,8 @@ diff --git a/src/netbeans.c b/src/netbeans.c
  
  static int curPCtype = -1;
  
-@@ -3404,7 +3404,7 @@ print_read_msg(buf)
-     nbbuf_T	*buf;
+@@ -3401,7 +3401,7 @@ pos2off(buf_T *buf, pos_T *pos)
+ print_read_msg(nbbuf_T *buf)
  {
      int	    lnum = buf->bufp->b_ml.ml_line_count;
 -    off_t   nchars = buf->bufp->b_orig_size;
@@ -248,12 +248,12 @@ diff --git a/src/netbeans.c b/src/netbeans.c
      char_u  c;
  
      msg_add_fname(buf->bufp, buf->bufp->b_ffname);
-@@ -3440,7 +3440,7 @@ print_read_msg(buf)
+@@ -3435,7 +3435,7 @@ print_read_msg(nbbuf_T *buf)
+  * writing a file.
+  */
      static void
- print_save_msg(buf, nchars)
-     nbbuf_T	*buf;
--    off_t	nchars;
-+    off_T	nchars;
+-print_save_msg(nbbuf_T *buf, off_t nchars)
++print_save_msg(nbbuf_T *buf, off_T nchars)
  {
      char_u	c;
      char_u	*p;
@@ -314,7 +314,7 @@ diff --git a/src/tag.c b/src/tag.c
  #if defined(FEAT_WINDOWS) && defined(FEAT_QUICKFIX)
  /*
   * Tag for preview window is remembered separately, to avoid messing up the
-@@ -1296,19 +1287,19 @@ find_tags(pat, num_matches, matchesp, fl
+@@ -1289,19 +1280,19 @@ find_tags(
      int		tag_file_sorted = NUL;	/* !_TAG_FILE_SORTED value */
      struct tag_search_info	/* Binary search file offsets */
      {
@@ -341,7 +341,7 @@ diff --git a/src/tag.c b/src/tag.c
      int		round;
  #endif
      enum
-@@ -1639,25 +1630,17 @@ find_tags(pat, num_matches, matchesp, fl
+@@ -1632,25 +1623,17 @@ find_tags(
  	    {
  		/* Adjust the search file offset to the correct position */
  		search_info.curr_offset_used = search_info.curr_offset;
@@ -370,7 +370,7 @@ diff --git a/src/tag.c b/src/tag.c
  			search_info.curr_offset = search_info.low_offset;
  		    }
  		    eof = tag_fgets(lbuf, LSIZE, fp);
-@@ -1665,14 +1648,14 @@ find_tags(pat, num_matches, matchesp, fl
+@@ -1658,14 +1641,14 @@ find_tags(
  		/* skip empty and blank lines */
  		while (!eof && vim_isblankline(lbuf))
  		{
@@ -387,7 +387,7 @@ diff --git a/src/tag.c b/src/tag.c
  		    search_info.curr_offset = search_info.curr_offset_used;
  		    continue;
  		}
-@@ -1898,12 +1881,12 @@ line_read_in:
+@@ -1891,12 +1874,12 @@ line_read_in:
  		{
  		    /* Get the tag file size (don't use mch_fstat(), it's not
  		     * portable). */
@@ -403,7 +403,7 @@ diff --git a/src/tag.c b/src/tag.c
  
  			/* Calculate the first read offset in the file.  Start
  			 * the search in the middle of the file. */
-@@ -1955,11 +1938,7 @@ parse_line:
+@@ -1948,11 +1931,7 @@ parse_line:
  			    /* Avoid getting stuck. */
  			    linear = TRUE;
  			    state = TS_LINEAR;
@@ -416,7 +416,7 @@ diff --git a/src/tag.c b/src/tag.c
  			}
  #endif
  			continue;
-@@ -2057,7 +2036,7 @@ parse_line:
+@@ -2050,7 +2029,7 @@ parse_line:
  		    }
  		    if (tagcmp < 0)
  		    {
@@ -425,7 +425,7 @@ diff --git a/src/tag.c b/src/tag.c
  			if (search_info.curr_offset < search_info.high_offset)
  			{
  			    search_info.low_offset = search_info.curr_offset;
-@@ -2098,7 +2077,7 @@ parse_line:
+@@ -2091,7 +2070,7 @@ parse_line:
  		{
  		    if (MB_STRNICMP(tagp.tagname, orgpat.head, cmplen) != 0)
  		    {
@@ -434,7 +434,7 @@ diff --git a/src/tag.c b/src/tag.c
  			    break;	/* past last match */
  			else
  			    continue;	/* before first match */
-@@ -2441,7 +2420,7 @@ parse_line:
+@@ -2434,7 +2413,7 @@ parse_line:
  #ifdef FEAT_CSCOPE
  	    if (!use_cscope)
  #endif
@@ -483,7 +483,7 @@ diff --git a/src/vim.h b/src/vim.h
   * The characters and attributes cached for the screen.
   */
  typedef char_u schar_T;
-@@ -1980,6 +2010,19 @@ typedef int sock_T;
+@@ -1978,6 +2008,19 @@ typedef int sock_T;
  # endif
  #endif
  

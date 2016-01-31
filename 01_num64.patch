@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  c31bc1b8488069c0b351b8e4ce58d98cc37d9265
+# Parent  9628a83762b38d2d8b208b17765986abe23fa9d9
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -303,7 +303,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_OLE
  	"ole",
  #endif
-@@ -16381,7 +16402,7 @@ search_cmn(typval_T *argvars, pos_T *mat
+@@ -16376,7 +16397,7 @@ search_cmn(typval_T *argvars, pos_T *mat
  #ifdef FEAT_RELTIME
  	if (argvars[3].v_type != VAR_UNKNOWN)
  	{
@@ -312,7 +312,7 @@ diff --git a/src/eval.c b/src/eval.c
  	    if (time_limit < 0)
  		goto theend;
  	}
-@@ -16477,8 +16498,8 @@ f_screenattr(typval_T *argvars UNUSED, t
+@@ -16472,8 +16493,8 @@ f_screenattr(typval_T *argvars UNUSED, t
      int		col;
      int		c;
  
@@ -323,7 +323,7 @@ diff --git a/src/eval.c b/src/eval.c
      if (row < 0 || row >= screen_Rows
  	    || col < 0 || col >= screen_Columns)
  	c = -1;
-@@ -16498,8 +16519,8 @@ f_screenchar(typval_T *argvars UNUSED, t
+@@ -16493,8 +16514,8 @@ f_screenchar(typval_T *argvars UNUSED, t
      int		off;
      int		c;
  
@@ -334,7 +334,7 @@ diff --git a/src/eval.c b/src/eval.c
      if (row < 0 || row >= screen_Rows
  	    || col < 0 || col >= screen_Columns)
  	c = -1;
-@@ -18362,7 +18383,7 @@ f_str2nr(typval_T *argvars, typval_T *re
+@@ -18357,7 +18378,7 @@ f_str2nr(typval_T *argvars, typval_T *re
  {
      int		base = 10;
      char_u	*p;
@@ -343,7 +343,7 @@ diff --git a/src/eval.c b/src/eval.c
      int		what;
  
      if (argvars[1].v_type != VAR_UNKNOWN)
-@@ -18742,14 +18763,14 @@ f_synID(typval_T *argvars UNUSED, typval
+@@ -18737,14 +18758,14 @@ f_synID(typval_T *argvars UNUSED, typval
  {
      int		id = 0;
  #ifdef FEAT_SYN_HL
@@ -362,7 +362,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      if (!transerr && lnum >= 1 && lnum <= curbuf->b_ml.ml_line_count
  	    && col >= 0 && col < (long)STRLEN(ml_get(lnum)))
-@@ -18773,7 +18794,7 @@ f_synIDattr(typval_T *argvars UNUSED, ty
+@@ -18768,7 +18789,7 @@ f_synIDattr(typval_T *argvars UNUSED, ty
      char_u	modebuf[NUMBUFLEN];
      int		modec;
  
@@ -371,7 +371,7 @@ diff --git a/src/eval.c b/src/eval.c
      what = get_tv_string(&argvars[1]);
      if (argvars[2].v_type != VAR_UNKNOWN)
      {
-@@ -18861,7 +18882,7 @@ f_synIDtrans(typval_T *argvars UNUSED, t
+@@ -18856,7 +18877,7 @@ f_synIDtrans(typval_T *argvars UNUSED, t
      int		id;
  
  #ifdef FEAT_SYN_HL
@@ -380,7 +380,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      if (id > 0)
  	id = syn_get_final_id(id);
-@@ -18879,8 +18900,8 @@ f_synIDtrans(typval_T *argvars UNUSED, t
+@@ -18874,8 +18895,8 @@ f_synIDtrans(typval_T *argvars UNUSED, t
  f_synconcealed(typval_T *argvars UNUSED, typval_T *rettv)
  {
  #if defined(FEAT_SYN_HL) && defined(FEAT_CONCEAL)
@@ -391,7 +391,7 @@ diff --git a/src/eval.c b/src/eval.c
      int		syntax_flags = 0;
      int		cchar;
      int		matchid = 0;
-@@ -18892,7 +18913,7 @@ f_synconcealed(typval_T *argvars UNUSED,
+@@ -18887,7 +18908,7 @@ f_synconcealed(typval_T *argvars UNUSED,
  
  #if defined(FEAT_SYN_HL) && defined(FEAT_CONCEAL)
      lnum = get_tv_lnum(argvars);		/* -1 on type error */
@@ -400,7 +400,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      vim_memset(str, NUL, sizeof(str));
  
-@@ -18939,8 +18960,8 @@ f_synconcealed(typval_T *argvars UNUSED,
+@@ -18934,8 +18955,8 @@ f_synconcealed(typval_T *argvars UNUSED,
  f_synstack(typval_T *argvars UNUSED, typval_T *rettv)
  {
  #ifdef FEAT_SYN_HL
@@ -411,7 +411,7 @@ diff --git a/src/eval.c b/src/eval.c
      int		i;
      int		id;
  #endif
-@@ -18950,7 +18971,7 @@ f_synstack(typval_T *argvars UNUSED, typ
+@@ -18945,7 +18966,7 @@ f_synstack(typval_T *argvars UNUSED, typ
  
  #ifdef FEAT_SYN_HL
      lnum = get_tv_lnum(argvars);		/* -1 on type error */
@@ -420,7 +420,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      if (lnum >= 1 && lnum <= curbuf->b_ml.ml_line_count
  	    && col >= 0 && col <= (long)STRLEN(ml_get(lnum))
-@@ -19869,29 +19890,29 @@ f_winrestview(typval_T *argvars, typval_
+@@ -19864,29 +19885,29 @@ f_winrestview(typval_T *argvars, typval_
      else
      {
  	if (dict_find(dict, (char_u *)"lnum", -1) != NULL)
@@ -458,7 +458,7 @@ diff --git a/src/eval.c b/src/eval.c
  
  	check_cursor();
  	win_new_height(curwin, curwin->w_height);
-@@ -20553,7 +20574,7 @@ eval_isnamec1(int c)
+@@ -20548,7 +20569,7 @@ eval_isnamec1(int c)
   * Set number v: variable to "val".
   */
      void
@@ -467,7 +467,7 @@ diff --git a/src/eval.c b/src/eval.c
  {
      vimvars[idx].vv_nr = val;
  }
-@@ -20561,7 +20582,7 @@ set_vim_var_nr(int idx, long val)
+@@ -20556,7 +20577,7 @@ set_vim_var_nr(int idx, long val)
  /*
   * Get number v: variable value.
   */
@@ -476,7 +476,7 @@ diff --git a/src/eval.c b/src/eval.c
  get_vim_var_nr(int idx)
  {
      return vimvars[idx].vv_nr;
-@@ -21076,7 +21097,7 @@ init_tv(typval_T *varp)
+@@ -21071,7 +21092,7 @@ init_tv(typval_T *varp)
   * caller of incompatible types: it sets *denote to TRUE if "denote"
   * is not NULL or returns -1 otherwise.
   */
@@ -485,7 +485,7 @@ diff --git a/src/eval.c b/src/eval.c
  get_tv_number(typval_T *varp)
  {
      int		error = FALSE;
-@@ -21084,15 +21105,15 @@ get_tv_number(typval_T *varp)
+@@ -21079,15 +21100,15 @@ get_tv_number(typval_T *varp)
      return get_tv_number_chk(varp, &error);	/* return 0L on error */
  }
  
@@ -504,7 +504,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_FLOAT
  	case VAR_FLOAT:
  	    EMSG(_("E805: Using a Float as a Number"));
-@@ -21170,12 +21191,12 @@ get_tv_lnum(typval_T *argvars)
+@@ -21165,12 +21186,12 @@ get_tv_lnum(typval_T *argvars)
      typval_T	rettv;
      linenr_T	lnum;
  
@@ -519,7 +519,7 @@ diff --git a/src/eval.c b/src/eval.c
  	clear_tv(&rettv);
      }
      return lnum;
-@@ -21194,7 +21215,7 @@ get_tv_lnum_buf(typval_T *argvars, buf_T
+@@ -21189,7 +21210,7 @@ get_tv_lnum_buf(typval_T *argvars, buf_T
  	    && argvars[0].vval.v_string[0] == '$'
  	    && buf != NULL)
  	return buf->b_ml.ml_line_count;
@@ -528,7 +528,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -21240,7 +21261,8 @@ get_tv_string_buf_chk(typval_T *varp, ch
+@@ -21235,7 +21256,8 @@ get_tv_string_buf_chk(typval_T *varp, ch
      switch (varp->v_type)
      {
  	case VAR_NUMBER:
@@ -541,7 +541,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 --- a/src/ex_cmds.c
 +++ b/src/ex_cmds.c
-@@ -295,10 +295,10 @@ typedef struct
+@@ -292,10 +292,10 @@ typedef struct
      union {
  	struct
  	{
@@ -558,7 +558,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 diff --git a/src/ex_getln.c b/src/ex_getln.c
 --- a/src/ex_getln.c
 +++ b/src/ex_getln.c
-@@ -5930,7 +5930,7 @@ get_list_range(str, num1, num2)
+@@ -5878,7 +5878,7 @@ get_list_range(char_u **str, int *num1, 
  {
      int		len;
      int		first = FALSE;
@@ -590,7 +590,7 @@ diff --git a/src/feature.h b/src/feature.h
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -9535,7 +9535,7 @@ apply_autocmds_group(event, fname, fname
+@@ -9469,7 +9469,7 @@ apply_autocmds_group(
  
  #ifdef FEAT_EVAL
  	/* set v:cmdarg (only when there is a matching pattern) */
@@ -602,7 +602,7 @@ diff --git a/src/fileio.c b/src/fileio.c
 diff --git a/src/fold.c b/src/fold.c
 --- a/src/fold.c
 +++ b/src/fold.c
-@@ -3108,7 +3108,7 @@ foldlevelExpr(flp)
+@@ -3029,7 +3029,7 @@ foldlevelExpr(fline_T *flp)
      /* KeyTyped may be reset to 0 when calling a function which invokes
       * do_cmdline().  To make 'foldopen' work correctly restore KeyTyped. */
      save_keytyped = KeyTyped;
@@ -655,7 +655,7 @@ diff --git a/src/json.c b/src/json.c
 diff --git a/src/message.c b/src/message.c
 --- a/src/message.c
 +++ b/src/message.c
-@@ -3882,7 +3882,7 @@ do_browse(flags, title, dflt, ext, initd
+@@ -3811,7 +3811,7 @@ do_browse(
  #if defined(FEAT_EVAL)
  static char *e_printf = N_("E766: Insufficient arguments for printf()");
  
@@ -664,15 +664,13 @@ diff --git a/src/message.c b/src/message.c
  static char *tv_str(typval_T *tvs, int *idxp);
  # ifdef FEAT_FLOAT
  static double tv_float(typval_T *tvs, int *idxp);
-@@ -3891,13 +3891,13 @@ static double tv_float(typval_T *tvs, in
+@@ -3820,11 +3820,11 @@ static double tv_float(typval_T *tvs, in
  /*
   * Get number argument from "idxp" entry in "tvs".  First entry is 1.
   */
 -    static long
 +    static varnumber_T
- tv_nr(tvs, idxp)
-     typval_T	*tvs;
-     int		*idxp;
+ tv_nr(typval_T *tvs, int *idxp)
  {
      int		idx = *idxp - 1;
 -    long	n = 0;
@@ -680,7 +678,7 @@ diff --git a/src/message.c b/src/message.c
      int		err = FALSE;
  
      if (tvs[idx].v_type == VAR_UNKNOWN)
-@@ -3954,7 +3954,7 @@ tv_float(tvs, idxp)
+@@ -3877,7 +3877,7 @@ tv_float(typval_T *tvs, int *idxp)
  	if (tvs[idx].v_type == VAR_FLOAT)
  	    f = tvs[idx].vval.v_float;
  	else if (tvs[idx].v_type == VAR_NUMBER)
@@ -689,7 +687,7 @@ diff --git a/src/message.c b/src/message.c
  	else
  	    EMSG(_("E807: Expected Float argument for printf()"));
      }
-@@ -4212,7 +4212,11 @@ vim_vsnprintf(str, str_m, fmt, ap, tvs)
+@@ -4135,7 +4135,11 @@ vim_vsnprintf(
  		if (length_modifier == 'l' && *p == 'l')
  		{
  		    /* double l = long long */
@@ -701,7 +699,7 @@ diff --git a/src/message.c b/src/message.c
  		    p++;
  		}
  	    }
-@@ -4341,6 +4345,12 @@ vim_vsnprintf(str, str_m, fmt, ap, tvs)
+@@ -4264,6 +4268,12 @@ vim_vsnprintf(
  		    long int long_arg = 0;
  		    unsigned long int ulong_arg = 0;
  
@@ -714,7 +712,7 @@ diff --git a/src/message.c b/src/message.c
  		    /* pointer argument value -only defined for p
  		     * conversion */
  		    void *ptr_arg = NULL;
-@@ -4385,6 +4395,19 @@ vim_vsnprintf(str, str_m, fmt, ap, tvs)
+@@ -4308,6 +4318,19 @@ vim_vsnprintf(
  			    else if (long_arg < 0)
  				arg_sign = -1;
  			    break;
@@ -734,7 +732,7 @@ diff --git a/src/message.c b/src/message.c
  			}
  		    }
  		    else
-@@ -4413,6 +4436,18 @@ vim_vsnprintf(str, str_m, fmt, ap, tvs)
+@@ -4336,6 +4359,18 @@ vim_vsnprintf(
  				if (ulong_arg != 0)
  				    arg_sign = 1;
  				break;
@@ -753,7 +751,7 @@ diff --git a/src/message.c b/src/message.c
  			}
  		    }
  
-@@ -4457,17 +4492,27 @@ vim_vsnprintf(str, str_m, fmt, ap, tvs)
+@@ -4380,17 +4415,27 @@ vim_vsnprintf(
  		    }
  		    else
  		    {
@@ -783,7 +781,7 @@ diff --git a/src/message.c b/src/message.c
  			}
  			else
  			    f[f_l++] = length_modifier;
-@@ -4488,6 +4533,11 @@ vim_vsnprintf(str, str_m, fmt, ap, tvs)
+@@ -4411,6 +4456,11 @@ vim_vsnprintf(
  			    case 'l': str_arg_l += sprintf(
  						tmp + str_arg_l, f, long_arg);
  				      break;
@@ -795,7 +793,7 @@ diff --git a/src/message.c b/src/message.c
  			    }
  			}
  			else
-@@ -4502,6 +4552,11 @@ vim_vsnprintf(str, str_m, fmt, ap, tvs)
+@@ -4425,6 +4475,11 @@ vim_vsnprintf(
  			    case 'l': str_arg_l += sprintf(
  					       tmp + str_arg_l, f, ulong_arg);
  				      break;
@@ -810,7 +808,7 @@ diff --git a/src/message.c b/src/message.c
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -9309,7 +9309,7 @@ get_expr_indent()
+@@ -9182,7 +9182,7 @@ get_expr_indent(void)
      if (use_sandbox)
  	++sandbox;
      ++textlock;
@@ -822,7 +820,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/misc2.c b/src/misc2.c
 --- a/src/misc2.c
 +++ b/src/misc2.c
-@@ -2820,7 +2820,7 @@ find_special_key(srcp, modp, keycode, ke
+@@ -2727,7 +2727,7 @@ find_special_key(
      int		modifiers;
      int		bit;
      int		key;
@@ -834,7 +832,7 @@ diff --git a/src/misc2.c b/src/misc2.c
 diff --git a/src/ops.c b/src/ops.c
 --- a/src/ops.c
 +++ b/src/ops.c
-@@ -4778,7 +4778,7 @@ fex_format(lnum, count, c)
+@@ -4728,7 +4728,7 @@ fex_format(
       */
      if (use_sandbox)
  	++sandbox;
@@ -846,7 +844,7 @@ diff --git a/src/ops.c b/src/ops.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -4192,7 +4192,7 @@ do_set(arg, opt_flags)
+@@ -4187,7 +4187,7 @@ do_set(
      int		afterchar;	    /* character just after option name */
      int		len;
      int		i;
@@ -855,7 +853,7 @@ diff --git a/src/option.c b/src/option.c
      int		key;
      long_u	flags;		    /* flags for current option */
      char_u	*varp = NULL;	    /* pointer to variable for current option */
-@@ -9153,7 +9153,7 @@ get_option_value(name, numval, stringval
+@@ -9119,7 +9119,7 @@ get_option_value(
  	if ((int *)varp == &curbuf->b_changed)
  	    *numval = curbufIsChanged();
  	else
@@ -926,7 +924,7 @@ diff --git a/src/proto/eval.pro b/src/proto/eval.pro
 diff --git a/src/quickfix.c b/src/quickfix.c
 --- a/src/quickfix.c
 +++ b/src/quickfix.c
-@@ -4068,11 +4068,11 @@ set_errorlist(wp, list, action, title)
+@@ -4003,11 +4003,11 @@ set_errorlist(
  	    continue;
  
  	filename = get_dict_string(d, (char_u *)"filename", TRUE);
