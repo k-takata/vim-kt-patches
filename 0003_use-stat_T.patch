@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent a1d2cd2af94c52ff4d3e82f9241fdd5cbec88c6e
-# Parent  2b38dd9df181d4a005f81a82f6a6fe9dd1964cae
+# Parent  79d8add73341f8703918c7c531ac0fe986588311
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -148,7 +148,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 --- a/src/ex_cmds.c
 +++ b/src/ex_cmds.c
-@@ -1842,14 +1842,14 @@ write_viminfo(char_u *file, int forceit)
+@@ -1838,14 +1838,14 @@ write_viminfo(char_u *file, int forceit)
      FILE	*fp_in = NULL;	/* input viminfo file, if any */
      FILE	*fp_out = NULL;	/* output viminfo file */
      char_u	*tempname = NULL;	/* name of temp viminfo file */
@@ -165,7 +165,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
  #endif
  #ifdef WIN3264
      int		hidden = FALSE;
-@@ -3078,7 +3078,7 @@ not_writing(void)
+@@ -3074,7 +3074,7 @@ not_writing(void)
      static int
  check_readonly(int *forceit, buf_T *buf)
  {
@@ -177,7 +177,7 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 --- a/src/ex_cmds2.c
 +++ b/src/ex_cmds2.c
-@@ -3209,7 +3209,7 @@ do_source(
+@@ -3203,7 +3203,7 @@ do_source(
      int			    save_debug_break_level = debug_break_level;
      scriptitem_T	    *si = NULL;
  # ifdef UNIX
@@ -786,8 +786,8 @@ diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
 diff --git a/src/pty.c b/src/pty.c
 --- a/src/pty.c
 +++ b/src/pty.c
-@@ -250,7 +250,7 @@ OpenPTY(ttyn)
-     char **ttyn;
+@@ -247,7 +247,7 @@ OpenPTY(char **ttyn)
+ OpenPTY(char **ttyn)
  {
      int		f;
 -    struct stat buf;
