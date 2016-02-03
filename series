@@ -10,8 +10,6 @@ gtk2_force_redraw.diff #+linux
 0003_use-stat_T.patch
 0004_add-stat-test.patch
 0005_test_largefile.patch
-timers3.patch #+timers
-timers-mark.diff #+timers
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
 support-alt-gettext-dll.patch
