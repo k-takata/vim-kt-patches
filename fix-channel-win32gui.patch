@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  98f776ab0af8d4068c858f3bda435e0e36a52062
+
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -549,7 +549,7 @@ typedef unsigned long u8char_T;	    /* l
+ # ifdef HAVE_SYS_POLL_H
+ #  include <sys/poll.h>
+ #  define HAVE_POLL
+-# elif defined(WIN32) && !defined(FEAT_GUI_W32)
++# elif defined(WIN32)
+ #  define HAVE_SELECT
+ # else
+ #  ifdef HAVE_POLL_H
