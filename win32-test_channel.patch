@@ -1,0 +1,82 @@
+# HG changeset patch
+# Parent  d453063d1055a6cd46be91a5beafaaa7e3002767
+
+diff --git a/src/testdir/test_channel.py b/src/testdir/test_channel.py
+--- a/src/testdir/test_channel.py
++++ b/src/testdir/test_channel.py
+@@ -7,12 +7,6 @@
+ # Then Vim can send requests to the server:
+ #  :let response = ch_sendexpr(handle, 'hello!')
+ #
+-# And you can control Vim by typing a JSON message here, e.g.:
+-#   ["ex","echo 'hi there'"]
+-#
+-# There is no prompt, just type a line and press Enter.
+-# To exit cleanly type "quit<Enter>".
+-#
+ # See ":help channel-demo" in Vim.
+ #
+ # This requires Python 2.6 or later.
+diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
+--- a/src/testdir/test_channel.vim
++++ b/src/testdir/test_channel.vim
+@@ -2,14 +2,40 @@
+ scriptencoding utf-8
+ 
+ " This requires the Python command to run the test server.
+-" This most likely only works on Unix.
+-if !has('unix') || !executable('python')
++" This most likely only works on Unix and Windows.
++if has('unix')
++  if !executable('python')
++    finish
++  endif
++elseif has('win32')
++  " Use Python Launcher for Windows (py.exe).
++  if !executable('py')
++    finish
++  endif
++else
+   finish
+ endif
+ 
++func s:start_server()
++  if has('win32')
++    silent !start cmd /c start "test_channel" py test_channel.py
++  else
++    silent !./test_channel.py&
++  endif
++endfunc
++
++func s:kill_server()
++  if has('win32')
++    call system('taskkill /IM py.exe /T /F /FI "WINDOWTITLE eq test_channel"')
++  else
++    call system("killall test_channel.py")
++  endif
++endfunc
++
+ func Test_communicate()
++  call delete("Xportnr")
+   " The Python program writes the port number in Xportnr.
+-  silent !./test_channel.py&
++  call s:start_server()
+ 
+   " Wait for up to 2 seconds for the port number to be there.
+   let cnt = 20
+@@ -29,7 +55,7 @@ func Test_communicate()
+ 
+   if len(l) == 0
+     " Can't make the connection, give up.
+-    call system("killall test_channel.py")
++    call s:kill_server()
+     return
+   endif
+   let port = l[0]
+@@ -49,5 +75,5 @@ func Test_communicate()
+   " make the server quit, can't check if this works, should not hang.
+   call ch_sendexpr(handle, '!quit!', 0)
+ 
+-  call system("killall test_channel.py")
++  call s:kill_server()
+ endfunc
