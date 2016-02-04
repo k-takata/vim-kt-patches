@@ -1,0 +1,36 @@
+# HG changeset patch
+# Parent  12f8862a1bb4e1831c7f45e01f0aa08d83f2afae
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -67,7 +67,7 @@ CSCOPE=yes
+ # Set to yes to enable Netbeans support (requires CHANNEL).
+ NETBEANS=$(GUI)
+ # Set to yes to enable inter process communication.
+-CHANNEL=$(GUI)
++CHANNEL=yes
+ 
+ 
+ # Link against the shared version of libstdc++ by default.  Set
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -101,7 +101,7 @@
+ #	Netbeans Debugging Support: NBDEBUG=[yes or no] (should be no, yes
+ #	doesn't work)
+ #
+-#	Inter process communication: CHANNEL=[yes or no] (default is yes if GUI
++#	Inter process communication: CHANNEL=[yes or no] (default is yes)
+ #	is yes)
+ #
+ #	XPM Image Support: XPM=[path to XPM directory]
+@@ -295,7 +295,7 @@ NETBEANS = $(GUI)
+ !endif
+ 
+ !ifndef CHANNEL
+-CHANNEL = $(GUI)
++CHANNEL = "yes"
+ !endif
+ 
+ # Only allow NETBEANS and XPM for a GUI build and CHANNEL.
