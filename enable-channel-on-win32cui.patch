@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  12f8862a1bb4e1831c7f45e01f0aa08d83f2afae
+# Parent  8d67cafbe1416d14203dc248f99b1b489f9a397a
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -30,7 +30,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  
  !ifndef CHANNEL
 -CHANNEL = $(GUI)
-+CHANNEL = "yes"
++CHANNEL = yes
  !endif
  
  # Only allow NETBEANS and XPM for a GUI build and CHANNEL.
