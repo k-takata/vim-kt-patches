@@ -1,11 +1,11 @@
 # HG changeset patch
-# Parent  26d10cf05f1a4e7109dabbebbb60be3d234e824c
+# Parent  a43e36068fce250f95a470fc668ff7708017db1b
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
 @@ -40,6 +40,8 @@ 1.1 Variable types ~
- There are six types of variables:
+ There are eight types of variables:
  
  Number		A 32 or 64 bit signed number.  |expr-number| *Number*
 +		64-bit Number is avaliable only when compiled with the
@@ -13,7 +13,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Examples:  -123  0x10  0177
  
  Float		A floating point number. |floating-point-format| *Float*
-@@ -836,6 +838,11 @@ When dividing a Number by zero the resul
+@@ -841,6 +843,11 @@ When dividing a Number by zero the resul
  	 <0 / 0  = -0x7fffffff	(like negative infinity)
  	(before Vim 7.2 it was always 0x7fffffff)
  
@@ -25,7 +25,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  When the righthand side of '%' is zero, the result is 0.
  
  None of these work for |Funcref|s.
-@@ -3213,8 +3220,10 @@ float2nr({expr})					*float2nr()*
+@@ -3279,8 +3286,10 @@ float2nr({expr})					*float2nr()*
  		decimal point.
  		{expr} must evaluate to a |Float| or a Number.
  		When the value of {expr} is out of range for a |Number| the
@@ -38,7 +38,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Examples: >
  			echo float2nr(3.95)
  <			3  >
-@@ -7085,6 +7094,7 @@ multi_lang		Compiled with support for mu
+@@ -7216,6 +7225,7 @@ multi_lang		Compiled with support for mu
  mzscheme		Compiled with MzScheme interface |mzscheme|.
  netbeans_enabled	Compiled with support for |netbeans| and connected.
  netbeans_intg		Compiled with support for |netbeans|.
@@ -49,7 +49,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
 --- a/runtime/doc/various.txt
 +++ b/runtime/doc/various.txt
-@@ -393,6 +393,7 @@ N  *+multi_lang*	non-English language su
+@@ -389,6 +389,7 @@ N  *+multi_lang*	non-English language su
  m  *+mzscheme*		Mzscheme interface |mzscheme|
  m  *+mzscheme/dyn*	Mzscheme interface |mzscheme-dynamic| |/dyn|
  m  *+netbeans_intg*	|netbeans|
