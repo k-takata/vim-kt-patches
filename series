@@ -48,7 +48,6 @@ off_T-disp-with-num64.patch
 fix-gvimext-loadlibrary.patch
 enable-channel-on-win32cui.patch
 fix-channel-eval-txt.patch
-fix-test_channel-py.patch
 fix-channel-win32.patch
 fix-test_channel-vim-on-windows.patch
 fix-config_cache-removal.patch #+rejected
