@@ -1,0 +1,12 @@
+diff --git a/src/testdir/test_channel.py b/src/testdir/test_channel.py
+--- a/src/testdir/test_channel.py
++++ b/src/testdir/test_channel.py
+@@ -133,7 +133,7 @@ class ThreadedTCPRequestHandler(socketse
+                     elif decoded[1] == '!quit!':
+                         # we're done
+                         self.server.shutdown()
+-                        break
++                        return
+                     elif decoded[1] == '!crash!':
+                         # Crash!
+                         42 / 0
