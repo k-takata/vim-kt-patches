@@ -1,0 +1,16 @@
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1959,9 +1959,9 @@ invert( {expr})			Number  bitwise invert
+ isdirectory( {directory})	Number	TRUE if {directory} is a directory
+ islocked( {expr})		Number	TRUE if {expr} is locked
+ items( {dict})			List	key-value pairs in {dict}
+-job_start({command} [, {options}]) Job	start a job	
+-job_status({job})		String	get the status of a job
+-job_stop({job} [, {how}])	Number	stop a job
++job_start( {command} [, {options}]) Job	start a job
++job_status( {job})		String	get the status of a job
++job_stop( {job} [, {how}])	Number	stop a job
+ join( {list} [, {sep}])		String	join {list} items into one String
+ jsdecode( {string})		any	decode JS style JSON
+ jsencode( {expr})		String	encode JS style JSON
