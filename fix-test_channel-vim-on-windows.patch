@@ -1,0 +1,31 @@
+diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
+--- a/src/testdir/test_channel.vim
++++ b/src/testdir/test_channel.vim
+@@ -14,8 +14,7 @@ if has('unix')
+     finish
+   endif
+ elseif has('win32')
+-  " Use Python Launcher for Windows (py.exe).
+-  if !executable('py')
++  if !executable('python')
+     finish
+   endif
+ else
+@@ -31,7 +30,7 @@ func s:start_server()
+   if has('job')
+     let s:job = job_start("python test_channel.py")
+   elseif has('win32')
+-    silent !start cmd /c start "test_channel" py test_channel.py
++    silent !start cmd /c start "test_channel" python test_channel.py
+   else
+     silent !python test_channel.py&
+   endif
+@@ -66,7 +65,7 @@ endfunc
+ 
+ func s:kill_server()
+   if has('job')
+-    call job_stop(s:job)
++    call job_stop(s:job, has('win32') ? 'kill' : 'term')
+   elseif has('win32')
+     call system('taskkill /IM py.exe /T /F /FI "WINDOWTITLE eq test_channel"')
+   else
