@@ -1,0 +1,90 @@
+# HG changeset patch
+# Parent  0a2668ead45598497b6e46280f9a42d67ec965a8
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -7728,7 +7728,8 @@ failret:
+     static void
+ job_free(job_T *job)
+ {
+-    /* TODO: free any handles */
++    /* free any handles */
++    mch_free_job(job);
+ 
+     vim_free(job);
+ }
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -5116,6 +5116,12 @@ mch_stop_job(job_T *job, char_u *how)
+     kill(-job->jv_pid, sig);
+     return OK;
+ }
++
++    void
++mch_free_job(job_T *job)
++{
++    /* Do nothing. */
++}
+ #endif
+ 
+ /*
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -5073,11 +5073,13 @@ mch_job_status(job_T *job)
+     DWORD dwExitCode = 0;
+ 
+     if (!GetExitCodeProcess(job->jf_pi.hProcess, &dwExitCode))
++    {
++	job->jv_status = JOB_ENDED;
+ 	return "dead";
++    }
+     if (dwExitCode != STILL_ACTIVE)
+     {
+-	CloseHandle(job->jf_pi.hProcess);
+-	CloseHandle(job->jf_pi.hThread);
++	job->jv_status = JOB_ENDED;
+ 	return "dead";
+     }
+     return "run";
+@@ -5095,6 +5097,16 @@ mch_stop_job(job_T *job, char_u *how)
+ 		job->jf_pi.dwProcessId) ? OK : FAIL;
+     return OK;
+ }
++
++    void
++mch_free_job(job_T *job)
++{
++    if (job->jv_status != JOB_FAILED)
++    {
++	CloseHandle(job->jf_pi.hProcess);
++	CloseHandle(job->jf_pi.hThread);
++    }
++}
+ #endif
+ 
+ 
+diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
+--- a/src/proto/os_unix.pro
++++ b/src/proto/os_unix.pro
+@@ -60,6 +60,7 @@ int mch_call_shell(char_u *cmd, int opti
+ void mch_start_job(char **argv, job_T *job);
+ char *mch_job_status(job_T *job);
+ int mch_stop_job(job_T *job, char_u *how);
++void mch_free_job(job_T *job);
+ void mch_breakcheck(void);
+ int mch_expandpath(garray_T *gap, char_u *path, int flags);
+ int mch_expand_wildcards(int num_pat, char_u **pat, int *num_file, char_u ***file, int flags);
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -43,6 +43,7 @@ int mch_call_shell(char_u *cmd, int opti
+ void mch_start_job(char *cmd, job_T *job);
+ char *mch_job_status(job_T *job);
+ int mch_stop_job(job_T *job, char_u *how);
++void mch_free_job(job_T *job);
+ void mch_set_normal_colors(void);
+ void mch_write(char_u *s, int len);
+ void mch_delay(long msec, int ignoreinput);
