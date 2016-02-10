@@ -23,7 +23,7 @@ diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
      else
        silent !python test_channel.py&
      endif
-@@ -73,7 +72,7 @@ endfunc
+@@ -73,11 +72,11 @@ endfunc
  func s:kill_server()
    if has('job')
      if exists('s:job')
@@ -32,3 +32,8 @@ diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
        unlet s:job
      endif
    elseif has('win32')
+-    call system('taskkill /IM py.exe /T /F /FI "WINDOWTITLE eq test_channel"')
++    call system('taskkill /IM python.exe /T /F /FI "WINDOWTITLE eq test_channel"')
+   else
+     call system("pkill -f test_channel.py")
+   endif
