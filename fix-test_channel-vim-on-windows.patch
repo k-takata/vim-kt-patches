@@ -1,3 +1,6 @@
+# HG changeset patch
+# Parent  6cc8fbaadf54d1ea5e497113b6e17dea0541c7bb
+
 diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
 --- a/src/testdir/test_channel.vim
 +++ b/src/testdir/test_channel.vim
@@ -11,21 +14,21 @@ diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
      finish
    endif
  else
-@@ -31,7 +30,7 @@ func s:start_server()
-   if has('job')
-     let s:job = job_start("python test_channel.py")
-   elseif has('win32')
--    silent !start cmd /c start "test_channel" py test_channel.py
-+    silent !start cmd /c start "test_channel" python test_channel.py
-   else
-     silent !python test_channel.py&
-   endif
-@@ -66,7 +65,7 @@ endfunc
- 
+@@ -34,7 +33,7 @@ func s:run_server(testfunc)
+     if has('job')
+       let s:job = job_start("python test_channel.py")
+     elseif has('win32')
+-      silent !start cmd /c start "test_channel" py test_channel.py
++      silent !start cmd /c start "test_channel" python test_channel.py
+     else
+       silent !python test_channel.py&
+     endif
+@@ -73,7 +72,7 @@ endfunc
  func s:kill_server()
    if has('job')
--    call job_stop(s:job)
-+    call job_stop(s:job, has('win32') ? 'kill' : 'term')
+     if exists('s:job')
+-      call job_stop(s:job)
++      call job_stop(s:job, has('win32') ? 'kill' : 'term')
+       unlet s:job
+     endif
    elseif has('win32')
-     call system('taskkill /IM py.exe /T /F /FI "WINDOWTITLE eq test_channel"')
-   else
