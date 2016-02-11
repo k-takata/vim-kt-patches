@@ -1,0 +1,70 @@
+# HG changeset patch
+# Parent  d5a935a415226439458f2032a69cdb8a8ba2d8eb
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -21648,7 +21648,7 @@ get_tv_string_buf_chk(typval_T *varp, ch
+ 			    "process %ld %s", (long)job->jv_pid, status);
+ # elif defined(WIN32)
+ 		vim_snprintf((char *)buf, NUMBUFLEN,
+-			    "process %ld %s", (long)job->jf_pi.dwProcessId,
++			    "process %ld %s", (long)job->jv_pi.dwProcessId,
+ 			    status);
+ # else
+ 		/* fall-back */
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -5062,7 +5062,7 @@ mch_start_job(char *cmd, job_T *job)
+ 	job->jv_status = JOB_FAILED;
+     else
+     {
+-	job->jf_pi = pi;
++	job->jv_pi = pi;
+ 	job->jv_status = JOB_STARTED;
+     }
+ }
+@@ -5072,12 +5072,12 @@ mch_job_status(job_T *job)
+ {
+     DWORD dwExitCode = 0;
+ 
+-    if (!GetExitCodeProcess(job->jf_pi.hProcess, &dwExitCode))
++    if (!GetExitCodeProcess(job->jv_pi.hProcess, &dwExitCode))
+ 	return "dead";
+     if (dwExitCode != STILL_ACTIVE)
+     {
+-	CloseHandle(job->jf_pi.hProcess);
+-	CloseHandle(job->jf_pi.hThread);
++	CloseHandle(job->jv_pi.hProcess);
++	CloseHandle(job->jv_pi.hThread);
+ 	return "dead";
+     }
+     return "run";
+@@ -5087,12 +5087,12 @@ mch_job_status(job_T *job)
+ mch_stop_job(job_T *job, char_u *how)
+ {
+     if (STRCMP(how, "kill") == 0)
+-	TerminateProcess(job->jf_pi.hProcess, 0);
++	TerminateProcess(job->jv_pi.hProcess, 0);
+     else
+ 	return GenerateConsoleCtrlEvent(
+ 	    STRCMP(how, "hup") == 0 ?
+ 		    CTRL_BREAK_EVENT : CTRL_C_EVENT,
+-		job->jf_pi.dwProcessId) ? OK : FAIL;
++		job->jv_pi.dwProcessId) ? OK : FAIL;
+     return OK;
+ }
+ #endif
+diff --git a/src/structs.h b/src/structs.h
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -1272,7 +1272,7 @@ struct jobvar_S
+     int		jv_exitval;
+ #endif
+ #ifdef WIN32
+-    PROCESS_INFORMATION	jf_pi;
++    PROCESS_INFORMATION	jv_pi;
+ #endif
+     jobstatus_T	jv_status;
+ 

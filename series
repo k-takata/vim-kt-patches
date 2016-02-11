@@ -49,6 +49,7 @@ fix-gvimext-loadlibrary.patch
 enable-channel-on-win32cui.patch
 fix-channel-eval-txt.patch
 fix-test_channel-vim-on-windows.patch
+fix-channel-prefix.patch
 fix-job-win32-resource-leak.patch
 update-job-doc.patch
 fix-config_cache-removal.patch #+rejected

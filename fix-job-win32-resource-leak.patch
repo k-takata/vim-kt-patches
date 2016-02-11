@@ -36,21 +36,21 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 @@ -5073,11 +5073,13 @@ mch_job_status(job_T *job)
      DWORD dwExitCode = 0;
  
-     if (!GetExitCodeProcess(job->jf_pi.hProcess, &dwExitCode))
+     if (!GetExitCodeProcess(job->jv_pi.hProcess, &dwExitCode))
 +    {
 +	job->jv_status = JOB_ENDED;
  	return "dead";
 +    }
      if (dwExitCode != STILL_ACTIVE)
      {
--	CloseHandle(job->jf_pi.hProcess);
--	CloseHandle(job->jf_pi.hThread);
+-	CloseHandle(job->jv_pi.hProcess);
+-	CloseHandle(job->jv_pi.hThread);
 +	job->jv_status = JOB_ENDED;
  	return "dead";
      }
      return "run";
 @@ -5095,6 +5097,16 @@ mch_stop_job(job_T *job, char_u *how)
- 		job->jf_pi.dwProcessId) ? OK : FAIL;
+ 		job->jv_pi.dwProcessId) ? OK : FAIL;
      return OK;
  }
 +
@@ -59,8 +59,8 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +{
 +    if (job->jv_status != JOB_FAILED)
 +    {
-+	CloseHandle(job->jf_pi.hProcess);
-+	CloseHandle(job->jf_pi.hThread);
++	CloseHandle(job->jv_pi.hProcess);
++	CloseHandle(job->jv_pi.hThread);
 +    }
 +}
  #endif
