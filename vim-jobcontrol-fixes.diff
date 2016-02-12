@@ -1,0 +1,280 @@
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+index 18069f0..644ac74 100644
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -4322,6 +4322,9 @@ job_start({command} [, {options}])				*job_start()*
+ 		and further items are the arguments.  All items are converted
+ 		to String.  This works best on Unix.
+ 
++		On MS-Windows, job_start() makes GUI application hidden. If
++		want to show GUIs, Use |:!start| instead.
++
+ 		The command is executed directly, not through a shell, the
+ 		'shell' option is not used.  To use the shell: >
+ 	let job = job_start(["/bin/sh", "-c", "echo hello"])
+@@ -4368,6 +4371,13 @@ job_stop({job} [, {how}])					*job_stop()*
+ 			"kill"	Unix: SIGKILL (strongest way to stop)
+ 			number	Unix: signal with that number
+ 
++		For MS-Windows, when {how} is omitted, CTRL_BREAK will be sent
++		to the process group.
++		Other values:
++			"int"	Windows: CTRL_C
++			"kill"	Windows: terminate process forcedly
++			Others	Windows: CTRL_BREAK
++
+ 		The result is a Number: 1 if the operation could be executed,
+ 		0 if "how" is not supported on the system.
+ 		Note that even when the operation was executed, whether the
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+index 11d5629..6cada65 100644
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -113,7 +113,7 @@
+ #	Processor Version: CPUNR=[i386, i486, i586, i686, pentium4] (default is
+ #	i386)
+ #
+-#	Version Support: WINVER=[0x0400, 0x0500] (default is 0x0400)
++#	Version Support: WINVER=[0x0400, 0x0500] (default is 0x0500)
+ #
+ #	Debug version: DEBUG=yes
+ #	Mapfile: MAP=[no, yes or lines] (default is yes)
+@@ -370,9 +370,8 @@ CON_LIB = $(CON_LIB) /DELAYLOAD:comdlg32.dll /DELAYLOAD:ole32.dll DelayImp.lib
+ !endif
+ 
+ ### Set the default $(WINVER) to make it work with VC++7.0 (VS.NET)
+-#  When set to 0x0500 ":browse" stops working.
+ !ifndef WINVER
+-WINVER = 0x0400
++WINVER = 0x0500
+ !endif
+ 
+ # If you have a fixed directory for $VIM or $VIMRUNTIME, other than the normal
+diff --git a/src/eval.c b/src/eval.c
+index 30d5684..1dbf069 100644
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -7720,8 +7720,7 @@ failret:
+     static void
+ job_free(job_T *job)
+ {
+-    /* TODO: free any handles */
+-
++    mch_free_job(job);
+     vim_free(job);
+ }
+ 
+@@ -14369,9 +14368,11 @@ f_job_start(typval_T *argvars UNUSED, typval_T *rettv)
+ 		s = vim_strsave_shellescape(s, FALSE, TRUE);
+ 		if (s == NULL)
+ 		    goto theend;
++		ga_concat(&ga, s);
++		vim_free(s);
+ 	    }
+-	    ga_concat(&ga, s);
+-	    vim_free(s);
++	    else
++		ga_concat(&ga, s);
+ 	    if (li->li_next != NULL)
+ 		ga_append(&ga, ' ');
+ #endif
+diff --git a/src/os_unix.c b/src/os_unix.c
+index 17bb322..45527fe 100644
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -5092,6 +5092,12 @@ mch_job_status(job_T *job)
+ 	job->jv_status = JOB_ENDED;
+ 	return "dead";
+     }
++    if (WIFSIGNALED(status))
++    {
++	job->jv_exitval = -1;
++	job->jv_status = JOB_ENDED;
++	return "dead";
++    }
+     return "run";
+ }
+ 
+@@ -5099,6 +5105,7 @@ mch_job_status(job_T *job)
+ mch_stop_job(job_T *job, char_u *how)
+ {
+     int sig = -1;
++    pid_t job_pid;
+ 
+     if (STRCMP(how, "hup") == 0)
+ 	sig = SIGHUP;
+@@ -5112,10 +5119,27 @@ mch_stop_job(job_T *job, char_u *how)
+ 	sig = atoi((char *)how);
+     else
+ 	return FAIL;
++
+     /* TODO: have an option to only kill the process, not the group? */
+-    kill(-job->jv_pid, sig);
++    job_pid = job->jv_pid;
++    if (job_pid == getpgid(job_pid))
++	job_pid = -job_pid;
++
++    kill(job_pid, sig);
++
+     return OK;
+ }
++
++    void
++mch_free_job(job_T *job)
++{
++    /* call waitpid because child process may become zombi */
++# ifdef __NeXT__
++    wait4(job->jv_pid, NULL, WNOHANG, (struct rusage *)0);
++# else
++    waitpid(job->jv_pid, NULL, WNOHANG);
++# endif
++}
+ #endif
+ 
+ /*
+diff --git a/src/os_win32.c b/src/os_win32.c
+index 5841d13..05d29b1 100644
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -5038,19 +5038,44 @@ mch_start_job(char *cmd, job_T *job)
+ {
+     STARTUPINFO		si;
+     PROCESS_INFORMATION	pi;
++    HANDLE		jo;
+ 
++    jo = CreateJobObject(NULL, NULL);
++    if (jo == NULL)
++    {
++	job->jv_status = JOB_FAILED;
++	return;
++    }
++
++    ZeroMemory(&pi, sizeof(pi));
+     ZeroMemory(&si, sizeof(si));
+     si.cb = sizeof(si);
++    si.dwFlags = STARTF_USESHOWWINDOW;
++    si.wShowWindow = SW_HIDE;
+ 
+     if (!vim_create_process(cmd, FALSE,
++	    CREATE_SUSPENDED |
+ 	    CREATE_DEFAULT_ERROR_MODE |
+ 	    CREATE_NEW_PROCESS_GROUP |
+-	    CREATE_NO_WINDOW,
++	    CREATE_NEW_CONSOLE,
+ 	    &si, &pi))
++    {
++	CloseHandle(jo);
+ 	job->jv_status = JOB_FAILED;
++    }
+     else
+     {
++	if (!AssignProcessToJobObject(jo, pi.hProcess))
++	{
++	    /* if failing, switch the way to terminate
++	     * process with TerminateProcess. */
++	    CloseHandle(jo);
++	    jo = NULL;
++	}
++	ResumeThread(pi.hThread);
++	CloseHandle(job->jv_pi.hThread);
+ 	job->jv_pi = pi;
++	job->jv_jo = jo;
+ 	job->jv_status = JOB_STARTED;
+     }
+ }
+@@ -5060,12 +5085,10 @@ mch_job_status(job_T *job)
+ {
+     DWORD dwExitCode = 0;
+ 
+-    if (!GetExitCodeProcess(job->jv_pi.hProcess, &dwExitCode))
+-	return "dead";
+-    if (dwExitCode != STILL_ACTIVE)
++    if (!GetExitCodeProcess(job->jv_pi.hProcess, &dwExitCode)
++	    || dwExitCode != STILL_ACTIVE)
+     {
+-	CloseHandle(job->jv_pi.hProcess);
+-	CloseHandle(job->jv_pi.hThread);
++	job->jv_status = JOB_ENDED;
+ 	return "dead";
+     }
+     return "run";
+@@ -5074,14 +5097,36 @@ mch_job_status(job_T *job)
+     int
+ mch_stop_job(job_T *job, char_u *how)
+ {
++    int ret = 0;
++    int ctrl_c = STRCMP(how, "int") == 0;
++
+     if (STRCMP(how, "kill") == 0)
+-	TerminateProcess(job->jv_pi.hProcess, 0);
+-    else
+-	return GenerateConsoleCtrlEvent(
+-	    STRCMP(how, "hup") == 0 ?
+-		    CTRL_BREAK_EVENT : CTRL_C_EVENT,
+-		job->jv_pi.dwProcessId) ? OK : FAIL;
+-    return OK;
++    {
++	if (job->jv_jo != NULL)
++	    return TerminateJobObject(job->jv_jo, 0) ? OK : FAIL;
++	else
++	    return TerminateProcess(job->jv_pi.hProcess, 0) ? OK : FAIL;
++    }
++
++    if (!AttachConsole(job->jv_pi.dwProcessId))
++	return FAIL;
++    ret = GenerateConsoleCtrlEvent(
++	    ctrl_c ? CTRL_C_EVENT : CTRL_BREAK_EVENT,
++	    job->jv_pi.dwProcessId)
++	? OK : FAIL;
++    FreeConsole();
++    return ret;
++}
++
++    void
++mch_free_job(job_T *job)
++{
++    if (job->jv_status != JOB_FAILED)
++    {
++	if (job->jv_jo != NULL)
++	    CloseHandle(job->jv_jo);
++	CloseHandle(job->jv_pi.hProcess);
++    }
+ }
+ #endif
+ 
+diff --git a/src/proto/os_unix.pro b/src/proto/os_unix.pro
+index bc250c8..7b35e55 100644
+--- a/src/proto/os_unix.pro
++++ b/src/proto/os_unix.pro
+@@ -60,6 +60,7 @@ int mch_call_shell(char_u *cmd, int options);
+ void mch_start_job(char **argv, job_T *job);
+ char *mch_job_status(job_T *job);
+ int mch_stop_job(job_T *job, char_u *how);
++void mch_free_job(job_T *job);
+ void mch_breakcheck(void);
+ int mch_expandpath(garray_T *gap, char_u *path, int flags);
+ int mch_expand_wildcards(int num_pat, char_u **pat, int *num_file, char_u ***file, int flags);
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+index 2128807..1029df0 100644
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -43,6 +43,7 @@ int mch_call_shell(char_u *cmd, int options);
+ void mch_start_job(char *cmd, job_T *job);
+ char *mch_job_status(job_T *job);
+ int mch_stop_job(job_T *job, char_u *how);
++void mch_free_job(job_T *job);
+ void mch_set_normal_colors(void);
+ void mch_write(char_u *s, int len);
+ void mch_delay(long msec, int ignoreinput);
+diff --git a/src/structs.h b/src/structs.h
+index 1ce98d0..72c3c00 100644
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -1250,6 +1250,7 @@ struct jobvar_S
+ #endif
+ #ifdef WIN32
+     PROCESS_INFORMATION	jv_pi;
++    HANDLE		jv_jo;
+ #endif
+     jobstatus_T	jv_status;
+ 
