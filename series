@@ -47,7 +47,6 @@ num64-mark.diff
 off_T-disp-with-num64.patch
 fix-gvimext-loadlibrary.patch
 enable-channel-on-win32cui.patch
-fix-channel-eval-txt.patch
 fix-test_channel-vim-on-windows.patch
 fix-job-win32-resource-leak.patch
 update-job-doc.patch
