@@ -1,0 +1,73 @@
+# HG changeset patch
+# Parent  14542a413020d9db83ad2c8a62c4108cf48caa54
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1798,9 +1798,9 @@ argidx()			Number	current index in the a
+ arglistid( [{winnr} [, {tabnr}]])
+ 				Number	argument list id
+ argv( {nr})			String	{nr} entry of the argument list
+-argv( )				List	the argument list
++argv()				List	the argument list
+ assert_equal( {exp}, {act} [, {msg}]) none  assert {exp} equals {act}
+-assert_exception({error} [, {msg}])   none  assert {error} is in v:exception
++assert_exception( {error} [, {msg}])  none  assert {error} is in v:exception
+ assert_fails( {cmd} [, {error}])      none  assert {cmd} fails
+ assert_false( {actual} [, {msg}])     none  assert {actual} is false
+ assert_true( {actual} [, {msg}])      none  assert {actual} is true
+@@ -1855,11 +1855,11 @@ delete( {fname} [, {flags}])	Number	dele
+ did_filetype()			Number	TRUE if FileType autocommand event used
+ diff_filler( {lnum})		Number	diff filler lines about {lnum}
+ diff_hlID( {lnum}, {col})	Number	diff highlighting at {lnum}/{col}
+-disable_char_avail_for_testing({expr})  none  test without typeahead
++disable_char_avail_for_testing( {expr})  none  test without typeahead
+ empty( {expr})			Number	TRUE if {expr} is empty
+ escape( {string}, {chars})	String	escape {chars} in {string} with '\'
+ eval( {string})			any	evaluate {string} into its value
+-eventhandler( )			Number	TRUE if inside an event handler
++eventhandler()			Number	TRUE if inside an event handler
+ executable( {expr})		Number	1 if executable {expr} exists
+ exepath( {expr})		String  full path of the command {expr}
+ exists( {expr})			Number	TRUE if {expr} exists
+@@ -1885,9 +1885,9 @@ fnamemodify( {fname}, {mods})	String	mod
+ foldclosed( {lnum})		Number	first line of fold at {lnum} if closed
+ foldclosedend( {lnum})		Number	last line of fold at {lnum} if closed
+ foldlevel( {lnum})		Number	fold level at {lnum}
+-foldtext( )			String	line displayed for closed fold
++foldtext()			String	line displayed for closed fold
+ foldtextresult( {lnum})		String	text for closed fold at {lnum}
+-foreground( )			Number	bring the Vim window to the foreground
++foreground()			Number	bring the Vim window to the foreground
+ function( {name})		Funcref reference to function {name}
+ garbagecollect( [{atexit}])	none	free memory, breaking cyclic references
+ get( {list}, {idx} [, {def}])	any	get item {idx} from {list} or {def}
+@@ -1897,7 +1897,7 @@ getbufline( {expr}, {lnum} [, {end}])
+ getbufvar( {expr}, {varname} [, {def}])
+ 				any	variable {varname} in buffer {expr}
+ getchar( [expr])		Number	get one character from the user
+-getcharmod( )			Number	modifiers for the last typed character
++getcharmod()			Number	modifiers for the last typed character
+ getcharsearch()			Dict	last character search
+ getcmdline()			String	return the current command-line
+ getcmdpos()			Number	return cursor position in command-line
+@@ -2689,7 +2689,7 @@ ch_close({handle})						*ch_close()*
+ 		Close channel {handle}.  See |channel|.
+ 		{only available when compiled with the |+channel| feature}
+ 
+-ch_logfile( {fname} [, {mode}])					*ch_logfile()*
++ch_logfile({fname} [, {mode}])					*ch_logfile()*
+ 		Start logging channel activity to {fname}.
+ 		When {mode} is omitted or "a" append to the file.
+ 		When {mode} is "w" start with an empty file.
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -358,6 +358,7 @@ m  *+hangul_input*	Hangul input support 
+    *+iconv*		Compiled with the |iconv()| function
+    *+iconv/dyn*		Likewise |iconv-dynamic| |/dyn|
+ N  *+insert_expand*	|insert_expand| Insert mode completion
++m  *+job*		|job-control|
+ N  *+jumplist*		|jumplist|
+ B  *+keymap*		|'keymap'|
+ B  *+langmap*		|'langmap'|
