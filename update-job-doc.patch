@@ -1,36 +1,6 @@
 # HG changeset patch
-# Parent  2ab2285abeb583d72bedfe92bc784dbebf8436c3
+# Parent  14542a413020d9db83ad2c8a62c4108cf48caa54
 
-diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
---- a/runtime/doc/eval.txt
-+++ b/runtime/doc/eval.txt
-@@ -4354,7 +4354,7 @@ job_start({command} [, {options}])				*j
- 			killonexit	When non-zero kill the job when Vim
- 					exits. (default: 0, don't kill)
- 
--		{only available when compiled with the |+channel| feature}
-+		{only available when compiled with the |+job| feature}
- 
- job_status({job})						*job_status()*
- 		Returns a String with the status of {job}:
-@@ -4362,7 +4362,7 @@ job_status({job})						*job_status()*
- 			"fail"	job failed to start
- 			"dead"	job died or was stopped after running
- 
--		{only available when compiled with the |+channel| feature}
-+		{only available when compiled with the |+job| feature}
- 
- job_stop({job} [, {how}])					*job_stop()*
- 		Stop the {job}.  This can also be used to signal the job.
-@@ -4382,7 +4382,7 @@ job_stop({job} [, {how}])					*job_stop(
- 		job_status().
- 		The operation will even be done when the job wasn't running.
- 
--		{only available when compiled with the |+channel| feature}
-+		{only available when compiled with the |+job| feature}
- 
- join({list} [, {sep}])					*join()*
- 		Join the items in {list} together into one String.
 diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
 --- a/runtime/doc/various.txt
 +++ b/runtime/doc/various.txt
