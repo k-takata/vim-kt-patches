@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  7250994a86546a754f6c99b2bf86215a60edc625
+# Parent  99133880a7964538d76483831bdd52f4bfb2b16f
 
 diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
 --- a/src/testdir/test_channel.vim
@@ -45,3 +45,28 @@ diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
    else
      call system("pkill -f test_channel.py")
    endif
+@@ -280,16 +285,21 @@ func Test_connect_waittime()
+ endfunc
+ 
+ func Test_pipe()
+-  if !has('job') || !has('unix')
++  if !has('job')
+     return
+   endif
+-  let job = job_start("python test_channel_pipe.py")
++  let job = job_start(s:python . " test_channel_pipe.py")
+   call assert_equal("run", job_status(job))
+   try
+     let handle = job_getchannel(job)
++
+     call ch_sendraw(handle, "echo something\n", 0)
+-    call assert_equal("something\n", ch_readraw(handle))
++    let reply = ch_readraw(handle))
++    let reply = substitute(reply, '\r', '', '')
++    call assert_equal("something\n", reply)
++
+     let reply = ch_sendraw(handle, "quit\n")
++    let reply = substitute(reply, '\r', '', '')
+     call assert_equal("Goodbye!\n", reply)
+   finally
+     call job_stop(job)
