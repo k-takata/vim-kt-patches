@@ -33,7 +33,6 @@ remove-useless-STRCPY.patch
 use-correct-struct-size.patch
 bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
-mingw-enable-warnings.patch
 if_ruby-remove-allocate-method.patch
 fix-indent-in-if_perl.patch
 make-tests-silent.patch
