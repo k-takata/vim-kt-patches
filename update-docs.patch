@@ -1,33 +1,10 @@
 # HG changeset patch
-# Parent  82a3315726aa3479179dc549f8a98d1276aeed30
+# Parent  8d90765fef6f766f698d54384314183ce268b990
 
-diff --git a/runtime/doc/channel.txt b/runtime/doc/channel.txt
---- a/runtime/doc/channel.txt
-+++ b/runtime/doc/channel.txt
-@@ -133,7 +133,7 @@ If {mode} is "json" then a message can b
- This awaits a response from the other side.
- 
- When {mode} is "js" this works the same, except that the messages use
--JavaScript encoding.  See |jsencode()| for the difference.
-+JavaScript encoding.  See |js_encode()| for the difference.
- 
- To send a message, without handling a response: >
-     call ch_sendexpr(handle, {expr}, 0)
-@@ -268,8 +268,8 @@ To send a message and letting the respon
- asynchronously: >
-     call ch_sendraw(handle, {string}, {callback})
- 
--This {string} can also be JSON, use |jsonencode()| to create it and
--|jsondecode()| to handle a received JSON message.
-+This {string} can also be JSON, use |json_encode()| to create it and
-+|json_decode()| to handle a received JSON message.
- 
- It is not possible to use |ch_sendexpr()| on a raw channel.
- 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1798,9 +1798,9 @@ argidx()			Number	current index in the a
+@@ -1800,9 +1800,9 @@ argidx()			Number	current index in the a
  arglistid( [{winnr} [, {tabnr}]])
  				Number	argument list id
  argv( {nr})			String	{nr} entry of the argument list
@@ -39,7 +16,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  assert_fails( {cmd} [, {error}])      none  assert {cmd} fails
  assert_false( {actual} [, {msg}])     none  assert {actual} is false
  assert_true( {actual} [, {msg}])      none  assert {actual} is true
-@@ -1824,7 +1824,7 @@ call( {func}, {arglist} [, {dict}])
+@@ -1826,7 +1826,7 @@ call( {func}, {arglist} [, {dict}])
  ceil( {expr})			Float	round {expr} up
  ch_close( {handle})		none	close a channel
  ch_logfile( {fname} [, {mode}])	none	start logging channel activity
@@ -48,7 +25,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  ch_readraw( {handle})		String	read from channel {handle}
  ch_sendexpr( {handle}, {expr} [, {callback}])
  				any	send {expr} over JSON channel {handle}
-@@ -1855,11 +1855,11 @@ delete( {fname} [, {flags}])	Number	dele
+@@ -1858,11 +1858,11 @@ delete( {fname} [, {flags}])	Number	dele
  did_filetype()			Number	TRUE if FileType autocommand event used
  diff_filler( {lnum})		Number	diff filler lines about {lnum}
  diff_hlID( {lnum}, {col})	Number	diff highlighting at {lnum}/{col}
@@ -62,7 +39,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  executable( {expr})		Number	1 if executable {expr} exists
  exepath( {expr})		String  full path of the command {expr}
  exists( {expr})			Number	TRUE if {expr} exists
-@@ -1885,9 +1885,9 @@ fnamemodify( {fname}, {mods})	String	mod
+@@ -1888,9 +1888,9 @@ fnamemodify( {fname}, {mods})	String	mod
  foldclosed( {lnum})		Number	first line of fold at {lnum} if closed
  foldclosedend( {lnum})		Number	last line of fold at {lnum} if closed
  foldlevel( {lnum})		Number	fold level at {lnum}
@@ -74,7 +51,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  function( {name})		Funcref reference to function {name}
  garbagecollect( [{atexit}])	none	free memory, breaking cyclic references
  get( {list}, {idx} [, {def}])	any	get item {idx} from {list} or {def}
-@@ -1897,7 +1897,7 @@ getbufline( {expr}, {lnum} [, {end}])
+@@ -1900,7 +1900,7 @@ getbufline( {expr}, {lnum} [, {end}])
  getbufvar( {expr}, {varname} [, {def}])
  				any	variable {varname} in buffer {expr}
  getchar( [expr])		Number	get one character from the user
@@ -83,7 +60,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  getcharsearch()			Dict	last character search
  getcmdline()			String	return the current command-line
  getcmdpos()			Number	return cursor position in command-line
-@@ -1939,7 +1939,7 @@ haslocaldir( [{winnr} [, {tabnr}]])
+@@ -1942,7 +1942,7 @@ haslocaldir( [{winnr} [, {tabnr}]])
  				Number	TRUE if the window executed |:lcd|
  hasmapto( {what} [, {mode} [, {abbr}]])
  				Number	TRUE if mapping to {what} exists
@@ -92,7 +69,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  histdel( {history} [, {item}])	String	remove an item from a history
  histget( {history} [, {index}])	String	get the item {index} from a history
  histnr( {history})		Number	highest index of a history
-@@ -2223,7 +2223,7 @@ argidx()	The result is the current index
+@@ -2227,7 +2227,7 @@ argidx()	The result is the current index
  		the first file.  argc() - 1 is the last one.  See |arglist|.
  
  							*arglistid()*
@@ -101,16 +78,16 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Return the argument list ID.  This is a number which
  		identifies the argument list being used.  Zero is used for the
  		global argument list.  See |arglist|.
-@@ -2689,7 +2689,7 @@ ch_close({handle})						*ch_close()*
+@@ -2693,7 +2693,7 @@ ch_close({handle})						*ch_close()*
  		Close channel {handle}.  See |channel|.
  		{only available when compiled with the |+channel| feature}
  
 -ch_logfile( {fname} [, {mode}])					*ch_logfile()*
 +ch_logfile({fname} [, {mode}])					*ch_logfile()*
  		Start logging channel activity to {fname}.
- 		When {mode} is omitted or "a" append to the file.
- 		When {mode} is "w" start with an empty file.
-@@ -5991,7 +5991,7 @@ setqflist({list} [, {action}])				*setqf
+ 		When {fname} is an empty string: stop logging.
+ 
+@@ -6010,7 +6010,7 @@ setqflist({list} [, {action}])				*setqf
  
  
  							*setreg()*
@@ -119,14 +96,3 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Set the register {regname} to {value}.
  		{value} may be any value returned by |getreg()|, including 
  		a |List|.
-diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
---- a/runtime/doc/various.txt
-+++ b/runtime/doc/various.txt
-@@ -358,6 +358,7 @@ m  *+hangul_input*	Hangul input support 
-    *+iconv*		Compiled with the |iconv()| function
-    *+iconv/dyn*		Likewise |iconv-dynamic| |/dyn|
- N  *+insert_expand*	|insert_expand| Insert mode completion
-+m  *+job*		|job-control|
- N  *+jumplist*		|jumplist|
- B  *+keymap*		|'keymap'|
- B  *+langmap*		|'langmap'|
