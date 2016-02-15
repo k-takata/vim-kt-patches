@@ -1,6 +1,29 @@
 # HG changeset patch
-# Parent  14542a413020d9db83ad2c8a62c4108cf48caa54
+# Parent  82a3315726aa3479179dc549f8a98d1276aeed30
 
+diff --git a/runtime/doc/channel.txt b/runtime/doc/channel.txt
+--- a/runtime/doc/channel.txt
++++ b/runtime/doc/channel.txt
+@@ -133,7 +133,7 @@ If {mode} is "json" then a message can b
+ This awaits a response from the other side.
+ 
+ When {mode} is "js" this works the same, except that the messages use
+-JavaScript encoding.  See |jsencode()| for the difference.
++JavaScript encoding.  See |js_encode()| for the difference.
+ 
+ To send a message, without handling a response: >
+     call ch_sendexpr(handle, {expr}, 0)
+@@ -268,8 +268,8 @@ To send a message and letting the respon
+ asynchronously: >
+     call ch_sendraw(handle, {string}, {callback})
+ 
+-This {string} can also be JSON, use |jsonencode()| to create it and
+-|jsondecode()| to handle a received JSON message.
++This {string} can also be JSON, use |json_encode()| to create it and
++|json_decode()| to handle a received JSON message.
+ 
+ It is not possible to use |ch_sendexpr()| on a raw channel.
+ 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
@@ -16,6 +39,15 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  assert_fails( {cmd} [, {error}])      none  assert {cmd} fails
  assert_false( {actual} [, {msg}])     none  assert {actual} is false
  assert_true( {actual} [, {msg}])      none  assert {actual} is true
+@@ -1824,7 +1824,7 @@ call( {func}, {arglist} [, {dict}])
+ ceil( {expr})			Float	round {expr} up
+ ch_close( {handle})		none	close a channel
+ ch_logfile( {fname} [, {mode}])	none	start logging channel activity
+-ch_open( {address} [, {argdict})] Number open a channel to {address}
++ch_open( {address} [, {argdict}]) Number open a channel to {address}
+ ch_readraw( {handle})		String	read from channel {handle}
+ ch_sendexpr( {handle}, {expr} [, {callback}])
+ 				any	send {expr} over JSON channel {handle}
 @@ -1855,11 +1855,11 @@ delete( {fname} [, {flags}])	Number	dele
  did_filetype()			Number	TRUE if FileType autocommand event used
  diff_filler( {lnum})		Number	diff filler lines about {lnum}
@@ -51,6 +83,24 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  getcharsearch()			Dict	last character search
  getcmdline()			String	return the current command-line
  getcmdpos()			Number	return cursor position in command-line
+@@ -1939,7 +1939,7 @@ haslocaldir( [{winnr} [, {tabnr}]])
+ 				Number	TRUE if the window executed |:lcd|
+ hasmapto( {what} [, {mode} [, {abbr}]])
+ 				Number	TRUE if mapping to {what} exists
+-histadd( {history},{item})	String	add an item to a history
++histadd( {history}, {item})	String	add an item to a history
+ histdel( {history} [, {item}])	String	remove an item from a history
+ histget( {history} [, {index}])	String	get the item {index} from a history
+ histnr( {history})		Number	highest index of a history
+@@ -2223,7 +2223,7 @@ argidx()	The result is the current index
+ 		the first file.  argc() - 1 is the last one.  See |arglist|.
+ 
+ 							*arglistid()*
+-arglistid([{winnr}, [ {tabnr} ]])
++arglistid([{winnr} [, {tabnr}]])
+ 		Return the argument list ID.  This is a number which
+ 		identifies the argument list being used.  Zero is used for the
+ 		global argument list.  See |arglist|.
 @@ -2689,7 +2689,7 @@ ch_close({handle})						*ch_close()*
  		Close channel {handle}.  See |channel|.
  		{only available when compiled with the |+channel| feature}
@@ -60,6 +110,15 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Start logging channel activity to {fname}.
  		When {mode} is omitted or "a" append to the file.
  		When {mode} is "w" start with an empty file.
+@@ -5991,7 +5991,7 @@ setqflist({list} [, {action}])				*setqf
+ 
+ 
+ 							*setreg()*
+-setreg({regname}, {value} [,{options}])
++setreg({regname}, {value} [, {options}])
+ 		Set the register {regname} to {value}.
+ 		{value} may be any value returned by |getreg()|, including 
+ 		a |List|.
 diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
 --- a/runtime/doc/various.txt
 +++ b/runtime/doc/various.txt
