@@ -37,7 +37,6 @@ if_ruby-remove-allocate-method.patch
 fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
-fix-ruby-warning.patch
 fix-po-msys2.patch
 01_num64.patch
 02_incdec64.patch
