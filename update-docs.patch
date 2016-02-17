@@ -1,6 +1,21 @@
 # HG changeset patch
-# Parent  8d90765fef6f766f698d54384314183ce268b990
+# Parent  e27ee07f31e36fba6f8a2375279bb052c34de585
 
+diff --git a/runtime/doc/change.txt b/runtime/doc/change.txt
+--- a/runtime/doc/change.txt
++++ b/runtime/doc/change.txt
+@@ -409,6 +409,11 @@ CTRL-X			Subtract [count] from the numbe
+ {Visual}CTRL-X		Subtract [count] from the number or alphabetic
+ 			character in the highlighted text.  {not in Vi}
+ 
++			On MS-Windows, this is mapped to cut Visual text
++			|dos-standard-mappings|.  If you want to disable the
++			mapping, use this: >
++				silent! vunmap <C-X>
++<
+ 							*v_g_CTRL-X*
+ {Visual}g CTRL-X	Subtract [count] from the number or alphabetic
+ 			character in the highlighted text. If several lines
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
@@ -23,7 +38,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 -ch_open( {address} [, {argdict})] Number open a channel to {address}
 +ch_open( {address} [, {argdict}]) Number open a channel to {address}
  ch_readraw( {handle})		String	read from channel {handle}
- ch_sendexpr( {handle}, {expr} [, {callback}])
+ ch_sendexpr( {handle}, {expr} [, {options}])
  				any	send {expr} over JSON channel {handle}
 @@ -1858,11 +1858,11 @@ delete( {fname} [, {flags}])	Number	dele
  did_filetype()			Number	TRUE if FileType autocommand event used
@@ -87,7 +102,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Start logging channel activity to {fname}.
  		When {fname} is an empty string: stop logging.
  
-@@ -6010,7 +6010,7 @@ setqflist({list} [, {action}])				*setqf
+@@ -6014,7 +6014,7 @@ setqflist({list} [, {action}])				*setqf
  
  
  							*setreg()*
@@ -96,3 +111,22 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Set the register {regname} to {value}.
  		{value} may be any value returned by |getreg()|, including 
  		a |List|.
+diff --git a/runtime/doc/os_dos.txt b/runtime/doc/os_dos.txt
+--- a/runtime/doc/os_dos.txt
++++ b/runtime/doc/os_dos.txt
+@@ -94,6 +94,7 @@ Shift-Insert	paste text (from clipboard)
+ CTRL-Insert	copy Visual text (to clipboard)			*<C-Insert>*
+ CTRL-Del	cut Visual text (to clipboard)			*<C-Del>*
+ Shift-Del	cut Visual text (to clipboard)			*<S-Del>*
++CTRL-X		cut Visual text (to clipboard)
+ 
+ These mappings accomplish this (Win32 and DJGPP versions of Vim):
+ 
+@@ -102,6 +103,7 @@ Shift-Insert	<M-N><M-T>   "*P	"-d"*P    
+ CTRL-Insert	<M-N><M-U>		"*y
+ Shift-Del	<M-N><M-W>		"*d
+ CTRL-Del	<M-N><M-X>		"*d
++CTRL-X		<C-X>			"*d
+ 
+ Or these mappings (non-Win32 version of Vim):
+ 
