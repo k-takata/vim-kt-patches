@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent 77eb2adaee0cedf71cd7949557fc841b8e177b4a
-# Parent  e53c47128ccfe447e4ef64f0334457cf94e7eb13
+# Parent  ace65a22f6cfa283ae909544b68e4e40f79dd10d
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -11968,7 +11968,7 @@ f_getfsize(typval_T *argvars, typval_T *
+@@ -12384,7 +12384,7 @@ f_getfsize(typval_T *argvars, typval_T *
  	    rettv->vval.v_number = (varnumber_T)st.st_size;
  
  	    /* non-perfect check for overflow */
@@ -200,7 +200,7 @@ diff --git a/src/memline.c b/src/memline.c
  	    mfp->mf_blocknr_max = 0;	    /* no file or empty file */
  	else
  	    mfp->mf_blocknr_max = (blocknr_T)(size / mfp->mf_page_size);
-@@ -4804,7 +4804,7 @@ ml_setflags(buf_T *buf)
+@@ -4803,7 +4803,7 @@ ml_setflags(buf_T *buf)
  ml_encrypt_data(
      memfile_T	*mfp,
      char_u	*data,
@@ -209,7 +209,7 @@ diff --git a/src/memline.c b/src/memline.c
      unsigned	size)
  {
      DATA_BL	*dp = (DATA_BL *)data;
-@@ -4849,7 +4849,7 @@ ml_encrypt_data(
+@@ -4848,7 +4848,7 @@ ml_encrypt_data(
  ml_decrypt_data(
      memfile_T	*mfp,
      char_u	*data,
@@ -218,7 +218,7 @@ diff --git a/src/memline.c b/src/memline.c
      unsigned	size)
  {
      DATA_BL	*dp = (DATA_BL *)data;
-@@ -4883,7 +4883,7 @@ ml_decrypt_data(
+@@ -4882,7 +4882,7 @@ ml_decrypt_data(
   * Return an allocated cryptstate_T *.
   */
      static cryptstate_T *
@@ -286,7 +286,7 @@ diff --git a/src/proto/memline.pro b/src/proto/memline.pro
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -1444,7 +1444,7 @@ struct file_buffer
+@@ -1600,7 +1600,7 @@ struct file_buffer
  
      long	b_mtime;	/* last change time of original file */
      long	b_mtime_read;	/* last change time when reading */
@@ -483,8 +483,8 @@ diff --git a/src/vim.h b/src/vim.h
   * The characters and attributes cached for the screen.
   */
  typedef char_u schar_T;
-@@ -1978,6 +2008,19 @@ typedef int sock_T;
- # endif
+@@ -1976,6 +2006,19 @@ typedef int VimClipboard;	/* This is req
+ # define stat(a,b) (access(a,0) ? -1 : stat(a,b))
  #endif
  
 +/* Use 64-bit stat functions if available. */
