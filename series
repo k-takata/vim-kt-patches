@@ -46,4 +46,5 @@ off_T-disp-with-num64.patch
 fix-gvimext-loadlibrary.patch
 enable-channel-on-win32cui.patch
 update-docs.patch
+fix-mingw-cxx-warnings.patch
 fix-config_cache-removal.patch #+rejected
