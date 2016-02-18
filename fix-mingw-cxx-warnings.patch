@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  63bec600c3e0ef3319feaa74f13a0b125cb8d7c4
+# Parent  47ebaeea3185dab7dbd3fe474179ab9ce23cead0
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -79,3 +79,12 @@ diff --git a/src/if_ole.cpp b/src/if_ole.cpp
  {
  public:
      ~CVim();
+@@ -428,7 +434,7 @@ CVim::Eval(BSTR expr, BSTR *result)
+  * ----------
+  */
+ 
+-class CVimCF : public IClassFactory
++class CVimCF FINAL : public IClassFactory
+ {
+ public:
+     static CVimCF *Create();
