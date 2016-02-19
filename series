@@ -47,4 +47,5 @@ fix-gvimext-loadlibrary.patch
 enable-channel-on-win32cui.patch
 update-docs.patch
 fix-mingw-cxx-warnings.patch
+set-winver-0x0501.patch
 fix-config_cache-removal.patch #+rejected
