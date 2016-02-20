@@ -1,9 +1,11 @@
 # HG changeset patch
 # Parent eff3dca1434d0965c4000460621a8e7cd5a39196
-diff --git a/src/gui_w48.c b/src/gui_w48.c
---- a/src/gui_w48.c
-+++ b/src/gui_w48.c
-@@ -3454,7 +3454,7 @@
+# Parent  db756b8d387d52b82139c11ec80c0fa43064d22b
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -3688,7 +3688,7 @@ gui_mch_browseW(
      WCHAR		*extp = NULL;
      WCHAR		*initdirp = NULL;
      WCHAR		*filterp;
@@ -12,7 +14,7 @@ diff --git a/src/gui_w48.c b/src/gui_w48.c
  
      if (dflt == NULL)
  	fileBuf[0] = NUL;
-@@ -3541,16 +3541,16 @@
+@@ -3775,16 +3775,16 @@ gui_mch_browseW(
  
      /* Convert from UCS2 to 'encoding'. */
      p = utf16_to_enc(fileBuf, NULL);

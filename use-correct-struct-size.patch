@@ -1,9 +1,11 @@
 # HG changeset patch
 # Parent 7ac5bdfc9ac4edc2e3828579fc05d7f0d4a4f253
-diff --git a/src/gui_w48.c b/src/gui_w48.c
---- a/src/gui_w48.c
-+++ b/src/gui_w48.c
-@@ -3476,10 +3476,9 @@
+# Parent  429cbeaf01b6c2b332ae52f05d49a2fe0ef977bb
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -3710,10 +3710,9 @@ gui_mch_browseW(
      filterp = convert_filterW(filter);
  
      vim_memset(&fileStruct, 0, sizeof(OPENFILENAMEW));
