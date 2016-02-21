@@ -1,0 +1,327 @@
+# HG changeset patch
+# Parent  b12acf9f2a9f3b7ea0bdea965a61953f3c31aa20
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -139,26 +139,6 @@ typedef int STARTUPINFO;
+ typedef int PROCESS_INFORMATION;
+ #endif
+ 
+-#ifndef FEAT_GUI_W32
+-/* Undocumented API in kernel32.dll needed to work around dead key bug in
+- * console-mode applications in NT 4.0.  If you switch keyboard layouts
+- * in a console app to a layout that includes dead keys and then hit a
+- * dead key, a call to ToAscii will trash the stack.  My thanks to Ian James
+- * and Michael Dietrich for helping me figure out this workaround.
+- */
+-
+-/* WINAPI BOOL WINAPI GetConsoleKeyboardLayoutNameA(LPSTR); */
+-#ifndef WINAPI
+-# define WINAPI __stdcall
+-#endif
+-#if defined(__BORLANDC__)
+-typedef BOOL (__stdcall *PFNGCKLN)(LPSTR);
+-#else
+-typedef BOOL (WINAPI *PFNGCKLN)(LPSTR);
+-#endif
+-static PFNGCKLN    s_pfnGetConsoleKeyboardLayoutName = NULL;
+-#endif
+-
+ #if defined(__BORLANDC__)
+ /* Strangely Borland uses a non-standard name. */
+ # define wcsicmp(a, b) wcscmpi((a), (b))
+@@ -610,37 +590,7 @@ DWORD g_PlatformId;
+ # ifndef PROTECTED_DACL_SECURITY_INFORMATION
+ #  define PROTECTED_DACL_SECURITY_INFORMATION	0x80000000L
+ # endif
+-
+-/*
+- * These are needed to dynamically load the ADVAPI DLL, which is not
+- * implemented under Windows 95 (and causes VIM to crash)
+- */
+-typedef DWORD (WINAPI *PSNSECINFO) (LPSTR, SE_OBJECT_TYPE,
+-	SECURITY_INFORMATION, PSID, PSID, PACL, PACL);
+-typedef DWORD (WINAPI *PGNSECINFO) (LPSTR, SE_OBJECT_TYPE,
+-	SECURITY_INFORMATION, PSID *, PSID *, PACL *, PACL *,
+-	PSECURITY_DESCRIPTOR *);
+-# ifdef FEAT_MBYTE
+-typedef DWORD (WINAPI *PSNSECINFOW) (LPWSTR, SE_OBJECT_TYPE,
+-	SECURITY_INFORMATION, PSID, PSID, PACL, PACL);
+-typedef DWORD (WINAPI *PGNSECINFOW) (LPWSTR, SE_OBJECT_TYPE,
+-	SECURITY_INFORMATION, PSID *, PSID *, PACL *, PACL *,
+-	PSECURITY_DESCRIPTOR *);
+-# endif
+-
+-static HANDLE advapi_lib = NULL;	/* Handle for ADVAPI library */
+-static PSNSECINFO pSetNamedSecurityInfo;
+-static PGNSECINFO pGetNamedSecurityInfo;
+-# ifdef FEAT_MBYTE
+-static PSNSECINFOW pSetNamedSecurityInfoW;
+-static PGNSECINFOW pGetNamedSecurityInfoW;
+-# endif
+-#endif
+-
+-typedef BOOL (WINAPI *PSETHANDLEINFORMATION)(HANDLE, DWORD, DWORD);
+-
+-static BOOL allowPiping = FALSE;
+-static PSETHANDLEINFORMATION pSetHandleInformation;
++#endif
+ 
+ #ifdef HAVE_ACL
+ /*
+@@ -701,62 +651,9 @@ PlatformId(void)
+ 	    win8_or_later = TRUE;
+ 
+ #ifdef HAVE_ACL
+-	/*
+-	 * Load the ADVAPI runtime if we are on anything
+-	 * other than Windows 95
+-	 */
+-	if (g_PlatformId == VER_PLATFORM_WIN32_NT)
+-	{
+-	    /*
+-	     * do this load.  Problems: Doesn't unload at end of run (this is
+-	     * theoretically okay, since Windows should unload it when VIM
+-	     * terminates).  Should we be using the 'mch_libcall' routines?
+-	     * Seems like a lot of overhead to load/unload ADVAPI32.DLL each
+-	     * time we verify security...
+-	     */
+-	    advapi_lib = vimLoadLib("ADVAPI32.DLL");
+-	    if (advapi_lib != NULL)
+-	    {
+-		pSetNamedSecurityInfo = (PSNSECINFO)GetProcAddress(advapi_lib,
+-						      "SetNamedSecurityInfoA");
+-		pGetNamedSecurityInfo = (PGNSECINFO)GetProcAddress(advapi_lib,
+-						      "GetNamedSecurityInfoA");
+-# ifdef FEAT_MBYTE
+-		pSetNamedSecurityInfoW = (PSNSECINFOW)GetProcAddress(advapi_lib,
+-						      "SetNamedSecurityInfoW");
+-		pGetNamedSecurityInfoW = (PGNSECINFOW)GetProcAddress(advapi_lib,
+-						      "GetNamedSecurityInfoW");
+-# endif
+-		if (pSetNamedSecurityInfo == NULL
+-			|| pGetNamedSecurityInfo == NULL
+-# ifdef FEAT_MBYTE
+-			|| pSetNamedSecurityInfoW == NULL
+-			|| pGetNamedSecurityInfoW == NULL
+-# endif
+-			)
+-		{
+-		    /* If we can't get the function addresses, set advapi_lib
+-		     * to NULL so that we don't use them. */
+-		    FreeLibrary(advapi_lib);
+-		    advapi_lib = NULL;
+-		}
+-		/* Enable privilege for getting or setting SACLs. */
+-		win32_enable_privilege(SE_SECURITY_NAME, TRUE);
+-	    }
+-	}
+-#endif
+-	/*
+-	 * If we are on windows NT, try to load the pipe functions, only
+-	 * available from Win2K.
+-	 */
+-	if (g_PlatformId == VER_PLATFORM_WIN32_NT)
+-	{
+-	    HANDLE kernel32 = GetModuleHandle("kernel32");
+-	    pSetHandleInformation = (PSETHANDLEINFORMATION)GetProcAddress(
+-					    kernel32, "SetHandleInformation");
+-
+-	    allowPiping = pSetHandleInformation != NULL;
+-	}
++	/* Enable privilege for getting or setting SACLs. */
++	win32_enable_privilege(SE_SECURITY_NAME, TRUE);
++#endif
+ 	done = TRUE;
+     }
+ }
+@@ -915,15 +812,6 @@ win32_kbd_patch_key(
+ 
+     vim_memset(abKeystate, 0, sizeof (abKeystate));
+ 
+-    // Should only be non-NULL on NT 4.0
+-    if (s_pfnGetConsoleKeyboardLayoutName != NULL)
+-    {
+-	CHAR szKLID[KL_NAMELENGTH];
+-
+-	if ((*s_pfnGetConsoleKeyboardLayoutName)(szKLID))
+-	    (void)LoadKeyboardLayout(szKLID, KLF_ACTIVATE);
+-    }
+-
+     /* Clear any pending dead keys */
+     ToUnicode(VK_SPACE, MapVirtualKey(VK_SPACE, 0), abKeystate, awAnsiCode, 2, 0);
+ 
+@@ -2449,8 +2337,6 @@ SetConsoleIcon(
+     static void
+ SaveConsoleTitleAndIcon(void)
+ {
+-    GETCONSOLEWINDOWPROC GetConsoleWindowProc;
+-
+     /* Save the original title. */
+     if (!GetConsoleTitle(g_szOrigTitle, sizeof(g_szOrigTitle)))
+ 	return;
+@@ -2462,12 +2348,7 @@ SaveConsoleTitleAndIcon(void)
+      * 2000.  On older operating systems, we can't change the window icon
+      * anyway.
+      */
+-    if ((GetConsoleWindowProc = (GETCONSOLEWINDOWPROC)
+-	    GetProcAddress(GetModuleHandle("KERNEL32.DLL"),
+-		    "GetConsoleWindow")) != NULL)
+-    {
+-	g_hWnd = (*GetConsoleWindowProc)();
+-    }
++    g_hWnd = GetConsoleWindow();
+     if (g_hWnd == NULL)
+ 	return;
+ 
+@@ -2576,11 +2457,6 @@ mch_init(void)
+ #ifdef FEAT_CLIPBOARD
+     win_clip_init();
+ #endif
+-
+-    /* This will be NULL on anything but NT 4.0 */
+-    s_pfnGetConsoleKeyboardLayoutName =
+-	(PFNGCKLN) GetProcAddress(GetModuleHandle("kernel32.dll"),
+-				  "GetConsoleKeyboardLayoutNameA");
+ }
+ 
+ /*
+@@ -3603,7 +3479,7 @@ mch_get_acl(char_u *fname)
+     DWORD   err;
+ 
+     /* This only works on Windows NT and 2000. */
+-    if (g_PlatformId == VER_PLATFORM_WIN32_NT && advapi_lib != NULL)
++    if (g_PlatformId == VER_PLATFORM_WIN32_NT)
+     {
+ 	p = (struct my_acl *)alloc_clear((unsigned)sizeof(struct my_acl));
+ 	if (p != NULL)
+@@ -3616,7 +3492,7 @@ mch_get_acl(char_u *fname)
+ 	    if (wn != NULL)
+ 	    {
+ 		/* Try to retrieve the entire security descriptor. */
+-		err = pGetNamedSecurityInfoW(
++		err = GetNamedSecurityInfoW(
+ 			    wn,			// Abstract filename
+ 			    SE_FILE_OBJECT,	// File Object
+ 			    OWNER_SECURITY_INFORMATION |
+@@ -3632,7 +3508,7 @@ mch_get_acl(char_u *fname)
+ 			err == ERROR_PRIVILEGE_NOT_HELD)
+ 		{
+ 		    /* Retrieve only DACL. */
+-		    (void)pGetNamedSecurityInfoW(
++		    (void)GetNamedSecurityInfoW(
+ 			    wn,
+ 			    SE_FILE_OBJECT,
+ 			    DACL_SECURITY_INFORMATION,
+@@ -3653,7 +3529,7 @@ mch_get_acl(char_u *fname)
+ # endif
+ 	    {
+ 		/* Try to retrieve the entire security descriptor. */
+-		err = pGetNamedSecurityInfo(
++		err = GetNamedSecurityInfo(
+ 			    (LPSTR)fname,	// Abstract filename
+ 			    SE_FILE_OBJECT,	// File Object
+ 			    OWNER_SECURITY_INFORMATION |
+@@ -3669,7 +3545,7 @@ mch_get_acl(char_u *fname)
+ 			err == ERROR_PRIVILEGE_NOT_HELD)
+ 		{
+ 		    /* Retrieve only DACL. */
+-		    (void)pGetNamedSecurityInfo(
++		    (void)GetNamedSecurityInfo(
+ 			    (LPSTR)fname,
+ 			    SE_FILE_OBJECT,
+ 			    DACL_SECURITY_INFORMATION,
+@@ -3727,7 +3603,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+     struct my_acl   *p = (struct my_acl *)acl;
+     SECURITY_INFORMATION    sec_info = 0;
+ 
+-    if (p != NULL && advapi_lib != NULL)
++    if (p != NULL)
+     {
+ # ifdef FEAT_MBYTE
+ 	WCHAR	*wn = NULL;
+@@ -3755,7 +3631,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+ 	    wn = enc_to_utf16(fname, NULL);
+ 	if (wn != NULL)
+ 	{
+-	    (void)pSetNamedSecurityInfoW(
++	    (void)SetNamedSecurityInfoW(
+ 			wn,			// Abstract filename
+ 			SE_FILE_OBJECT,		// File Object
+ 			sec_info,
+@@ -3769,7 +3645,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+ 	else
+ # endif
+ 	{
+-	    (void)pSetNamedSecurityInfo(
++	    (void)SetNamedSecurityInfo(
+ 			(LPSTR)fname,		// Abstract filename
+ 			SE_FILE_OBJECT,		// File Object
+ 			sec_info,
+@@ -4447,11 +4323,11 @@ mch_system_piped(char *cmd, int options)
+ 
+     if ( ! CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0)
+ 	/* Ensure the read handle to the pipe for STDOUT is not inherited. */
+-       || ! pSetHandleInformation(g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0)
++       || ! SetHandleInformation(g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0)
+ 	/* Create a pipe for the child process's STDIN. */
+        || ! CreatePipe(&g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &saAttr, 0)
+ 	/* Ensure the write handle to the pipe for STDIN is not inherited. */
+-       || ! pSetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0) )
++       || ! SetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0) )
+     {
+ 	CloseHandle(g_hChildStd_IN_Rd);
+ 	CloseHandle(g_hChildStd_IN_Wr);
+@@ -4701,7 +4577,7 @@ mch_system_piped(char *cmd, int options)
+ mch_system(char *cmd, int options)
+ {
+     /* if we can pipe and the shelltemp option is off */
+-    if (allowPiping && !p_stmp)
++    if (!p_stmp)
+ 	return mch_system_piped(cmd, options);
+     else
+ 	return mch_system_classic(cmd, options);
+@@ -4954,7 +4830,7 @@ mch_call_shell(
+ 	{
+ 	    cmdlen = (
+ #ifdef FEAT_GUI_W32
+-		(allowPiping && !p_stmp ? 0 : STRLEN(vimrun_path)) +
++		(!p_stmp ? 0 : STRLEN(vimrun_path)) +
+ #endif
+ 		STRLEN(p_sh) + STRLEN(p_shcf) + STRLEN(cmd) + 10);
+ 
+@@ -4972,7 +4848,7 @@ mch_call_shell(
+ 			    MB_ICONWARNING);
+ 		    need_vimrun_warning = FALSE;
+ 		}
+-		if (!s_dont_use_vimrun && (!allowPiping || p_stmp))
++		if (!s_dont_use_vimrun && p_stmp)
+ 		    /* Use vimrun to execute the command.  It opens a console
+ 		     * window, which can be closed without killing Vim. */
+ 		    vim_snprintf((char *)newcmd, cmdlen, "%s%s%s %s %s",
+@@ -4996,8 +4872,7 @@ mch_call_shell(
+     /* Print the return value, unless "vimrun" was used. */
+     if (x != 0 && !(options & SHELL_SILENT) && !emsg_silent
+ #if defined(FEAT_GUI_W32)
+-		&& ((options & SHELL_DOOUT) || s_dont_use_vimrun
+-						  || (allowPiping && !p_stmp))
++		&& ((options & SHELL_DOOUT) || s_dont_use_vimrun || !p_stmp)
+ #endif
+ 	    )
+     {
+@@ -5067,11 +4942,11 @@ mch_start_job(char *cmd, job_T *job, job
+     saAttr.bInheritHandle = TRUE;
+     saAttr.lpSecurityDescriptor = NULL;
+     if (!CreatePipe(&ifd[0], &ifd[1], &saAttr, 0)
+-       || !pSetHandleInformation(ifd[1], HANDLE_FLAG_INHERIT, 0)
++       || !SetHandleInformation(ifd[1], HANDLE_FLAG_INHERIT, 0)
+        || !CreatePipe(&ofd[0], &ofd[1], &saAttr, 0)
+-       || !pSetHandleInformation(ofd[0], HANDLE_FLAG_INHERIT, 0)
++       || !SetHandleInformation(ofd[0], HANDLE_FLAG_INHERIT, 0)
+        || !CreatePipe(&efd[0], &efd[1], &saAttr, 0)
+-       || !pSetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0))
++       || !SetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0))
+ 	goto failed;
+     si.dwFlags |= STARTF_USESTDHANDLES;
+     si.hStdInput = ifd[0];
