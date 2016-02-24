@@ -1,6 +1,62 @@
 # HG changeset patch
 # Parent  9d8fda4afd85ff6667a407d5dabdc9e5fbf15bcf
 
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -40,6 +40,8 @@ 1.1 Variable types ~
+ There are nine types of variables:
+ 
+ Number		A 32 or 64 bit signed number.  |expr-number| *Number*
++		64-bit Number is avaliable only when compiled with the
++		|+num64| feature.
+ 		Examples:  -123  0x10  0177
+ 
+ Float		A floating point number. |floating-point-format| *Float*
+@@ -843,6 +845,11 @@ When dividing a Number by zero the resul
+ 	 <0 / 0  = -0x7fffffff	(like negative infinity)
+ 	(before Vim 7.2 it was always 0x7fffffff)
+ 
++When 64-bit Number support is enabled:
++	  0 / 0  = -0x8000000000000000	(like NaN for Float)
++	 >0 / 0  =  0x7fffffffffffffff	(like positive infinity)
++	 <0 / 0  = -0x7fffffffffffffff	(like negative infinity)
++
+ When the righthand side of '%' is zero, the result is 0.
+ 
+ None of these work for |Funcref|s.
+@@ -3380,8 +3387,10 @@ float2nr({expr})					*float2nr()*
+ 		decimal point.
+ 		{expr} must evaluate to a |Float| or a Number.
+ 		When the value of {expr} is out of range for a |Number| the
+-		result is truncated to 0x7fffffff or -0x7fffffff.  NaN results
+-		in -0x80000000.
++		result is truncated to 0x7fffffff or -0x7fffffff (or when
++		64-bit Number support is enabled, 0x7fffffffffffffff or
++		-0x7fffffffffffffff.  NaN results in -0x80000000 (or when
++		64-bit Number support is enabled, -0x8000000000000000).
+ 		Examples: >
+ 			echo float2nr(3.95)
+ <			3  >
+@@ -7361,6 +7370,7 @@ multi_lang		Compiled with support for mu
+ mzscheme		Compiled with MzScheme interface |mzscheme|.
+ netbeans_enabled	Compiled with support for |netbeans| and connected.
+ netbeans_intg		Compiled with support for |netbeans|.
++num64			Compiled with 64-bit |Number| support.
+ ole			Compiled with OLE automation support for Win32.
+ os2			OS/2 version of Vim.
+ path_extra		Compiled with up/downwards search in 'path' and 'tags'
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -390,6 +390,7 @@ N  *+multi_lang*	non-English language su
+ m  *+mzscheme*		Mzscheme interface |mzscheme|
+ m  *+mzscheme/dyn*	Mzscheme interface |mzscheme-dynamic| |/dyn|
+ m  *+netbeans_intg*	|netbeans|
++   *+num64*		64-bit Number support |Number|
+ m  *+ole*		Win32 GUI only: |ole-interface|
+ N  *+path_extra*	Up/downwards search in 'path' and 'tags'
+ m  *+perl*		Perl interface |perl|
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
@@ -850,6 +906,74 @@ diff --git a/src/ops.c b/src/ops.c
      if (use_sandbox)
  	--sandbox;
  
+@@ -5422,8 +5422,8 @@ do_addsub(
+     char_u	buf2[NUMBUFLEN];
+     int		pre;		/* 'X'/'x': hex; '0': octal; 'B'/'b': bin */
+     static int	hexupper = FALSE;	/* 0xABC */
+-    unsigned long n;
+-    long_u	oldn;
++    uvarnumber_T	n;
++    uvarnumber_T	oldn;
+     char_u	*ptr;
+     int		c;
+     int		todel;
+@@ -5629,9 +5629,9 @@ do_addsub(
+ 
+ 	oldn = n;
+ 	if (subtract)
+-	    n -= (unsigned long)Prenum1;
++	    n -= (uvarnumber_T)Prenum1;
+ 	else
+-	    n += (unsigned long)Prenum1;
++	    n += (uvarnumber_T)Prenum1;
+ 	/* handle wraparound for decimal numbers */
+ 	if (!pre)
+ 	{
+@@ -5639,7 +5639,7 @@ do_addsub(
+ 	    {
+ 		if (n > oldn)
+ 		{
+-		    n = 1 + (n ^ (unsigned long)-1);
++		    n = 1 + (n ^ (uvarnumber_T)-1);
+ 		    negative ^= TRUE;
+ 		}
+ 	    }
+@@ -5648,7 +5648,7 @@ do_addsub(
+ 		/* add */
+ 		if (n < oldn)
+ 		{
+-		    n = (n ^ (unsigned long)-1);
++		    n = (n ^ (uvarnumber_T)-1);
+ 		    negative ^= TRUE;
+ 		}
+ 	    }
+@@ -5724,7 +5724,7 @@ do_addsub(
+ 	{
+ 	    int i;
+ 	    int bit = 0;
+-	    int bits = sizeof(unsigned long) * 8;
++	    int bits = sizeof(uvarnumber_T) * 8;
+ 
+ 	    /* leading zeros */
+ 	    for (bit = bits; bit > 0; bit--)
+@@ -5736,13 +5736,13 @@ do_addsub(
+ 	    buf2[i] = '\0';
+ 	}
+ 	else if (pre == 0)
+-	    sprintf((char *)buf2, "%lu", n);
++	    sprintf((char *)buf2, "%"VARNUMBER_FMT"u", n);
+ 	else if (pre == '0')
+-	    sprintf((char *)buf2, "%lo", n);
++	    sprintf((char *)buf2, "%"VARNUMBER_FMT"o", n);
+ 	else if (pre && hexupper)
+-	    sprintf((char *)buf2, "%lX", n);
++	    sprintf((char *)buf2, "%"VARNUMBER_FMT"X", n);
+ 	else
+-	    sprintf((char *)buf2, "%lx", n);
++	    sprintf((char *)buf2, "%"VARNUMBER_FMT"x", n);
+ 	length -= (int)STRLEN(buf2);
+ 
+ 	/*
 @@ -6835,7 +6835,7 @@ clear_oparg(oparg_T *oap)
      vim_memset(oap, 0, sizeof(oparg_T));
  }
