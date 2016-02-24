@@ -1,8 +1,10 @@
+# HG changeset patch
+# Parent  7bea1e7e626163c886836db1f838da0324a126c6
+
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
-index 97ad6b0..e03295c 100644
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -2946,6 +2946,29 @@ on_select_tab(
+@@ -3489,6 +3489,33 @@ on_select_tab(
  }
  
  /*
@@ -11,7 +13,11 @@ index 97ad6b0..e03295c 100644
 +    static void
 +on_tab_reordered(
 +	GtkNotebook	*notebook UNUSED,
++# if GTK_CHECK_VERSION(3,0,0)
++	gpointer	*page UNUSED,
++# else
 +	GtkNotebookPage *page UNUSED,
++# endif
 +	gint		idx,
 +	gpointer	data UNUSED)
 +{
@@ -32,7 +38,7 @@ index 97ad6b0..e03295c 100644
   * Show or hide the tabline.
   */
      void
-@@ -3020,6 +3043,9 @@ gui_mch_update_tabline(void)
+@@ -3574,6 +3601,9 @@ gui_mch_update_tabline(void)
  		    page,
  		    event_box,
  		    nr++);
@@ -42,27 +48,30 @@ index 97ad6b0..e03295c 100644
  	}
  
  	event_box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(gui.tabline), page);
-@@ -3387,11 +3413,15 @@ gui_mch_init(void)
- 	gtk_misc_set_padding(GTK_MISC(label), 2, 2);
+@@ -4007,14 +4037,19 @@ gui_mch_init(void)
+ # endif
  	gtk_container_add(GTK_CONTAINER(event_box), label);
  	gtk_notebook_set_tab_label(GTK_NOTEBOOK(gui.tabline), page, event_box);
 +	gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(gui.tabline), page, TRUE);
      }
  
+ # if GTK_CHECK_VERSION(3,0,0)
+     g_signal_connect(G_OBJECT(gui.tabline), "switch-page",
+ 		     G_CALLBACK(on_select_tab), NULL);
++    g_signal_connect(GTK_OBJECT(gui.tabline), "page-reordered",
++		     G_CALLBACK(on_tab_reordered), NULL);
+ # else
      gtk_signal_connect(GTK_OBJECT(gui.tabline), "switch_page",
  		       GTK_SIGNAL_FUNC(on_select_tab), NULL);
- 
 +    gtk_signal_connect(GTK_OBJECT(gui.tabline), "page-reordered",
 +		       GTK_SIGNAL_FUNC(on_tab_reordered), NULL);
-+
+ # endif
+ 
      /* Create a popup menu for the tab line and connect it. */
-     tabline_menu = create_tabline_menu();
-     gtk_signal_connect_object(GTK_OBJECT(gui.tabline), "button_press_event",
 diff --git a/src/gui_w32.c b/src/gui_w32.c
-index 4fbf70e..4b8f5c6 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4427,6 +4427,34 @@ initialise_tabline(void)
+@@ -8506,6 +8506,34 @@ initialise_tabline(void)
  # endif
  }
  
@@ -97,7 +106,7 @@ index 4fbf70e..4b8f5c6 100644
      static LRESULT CALLBACK
  tabline_wndproc(
      HWND hwnd,
-@@ -4434,7 +4462,73 @@ tabline_wndproc(
+@@ -8513,7 +8541,73 @@ tabline_wndproc(
      WPARAM wParam,
      LPARAM lParam)
  {
