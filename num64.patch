@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  9d8fda4afd85ff6667a407d5dabdc9e5fbf15bcf
+# Parent  dfb0184148e5eb0727e8acdda1db39139b6fbb3c
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -25,7 +25,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  When the righthand side of '%' is zero, the result is 0.
  
  None of these work for |Funcref|s.
-@@ -3380,8 +3387,10 @@ float2nr({expr})					*float2nr()*
+@@ -3381,8 +3388,10 @@ float2nr({expr})					*float2nr()*
  		decimal point.
  		{expr} must evaluate to a |Float| or a Number.
  		When the value of {expr} is out of range for a |Number| the
@@ -38,7 +38,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Examples: >
  			echo float2nr(3.95)
  <			3  >
-@@ -7361,6 +7370,7 @@ multi_lang		Compiled with support for mu
+@@ -7369,6 +7378,7 @@ multi_lang		Compiled with support for mu
  mzscheme		Compiled with MzScheme interface |mzscheme|.
  netbeans_enabled	Compiled with support for |netbeans| and connected.
  netbeans_intg		Compiled with support for |netbeans|.
@@ -46,6 +46,17 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  ole			Compiled with OLE automation support for Win32.
  os2			OS/2 version of Vim.
  path_extra		Compiled with up/downwards search in 'path' and 'tags'
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
+@@ -1254,6 +1254,7 @@
+ +mzscheme	various.txt	/*+mzscheme*
+ +mzscheme/dyn	various.txt	/*+mzscheme\/dyn*
+ +netbeans_intg	various.txt	/*+netbeans_intg*
+++num64	various.txt	/*+num64*
+ +ole	various.txt	/*+ole*
+ +path_extra	various.txt	/*+path_extra*
+ +perl	various.txt	/*+perl*
 diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
 --- a/runtime/doc/various.txt
 +++ b/runtime/doc/various.txt
