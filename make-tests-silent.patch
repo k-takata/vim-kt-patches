@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  3c77184c2569829805427ef6c8a7e6e227e54b00
+# Parent  95d6a4b65f6fecabde94139b24063a8b3597317b
 
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 --- a/src/testdir/Make_dos.mak
@@ -14,7 +14,7 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 +	move $(*B).in $(*B).in.bak > nul
 +	copy $(DOSTMP)\$(*B).in $(*B).in > nul
 +	copy $(*B).ok test.ok > nul
- 	$(VIMPROG) -u dos.vim -U NONE --noplugin -s dotest.in $(*B).in
+ 	$(VIMPROG) -u dos.vim $(NO_PLUGIN) -s dotest.in $(*B).in
 -	-@if exist test.out MOVE /y test.out $(DOSTMP)\$(*B).out
 -	-@if exist $(*B).in.bak move /y $(*B).in.bak $(*B).in
 +	-@if exist test.out MOVE /y test.out $(DOSTMP)\$(*B).out > nul
@@ -23,7 +23,7 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
  	-@if exist Xdir1 rd /s /q Xdir1
  	-@if exist Xfind rd /s /q Xfind
 @@ -58,10 +58,10 @@ win32:	nolog $(SCRIPTS_FIRST) $(SCRIPTS)
- 	$(VIMPROG) -u dos.vim -U NONE --noplugin "+set ff=unix|f test.out|wq" \
+ 	$(VIMPROG) -u dos.vim $(NO_PLUGIN) "+set ff=unix|f test.out|wq" \
  		$(DOSTMP)\$(*B).out
  	@diff test.out $*.ok & if errorlevel 1 \
 -		( move /y test.out $*.failed \
