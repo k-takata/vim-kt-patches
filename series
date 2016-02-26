@@ -45,5 +45,4 @@ enable-channel-on-win32cui.patch
 fix-mingw-cxx-warnings.patch
 drop-support-for-win9x.patch
 fix-not-a-term-doc.patch
-msdos-doc.patch
 fix-config_cache-removal.patch #+rejected
