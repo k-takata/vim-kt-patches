@@ -1,0 +1,46 @@
+# HG changeset patch
+# Parent  ad0f7a366373158c586bd4c3dcf8dcd6a3301a99
+
+diff --git a/src/testdir/test_json.vim b/src/testdir/test_json.vim
+--- a/src/testdir/test_json.vim
++++ b/src/testdir/test_json.vim
+@@ -82,8 +82,8 @@ func Test_json_encode()
+ 
+   if has('multi_byte')
+     call assert_equal(s:jsonmb, json_encode(s:varmb))
+-    call assert_equal(s:varsp1, json_decode(s:jsonsp1))
+-    call assert_equal(s:varsp2, json_decode(s:jsonsp2))
++    "call assert_equal(s:jsonsp1, json_encode(s:varsp1))
++    "call assert_equal(s:jsonsp2, json_encode(s:varsp2))
+   endif
+ 
+   call assert_equal(s:jsonnr, json_encode(s:varnr))
+@@ -120,8 +120,8 @@ func Test_json_decode()
+ 
+   if has('multi_byte')
+     call assert_equal(s:varmb, json_decode(s:jsonmb))
+-    call assert_equal(s:varsp1, js_decode(s:jsonsp1))
+-    call assert_equal(s:varsp2, js_decode(s:jsonsp2))
++    call assert_equal(s:varsp1, json_decode(s:jsonsp1))
++    call assert_equal(s:varsp2, json_decode(s:jsonsp2))
+   endif
+ 
+   call assert_equal(s:varnr, json_decode(s:jsonnr))
+@@ -185,6 +185,8 @@ func Test_js_encode()
+ 
+   if has('multi_byte')
+     call assert_equal(s:jsonmb, js_encode(s:varmb))
++    "call assert_equal(s:jsonsp1, js_encode(s:varsp1))
++    "call assert_equal(s:jsonsp2, js_encode(s:varsp2))
+   endif
+ 
+   call assert_equal(s:jsonnr, js_encode(s:varnr))
+@@ -223,6 +225,8 @@ func Test_js_decode()
+ 
+   if has('multi_byte')
+     call assert_equal(s:varmb, js_decode(s:jsonmb))
++    call assert_equal(s:varsp1, js_decode(s:jsonsp1))
++    call assert_equal(s:varsp2, js_decode(s:jsonsp2))
+   endif
+ 
+   call assert_equal(s:varnr, js_decode(s:jsonnr))
