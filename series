@@ -42,7 +42,6 @@ num64.patch
 num64-mark.diff
 off_T-disp-with-num64.patch
 enable-channel-on-win32cui.patch
-fix-ansi-style.patch
 fix-char_u-usage.patch
 fix-coding-style-in-if_ruby.patch
 use-getsockopt-on-win32.patch
