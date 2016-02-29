@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  b12acf9f2a9f3b7ea0bdea965a61953f3c31aa20
+# Parent  1d9f0656a9074ebcdc5d4cd21809de5540042dd8
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -152,7 +152,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      /* Clear any pending dead keys */
      ToUnicode(VK_SPACE, MapVirtualKey(VK_SPACE, 0), abKeystate, awAnsiCode, 2, 0);
  
-@@ -2449,8 +2337,6 @@ SetConsoleIcon(
+@@ -2429,8 +2317,6 @@ SetConsoleIcon(
      static void
  SaveConsoleTitleAndIcon(void)
  {
@@ -161,7 +161,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      /* Save the original title. */
      if (!GetConsoleTitle(g_szOrigTitle, sizeof(g_szOrigTitle)))
  	return;
-@@ -2462,12 +2348,7 @@ SaveConsoleTitleAndIcon(void)
+@@ -2442,12 +2328,7 @@ SaveConsoleTitleAndIcon(void)
       * 2000.  On older operating systems, we can't change the window icon
       * anyway.
       */
@@ -175,7 +175,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (g_hWnd == NULL)
  	return;
  
-@@ -2576,11 +2457,6 @@ mch_init(void)
+@@ -2556,11 +2437,6 @@ mch_init(void)
  #ifdef FEAT_CLIPBOARD
      win_clip_init();
  #endif
@@ -187,7 +187,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  /*
-@@ -3603,7 +3479,7 @@ mch_get_acl(char_u *fname)
+@@ -3583,7 +3459,7 @@ mch_get_acl(char_u *fname)
      DWORD   err;
  
      /* This only works on Windows NT and 2000. */
@@ -196,7 +196,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	p = (struct my_acl *)alloc_clear((unsigned)sizeof(struct my_acl));
  	if (p != NULL)
-@@ -3616,7 +3492,7 @@ mch_get_acl(char_u *fname)
+@@ -3596,7 +3472,7 @@ mch_get_acl(char_u *fname)
  	    if (wn != NULL)
  	    {
  		/* Try to retrieve the entire security descriptor. */
@@ -205,7 +205,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			    wn,			// Abstract filename
  			    SE_FILE_OBJECT,	// File Object
  			    OWNER_SECURITY_INFORMATION |
-@@ -3632,7 +3508,7 @@ mch_get_acl(char_u *fname)
+@@ -3612,7 +3488,7 @@ mch_get_acl(char_u *fname)
  			err == ERROR_PRIVILEGE_NOT_HELD)
  		{
  		    /* Retrieve only DACL. */
@@ -214,7 +214,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			    wn,
  			    SE_FILE_OBJECT,
  			    DACL_SECURITY_INFORMATION,
-@@ -3653,7 +3529,7 @@ mch_get_acl(char_u *fname)
+@@ -3633,7 +3509,7 @@ mch_get_acl(char_u *fname)
  # endif
  	    {
  		/* Try to retrieve the entire security descriptor. */
@@ -223,7 +223,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			    (LPSTR)fname,	// Abstract filename
  			    SE_FILE_OBJECT,	// File Object
  			    OWNER_SECURITY_INFORMATION |
-@@ -3669,7 +3545,7 @@ mch_get_acl(char_u *fname)
+@@ -3649,7 +3525,7 @@ mch_get_acl(char_u *fname)
  			err == ERROR_PRIVILEGE_NOT_HELD)
  		{
  		    /* Retrieve only DACL. */
@@ -232,7 +232,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			    (LPSTR)fname,
  			    SE_FILE_OBJECT,
  			    DACL_SECURITY_INFORMATION,
-@@ -3727,7 +3603,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+@@ -3707,7 +3583,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
      struct my_acl   *p = (struct my_acl *)acl;
      SECURITY_INFORMATION    sec_info = 0;
  
@@ -241,7 +241,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  # ifdef FEAT_MBYTE
  	WCHAR	*wn = NULL;
-@@ -3755,7 +3631,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+@@ -3735,7 +3611,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
  	    wn = enc_to_utf16(fname, NULL);
  	if (wn != NULL)
  	{
@@ -250,7 +250,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			wn,			// Abstract filename
  			SE_FILE_OBJECT,		// File Object
  			sec_info,
-@@ -3769,7 +3645,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+@@ -3749,7 +3625,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
  	else
  # endif
  	{
@@ -259,7 +259,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			(LPSTR)fname,		// Abstract filename
  			SE_FILE_OBJECT,		// File Object
  			sec_info,
-@@ -4447,11 +4323,11 @@ mch_system_piped(char *cmd, int options)
+@@ -4427,11 +4303,11 @@ mch_system_piped(char_u *cmd, int option
  
      if ( ! CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0)
  	/* Ensure the read handle to the pipe for STDOUT is not inherited. */
@@ -273,8 +273,8 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	CloseHandle(g_hChildStd_IN_Rd);
  	CloseHandle(g_hChildStd_IN_Wr);
-@@ -4701,7 +4577,7 @@ mch_system_piped(char *cmd, int options)
- mch_system(char *cmd, int options)
+@@ -4681,7 +4557,7 @@ mch_system_piped(char_u *cmd, int option
+ mch_system(char_u *cmd, int options)
  {
      /* if we can pipe and the shelltemp option is off */
 -    if (allowPiping && !p_stmp)
@@ -282,7 +282,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	return mch_system_piped(cmd, options);
      else
  	return mch_system_classic(cmd, options);
-@@ -4954,7 +4830,7 @@ mch_call_shell(
+@@ -4934,7 +4810,7 @@ mch_call_shell(
  	{
  	    cmdlen = (
  #ifdef FEAT_GUI_W32
@@ -291,7 +291,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  		STRLEN(p_sh) + STRLEN(p_shcf) + STRLEN(cmd) + 10);
  
-@@ -4972,7 +4848,7 @@ mch_call_shell(
+@@ -4952,7 +4828,7 @@ mch_call_shell(
  			    MB_ICONWARNING);
  		    need_vimrun_warning = FALSE;
  		}
@@ -300,7 +300,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		    /* Use vimrun to execute the command.  It opens a console
  		     * window, which can be closed without killing Vim. */
  		    vim_snprintf((char *)newcmd, cmdlen, "%s%s%s %s %s",
-@@ -4996,8 +4872,7 @@ mch_call_shell(
+@@ -4976,8 +4852,7 @@ mch_call_shell(
      /* Print the return value, unless "vimrun" was used. */
      if (x != 0 && !(options & SHELL_SILENT) && !emsg_silent
  #if defined(FEAT_GUI_W32)
@@ -310,7 +310,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    )
      {
-@@ -5067,11 +4942,11 @@ mch_start_job(char *cmd, job_T *job, job
+@@ -5047,11 +4922,11 @@ mch_start_job(char_u *cmd, job_T *job, j
      saAttr.bInheritHandle = TRUE;
      saAttr.lpSecurityDescriptor = NULL;
      if (!CreatePipe(&ifd[0], &ifd[1], &saAttr, 0)
