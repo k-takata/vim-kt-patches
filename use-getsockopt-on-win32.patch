@@ -1,0 +1,65 @@
+# HG changeset patch
+# Parent  367026a445567038c94adb5d52c81fd961f98884
+
+diff --git a/src/channel.c b/src/channel.c
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -37,6 +37,7 @@
+ # define sock_write(sd, buf, len) send((SOCKET)sd, buf, len, 0)
+ # define sock_read(sd, buf, len) recv((SOCKET)sd, buf, len, 0)
+ # define sock_close(sd) closesocket((SOCKET)sd)
++typedef int socklen_t;
+ #else
+ # include <netdb.h>
+ # include <netinet/in.h>
+@@ -681,10 +682,8 @@ channel_open(
+ 	    struct timeval	tv;
+ 	    fd_set		rfds;
+ 	    fd_set		wfds;
+-#ifndef WIN32
+ 	    int			so_error = 0;
+ 	    socklen_t		so_error_len = sizeof(so_error);
+-#endif
+ 
+ 	    FD_ZERO(&rfds);
+ 	    FD_SET(sd, &rfds);
+@@ -711,12 +710,9 @@ channel_open(
+ 		return NULL;
+ 	    }
+ 
+-#ifdef WIN32
+ 	    /* On Win32: select() is expected to work and wait for up to the
+-	     * waittime for the socket to be open. */
+-	    if (!FD_ISSET(sd, &wfds) || ret == 0)
+-#else
+-	    /* On Linux-like systems: See socket(7) for the behavior
++	     * waittime for the socket to be open.
++	     * On Linux-like systems: See socket(7) for the behavior
+ 	     * After putting the socket in non-blocking mode, connect() will
+ 	     * return EINPROGRESS, select() will not wait (as if writing is
+ 	     * possible), need to use getsockopt() to check if the socket is
+@@ -726,13 +722,13 @@ channel_open(
+ 	    if (FD_ISSET(sd, &rfds) && FD_ISSET(sd, &wfds))
+ 	    {
+ 		ret = getsockopt(sd,
+-			    SOL_SOCKET, SO_ERROR, &so_error, &so_error_len);
++		    SOL_SOCKET, SO_ERROR, (void *)&so_error, &so_error_len);
+ 		if (ret < 0 || (so_error != 0
+ 			&& so_error != EWOULDBLOCK
+ 			&& so_error != ECONNREFUSED
+-# ifdef EINPROGRESS
++#ifdef EINPROGRESS
+ 			&& so_error != EINPROGRESS
+-# endif
++#endif
+ 			))
+ 		{
+ 		    ch_errorn(channel,
+@@ -746,7 +742,6 @@ channel_open(
+ 	    }
+ 
+ 	    if (!FD_ISSET(sd, &wfds) || so_error != 0)
+-#endif
+ 	    {
+ #ifndef WIN32
+ 		struct  timeval end_tv;

@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  58600059c8c7e7abd7ddbfa36e69c8e0b577ceba
+
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -6461,7 +6461,7 @@ have_dollars(int num, char_u **file)
+  * destination exists.
+  */
+     int
+-mch_rename(const char *src, *dest)
++mch_rename(const char *src, const char *dest)
+ {
+     struct stat	    st;
+ 

@@ -1,0 +1,162 @@
+# HG changeset patch
+# Parent  4a671d384fa7dfbc2e9cc36283b63fa1d351b8b8
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -15202,7 +15202,7 @@ f_job_start(typval_T *argvars UNUSED, ty
+ # ifdef FEAT_CHANNEL
+     ch_logs(NULL, "Starting job: %s", (char *)cmd);
+ # endif
+-    mch_start_job((char *)cmd, job, &opt);
++    mch_start_job(cmd, job, &opt);
+ #endif
+ 
+ theend:
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -4044,7 +4044,7 @@ mch_set_winsize_now(void)
+ 
+     static BOOL
+ vim_create_process(
+-    char		*cmd,
++    char_u		*cmd,
+     BOOL		inherit_handles,
+     DWORD		flags,
+     STARTUPINFO		*si,
+@@ -4053,7 +4053,7 @@ vim_create_process(
+ #  ifdef FEAT_MBYTE
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+-	WCHAR	*wcmd = enc_to_utf16((char_u *)cmd, NULL);
++	WCHAR	*wcmd = enc_to_utf16(cmd, NULL);
+ 
+ 	if (wcmd != NULL)
+ 	{
+@@ -4076,7 +4076,7 @@ vim_create_process(
+ #endif
+     return CreateProcess(
+ 	NULL,			/* Executable name */
+-	cmd,			/* Command to execute */
++	(char *)cmd,		/* Command to execute */
+ 	NULL,			/* Process security attributes */
+ 	NULL,			/* Thread security attributes */
+ 	inherit_handles,	/* Inherit handles */
+@@ -4099,7 +4099,7 @@ vim_create_process(
+  *    4. Prompt the user to press a key to close the console window
+  */
+     static int
+-mch_system_classic(char *cmd, int options)
++mch_system_classic(char_u *cmd, int options)
+ {
+     STARTUPINFO		si;
+     PROCESS_INFORMATION pi;
+@@ -4392,7 +4392,7 @@ dump_pipe(int	    options,
+  * for communication and doesn't open any new window.
+  */
+     static int
+-mch_system_piped(char *cmd, int options)
++mch_system_piped(char_u *cmd, int options)
+ {
+     STARTUPINFO		si;
+     PROCESS_INFORMATION pi;
+@@ -4414,9 +4414,9 @@ mch_system_piped(char *cmd, int options)
+     int		c;
+     int		noread_cnt = 0;
+     garray_T	ga;
+-    int	    delay = 1;
++    int		delay = 1;
+     DWORD	buffer_off = 0;	/* valid bytes in buffer[] */
+-    char	*p = NULL;
++    char_u	*p = NULL;
+ 
+     SECURITY_ATTRIBUTES saAttr;
+ 
+@@ -4459,9 +4459,9 @@ mch_system_piped(char *cmd, int options)
+ 
+     if (cmd != NULL)
+     {
+-	p = (char *)vim_strsave((char_u *)cmd);
++	p = vim_strsave(cmd);
+ 	if (p != NULL)
+-	    unescape_shellxquote((char_u *)p, p_sxe);
++	    unescape_shellxquote(p, p_sxe);
+ 	else
+ 	    p = cmd;
+     }
+@@ -4678,7 +4678,7 @@ mch_system_piped(char *cmd, int options)
+ }
+ 
+     static int
+-mch_system(char *cmd, int options)
++mch_system(char_u *cmd, int options)
+ {
+     /* if we can pipe and the shelltemp option is off */
+     if (allowPiping && !p_stmp)
+@@ -4690,7 +4690,7 @@ mch_system(char *cmd, int options)
+ 
+ # ifdef FEAT_MBYTE
+     static int
+-mch_system(char *cmd, int options)
++mch_system(char_u *cmd, int options)
+ {
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+@@ -4705,7 +4705,7 @@ mch_system(char *cmd, int options)
+     return system(cmd);
+ }
+ # else
+-#  define mch_system(c, o) system(c)
++#  define mch_system(c, o) system((char *)c)
+ # endif
+ 
+ #endif
+@@ -4801,7 +4801,7 @@ mch_call_shell(
+ 
+     if (cmd == NULL)
+     {
+-	x = mch_system((char *)p_sh, options);
++	x = mch_system(p_sh, options);
+     }
+     else
+     {
+@@ -4908,7 +4908,7 @@ mch_call_shell(
+ 	     * inherit our handles which causes unpleasant dangling swap
+ 	     * files if we exit before the spawned process
+ 	     */
+-	    if (vim_create_process((char *)newcmd, FALSE, flags, &si, &pi))
++	    if (vim_create_process(newcmd, FALSE, flags, &si, &pi))
+ 		x = 0;
+ 	    else
+ 	    {
+@@ -4964,7 +4964,7 @@ mch_call_shell(
+ #endif
+ 		    vim_snprintf((char *)newcmd, cmdlen, "%s %s %s",
+ 							   p_sh, p_shcf, cmd);
+-		x = mch_system((char *)newcmd, options);
++		x = mch_system(newcmd, options);
+ 		vim_free(newcmd);
+ 	    }
+ 	}
+@@ -5005,7 +5005,7 @@ mch_call_shell(
+ 
+ #if defined(FEAT_JOB) || defined(PROTO)
+     void
+-mch_start_job(char *cmd, job_T *job, jobopt_T *options)
++mch_start_job(char_u *cmd, job_T *job, jobopt_T *options)
+ {
+     STARTUPINFO		si;
+     PROCESS_INFORMATION	pi;
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -40,7 +40,7 @@ void mch_set_shellsize(void);
+ void mch_new_shellsize(void);
+ void mch_set_winsize_now(void);
+ int mch_call_shell(char_u *cmd, int options);
+-void mch_start_job(char *cmd, job_T *job, jobopt_T *options);
++void mch_start_job(char_u *cmd, job_T *job, jobopt_T *options);
+ char *mch_job_status(job_T *job);
+ int mch_stop_job(job_T *job, char_u *how);
+ void mch_clear_job(job_T *job);
