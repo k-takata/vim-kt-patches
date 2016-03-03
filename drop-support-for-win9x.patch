@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  1d9f0656a9074ebcdc5d4cd21809de5540042dd8
+# Parent  9b1e76ee836e2e49027e169078654d78f7f9067a
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -310,7 +310,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    )
      {
-@@ -5047,11 +4922,11 @@ mch_start_job(char_u *cmd, job_T *job, j
+@@ -5048,12 +4923,12 @@ mch_start_job(char_u *cmd, job_T *job, j
      saAttr.bInheritHandle = TRUE;
      saAttr.lpSecurityDescriptor = NULL;
      if (!CreatePipe(&ifd[0], &ifd[1], &saAttr, 0)
@@ -319,9 +319,10 @@ diff --git a/src/os_win32.c b/src/os_win32.c
         || !CreatePipe(&ofd[0], &ofd[1], &saAttr, 0)
 -       || !pSetHandleInformation(ofd[0], HANDLE_FLAG_INHERIT, 0)
 +       || !SetHandleInformation(ofd[0], HANDLE_FLAG_INHERIT, 0)
-        || !CreatePipe(&efd[0], &efd[1], &saAttr, 0)
--       || !pSetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0))
-+       || !SetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0))
+        || (!use_out_for_err
+ 	   && (!CreatePipe(&efd[0], &efd[1], &saAttr, 0)
+-	    || !pSetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0))))
++	    || !SetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0))))
  	goto failed;
      si.dwFlags |= STARTF_USESTDHANDLES;
      si.hStdInput = ifd[0];
