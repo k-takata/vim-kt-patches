@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  4a671d384fa7dfbc2e9cc36283b63fa1d351b8b8
+# Parent  4e5a4f1cff9292a94ed041f9442d275ec737ad4c
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -15202,7 +15202,7 @@ f_job_start(typval_T *argvars UNUSED, ty
+@@ -15266,7 +15266,7 @@ f_job_start(typval_T *argvars UNUSED, ty
  # ifdef FEAT_CHANNEL
      ch_logs(NULL, "Starting job: %s", (char *)cmd);
  # endif
@@ -12,7 +12,40 @@ diff --git a/src/eval.c b/src/eval.c
 +    mch_start_job(cmd, job, &opt);
  #endif
  
- theend:
+ #ifdef FEAT_CHANNEL
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -441,9 +441,9 @@ mch_isFullName(char_u *fname)
+     /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
+      * means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
+      * UTF-8. */
+-    char szName[_MAX_PATH * 3 + 1];
++    char_u szName[_MAX_PATH * 3 + 1];
+ #else
+-    char szName[_MAX_PATH + 1];
++    char_u szName[_MAX_PATH + 1];
+ #endif
+ 
+     /* A name like "d:/foo" and "//server/share" is absolute */
+@@ -452,7 +452,7 @@ mch_isFullName(char_u *fname)
+ 	return TRUE;
+ 
+     /* A name that can't be made absolute probably isn't absolute. */
+-    if (mch_FullName(fname, (char_u *)szName, sizeof(szName) - 1, FALSE) == FAIL)
++    if (mch_FullName(fname, szName, sizeof(szName) - 1, FALSE) == FAIL)
+ 	return FALSE;
+ 
+     return pathcmp((const char *)fname, (const char *)szName, -1) == 0;
+@@ -620,7 +620,7 @@ vim_stat(const char *name, stat_T *stp)
+ #endif
+     char_u	*p;
+ 
+-    vim_strncpy((char_u *)buf, (char_u *)name, sizeof(buf) - 1);
++    vim_strncpy(buf, (char_u *)name, sizeof(buf) - 1);
+     p = buf + STRLEN(buf);
+     if (p > buf)
+ 	mb_ptr_back(buf, p);
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
