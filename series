@@ -46,5 +46,4 @@ fix-char_u-usage.patch
 fix-coding-style-in-if_ruby.patch
 use-getsockopt-on-win32.patch
 drop-support-for-win9x.patch
-fix-7.4.1487.patch
 fix-config_cache-removal.patch #+rejected
