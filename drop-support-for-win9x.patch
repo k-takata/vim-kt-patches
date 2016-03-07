@@ -643,9 +643,20 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    s_need_activate = FALSE;
  	}
  
-@@ -2543,9 +2512,6 @@ add_tabline_popup_menu_entry(HMENU pmenu
+@@ -2524,7 +2493,6 @@ add_tabline_popup_menu_entry(HMENU pmenu
+ {
+ #ifdef FEAT_MBYTE
+     WCHAR	*wn = NULL;
+-    int		n;
+ 
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+@@ -2541,11 +2509,8 @@ add_tabline_popup_menu_entry(HMENU pmenu
+ 	    infow.fType = MFT_STRING;
+ 	    infow.dwTypeData = wn;
  	    infow.cch = (UINT)wcslen(wn);
- 	    n = InsertMenuItemW(pmenu, item_id, FALSE, &infow);
+-	    n = InsertMenuItemW(pmenu, item_id, FALSE, &infow);
++	    InsertMenuItemW(pmenu, item_id, FALSE, &infow);
  	    vim_free(wn);
 -	    if (n == 0 && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
 -		/* Failed, try using non-wide function. */
@@ -653,7 +664,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -2666,7 +2632,7 @@ gui_mch_update_tabline(void)
+@@ -2666,7 +2631,7 @@ gui_mch_update_tabline(void)
      if (s_tabhwnd == NULL)
  	return;
  
@@ -662,7 +673,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  # ifndef CCM_SETUNICODEFORMAT
      /* For older compilers.  We assume this never changes. */
  #  define CCM_SETUNICODEFORMAT 0x2005
-@@ -2811,18 +2777,15 @@ set_window_title(HWND hwnd, char *title)
+@@ -2811,18 +2776,15 @@ set_window_title(HWND hwnd, char *title)
      if (title != NULL && enc_codepage >= 0 && enc_codepage != (int)GetACP())
      {
  	WCHAR	*wbuf;
@@ -684,7 +695,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  #endif
      (void)SetWindowText(hwnd, (LPCSTR)title);
-@@ -2840,11 +2803,10 @@ gui_mch_find_dialog(exarg_T *eap)
+@@ -2840,11 +2802,10 @@ gui_mch_find_dialog(exarg_T *eap)
  	if (!IsWindow(s_findrep_hwnd))
  	{
  	    initialise_findrep(eap->arg);
@@ -698,7 +709,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		findrep_atow(&s_findrep_struct_w, &s_findrep_struct);
  		s_findrep_hwnd = FindTextW(
-@@ -2877,9 +2839,8 @@ gui_mch_replace_dialog(exarg_T *eap)
+@@ -2877,9 +2838,8 @@ gui_mch_replace_dialog(exarg_T *eap)
  	if (!IsWindow(s_findrep_hwnd))
  	{
  	    initialise_findrep(eap->arg);
@@ -710,7 +721,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		findrep_atow(&s_findrep_struct_w, &s_findrep_struct);
  		s_findrep_hwnd = ReplaceTextW(
-@@ -3561,11 +3522,7 @@ static LPCSTR mshape_idcs[] =
+@@ -3561,11 +3521,7 @@ static LPCSTR mshape_idcs[] =
      IDC_SIZEWE,			/* leftright */
      IDC_SIZEWE,			/* lrsizing */
      IDC_WAIT,			/* busy */
@@ -722,7 +733,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      IDC_ARROW,			/* crosshair */
      IDC_ARROW,			/* hand1 */
      IDC_ARROW,			/* hand2 */
-@@ -3592,11 +3549,7 @@ mch_set_mouse_shape(int shape)
+@@ -3592,11 +3548,7 @@ mch_set_mouse_shape(int shape)
  #ifdef SetClassLongPtr
  	SetClassLongPtr(s_textArea, GCLP_HCURSOR, (__int3264)(LONG_PTR)LoadCursor(NULL, idc));
  #else
@@ -734,7 +745,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  	if (!p_mh)
  	{
-@@ -3618,7 +3571,7 @@ mch_set_mouse_shape(int shape)
+@@ -3618,7 +3570,7 @@ mch_set_mouse_shape(int shape)
   * Windows NT/2000/XP the "W" functions are used.
   */
  
@@ -743,7 +754,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Wide version of convert_filter().
   */
-@@ -3824,17 +3777,15 @@ gui_mch_browse(
+@@ -3824,17 +3776,15 @@ gui_mch_browse(
  	char_u *initdir,
  	char_u *filter)
  {
@@ -764,7 +775,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (dflt == NULL)
  	fileBuf[0] = NUL;
      else
-@@ -3844,12 +3795,12 @@ gui_mch_browse(
+@@ -3844,12 +3794,12 @@ gui_mch_browse(
      filterp = convert_filter(filter);
  
      vim_memset(&fileStruct, 0, sizeof(OPENFILENAME));
@@ -780,7 +791,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      fileStruct.lpstrTitle = (LPSTR)title;
      fileStruct.lpstrDefExt = (LPSTR)ext;
-@@ -3879,10 +3830,10 @@ gui_mch_browse(
+@@ -3879,10 +3829,10 @@ gui_mch_browse(
       * Don't use OFN_OVERWRITEPROMPT, Vim has its own ":confirm" dialog.
       */
      fileStruct.Flags = (OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY);
@@ -793,7 +804,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (saving)
      {
  	if (!GetSaveFileName(&fileStruct))
-@@ -3902,6 +3853,7 @@ gui_mch_browse(
+@@ -3902,6 +3852,7 @@ gui_mch_browse(
  
      /* Shorten the file name if possible */
      return vim_strsave(shorten_fname1((char_u *)fileBuf));
@@ -801,7 +812,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  #endif /* FEAT_BROWSE */
  
-@@ -3912,16 +3864,11 @@ gui_mch_browse(
+@@ -3912,16 +3863,11 @@ gui_mch_browse(
      HDROP hDrop)
  {
  #ifdef FEAT_WINDOWS
@@ -820,7 +831,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      char    szFile[BUFPATHLEN];
      UINT    cFiles = DragQueryFile(hDrop, DRAGQVAL, NULL, 0);
      UINT    i;
-@@ -3942,11 +3889,11 @@ gui_mch_browse(
+@@ -3942,11 +3888,11 @@ gui_mch_browse(
      if (fnames != NULL)
  	for (i = 0; i < cFiles; ++i)
  	{
@@ -834,7 +845,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		DragQueryFile(hDrop, i, szFile, BUFPATHLEN);
  		fnames[i] = vim_strsave((char_u *)szFile);
-@@ -3984,14 +3931,10 @@ gui_mch_browse(
+@@ -3984,14 +3930,10 @@ gui_mch_browse(
      long	val;
      int		dragging = FALSE;
      int		dont_scroll_save = dont_scroll;
@@ -849,7 +860,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      sb = gui_mswin_find_scrollbar(hwndCtl);
      if (sb == NULL)
-@@ -4056,13 +3999,8 @@ gui_mch_browse(
+@@ -4056,13 +3998,8 @@ gui_mch_browse(
      }
      prev_code = code;
  
@@ -863,7 +874,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      /*
       * When moving a vertical scrollbar, move the other vertical scrollbar too.
-@@ -4072,11 +4010,7 @@ gui_mch_browse(
+@@ -4072,11 +4009,7 @@ gui_mch_browse(
  	scrollbar_T *sba = sb->wp->w_scrollbars;
  	HWND    id = sba[ (sb == sba + SBAR_LEFT) ? SBAR_RIGHT : SBAR_LEFT].id;
  
@@ -875,7 +886,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      /* Don't let us be interrupted here by another message. */
-@@ -4544,7 +4478,6 @@ static int dialog_default_button = -1;
+@@ -4544,7 +4477,6 @@ static int dialog_default_button = -1;
  
  /* Intellimouse support */
  static int mouse_scroll_lines = 0;
@@ -883,7 +894,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  static int	s_usenewlook;	    /* emulate W95/NT4 non-bold dialogs */
  #ifdef FEAT_TOOLBAR
-@@ -4601,43 +4534,6 @@ static void dyn_imm_load(void);
+@@ -4601,43 +4533,6 @@ static void dyn_imm_load(void);
  # define pImmSetConversionStatus  ImmSetConversionStatus
  #endif
  
@@ -927,7 +938,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  /*
   * Figure out how high the menu bar is at the moment.
-@@ -4669,45 +4565,20 @@ gui_mswin_get_menu_height(
+@@ -4669,45 +4564,20 @@ gui_mswin_get_menu_height(
      }
      else
      {
@@ -987,7 +998,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -4741,42 +4612,11 @@ init_mouse_wheel(void)
+@@ -4741,42 +4611,11 @@ init_mouse_wheel(void)
  #define VMSH_MOUSEWHEEL    "MSWHEEL_ROLLMSG"
  #define VMSH_SCROLL_LINES  "MSH_SCROLL_LINES_MSG"
  
@@ -1033,7 +1044,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
  
-@@ -5315,13 +5155,8 @@ set_tabline_font(void)
+@@ -5315,13 +5154,8 @@ set_tabline_font(void)
  #endif
  
      default:
@@ -1048,7 +1059,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{
  	    _OnFindRepl();
  	}
-@@ -5482,40 +5317,13 @@ gui_mch_prepare(int *argc, char **argv)
+@@ -5482,40 +5316,13 @@ gui_mch_prepare(int *argc, char **argv)
      }
  #endif
  
@@ -1093,7 +1104,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  }
  
-@@ -5580,12 +5388,7 @@ gui_mch_init(void)
+@@ -5580,12 +5387,7 @@ gui_mch_init(void)
  		    atom =
  #endif
  		    RegisterClassW(&wndclassw)) == 0)
@@ -1107,7 +1118,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	else
  	    wide_WindowProc = TRUE;
      }
-@@ -5815,7 +5618,7 @@ gui_mch_init(void)
+@@ -5815,7 +5617,7 @@ gui_mch_init(void)
      s_findrep_struct.lpstrReplaceWith[0] = NUL;
      s_findrep_struct.wFindWhatLen = MSWIN_FR_BUFSIZE;
      s_findrep_struct.wReplaceWithLen = MSWIN_FR_BUFSIZE;
@@ -1116,7 +1127,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      s_findrep_struct_w.lStructSize = sizeof(s_findrep_struct_w);
      s_findrep_struct_w.lpstrFindWhat =
  			      (LPWSTR)alloc(MSWIN_FR_BUFSIZE * sizeof(WCHAR));
-@@ -5858,22 +5661,18 @@ theend:
+@@ -5858,22 +5660,18 @@ theend:
      static void
  get_work_area(RECT *spi_rect)
  {
@@ -1151,7 +1162,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
      /* this is the old method... */
-@@ -6412,29 +6211,10 @@ RevOut( HDC s_hdc,
+@@ -6412,29 +6210,10 @@ RevOut( HDC s_hdc,
  	CONST INT *padding)
  {
      int		ix;
@@ -1185,7 +1196,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  #endif
  
-@@ -6823,63 +6603,51 @@ gui_mch_add_menu(
+@@ -6823,63 +6602,50 @@ gui_mch_add_menu(
  
      if (menu_is_menubar(menu->name))
      {
@@ -1203,7 +1214,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -
 -	    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +	WCHAR	*wn = NULL;
-+	int		n;
 +
 +	if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +	{
@@ -1247,7 +1257,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +		infow.dwTypeData = wn;
 +		infow.cch = (UINT)wcslen(wn);
 +		infow.hSubMenu = menu->submenu_id;
-+		n = InsertMenuItemW((parent == NULL)
++		InsertMenuItemW((parent == NULL)
 +			? s_menuBar : parent->submenu_id,
 +			(UINT)pos, TRUE, &infow);
 +		vim_free(wn);
@@ -1291,7 +1301,21 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -7009,9 +6777,6 @@ gui_mch_add_menu_item(
+@@ -6995,7 +6761,6 @@ gui_mch_add_menu_item(
+     {
+ #ifdef FEAT_MBYTE
+ 	WCHAR	*wn = NULL;
+-	int	n;
+ 
+ 	if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+ 	{
+@@ -7004,14 +6769,11 @@ gui_mch_add_menu_item(
+ 	    wn = enc_to_utf16(menu->name, NULL);
+ 	    if (wn != NULL)
+ 	    {
+-		n = InsertMenuW(parent->submenu_id, (UINT)idx,
++		InsertMenuW(parent->submenu_id, (UINT)idx,
+ 			(menu_is_separator(menu->name)
  				 ? MF_SEPARATOR : MF_STRING) | MF_BYPOSITION,
  			(UINT)menu->id, wn);
  		vim_free(wn);
@@ -1301,7 +1325,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    }
  	}
  	if (wn == NULL)
-@@ -7212,11 +6977,10 @@ dialog_callback(
+@@ -7212,11 +6974,10 @@ dialog_callback(
  	/* If the edit box exists, copy the string. */
  	if (s_textfield != NULL)
  	{
@@ -1315,7 +1339,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  	       WCHAR  *wp = (WCHAR *)alloc(IOSIZE * sizeof(WCHAR));
  	       char_u *p;
-@@ -7973,38 +7737,31 @@ get_dialog_font_metrics(void)
+@@ -7973,38 +7734,31 @@ get_dialog_font_metrics(void)
  
      s_usenewlook = FALSE;
  
@@ -1376,7 +1400,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      if (!s_usenewlook)
-@@ -8151,10 +7908,6 @@ gui_mch_tearoff(
+@@ -8151,10 +7905,6 @@ gui_mch_tearoff(
  	dlgwidth = textWidth;
      dlgwidth += 2 * TEAROFF_PADDING_X + TEAROFF_BUTTON_PAD_X;
  
@@ -1387,7 +1411,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /* start to fill in the dlgtemplate information.  addressing by WORDs */
      if (s_usenewlook)
  	lStyle = DS_MODALFRAME | WS_CAPTION| WS_SYSMENU |DS_SETFONT| WS_VISIBLE;
-@@ -8406,7 +8159,7 @@ get_toolbar_bitmap(vimmenu_T *menu)
+@@ -8406,7 +8156,7 @@ get_toolbar_bitmap(vimmenu_T *menu)
      /*
       * Check user bitmaps first, unless builtin is specified.
       */
@@ -1396,7 +1420,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      {
  	char_u fname[MAXPATHL];
  	HANDLE hbitmap = NULL;
-@@ -8663,12 +8416,6 @@ gui_mch_register_sign(char_u *signfile)
+@@ -8663,12 +8413,6 @@ gui_mch_register_sign(char_u *signfile)
      signicon_t	sign, *psign;
      char_u	*ext;
  
