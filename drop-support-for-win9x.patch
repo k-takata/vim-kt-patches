@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  d036b4be99b094ea00e35af81726d770d0d0bb0e
+# Parent  5ae431a522ac049d1595715f955a9dee80d5d750
 
 diff --git a/runtime/doc/gui_w32.txt b/runtime/doc/gui_w32.txt
 --- a/runtime/doc/gui_w32.txt
@@ -393,7 +393,35 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/ex_cmds.c b/src/ex_cmds.c
 --- a/src/ex_cmds.c
 +++ b/src/ex_cmds.c
-@@ -1925,11 +1925,7 @@ write_viminfo(char_u *file, int forceit)
+@@ -1175,14 +1175,6 @@ do_filter(
+     if (*cmd == NUL)	    /* no filter command */
+ 	return;
+ 
+-#ifdef WIN3264
+-    /*
+-     * Check if external commands are allowed now.
+-     */
+-    if (can_end_termcap_mode(TRUE) == FALSE)
+-	return;
+-#endif
+-
+     cursor_save = curwin->w_cursor;
+     linecount = line2 - line1 + 1;
+     curwin->w_cursor.lnum = line1;
+@@ -1460,12 +1452,6 @@ do_shell(
+ 
+ #ifdef MSWIN
+     /*
+-     * Check if external commands are allowed now.
+-     */
+-    if (can_end_termcap_mode(TRUE) == FALSE)
+-	return;
+-
+-    /*
+      * Check if ":!start" is used.
+      */
+     if (cmd != NULL)
+@@ -1925,11 +1911,7 @@ write_viminfo(char_u *file, int forceit)
  #ifdef UNIX
  				    shortname,
  #else
@@ -405,6 +433,25 @@ diff --git a/src/ex_cmds.c b/src/ex_cmds.c
  #endif
  				    fname,
  #ifdef VMS
+diff --git a/src/ex_docmd.c b/src/ex_docmd.c
+--- a/src/ex_docmd.c
++++ b/src/ex_docmd.c
+@@ -7437,14 +7437,7 @@ ex_stop(exarg_T *eap)
+     /*
+      * Disallow suspending for "rvim".
+      */
+-    if (!check_restricted()
+-#ifdef WIN3264
+-	/*
+-	 * Check if external commands are allowed now.
+-	 */
+-	&& can_end_termcap_mode(TRUE)
+-#endif
+-					)
++    if (!check_restricted())
+     {
+ 	if (!eap->forceit)
+ 	    autowrite_all();
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
@@ -426,17 +473,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
    /* use of WindowProc depends on wide_WindowProc */
  # define MyWindowProc vim_WindowProc
  #else
-@@ -471,9 +471,7 @@ static UINT	s_wait_timer = 0;   /* Timer
+@@ -471,10 +471,6 @@ static UINT	s_wait_timer = 0;   /* Timer
  static int	s_timed_out = FALSE;
  static int	dead_key = 0;	/* 0: no dead key, 1: dead key pressed */
  
 -#ifdef WIN3264
- static OSVERSIONINFO os_version;    /* like it says.  Init in gui_mch_init() */
+-static OSVERSIONINFO os_version;    /* like it says.  Init in gui_mch_init() */
 -#endif
- 
+-
  #ifdef FEAT_BEVAL
  /* balloon-eval WM_NOTIFY_HANDLER */
-@@ -681,61 +679,41 @@ char_to_string(int ch, char_u *string, i
+ static void Handle_WM_Notify(HWND hwnd, LPNMHDR pnmh);
+@@ -681,61 +677,41 @@ char_to_string(int ch, char_u *string, i
      WCHAR	wstring[2];
      char_u	*ws = NULL;;
  
@@ -531,7 +579,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -1065,7 +1043,7 @@ gui_mswin_find_menu(
+@@ -1065,7 +1041,7 @@ gui_mswin_find_menu(
  #endif
  
  #ifdef MSWIN_FIND_REPLACE
@@ -540,7 +588,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * copy useful data from structure LPFINDREPLACE to structure LPFINDREPLACEW
   */
-@@ -1113,11 +1091,10 @@ findrep_wtoa(LPFINDREPLACE lpfr, LPFINDR
+@@ -1113,11 +1089,10 @@ findrep_wtoa(LPFINDREPLACE lpfr, LPFINDR
      int	    flags = 0;
      int	    down;
  
@@ -554,7 +602,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      {
  	findrep_wtoa(&s_findrep_struct, &s_findrep_struct_w);
      }
-@@ -1265,7 +1242,7 @@ HandleMouseHide(UINT uMsg, LPARAM lParam
+@@ -1265,7 +1240,7 @@ HandleMouseHide(UINT uMsg, LPARAM lParam
      }
  }
  
@@ -563,7 +611,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	|| defined(GLOBAL_IME) \
  	|| defined(PROTO)
  # ifdef PROTO
-@@ -1640,10 +1617,9 @@ gui_mch_get_color(char_u *name)
+@@ -1640,10 +1615,9 @@ gui_mch_get_color(char_u *name)
  
      static SysColorTable sys_table[] =
      {
@@ -575,7 +623,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{"SYS_3DHIGHLIGHT", COLOR_3DHIGHLIGHT},
  #endif
  	{"SYS_BTNHILIGHT", COLOR_BTNHILIGHT},
-@@ -1654,7 +1630,6 @@ gui_mch_get_color(char_u *name)
+@@ -1654,7 +1628,6 @@ gui_mch_get_color(char_u *name)
  	{"SYS_INFOBK", COLOR_INFOBK},
  	{"SYS_INFOTEXT", COLOR_INFOTEXT},
  	{"SYS_3DFACE", COLOR_3DFACE},
@@ -583,7 +631,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{"SYS_BTNFACE", COLOR_BTNFACE},
  	{"SYS_BTNSHADOW", COLOR_BTNSHADOW},
  	{"SYS_ACTIVEBORDER", COLOR_ACTIVEBORDER},
-@@ -2201,11 +2176,7 @@ gui_mch_wait_for_chars(int wtime)
+@@ -2201,11 +2174,7 @@ gui_mch_wait_for_chars(int wtime)
  
  	if (s_need_activate)
  	{
@@ -595,7 +643,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    s_need_activate = FALSE;
  	}
  
-@@ -2543,9 +2514,6 @@ add_tabline_popup_menu_entry(HMENU pmenu
+@@ -2543,9 +2512,6 @@ add_tabline_popup_menu_entry(HMENU pmenu
  	    infow.cch = (UINT)wcslen(wn);
  	    n = InsertMenuItemW(pmenu, item_id, FALSE, &infow);
  	    vim_free(wn);
@@ -605,7 +653,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -2666,7 +2634,7 @@ gui_mch_update_tabline(void)
+@@ -2666,7 +2632,7 @@ gui_mch_update_tabline(void)
      if (s_tabhwnd == NULL)
  	return;
  
@@ -614,7 +662,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  # ifndef CCM_SETUNICODEFORMAT
      /* For older compilers.  We assume this never changes. */
  #  define CCM_SETUNICODEFORMAT 0x2005
-@@ -2811,18 +2779,15 @@ set_window_title(HWND hwnd, char *title)
+@@ -2811,18 +2777,15 @@ set_window_title(HWND hwnd, char *title)
      if (title != NULL && enc_codepage >= 0 && enc_codepage != (int)GetACP())
      {
  	WCHAR	*wbuf;
@@ -636,7 +684,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  #endif
      (void)SetWindowText(hwnd, (LPCSTR)title);
-@@ -2840,11 +2805,10 @@ gui_mch_find_dialog(exarg_T *eap)
+@@ -2840,11 +2803,10 @@ gui_mch_find_dialog(exarg_T *eap)
  	if (!IsWindow(s_findrep_hwnd))
  	{
  	    initialise_findrep(eap->arg);
@@ -650,7 +698,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		findrep_atow(&s_findrep_struct_w, &s_findrep_struct);
  		s_findrep_hwnd = FindTextW(
-@@ -2877,9 +2841,8 @@ gui_mch_replace_dialog(exarg_T *eap)
+@@ -2877,9 +2839,8 @@ gui_mch_replace_dialog(exarg_T *eap)
  	if (!IsWindow(s_findrep_hwnd))
  	{
  	    initialise_findrep(eap->arg);
@@ -662,7 +710,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		findrep_atow(&s_findrep_struct_w, &s_findrep_struct);
  		s_findrep_hwnd = ReplaceTextW(
-@@ -3561,11 +3524,7 @@ static LPCSTR mshape_idcs[] =
+@@ -3561,11 +3522,7 @@ static LPCSTR mshape_idcs[] =
      IDC_SIZEWE,			/* leftright */
      IDC_SIZEWE,			/* lrsizing */
      IDC_WAIT,			/* busy */
@@ -674,7 +722,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      IDC_ARROW,			/* crosshair */
      IDC_ARROW,			/* hand1 */
      IDC_ARROW,			/* hand2 */
-@@ -3592,11 +3551,7 @@ mch_set_mouse_shape(int shape)
+@@ -3592,11 +3549,7 @@ mch_set_mouse_shape(int shape)
  #ifdef SetClassLongPtr
  	SetClassLongPtr(s_textArea, GCLP_HCURSOR, (__int3264)(LONG_PTR)LoadCursor(NULL, idc));
  #else
@@ -686,7 +734,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  	if (!p_mh)
  	{
-@@ -3618,7 +3573,7 @@ mch_set_mouse_shape(int shape)
+@@ -3618,7 +3571,7 @@ mch_set_mouse_shape(int shape)
   * Windows NT/2000/XP the "W" functions are used.
   */
  
@@ -695,7 +743,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Wide version of convert_filter().
   */
-@@ -3824,17 +3779,15 @@ gui_mch_browse(
+@@ -3824,17 +3777,15 @@ gui_mch_browse(
  	char_u *initdir,
  	char_u *filter)
  {
@@ -716,7 +764,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (dflt == NULL)
  	fileBuf[0] = NUL;
      else
-@@ -3844,12 +3797,12 @@ gui_mch_browse(
+@@ -3844,12 +3795,12 @@ gui_mch_browse(
      filterp = convert_filter(filter);
  
      vim_memset(&fileStruct, 0, sizeof(OPENFILENAME));
@@ -732,7 +780,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      fileStruct.lpstrTitle = (LPSTR)title;
      fileStruct.lpstrDefExt = (LPSTR)ext;
-@@ -3879,10 +3832,10 @@ gui_mch_browse(
+@@ -3879,10 +3830,10 @@ gui_mch_browse(
       * Don't use OFN_OVERWRITEPROMPT, Vim has its own ":confirm" dialog.
       */
      fileStruct.Flags = (OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY);
@@ -745,7 +793,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (saving)
      {
  	if (!GetSaveFileName(&fileStruct))
-@@ -3902,6 +3855,7 @@ gui_mch_browse(
+@@ -3902,6 +3853,7 @@ gui_mch_browse(
  
      /* Shorten the file name if possible */
      return vim_strsave(shorten_fname1((char_u *)fileBuf));
@@ -753,7 +801,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  #endif /* FEAT_BROWSE */
  
-@@ -3912,16 +3866,11 @@ gui_mch_browse(
+@@ -3912,16 +3864,11 @@ gui_mch_browse(
      HDROP hDrop)
  {
  #ifdef FEAT_WINDOWS
@@ -772,7 +820,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      char    szFile[BUFPATHLEN];
      UINT    cFiles = DragQueryFile(hDrop, DRAGQVAL, NULL, 0);
      UINT    i;
-@@ -3942,11 +3891,11 @@ gui_mch_browse(
+@@ -3942,11 +3889,11 @@ gui_mch_browse(
      if (fnames != NULL)
  	for (i = 0; i < cFiles; ++i)
  	{
@@ -786,7 +834,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		DragQueryFile(hDrop, i, szFile, BUFPATHLEN);
  		fnames[i] = vim_strsave((char_u *)szFile);
-@@ -3984,14 +3933,10 @@ gui_mch_browse(
+@@ -3984,14 +3931,10 @@ gui_mch_browse(
      long	val;
      int		dragging = FALSE;
      int		dont_scroll_save = dont_scroll;
@@ -801,7 +849,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      sb = gui_mswin_find_scrollbar(hwndCtl);
      if (sb == NULL)
-@@ -4056,13 +4001,8 @@ gui_mch_browse(
+@@ -4056,13 +3999,8 @@ gui_mch_browse(
      }
      prev_code = code;
  
@@ -815,7 +863,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      /*
       * When moving a vertical scrollbar, move the other vertical scrollbar too.
-@@ -4072,11 +4012,7 @@ gui_mch_browse(
+@@ -4072,11 +4010,7 @@ gui_mch_browse(
  	scrollbar_T *sba = sb->wp->w_scrollbars;
  	HWND    id = sba[ (sb == sba + SBAR_LEFT) ? SBAR_RIGHT : SBAR_LEFT].id;
  
@@ -827,7 +875,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      /* Don't let us be interrupted here by another message. */
-@@ -4544,7 +4480,6 @@ static int dialog_default_button = -1;
+@@ -4544,7 +4478,6 @@ static int dialog_default_button = -1;
  
  /* Intellimouse support */
  static int mouse_scroll_lines = 0;
@@ -835,10 +883,26 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  static int	s_usenewlook;	    /* emulate W95/NT4 non-bold dialogs */
  #ifdef FEAT_TOOLBAR
-@@ -4617,26 +4552,6 @@ typedef BOOL (WINAPI *TGetMonitorInfo)(_
- static TMonitorFromWindow   pMonitorFromWindow = NULL;
- static TGetMonitorInfo	    pGetMonitorInfo = NULL;
- static HANDLE		    user32_lib = NULL;
+@@ -4601,43 +4534,6 @@ static void dyn_imm_load(void);
+ # define pImmSetConversionStatus  ImmSetConversionStatus
+ #endif
+ 
+-/* multi monitor support */
+-typedef struct _MONITORINFOstruct
+-{
+-    DWORD cbSize;
+-    RECT rcMonitor;
+-    RECT rcWork;
+-    DWORD dwFlags;
+-} _MONITORINFO;
+-
+-typedef HANDLE _HMONITOR;
+-typedef _HMONITOR (WINAPI *TMonitorFromWindow)(HWND, DWORD);
+-typedef BOOL (WINAPI *TGetMonitorInfo)(_HMONITOR, _MONITORINFO *);
+-
+-static TMonitorFromWindow   pMonitorFromWindow = NULL;
+-static TGetMonitorInfo	    pGetMonitorInfo = NULL;
+-static HANDLE		    user32_lib = NULL;
 -/*
 - * Return TRUE when running under Windows NT 3.x or Win32s, both of which have
 - * less fancy GUI APIs.
@@ -859,10 +923,11 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -{
 -    return (os_version.dwPlatformId == VER_PLATFORM_WIN32s);
 -}
- 
+-
  #ifdef FEAT_MENU
  /*
-@@ -4669,45 +4584,20 @@ gui_mswin_get_menu_height(
+  * Figure out how high the menu bar is at the moment.
+@@ -4669,45 +4565,20 @@ gui_mswin_get_menu_height(
      }
      else
      {
@@ -922,7 +987,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -4741,42 +4631,11 @@ init_mouse_wheel(void)
+@@ -4741,42 +4612,11 @@ init_mouse_wheel(void)
  #define VMSH_MOUSEWHEEL    "MSWHEEL_ROLLMSG"
  #define VMSH_SCROLL_LINES  "MSH_SCROLL_LINES_MSG"
  
@@ -968,7 +1033,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
  
-@@ -5315,13 +5174,8 @@ set_tabline_font(void)
+@@ -5315,13 +5155,8 @@ set_tabline_font(void)
  #endif
  
      default:
@@ -983,7 +1048,27 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{
  	    _OnFindRepl();
  	}
-@@ -5502,20 +5356,10 @@ gui_mch_prepare(int *argc, char **argv)
+@@ -5482,40 +5317,13 @@ gui_mch_prepare(int *argc, char **argv)
+     }
+ #endif
+ 
+-    /* get the OS version info */
+-    os_version.dwOSVersionInfoSize = sizeof(os_version);
+-    GetVersionEx(&os_version); /* this call works on Win32s, Win95 and WinNT */
+-
+-    /* try and load the user32.dll library and get the entry points for
+-     * multi-monitor-support. */
+-    if ((user32_lib = vimLoadLib("User32.dll")) != NULL)
+-    {
+-	pMonitorFromWindow = (TMonitorFromWindow)GetProcAddress(user32_lib,
+-							 "MonitorFromWindow");
+-
+-	/* there are ...A and ...W version of GetMonitorInfo - looking at
+-	 * winuser.h, they have exactly the same declaration. */
+-	pGetMonitorInfo = (TGetMonitorInfo)GetProcAddress(user32_lib,
+-							  "GetMonitorInfoA");
+-    }
+-
  #ifdef FEAT_MBYTE
      /* If the OS is Windows NT, use wide functions;
       * this enables common dialogs input unicode from IME. */
@@ -1008,7 +1093,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  }
  
-@@ -5580,12 +5424,7 @@ gui_mch_init(void)
+@@ -5580,12 +5388,7 @@ gui_mch_init(void)
  		    atom =
  #endif
  		    RegisterClassW(&wndclassw)) == 0)
@@ -1022,7 +1107,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	else
  	    wide_WindowProc = TRUE;
      }
-@@ -5815,7 +5654,7 @@ gui_mch_init(void)
+@@ -5815,7 +5618,7 @@ gui_mch_init(void)
      s_findrep_struct.lpstrReplaceWith[0] = NUL;
      s_findrep_struct.wFindWhatLen = MSWIN_FR_BUFSIZE;
      s_findrep_struct.wReplaceWithLen = MSWIN_FR_BUFSIZE;
@@ -1031,7 +1116,42 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      s_findrep_struct_w.lStructSize = sizeof(s_findrep_struct_w);
      s_findrep_struct_w.lpstrFindWhat =
  			      (LPWSTR)alloc(MSWIN_FR_BUFSIZE * sizeof(WCHAR));
-@@ -6412,29 +6251,10 @@ RevOut( HDC s_hdc,
+@@ -5858,22 +5661,18 @@ theend:
+     static void
+ get_work_area(RECT *spi_rect)
+ {
+-    _HMONITOR	    mon;
+-    _MONITORINFO    moninfo;
+-
+-    /* use these functions only if available */
+-    if (pMonitorFromWindow != NULL && pGetMonitorInfo != NULL)
+-    {
+-	/* work out which monitor the window is on, and get *it's* work area */
+-	mon = pMonitorFromWindow(s_hwnd, 1 /*MONITOR_DEFAULTTOPRIMARY*/);
+-	if (mon != NULL)
+-	{
+-	    moninfo.cbSize = sizeof(_MONITORINFO);
+-	    if (pGetMonitorInfo(mon, &moninfo))
+-	    {
+-		*spi_rect = moninfo.rcWork;
+-		return;
+-	    }
++    HMONITOR	    mon;
++    MONITORINFO	    moninfo;
++
++    /* work out which monitor the window is on, and get *it's* work area */
++    mon = MonitorFromWindow(s_hwnd, 1 /*MONITOR_DEFAULTTOPRIMARY*/);
++    if (mon != NULL)
++    {
++	moninfo.cbSize = sizeof(MONITORINFO);
++	if (GetMonitorInfo(mon, &moninfo))
++	{
++	    *spi_rect = moninfo.rcWork;
++	    return;
+ 	}
+     }
+     /* this is the old method... */
+@@ -6412,29 +6211,10 @@ RevOut( HDC s_hdc,
  	CONST INT *padding)
  {
      int		ix;
@@ -1065,7 +1185,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  #endif
  
-@@ -6823,63 +6643,51 @@ gui_mch_add_menu(
+@@ -6823,63 +6603,51 @@ gui_mch_add_menu(
  
      if (menu_is_menubar(menu->name))
      {
@@ -1171,7 +1291,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -7009,9 +6817,6 @@ gui_mch_add_menu_item(
+@@ -7009,9 +6777,6 @@ gui_mch_add_menu_item(
  				 ? MF_SEPARATOR : MF_STRING) | MF_BYPOSITION,
  			(UINT)menu->id, wn);
  		vim_free(wn);
@@ -1181,7 +1301,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    }
  	}
  	if (wn == NULL)
-@@ -7212,11 +7017,10 @@ dialog_callback(
+@@ -7212,11 +6977,10 @@ dialog_callback(
  	/* If the edit box exists, copy the string. */
  	if (s_textfield != NULL)
  	{
@@ -1195,7 +1315,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  	       WCHAR  *wp = (WCHAR *)alloc(IOSIZE * sizeof(WCHAR));
  	       char_u *p;
-@@ -7973,38 +7777,31 @@ get_dialog_font_metrics(void)
+@@ -7973,38 +7737,31 @@ get_dialog_font_metrics(void)
  
      s_usenewlook = FALSE;
  
@@ -1256,7 +1376,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      if (!s_usenewlook)
-@@ -8151,10 +7948,6 @@ gui_mch_tearoff(
+@@ -8151,10 +7908,6 @@ gui_mch_tearoff(
  	dlgwidth = textWidth;
      dlgwidth += 2 * TEAROFF_PADDING_X + TEAROFF_BUTTON_PAD_X;
  
@@ -1267,7 +1387,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /* start to fill in the dlgtemplate information.  addressing by WORDs */
      if (s_usenewlook)
  	lStyle = DS_MODALFRAME | WS_CAPTION| WS_SYSMENU |DS_SETFONT| WS_VISIBLE;
-@@ -8406,7 +8199,7 @@ get_toolbar_bitmap(vimmenu_T *menu)
+@@ -8406,7 +8159,7 @@ get_toolbar_bitmap(vimmenu_T *menu)
      /*
       * Check user bitmaps first, unless builtin is specified.
       */
@@ -1276,7 +1396,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      {
  	char_u fname[MAXPATHL];
  	HANDLE hbitmap = NULL;
-@@ -8663,12 +8456,6 @@ gui_mch_register_sign(char_u *signfile)
+@@ -8663,12 +8416,6 @@ gui_mch_register_sign(char_u *signfile)
      signicon_t	sign, *psign;
      char_u	*ext;
  
@@ -1343,6 +1463,21 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
  		    && csinfo[j].nIndexHigh == bhfi.nFileIndexHigh
  		    && csinfo[j].nIndexLow == bhfi.nFileIndexLow))
  #endif
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -9438,10 +9438,7 @@ prepare_to_exit(void)
+ 	 * screen (if there are two screens).
+ 	 */
+ 	settmode(TMODE_COOK);
+-#ifdef WIN3264
+-	if (can_end_termcap_mode(FALSE) == TRUE)
+-#endif
+-	    stoptermcap();
++	stoptermcap();
+ 	out_flush();
+     }
+ }
 diff --git a/src/misc2.c b/src/misc2.c
 --- a/src/misc2.c
 +++ b/src/misc2.c
@@ -1402,6 +1537,21 @@ diff --git a/src/option.c b/src/option.c
  #ifdef FEAT_SEARCHPATH
      {
  	char_u	*cdpath;
+@@ -9863,13 +9853,7 @@ clear_termoptions(void)
+     if (gui.starting)
+ 	clear_xterm_clip();
+ #endif
+-#ifdef WIN3264
+-    /*
+-     * Check if this is allowed now.
+-     */
+-    if (can_end_termcap_mode(FALSE) == TRUE)
+-#endif
+-	stoptermcap();			/* stop termcap mode */
++    stoptermcap();			/* stop termcap mode */
+ 
+     free_termoptions();
+ }
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
@@ -1519,10 +1669,19 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	}
      }
  #endif
-@@ -831,16 +798,7 @@ mch_chdir(char *path)
- can_end_termcap_mode(
-     int give_msg)
- {
+@@ -822,27 +789,6 @@ mch_chdir(char *path)
+ }
+ 
+ 
+-/*
+- * Switching off termcap mode is only allowed when Columns is 80, otherwise a
+- * crash may result.  It's always allowed on NT or when running the GUI.
+- */
+-/*ARGSUSED*/
+-    int
+-can_end_termcap_mode(
+-    int give_msg)
+-{
 -#ifdef FEAT_GUI_MSWIN
 -    return TRUE;	/* GUI starts a new console anyway */
 -#else
@@ -1533,11 +1692,12 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 -		_("'columns' is not 80, cannot execute external commands"));
 -    return FALSE;
 -#endif
-+    return TRUE;
- }
- 
+-}
+-
  #ifdef FEAT_GUI_MSWIN
-@@ -875,17 +833,10 @@ mch_screenmode(
+ /*
+  * return non-zero if a character is available
+@@ -875,17 +821,10 @@ mch_screenmode(
   * and returns an allocated string.
   * Return OK if it worked, FAIL if not.
   */
@@ -1555,7 +1715,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  
  /*
   * Check if a pointer points to a valid NUL terminated string.
-@@ -1081,7 +1032,7 @@ Trace(
+@@ -1081,7 +1020,7 @@ Trace(
  #endif //_DEBUG
  
  #if !defined(FEAT_GUI) || defined(PROTO)
@@ -1564,7 +1724,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  extern HWND g_hWnd;	/* This is in os_win32.c. */
  # endif
  
-@@ -1102,7 +1053,7 @@ GetConsoleHwnd(void)
+@@ -1102,7 +1041,7 @@ GetConsoleHwnd(void)
      if (s_hwnd != 0)
  	return;
  
@@ -1573,7 +1733,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      /* Window handle may have been found by init code (Windows NT only) */
      if (g_hWnd != 0)
      {
-@@ -1527,7 +1478,6 @@ mch_print_init(prt_settings_T *psettings
+@@ -1527,7 +1466,6 @@ mch_print_init(prt_settings_T *psettings
  	    )
      {
  	prt_dlg.Flags |= PD_RETURNDEFAULT;
@@ -1581,7 +1741,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	/*
  	 * MSDN suggests setting the first parameter to WINSPOOL for
  	 * NT, but NULL appears to work just as well.
-@@ -1535,7 +1485,6 @@ mch_print_init(prt_settings_T *psettings
+@@ -1535,7 +1473,6 @@ mch_print_init(prt_settings_T *psettings
  	if (*p_pdev != NUL)
  	    prt_dlg.hDC = CreateDC(NULL, (LPCSTR)p_pdev, NULL, NULL);
  	else
@@ -1589,7 +1749,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	{
  	    prt_dlg.Flags |= PD_RETURNDEFAULT;
  	    if (PrintDlg(&prt_dlg) == 0)
-@@ -1581,10 +1530,8 @@ mch_print_init(prt_settings_T *psettings
+@@ -1581,10 +1518,8 @@ mch_print_init(prt_settings_T *psettings
      mem = (DEVMODE *)GlobalLock(prt_dlg.hDevMode);
      if (mem != NULL)
      {
@@ -1600,7 +1760,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	if ((mem->dmFields & DM_DUPLEX) && (mem->dmDuplex & ~DMDUP_SIMPLEX))
  	    psettings->duplex = TRUE;
  	if ((mem->dmFields & DM_COLOR) && (mem->dmColor & DMCOLOR_COLOR))
-@@ -1941,7 +1888,7 @@ shortcut_errorw:
+@@ -1941,7 +1876,7 @@ shortcut_errorw:
  		goto shortcut_end;
  	    }
  	}
@@ -1609,7 +1769,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      }
  # endif
      // create a link manager object and request its interface
-@@ -2669,7 +2616,6 @@ charset_pairs[] =
+@@ -2669,7 +2604,6 @@ charset_pairs[] =
      {"OEM",		OEM_CHARSET},
      {"SHIFTJIS",	SHIFTJIS_CHARSET},
      {"SYMBOL",		SYMBOL_CHARSET},
@@ -1617,7 +1777,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      {"ARABIC",		ARABIC_CHARSET},
      {"BALTIC",		BALTIC_CHARSET},
      {"EASTEUROPE",	EASTEUROPE_CHARSET},
-@@ -2681,10 +2627,8 @@ charset_pairs[] =
+@@ -2681,10 +2615,8 @@ charset_pairs[] =
      {"RUSSIAN",		RUSSIAN_CHARSET},
      {"THAI",		THAI_CHARSET},
      {"TURKISH",		TURKISH_CHARSET},
@@ -2753,6 +2913,17 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
  void gui_mch_set_parent(char *title);
  void gui_mch_prepare(int *argc, char **argv);
  int gui_mch_init(void);
+diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
+--- a/src/proto/os_mswin.pro
++++ b/src/proto/os_mswin.pro
+@@ -19,7 +19,6 @@ void display_errors(void);
+ int mch_has_exp_wildcard(char_u *p);
+ int mch_has_wildcard(char_u *p);
+ int mch_chdir(char *path);
+-int can_end_termcap_mode(int give_msg);
+ int mch_screenmode(char_u *arg);
+ int mch_icon_load(HANDLE *iconp);
+ int mch_libcall(char_u *libname, char_u *funcname, char_u *argstring, int argint, char_u **string_result, int *number_result);
 diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 --- a/src/proto/os_win32.pro
 +++ b/src/proto/os_win32.pro
@@ -2767,7 +2938,7 @@ diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 diff --git a/src/version.c b/src/version.c
 --- a/src/version.c
 +++ b/src/version.c
-@@ -3897,18 +3897,11 @@ list_version(void)
+@@ -3899,18 +3899,11 @@ list_version(void)
      MSG(longVersion);
  #ifdef WIN3264
  # ifdef FEAT_GUI_W32
@@ -2788,7 +2959,7 @@ diff --git a/src/version.c b/src/version.c
  # ifdef FEAT_OLE
      MSG_PUTS(_(" with OLE support"));
  # endif
-@@ -4266,10 +4259,6 @@ intro_message(
+@@ -4268,10 +4261,6 @@ intro_message(
      blanklines = (int)Rows - ((sizeof(lines) / sizeof(char *)) - 1);
      if (!p_cp)
  	blanklines += 4;  /* add 4 for not showing "Vi compatible" message */
@@ -2799,7 +2970,7 @@ diff --git a/src/version.c b/src/version.c
  
  #ifdef FEAT_WINDOWS
      /* Don't overwrite a statusline.  Depends on 'cmdheight'. */
-@@ -4318,17 +4307,6 @@ intro_message(
+@@ -4320,17 +4309,6 @@ intro_message(
  		do_intro_line(row, (char_u *)_(p), i == 2, 0);
  	    ++row;
  	}
