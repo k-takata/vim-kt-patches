@@ -2616,7 +2616,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    )
      {
-@@ -5049,9 +4790,6 @@ mch_start_job(char *cmd, job_T *job, job
+@@ -5049,14 +4790,10 @@ mch_start_job(char *cmd, job_T *job, job
  		ifd[0] = CreateFileW(wn, GENERIC_WRITE, FILE_SHARE_READ,
  			 &saAttr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
  		vim_free(wn);
@@ -2626,7 +2626,12 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    }
  	}
  	if (wn == NULL)
-@@ -5066,16 +4804,16 @@ mch_start_job(char *cmd, job_T *job, job
+ #endif
+-
+ 	    ifd[0] = CreateFile((LPCSTR)fname, GENERIC_READ, FILE_SHARE_READ,
+ 			 &saAttr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+ 	if (ifd[0] == INVALID_HANDLE_VALUE)
+@@ -5066,16 +4803,16 @@ mch_start_job(char *cmd, job_T *job, job
  	}
      }
      else if (!CreatePipe(&ifd[0], &ifd[1], &saAttr, 0)
@@ -2646,7 +2651,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	goto failed;
      si.dwFlags |= STARTF_USESTDHANDLES;
      si.hStdInput = ifd[0];
-@@ -6078,9 +5816,7 @@ mch_remove(char_u *name)
+@@ -6078,9 +5815,7 @@ mch_remove(char_u *name)
  	{
  	    n = DeleteFileW(wn) ? 0 : -1;
  	    vim_free(wn);
@@ -2657,7 +2662,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  #endif
-@@ -6105,7 +5841,6 @@ mch_breakcheck(void)
+@@ -6105,7 +5840,6 @@ mch_breakcheck(void)
  
  /* physical RAM to leave for the OS */
  #define WINNT_RESERVE_BYTES     (256*1024*1024)
@@ -2665,7 +2670,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /*
   * How much main memory in KiB that can be used by VIM.
-@@ -6114,54 +5849,25 @@ mch_breakcheck(void)
+@@ -6114,54 +5848,25 @@ mch_breakcheck(void)
      long_u
  mch_total_mem(int special)
  {
@@ -2734,7 +2739,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  #ifdef FEAT_MBYTE
-@@ -6178,16 +5884,13 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6178,16 +5883,13 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
      WCHAR	szNewPath[_MAX_PATH + 1];
      HANDLE	hf;
  
@@ -2758,7 +2763,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (GetFullPathNameW(wnew, _MAX_PATH, szNewPath, &p) == 0 || p == NULL)
  	return -1;
-@@ -6265,22 +5968,17 @@ mch_rename(
+@@ -6265,22 +5967,17 @@ mch_rename(
  	    retval = mch_wrename(wold, wnew);
  	vim_free(wold);
  	vim_free(wnew);
@@ -2787,7 +2792,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Get base path of new file name.  Undocumented feature: If pszNewFile is
       * a directory, no error is returned and pszFilePart will be NULL. */
-@@ -6343,16 +6041,9 @@ mch_rename(
+@@ -6343,16 +6040,9 @@ mch_rename(
      char *
  default_shell(void)
  {
@@ -2805,7 +2810,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  /*
-@@ -6398,18 +6089,11 @@ mch_access(char *n, int p)
+@@ -6398,18 +6088,11 @@ mch_access(char *n, int p)
  
  		hFile = FindFirstFileW(TempNameW, &d);
  		if (hFile == INVALID_HANDLE_VALUE)
@@ -2826,7 +2831,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    {
  		char		    *pch;
-@@ -6439,18 +6123,11 @@ mch_access(char *n, int p)
+@@ -6439,18 +6122,11 @@ mch_access(char *n, int p)
  	    if (wn != NULL)
  	    {
  		if (!GetTempFileNameW(wn, L"VIM", 0, TempNameW))
@@ -2847,7 +2852,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    {
  		if (!GetTempFileName(n, "VIM", 0, TempName))
-@@ -6467,17 +6144,8 @@ mch_access(char *n, int p)
+@@ -6467,17 +6143,8 @@ mch_access(char *n, int p)
  		| ((p & R_OK) ? GENERIC_READ : 0);
  #ifdef FEAT_MBYTE
  	if (wn != NULL)
@@ -2866,7 +2871,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    hFile = CreateFile(n, am, 0, NULL, OPEN_EXISTING, 0, NULL);
  	if (hFile == INVALID_HANDLE_VALUE)
-@@ -6512,11 +6180,7 @@ mch_open(char *name, int flags, int mode
+@@ -6512,11 +6179,7 @@ mch_open(char *name, int flags, int mode
  	{
  	    f = _wopen(wn, flags, mode);
  	    vim_free(wn);
@@ -2879,7 +2884,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  # endif
-@@ -6540,12 +6204,7 @@ mch_fopen(char *name, char *mode)
+@@ -6540,12 +6203,7 @@ mch_fopen(char *name, char *mode)
      WCHAR	*wn, *wm;
      FILE	*f = NULL;
  
@@ -2893,7 +2898,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  # if defined(DEBUG) && _MSC_VER >= 1400
  	/* Work around an annoying assertion in the Microsoft debug CRT
-@@ -6569,12 +6228,7 @@ mch_fopen(char *name, char *mode)
+@@ -6569,12 +6227,7 @@ mch_fopen(char *name, char *mode)
  # if defined(DEBUG) && _MSC_VER >= 1400
  	_set_fmode(oldMode);
  # endif
@@ -2907,7 +2912,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  
      /* fopen() can open a file which name is longer than _MAX_PATH bytes
-@@ -6745,8 +6399,7 @@ mch_copy_file_attribute(char_u *from, ch
+@@ -6745,8 +6398,7 @@ mch_copy_file_attribute(char_u *from, ch
  #ifdef FEAT_MBYTE
      /* File streams only work on Windows NT and later. */
      PlatformId();
@@ -2917,7 +2922,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
      return 0;
  }
-@@ -6758,7 +6411,6 @@ mch_copy_file_attribute(char_u *from, ch
+@@ -6758,7 +6410,6 @@ mch_copy_file_attribute(char_u *from, ch
   */
  
  /* These magic numbers are from the MS header files */
@@ -2925,7 +2930,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #define MIN_STACK_WINNT 2
  
  /*
-@@ -6778,10 +6430,7 @@ myresetstkoflw(void)
+@@ -6778,10 +6429,7 @@ myresetstkoflw(void)
      DWORD	nPageSize;
      DWORD	dummy;
  
@@ -2936,7 +2941,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* We need to know the system page size. */
      GetSystemInfo(&si);
-@@ -6797,29 +6446,12 @@ myresetstkoflw(void)
+@@ -6797,29 +6445,12 @@ myresetstkoflw(void)
  
      /* ...and the page thats min_stack_req pages away from stack base; this is
       * the lowest page we could use. */
