@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  865b2c46e6251beebb391c9417bba12138be5f33
+# Parent  552c13b08d0bd444e6e0287818986705ca01aef7
 
 diff --git a/runtime/doc/gui_w32.txt b/runtime/doc/gui_w32.txt
 --- a/runtime/doc/gui_w32.txt
@@ -372,7 +372,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -14265,7 +14265,7 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -14264,7 +14264,7 @@ f_has(typval_T *argvars, typval_T *rettv
  	    n = (gui.in_use || gui.starting);
  # ifdef FEAT_GUI_W32
  	else if (STRICMP(name, "gui_win32s") == 0)
@@ -381,7 +381,7 @@ diff --git a/src/eval.c b/src/eval.c
  # endif
  # ifdef FEAT_BROWSE
  	else if (STRICMP(name, "browse") == 0)
-@@ -14278,7 +14278,7 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -14277,7 +14277,7 @@ f_has(typval_T *argvars, typval_T *rettv
  #endif
  #if defined(WIN3264)
  	else if (STRICMP(name, "win95") == 0)
@@ -2616,32 +2616,32 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    )
      {
-@@ -5039,7 +4780,7 @@ mch_start_job(char *cmd, job_T *job, job
-     if (use_file_for_in)
-     {
- 	char_u *fname = options->jo_io_name[PART_IN];
+@@ -5002,7 +4743,7 @@ job_io_file_open(
+ 	DWORD dwFlagsAndAttributes)
+ {
+     HANDLE h;
 -#ifdef FEAT_MBYTE
-+#  ifdef FEAT_MBYTE
- 	WCHAR *wn = NULL;
- 	if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
- 	{
-@@ -5049,14 +4790,10 @@ mch_start_job(char *cmd, job_T *job, job
- 		ifd[0] = CreateFileW(wn, GENERIC_WRITE, FILE_SHARE_READ,
- 			 &saAttr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
- 		vim_free(wn);
--		if (ifd[0] == INVALID_HANDLE_VALUE
--			      && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
--		    wn = NULL;
- 	    }
++# ifdef FEAT_MBYTE
+     WCHAR *wn = NULL;
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+@@ -5013,14 +4754,10 @@ job_io_file_open(
+ 		     lpSecurityAttributes, dwCreationDisposition,
+ 		     dwFlagsAndAttributes, NULL);
+ 	    vim_free(wn);
+-	    if (h == INVALID_HANDLE_VALUE
+-			  && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
+-		wn = NULL;
  	}
- 	if (wn == NULL)
+     }
+     if (wn == NULL)
 -#endif
 -
-+#  endif
- 	    ifd[0] = CreateFile((LPCSTR)fname, GENERIC_READ, FILE_SHARE_READ,
- 			 &saAttr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
- 	if (ifd[0] == INVALID_HANDLE_VALUE)
-@@ -5066,16 +4803,16 @@ mch_start_job(char *cmd, job_T *job, job
++# endif
+ 	h = CreateFile((LPCSTR)fname, dwDesiredAccess, dwShareMode,
+ 		     lpSecurityAttributes, dwCreationDisposition,
+ 		     dwFlagsAndAttributes, NULL);
+@@ -5087,7 +4824,7 @@ mch_start_job(char *cmd, job_T *job, job
  	}
      }
      else if (!CreatePipe(&ifd[0], &ifd[1], &saAttr, 0)
@@ -2649,19 +2649,26 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +	    || !SetHandleInformation(ifd[1], HANDLE_FLAG_INHERIT, 0))
  	goto failed;
  
-     if (!CreatePipe(&ofd[0], &ofd[1], &saAttr, 0)
+     if (use_file_for_out)
+@@ -5103,7 +4840,7 @@ mch_start_job(char *cmd, job_T *job, job
+ 	}
+     }
+     else if (!CreatePipe(&ofd[0], &ofd[1], &saAttr, 0)
 -	    || !pSetHandleInformation(ofd[0], HANDLE_FLAG_INHERIT, 0))
 +	    || !SetHandleInformation(ofd[0], HANDLE_FLAG_INHERIT, 0))
  	goto failed;
  
-     if (!use_out_for_err
+     if (use_file_for_err)
+@@ -5120,7 +4857,7 @@ mch_start_job(char *cmd, job_T *job, job
+     }
+     else if (!use_out_for_err
  	   && (!CreatePipe(&efd[0], &efd[1], &saAttr, 0)
 -	    || !pSetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0)))
 +	    || !SetHandleInformation(efd[0], HANDLE_FLAG_INHERIT, 0)))
  	goto failed;
+ 
      si.dwFlags |= STARTF_USESTDHANDLES;
-     si.hStdInput = ifd[0];
-@@ -6078,9 +5815,7 @@ mch_remove(char_u *name)
+@@ -6125,9 +5862,7 @@ mch_remove(char_u *name)
  	{
  	    n = DeleteFileW(wn) ? 0 : -1;
  	    vim_free(wn);
@@ -2672,7 +2679,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  #endif
-@@ -6105,7 +5840,6 @@ mch_breakcheck(void)
+@@ -6152,7 +5887,6 @@ mch_breakcheck(void)
  
  /* physical RAM to leave for the OS */
  #define WINNT_RESERVE_BYTES     (256*1024*1024)
@@ -2680,7 +2687,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /*
   * How much main memory in KiB that can be used by VIM.
-@@ -6114,54 +5848,25 @@ mch_breakcheck(void)
+@@ -6161,54 +5895,25 @@ mch_breakcheck(void)
      long_u
  mch_total_mem(int special)
  {
@@ -2749,7 +2756,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  #ifdef FEAT_MBYTE
-@@ -6178,16 +5883,13 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6225,16 +5930,13 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
      WCHAR	szNewPath[_MAX_PATH + 1];
      HANDLE	hf;
  
@@ -2773,7 +2780,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (GetFullPathNameW(wnew, _MAX_PATH, szNewPath, &p) == 0 || p == NULL)
  	return -1;
-@@ -6265,22 +5967,17 @@ mch_rename(
+@@ -6312,22 +6014,17 @@ mch_rename(
  	    retval = mch_wrename(wold, wnew);
  	vim_free(wold);
  	vim_free(wnew);
@@ -2802,7 +2809,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Get base path of new file name.  Undocumented feature: If pszNewFile is
       * a directory, no error is returned and pszFilePart will be NULL. */
-@@ -6343,16 +6040,9 @@ mch_rename(
+@@ -6390,16 +6087,9 @@ mch_rename(
      char *
  default_shell(void)
  {
@@ -2820,7 +2827,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  /*
-@@ -6398,18 +6088,11 @@ mch_access(char *n, int p)
+@@ -6445,18 +6135,11 @@ mch_access(char *n, int p)
  
  		hFile = FindFirstFileW(TempNameW, &d);
  		if (hFile == INVALID_HANDLE_VALUE)
@@ -2841,7 +2848,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    {
  		char		    *pch;
-@@ -6439,18 +6122,11 @@ mch_access(char *n, int p)
+@@ -6486,18 +6169,11 @@ mch_access(char *n, int p)
  	    if (wn != NULL)
  	    {
  		if (!GetTempFileNameW(wn, L"VIM", 0, TempNameW))
@@ -2862,7 +2869,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    {
  		if (!GetTempFileName(n, "VIM", 0, TempName))
-@@ -6467,17 +6143,8 @@ mch_access(char *n, int p)
+@@ -6514,17 +6190,8 @@ mch_access(char *n, int p)
  		| ((p & R_OK) ? GENERIC_READ : 0);
  #ifdef FEAT_MBYTE
  	if (wn != NULL)
@@ -2881,7 +2888,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    hFile = CreateFile(n, am, 0, NULL, OPEN_EXISTING, 0, NULL);
  	if (hFile == INVALID_HANDLE_VALUE)
-@@ -6512,11 +6179,7 @@ mch_open(char *name, int flags, int mode
+@@ -6559,11 +6226,7 @@ mch_open(char *name, int flags, int mode
  	{
  	    f = _wopen(wn, flags, mode);
  	    vim_free(wn);
@@ -2894,7 +2901,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  # endif
-@@ -6540,12 +6203,7 @@ mch_fopen(char *name, char *mode)
+@@ -6587,12 +6250,7 @@ mch_fopen(char *name, char *mode)
      WCHAR	*wn, *wm;
      FILE	*f = NULL;
  
@@ -2908,7 +2915,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  # if defined(DEBUG) && _MSC_VER >= 1400
  	/* Work around an annoying assertion in the Microsoft debug CRT
-@@ -6569,12 +6227,7 @@ mch_fopen(char *name, char *mode)
+@@ -6616,12 +6274,7 @@ mch_fopen(char *name, char *mode)
  # if defined(DEBUG) && _MSC_VER >= 1400
  	_set_fmode(oldMode);
  # endif
@@ -2922,7 +2929,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  
      /* fopen() can open a file which name is longer than _MAX_PATH bytes
-@@ -6745,8 +6398,7 @@ mch_copy_file_attribute(char_u *from, ch
+@@ -6792,8 +6445,7 @@ mch_copy_file_attribute(char_u *from, ch
  #ifdef FEAT_MBYTE
      /* File streams only work on Windows NT and later. */
      PlatformId();
@@ -2932,7 +2939,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
      return 0;
  }
-@@ -6758,7 +6410,6 @@ mch_copy_file_attribute(char_u *from, ch
+@@ -6805,7 +6457,6 @@ mch_copy_file_attribute(char_u *from, ch
   */
  
  /* These magic numbers are from the MS header files */
@@ -2940,7 +2947,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #define MIN_STACK_WINNT 2
  
  /*
-@@ -6778,10 +6429,7 @@ myresetstkoflw(void)
+@@ -6825,10 +6476,7 @@ myresetstkoflw(void)
      DWORD	nPageSize;
      DWORD	dummy;
  
@@ -2951,7 +2958,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* We need to know the system page size. */
      GetSystemInfo(&si);
-@@ -6797,29 +6445,12 @@ myresetstkoflw(void)
+@@ -6844,29 +6492,12 @@ myresetstkoflw(void)
  
      /* ...and the page thats min_stack_req pages away from stack base; this is
       * the lowest page we could use. */
@@ -3022,7 +3029,7 @@ diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 diff --git a/src/version.c b/src/version.c
 --- a/src/version.c
 +++ b/src/version.c
-@@ -3909,18 +3909,11 @@ list_version(void)
+@@ -3935,18 +3935,11 @@ list_version(void)
      MSG(longVersion);
  #ifdef WIN3264
  # ifdef FEAT_GUI_W32
@@ -3043,7 +3050,7 @@ diff --git a/src/version.c b/src/version.c
  # ifdef FEAT_OLE
      MSG_PUTS(_(" with OLE support"));
  # endif
-@@ -4278,10 +4271,6 @@ intro_message(
+@@ -4304,10 +4297,6 @@ intro_message(
      blanklines = (int)Rows - ((sizeof(lines) / sizeof(char *)) - 1);
      if (!p_cp)
  	blanklines += 4;  /* add 4 for not showing "Vi compatible" message */
@@ -3054,7 +3061,7 @@ diff --git a/src/version.c b/src/version.c
  
  #ifdef FEAT_WINDOWS
      /* Don't overwrite a statusline.  Depends on 'cmdheight'. */
-@@ -4330,17 +4319,6 @@ intro_message(
+@@ -4356,17 +4345,6 @@ intro_message(
  		do_intro_line(row, (char_u *)_(p), i == 2, 0);
  	    ++row;
  	}
