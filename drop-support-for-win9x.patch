@@ -2616,6 +2616,15 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    )
      {
+@@ -5039,7 +4780,7 @@ mch_start_job(char *cmd, job_T *job, job
+     if (use_file_for_in)
+     {
+ 	char_u *fname = options->jo_io_name[PART_IN];
+-#ifdef FEAT_MBYTE
++#  ifdef FEAT_MBYTE
+ 	WCHAR *wn = NULL;
+ 	if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+ 	{
 @@ -5049,14 +4790,10 @@ mch_start_job(char *cmd, job_T *job, job
  		ifd[0] = CreateFileW(wn, GENERIC_WRITE, FILE_SHARE_READ,
  			 &saAttr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -2626,8 +2635,9 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    }
  	}
  	if (wn == NULL)
- #endif
+-#endif
 -
++#  endif
  	    ifd[0] = CreateFile((LPCSTR)fname, GENERIC_READ, FILE_SHARE_READ,
  			 &saAttr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
  	if (ifd[0] == INVALID_HANDLE_VALUE)
