@@ -1,6 +1,20 @@
 # HG changeset patch
-# Parent  d1b2d416d39ab042846ef4c5b66ccccca5f19568
+# Parent  fa2e1a10f7e8a99905937ce5724774836b04fb83
 
+diff --git a/runtime/doc/helphelp.txt b/runtime/doc/helphelp.txt
+--- a/runtime/doc/helphelp.txt
++++ b/runtime/doc/helphelp.txt
+@@ -257,8 +257,8 @@ The second one finds the English user ma
+ "it".
+ 
+ When using command-line completion for the ":help" command, the "@en"
+-extension is only shown when a tag exists for multiple languages.  When the
+-tag only exists for English "@en" is omitted.
++extension is always omitted even when a tag exists for multiple languages.
++You need to add "@en" explicitly when you want to find the tag for English.
+ 
+ When using |CTRL-]| or ":help!" in a non-English help file Vim will try to
+ find the tag in the same language.  If not found then 'helplang' will be used
 diff --git a/src/ex_getln.c b/src/ex_getln.c
 --- a/src/ex_getln.c
 +++ b/src/ex_getln.c
