@@ -1,0 +1,55 @@
+# HG changeset patch
+# Parent  b29c4c18f0bb4591a1f19d5a890d21f3c4b559e2
+
+diff --git a/src/memfile.c b/src/memfile.c
+--- a/src/memfile.c
++++ b/src/memfile.c
+@@ -541,9 +541,6 @@ mf_sync(memfile_T *mfp, int flags)
+ {
+     int		status;
+     bhdr_T	*hp;
+-#if defined(SYNC_DUP_CLOSE)
+-    int		fd;
+-#endif
+     int		got_int_save = got_int;
+ 
+     if (mfp->mf_fd < 0)	    /* there is no file, nothing to do */
+@@ -635,13 +632,9 @@ mf_sync(memfile_T *mfp, int flags)
+ 		status = FAIL;
+ 	}
+ #endif
+-#ifdef SYNC_DUP_CLOSE
+-	/*
+-	 * Win32 is a bit more work: Duplicate the file handle and close it.
+-	 * This should flush the file to disk.
+-	 */
+-	if ((fd = dup(mfp->mf_fd)) >= 0)
+-	    close(fd);
++#ifdef WIN32
++	if (_commit(mfp->mf_fd))
++	    status = FAIL;
+ #endif
+ #ifdef AMIGA
+ # if defined(__AROS__) || defined(__amigaos4__)
+diff --git a/src/os_mac.h b/src/os_mac.h
+--- a/src/os_mac.h
++++ b/src/os_mac.h
+@@ -106,7 +106,6 @@
+ #define HAVE_AVAIL_MEM
+ 
+ #ifndef HAVE_CONFIG_H
+-/* #define SYNC_DUP_CLOSE	   sync() a file with dup() and close() */
+ # define HAVE_STRING_H
+ # define HAVE_STRCSPN
+ # define HAVE_MEMSET
+diff --git a/src/os_win32.h b/src/os_win32.h
+--- a/src/os_win32.h
++++ b/src/os_win32.h
+@@ -26,7 +26,6 @@
+ 
+ #define BINARY_FILE_IO
+ #define USE_EXE_NAME		/* use argv[0] for $VIM */
+-#define SYNC_DUP_CLOSE		/* sync() a file with dup() and close() */
+ #define USE_TERM_CONSOLE
+ #ifndef HAVE_STRING_H
+ # define HAVE_STRING_H
