@@ -46,6 +46,5 @@ fix-char_u-usage.patch
 fix-coding-style-in-if_ruby.patch
 remove-sync_dup_close.patch
 omit-en-from-help.patch
-fix-closing-uninitialized-handle.patch
 drop-support-for-win9x.patch
 fix-config_cache-removal.patch #+rejected
