@@ -1,18 +1,18 @@
 # HG changeset patch
-# Parent  4e5a4f1cff9292a94ed041f9442d275ec737ad4c
+# Parent  567f11a6b141bb190f60d185664b34bf35c08c59
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -15266,7 +15266,7 @@ f_job_start(typval_T *argvars UNUSED, ty
- # ifdef FEAT_CHANNEL
+@@ -15319,7 +15319,7 @@ f_job_start(typval_T *argvars, typval_T 
+     mch_start_job(argv, job, &opt);
+ #else
      ch_logs(NULL, "Starting job: %s", (char *)cmd);
- # endif
 -    mch_start_job((char *)cmd, job, &opt);
 +    mch_start_job(cmd, job, &opt);
  #endif
  
- #ifdef FEAT_CHANNEL
+     /* If the channel is reading from a buffer, write lines now. */
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
@@ -172,9 +172,9 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		vim_free(newcmd);
  	    }
  	}
-@@ -5005,7 +5005,7 @@ mch_call_shell(
+@@ -5040,7 +5040,7 @@ job_io_file_open(
+ }
  
- #if defined(FEAT_JOB) || defined(PROTO)
      void
 -mch_start_job(char *cmd, job_T *job, jobopt_T *options)
 +mch_start_job(char_u *cmd, job_T *job, jobopt_T *options)
