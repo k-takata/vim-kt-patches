@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  567f11a6b141bb190f60d185664b34bf35c08c59
+# Parent  ffcd8f1bcff7d8cfdad9d3f789fe78dd9cda7d99
 
-diff --git a/src/eval.c b/src/eval.c
---- a/src/eval.c
-+++ b/src/eval.c
-@@ -15319,7 +15319,7 @@ f_job_start(typval_T *argvars, typval_T 
+diff --git a/src/channel.c b/src/channel.c
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -3663,7 +3663,7 @@ job_start(typval_T *argvars)
      mch_start_job(argv, job, &opt);
  #else
      ch_logs(NULL, "Starting job: %s", (char *)cmd);
