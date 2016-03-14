@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  4bc8838e4848e015c26792266b933a4267eaa5b6
+# Parent  b15204a1ea72e9743562c5afde33bad1d503867a
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -6657,6 +6657,7 @@ synIDattr({synID}, {what} [, {mode}])			
+@@ -6755,6 +6755,7 @@ synIDattr({synID}, {what} [, {mode}])			
  		"standout"	"1" if standout
  		"underline"	"1" if underlined
  		"undercurl"	"1" if undercurled
@@ -88,7 +88,7 @@ diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -19894,6 +19894,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
+@@ -19240,6 +19240,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
  	case 's':
  		if (TOLOWER_ASC(what[1]) == 'p')	/* sp[#] */
  		    p = highlight_color(id, what, modec);
@@ -135,22 +135,53 @@ diff --git a/src/gui.h b/src/gui.h
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -5840,6 +5840,15 @@ draw_under(int flags, int row, int col, 
- 		      FILL_X(col + cells) - 1, y);
+@@ -5853,6 +5853,25 @@ draw_under(int flags, int row, int col, 
  #endif
      }
-+
+ 
 +    /* Draw a strikethrough line */
 +    if (flags & DRAW_STRIKE)
 +    {
++#if GTK_CHECK_VERSION(3,0,0)
++	cairo_set_line_width(cr, 1.0);
++	cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
++	set_cairo_source_rgb_from_pixel(cr, gui.spcolor->pixel);
++	cairo_move_to(cr, FILL_X(col), y + 1 - gui.char_height/2 + 0.5);
++	cairo_line_to(cr, FILL_X(col + cells), y + 1 - gui.char_height/2 + 0.5);
++	cairo_stroke(cr);
++#else
 +	gdk_gc_set_foreground(gui.text_gc, gui.spcolor);
 +	gdk_draw_line(gui.drawarea->window, gui.text_gc,
-+		      FILL_X(col), y + 1 - gui.char_height/2, FILL_X(col + cells), y + 1 - gui.char_height/2);
++		      FILL_X(col), y + 1 - gui.char_height/2,
++		      FILL_X(col + cells), y + 1 - gui.char_height/2);
 +	gdk_gc_set_foreground(gui.text_gc, gui.fgcolor);
++#endif
 +    }
- }
- 
-     int
++
+     /* Underline: draw a line at the bottom of the character cell. */
+     if (flags & DRAW_UNDERL)
+     {
+@@ -5861,14 +5880,12 @@ draw_under(int flags, int row, int col, 
+ 	if (p_linespace > 1)
+ 	    y -= p_linespace - 1;
+ #if GTK_CHECK_VERSION(3,0,0)
+-	{
+-	    cairo_set_line_width(cr, 1.0);
+-	    cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+-	    set_cairo_source_rgb_from_pixel(cr, gui.fgcolor->pixel);
+-	    cairo_move_to(cr, FILL_X(col), y + 0.5);
+-	    cairo_line_to(cr, FILL_X(col + cells), y + 0.5);
+-	    cairo_stroke(cr);
+-	}
++	cairo_set_line_width(cr, 1.0);
++	cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
++	set_cairo_source_rgb_from_pixel(cr, gui.fgcolor->pixel);
++	cairo_move_to(cr, FILL_X(col), y + 0.5);
++	cairo_line_to(cr, FILL_X(col + cells), y + 0.5);
++	cairo_stroke(cr);
+ #else
+ 	gdk_draw_line(gui.drawarea->window, gui.text_gc,
+ 		      FILL_X(col), y,
 diff --git a/src/gui_mac.c b/src/gui_mac.c
 --- a/src/gui_mac.c
 +++ b/src/gui_mac.c
@@ -169,7 +200,7 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -6745,6 +6745,18 @@ gui_mch_draw_string(
+@@ -6734,6 +6734,18 @@ gui_mch_draw_string(
  	DeleteObject(SelectObject(s_hdc, old_pen));
      }
  
@@ -191,7 +222,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/gui_x11.c b/src/gui_x11.c
 --- a/src/gui_x11.c
 +++ b/src/gui_x11.c
-@@ -2653,6 +2653,16 @@ gui_mch_draw_string(
+@@ -2636,6 +2636,16 @@ gui_mch_draw_string(
  		y, FILL_X(col + cells) - 1, y);
      }
  
@@ -273,7 +304,7 @@ diff --git a/src/syntax.c b/src/syntax.c
  
  static int get_attr_entry(garray_T *table, attrentry_T *aep);
  static void syn_unadd_group(void);
-@@ -9541,6 +9541,8 @@ highlight_changed(void)
+@@ -9545,6 +9545,8 @@ highlight_changed(void)
  				break;
  		    case 'c':	attr |= HL_UNDERCURL;
  				break;
