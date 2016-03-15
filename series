@@ -30,7 +30,6 @@ subpixel-artifacts.patch
 fix-italic-overhang-before-space.patch
 update-if_xx_doc.patch
 remove-useless-STRCPY.patch
-use-correct-struct-size.patch
 bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
