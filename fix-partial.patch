@@ -1,0 +1,123 @@
+# HG changeset patch
+# Parent  811908dd6c7f053712cbb8694d1babc99ef2f3e6
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -11832,6 +11832,7 @@ f_function(typval_T *argvars, typval_T *
+     char_u	*s;
+     char_u	*name;
+     int		use_string = FALSE;
++    partial_T   *pt_arg = NULL;
+ 
+     if (argvars[0].v_type == VAR_FUNC)
+     {
+@@ -11840,8 +11841,11 @@ f_function(typval_T *argvars, typval_T *
+     }
+     else if (argvars[0].v_type == VAR_PARTIAL
+ 					 && argvars[0].vval.v_partial != NULL)
++    {
+ 	/* function(dict.MyFunc, [arg]) */
+-	s = argvars[0].vval.v_partial->pt_name;
++	pt_arg = argvars[0].vval.v_partial;
++	s = pt_arg->pt_name;
++    }
+     else
+     {
+ 	/* function('MyFunc', [arg], dict) */
+@@ -11919,30 +11923,42 @@ f_function(typval_T *argvars, typval_T *
+ 		    arg_idx = 0;
+ 	    }
+ 	}
+-	if (dict_idx > 0 || arg_idx > 0)
++	if (dict_idx > 0 || arg_idx > 0 || pt_arg != NULL)
+ 	{
+ 	    partial_T	*pt = (partial_T *)alloc_clear(sizeof(partial_T));
+ 
+ 	    if (pt != NULL)
+ 	    {
+-		if (arg_idx > 0)
++		if (arg_idx > 0 || pt_arg != NULL)
+ 		{
+ 		    listitem_T	*li;
+ 		    int		i = 0;
+-
+-		    pt->pt_argv = (typval_T *)alloc(
+-					     sizeof(typval_T) * list->lv_len);
+-		    if (pt->pt_argv == NULL)
+-		    {
+-			vim_free(pt);
+-			vim_free(name);
+-			return;
+-		    }
+-		    else
+-		    {
+-			pt->pt_argc = list->lv_len;
+-			for (li = list->lv_first; li != NULL; li = li->li_next)
+-			    copy_tv(&li->li_tv, &pt->pt_argv[i++]);
++		    int		arg_len = 0, lv_len = 0;
++
++		    if (pt_arg != NULL)
++			arg_len = pt_arg->pt_argc;
++		    if (list != NULL)
++			lv_len = list->lv_len;
++		    pt->pt_argc = arg_len + lv_len;
++		    if (pt->pt_argc > 0)
++		    {
++			pt->pt_argv = (typval_T *)alloc(
++					    sizeof(typval_T) * pt->pt_argc);
++			if (pt->pt_argv == NULL)
++			{
++			    vim_free(pt);
++			    vim_free(name);
++			    return;
++			}
++			else
++			{
++			    for (i = 0; i < arg_len; i++)
++				copy_tv(&pt_arg->pt_argv[i], &pt->pt_argv[i]);
++			    if (lv_len > 0)
++				for (li = list->lv_first; li != NULL;
++							    li = li->li_next)
++				    copy_tv(&li->li_tv, &pt->pt_argv[i++]);
++			}
+ 		    }
+ 		}
+ 
+@@ -11953,10 +11969,11 @@ f_function(typval_T *argvars, typval_T *
+ 		    pt->pt_dict = argvars[dict_idx].vval.v_dict;
+ 		    ++pt->pt_dict->dv_refcount;
+ 		}
+-		else if (argvars[0].v_type == VAR_PARTIAL)
+-		{
+-		    pt->pt_dict = argvars[0].vval.v_partial->pt_dict;
+-		    ++pt->pt_dict->dv_refcount;
++		else if (pt_arg != NULL)
++		{
++		    pt->pt_dict = pt_arg->pt_dict;
++		    if (pt->pt_dict != NULL)
++			++pt->pt_dict->dv_refcount;
+ 		}
+ 
+ 		pt->pt_refcount = 1;
+diff --git a/src/testdir/test_partial.vim b/src/testdir/test_partial.vim
+--- a/src/testdir/test_partial.vim
++++ b/src/testdir/test_partial.vim
+@@ -20,9 +20,17 @@ func Test_partial_args()
+   call Cb("zzz")
+   call assert_equal("foo/bar/xxx", Cb("xxx"))
+   call assert_equal("foo/bar/yyy", call(Cb, ["yyy"]))
++  let Cb2 = function(Cb)
++  call assert_equal("foo/bar/zzz", Cb2("zzz"))
++  let Cb3 = function(Cb, ["www"])
++  call assert_equal("foo/bar/www", Cb3())
+ 
+   let Cb = function('MyFunc', [])
+   call assert_equal("a/b/c", Cb("a", "b", "c"))
++  let Cb2 = function(Cb, [])
++  call assert_equal("a/b/d", Cb2("a", "b", "d"))
++  let Cb3 = function(Cb, ["a", "b"])
++  call assert_equal("a/b/e", Cb3("e"))
+ 
+   let Sort = function('MySort', [1])
+   call assert_equal([1, 2, 3], sort([3, 1, 2], Sort))
