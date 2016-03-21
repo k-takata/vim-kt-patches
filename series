@@ -28,7 +28,6 @@ tabline-dnd.patch
 tabline-dnd-mark.diff
 subpixel-artifacts.patch
 fix-italic-overhang-before-space.patch
-update-if_xx_doc.patch
 remove-useless-STRCPY.patch
 bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
