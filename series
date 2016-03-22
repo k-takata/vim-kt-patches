@@ -46,5 +46,4 @@ remove-sync_dup_close.patch
 omit-helplang.patch
 drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
-fix-partial-refcount.patch
 fix-config_cache-removal.patch #+rejected
