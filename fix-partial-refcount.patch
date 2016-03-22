@@ -1,0 +1,25 @@
+# HG changeset patch
+# Parent  c4b815d03326be39e392d1fb4e46c2851039be19
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -12038,6 +12038,7 @@ partial_free(partial_T *pt)
+ 	clear_tv(&pt->pt_argv[i]);
+     vim_free(pt->pt_argv);
+     func_unref(pt->pt_name);
++    dict_unref(pt->pt_dict);
+     vim_free(pt->pt_name);
+     vim_free(pt);
+ }
+@@ -21846,9 +21847,9 @@ handle_subscript(
+ 				copy_tv(&ret_pt->pt_argv[i], &pt->pt_argv[i]);
+ 			}
+ 		    }
++		    func_ref(pt->pt_name);
+ 		    partial_unref(ret_pt);
+ 		}
+-		func_ref(pt->pt_name);
+ 		rettv->v_type = VAR_PARTIAL;
+ 		rettv->vval.v_partial = pt;
+ 	    }
