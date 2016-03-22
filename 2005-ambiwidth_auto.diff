@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent b310fc3abf0bd107728295980e4090a7573dea3d
-# Parent  33f896ae96fdebc326b973a1a33f2d9a9c724350
+# Parent  f551f6dbad6e797d437d1e495c9eada44b527ab6
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
@@ -30,7 +30,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5047,3 +5047,54 @@ netbeans_draw_multisign_indicator(int ro
+@@ -9089,3 +9089,54 @@ netbeans_draw_multisign_indicator(int ro
      SetPixel(s_hdc, x+2, y, gui.currFgColor);
  }
  #endif
@@ -88,8 +88,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -1459,6 +1459,19 @@ utf_char2cells(c)
- 	{0x100000, 0x10fffd}
+@@ -1524,6 +1524,19 @@ utf_char2cells(int c)
+ 	{0x1f680, 0x1f6c5}
      };
  
 +#ifdef USE_AMBIWIDTH_AUTO
@@ -111,7 +111,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -3039,7 +3039,11 @@ static struct vimoption
+@@ -3021,7 +3021,11 @@ static struct vimoption options[] =
  #define PARAM_COUNT (sizeof(options) / sizeof(struct vimoption))
  
  #ifdef FEAT_MBYTE
@@ -138,7 +138,7 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -582,6 +582,14 @@ typedef unsigned long u8char_T;	    /* l
+@@ -555,6 +555,14 @@ typedef unsigned long u8char_T;	    /* l
  #endif
  
  /*
