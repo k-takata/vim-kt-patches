@@ -1,0 +1,32 @@
+# HG changeset patch
+# Parent  0762ff4fda84fa1b875008a9fa232c23e3b3d1fb
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -8466,7 +8466,7 @@ static struct fst
+     {"strftime",	1, 2, f_strftime},
+ #endif
+     {"stridx",		2, 3, f_stridx},
+-    {"string",		1, 1, f_string},
++    {"string",		1, 2, f_string},
+     {"strlen",		1, 1, f_strlen},
+     {"strpart",		2, 3, f_strpart},
+     {"strridx",		2, 3, f_strridx},
+@@ -19277,9 +19277,13 @@ f_string(typval_T *argvars, typval_T *re
+ {
+     char_u	*tofree;
+     char_u	numbuf[NUMBUFLEN];
+-
+-    rettv->v_type = VAR_STRING;
+-    rettv->vval.v_string = tv2string(&argvars[0], &tofree, numbuf, 0);
++    int		flag = 0;
++
++    if (argvars[1].v_type != VAR_UNKNOWN)
++	flag = get_tv_number(&argvars[1]);
++    rettv->v_type = VAR_STRING;
++    rettv->vval.v_string = tv2string(&argvars[0], &tofree, numbuf,
++						flag ? get_copyID() : 0);
+     /* Make a copy if we have a value but it's not in allocated memory. */
+     if (rettv->vval.v_string != NULL && tofree == NULL)
+ 	rettv->vval.v_string = vim_strsave(rettv->vval.v_string);
