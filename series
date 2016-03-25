@@ -47,4 +47,5 @@ omit-helplang.patch
 remove-more-ifdefs.patch
 drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
+if_mzsch-support-partial.patch
 fix-config_cache-removal.patch #+rejected
