@@ -1,9 +1,9 @@
 # HG changeset patch
-# Parent  077648d48f92ba3df877cba48d6142f2ae5ee6a1
+# Parent  c91167dda6b96b9171f439240f4dba9df7d27dad
 
-diff --git a/runtime/macros/matchit.vim b/runtime/macros/matchit.vim
---- a/runtime/macros/matchit.vim
-+++ b/runtime/macros/matchit.vim
+diff --git a/runtime/pack/dist/opt/matchit/plugin/matchit.vim b/runtime/pack/dist/opt/matchit/plugin/matchit.vim
+--- a/runtime/pack/dist/opt/matchit/plugin/matchit.vim
++++ b/runtime/pack/dist/opt/matchit/plugin/matchit.vim
 @@ -43,6 +43,7 @@ endif
  let loaded_matchit = 1
  let s:last_mps = ""
