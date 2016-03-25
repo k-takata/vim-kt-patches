@@ -44,7 +44,6 @@ fix-char_u-usage.patch
 fix-coding-style-in-if_ruby.patch
 remove-sync_dup_close.patch
 omit-helplang.patch
-remove-more-ifdefs.patch
 drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
 if_mzsch-support-partial.patch
