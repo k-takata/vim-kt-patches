@@ -1,6 +1,18 @@
 # HG changeset patch
 # Parent  04792ebb0c59fd8864cca15d46f968ed01125880
 
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1911,7 +1911,7 @@ foldlevel( {lnum})		Number	fold level at
+ foldtext()			String	line displayed for closed fold
+ foldtextresult( {lnum})		String	text for closed fold at {lnum}
+ foreground()			Number	bring the Vim window to the foreground
+-function({name} [, {arglist}] [, {dict}])
++function( {name} [, {arglist}] [, {dict}])
+ 				Funcref reference to function {name}
+ garbagecollect( [{atexit}])	none	free memory, breaking cyclic references
+ get( {list}, {idx} [, {def}])	any	get item {idx} from {list} or {def}
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
@@ -23,3 +35,13 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  	Under MS-Windows, when the executable ends in ".com" it must be
  	included.  Thus setting the shell to "command.com" or "4dos.com"
  	works, but "command" and "4dos" do not work for all commands (e.g.,
+@@ -6348,8 +6345,7 @@ A jump table for the options with a shor
+ 	Flag passed to the shell to execute "!" and ":!" commands; e.g.,
+ 	"bash.exe -c ls" or "command.com /c dir".  For the MS-DOS-like
+ 	systems, the default is set according to the value of 'shell', to
+-	reduce the need to set this option by the user.  It's not used for
+-	OS/2 (EMX figures this out itself).
++	reduce the need to set this option by the user.
+ 	On Unix it can have more than one flag.  Each white space separated
+ 	part is passed as an argument to the shell command.
+ 	See |option-backslash| about including spaces and backslashes.
