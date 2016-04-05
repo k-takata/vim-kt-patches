@@ -1,0 +1,25 @@
+# HG changeset patch
+# Parent  04792ebb0c59fd8864cca15d46f968ed01125880
+
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -5052,7 +5052,7 @@ A jump table for the options with a shor
+ 	without a limit.
+ 	On 64 bit machines higher values might work.  But hey, do you really
+ 	need more than 2 Gbyte for text editing?  Keep in mind that text is
+-	stored in the swap file, one can edit files > 2 Gbyte anyay.  We do
++	stored in the swap file, one can edit files > 2 Gbyte anyway.  We do
+ 	need the memory to store undo info.
+ 	Also see 'maxmem'.
+ 
+@@ -6326,9 +6326,6 @@ A jump table for the options with a shor
+ 	"-f" is not inside the quotes, because it is not part of the command
+ 	name.  And Vim automagically recognizes the backslashes that are path
+ 	separators.
+-	For Dos 32 bits (DJGPP), you can set the $DJSYSFLAGS environment
+-	variable to change the way external commands are executed.  See the
+-	libc.inf file of DJGPP.
+ 	Under MS-Windows, when the executable ends in ".com" it must be
+ 	included.  Thus setting the shell to "command.com" or "4dos.com"
+ 	works, but "command" and "4dos" do not work for all commands (e.g.,
