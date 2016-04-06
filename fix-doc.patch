@@ -1,6 +1,18 @@
 # HG changeset patch
 # Parent  9bd55b7fbadf4aec0a3e03a712c26abd5215329c
 
+diff --git a/runtime/doc/change.txt b/runtime/doc/change.txt
+--- a/runtime/doc/change.txt
++++ b/runtime/doc/change.txt
+@@ -1205,7 +1205,7 @@ name '"'.  This means you have to type t
+ register writes to register "0.
+ {Vi: register contents are lost when changing files, no '"'}
+ 
+-2. Numbered registers "0 to "9		*quote_number* *quote0*	*quote1*
++2. Numbered registers "0 to "9		*quote_number* *quote0* *quote1*
+ 					*quote2* *quote3* *quote4* *quote9*
+ Vim fills these registers with text from yank and delete commands.
+    Numbered register 0 contains the text from the most recent yank command,
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
