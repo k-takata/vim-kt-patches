@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  04792ebb0c59fd8864cca15d46f968ed01125880
+# Parent  9bd55b7fbadf4aec0a3e03a712c26abd5215329c
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -25,3 +25,65 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  	need the memory to store undo info.
  	Also see 'maxmem'.
  
+diff --git a/src/INSTALL b/src/INSTALL
+--- a/src/INSTALL
++++ b/src/INSTALL
+@@ -11,10 +11,10 @@ 4. Atari MiNT
+ 
+ See INSTALLami.txt              for Amiga
+ See INSTALLmac.txt              for Macintosh
+-See INSTALLpc.txt               for PC (MS-DOS, Windows 95/98/NT/XP)
++See INSTALLpc.txt               for PC (Windows 95/98/NT/XP/Vista/7/8/10)
+ See INSTALLvms.txt              for VMS
+ See INSTALLx.txt		for cross-compiling on Unix
+-See ../README_390.txt           for OS/390 Unix
++See ../READMEdir/README_390.txt for OS/390 Unix
+ See ../runtime/doc/os_beos.txt  for BeBox
+ 
+ 
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -252,11 +252,13 @@ or on NT/2000/XP, go to the Control Pane
+ System, Advanced, and edit the environment from there. If you use msys2
+ compilers, set your installed paths:
+ 
+-    C:\msys2\mingw32\bin
++    C:\msys64\mingw32\bin
+ 
+-for 32bit. And 64bit:
++for 32bit target. And 64bit target:
+ 
+-    C:\msys2\mingw64\bin
++    C:\msys64\mingw64\bin
++
++(Both assuming 64-bit msys2 is installed.)
+ 
+ Test if gcc is on your path.  From a CMD (or COMMAND on '95/98) window:
+ 
+@@ -639,9 +641,10 @@ config.h and Ruby's DLL name. Here are t
+       nmake -f Make_mvc.mak
+           RUBY=C:\Ruby22 DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0
+           RUBY_MSVCRT_NAME=msvcrt
+-          WINVER=0x500
++          WINVER=0x501
+ 
+-    WINVER must be set to >=0x500, when building with Ruby 2.1 or later.
++    If you set WINVER explicitly, it must be set to >=0x500, when building
++    with Ruby 2.1 or later.  (Default is 0x501.)
+     When using this trick, you also need to set RUBY_MSVCRT_NAME to msvcrt
+     which is used for the Ruby's DLL name.
+ 
+@@ -652,9 +655,10 @@ After you install RubyInstaller, just ty
+ 
+     mingw32-make -f Make_ming.mak
+         RUBY=C:/Ruby22 DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0
+-        WINVER=0x500
++        WINVER=0x501
+ 
+-WINVER must be set to >=0x500, when building with Ruby 2.1 or later.
++If you set WINVER explicitly, it must be set to >=0x500, when building with
++Ruby 2.1 or later.  (Default is 0x501.)
+ 
+ 
+ 12. Building with Tcl support
