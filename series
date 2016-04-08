@@ -47,4 +47,5 @@ matchit-respect-matchpairs.patch
 fix-7.4.1705.patch
 remove-old-doc.patch
 fix-doc.patch
+fix-installing-tags.patch
 fix-config_cache-removal.patch #+rejected
