@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  0273f420d6679cb2c7a45359a1f0a993515e973a
+# Parent  a7b173b40ef866db5b24001ba8897889c85b97b5
 
 diff --git a/runtime/doc/change.txt b/runtime/doc/change.txt
 --- a/runtime/doc/change.txt
@@ -16,7 +16,7 @@ diff --git a/runtime/doc/change.txt b/runtime/doc/change.txt
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1911,7 +1911,7 @@ foldlevel( {lnum})		Number	fold level at
+@@ -1912,7 +1912,7 @@ foldlevel( {lnum})		Number	fold level at
  foldtext()			String	line displayed for closed fold
  foldtextresult( {lnum})		String	text for closed fold at {lnum}
  foreground()			Number	bring the Vim window to the foreground
@@ -76,16 +76,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
 --- a/runtime/doc/todo.txt
 +++ b/runtime/doc/todo.txt
-@@ -27,7 +27,7 @@ 1   probably not
- See |develop.txt| for development plans.  You can vote for which items should
- be worked on, but only if you sponsor Vim development.  See |sponsor|.
- 
--Issues can also be entered online: http://code.google.com/p/vim/issues/list
-+Issues can also be entered online: https://github.com/vim/vim/issues
- Updates will be forwarded to the vim_dev maillist.  Issues entered there will
- not be repeated below, unless there is extra information.
- 
-@@ -338,9 +338,6 @@ handling the 0x80 as a second byte corre
+@@ -374,9 +374,6 @@ is Vi compatible, the completion fails. 
  Patch to use two highlight groups for relative numbers. (Shaun Brady, 2016 Jan
  30)
  
@@ -95,7 +86,7 @@ diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
  MS-Windows: Crash opening very long file name starting with "\\".
  (Christian Brock, 2012 Jun 29)
  
-@@ -392,8 +389,6 @@ Patch to fix checking global option valu
+@@ -428,8 +425,6 @@ Patch to fix checking global option valu
  When 'showbreak' is set repeating a Visual operation counts the size of the
  'showbreak' text as part of the operation. (Axel Bender, 2015 Jul 20)
  
@@ -104,7 +95,7 @@ diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
  Patch for multi-byte characters in langmap and applying a mapping on them.
  (Christian Brabandt, 2015 Jun 12, update July 25)
  Is this the right solution?  Need to cleanup langmap behavior:
-@@ -644,9 +639,6 @@ various other commands.  (ZyX, 2014 Mar 
+@@ -678,9 +673,6 @@ various other commands.  (ZyX, 2014 Mar 
  Patch to skip sort if no line matches the expression.
  (Christian Brabandt, 2014 Jun 25)
  

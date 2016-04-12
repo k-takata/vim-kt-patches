@@ -44,7 +44,6 @@ fix-char_u-usage.patch
 remove-sync_dup_close.patch
 drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
-fix-7.4.1705.patch
 remove-old-doc.patch
 fix-doc.patch
 fix-installing-tags.patch
