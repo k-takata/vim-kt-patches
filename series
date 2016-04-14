@@ -46,5 +46,4 @@ drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
 remove-old-doc.patch
 fix-doc.patch
-fix-installing-tags.patch
 fix-config_cache-removal.patch #+rejected
