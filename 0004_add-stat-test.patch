@@ -1,22 +1,22 @@
 # HG changeset patch
 # Parent 7656647da44ed09b242c32cf1d95c9d4ca0df086
-# Parent  bf28bf920930d11e86d9871461722b40b1985962
+# Parent  1c3a862e3cd37bfb1d36fbbeefd0c2b5ddc3d0a9
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2025,6 +2025,7 @@ test_arglist \
+@@ -2038,6 +2038,7 @@ test_arglist \
  	test_searchpos \
  	test_set \
  	test_sort \
 +	test_stat \
+ 	test_statusline \
  	test_syn_attr \
  	test_syntax \
- 	test_timers \
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -179,6 +179,7 @@ NEW_TESTS = test_arglist.res \
+@@ -178,6 +178,7 @@ NEW_TESTS = test_arglist.res \
  	    test_packadd.res \
  	    test_perl.res \
  	    test_quickfix.res \
