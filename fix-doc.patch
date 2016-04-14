@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a7b173b40ef866db5b24001ba8897889c85b97b5
+# Parent  f0c589ca06172884c180cf601fbc643e3b3d912e
 
 diff --git a/runtime/doc/change.txt b/runtime/doc/change.txt
 --- a/runtime/doc/change.txt
@@ -13,18 +13,6 @@ diff --git a/runtime/doc/change.txt b/runtime/doc/change.txt
  					*quote2* *quote3* *quote4* *quote9*
  Vim fills these registers with text from yank and delete commands.
     Numbered register 0 contains the text from the most recent yank command,
-diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
---- a/runtime/doc/eval.txt
-+++ b/runtime/doc/eval.txt
-@@ -1912,7 +1912,7 @@ foldlevel( {lnum})		Number	fold level at
- foldtext()			String	line displayed for closed fold
- foldtextresult( {lnum})		String	text for closed fold at {lnum}
- foreground()			Number	bring the Vim window to the foreground
--function({name} [, {arglist}] [, {dict}])
-+function( {name} [, {arglist}] [, {dict}])
- 				Funcref reference to function {name}
- garbagecollect( [{atexit}])	none	free memory, breaking cyclic references
- get( {list}, {idx} [, {def}])	any	get item {idx} from {list} or {def}
 diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
 --- a/runtime/doc/index.txt
 +++ b/runtime/doc/index.txt
