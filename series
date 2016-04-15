@@ -47,4 +47,5 @@ matchit-respect-matchpairs.patch
 remove-old-doc.patch
 fix-doc.patch
 lambda.diff
+lambda-fixtypo.diff
 fix-config_cache-removal.patch #+rejected

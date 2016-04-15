@@ -1,0 +1,109 @@
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+index 99dca2f..39baebd 100644
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -2003,7 +2003,7 @@ json_decode({string})		any	decode JSON
+ json_encode({expr})		String	encode JSON
+ keys({dict})			List	keys in {dict}
+ len({expr})			Number	the length of {expr}
+-lambda({expr})			Create lambda function constructed with {expr}
++lambda({expr})			Funcref	create a lambda function
+ libcall({lib}, {func}, {arg})	String	call {func} in library {lib} with {arg}
+ libcallnr({lib}, {func}, {arg})  Number  idem, but return a Number
+ line({expr})			Number	line nr of cursor, last line or mark
+@@ -3441,9 +3441,9 @@ filewritable({file})					*filewritable()*
+ 
+ filter({expr1}, {expr2})				*filter()*
+ 		{expr1} must be a |List| or a |Dictionary|.
+-		For each item in {expr1} evaluate {string} and when the result
++		For each item in {expr1} evaluate {expr2} and when the result
+ 		is zero remove the item from the |List| or |Dictionary|.
+-		{expr2} must be a |string| or |Funcref|. If it's |string|,
++		{expr2} must be a |string| or |Funcref|. If it is a |string|,
+ 		inside {expr2} |v:val| has the value of the current item.
+ 		For a |Dictionary| |v:key| has the key of the current item.
+ 		Examples: >
+@@ -4793,34 +4793,40 @@ len({expr})	The result is a Number, which is the length of the argument.
+ 
+ 							*lambda()*
+ lambda({expr})
+-		Create new lambda function with constructed with {expr}.
+-		The result is function reference. So you can call it like.
++		Create a new lambda function with constructed with {expr}.
++		The result is a function reference. So you can call it like.
+ 		Example: >
+-		    :let F = lambda("return 1+2")
++		    :let F = lambda("return 1 + 2")
+ 		    :echo F()
+-<
+-		Lambda function allow to be given variadic arguments.
++<		    3
++
++		Lambda function allows to be given variadic arguments.
+ 		Example: >
+-		    :let F = lambda("return a:1+2")
++		    :let F = lambda("return a:1 + 2")
+ 		    :echo F(2)
+-<
+-		|sort()|, |map()|, |filter()| can be used with |lambda()|
+-		Example: >
++<		    4
++
++		|sort()|, |map()| and |filter()| can be used with |lambda()|
++		Examples: >
+ 		    :echo map([1, 2, 3], lambda("return a:1 + 1"))
++<		    [2, 3, 4] >
+ 		    :echo sort([3,7,2,1,4], lambda("return a:1 - a:2"))
+-<
++<		    [1, 2, 3, 4, 7]
++
+ 		Lambda function is possible to reference the variables in the
+ 		defined scope.
+-		Example: >
++		Examples: >
+ 		    :let s:x = 2
+ 		    :echo filter([1, 2, 3], lambda("return a:1 >= s:x"))
++<		    [2, 3] >
+ 
+ 		    :function! Foo()
+ 		    :  let x = 1
+ 		    :  return lambda("return x")
+ 		    :endfunction
+ 		    :echo Foo()()
+-<
++<		    1
++
+ 		And if let new variable, it will be stored in the lambda's
+ 		scope.
+ 		Example: >
+@@ -4829,7 +4835,7 @@ lambda({expr})
+ 		    :  echo x | " Should be error
+ 		    :endfunction
+ <
+-		For example, you can create counter generator. >
++		For example, you can create a counter generator. >
+ 		    :function! s:counter(x)
+ 		    :  let x = a:x
+ 		    :  return lambda("
+@@ -4994,7 +5000,7 @@ map({expr1}, {expr2})					*map()*
+ 		{expr1} must be a |List| or a |Dictionary|.
+ 		Replace each item in {expr1} with the result of evaluating
+ 		{expr2}.
+-		{expr2} must be a |string| or |Funcref|. If it's |string|,
++		{expr2} must be a |string| or |Funcref|. If it is a |string|,
+ 		inside {expr2} |v:val| has the value of the current item.
+ 		For a |Dictionary| |v:key| has the key of the current item
+ 		and for a |List| |v:key| has the index of the current item.
+diff --git a/src/eval.c b/src/eval.c
+index 60bb58e..af36a26 100644
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -25404,7 +25404,7 @@ func_ref(char_u *name)
+     }
+     else if (!STRNICMP(name, "<LAMBDA>", 8))
+     {
+-	/* fail silently, when lambda function isn't be found. */
++	/* fail silently, when lambda function isn't found. */
+ 	fp = find_func(name);
+ 	if (fp != NULL)
+ 	    ++fp->uf_refcount;
