@@ -4,7 +4,21 @@
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2010,7 +2010,7 @@ json_decode({string})		any	decode JSON
+@@ -121,9 +121,10 @@ You will not get an error if you try to 
+ 
+ 1.2 Function references ~
+ 					*Funcref* *E695* *E718*
+-A Funcref variable is obtained with the |function()| function.	It can be used
+-in an expression in the place of a function name, before the parenthesis
+-around the arguments, to invoke the function it refers to.  Example: >
++A Funcref variable is obtained with the |function()| function or created with
++the |lambda()| function.  It can be used in an expression in the place of a
++function name, before the parenthesis around the arguments, to invoke the
++function it refers to.  Example: >
+ 
+ 	:let Fn = function("MyFunc")
+ 	:echo Fn()
+@@ -2010,7 +2011,7 @@ json_decode({string})		any	decode JSON
  json_encode({expr})		String	encode JSON
  keys({dict})			List	keys in {dict}
  len({expr})			Number	the length of {expr}
@@ -13,7 +27,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  libcall({lib}, {func}, {arg})	String	call {func} in library {lib} with {arg}
  libcallnr({lib}, {func}, {arg})  Number  idem, but return a Number
  line({expr})			Number	line nr of cursor, last line or mark
-@@ -3448,9 +3448,9 @@ filewritable({file})					*filewritable()
+@@ -3448,9 +3449,9 @@ filewritable({file})					*filewritable()
  
  filter({expr1}, {expr2})				*filter()*
  		{expr1} must be a |List| or a |Dictionary|.
@@ -25,7 +39,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		inside {expr2} |v:val| has the value of the current item.
  		For a |Dictionary| |v:key| has the key of the current item.
  		Examples: >
-@@ -4802,34 +4802,47 @@ len({expr})	The result is a Number, whic
+@@ -4802,34 +4803,47 @@ len({expr})	The result is a Number, whic
  
  							*lambda()*
  lambda({expr})
@@ -90,7 +104,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		And if let new variable, it will be stored in the lambda's
  		scope.
  		Example: >
-@@ -4838,7 +4851,7 @@ lambda({expr})
+@@ -4838,7 +4852,7 @@ lambda({expr})
  		    :  echo x | " Should be error
  		    :endfunction
  <
@@ -99,7 +113,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		    :function! s:counter(x)
  		    :  let x = a:x
  		    :  return lambda("
-@@ -5003,7 +5016,7 @@ map({expr1}, {expr2})					*map()*
+@@ -5003,7 +5017,7 @@ map({expr1}, {expr2})					*map()*
  		{expr1} must be a |List| or a |Dictionary|.
  		Replace each item in {expr1} with the result of evaluating
  		{expr2}.
