@@ -1,8 +1,10 @@
+# HG changeset patch
+# Parent  26cbda8c9e83f389b80a5e47362c46b8d4bafc4d
+
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
-index 99dca2f..39baebd 100644
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2003,7 +2003,7 @@ json_decode({string})		any	decode JSON
+@@ -2010,7 +2010,7 @@ json_decode({string})		any	decode JSON
  json_encode({expr})		String	encode JSON
  keys({dict})			List	keys in {dict}
  len({expr})			Number	the length of {expr}
@@ -11,7 +13,7 @@ index 99dca2f..39baebd 100644
  libcall({lib}, {func}, {arg})	String	call {func} in library {lib} with {arg}
  libcallnr({lib}, {func}, {arg})  Number  idem, but return a Number
  line({expr})			Number	line nr of cursor, last line or mark
-@@ -3441,9 +3441,9 @@ filewritable({file})					*filewritable()*
+@@ -3448,9 +3448,9 @@ filewritable({file})					*filewritable()
  
  filter({expr1}, {expr2})				*filter()*
  		{expr1} must be a |List| or a |Dictionary|.
@@ -23,43 +25,55 @@ index 99dca2f..39baebd 100644
  		inside {expr2} |v:val| has the value of the current item.
  		For a |Dictionary| |v:key| has the key of the current item.
  		Examples: >
-@@ -4793,34 +4793,40 @@ len({expr})	The result is a Number, which is the length of the argument.
+@@ -4802,34 +4802,47 @@ len({expr})	The result is a Number, whic
  
  							*lambda()*
  lambda({expr})
 -		Create new lambda function with constructed with {expr}.
 -		The result is function reference. So you can call it like.
-+		Create a new lambda function with constructed with {expr}.
-+		The result is a function reference. So you can call it like.
++		Create a new lambda function which constructed with {expr}.
++		The result is a |Funcref|. So you can call it just like a
++		normal function.
  		Example: >
 -		    :let F = lambda("return 1+2")
 +		    :let F = lambda("return 1 + 2")
  		    :echo F()
--<
--		Lambda function allow to be given variadic arguments.
 +<		    3
 +
-+		Lambda function allows to be given variadic arguments.
- 		Example: >
--		    :let F = lambda("return a:1+2")
++		Lambda function can take variadic arguments.
++		Example: >
 +		    :let F = lambda("return a:1 + 2")
- 		    :echo F(2)
++		    :echo F(2)
++<		    4
++
++		|sort()|, |map()| and |filter()| can be used with |lambda()|.
++		Examples: >
++		    :echo map([1, 2, 3], lambda("return a:1 + 1"))
++<		    [2, 3, 4] >
++		    :echo sort([3,7,2,1,4], lambda("return a:1 - a:2"))
++<		    [1, 2, 3, 4, 7]
++
++		Channel, job and timer can also be used with |lambda()|.
++		Example: >
++		    :let timer = timer_start(500,
++				\ lambda("echo 'Handler called'"),
++				\ {'repeat': 3})
+ <
+-		Lambda function allow to be given variadic arguments.
+-		Example: >
+-		    :let F = lambda("return a:1+2")
+-		    :echo F(2)
 -<
 -		|sort()|, |map()|, |filter()| can be used with |lambda()|
 -		Example: >
-+<		    4
-+
-+		|sort()|, |map()| and |filter()| can be used with |lambda()|
-+		Examples: >
- 		    :echo map([1, 2, 3], lambda("return a:1 + 1"))
-+<		    [2, 3, 4] >
- 		    :echo sort([3,7,2,1,4], lambda("return a:1 - a:2"))
+-		    :echo map([1, 2, 3], lambda("return a:1 + 1"))
+-		    :echo sort([3,7,2,1,4], lambda("return a:1 - a:2"))
 -<
-+<		    [1, 2, 3, 4, 7]
-+
- 		Lambda function is possible to reference the variables in the
- 		defined scope.
+-		Lambda function is possible to reference the variables in the
+-		defined scope.
 -		Example: >
++		Lambda function can reference the variables in the defined
++		scope.
 +		Examples: >
  		    :let s:x = 2
  		    :echo filter([1, 2, 3], lambda("return a:1 >= s:x"))
@@ -76,7 +90,7 @@ index 99dca2f..39baebd 100644
  		And if let new variable, it will be stored in the lambda's
  		scope.
  		Example: >
-@@ -4829,7 +4835,7 @@ lambda({expr})
+@@ -4838,7 +4851,7 @@ lambda({expr})
  		    :  echo x | " Should be error
  		    :endfunction
  <
@@ -85,7 +99,7 @@ index 99dca2f..39baebd 100644
  		    :function! s:counter(x)
  		    :  let x = a:x
  		    :  return lambda("
-@@ -4994,7 +5000,7 @@ map({expr1}, {expr2})					*map()*
+@@ -5003,7 +5016,7 @@ map({expr1}, {expr2})					*map()*
  		{expr1} must be a |List| or a |Dictionary|.
  		Replace each item in {expr1} with the result of evaluating
  		{expr2}.
@@ -95,10 +109,9 @@ index 99dca2f..39baebd 100644
  		For a |Dictionary| |v:key| has the key of the current item
  		and for a |List| |v:key| has the index of the current item.
 diff --git a/src/eval.c b/src/eval.c
-index 60bb58e..af36a26 100644
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -25404,7 +25404,7 @@ func_ref(char_u *name)
+@@ -25437,7 +25437,7 @@ func_ref(char_u *name)
      }
      else if (!STRNICMP(name, "<LAMBDA>", 8))
      {
