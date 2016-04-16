@@ -1,16 +1,30 @@
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
-index 2d7beb7..99dca2f 100644
+index 2d7beb7..623e417 100644
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2003,6 +2003,7 @@ json_decode({string})		any	decode JSON
+@@ -119,9 +119,10 @@ You will not get an error if you try to change the type of a variable.
+ 
+ 1.2 Function references ~
+ 					*Funcref* *E695* *E718*
+-A Funcref variable is obtained with the |function()| function.	It can be used
+-in an expression in the place of a function name, before the parenthesis
+-around the arguments, to invoke the function it refers to.  Example: >
++A Funcref variable is obtained with the |function()| function or created with
++the |lambda()| function.  It can be used in an expression in the place of a
++function name, before the parenthesis around the arguments, to invoke the
++function it refers to.  Example: >
+ 
+ 	:let Fn = function("MyFunc")
+ 	:echo Fn()
+@@ -2003,6 +2004,7 @@ json_decode({string})		any	decode JSON
  json_encode({expr})		String	encode JSON
  keys({dict})			List	keys in {dict}
  len({expr})			Number	the length of {expr}
-+lambda({expr})			Create lambda function constructed with {expr}
++lambda({expr})			Funcref	create a lambda function
  libcall({lib}, {func}, {arg})	String	call {func} in library {lib} with {arg}
  libcallnr({lib}, {func}, {arg})  Number  idem, but return a Number
  line({expr})			Number	line nr of cursor, last line or mark
-@@ -3438,11 +3439,12 @@ filewritable({file})					*filewritable()*
+@@ -3438,11 +3440,12 @@ filewritable({file})					*filewritable()*
  		directory, and we can write to it, the result is 2.
  
  
@@ -19,15 +33,15 @@ index 2d7beb7..99dca2f 100644
 -		For each item in {expr} evaluate {string} and when the result
 +filter({expr1}, {expr2})				*filter()*
 +		{expr1} must be a |List| or a |Dictionary|.
-+		For each item in {expr1} evaluate {string} and when the result
++		For each item in {expr1} evaluate {expr2} and when the result
  		is zero remove the item from the |List| or |Dictionary|.
 -		Inside {string} |v:val| has the value of the current item.
-+		{expr2} must be a |string| or |Funcref|. If it's |string|,
++		{expr2} must be a |string| or |Funcref|. If it is a |string|,
 +		inside {expr2} |v:val| has the value of the current item.
  		For a |Dictionary| |v:key| has the key of the current item.
  		Examples: >
  			:call filter(mylist, 'v:val !~ "OLD"')
-@@ -3452,7 +3454,7 @@ filter({expr}, {string})					*filter()*
+@@ -3452,7 +3455,7 @@ filter({expr}, {string})					*filter()*
  			:call filter(var, 0)
  <		Removes all the items, thus clears the |List| or |Dictionary|.
  
@@ -36,7 +50,7 @@ index 2d7beb7..99dca2f 100644
  		used as an expression again.  Often it is good to use a
  		|literal-string| to avoid having to double backslashes.
  
-@@ -3460,9 +3462,13 @@ filter({expr}, {string})					*filter()*
+@@ -3460,9 +3463,13 @@ filter({expr}, {string})					*filter()*
  		|Dictionary| to remain unmodified make a copy first: >
  			:let l = filter(copy(mylist), 'v:val =~ "KEEP"')
  
@@ -53,40 +67,53 @@ index 2d7beb7..99dca2f 100644
  
  
  finddir({name}[, {path}[, {count}]])				*finddir()*
-@@ -4785,6 +4791,59 @@ len({expr})	The result is a Number, which is the length of the argument.
+@@ -4785,6 +4792,72 @@ len({expr})	The result is a Number, which is the length of the argument.
  		|Dictionary| is returned.
  		Otherwise an error is given.
  
 +							*lambda()*
 +lambda({expr})
-+		Create new lambda function with constructed with {expr}.
-+		The result is function reference. So you can call it like.
++		Create a new lambda function which constructed with {expr}.
++		The result is a |Funcref|. So you can call it just like a
++		normal function.
 +		Example: >
-+		    :let F = lambda("return 1+2")
++		    :let F = lambda("return 1 + 2")
 +		    :echo F()
-+<
-+		Lambda function allow to be given variadic arguments.
++<		    3
++
++		Lambda function can take variadic arguments.
 +		Example: >
-+		    :let F = lambda("return a:1+2")
++		    :let F = lambda("return a:1 + 2")
 +		    :echo F(2)
-+<
-+		|sort()|, |map()|, |filter()| can be used with |lambda()|
-+		Example: >
++<		    4
++
++		|sort()|, |map()| and |filter()| can be used with |lambda()|.
++		Examples: >
 +		    :echo map([1, 2, 3], lambda("return a:1 + 1"))
++<		    [2, 3, 4] >
 +		    :echo sort([3,7,2,1,4], lambda("return a:1 - a:2"))
-+<
-+		Lambda function is possible to reference the variables in the
-+		defined scope.
++<		    [1, 2, 3, 4, 7]
++
++		Channel, job and timer can also be used with |lambda()|.
 +		Example: >
++		    :let timer = timer_start(500,
++				\ lambda("echo 'Handler called'"),
++				\ {'repeat': 3})
++<
++		Lambda function can reference the variables in the defined
++		scope.
++		Examples: >
 +		    :let s:x = 2
 +		    :echo filter([1, 2, 3], lambda("return a:1 >= s:x"))
++<		    [2, 3] >
 +
 +		    :function! Foo()
 +		    :  let x = 1
 +		    :  return lambda("return x")
 +		    :endfunction
 +		    :echo Foo()()
-+<
++<		    1
++
 +		And if let new variable, it will be stored in the lambda's
 +		scope.
 +		Example: >
@@ -95,7 +122,7 @@ index 2d7beb7..99dca2f 100644
 +		    :  echo x | " Should be error
 +		    :endfunction
 +<
-+		For example, you can create counter generator. >
++		For example, you can create a counter generator. >
 +		    :function! s:counter(x)
 +		    :  let x = a:x
 +		    :  return lambda("
@@ -113,7 +140,7 @@ index 2d7beb7..99dca2f 100644
  						*libcall()* *E364* *E368*
  libcall({libname}, {funcname}, {argument})
  		Call function {funcname} in the run-time library {libname}
-@@ -4931,18 +4990,19 @@ luaeval({expr}[, {expr}])					*luaeval()*
+@@ -4931,18 +5004,19 @@ luaeval({expr}[, {expr}])					*luaeval()*
  		See |lua-luaeval| for more details.
  		{only available when compiled with the |+lua| feature}
  
@@ -126,7 +153,7 @@ index 2d7beb7..99dca2f 100644
 +		{expr1} must be a |List| or a |Dictionary|.
 +		Replace each item in {expr1} with the result of evaluating
 +		{expr2}.
-+		{expr2} must be a |string| or |Funcref|. If it's |string|,
++		{expr2} must be a |string| or |Funcref|. If it is a |string|,
 +		inside {expr2} |v:val| has the value of the current item.
  		For a |Dictionary| |v:key| has the key of the current item
  		and for a |List| |v:key| has the index of the current item.
@@ -139,7 +166,7 @@ index 2d7beb7..99dca2f 100644
  		used as an expression again.  Often it is good to use a
  		|literal-string| to avoid having to double backslashes.  You
  		still have to double ' quotes
-@@ -4951,10 +5011,12 @@ map({expr}, {string})					*map()*
+@@ -4951,10 +5025,12 @@ map({expr}, {string})					*map()*
  		|Dictionary| to remain unmodified make a copy first: >
  			:let tlist = map(copy(mylist), ' v:val . "\t"')
  
@@ -156,7 +183,7 @@ index 2d7beb7..99dca2f 100644
  maparg({name}[, {mode} [, {abbr} [, {dict}]]])			*maparg()*
  		When {dict} is omitted or zero: Return the rhs of mapping
 diff --git a/src/eval.c b/src/eval.c
-index bd4a11a..dda19c2 100644
+index bd4a11a..f9bd05f 100644
 --- a/src/eval.c
 +++ b/src/eval.c
 @@ -163,6 +163,7 @@ static int echo_attr = 0;   /* attributes used for ":echo" */
@@ -607,7 +634,7 @@ index bd4a11a..dda19c2 100644
      }
 +    else if (!STRNICMP(name, "<LAMBDA>", 8))
 +    {
-+	/* fail silently, when lambda function isn't be found. */
++	/* fail silently, when lambda function isn't found. */
 +	fp = find_func(name);
 +	if (fp != NULL)
 +	    ++fp->uf_refcount;
@@ -674,12 +701,98 @@ index d393fe7..3e719e1 100644
  source test_lispwords.vim
  source test_matchstrpos.vim
  source test_menu.vim
+diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
+index 05df50a..da4729d 100644
+--- a/src/testdir/test_channel.vim
++++ b/src/testdir/test_channel.vim
+@@ -182,6 +182,19 @@ func s:communicate(port)
+   endif
+   call assert_equal('got it', s:responseMsg)
+ 
++  if exists('*lambda')
++    let s:responseMsg = ''
++    call ch_sendexpr(handle, 'hello!', {'callback': lambda(':return s:RequestHandler(a:1, a:2)')})
++    call s:waitFor('exists("s:responseHandle")')
++    if !exists('s:responseHandle')
++      call assert_false(1, 's:responseHandle was not set')
++    else
++      call assert_equal(handle, s:responseHandle)
++      unlet s:responseHandle
++    endif
++    call assert_equal('got it', s:responseMsg)
++  endif
++
+   " Collect garbage, tests that our handle isn't collected.
+   call garbagecollect_for_testing()
+ 
+@@ -1048,6 +1061,32 @@ func Test_out_cb()
+   endtry
+ endfunc
+ 
++func Test_out_cb_lambda()
++  if !has('job') || !exists('*lambda')
++    return
++  endif
++  call ch_log('Test_out_cb_lambda()')
++
++  let job = job_start(s:python . " test_channel_pipe.py",
++  \ {'out_cb': lambda(":let s:outmsg = 'lambda: ' . a:2"),
++  \ 'out_mode': 'json',
++  \ 'err_cb': lambda(":let s:errmsg = 'lambda: ' . a:2"),
++  \ 'err_mode': 'json'})
++  call assert_equal("run", job_status(job))
++  try
++    let s:outmsg = ''
++    let s:errmsg = ''
++    call ch_sendraw(job, "echo [0, \"hello\"]\n")
++    call ch_sendraw(job, "echoerr [0, \"there\"]\n")
++    call s:waitFor('s:outmsg != ""')
++    call assert_equal("lambda: hello", s:outmsg)
++    call s:waitFor('s:errmsg != ""')
++    call assert_equal("lambda: there", s:errmsg)
++  finally
++    call job_stop(job)
++  endtry
++endfunc
++
+ """"""""""
+ 
+ let s:unletResponse = ''
+@@ -1249,6 +1288,28 @@ func Test_using_freed_memory()
+   call garbagecollect_for_testing()
+ endfunc
+ 
++function s:test_close_lambda(port)
++  if !exists('*lambda')
++    return
++  endif
++
++  let handle = ch_open('localhost:' . a:port, s:chopt)
++  if ch_status(handle) == "fail"
++    call assert_false(1, "Can't open channel")
++    return
++  endif
++  let s:close_ret = ''
++  call ch_setoptions(handle, {'close_cb': lambda("let s:close_ret = 'closed'")})
++
++  call assert_equal('', ch_evalexpr(handle, 'close me'))
++  call s:waitFor('"closed" == s:close_ret')
++  call assert_equal('closed', s:close_ret)
++endfunc
++
++func Test_close_lambda()
++  call ch_log('Test_close_lambda()')
++  call s:run_server('s:test_close_lambda')
++endfunc
+ 
+ 
+ " Uncomment this to see what happens, output is in src/testdir/channellog.
 diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 new file mode 100644
-index 0000000..57b414a
+index 0000000..f96e5af
 --- /dev/null
 +++ b/src/testdir/test_lambda.vim
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,249 @@
 +function! Test_lambda_with_filter()
 +  let s:x = 2
 +  call assert_equal([2, 3], filter([1, 2, 3], lambda('return a:1 >= s:x')))
@@ -902,4 +1015,30 @@ index 0000000..57b414a
 +
 +function! Test_lambda_in_sandbox()
 +  call assert_fails(':sandbox call lambda("")', 'E48:')
++endfunction
++
++function! Test_lambda_with_timer()
++  if !has('timers')
++    return
++  endif
++
++  let s:n = 0
++  let s:timer_id = 0
++  function! s:Foo()
++    let n = 0
++    let s:timer_id = timer_start(50, lambda("let n += 1 | let s:n = n | echo n"), {"repeat": -1})
++  endfunction
++
++  call s:Foo()
++  sleep 100ms
++  " do not collect lambda nor l:n in lambda
++  call garbagecollect_for_testing()
++  sleep 100ms
++  call timer_stop(s:timer_id)
++  call assert_true(s:n > 3)
++endfunction
++
++function! Test_lambda_with_partial()
++  let l:Cb = function(lambda(":return ['zero', a:1, a:2, a:3]"), ['one', 'two'])
++  call assert_equal(['zero', 'one', 'two', 'three'], l:Cb('three'))
 +endfunction
