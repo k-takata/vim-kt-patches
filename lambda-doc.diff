@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  e0eceaa835b3312b00ec6050bab90b45d180a175
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -4810,6 +4810,8 @@ lambda({expr})
+ 		    :let F = lambda("return 1 + 2")
+ 		    :echo F()
+ <		    3
++		Note that "return" cannot be omitted unlike Python and other
++		languages if you want to return a value.
+ 
+ 		Lambda function can take variadic arguments.
+ 		Example: >
