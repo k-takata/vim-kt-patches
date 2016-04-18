@@ -48,4 +48,5 @@ remove-old-doc.patch
 fix-doc.patch
 lambda.diff
 lambda-doc.diff
+fix-doc-indent.patch
 fix-config_cache-removal.patch #+rejected
