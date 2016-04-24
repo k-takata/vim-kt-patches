@@ -8,7 +8,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  There are nine types of variables:
  
  Number		A 32 or 64 bit signed number.  |expr-number| *Number*
-+		64-bit Number is avaliable only when compiled with the
++		64-bit Number is available only when compiled with the
 +		|+num64| feature.
  		Examples:  -123  0x10  0177
  
