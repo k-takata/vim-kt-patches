@@ -137,7 +137,7 @@ diff --git a/src/term.c b/src/term.c
  	{
  	    fclose(fd);
 -	    return (guicolor_T) TORGB(r, g, b);
-+	    return (guicolor_T) RGB(r, g, b);
++	    return (guicolor_T)RGB(r, g, b);
  	}
      }
      fclose(fd);
