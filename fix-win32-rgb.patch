@@ -17,7 +17,7 @@ diff --git a/src/term.c b/src/term.c
      FILE	*fd;
      char	line[LINE_LEN];
      char_u	*fname;
-@@ -6089,56 +6091,56 @@ gui_get_color_cmn(char_u *name)
+@@ -6089,63 +6091,63 @@ gui_get_color_cmn(char_u *name)
      };
  
      static struct rgbcolor_table_S rgb_table[] = {
@@ -124,3 +124,20 @@ diff --git a/src/term.c b/src/term.c
      };
  
  
+     if (name[0] == '#' && STRLEN(name) == 7)
+     {
+ 	/* Name is in "#rrggbb" format */
+-	color = TORGB(((hex_digit(name[1]) << 4) + hex_digit(name[2])),
++	color = RGB(((hex_digit(name[1]) << 4) + hex_digit(name[2])),
+ 		    ((hex_digit(name[3]) << 4) + hex_digit(name[4])),
+ 		    ((hex_digit(name[5]) << 4) + hex_digit(name[6])));
+ 	if (color > 0xffffff)
+@@ -6195,7 +6197,7 @@ gui_get_color_cmn(char_u *name)
+ 	if (STRICMP(line + pos, name) == 0)
+ 	{
+ 	    fclose(fd);
+-	    return (guicolor_T) TORGB(r, g, b);
++	    return (guicolor_T) RGB(r, g, b);
+ 	}
+     }
+     fclose(fd);
