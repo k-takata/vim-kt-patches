@@ -1,0 +1,21 @@
+# HG changeset patch
+# Parent  25f4d48695640b941a8524ca5ff96a14c4bd4d16
+
+diff --git a/src/term.c b/src/term.c
+--- a/src/term.c
++++ b/src/term.c
+@@ -6075,8 +6075,12 @@ hex_digit(int c)
+     guicolor_T
+ gui_get_color_cmn(char_u *name)
+ {
+-#define TORGB(r, g, b) ((r<<16) | (g<<8) | (b))
+-#define LINE_LEN 100
++# ifdef WIN3264
++#  define TORGB(r, g, b)    RGB(r, g, b)
++# else
++#  define TORGB(r, g, b)    ((r<<16) | (g<<8) | (b))
++# endif
++# define LINE_LEN 100
+     FILE	*fd;
+     char	line[LINE_LEN];
+     char_u	*fname;
