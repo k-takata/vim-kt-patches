@@ -49,5 +49,4 @@ fix-doc.patch
 lambda.diff
 lambda-doc.diff
 fix-doc-indent.patch
-tgc_remove_ifdef.patch
 fix-config_cache-removal.patch #+rejected
