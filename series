@@ -49,4 +49,5 @@ fix-doc.patch
 lambda.diff
 lambda-doc.diff
 fix-doc-indent.patch
+perl-5.22.2.patch
 fix-config_cache-removal.patch #+rejected
