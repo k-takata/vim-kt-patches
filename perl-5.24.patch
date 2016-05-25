@@ -1,0 +1,36 @@
+# HG changeset patch
+# Parent  92c8a94dcae85ab884362a5da2d4103522bcaa62
+
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -299,6 +299,9 @@ typedef int perl_key;
+ #  define PerlIOBase_pushed dll_PerlIOBase_pushed
+ #  define PerlIO_define_layer dll_PerlIO_define_layer
+ # endif
++# if (PERL_REVISION == 5) && (PERL_VERSION >= 24)
++#  define Perl_savetmps dll_Perl_savetmps
++# endif
+ 
+ /*
+  * Declare HANDLE for perl.dll and function pointers.
+@@ -455,6 +458,9 @@ static NV (*Perl_sv_2nv_flags)(pTHX_ SV 
+ static IV (*PerlIOBase_pushed)(pTHX_ PerlIO *, const char *, SV *, PerlIO_funcs *);
+ static void (*PerlIO_define_layer)(pTHX_ PerlIO_funcs *);
+ #endif
++#if (PERL_REVISION == 5) && (PERL_VERSION >= 24)
++static void (*Perl_savetmps)(pTHX);
++#endif
+ 
+ /*
+  * Table of name to function pointer of perl.
+@@ -598,6 +604,9 @@ static struct {
+     {"PerlIOBase_pushed", (PERL_PROC*)&PerlIOBase_pushed},
+     {"PerlIO_define_layer", (PERL_PROC*)&PerlIO_define_layer},
+ #endif
++#if (PERL_REVISION == 5) && (PERL_VERSION >= 24)
++    {"Perl_savetmps", (PERL_PROC*)&Perl_savetmps},
++#endif
+     {"", NULL},
+ };
+ 
