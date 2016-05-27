@@ -1,18 +1,9 @@
 # HG changeset patch
-# Parent  629fa9144d74d39699ccc772b1f5c5d235ec5d14
+# Parent  4286be5e55f8edb4155145d2880f6279c904a93f
 
 diff --git a/runtime/doc/gui_w32.txt b/runtime/doc/gui_w32.txt
 --- a/runtime/doc/gui_w32.txt
 +++ b/runtime/doc/gui_w32.txt
-@@ -30,7 +30,7 @@ start it or what it's called.
- The GUI will always run in the Windows subsystem.  Mostly shells automatically
- return with a command prompt after starting gvim.  If not, you should use the
- "start" command: >
--	start gvim [options] file ..
-+	start /wait gvim [options] file ..
- 
- Note: All fonts (bold, italic) must be of the same size!!!  If you don't do
- this, text will disappear or mess up the display.  Vim does not check the font
 @@ -49,10 +49,6 @@ If you want Vim to start with a maximize
  vimrc or gvimrc file: >
  	au GUIEnter * simalt ~x
@@ -372,7 +363,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -14307,7 +14307,7 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -14278,7 +14278,7 @@ f_has(typval_T *argvars, typval_T *rettv
  	    n = (gui.in_use || gui.starting);
  # ifdef FEAT_GUI_W32
  	else if (STRICMP(name, "gui_win32s") == 0)
@@ -381,7 +372,7 @@ diff --git a/src/eval.c b/src/eval.c
  # endif
  # ifdef FEAT_BROWSE
  	else if (STRICMP(name, "browse") == 0)
-@@ -14320,7 +14320,7 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -14291,7 +14291,7 @@ f_has(typval_T *argvars, typval_T *rettv
  #endif
  #if defined(WIN3264)
  	else if (STRICMP(name, "win95") == 0)
@@ -611,7 +602,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	|| defined(GLOBAL_IME) \
  	|| defined(PROTO)
  # ifdef PROTO
-@@ -1640,10 +1615,9 @@ gui_mch_get_color(char_u *name)
+@@ -1572,10 +1547,9 @@ gui_mch_get_color(char_u *name)
  
      static SysColorTable sys_table[] =
      {
@@ -623,7 +614,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{"SYS_3DHIGHLIGHT", COLOR_3DHIGHLIGHT},
  #endif
  	{"SYS_BTNHILIGHT", COLOR_BTNHILIGHT},
-@@ -1654,7 +1628,6 @@ gui_mch_get_color(char_u *name)
+@@ -1586,7 +1560,6 @@ gui_mch_get_color(char_u *name)
  	{"SYS_INFOBK", COLOR_INFOBK},
  	{"SYS_INFOTEXT", COLOR_INFOTEXT},
  	{"SYS_3DFACE", COLOR_3DFACE},
@@ -631,7 +622,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{"SYS_BTNFACE", COLOR_BTNFACE},
  	{"SYS_BTNSHADOW", COLOR_BTNSHADOW},
  	{"SYS_ACTIVEBORDER", COLOR_ACTIVEBORDER},
-@@ -2201,11 +2174,7 @@ gui_mch_wait_for_chars(int wtime)
+@@ -2065,11 +2038,7 @@ gui_mch_wait_for_chars(int wtime)
  
  	if (s_need_activate)
  	{
@@ -643,7 +634,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    s_need_activate = FALSE;
  	}
  
-@@ -2524,7 +2493,6 @@ add_tabline_popup_menu_entry(HMENU pmenu
+@@ -2388,7 +2357,6 @@ add_tabline_popup_menu_entry(HMENU pmenu
  {
  #ifdef FEAT_MBYTE
      WCHAR	*wn = NULL;
@@ -651,7 +642,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
      {
-@@ -2541,11 +2509,8 @@ add_tabline_popup_menu_entry(HMENU pmenu
+@@ -2405,11 +2373,8 @@ add_tabline_popup_menu_entry(HMENU pmenu
  	    infow.fType = MFT_STRING;
  	    infow.dwTypeData = wn;
  	    infow.cch = (UINT)wcslen(wn);
@@ -664,7 +655,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -2666,7 +2631,7 @@ gui_mch_update_tabline(void)
+@@ -2530,7 +2495,7 @@ gui_mch_update_tabline(void)
      if (s_tabhwnd == NULL)
  	return;
  
@@ -673,7 +664,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  # ifndef CCM_SETUNICODEFORMAT
      /* For older compilers.  We assume this never changes. */
  #  define CCM_SETUNICODEFORMAT 0x2005
-@@ -2811,18 +2776,15 @@ set_window_title(HWND hwnd, char *title)
+@@ -2675,18 +2640,15 @@ set_window_title(HWND hwnd, char *title)
      if (title != NULL && enc_codepage >= 0 && enc_codepage != (int)GetACP())
      {
  	WCHAR	*wbuf;
@@ -695,7 +686,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  #endif
      (void)SetWindowText(hwnd, (LPCSTR)title);
-@@ -2840,11 +2802,10 @@ gui_mch_find_dialog(exarg_T *eap)
+@@ -2704,11 +2666,10 @@ gui_mch_find_dialog(exarg_T *eap)
  	if (!IsWindow(s_findrep_hwnd))
  	{
  	    initialise_findrep(eap->arg);
@@ -709,7 +700,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		findrep_atow(&s_findrep_struct_w, &s_findrep_struct);
  		s_findrep_hwnd = FindTextW(
-@@ -2877,9 +2838,8 @@ gui_mch_replace_dialog(exarg_T *eap)
+@@ -2741,9 +2702,8 @@ gui_mch_replace_dialog(exarg_T *eap)
  	if (!IsWindow(s_findrep_hwnd))
  	{
  	    initialise_findrep(eap->arg);
@@ -721,7 +712,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		findrep_atow(&s_findrep_struct_w, &s_findrep_struct);
  		s_findrep_hwnd = ReplaceTextW(
-@@ -3561,11 +3521,7 @@ static LPCSTR mshape_idcs[] =
+@@ -3433,11 +3393,7 @@ static LPCSTR mshape_idcs[] =
      IDC_SIZEWE,			/* leftright */
      IDC_SIZEWE,			/* lrsizing */
      IDC_WAIT,			/* busy */
@@ -733,7 +724,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      IDC_ARROW,			/* crosshair */
      IDC_ARROW,			/* hand1 */
      IDC_ARROW,			/* hand2 */
-@@ -3592,11 +3548,7 @@ mch_set_mouse_shape(int shape)
+@@ -3464,11 +3420,7 @@ mch_set_mouse_shape(int shape)
  #ifdef SetClassLongPtr
  	SetClassLongPtr(s_textArea, GCLP_HCURSOR, (__int3264)(LONG_PTR)LoadCursor(NULL, idc));
  #else
@@ -745,7 +736,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  	if (!p_mh)
  	{
-@@ -3618,7 +3570,7 @@ mch_set_mouse_shape(int shape)
+@@ -3490,7 +3442,7 @@ mch_set_mouse_shape(int shape)
   * Windows NT/2000/XP the "W" functions are used.
   */
  
@@ -754,7 +745,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Wide version of convert_filter().
   */
-@@ -3823,17 +3775,15 @@ gui_mch_browse(
+@@ -3695,17 +3647,15 @@ gui_mch_browse(
  	char_u *initdir,
  	char_u *filter)
  {
@@ -775,7 +766,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (dflt == NULL)
  	fileBuf[0] = NUL;
      else
-@@ -3843,12 +3793,12 @@ gui_mch_browse(
+@@ -3715,12 +3665,12 @@ gui_mch_browse(
      filterp = convert_filter(filter);
  
      vim_memset(&fileStruct, 0, sizeof(OPENFILENAME));
@@ -791,7 +782,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      fileStruct.lpstrTitle = (LPSTR)title;
      fileStruct.lpstrDefExt = (LPSTR)ext;
-@@ -3878,10 +3828,10 @@ gui_mch_browse(
+@@ -3750,10 +3700,10 @@ gui_mch_browse(
       * Don't use OFN_OVERWRITEPROMPT, Vim has its own ":confirm" dialog.
       */
      fileStruct.Flags = (OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY);
@@ -804,7 +795,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (saving)
      {
  	if (!GetSaveFileName(&fileStruct))
-@@ -3901,6 +3851,7 @@ gui_mch_browse(
+@@ -3773,6 +3723,7 @@ gui_mch_browse(
  
      /* Shorten the file name if possible */
      return vim_strsave(shorten_fname1((char_u *)fileBuf));
@@ -812,7 +803,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  #endif /* FEAT_BROWSE */
  
-@@ -3911,16 +3862,11 @@ gui_mch_browse(
+@@ -3783,16 +3734,11 @@ gui_mch_browse(
      HDROP hDrop)
  {
  #ifdef FEAT_WINDOWS
@@ -831,7 +822,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      char    szFile[BUFPATHLEN];
      UINT    cFiles = DragQueryFile(hDrop, DRAGQVAL, NULL, 0);
      UINT    i;
-@@ -3941,11 +3887,11 @@ gui_mch_browse(
+@@ -3813,11 +3759,11 @@ gui_mch_browse(
      if (fnames != NULL)
  	for (i = 0; i < cFiles; ++i)
  	{
@@ -845,7 +836,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  		DragQueryFile(hDrop, i, szFile, BUFPATHLEN);
  		fnames[i] = vim_strsave((char_u *)szFile);
-@@ -3983,14 +3929,10 @@ gui_mch_browse(
+@@ -3855,14 +3801,10 @@ gui_mch_browse(
      long	val;
      int		dragging = FALSE;
      int		dont_scroll_save = dont_scroll;
@@ -860,7 +851,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      sb = gui_mswin_find_scrollbar(hwndCtl);
      if (sb == NULL)
-@@ -4055,13 +3997,8 @@ gui_mch_browse(
+@@ -3927,13 +3869,8 @@ gui_mch_browse(
      }
      prev_code = code;
  
@@ -874,7 +865,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      /*
       * When moving a vertical scrollbar, move the other vertical scrollbar too.
-@@ -4071,11 +4008,7 @@ gui_mch_browse(
+@@ -3943,11 +3880,7 @@ gui_mch_browse(
  	scrollbar_T *sba = sb->wp->w_scrollbars;
  	HWND    id = sba[ (sb == sba + SBAR_LEFT) ? SBAR_RIGHT : SBAR_LEFT].id;
  
@@ -886,7 +877,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      /* Don't let us be interrupted here by another message. */
-@@ -4543,7 +4476,6 @@ static int dialog_default_button = -1;
+@@ -4415,7 +4348,6 @@ static int dialog_default_button = -1;
  
  /* Intellimouse support */
  static int mouse_scroll_lines = 0;
@@ -894,7 +885,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  static int	s_usenewlook;	    /* emulate W95/NT4 non-bold dialogs */
  #ifdef FEAT_TOOLBAR
-@@ -4600,43 +4532,6 @@ static void dyn_imm_load(void);
+@@ -4472,43 +4404,6 @@ static void dyn_imm_load(void);
  # define pImmSetConversionStatus  ImmSetConversionStatus
  #endif
  
@@ -938,7 +929,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  /*
   * Figure out how high the menu bar is at the moment.
-@@ -4668,45 +4563,20 @@ gui_mswin_get_menu_height(
+@@ -4540,45 +4435,20 @@ gui_mswin_get_menu_height(
      }
      else
      {
@@ -998,7 +989,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -4740,42 +4610,11 @@ init_mouse_wheel(void)
+@@ -4612,42 +4482,11 @@ init_mouse_wheel(void)
  #define VMSH_MOUSEWHEEL    "MSWHEEL_ROLLMSG"
  #define VMSH_SCROLL_LINES  "MSH_SCROLL_LINES_MSG"
  
@@ -1044,7 +1035,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
  
-@@ -5314,13 +5153,8 @@ set_tabline_font(void)
+@@ -5186,13 +5025,8 @@ set_tabline_font(void)
  #endif
  
      default:
@@ -1059,7 +1050,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{
  	    _OnFindRepl();
  	}
-@@ -5481,40 +5315,13 @@ gui_mch_prepare(int *argc, char **argv)
+@@ -5353,40 +5187,13 @@ gui_mch_prepare(int *argc, char **argv)
      }
  #endif
  
@@ -1104,7 +1095,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  }
  
-@@ -5579,12 +5386,7 @@ gui_mch_init(void)
+@@ -5451,12 +5258,7 @@ gui_mch_init(void)
  		    atom =
  #endif
  		    RegisterClassW(&wndclassw)) == 0)
@@ -1118,7 +1109,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	else
  	    wide_WindowProc = TRUE;
      }
-@@ -5814,7 +5616,7 @@ gui_mch_init(void)
+@@ -5686,7 +5488,7 @@ gui_mch_init(void)
      s_findrep_struct.lpstrReplaceWith[0] = NUL;
      s_findrep_struct.wFindWhatLen = MSWIN_FR_BUFSIZE;
      s_findrep_struct.wReplaceWithLen = MSWIN_FR_BUFSIZE;
@@ -1127,7 +1118,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      s_findrep_struct_w.lStructSize = sizeof(s_findrep_struct_w);
      s_findrep_struct_w.lpstrFindWhat =
  			      (LPWSTR)alloc(MSWIN_FR_BUFSIZE * sizeof(WCHAR));
-@@ -5857,22 +5659,18 @@ theend:
+@@ -5729,22 +5531,18 @@ theend:
      static void
  get_work_area(RECT *spi_rect)
  {
@@ -1162,7 +1153,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
      /* this is the old method... */
-@@ -6411,29 +6209,10 @@ RevOut( HDC s_hdc,
+@@ -6283,29 +6081,10 @@ RevOut( HDC s_hdc,
  	CONST INT *padding)
  {
      int		ix;
@@ -1196,7 +1187,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  #endif
  
-@@ -6834,63 +6613,50 @@ gui_mch_add_menu(
+@@ -6706,63 +6485,50 @@ gui_mch_add_menu(
  
      if (menu_is_menubar(menu->name))
      {
@@ -1301,7 +1292,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
  
-@@ -7006,7 +6772,6 @@ gui_mch_add_menu_item(
+@@ -6878,7 +6644,6 @@ gui_mch_add_menu_item(
      {
  #ifdef FEAT_MBYTE
  	WCHAR	*wn = NULL;
@@ -1309,7 +1300,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  	if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
  	{
-@@ -7015,14 +6780,11 @@ gui_mch_add_menu_item(
+@@ -6887,14 +6652,11 @@ gui_mch_add_menu_item(
  	    wn = enc_to_utf16(menu->name, NULL);
  	    if (wn != NULL)
  	    {
@@ -1325,7 +1316,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    }
  	}
  	if (wn == NULL)
-@@ -7223,11 +6985,10 @@ dialog_callback(
+@@ -7095,11 +6857,10 @@ dialog_callback(
  	/* If the edit box exists, copy the string. */
  	if (s_textfield != NULL)
  	{
@@ -1339,7 +1330,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    {
  	       WCHAR  *wp = (WCHAR *)alloc(IOSIZE * sizeof(WCHAR));
  	       char_u *p;
-@@ -7984,38 +7745,31 @@ get_dialog_font_metrics(void)
+@@ -7856,38 +7617,31 @@ get_dialog_font_metrics(void)
  
      s_usenewlook = FALSE;
  
@@ -1398,7 +1389,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      if (!s_usenewlook)
-@@ -8162,10 +7916,6 @@ gui_mch_tearoff(
+@@ -8034,10 +7788,6 @@ gui_mch_tearoff(
  	dlgwidth = textWidth;
      dlgwidth += 2 * TEAROFF_PADDING_X + TEAROFF_BUTTON_PAD_X;
  
@@ -1409,7 +1400,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /* start to fill in the dlgtemplate information.  addressing by WORDs */
      if (s_usenewlook)
  	lStyle = DS_MODALFRAME | WS_CAPTION| WS_SYSMENU |DS_SETFONT| WS_VISIBLE;
-@@ -8417,7 +8167,7 @@ get_toolbar_bitmap(vimmenu_T *menu)
+@@ -8289,7 +8039,7 @@ get_toolbar_bitmap(vimmenu_T *menu)
      /*
       * Check user bitmaps first, unless builtin is specified.
       */
@@ -1418,7 +1409,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      {
  	char_u fname[MAXPATHL];
  	HANDLE hbitmap = NULL;
-@@ -8768,12 +8518,6 @@ gui_mch_register_sign(char_u *signfile)
+@@ -8640,12 +8390,6 @@ gui_mch_register_sign(char_u *signfile)
      signicon_t	sign, *psign;
      char_u	*ext;
  
@@ -1542,7 +1533,7 @@ diff --git a/src/misc2.c b/src/misc2.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -3268,16 +3268,6 @@ set_init_1(void)
+@@ -3285,16 +3285,6 @@ set_init_1(void)
  	}
      }
  
@@ -1559,7 +1550,7 @@ diff --git a/src/option.c b/src/option.c
  #ifdef FEAT_SEARCHPATH
      {
  	char_u	*cdpath;
-@@ -9886,13 +9876,7 @@ clear_termoptions(void)
+@@ -9925,13 +9915,7 @@ clear_termoptions(void)
      if (gui.starting)
  	clear_xterm_clip();
  #endif
@@ -1841,7 +1832,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #if defined(__BORLANDC__)
  /* Strangely Borland uses a non-standard name. */
  # define wcsicmp(a, b) wcscmpi((a), (b))
-@@ -429,7 +409,6 @@ unescape_shellxquote(char_u *p, char_u *
+@@ -428,7 +408,6 @@ unescape_shellxquote(char_u *p, char_u *
  vimLoadLib(char *name)
  {
      HINSTANCE	dll = NULL;
@@ -1849,7 +1840,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* NOTE: Do not use mch_dirname() and mch_chdir() here, they may call
       * vimLoadLib() recursively, which causes a stack overflow. */
-@@ -437,7 +416,6 @@ vimLoadLib(char *name)
+@@ -436,7 +415,6 @@ vimLoadLib(char *name)
  	get_exe_name();
      if (exe_path != NULL)
      {
@@ -1857,7 +1848,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	WCHAR old_dirw[MAXPATHL];
  
  	if (GetCurrentDirectoryW(MAXPATHL, old_dirw) != 0)
-@@ -450,18 +428,6 @@ vimLoadLib(char *name)
+@@ -449,18 +427,6 @@ vimLoadLib(char *name)
  	    SetCurrentDirectoryW(old_dirw);
  	    return dll;
  	}
@@ -1876,7 +1867,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
      return dll;
  }
-@@ -610,38 +576,8 @@ DWORD g_PlatformId;
+@@ -609,37 +575,7 @@ DWORD g_PlatformId;
  # ifndef PROTECTED_DACL_SECURITY_INFORMATION
  #  define PROTECTED_DACL_SECURITY_INFORMATION	0x80000000L
  # endif
@@ -1905,17 +1896,17 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -static PSNSECINFOW pSetNamedSecurityInfoW;
 -static PGNSECINFOW pGetNamedSecurityInfoW;
 -# endif
- #endif
- 
+-#endif
+-
 -typedef BOOL (WINAPI *PSETHANDLEINFORMATION)(HANDLE, DWORD, DWORD);
 -
 -static BOOL allowPiping = FALSE;
 -static PSETHANDLEINFORMATION pSetHandleInformation;
--
++#endif
+ 
  #ifdef HAVE_ACL
  /*
-  * Enables or disables the specified privilege.
-@@ -701,93 +637,13 @@ PlatformId(void)
+@@ -700,93 +636,13 @@ PlatformId(void)
  	    win8_or_later = TRUE;
  
  #ifdef HAVE_ACL
@@ -1962,9 +1953,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -		win32_enable_privilege(SE_SECURITY_NAME, TRUE);
 -	    }
 -	}
-+	/* Enable privilege for getting or setting SACLs. */
-+	win32_enable_privilege(SE_SECURITY_NAME, TRUE);
- #endif
+-#endif
 -	/*
 -	 * If we are on windows NT, try to load the pipe functions, only
 -	 * available from Win2K.
@@ -1977,6 +1966,9 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -
 -	    allowPiping = pSetHandleInformation != NULL;
 -	}
++	/* Enable privilege for getting or setting SACLs. */
++	win32_enable_privilege(SE_SECURITY_NAME, TRUE);
++#endif
  	done = TRUE;
      }
  }
@@ -2011,7 +2003,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #ifndef FEAT_GUI_W32
  
  #define SHIFT  (SHIFT_PRESSED)
-@@ -915,15 +771,6 @@ win32_kbd_patch_key(
+@@ -914,15 +770,6 @@ win32_kbd_patch_key(
  
      vim_memset(abKeystate, 0, sizeof (abKeystate));
  
@@ -2027,7 +2019,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      /* Clear any pending dead keys */
      ToUnicode(VK_SPACE, MapVirtualKey(VK_SPACE, 0), abKeystate, awAnsiCode, 2, 0);
  
-@@ -1943,17 +1790,13 @@ executable_exists(char *name, char_u **p
+@@ -1965,17 +1812,13 @@ executable_exists(char *name, char_u **p
  	    n = (long)SearchPathW(wnewpath, p, NULL, _MAX_PATH, fnamew, &dumw);
  	    vim_free(wnewpath);
  	    vim_free(p);
@@ -2052,7 +2044,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  #endif
-@@ -2030,7 +1873,6 @@ mch_init(void)
+@@ -2052,7 +1895,6 @@ mch_init(void)
      Columns = 80;
  
      /* Look for 'vimrun' */
@@ -2060,7 +2052,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	char_u vimrun_location[_MAX_PATH + 4];
  
-@@ -2429,8 +2271,6 @@ SetConsoleIcon(
+@@ -2451,8 +2293,6 @@ SetConsoleIcon(
      static void
  SaveConsoleTitleAndIcon(void)
  {
@@ -2069,7 +2061,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      /* Save the original title. */
      if (!GetConsoleTitle(g_szOrigTitle, sizeof(g_szOrigTitle)))
  	return;
-@@ -2442,12 +2282,7 @@ SaveConsoleTitleAndIcon(void)
+@@ -2464,12 +2304,7 @@ SaveConsoleTitleAndIcon(void)
       * 2000.  On older operating systems, we can't change the window icon
       * anyway.
       */
@@ -2083,7 +2075,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (g_hWnd == NULL)
  	return;
  
-@@ -2556,11 +2391,6 @@ mch_init(void)
+@@ -2578,11 +2413,6 @@ mch_init(void)
  #ifdef FEAT_CLIPBOARD
      win_clip_init();
  #endif
@@ -2095,7 +2087,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  /*
-@@ -2742,9 +2572,6 @@ fname_casew(
+@@ -2764,9 +2594,6 @@ fname_casew(
  	    *porig = c;
  	    ptrue = ptruePrev + wcslen(ptruePrev);
  	}
@@ -2105,7 +2097,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  
      wcscpy(name, szTrueName);
-@@ -2803,7 +2630,7 @@ fname_case(
+@@ -2825,7 +2652,7 @@ fname_case(
  		}
  	    }
  	}
@@ -2114,7 +2106,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  #endif
  
-@@ -2933,9 +2760,6 @@ mch_get_user_name(
+@@ -2955,9 +2782,6 @@ mch_get_user_name(
  		return OK;
  	    }
  	}
@@ -2124,7 +2116,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  #endif
      if (GetUserName(szUserName, &cch))
-@@ -2975,9 +2799,6 @@ mch_get_host_name(
+@@ -2997,9 +2821,6 @@ mch_get_host_name(
  		return;
  	    }
  	}
@@ -2134,7 +2126,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  #endif
      if (!GetComputerName((LPSTR)s, &cch))
-@@ -3026,9 +2847,7 @@ mch_dirname(
+@@ -3048,9 +2869,7 @@ mch_dirname(
  		return OK;
  	    }
  	}
@@ -2145,7 +2137,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  #endif
      return (GetCurrentDirectory(len, (LPSTR)buf) != 0 ? OK : FAIL);
-@@ -3068,9 +2887,8 @@ mch_setperm(char_u *name, long perm)
+@@ -3090,9 +2909,8 @@ mch_setperm(char_u *name, long perm)
  	{
  	    n = _wchmod(p, perm);
  	    vim_free(p);
@@ -2156,7 +2148,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
      if (n == -1)
-@@ -3218,18 +3036,7 @@ mch_is_symbolic_link(char_u *name)
+@@ -3240,18 +3058,7 @@ mch_is_symbolic_link(char_u *name)
      {
  	hFind = FindFirstFileW(wn, &findDataW);
  	vim_free(wn);
@@ -2176,7 +2168,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	{
  	    fileFlags = findDataW.dwFileAttributes;
  	    reparseTag = findDataW.dwReserved0;
-@@ -3288,7 +3095,7 @@ win32_fileinfo(char_u *fname, BY_HANDLE_
+@@ -3310,7 +3117,7 @@ win32_fileinfo(char_u *fname, BY_HANDLE_
      {
  	wn = enc_to_utf16(fname, NULL);
  	if (wn == NULL)
@@ -2185,7 +2177,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
      if (wn != NULL)
      {
-@@ -3299,15 +3106,9 @@ win32_fileinfo(char_u *fname, BY_HANDLE_
+@@ -3321,15 +3128,9 @@ win32_fileinfo(char_u *fname, BY_HANDLE_
  		    OPEN_EXISTING,	/* creation disposition */
  		    FILE_FLAG_BACKUP_SEMANTICS,	/* file attributes */
  		    NULL);		/* handle to template file */
@@ -2203,7 +2195,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	hFile = CreateFile((LPCSTR)fname,    /* file name */
  		    GENERIC_READ,	    /* access mode */
-@@ -3326,9 +3127,6 @@ win32_fileinfo(char_u *fname, BY_HANDLE_
+@@ -3348,9 +3149,6 @@ win32_fileinfo(char_u *fname, BY_HANDLE_
  	CloseHandle(hFile);
      }
  
@@ -2213,7 +2205,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      return res;
  }
  
-@@ -3350,19 +3148,12 @@ win32_getattrs(char_u *name)
+@@ -3372,19 +3170,12 @@ win32_getattrs(char_u *name)
      if (p != NULL)
      {
  	attr = GetFileAttributesW(p);
@@ -2236,7 +2228,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      return attr;
  }
  
-@@ -3385,20 +3176,12 @@ win32_setattrs(char_u *name, int attrs)
+@@ -3407,20 +3198,12 @@ win32_setattrs(char_u *name, int attrs)
      if (p != NULL)
      {
  	res = SetFileAttributesW(p, attrs);
@@ -2260,7 +2252,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      return res ? 0 : -1;
  }
  
-@@ -3513,27 +3296,20 @@ mch_nodetype(char_u *name)
+@@ -3535,27 +3318,20 @@ mch_nodetype(char_u *name)
  
  #ifdef FEAT_MBYTE
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
@@ -2300,7 +2292,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	hFile = CreateFile((LPCSTR)name,    /* file name */
  		    GENERIC_WRITE,	    /* access mode */
-@@ -3543,9 +3319,6 @@ mch_nodetype(char_u *name)
+@@ -3565,9 +3341,6 @@ mch_nodetype(char_u *name)
  		    0,			    /* file attributes */
  		    NULL);		    /* handle to template file */
  
@@ -2310,7 +2302,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (hFile == INVALID_HANDLE_VALUE)
  	return NODE_NORMAL;
  
-@@ -3582,88 +3355,84 @@ mch_get_acl(char_u *fname)
+@@ -3604,88 +3377,84 @@ mch_get_acl(char_u *fname)
      struct my_acl   *p = NULL;
      DWORD   err;
  
@@ -2471,7 +2463,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    }
  	}
      }
-@@ -3707,7 +3476,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+@@ -3729,7 +3498,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
      struct my_acl   *p = (struct my_acl *)acl;
      SECURITY_INFORMATION    sec_info = 0;
  
@@ -2480,7 +2472,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  # ifdef FEAT_MBYTE
  	WCHAR	*wn = NULL;
-@@ -3735,7 +3504,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+@@ -3757,7 +3526,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
  	    wn = enc_to_utf16(fname, NULL);
  	if (wn != NULL)
  	{
@@ -2489,7 +2481,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			wn,			// Abstract filename
  			SE_FILE_OBJECT,		// File Object
  			sec_info,
-@@ -3749,7 +3518,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
+@@ -3771,7 +3540,7 @@ mch_set_acl(char_u *fname, vim_acl_T acl
  	else
  # endif
  	{
@@ -2498,7 +2490,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			(LPSTR)fname,		// Abstract filename
  			SE_FILE_OBJECT,		// File Object
  			sec_info,
-@@ -4050,7 +3819,7 @@ vim_create_process(
+@@ -4072,7 +3841,7 @@ vim_create_process(
      STARTUPINFO		*si,
      PROCESS_INFORMATION *pi)
  {
@@ -2507,7 +2499,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
      {
  	WCHAR	*wcmd = enc_to_utf16(cmd, NULL);
-@@ -4112,31 +3881,21 @@ mch_system_classic(char_u *cmd, int opti
+@@ -4134,31 +3903,21 @@ mch_system_classic(char_u *cmd, int opti
      si.lpTitle = NULL;
      si.dwFlags = STARTF_USESHOWWINDOW;
      /*
@@ -2541,7 +2533,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  #ifdef FEAT_GUI
  	int	    delay = 1;
-@@ -4169,23 +3928,6 @@ mch_system_classic(char_u *cmd, int opti
+@@ -4191,23 +3950,6 @@ mch_system_classic(char_u *cmd, int opti
  	/* Get the command exit code */
  	GetExitCodeProcess(pi.hProcess, &ret);
      }
@@ -2565,7 +2557,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Close the handles to the subprocess, so that it goes away */
      CloseHandle(pi.hThread);
-@@ -4427,11 +4169,11 @@ mch_system_piped(char_u *cmd, int option
+@@ -4449,11 +4191,11 @@ mch_system_piped(char_u *cmd, int option
  
      if ( ! CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0)
  	/* Ensure the read handle to the pipe for STDOUT is not inherited. */
@@ -2579,7 +2571,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	CloseHandle(g_hChildStd_IN_Rd);
  	CloseHandle(g_hChildStd_IN_Wr);
-@@ -4681,7 +4423,7 @@ mch_system_piped(char_u *cmd, int option
+@@ -4703,7 +4445,7 @@ mch_system_piped(char_u *cmd, int option
  mch_system(char_u *cmd, int options)
  {
      /* if we can pipe and the shelltemp option is off */
@@ -2588,7 +2580,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	return mch_system_piped(cmd, options);
      else
  	return mch_system_classic(cmd, options);
-@@ -4934,7 +4676,7 @@ mch_call_shell(
+@@ -4956,7 +4698,7 @@ mch_call_shell(
  	{
  	    cmdlen = (
  #ifdef FEAT_GUI_W32
@@ -2597,7 +2589,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  		STRLEN(p_sh) + STRLEN(p_shcf) + STRLEN(cmd) + 10);
  
-@@ -4952,7 +4694,7 @@ mch_call_shell(
+@@ -4974,7 +4716,7 @@ mch_call_shell(
  			    MB_ICONWARNING);
  		    need_vimrun_warning = FALSE;
  		}
@@ -2606,7 +2598,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		    /* Use vimrun to execute the command.  It opens a console
  		     * window, which can be closed without killing Vim. */
  		    vim_snprintf((char *)newcmd, cmdlen, "%s%s%s %s %s",
-@@ -4976,8 +4718,7 @@ mch_call_shell(
+@@ -4998,8 +4740,7 @@ mch_call_shell(
      /* Print the return value, unless "vimrun" was used. */
      if (x != 0 && !(options & SHELL_SILENT) && !emsg_silent
  #if defined(FEAT_GUI_W32)
@@ -2616,7 +2608,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    )
      {
-@@ -5025,14 +4766,10 @@ job_io_file_open(
+@@ -5047,14 +4788,10 @@ job_io_file_open(
                       lpSecurityAttributes, dwCreationDisposition,
                       dwFlagsAndAttributes, NULL);
              vim_free(wn);
@@ -2631,7 +2623,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
          h = CreateFile((LPCSTR)fname, dwDesiredAccess, dwShareMode,
                       lpSecurityAttributes, dwCreationDisposition,
                       dwFlagsAndAttributes, NULL);
-@@ -5104,7 +4841,7 @@ mch_start_job(char_u *cmd, job_T *job, j
+@@ -5123,7 +4860,7 @@ mch_start_job(char_u *cmd, job_T *job, j
      }
      else if (!use_null_for_in &&
  	    (!CreatePipe(&ifd[0], &ifd[1], &saAttr, 0)
@@ -2640,7 +2632,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	goto failed;
  
      if (use_file_for_out)
-@@ -5122,7 +4859,7 @@ mch_start_job(char_u *cmd, job_T *job, j
+@@ -5141,7 +4878,7 @@ mch_start_job(char_u *cmd, job_T *job, j
      }
      else if (!use_null_for_out &&
  	    (!CreatePipe(&ofd[0], &ofd[1], &saAttr, 0)
@@ -2649,7 +2641,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	goto failed;
  
      if (use_file_for_err)
-@@ -5140,7 +4877,7 @@ mch_start_job(char_u *cmd, job_T *job, j
+@@ -5159,7 +4896,7 @@ mch_start_job(char_u *cmd, job_T *job, j
      }
      else if (!use_out_for_err && !use_null_for_err &&
  	    (!CreatePipe(&efd[0], &efd[1], &saAttr, 0)
@@ -2658,7 +2650,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	goto failed;
  
      si.dwFlags |= STARTF_USESTDHANDLES;
-@@ -6158,9 +5895,7 @@ mch_remove(char_u *name)
+@@ -6174,9 +5911,7 @@ mch_remove(char_u *name)
  	{
  	    n = DeleteFileW(wn) ? 0 : -1;
  	    vim_free(wn);
@@ -2669,7 +2661,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  #endif
-@@ -6185,7 +5920,6 @@ mch_breakcheck(void)
+@@ -6201,7 +5936,6 @@ mch_breakcheck(void)
  
  /* physical RAM to leave for the OS */
  #define WINNT_RESERVE_BYTES     (256*1024*1024)
@@ -2677,7 +2669,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /*
   * How much main memory in KiB that can be used by VIM.
-@@ -6194,54 +5928,25 @@ mch_breakcheck(void)
+@@ -6210,54 +5944,25 @@ mch_breakcheck(void)
      long_u
  mch_total_mem(int special)
  {
@@ -2746,7 +2738,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  #ifdef FEAT_MBYTE
-@@ -6258,16 +5963,13 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6274,16 +5979,13 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
      WCHAR	szNewPath[_MAX_PATH + 1];
      HANDLE	hf;
  
@@ -2770,7 +2762,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (GetFullPathNameW(wnew, _MAX_PATH, szNewPath, &p) == 0 || p == NULL)
  	return -1;
-@@ -6345,22 +6047,17 @@ mch_rename(
+@@ -6361,22 +6063,17 @@ mch_rename(
  	    retval = mch_wrename(wold, wnew);
  	vim_free(wold);
  	vim_free(wnew);
@@ -2799,7 +2791,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Get base path of new file name.  Undocumented feature: If pszNewFile is
       * a directory, no error is returned and pszFilePart will be NULL. */
-@@ -6423,16 +6120,9 @@ mch_rename(
+@@ -6439,16 +6136,9 @@ mch_rename(
      char *
  default_shell(void)
  {
@@ -2817,7 +2809,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  /*
-@@ -6478,18 +6168,11 @@ mch_access(char *n, int p)
+@@ -6494,18 +6184,11 @@ mch_access(char *n, int p)
  
  		hFile = FindFirstFileW(TempNameW, &d);
  		if (hFile == INVALID_HANDLE_VALUE)
@@ -2838,7 +2830,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    {
  		char		    *pch;
-@@ -6519,18 +6202,11 @@ mch_access(char *n, int p)
+@@ -6535,18 +6218,11 @@ mch_access(char *n, int p)
  	    if (wn != NULL)
  	    {
  		if (!GetTempFileNameW(wn, L"VIM", 0, TempNameW))
@@ -2859,7 +2851,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    {
  		if (!GetTempFileName(n, "VIM", 0, TempName))
-@@ -6547,17 +6223,8 @@ mch_access(char *n, int p)
+@@ -6563,17 +6239,8 @@ mch_access(char *n, int p)
  		| ((p & R_OK) ? GENERIC_READ : 0);
  #ifdef FEAT_MBYTE
  	if (wn != NULL)
@@ -2878,7 +2870,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  	    hFile = CreateFile(n, am, 0, NULL, OPEN_EXISTING, 0, NULL);
  	if (hFile == INVALID_HANDLE_VALUE)
-@@ -6592,11 +6259,7 @@ mch_open(char *name, int flags, int mode
+@@ -6608,11 +6275,7 @@ mch_open(char *name, int flags, int mode
  	{
  	    f = _wopen(wn, flags, mode);
  	    vim_free(wn);
@@ -2891,7 +2883,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  # endif
-@@ -6620,12 +6283,7 @@ mch_fopen(char *name, char *mode)
+@@ -6636,12 +6299,7 @@ mch_fopen(char *name, char *mode)
      WCHAR	*wn, *wm;
      FILE	*f = NULL;
  
@@ -2905,7 +2897,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  # if defined(DEBUG) && _MSC_VER >= 1400
  	/* Work around an annoying assertion in the Microsoft debug CRT
-@@ -6649,12 +6307,7 @@ mch_fopen(char *name, char *mode)
+@@ -6665,12 +6323,7 @@ mch_fopen(char *name, char *mode)
  # if defined(DEBUG) && _MSC_VER >= 1400
  	_set_fmode(oldMode);
  # endif
@@ -2919,7 +2911,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  
      /* fopen() can open a file which name is longer than _MAX_PATH bytes
-@@ -6825,8 +6478,7 @@ mch_copy_file_attribute(char_u *from, ch
+@@ -6841,8 +6494,7 @@ mch_copy_file_attribute(char_u *from, ch
  #ifdef FEAT_MBYTE
      /* File streams only work on Windows NT and later. */
      PlatformId();
@@ -2929,7 +2921,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
      return 0;
  }
-@@ -6838,7 +6490,6 @@ mch_copy_file_attribute(char_u *from, ch
+@@ -6854,7 +6506,6 @@ mch_copy_file_attribute(char_u *from, ch
   */
  
  /* These magic numbers are from the MS header files */
@@ -2937,7 +2929,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #define MIN_STACK_WINNT 2
  
  /*
-@@ -6858,10 +6509,7 @@ myresetstkoflw(void)
+@@ -6874,10 +6525,7 @@ myresetstkoflw(void)
      DWORD	nPageSize;
      DWORD	dummy;
  
@@ -2948,7 +2940,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* We need to know the system page size. */
      GetSystemInfo(&si);
-@@ -6877,29 +6525,12 @@ myresetstkoflw(void)
+@@ -6893,29 +6541,12 @@ myresetstkoflw(void)
  
      /* ...and the page thats min_stack_req pages away from stack base; this is
       * the lowest page we could use. */
@@ -3019,7 +3011,7 @@ diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 diff --git a/src/version.c b/src/version.c
 --- a/src/version.c
 +++ b/src/version.c
-@@ -3966,18 +3966,11 @@ list_version(void)
+@@ -4606,18 +4606,11 @@ list_version(void)
      MSG(longVersion);
  #ifdef WIN3264
  # ifdef FEAT_GUI_W32
@@ -3040,7 +3032,7 @@ diff --git a/src/version.c b/src/version.c
  # ifdef FEAT_OLE
      MSG_PUTS(_(" with OLE support"));
  # endif
-@@ -4335,10 +4328,6 @@ intro_message(
+@@ -4975,10 +4968,6 @@ intro_message(
      blanklines = (int)Rows - ((sizeof(lines) / sizeof(char *)) - 1);
      if (!p_cp)
  	blanklines += 4;  /* add 4 for not showing "Vi compatible" message */
@@ -3051,7 +3043,7 @@ diff --git a/src/version.c b/src/version.c
  
  #ifdef FEAT_WINDOWS
      /* Don't overwrite a statusline.  Depends on 'cmdheight'. */
-@@ -4387,17 +4376,6 @@ intro_message(
+@@ -5027,17 +5016,6 @@ intro_message(
  		do_intro_line(row, (char_u *)_(p), i == 2, 0);
  	    ++row;
  	}
