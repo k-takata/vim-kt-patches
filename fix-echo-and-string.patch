@@ -1,0 +1,590 @@
+# HG changeset patch
+# Parent  d0be26c5c0dc92ad26e047247f88d4ac12080d98
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -450,7 +450,7 @@ static long list_idx_of_item(list_T *l, 
+ static int list_extend(list_T	*l1, list_T *l2, listitem_T *bef);
+ static int list_concat(list_T *l1, list_T *l2, typval_T *tv);
+ static list_T *list_copy(list_T *orig, int deep, int copyID);
+-static char_u *list2string(typval_T *tv, int copyID);
++static char_u *list2string(typval_T *tv, int copyID, int echo_style);
+ static int list_join_inner(garray_T *gap, list_T *l, char_u *sep, int echo_style, int copyID, garray_T *join_gap);
+ static int list_join(garray_T *gap, list_T *l, char_u *sep, int echo, int copyID);
+ static int free_unref_items(int copyID);
+@@ -458,8 +458,9 @@ static dictitem_T *dictitem_copy(dictite
+ static void dictitem_remove(dict_T *dict, dictitem_T *item);
+ static dict_T *dict_copy(dict_T *orig, int deep, int copyID);
+ static long dict_len(dict_T *d);
+-static char_u *dict2string(typval_T *tv, int copyID);
++static char_u *dict2string(typval_T *tv, int copyID, int echo_style);
+ static int get_dict_tv(char_u **arg, typval_T *rettv, int evaluate);
++static char_u *echo_string_core(typval_T *tv, char_u **tofree, char_u *numbuf, int copyID, int echo_style, int dict_val);
+ static char_u *echo_string(typval_T *tv, char_u **tofree, char_u *numbuf, int copyID);
+ static char_u *string_quote(char_u *str, int function);
+ static int get_env_tv(char_u **arg, typval_T *rettv, int evaluate);
+@@ -6802,7 +6803,7 @@ vimlist_remove(list_T *l, listitem_T *it
+  * May return NULL.
+  */
+     static char_u *
+-list2string(typval_T *tv, int copyID)
++list2string(typval_T *tv, int copyID, int echo_style)
+ {
+     garray_T	ga;
+ 
+@@ -6810,7 +6811,8 @@ list2string(typval_T *tv, int copyID)
+ 	return NULL;
+     ga_init2(&ga, (int)sizeof(char), 80);
+     ga_append(&ga, '[');
+-    if (list_join(&ga, tv->vval.v_list, (char_u *)", ", FALSE, copyID) == FAIL)
++    if (list_join(&ga, tv->vval.v_list, (char_u *)", ", echo_style, copyID)
++								      == FAIL)
+     {
+ 	vim_free(ga.ga_data);
+ 	return NULL;
+@@ -7885,7 +7887,7 @@ get_dict_number(dict_T *d, char_u *key)
+  * May return NULL.
+  */
+     static char_u *
+-dict2string(typval_T *tv, int copyID)
++dict2string(typval_T *tv, int copyID, int echo_style)
+ {
+     garray_T	ga;
+     int		first = TRUE;
+@@ -7920,7 +7922,8 @@ dict2string(typval_T *tv, int copyID)
+ 		vim_free(tofree);
+ 	    }
+ 	    ga_concat(&ga, (char_u *)": ");
+-	    s = tv2string(&HI2DI(hi)->di_tv, &tofree, numbuf, copyID);
++	    s = echo_string_core(&HI2DI(hi)->di_tv, &tofree, numbuf, copyID,
++							    echo_style, TRUE);
+ 	    if (s != NULL)
+ 		ga_concat(&ga, s);
+ 	    vim_free(tofree);
+@@ -8078,6 +8081,195 @@ get_var_special_name(int nr)
+  * Return a string with the string representation of a variable.
+  * If the memory is allocated "tofree" is set to it, otherwise NULL.
+  * "numbuf" is used for a number.
++ * When "copyID" is not NULL replace recursive lists and dicts with "...".
++ * When both "echo_style" and "dict_val" are FALSE, put quotes around stings as
++ * "string()", otherwise does not put quotes around strings, as ":echo"
++ * displays values.  When "echo_style" is TRUE, the same items in dictionaries
++ * or lists are replaced with "...".
++ * May return NULL.
++ */
++    static char_u *
++echo_string_core(
++    typval_T	*tv,
++    char_u	**tofree,
++    char_u	*numbuf,
++    int		copyID,
++    int		echo_style,
++    int		dict_val)
++{
++    static int	recurse = 0;
++    char_u	*r = NULL;
++
++    if (recurse >= DICT_MAXNEST)
++    {
++	if (!did_echo_string_emsg)
++	{
++	    /* Only give this message once for a recursive call to avoid
++	     * flooding the user with errors.  And stop iterating over lists
++	     * and dicts. */
++	    did_echo_string_emsg = TRUE;
++	    EMSG(_("E724: variable nested too deep for displaying"));
++	}
++	*tofree = NULL;
++	return (char_u *)"{E724}";
++    }
++    ++recurse;
++
++    switch (tv->v_type)
++    {
++	case VAR_STRING:
++	    if (echo_style && !dict_val)
++	    {
++		*tofree = NULL;
++		r = get_tv_string_buf(tv, numbuf);
++	    }
++	    else
++	    {
++		*tofree = string_quote(tv->vval.v_string, FALSE);
++		r = *tofree;
++	    }
++	    break;
++
++	case VAR_FUNC:
++	    if (echo_style)
++	    {
++		*tofree = NULL;
++		r = tv->vval.v_string;
++	    }
++	    else
++	    {
++		*tofree = string_quote(tv->vval.v_string, TRUE);
++		r = *tofree;
++	    }
++	    break;
++
++	case VAR_PARTIAL:
++	    {
++		partial_T   *pt = tv->vval.v_partial;
++		char_u	    *fname = string_quote(pt == NULL ? NULL
++							: pt->pt_name, FALSE);
++		garray_T    ga;
++		int	    i;
++		char_u	    *tf;
++
++		ga_init2(&ga, 1, 100);
++		ga_concat(&ga, (char_u *)"function(");
++		if (fname != NULL)
++		{
++		    ga_concat(&ga, fname);
++		    vim_free(fname);
++		}
++		if (pt != NULL && pt->pt_argc > 0)
++		{
++		    ga_concat(&ga, (char_u *)", [");
++		    for (i = 0; i < pt->pt_argc; ++i)
++		    {
++			if (i > 0)
++			    ga_concat(&ga, (char_u *)", ");
++			ga_concat(&ga,
++			     tv2string(&pt->pt_argv[i], &tf, numbuf, copyID));
++			vim_free(tf);
++		    }
++		    ga_concat(&ga, (char_u *)"]");
++		}
++		if (pt != NULL && pt->pt_dict != NULL)
++		{
++		    typval_T dtv;
++
++		    ga_concat(&ga, (char_u *)", ");
++		    dtv.v_type = VAR_DICT;
++		    dtv.vval.v_dict = pt->pt_dict;
++		    ga_concat(&ga, tv2string(&dtv, &tf, numbuf, copyID));
++		    vim_free(tf);
++		}
++		ga_concat(&ga, (char_u *)")");
++
++		*tofree = ga.ga_data;
++		r = *tofree;
++		break;
++	    }
++
++	case VAR_LIST:
++	    if (tv->vval.v_list == NULL)
++	    {
++		*tofree = NULL;
++		r = NULL;
++	    }
++	    else if (copyID != 0 && tv->vval.v_list->lv_copyID == copyID)
++	    {
++		*tofree = NULL;
++		if (tv->vval.v_list->lv_len > 0)
++		    r = (char_u *)"[...]";
++		else
++		    r = (char_u *)"[]";
++	    }
++	    else
++	    {
++		int old_copyID = tv->vval.v_list->lv_copyID;
++		tv->vval.v_list->lv_copyID = copyID;
++		*tofree = list2string(tv, copyID, echo_style);
++		if (!echo_style)
++		    tv->vval.v_list->lv_copyID = old_copyID;
++		r = *tofree;
++	    }
++	    break;
++
++	case VAR_DICT:
++	    if (tv->vval.v_dict == NULL)
++	    {
++		*tofree = NULL;
++		r = NULL;
++	    }
++	    else if (copyID != 0 && tv->vval.v_dict->dv_copyID == copyID)
++	    {
++		*tofree = NULL;
++		if (tv->vval.v_dict->dv_hashtab.ht_used != 0)
++		    r = (char_u *)"{...}";
++		else
++		    r = (char_u *)"{}";
++	    }
++	    else
++	    {
++		int old_copyID = tv->vval.v_dict->dv_copyID;
++		tv->vval.v_dict->dv_copyID = copyID;
++		*tofree = dict2string(tv, copyID, echo_style);
++		if (!echo_style)
++		    tv->vval.v_dict->dv_copyID = old_copyID;
++		r = *tofree;
++	    }
++	    break;
++
++	case VAR_NUMBER:
++	case VAR_UNKNOWN:
++	case VAR_JOB:
++	case VAR_CHANNEL:
++	    *tofree = NULL;
++	    r = get_tv_string_buf(tv, numbuf);
++	    break;
++
++	case VAR_FLOAT:
++#ifdef FEAT_FLOAT
++	    *tofree = NULL;
++	    vim_snprintf((char *)numbuf, NUMBUFLEN, "%g", tv->vval.v_float);
++	    r = numbuf;
++	    break;
++#endif
++
++	case VAR_SPECIAL:
++	    *tofree = NULL;
++	    r = (char_u *)get_var_special_name(tv->vval.v_number);
++	    break;
++    }
++
++    if (--recurse == 0)
++	did_echo_string_emsg = FALSE;
++    return r;
++}
++
++/*
++ * Return a string with the string representation of a variable.
++ * If the memory is allocated "tofree" is set to it, otherwise NULL.
++ * "numbuf" is used for a number.
+  * Does not put quotes around strings, as ":echo" displays values.
+  * When "copyID" is not NULL replace recursive lists and dicts with "...".
+  * May return NULL.
+@@ -8089,141 +8281,7 @@ echo_string(
+     char_u	*numbuf,
+     int		copyID)
+ {
+-    static int	recurse = 0;
+-    char_u	*r = NULL;
+-
+-    if (recurse >= DICT_MAXNEST)
+-    {
+-	if (!did_echo_string_emsg)
+-	{
+-	    /* Only give this message once for a recursive call to avoid
+-	     * flooding the user with errors.  And stop iterating over lists
+-	     * and dicts. */
+-	    did_echo_string_emsg = TRUE;
+-	    EMSG(_("E724: variable nested too deep for displaying"));
+-	}
+-	*tofree = NULL;
+-	return (char_u *)"{E724}";
+-    }
+-    ++recurse;
+-
+-    switch (tv->v_type)
+-    {
+-	case VAR_FUNC:
+-	    *tofree = NULL;
+-	    r = tv->vval.v_string;
+-	    break;
+-
+-	case VAR_PARTIAL:
+-	    {
+-		partial_T   *pt = tv->vval.v_partial;
+-		char_u	    *fname = string_quote(pt == NULL ? NULL
+-							: pt->pt_name, FALSE);
+-		garray_T    ga;
+-		int	    i;
+-		char_u	    *tf;
+-
+-		ga_init2(&ga, 1, 100);
+-		ga_concat(&ga, (char_u *)"function(");
+-		if (fname != NULL)
+-		{
+-		    ga_concat(&ga, fname);
+-		    vim_free(fname);
+-		}
+-		if (pt != NULL && pt->pt_argc > 0)
+-		{
+-		    ga_concat(&ga, (char_u *)", [");
+-		    for (i = 0; i < pt->pt_argc; ++i)
+-		    {
+-			if (i > 0)
+-			    ga_concat(&ga, (char_u *)", ");
+-			ga_concat(&ga,
+-			     tv2string(&pt->pt_argv[i], &tf, numbuf, copyID));
+-			vim_free(tf);
+-		    }
+-		    ga_concat(&ga, (char_u *)"]");
+-		}
+-		if (pt != NULL && pt->pt_dict != NULL)
+-		{
+-		    typval_T dtv;
+-
+-		    ga_concat(&ga, (char_u *)", ");
+-		    dtv.v_type = VAR_DICT;
+-		    dtv.vval.v_dict = pt->pt_dict;
+-		    ga_concat(&ga, tv2string(&dtv, &tf, numbuf, copyID));
+-		    vim_free(tf);
+-		}
+-		ga_concat(&ga, (char_u *)")");
+-
+-		*tofree = ga.ga_data;
+-		r = *tofree;
+-		break;
+-	    }
+-
+-	case VAR_LIST:
+-	    if (tv->vval.v_list == NULL)
+-	    {
+-		*tofree = NULL;
+-		r = NULL;
+-	    }
+-	    else if (copyID != 0 && tv->vval.v_list->lv_copyID == copyID)
+-	    {
+-		*tofree = NULL;
+-		r = (char_u *)"[...]";
+-	    }
+-	    else
+-	    {
+-		tv->vval.v_list->lv_copyID = copyID;
+-		*tofree = list2string(tv, copyID);
+-		r = *tofree;
+-	    }
+-	    break;
+-
+-	case VAR_DICT:
+-	    if (tv->vval.v_dict == NULL)
+-	    {
+-		*tofree = NULL;
+-		r = NULL;
+-	    }
+-	    else if (copyID != 0 && tv->vval.v_dict->dv_copyID == copyID)
+-	    {
+-		*tofree = NULL;
+-		r = (char_u *)"{...}";
+-	    }
+-	    else
+-	    {
+-		tv->vval.v_dict->dv_copyID = copyID;
+-		*tofree = dict2string(tv, copyID);
+-		r = *tofree;
+-	    }
+-	    break;
+-
+-	case VAR_STRING:
+-	case VAR_NUMBER:
+-	case VAR_UNKNOWN:
+-	case VAR_JOB:
+-	case VAR_CHANNEL:
+-	    *tofree = NULL;
+-	    r = get_tv_string_buf(tv, numbuf);
+-	    break;
+-
+-	case VAR_FLOAT:
+-#ifdef FEAT_FLOAT
+-	    *tofree = NULL;
+-	    vim_snprintf((char *)numbuf, NUMBUFLEN, "%g", tv->vval.v_float);
+-	    r = numbuf;
+-	    break;
+-#endif
+-
+-	case VAR_SPECIAL:
+-	    *tofree = NULL;
+-	    r = (char_u *)get_var_special_name(tv->vval.v_number);
+-	    break;
+-    }
+-
+-    if (--recurse == 0)
+-	did_echo_string_emsg = FALSE;
+-    return r;
++    return echo_string_core(tv, tofree, numbuf, copyID, TRUE, FALSE);
+ }
+ 
+ /*
+@@ -8240,31 +8298,7 @@ tv2string(
+     char_u	*numbuf,
+     int		copyID)
+ {
+-    switch (tv->v_type)
+-    {
+-	case VAR_FUNC:
+-	    *tofree = string_quote(tv->vval.v_string, TRUE);
+-	    return *tofree;
+-	case VAR_STRING:
+-	    *tofree = string_quote(tv->vval.v_string, FALSE);
+-	    return *tofree;
+-	case VAR_FLOAT:
+-#ifdef FEAT_FLOAT
+-	    *tofree = NULL;
+-	    vim_snprintf((char *)numbuf, NUMBUFLEN - 1, "%g", tv->vval.v_float);
+-	    return numbuf;
+-#endif
+-	case VAR_NUMBER:
+-	case VAR_LIST:
+-	case VAR_DICT:
+-	case VAR_PARTIAL:
+-	case VAR_SPECIAL:
+-	case VAR_JOB:
+-	case VAR_CHANNEL:
+-	case VAR_UNKNOWN:
+-	    break;
+-    }
+-    return echo_string(tv, tofree, numbuf, copyID);
++    return echo_string_core(tv, tofree, numbuf, copyID, FALSE, FALSE);
+ }
+ 
+ /*
+diff --git a/src/testdir/test_viml.vim b/src/testdir/test_viml.vim
+--- a/src/testdir/test_viml.vim
++++ b/src/testdir/test_viml.vim
+@@ -1053,6 +1053,150 @@ func Test_skip()
+ endfunc
+ 
+ "-------------------------------------------------------------------------------
++" Test 93:  :echo and string()					    {{{1
++"-------------------------------------------------------------------------------
++
++func Test_echo_and_string()
++    " String
++    let a = 'foo bar'
++    redir => result
++    echo a
++    echo string(a)
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["foo bar",
++		     \ "'foo bar'"], l)
++
++    " Float
++    if has('float')
++	let a = -1.2e0
++	redir => result
++	echo a
++	echo string(a)
++	redir END
++	let l = split(result, "\n")
++	call assert_equal(["-1.2",
++			 \ "-1.2"], l)
++    endif
++
++    " Funcref
++    redir => result
++    echo function('string')
++    echo string(function('string'))
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["string",
++		     \ "function('string')"], l)
++
++    " Recursive dictionary
++    let a = {}
++    let a["a"] = a
++    redir => result
++    echo a
++    echo string(a)
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["{'a': {...}}",
++		     \ "{'a': {...}}"], l)
++
++    " Recursive list
++    let a = [0]
++    let a[0] = a
++    redir => result
++    echo a
++    echo string(a)
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["[[...]]",
++		     \ "[[...]]"], l)
++
++    " Empty dictionaries in a list
++    let a = {}
++    redir => result
++    echo [a, a, a]
++    echo string([a, a, a])
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["[{}, {}, {}]",
++		     \ "[{}, {}, {}]"], l)
++
++    " Empty dictionaries in a dictionary
++    let a = {}
++    let b = {"a": a, "b": a}
++    redir => result
++    echo b
++    echo string(b)
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["{'a': {}, 'b': {}}",
++		     \ "{'a': {}, 'b': {}}"], l)
++
++    " Empty lists in a list
++    let a = []
++    redir => result
++    echo [a, a, a]
++    echo string([a, a, a])
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["[[], [], []]",
++		     \ "[[], [], []]"], l)
++
++    " Empty lists in a dictionary
++    let a = []
++    let b = {"a": a, "b": a}
++    redir => result
++    echo b
++    echo string(b)
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["{'a': [], 'b': []}",
++		     \ "{'a': [], 'b': []}"], l)
++
++    " Dictionaries in a list
++    let a = {"one": "yes", "two": "yes", "three": "yes"}
++    redir => result
++    echo [a, a, a]
++    echo string([a, a, a])
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["[{'one': 'yes', 'two': 'yes', 'three': 'yes'}, {...}, {...}]",
++		     \ "[{'one': 'yes', 'two': 'yes', 'three': 'yes'}, {'one': 'yes', 'two': 'yes', 'three': 'yes'}, {'one': 'yes', 'two': 'yes', 'three': 'yes'}]"], l)
++
++    " Dictionaries in a dictionary
++    let a = {"one": "yes", "two": "yes", "three": "yes"}
++    let b = {"a": a, "b": a}
++    redir => result
++    echo b
++    echo string(b)
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["{'a': {'one': 'yes', 'two': 'yes', 'three': 'yes'}, 'b': {...}}",
++		     \ "{'a': {'one': 'yes', 'two': 'yes', 'three': 'yes'}, 'b': {'one': 'yes', 'two': 'yes', 'three': 'yes'}}"], l)
++
++    " Lists in a list
++    let a = [1, 2, 3]
++    redir => result
++    echo [a, a, a]
++    echo string([a, a, a])
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["[[1, 2, 3], [...], [...]]",
++		     \ "[[1, 2, 3], [1, 2, 3], [1, 2, 3]]"], l)
++
++    " Lists in a dictionary
++    let a = [1, 2, 3]
++    let b = {"a": a, "b": a}
++    redir => result
++    echo b
++    echo string(b)
++    redir END
++    let l = split(result, "\n")
++    call assert_equal(["{'a': [1, 2, 3], 'b': [...]}",
++		     \ "{'a': [1, 2, 3], 'b': [1, 2, 3]}"], l)
++
++endfunc
++
++"-------------------------------------------------------------------------------
+ " Modelines								    {{{1
+ " vim: ts=8 sw=4 tw=80 fdm=marker
+ " vim: fdt=substitute(substitute(foldtext(),\ '\\%(^+--\\)\\@<=\\(\\s*\\)\\(.\\{-}\\)\:\ \\%(\"\ \\)\\=\\(Test\ \\d*\\)\:\\s*',\ '\\3\ (\\2)\:\ \\1',\ \"\"),\ '\\(Test\\s*\\)\\(\\d\\)\\D\\@=',\ '\\1\ \\2',\ "")
