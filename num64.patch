@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  0d31c12b2792d98d3e1d2d2f3dd8bca1e031721b
+# Parent  e49eb46bca874c6e3dcaaf4b6b9287a3ff71a7af
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -25,7 +25,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  When the righthand side of '%' is zero, the result is 0.
  
  None of these work for |Funcref|s.
-@@ -3537,8 +3544,10 @@ float2nr({expr})					*float2nr()*
+@@ -3537,17 +3544,19 @@ float2nr({expr})					*float2nr()*
  		decimal point.
  		{expr} must evaluate to a |Float| or a Number.
  		When the value of {expr} is out of range for a |Number| the
@@ -38,6 +38,17 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Examples: >
  			echo float2nr(3.95)
  <			3  >
+ 			echo float2nr(-23.45)
+ <			-23  >
+ 			echo float2nr(1.0e100)
+-<			2147483647  >
++<			2147483647  (or 9223372036854775807) >
+ 			echo float2nr(-1.0e150)
+-<			-2147483647  >
++<			-2147483647 (or -9223372036854775807) >
+ 			echo float2nr(1.0e-100)
+ <			0
+ 		{only available when compiled with the |+float| feature}
 @@ -7788,6 +7797,7 @@ multi_lang		Compiled with support for mu
  mzscheme		Compiled with MzScheme interface |mzscheme|.
  netbeans_enabled	Compiled with support for |netbeans| and connected.
@@ -896,7 +907,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/misc2.c b/src/misc2.c
 --- a/src/misc2.c
 +++ b/src/misc2.c
-@@ -2719,7 +2719,7 @@ find_special_key(
+@@ -2720,7 +2720,7 @@ find_special_key(
      int		modifiers;
      int		bit;
      int		key;
