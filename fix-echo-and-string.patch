@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  d0be26c5c0dc92ad26e047247f88d4ac12080d98
+# Parent  cc2ae62b366997a43ad73015a1de1a02e813fa09
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -62,7 +62,7 @@ diff --git a/src/eval.c b/src/eval.c
  	    if (s != NULL)
  		ga_concat(&ga, s);
  	    vim_free(tofree);
-@@ -8078,6 +8081,195 @@ get_var_special_name(int nr)
+@@ -8078,6 +8081,191 @@ get_var_special_name(int nr)
   * Return a string with the string representation of a variable.
   * If the memory is allocated "tofree" is set to it, otherwise NULL.
   * "numbuf" is used for a number.
@@ -180,13 +180,11 @@ diff --git a/src/eval.c b/src/eval.c
 +		*tofree = NULL;
 +		r = NULL;
 +	    }
-+	    else if (copyID != 0 && tv->vval.v_list->lv_copyID == copyID)
++	    else if (copyID != 0 && tv->vval.v_list->lv_copyID == copyID
++		    && tv->vval.v_list->lv_len > 0)
 +	    {
 +		*tofree = NULL;
-+		if (tv->vval.v_list->lv_len > 0)
-+		    r = (char_u *)"[...]";
-+		else
-+		    r = (char_u *)"[]";
++		r = (char_u *)"[...]";
 +	    }
 +	    else
 +	    {
@@ -205,13 +203,11 @@ diff --git a/src/eval.c b/src/eval.c
 +		*tofree = NULL;
 +		r = NULL;
 +	    }
-+	    else if (copyID != 0 && tv->vval.v_dict->dv_copyID == copyID)
++	    else if (copyID != 0 && tv->vval.v_dict->dv_copyID == copyID
++		    && tv->vval.v_dict->dv_hashtab.ht_used != 0)
 +	    {
 +		*tofree = NULL;
-+		if (tv->vval.v_dict->dv_hashtab.ht_used != 0)
-+		    r = (char_u *)"{...}";
-+		else
-+		    r = (char_u *)"{}";
++		r = (char_u *)"{...}";
 +	    }
 +	    else
 +	    {
@@ -258,7 +254,7 @@ diff --git a/src/eval.c b/src/eval.c
   * Does not put quotes around strings, as ":echo" displays values.
   * When "copyID" is not NULL replace recursive lists and dicts with "...".
   * May return NULL.
-@@ -8089,141 +8281,7 @@ echo_string(
+@@ -8089,141 +8277,7 @@ echo_string(
      char_u	*numbuf,
      int		copyID)
  {
@@ -401,7 +397,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -8240,31 +8298,7 @@ tv2string(
+@@ -8240,31 +8294,7 @@ tv2string(
      char_u	*numbuf,
      int		copyID)
  {
