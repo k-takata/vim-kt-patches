@@ -50,5 +50,4 @@ lambda.diff
 update-lambda.patch
 lambda-doc.diff
 fix-doc-indent.patch
-py2-chdir.patch
 fix-config_cache-removal.patch #+rejected
