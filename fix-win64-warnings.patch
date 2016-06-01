@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  74685d6ed45a15643879dcd76cce56f7c00b8180
+# Parent  f3270a2c3850af5dcbb28f351b37ddfb229cfbb5
 
 diff --git a/src/if_mzsch.c b/src/if_mzsch.c
 --- a/src/if_mzsch.c
@@ -44,7 +44,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  
  	    if (str_to) {
  		str_to[len] = '\0';
-@@ -1370,7 +1371,7 @@ PerlIOVim_write(pTHX_ PerlIO *f, const v
+@@ -1370,13 +1371,13 @@ PerlIOVim_write(pTHX_ PerlIO *f, const v
      char_u *str;
      PerlIOVim * s = PerlIOSelf(f, PerlIOVim);
  
@@ -53,6 +53,13 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
      if (str == NULL)
  	return 0;
      msg_split((char_u *)str, s->attr);
+     vim_free(str);
+ 
+-    return count;
++    return (SSize_t)count;
+ }
+ 
+ static PERLIO_FUNCS_DECL(PerlIO_Vim) = {
 diff --git a/src/if_ruby.c b/src/if_ruby.c
 --- a/src/if_ruby.c
 +++ b/src/if_ruby.c
@@ -65,3 +72,15 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  	}
      }
  #endif
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -5070,7 +5070,7 @@ do_intro_line(
+     if (*mesg == ' ')
+     {
+ 	vim_strncpy(modby, (char_u *)_("Modified by "), MODBY_LEN - 1);
+-	l = STRLEN(modby);
++	l = (int)STRLEN(modby);
+ 	vim_strncpy(modby + l, (char_u *)MODIFIED_BY, MODBY_LEN - l - 1);
+ 	mesg = modby;
+     }
