@@ -1,0 +1,67 @@
+# HG changeset patch
+# Parent  74685d6ed45a15643879dcd76cce56f7c00b8180
+
+diff --git a/src/if_mzsch.c b/src/if_mzsch.c
+--- a/src/if_mzsch.c
++++ b/src/if_mzsch.c
+@@ -545,7 +545,7 @@ static void (*dll_scheme_set_config_path
+ 
+ # if MZSCHEME_VERSION_MAJOR >= 500
+ #  if defined(IMPLEMENT_THREAD_LOCAL_VIA_WIN_TLS) || defined(IMPLEMENT_THREAD_LOCAL_EXTERNALLY_VIA_PROC)
+-/* define as function for macro in schshread.h */
++/* define as function for macro in schthread.h */
+ Thread_Local_Variables *
+ scheme_external_get_thread_local_variables(void)
+ {
+@@ -894,7 +894,7 @@ static void remove_timer(void);
+ /* timers are presented in GUI only */
+ # if defined(FEAT_GUI_W32)
+     static void CALLBACK
+-timer_proc(HWND hwnd UNUSED, UINT uMsg UNUSED, UINT idEvent UNUSED, DWORD dwTime UNUSED)
++timer_proc(HWND hwnd UNUSED, UINT uMsg UNUSED, UINT_PTR idEvent UNUSED, DWORD dwTime UNUSED)
+ # elif defined(FEAT_GUI_GTK)
+ #  if GTK_CHECK_VERSION(3,0,0)
+     static gboolean
+@@ -3571,7 +3571,7 @@ raise_vim_exn(const char *add_info)
+ 
+ 	info = scheme_make_byte_string(add_info);
+ 	MZ_GC_CHECK();
+-	c_string = scheme_format_utf8(fmt, STRLEN(fmt), 1, &info, NULL);
++	c_string = scheme_format_utf8(fmt, (int)STRLEN(fmt), 1, &info, NULL);
+ 	MZ_GC_CHECK();
+ 	byte_string = scheme_make_byte_string(c_string);
+ 	MZ_GC_CHECK();
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -1075,7 +1075,8 @@ perl_to_vim(SV *sv, typval_T *rettv)
+ 	{
+ 	    size_t  len		= 0;
+ 	    char *  str_from	= SvPV(sv, len);
+-	    char_u *str_to	= (char_u*)alloc(sizeof(char_u) * (len + 1));
++	    char_u *str_to	= (char_u*)alloc(
++				      (unsigned)(sizeof(char_u) * (len + 1)));
+ 
+ 	    if (str_to) {
+ 		str_to[len] = '\0';
+@@ -1370,7 +1371,7 @@ PerlIOVim_write(pTHX_ PerlIO *f, const v
+     char_u *str;
+     PerlIOVim * s = PerlIOSelf(f, PerlIOVim);
+ 
+-    str = vim_strnsave((char_u *)vbuf, count);
++    str = vim_strnsave((char_u *)vbuf, (int)count);
+     if (str == NULL)
+ 	return 0;
+     msg_split((char_u *)str, s->attr);
+diff --git a/src/if_ruby.c b/src/if_ruby.c
+--- a/src/if_ruby.c
++++ b/src/if_ruby.c
+@@ -736,7 +736,7 @@ vim_str2rb_enc_str(const char *s)
+ 	vim_free(sval);
+ 	if (enc)
+ 	{
+-	    return rb_enc_str_new(s, strlen(s), enc);
++	    return rb_enc_str_new(s, (long)strlen(s), enc);
+ 	}
+     }
+ #endif
