@@ -39,7 +39,6 @@ fix-po-msys2.patch
 num64.patch
 num64-mark.diff
 off_T-disp-with-num64.patch
-enable-channel-on-win32cui.patch
 fix-char_u-usage.patch
 remove-sync_dup_close.patch
 drop-support-for-win9x.patch
