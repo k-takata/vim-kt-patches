@@ -44,7 +44,6 @@ remove-sync_dup_close.patch
 drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
 remove-old-doc.patch
-fix-doc.patch
 lambda.diff
 update-lambda.patch
 lambda-doc.diff
