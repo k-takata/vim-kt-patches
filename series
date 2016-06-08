@@ -47,6 +47,7 @@ remove-old-doc.patch
 lambda.diff
 update-lambda.patch
 lambda-doc.diff
+lambda-mark.diff
 fix-doc-indent.patch
 restore-unicode-chars.patch
 fix-netbeans-warning.patch
