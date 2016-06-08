@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent  92d778867760e0bd8e86e0dc991c52465f431a0b
+
+diff --git a/src/netbeans.c b/src/netbeans.c
+--- a/src/netbeans.c
++++ b/src/netbeans.c
+@@ -383,7 +383,6 @@ handle_key_queue(void)
+ netbeans_parse_messages(void)
+ {
+     readq_T	*node;
+-    char_u	*buffer;
+     char_u	*p;
+     int		own_node;
+ 
+@@ -426,7 +425,8 @@ netbeans_parse_messages(void)
+ 		vim_free(node->rq_buffer);
+ 	    else
+ 		/* more follows, move it to the start */
+-		channel_consume(nb_channel, PART_SOCK, (int)(p - buffer));
++		channel_consume(nb_channel, PART_SOCK,
++					    (int)(p - node->rq_buffer));
+ 	}
+     }
+ }

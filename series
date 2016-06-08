@@ -49,4 +49,5 @@ update-lambda.patch
 lambda-doc.diff
 fix-doc-indent.patch
 restore-unicode-chars.patch
+fix-netbeans-warning.patch
 fix-config_cache-removal.patch #+rejected
