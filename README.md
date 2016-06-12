@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/j9v6gmrxqlk7i8wr/branch/default?svg=true)](https://ci.appveyor.com/project/k-takata/vim-ktakata-mq/branch/default)
+
 # K.Takata's patch queue for Vim #
 
 This is my private patch queue for Vim.
