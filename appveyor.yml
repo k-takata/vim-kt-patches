@@ -41,7 +41,7 @@ build_script:
     rem Show vim version
     .\vim --version
     rem Print interface versions
-    .\vim -S ..\.hg\patches\scripts\if_ver.vim -c quit
+    .\vim --not-a-term -S ..\.hg\patches\scripts\if_ver.vim -c quit
     type if_ver.txt
 
 test_script:
