@@ -50,4 +50,5 @@ lambda-doc.diff
 lambda-mark.diff
 fix-doc-indent.patch
 restore-unicode-chars.patch
+fix-indents-7.4.1922.patch
 fix-config_cache-removal.patch #+rejected

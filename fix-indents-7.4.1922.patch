@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent  ba37207d9d55e53678ee668e0b4f3b267407b3b5
+
+diff --git a/src/if_ruby.c b/src/if_ruby.c
+--- a/src/if_ruby.c
++++ b/src/if_ruby.c
+@@ -31,8 +31,8 @@
+ # define RUBYEXTERN extern
+ #endif
+ 
+-# if defined(DYNAMIC_RUBY_VER) && DYNAMIC_RUBY_VER >= 24
+- # define USE_RUBY_Integer
++#if defined(DYNAMIC_RUBY_VER) && DYNAMIC_RUBY_VER >= 24
++# define USE_RUBY_Integer
+ #endif
+ 
+ #ifdef DYNAMIC_RUBY
+@@ -44,7 +44,7 @@
+ # define rb_cFalseClass		(*dll_rb_cFalseClass)
+ # define rb_cFixnum		(*dll_rb_cFixnum)
+ # if defined(USE_RUBY_Integer)
+-# define rb_cInteger    (*dll_rb_cInteger)
++#  define rb_cInteger		(*dll_rb_cInteger)
+ # endif
+ # if defined(DYNAMIC_RUBY_VER) && DYNAMIC_RUBY_VER >= 20
+ #  define rb_cFloat		(*dll_rb_cFloat)
