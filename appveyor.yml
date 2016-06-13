@@ -20,12 +20,16 @@ build_script:
 - cmd: |-
     cd ..
     hg clone https://bitbucket.org/vim-mirror/vim
-    cd vim\.hg
+    cd vim
+    rem Show the recent commits in the Vim repository
+    hg log -v -r -1:-4
+    cd .hg
     mkdir patches
     xcopy /s ..\..\vim-ktakata-mq patches > nul
     cd ..\src
     rem Apply all patches
     hg --config extensions.mq= --config "ui.username=%USERNAME% <%USERNAME%@%USERDOMAIN%>" qpush -a
+    rem Suppress progress animation
     sed -e "s/\$(LINKARGS2)/\$(LINKARGS2) | sed -e 's#.*\\\\r.*##'/" Make_mvc.mak > Make_mvc2.mak
     rem Build gvim
     nmake -f Make_mvc2.mak GUI=yes OLE=yes DIRECTX=yes PYTHON_VER=27 DYNAMIC_PYTHON=yes PYTHON=%PYTHON2_DIR% PYTHON3_VER=34 DYNAMIC_PYTHON3=yes PYTHON3=%PYTHON3_DIR%
