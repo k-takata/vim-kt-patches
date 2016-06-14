@@ -4,9 +4,8 @@ before_script:
   - hg clone https://bitbucket.org/vim-mirror/vim
   - cd vim
   - hg log -v -r -1:-4
-  - cd hg
-  - cp -r ../../vim-ktakata-mq patches
-  - cd ../src
+  - cp -r ../vim-ktakata-mq .hg/patches
+  - cd src
   - hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
   - make
   - ./vim --version
