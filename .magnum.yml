@@ -1,3 +1,4 @@
+
 before_script:
   - cd ..
   - hg clone https://bitbucket.org/vim-mirror/vim
