@@ -1,3 +1,4 @@
+test_reduce_test_log.patch
 disable-regexp-debug-log.patch #+noregexplog
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
