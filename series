@@ -46,7 +46,6 @@ drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
 remove-old-doc.patch
 lambda.diff
-update-lambda.patch
 lambda-doc.diff
 lambda-mark.diff
 fix-doc-indent.patch
