@@ -50,4 +50,5 @@ lambda-doc.diff
 lambda-mark.diff
 fix-doc-indent.patch
 restore-unicode-chars.patch
+support-xpm-on-vc14.patch
 fix-config_cache-removal.patch #+rejected
