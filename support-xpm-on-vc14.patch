@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  e684162b1f2781020d139912fbf50ba51e75344c
+# Parent  151dd82f0341a4724de30cad913174a352e3048e
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
@@ -61,20 +61,30 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !if "$(NETBEANS)" == "yes" && "$(CHANNEL)" == "yes"
  # NETBEANS - Include support for Netbeans integration
  NETBEANS_PRO	= proto/netbeans.pro
-@@ -317,8 +357,10 @@ DIRECTX_INCL	= gui_dwrite.h
+@@ -317,8 +357,11 @@ DIRECTX_INCL	= gui_dwrite.h
  DIRECTX_OBJ	= $(OUTDIR)\gui_dwrite.obj
  !endif
  
--!ifndef XPM
--# XPM is not set, use the included xpm files, depending on the architecture.
 +# Only allow XPM for a GUI build.
-+!if !defined(XPM) && !defined(USE_MSVCRT)
+ !ifndef XPM
+-# XPM is not set, use the included xpm files, depending on the architecture.
++!ifndef USE_MSVCRT
 +# Both XPM and USE_MSVCRT are not set, use the included xpm files, depending
 +# on the architecture.
  !if "$(CPU)" == "AMD64"
  XPM = xpm\x64
  !elseif "$(CPU)" == "i386"
-@@ -332,7 +374,13 @@ XPM = no
+@@ -326,13 +369,22 @@ XPM = xpm\x86
+ !else
+ XPM = no
+ !endif
+-!endif
++!else # USE_MSVCRT
++XPM = no
++!endif # USE_MSVCRT
++!endif # XPM
+ !if "$(XPM)" != "no"
+ # XPM - Include support for XPM signs
  # See the xpm directory for more information.
  XPM_OBJ   = $(OBJDIR)/xpm_w32.obj
  XPM_DEFS  = -DFEAT_XPM_W32
@@ -88,7 +98,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  XPM_INC	  = -I $(XPM)\include -I $(XPM)\..\include
  !endif
  !endif
-@@ -389,43 +437,6 @@ DEL_TREE = rmdir /s /q
+@@ -389,43 +441,6 @@ DEL_TREE = rmdir /s /q
  INTDIR=$(OBJDIR)
  OUTDIR=$(OBJDIR)
  
