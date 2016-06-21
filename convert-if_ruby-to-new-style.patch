@@ -1,0 +1,113 @@
+# HG changeset patch
+# Parent  995fc07694de814617cd9525ff74baee407296e1
+
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -1986,7 +1986,6 @@ test1 \
+ 	test_marks \
+ 	test_nested_function \
+ 	test_options \
+-	test_ruby \
+ 	test_search_mbyte \
+ 	test_signs \
+ 	test_tagcase \
+diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
+--- a/src/testdir/Make_all.mak
++++ b/src/testdir/Make_all.mak
+@@ -106,7 +106,6 @@ SCRIPTS_ALL = \
+ 	test_marks.out \
+ 	test_nested_function.out \
+ 	test_options.out \
+-	test_ruby.out \
+ 	test_search_mbyte.out \
+ 	test_signs.out \
+ 	test_tagcase.out \
+diff --git a/src/testdir/test_alot.vim b/src/testdir/test_alot.vim
+--- a/src/testdir/test_alot.vim
++++ b/src/testdir/test_alot.vim
+@@ -23,6 +23,7 @@ source test_menu.vim
+ source test_messages.vim
+ source test_partial.vim
+ source test_reltime.vim
++source test_ruby.vim
+ source test_searchpos.vim
+ source test_set.vim
+ source test_sort.vim
+diff --git a/src/testdir/test_ruby.in b/src/testdir/test_ruby.in
+deleted file mode 100644
+--- a/src/testdir/test_ruby.in
++++ /dev/null
+@@ -1,25 +0,0 @@
+-Tests for ruby interface.     vim: set ft=vim :
+-
+-STARTTEST
+-:so small.vim
+-:set nocompatible viminfo+=nviminfo
+-:if !has('ruby') | e! test.ok | wq! test.out | endif
+-:" change buffer contents
+-:ruby VIM.command("normal /^1\n")
+-:ruby $curbuf.line = "1 changed line 1"
+-:" evaluate a List
+-:ruby VIM.command("normal /^2\n")
+-:let l = ["abc", "def"]
+-:ruby << EOF
+-curline = $curbuf.line_number
+-l = VIM.evaluate("l");
+-$curbuf.append(curline, l.join("\n"))
+-EOF
+-:normal j
+-:.rubydo $_ = $_.gsub(/\n/, '/')
+-:?^1?,$w! test.out
+-:qa!
+-ENDTEST
+-
+-1 line 1
+-2 line 2
+diff --git a/src/testdir/test_ruby.ok b/src/testdir/test_ruby.ok
+deleted file mode 100644
+--- a/src/testdir/test_ruby.ok
++++ /dev/null
+@@ -1,3 +0,0 @@
+-1 changed line 1
+-2 line 2
+-abc/def
+diff --git a/src/testdir/test_ruby.vim b/src/testdir/test_ruby.vim
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_ruby.vim
+@@ -0,0 +1,34 @@
++" Tests for ruby interface
++
++if !has('ruby')
++  finish
++end
++
++func Test_ruby_change_buffer()
++  call setline(line('$'), ['1 line 1'])
++  ruby Vim.command("normal /^1\n")
++  ruby $curbuf.line = "1 changed line 1"
++  call assert_equal('1 changed line 1', getline('$'))
++endfunc
++
++func Test_ruby_evaluate_list()
++  call setline(line('$'), ['2 line 2'])
++  ruby Vim.command("normal /^2\n")
++  let l = ["abc", "def"]
++  ruby << EOF
++  curline = $curbuf.line_number
++  l = Vim.evaluate("l");
++  $curbuf.append(curline, l.join("\n"))
++EOF
++  normal j
++  .rubydo $_ = $_.gsub(/\n/, '/')
++  call assert_equal('abc/def', getline('$'))
++endfunc
++
++func Test_ruby_evaluate_dict()
++  let d = {'a': 'foo', 'b': 123}
++  redir => l:out
++  ruby d = Vim.evaluate("d"); print d
++  redir END
++  call assert_equal(['{"a"=>"foo", "b"=>123}'], split(l:out, "\n"))
++endfunc
