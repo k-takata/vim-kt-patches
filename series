@@ -51,4 +51,5 @@ lambda-mark.diff
 fix-doc-indent.patch
 restore-unicode-chars.patch
 convert-if_ruby-to-new-style.patch
+add-check-for-cygwin-pty.patch
 fix-config_cache-removal.patch #+rejected
