@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent 7656647da44ed09b242c32cf1d95c9d4ca0df086
-# Parent  1c3a862e3cd37bfb1d36fbbeefd0c2b5ddc3d0a9
+# Parent  a8fe967f66d8efe6ea5dc998ce5136dceed44ed6
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2038,6 +2038,7 @@ test_arglist \
+@@ -2050,6 +2050,7 @@ test_arglist \
  	test_searchpos \
  	test_set \
  	test_sort \
@@ -16,14 +16,14 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -178,6 +178,7 @@ NEW_TESTS = test_arglist.res \
+@@ -180,6 +180,7 @@ NEW_TESTS = test_arglist.res \
  	    test_packadd.res \
  	    test_perl.res \
  	    test_quickfix.res \
 +	    test_stat.res \
  	    test_syntax.res \
+ 	    test_usercommands.res \
  	    test_viminfo.res \
- 	    test_viml.res \
 diff --git a/src/testdir/test_stat.vim b/src/testdir/test_stat.vim
 new file mode 100644
 --- /dev/null
