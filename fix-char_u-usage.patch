@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  ffcd8f1bcff7d8cfdad9d3f789fe78dd9cda7d99
+# Parent  68c8c8dfce7683980fc638d8b3f26497b5559269
 
 diff --git a/src/channel.c b/src/channel.c
 --- a/src/channel.c
 +++ b/src/channel.c
-@@ -3663,7 +3663,7 @@ job_start(typval_T *argvars)
+@@ -4727,7 +4727,7 @@ job_start(typval_T *argvars)
      mch_start_job(argv, job, &opt);
  #else
      ch_logs(NULL, "Starting job: %s", (char *)cmd);
@@ -49,7 +49,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -4044,7 +4044,7 @@ mch_set_winsize_now(void)
+@@ -4066,7 +4066,7 @@ mch_set_winsize_now(void)
  
      static BOOL
  vim_create_process(
@@ -58,7 +58,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      BOOL		inherit_handles,
      DWORD		flags,
      STARTUPINFO		*si,
-@@ -4053,7 +4053,7 @@ vim_create_process(
+@@ -4075,7 +4075,7 @@ vim_create_process(
  #  ifdef FEAT_MBYTE
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
      {
@@ -67,7 +67,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  	if (wcmd != NULL)
  	{
-@@ -4076,7 +4076,7 @@ vim_create_process(
+@@ -4098,7 +4098,7 @@ vim_create_process(
  #endif
      return CreateProcess(
  	NULL,			/* Executable name */
@@ -76,7 +76,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	NULL,			/* Process security attributes */
  	NULL,			/* Thread security attributes */
  	inherit_handles,	/* Inherit handles */
-@@ -4099,7 +4099,7 @@ vim_create_process(
+@@ -4121,7 +4121,7 @@ vim_create_process(
   *    4. Prompt the user to press a key to close the console window
   */
      static int
@@ -85,7 +85,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      STARTUPINFO		si;
      PROCESS_INFORMATION pi;
-@@ -4392,7 +4392,7 @@ dump_pipe(int	    options,
+@@ -4414,7 +4414,7 @@ dump_pipe(int	    options,
   * for communication and doesn't open any new window.
   */
      static int
@@ -94,7 +94,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      STARTUPINFO		si;
      PROCESS_INFORMATION pi;
-@@ -4414,9 +4414,9 @@ mch_system_piped(char *cmd, int options)
+@@ -4436,9 +4436,9 @@ mch_system_piped(char *cmd, int options)
      int		c;
      int		noread_cnt = 0;
      garray_T	ga;
@@ -106,7 +106,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      SECURITY_ATTRIBUTES saAttr;
  
-@@ -4459,9 +4459,9 @@ mch_system_piped(char *cmd, int options)
+@@ -4481,9 +4481,9 @@ mch_system_piped(char *cmd, int options)
  
      if (cmd != NULL)
      {
@@ -118,7 +118,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	else
  	    p = cmd;
      }
-@@ -4678,7 +4678,7 @@ mch_system_piped(char *cmd, int options)
+@@ -4700,7 +4700,7 @@ mch_system_piped(char *cmd, int options)
  }
  
      static int
@@ -127,7 +127,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      /* if we can pipe and the shelltemp option is off */
      if (allowPiping && !p_stmp)
-@@ -4690,7 +4690,7 @@ mch_system(char *cmd, int options)
+@@ -4712,7 +4712,7 @@ mch_system(char *cmd, int options)
  
  # ifdef FEAT_MBYTE
      static int
@@ -136,8 +136,12 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
      {
-@@ -4705,7 +4705,7 @@ mch_system(char *cmd, int options)
-     return system(cmd);
+@@ -4724,10 +4724,10 @@ mch_system(char *cmd, int options)
+ 	    return ret;
+ 	}
+     }
+-    return system(cmd);
++    return system((char *)cmd);
  }
  # else
 -#  define mch_system(c, o) system(c)
@@ -145,7 +149,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  
  #endif
-@@ -4801,7 +4801,7 @@ mch_call_shell(
+@@ -4823,7 +4823,7 @@ mch_call_shell(
  
      if (cmd == NULL)
      {
@@ -154,7 +158,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
      else
      {
-@@ -4908,7 +4908,7 @@ mch_call_shell(
+@@ -4930,7 +4930,7 @@ mch_call_shell(
  	     * inherit our handles which causes unpleasant dangling swap
  	     * files if we exit before the spawned process
  	     */
@@ -163,7 +167,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		x = 0;
  	    else
  	    {
-@@ -4964,7 +4964,7 @@ mch_call_shell(
+@@ -4986,7 +4986,7 @@ mch_call_shell(
  #endif
  		    vim_snprintf((char *)newcmd, cmdlen, "%s %s %s",
  							   p_sh, p_shcf, cmd);
@@ -172,7 +176,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		vim_free(newcmd);
  	    }
  	}
-@@ -5040,7 +5040,7 @@ job_io_file_open(
+@@ -5062,7 +5062,7 @@ job_io_file_open(
  }
  
      void
