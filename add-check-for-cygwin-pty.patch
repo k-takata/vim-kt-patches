@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  41500f475ef4d096950ea610aa3bef828abd4d83
+# Parent  2ef3a362bc1ec9f57d86b2871a6a2c5e37b210fc
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -33,7 +33,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  	     $(PERLTYPEMAP) if_perl.xs -output $@
  
 +$(OUTDIR)/iscygpty.o:	iscygpty.c $(CUI_INCL)
-+	$(CC) -c $(CFLAGS) iscygpty.c -o $(OUTDIR)/iscygpty.o -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID
++	$(CC) -c $(CFLAGS) iscygpty.c -o $(OUTDIR)/iscygpty.o -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID -DENABLE_STUB_IMPL
 +
 +$(OUTDIR)/main.o:		main.c $(INCL) $(CUI_INCL)
 +	$(CC) -c $(CFLAGS) main.c -o $(OUTDIR)/main.o
@@ -73,7 +73,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  	$(CC) $(CFLAGS) $(TCL_INC) if_tcl.c
  
 +$(OUTDIR)/iscygpty.obj:	$(OUTDIR) iscygpty.c $(CUI_INCL)
-+	$(CC) $(CFLAGS) iscygpty.c -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID
++	$(CC) $(CFLAGS) iscygpty.c -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID -DENABLE_STUB_IMPL
 +
  $(OUTDIR)/json.obj:	$(OUTDIR) json.c  $(INCL)
  
@@ -86,7 +86,7 @@ diff --git a/src/iscygpty.c b/src/iscygpty.c
 new file mode 100644
 --- /dev/null
 +++ b/src/iscygpty.c
-@@ -0,0 +1,167 @@
+@@ -0,0 +1,181 @@
 +/*
 + * iscygpty.c -- part of ptycheck
 + * https://github.com/k-takata/ptycheck
@@ -132,7 +132,17 @@ new file mode 100644
 + * http://www.microsoft.com/en-us/download/details.aspx?id=22599
 + * Needed for WinXP. */
 +# include <fileextd.h>
-+#endif
++#else /* USE_FILEEXTD */
++/* VC 8 or earlier. */
++# if defined(_MSC_VER) && (_MSC_VER < 1500)
++#  ifdef ENABLE_STUB_IMPL
++#   define STUB_IMPL
++#  else
++#   error "Win32 FileID API Library is required for VC2005 or earlier."
++#  endif
++# endif
++#endif /* USE_FILEEXTD */
++
 +
 +#include "iscygpty.h"
 +
@@ -186,6 +196,9 @@ new file mode 100644
 +/* Check if the fd is a cygwin/msys's pty. */
 +int is_cygpty(int fd)
 +{
++#ifdef STUB_IMPL
++	return 0;
++#else
 +	HANDLE h;
 +	int size = sizeof(FILE_NAME_INFO) + sizeof(WCHAR) * MAX_PATH;
 +	FILE_NAME_INFO *nameinfo;
@@ -240,6 +253,7 @@ new file mode 100644
 +	}
 +	free(nameinfo);
 +	return (p != NULL);
++#endif /* STUB_IMPL */
 +}
 +
 +/* Check if at least one cygwin/msys pty is used. */
