@@ -51,4 +51,5 @@ lambda-mark.diff
 fix-doc-indent.patch
 restore-unicode-chars.patch
 add-check-for-cygwin-pty.patch
+fix-perl-time_t-size.patch
 fix-config_cache-removal.patch #+rejected
