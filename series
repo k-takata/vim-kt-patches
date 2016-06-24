@@ -33,7 +33,6 @@ remove-useless-STRCPY.patch
 bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
-fix-indent-in-if_perl.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
 fix-po-msys2.patch
@@ -52,4 +51,6 @@ fix-doc-indent.patch
 restore-unicode-chars.patch
 add-check-for-cygwin-pty.patch
 fix-perl-time_t-size.patch
+if_perl-remove-vc-workaround.patch
+fix-indent-in-if_perl.patch
 fix-config_cache-removal.patch #+rejected
