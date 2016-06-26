@@ -48,6 +48,5 @@ lambda.diff
 lambda-doc.diff
 lambda-mark.diff
 restore-unicode-chars.patch
-if_perl-remove-vc-workaround.patch
 fix-indent-in-if_perl.patch
 fix-config_cache-removal.patch #+rejected
