@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  96b65a1b79647a0144a4926733a6ef48cc338108
+# Parent  c6500456352e60b45d2ae2057637947c98642e5c
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -123,9 +123,10 @@ You will not get an error if you try to 
+@@ -125,9 +125,10 @@ You will not get an error if you try to 
  
  1.2 Function references ~
  					*Funcref* *E695* *E718*
@@ -18,15 +18,15 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  	:let Fn = function("MyFunc")
  	:echo Fn()
-@@ -2057,6 +2058,7 @@ json_decode({string})		any	decode JSON
+@@ -2064,6 +2065,7 @@ json_decode({string})		any	decode JSON
  json_encode({expr})		String	encode JSON
  keys({dict})			List	keys in {dict}
  len({expr})			Number	the length of {expr}
 +lambda({expr})			Funcref	create a lambda function
  libcall({lib}, {func}, {arg})	String	call {func} in library {lib} with {arg}
- libcallnr({lib}, {func}, {arg})  Number  idem, but return a Number
+ libcallnr({lib}, {func}, {arg})	Number  idem, but return a Number
  line({expr})			Number	line nr of cursor, last line or mark
-@@ -3511,11 +3513,12 @@ filewritable({file})					*filewritable()
+@@ -3518,11 +3520,12 @@ filewritable({file})					*filewritable()
  		directory, and we can write to it, the result is 2.
  
  
@@ -43,7 +43,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		For a |Dictionary| |v:key| has the key of the current item.
  		Examples: >
  			:call filter(mylist, 'v:val !~ "OLD"')
-@@ -3525,7 +3528,7 @@ filter({expr}, {string})					*filter()*
+@@ -3532,7 +3535,7 @@ filter({expr}, {string})					*filter()*
  			:call filter(var, 0)
  <		Removes all the items, thus clears the |List| or |Dictionary|.
  
@@ -52,7 +52,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		used as an expression again.  Often it is good to use a
  		|literal-string| to avoid having to double backslashes.
  
-@@ -3533,9 +3536,13 @@ filter({expr}, {string})					*filter()*
+@@ -3540,9 +3543,13 @@ filter({expr}, {string})					*filter()*
  		|Dictionary| to remain unmodified make a copy first: >
  			:let l = filter(copy(mylist), 'v:val =~ "KEEP"')
  
@@ -69,7 +69,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  
  finddir({name}[, {path}[, {count}]])				*finddir()*
-@@ -4878,6 +4885,72 @@ len({expr})	The result is a Number, whic
+@@ -4887,6 +4894,72 @@ len({expr})	The result is a Number, whic
  		|Dictionary| is returned.
  		Otherwise an error is given.
  
@@ -142,7 +142,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  						*libcall()* *E364* *E368*
  libcall({libname}, {funcname}, {argument})
  		Call function {funcname} in the run-time library {libname}
-@@ -5024,18 +5097,19 @@ luaeval({expr}[, {expr}])					*luaeval()
+@@ -5033,18 +5106,19 @@ luaeval({expr}[, {expr}])					*luaeval()
  		See |lua-luaeval| for more details.
  		{only available when compiled with the |+lua| feature}
  
@@ -168,7 +168,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		used as an expression again.  Often it is good to use a
  		|literal-string| to avoid having to double backslashes.  You
  		still have to double ' quotes
-@@ -5044,10 +5118,12 @@ map({expr}, {string})					*map()*
+@@ -5053,10 +5127,12 @@ map({expr}, {string})					*map()*
  		|Dictionary| to remain unmodified make a copy first: >
  			:let tlist = map(copy(mylist), ' v:val . "\t"')
  
@@ -231,7 +231,7 @@ diff --git a/src/eval.c b/src/eval.c
  static void f_last_buffer_nr(typval_T *argvars, typval_T *rettv);
  static void f_len(typval_T *argvars, typval_T *rettv);
  static void f_libcall(typval_T *argvars, typval_T *rettv);
-@@ -3786,6 +3792,7 @@ do_unlet(char_u *name, int forceit)
+@@ -3788,6 +3794,7 @@ do_unlet(char_u *name, int forceit)
      char_u	*varname;
      dict_T	*d;
      dictitem_T	*di;
@@ -239,7 +239,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      ht = find_var_ht(name, &varname);
      if (ht != NULL && *varname != NUL)
-@@ -3808,6 +3815,26 @@ do_unlet(char_u *name, int forceit)
+@@ -3810,6 +3817,26 @@ do_unlet(char_u *name, int forceit)
  	    return FAIL;
  	}
  	hi = hash_find(ht, varname);
@@ -266,7 +266,7 @@ diff --git a/src/eval.c b/src/eval.c
  	if (!HASHITEM_EMPTY(hi))
  	{
  	    di = HI2DI(hi);
-@@ -7053,6 +7080,7 @@ garbage_collect(int testing)
+@@ -7064,6 +7091,7 @@ garbage_collect(int testing)
       * the item is referenced elsewhere the funccal must not be freed. */
      for (fc = previous_funccal; fc != NULL; fc = fc->caller)
      {
@@ -274,7 +274,7 @@ diff --git a/src/eval.c b/src/eval.c
  	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID + 1,
  									NULL);
  	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID + 1,
-@@ -7437,6 +7465,25 @@ set_ref_in_item(
+@@ -7448,6 +7476,25 @@ set_ref_in_item(
  							ht_stack, list_stack);
  	}
      }
@@ -300,7 +300,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_JOB_CHANNEL
      else if (tv->v_type == VAR_JOB)
      {
-@@ -8652,6 +8699,7 @@ static struct fst
+@@ -8663,6 +8710,7 @@ static struct fst
      {"json_decode",	1, 1, f_json_decode},
      {"json_encode",	1, 1, f_json_encode},
      {"keys",		1, 1, f_keys},
@@ -308,7 +308,7 @@ diff --git a/src/eval.c b/src/eval.c
      {"last_buffer_nr",	0, 0, f_last_buffer_nr},/* obsolete */
      {"len",		1, 1, f_len},
      {"libcall",		3, 3, f_libcall},
-@@ -9236,7 +9284,7 @@ call_func(
+@@ -9247,7 +9295,7 @@ call_func(
  	rettv->vval.v_number = 0;
  	error = ERROR_UNKNOWN;
  
@@ -317,7 +317,7 @@ diff --git a/src/eval.c b/src/eval.c
  	{
  	    /*
  	     * User defined function.
-@@ -11841,7 +11889,7 @@ findfilendir(
+@@ -11852,7 +11900,7 @@ findfilendir(
  }
  
  static void filter_map(typval_T *argvars, typval_T *rettv, int map);
@@ -326,7 +326,7 @@ diff --git a/src/eval.c b/src/eval.c
  
  /*
   * Implementation of map() and filter().
-@@ -11849,8 +11897,7 @@ static int filter_map_one(typval_T *tv, 
+@@ -11860,8 +11908,7 @@ static int filter_map_one(typval_T *tv, 
      static void
  filter_map(typval_T *argvars, typval_T *rettv, int map)
  {
@@ -336,7 +336,7 @@ diff --git a/src/eval.c b/src/eval.c
      listitem_T	*li, *nli;
      list_T	*l = NULL;
      dictitem_T	*di;
-@@ -11885,14 +11932,13 @@ filter_map(typval_T *argvars, typval_T *
+@@ -11896,14 +11943,13 @@ filter_map(typval_T *argvars, typval_T *
  	return;
      }
  
@@ -353,7 +353,7 @@ diff --git a/src/eval.c b/src/eval.c
  
  	/* We reset "did_emsg" to be able to detect whether an error
  	 * occurred during evaluation of the expression. */
-@@ -11964,21 +12010,31 @@ filter_map(typval_T *argvars, typval_T *
+@@ -11975,21 +12021,31 @@ filter_map(typval_T *argvars, typval_T *
  }
  
      static int
@@ -394,7 +394,7 @@ diff --git a/src/eval.c b/src/eval.c
      }
      if (map)
      {
-@@ -15385,6 +15441,82 @@ f_keys(typval_T *argvars, typval_T *rett
+@@ -15408,6 +15464,82 @@ f_keys(typval_T *argvars, typval_T *rett
  }
  
  /*
@@ -477,7 +477,7 @@ diff --git a/src/eval.c b/src/eval.c
   * "last_buffer_nr()" function.
   */
      static void
-@@ -20917,8 +21049,15 @@ get_callback(typval_T *arg, partial_T **
+@@ -20944,8 +21076,15 @@ get_callback(typval_T *arg, partial_T **
  	return (*pp)->pt_name;
      }
      *pp = NULL;
@@ -494,7 +494,7 @@ diff --git a/src/eval.c b/src/eval.c
      if (arg->v_type == VAR_NUMBER && arg->vval.v_number == 0)
  	return (char_u *)"";
      EMSG(_("E921: Invalid callback argument"));
-@@ -23001,6 +23140,37 @@ get_tv_string_buf_chk(typval_T *varp, ch
+@@ -23029,6 +23168,37 @@ get_tv_string_buf_chk(typval_T *varp, ch
      return NULL;
  }
  
@@ -532,7 +532,7 @@ diff --git a/src/eval.c b/src/eval.c
  /*
   * Find variable "name" in the list of variables.
   * Return a pointer to it if found, NULL if not found.
-@@ -23013,13 +23183,23 @@ find_var(char_u *name, hashtab_T **htp, 
+@@ -23041,13 +23211,23 @@ find_var(char_u *name, hashtab_T **htp, 
  {
      char_u	*varname;
      hashtab_T	*ht;
@@ -557,7 +557,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -23382,6 +23562,24 @@ set_var(
+@@ -23410,6 +23590,24 @@ set_var(
      }
      v = find_var_in_ht(ht, 0, varname, TRUE);
  
@@ -582,7 +582,7 @@ diff --git a/src/eval.c b/src/eval.c
      if ((tv->v_type == VAR_FUNC || tv->v_type == VAR_PARTIAL)
  				      && var_check_func_name(name, v == NULL))
  	return;
-@@ -24634,6 +24832,7 @@ ex_function(exarg_T *eap)
+@@ -24662,6 +24860,7 @@ ex_function(exarg_T *eap)
      fp->uf_flags = flags;
      fp->uf_calls = 0;
      fp->uf_script_ID = current_SID;
@@ -590,7 +590,7 @@ diff --git a/src/eval.c b/src/eval.c
      goto ret_free;
  
  erret:
-@@ -25452,7 +25651,9 @@ func_unref(char_u *name)
+@@ -25480,7 +25679,9 @@ func_unref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -601,7 +601,7 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	fp = find_func(name);
  	if (fp == NULL)
-@@ -25470,6 +25671,18 @@ func_unref(char_u *name)
+@@ -25498,6 +25699,18 @@ func_unref(char_u *name)
  		func_free(fp);
  	}
      }
@@ -620,7 +620,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -25480,7 +25693,9 @@ func_ref(char_u *name)
+@@ -25508,7 +25721,9 @@ func_ref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -631,7 +631,7 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	fp = find_func(name);
  	if (fp == NULL)
-@@ -25488,6 +25703,13 @@ func_ref(char_u *name)
+@@ -25516,6 +25731,13 @@ func_ref(char_u *name)
  	else
  	    ++fp->uf_refcount;
      }
@@ -645,7 +645,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -25545,6 +25767,9 @@ call_user_func(
+@@ -25573,6 +25795,9 @@ call_user_func(
      /* Check if this function has a breakpoint. */
      fc->breakpoint = dbg_find_breakpoint(FALSE, fp->uf_name, (linenr_T)0);
      fc->dbg_tick = debug_tick;
@@ -655,7 +655,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      /*
       * Note about using fc->fixvar[]: This is an array of FIXVAR_CNT variables
-@@ -25828,7 +26053,8 @@ call_user_func(
+@@ -25856,7 +26081,8 @@ call_user_func(
       * free the funccall_T and what's in it. */
      if (fc->l_varlist.lv_refcount == DO_NOT_FREE_CNT
  	    && fc->l_vars.dv_refcount == DO_NOT_FREE_CNT
@@ -665,7 +665,7 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	free_funccal(fc, FALSE);
      }
-@@ -25871,7 +26097,8 @@ can_free_funccal(funccall_T *fc, int cop
+@@ -25899,7 +26125,8 @@ can_free_funccal(funccall_T *fc, int cop
  {
      return (fc->l_varlist.lv_copyID != copyID
  	    && fc->l_vars.dv_copyID != copyID
@@ -725,7 +725,7 @@ diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
    " Collect garbage, tests that our handle isn't collected.
    call test_garbagecollect_now()
  
-@@ -1134,6 +1147,32 @@ func Test_read_in_close_cb()
+@@ -1156,6 +1169,32 @@ func Test_read_in_close_cb()
    endtry
  endfunc
  
@@ -758,7 +758,7 @@ diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
  """"""""""
  
  let s:unletResponse = ''
-@@ -1350,6 +1389,28 @@ func Test_collapse_buffers()
+@@ -1372,6 +1411,28 @@ func Test_collapse_buffers()
    bwipe!
  endfunc
  
