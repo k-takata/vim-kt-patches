@@ -31,7 +31,6 @@ if_ruby-remove-allocate-method.patch
 make-tests-silent.patch
 update-rubyinc-dir.patch
 fix-po-msys2.patch
-off_T-disp-with-num64.patch
 fix-char_u-usage.patch
 remove-sync_dup_close.patch
 drop-support-for-win9x.patch
