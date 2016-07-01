@@ -6,11 +6,6 @@ myconfiguration-private-install.patch #+private-install
 myconfiguration-clang.patch #+clang
 backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+linux
-0001_support-largefiles-on-windows.patch
-0002_fix-off_T-display.patch
-0003_use-stat_T.patch
-0004_add-stat-test.patch
-0005_test_largefile.patch
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
 support-alt-gettext-dll.patch
