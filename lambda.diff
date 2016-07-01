@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  c6500456352e60b45d2ae2057637947c98642e5c
+# Parent  c5143ed4127412f3fa08a1da32c399f3c5fbc4c4
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -694,10 +694,10 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 diff --git a/src/testdir/test_alot.vim b/src/testdir/test_alot.vim
 --- a/src/testdir/test_alot.vim
 +++ b/src/testdir/test_alot.vim
-@@ -16,6 +16,7 @@ source test_glob2regpat.vim
- source test_goto.vim
+@@ -17,6 +17,7 @@ source test_goto.vim
  source test_help_tagjump.vim
  source test_join.vim
+ source test_jumps.vim
 +source test_lambda.vim
  source test_lispwords.vim
  source test_matchstrpos.vim
