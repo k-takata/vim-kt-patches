@@ -41,4 +41,5 @@ lambda.diff
 lambda-doc.diff
 lambda-mark.diff
 restore-unicode-chars.patch
+use-num64-for-test_largefile.patch
 fix-config_cache-removal.patch #+rejected
