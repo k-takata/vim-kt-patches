@@ -36,8 +36,5 @@ remove-sync_dup_close.patch
 drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
 remove-old-doc.patch
-lambda.diff
-lambda-doc.diff
-lambda-mark.diff
 restore-unicode-chars.patch
 fix-config_cache-removal.patch #+rejected
