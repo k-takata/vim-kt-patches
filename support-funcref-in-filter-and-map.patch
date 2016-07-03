@@ -1,6 +1,94 @@
 # HG changeset patch
 # Parent  2c4371f2714ec0cc4f15102b586d4c102d2bdd58
 
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -3521,11 +3521,12 @@ filewritable({file})					*filewritable()
+ 		directory, and we can write to it, the result is 2.
+ 
+ 
+-filter({expr}, {string})					*filter()*
+-		{expr} must be a |List| or a |Dictionary|.
+-		For each item in {expr} evaluate {string} and when the result
++filter({expr1}, {expr2})				*filter()*
++		{expr1} must be a |List| or a |Dictionary|.
++		For each item in {expr1} evaluate {expr2} and when the result
+ 		is zero remove the item from the |List| or |Dictionary|.
+-		Inside {string} |v:val| has the value of the current item.
++		{expr2} must be a |string| or |Funcref|. If it is a |string|,
++		inside {expr2} |v:val| has the value of the current item.
+ 		For a |Dictionary| |v:key| has the key of the current item.
+ 		Examples: >
+ 			:call filter(mylist, 'v:val !~ "OLD"')
+@@ -3535,7 +3536,7 @@ filter({expr}, {string})					*filter()*
+ 			:call filter(var, 0)
+ <		Removes all the items, thus clears the |List| or |Dictionary|.
+ 
+-		Note that {string} is the result of expression and is then
++		Note that {expr2} is the result of expression and is then
+ 		used as an expression again.  Often it is good to use a
+ 		|literal-string| to avoid having to double backslashes.
+ 
+@@ -3543,9 +3544,13 @@ filter({expr}, {string})					*filter()*
+ 		|Dictionary| to remain unmodified make a copy first: >
+ 			:let l = filter(copy(mylist), 'v:val =~ "KEEP"')
+ 
+-<		Returns {expr}, the |List| or |Dictionary| that was filtered.
+-		When an error is encountered while evaluating {string} no
+-		further items in {expr} are processed.
++<		Returns {expr1}, the |List| or |Dictionary| that was filtered.
++		When an error is encountered while evaluating {expr2} no
++		further items in {expr1} are processed.
++
++		{expr2} is possible to be given as |Funcref|. The function
++		should return TRUE if the item should be kept. The value is
++		given as "a:1".
+ 
+ 
+ finddir({name}[, {path}[, {count}]])				*finddir()*
+@@ -5036,18 +5041,19 @@ luaeval({expr}[, {expr}])					*luaeval()
+ 		See |lua-luaeval| for more details.
+ 		{only available when compiled with the |+lua| feature}
+ 
+-map({expr}, {string})					*map()*
+-		{expr} must be a |List| or a |Dictionary|.
+-		Replace each item in {expr} with the result of evaluating
+-		{string}.
+-		Inside {string} |v:val| has the value of the current item.
++map({expr1}, {expr2})					*map()*
++		{expr1} must be a |List| or a |Dictionary|.
++		Replace each item in {expr1} with the result of evaluating
++		{expr2}.
++		{expr2} must be a |string| or |Funcref|. If it is a |string|,
++		inside {expr2} |v:val| has the value of the current item.
+ 		For a |Dictionary| |v:key| has the key of the current item
+ 		and for a |List| |v:key| has the index of the current item.
+ 		Example: >
+ 			:call map(mylist, '"> " . v:val . " <"')
+ <		This puts "> " before and " <" after each item in "mylist".
+ 
+-		Note that {string} is the result of an expression and is then
++		Note that {expr2} is the result of an expression and is then
+ 		used as an expression again.  Often it is good to use a
+ 		|literal-string| to avoid having to double backslashes.  You
+ 		still have to double ' quotes
+@@ -5056,9 +5062,12 @@ map({expr}, {string})					*map()*
+ 		|Dictionary| to remain unmodified make a copy first: >
+ 			:let tlist = map(copy(mylist), ' v:val . "\t"')
+ 
+-<		Returns {expr}, the |List| or |Dictionary| that was filtered.
+-		When an error is encountered while evaluating {string} no
+-		further items in {expr} are processed.
++<		Returns {expr1}, the |List| or |Dictionary| that was filtered.
++		When an error is encountered while evaluating {expr2} no
++		further items in {expr1} are processed.
++
++		{expr2} is possible to be given as |Funcref|. The function
++		should return value proceeded from "a:1".
+ 
+ 
+ maparg({name}[, {mode} [, {abbr} [, {dict}]]])			*maparg()*
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
