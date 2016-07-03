@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  2c4371f2714ec0cc4f15102b586d4c102d2bdd58
+# Parent  e8cf557dd9c2d7d7c9820048ae37d614e2b8d312
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -21,7 +21,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		For a |Dictionary| |v:key| has the key of the current item.
  		Examples: >
  			:call filter(mylist, 'v:val !~ "OLD"')
-@@ -3535,7 +3536,7 @@ filter({expr}, {string})					*filter()*
+@@ -3535,17 +3536,22 @@ filter({expr}, {string})					*filter()*
  			:call filter(var, 0)
  <		Removes all the items, thus clears the |List| or |Dictionary|.
  
@@ -30,7 +30,12 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		used as an expression again.  Often it is good to use a
  		|literal-string| to avoid having to double backslashes.
  
-@@ -3543,9 +3544,13 @@ filter({expr}, {string})					*filter()*
++		If {expr2} is a |Funcref|, the first argument has the key or
++		the index of the current item.  The second argument has the
++		value of the current item.  The function should return TRUE
++		if the item should be kept.
++
+ 		The operation is done in-place.  If you want a |List| or
  		|Dictionary| to remain unmodified make a copy first: >
  			:let l = filter(copy(mylist), 'v:val =~ "KEEP"')
  
@@ -40,14 +45,10 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +<		Returns {expr1}, the |List| or |Dictionary| that was filtered.
 +		When an error is encountered while evaluating {expr2} no
 +		further items in {expr1} are processed.
-+
-+		{expr2} is possible to be given as |Funcref|. The function
-+		should return TRUE if the item should be kept. The value is
-+		given as "a:1".
  
  
  finddir({name}[, {path}[, {count}]])				*finddir()*
-@@ -5036,18 +5041,19 @@ luaeval({expr}[, {expr}])					*luaeval()
+@@ -5036,29 +5042,35 @@ luaeval({expr}[, {expr}])					*luaeval()
  		See |lua-luaeval| for more details.
  		{only available when compiled with the |+lua| feature}
  
@@ -73,7 +74,13 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		used as an expression again.  Often it is good to use a
  		|literal-string| to avoid having to double backslashes.  You
  		still have to double ' quotes
-@@ -5056,9 +5062,12 @@ map({expr}, {string})					*map()*
+ 
++		If {expr2} is a |Funcref|, the first argument has the key or
++		the index of the current item.  The second argument has the
++		value of the current item.  The function should return a
++		value to replace the item with it.
++
+ 		The operation is done in-place.  If you want a |List| or
  		|Dictionary| to remain unmodified make a copy first: >
  			:let tlist = map(copy(mylist), ' v:val . "\t"')
  
@@ -83,9 +90,6 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +<		Returns {expr1}, the |List| or |Dictionary| that was filtered.
 +		When an error is encountered while evaluating {expr2} no
 +		further items in {expr1} are processed.
-+
-+		{expr2} is possible to be given as |Funcref|. The function
-+		should return value proceeded from "a:1".
  
  
  maparg({name}[, {mode} [, {abbr} [, {dict}]]])			*maparg()*
@@ -128,7 +132,7 @@ diff --git a/src/eval.c b/src/eval.c
  
  	/* We reset "did_emsg" to be able to detect whether an error
  	 * occurred during evaluation of the expression. */
-@@ -11975,21 +11973,41 @@ filter_map(typval_T *argvars, typval_T *
+@@ -11975,21 +11973,44 @@ filter_map(typval_T *argvars, typval_T *
  }
  
      static int
@@ -139,6 +143,7 @@ diff --git a/src/eval.c b/src/eval.c
      char_u	*s;
      int		retval = FAIL;
 +    int		dummy;
++    typval_T	argv[3];
  
      copy_tv(tv, &vimvars[VV_VAL].vv_tv);
 -    s = expr;
@@ -149,11 +154,13 @@ diff --git a/src/eval.c b/src/eval.c
 -	EMSG2(_(e_invexpr2), s);
 -	clear_tv(&rettv);
 -	goto theend;
++    argv[0] = vimvars[VV_KEY].vv_tv;
++    argv[1] = vimvars[VV_VAL].vv_tv;
 +    s = expr->vval.v_string;
 +    if (expr->v_type == VAR_FUNC)
 +    {
 +	if (call_func(s, (int)STRLEN(s),
-+		    &rettv, 1, tv, 0L, 0L, &dummy, TRUE, NULL, NULL) == FALSE)
++		    &rettv, 2, argv, 0L, 0L, &dummy, TRUE, NULL, NULL) == FALSE)
 +	    goto theend;
 +    }
 +    else if (expr->v_type == VAR_PARTIAL)
@@ -162,7 +169,7 @@ diff --git a/src/eval.c b/src/eval.c
 +
 +	s = partial->pt_name;
 +	if (call_func(s, (int)STRLEN(s),
-+		    &rettv, 1, tv, 0L, 0L, &dummy, TRUE, partial, NULL)
++		    &rettv, 2, argv, 0L, 0L, &dummy, TRUE, partial, NULL)
 +								    == FALSE)
 +	    goto theend;
 +    }
@@ -179,3 +186,29 @@ diff --git a/src/eval.c b/src/eval.c
      }
      if (map)
      {
+diff --git a/src/testdir/test_partial.vim b/src/testdir/test_partial.vim
+--- a/src/testdir/test_partial.vim
++++ b/src/testdir/test_partial.vim
+@@ -14,6 +14,10 @@ func MySort(up, one, two)
+   return a:one < a:two ? 1 : -1
+ endfunc
+ 
++func MyMap(sub, key, val)
++  return a:val - a:sub
++endfunc
++
+ func Test_partial_args()
+   let Cb = function('MyFunc', ["foo", "bar"])
+ 
+@@ -36,6 +40,11 @@ func Test_partial_args()
+   call assert_equal([1, 2, 3], sort([3, 1, 2], Sort))
+   let Sort = function('MySort', [0])
+   call assert_equal([3, 2, 1], sort([3, 1, 2], Sort))
++
++  let Map = function('MyMap', [2])
++  call assert_equal([-1, 0, 1], map([1, 2, 3], Map))
++  let Map = function('MyMap', [3])
++  call assert_equal([-2, -1, 0], map([1, 2, 3], Map))
+ endfunc
+ 
+ func MyDictFunc(arg1, arg2) dict
