@@ -140,10 +140,10 @@ diff --git a/src/eval.c b/src/eval.c
 +filter_map_one(typval_T *tv, typval_T *expr, int map, int *remp)
  {
      typval_T	rettv;
++    typval_T	argv[3];
      char_u	*s;
      int		retval = FAIL;
 +    int		dummy;
-+    typval_T	argv[3];
  
      copy_tv(tv, &vimvars[VV_VAL].vv_tv);
 -    s = expr;
