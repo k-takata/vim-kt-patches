@@ -37,5 +37,4 @@ drop-support-for-win9x.patch
 matchit-respect-matchpairs.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
-support-funcref-in-filter-and-map.patch
 fix-config_cache-removal.patch #+rejected
