@@ -93,6 +93,17 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  
  maparg({name}[, {mode} [, {abbr} [, {dict}]]])			*maparg()*
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -2031,6 +2031,7 @@ test_arglist \
+ 	test_farsi \
+ 	test_feedkeys \
+ 	test_file_perm \
++	test_filter_map \
+ 	test_fnamemodify \
+ 	test_glob2regpat \
+ 	test_goto \
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
@@ -186,21 +197,118 @@ diff --git a/src/eval.c b/src/eval.c
      }
      if (map)
      {
+diff --git a/src/testdir/test_alot.vim b/src/testdir/test_alot.vim
+--- a/src/testdir/test_alot.vim
++++ b/src/testdir/test_alot.vim
+@@ -12,6 +12,7 @@ source test_expand_dllpath.vim
+ source test_feedkeys.vim
+ source test_fnamemodify.vim
+ source test_file_perm.vim
++source test_filter_map.vim
+ source test_glob2regpat.vim
+ source test_goto.vim
+ source test_help_tagjump.vim
+diff --git a/src/testdir/test_filter_map.vim b/src/testdir/test_filter_map.vim
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_filter_map.vim
+@@ -0,0 +1,77 @@
++" Test filter() and map()
++
++" list with expression string
++func Test_filter_map_list_expr_string()
++  " filter()
++  call assert_equal([2, 3, 4], filter([1, 2, 3, 4], 'v:val > 1'))
++  call assert_equal([3, 4], filter([1, 2, 3, 4], 'v:key > 1'))
++
++  " map()
++  call assert_equal([2, 4, 6, 8], map([1, 2, 3, 4], 'v:val * 2'))
++  call assert_equal([0, 2, 4, 6], map([1, 2, 3, 4], 'v:key * 2'))
++endfunc
++
++" dict with expression string
++func Test_filter_map_dict_expr_string()
++  let dict = {"foo": 1, "bar": 2, "baz": 3}
++
++  " filter()
++  call assert_equal({"bar": 2, "baz": 3}, filter(copy(dict), 'v:val > 1'))
++  call assert_equal({"foo": 1, "baz": 3}, filter(copy(dict), 'v:key > "bar"'))
++
++  " map()
++  call assert_equal({"foo": 2, "bar": 4, "baz": 6}, map(copy(dict), 'v:val * 2'))
++  call assert_equal({"foo": "f", "bar": "b", "baz": "b"}, map(copy(dict), 'v:key[0]'))
++endfunc
++
++" list with funcref
++func Test_filter_map_list_expr_funcref()
++  " filter()
++  func! s:filter1(index, val) abort
++    return a:val > 1
++  endfunc
++  call assert_equal([2, 3, 4], filter([1, 2, 3, 4], function('s:filter1')))
++
++  func! s:filter2(index, val) abort
++    return a:index > 1
++  endfunc
++  call assert_equal([3, 4], filter([1, 2, 3, 4], function('s:filter2')))
++
++  " map()
++  func! s:filter3(index, val) abort
++    return a:val * 2
++  endfunc
++  call assert_equal([2, 4, 6, 8], map([1, 2, 3, 4], function('s:filter3')))
++
++  func! s:filter4(index, val) abort
++    return a:index * 2
++  endfunc
++  call assert_equal([0, 2, 4, 6], map([1, 2, 3, 4], function('s:filter4')))
++endfunc
++
++" dict with funcref
++func Test_filter_map_dict_expr_funcref()
++  let dict = {"foo": 1, "bar": 2, "baz": 3}
++
++  " filter()
++  func! s:filter1(key, val) abort
++    return a:val > 1
++  endfunc
++  call assert_equal({"bar": 2, "baz": 3}, filter(copy(dict), function('s:filter1')))
++
++  func! s:filter2(key, val) abort
++    return a:key > "bar"
++  endfunc
++  call assert_equal({"foo": 1, "baz": 3}, filter(copy(dict), function('s:filter2')))
++
++  " map()
++  func! s:filter3(key, val) abort
++    return a:val * 2
++  endfunc
++  call assert_equal({"foo": 2, "bar": 4, "baz": 6}, map(copy(dict), function('s:filter3')))
++
++  func! s:filter4(key, val) abort
++    return a:key[0]
++  endfunc
++  call assert_equal({"foo": "f", "bar": "b", "baz": "b"}, map(copy(dict), function('s:filter4')))
++endfunc
 diff --git a/src/testdir/test_partial.vim b/src/testdir/test_partial.vim
 --- a/src/testdir/test_partial.vim
 +++ b/src/testdir/test_partial.vim
-@@ -14,6 +14,10 @@ func MySort(up, one, two)
+@@ -14,6 +14,14 @@ func MySort(up, one, two)
    return a:one < a:two ? 1 : -1
  endfunc
  
-+func MyMap(sub, key, val)
++func MyMap(sub, index, val)
 +  return a:val - a:sub
++endfunc
++
++func MyFilter(threshold, index, val)
++  return a:val > a:threshold
 +endfunc
 +
  func Test_partial_args()
    let Cb = function('MyFunc', ["foo", "bar"])
  
-@@ -36,6 +40,11 @@ func Test_partial_args()
+@@ -36,6 +44,16 @@ func Test_partial_args()
    call assert_equal([1, 2, 3], sort([3, 1, 2], Sort))
    let Sort = function('MySort', [0])
    call assert_equal([3, 2, 1], sort([3, 1, 2], Sort))
@@ -209,6 +317,21 @@ diff --git a/src/testdir/test_partial.vim b/src/testdir/test_partial.vim
 +  call assert_equal([-1, 0, 1], map([1, 2, 3], Map))
 +  let Map = function('MyMap', [3])
 +  call assert_equal([-2, -1, 0], map([1, 2, 3], Map))
++
++  let Filter = function('MyFilter', [1])
++  call assert_equal([2, 3], filter([1, 2, 3], Filter))
++  let Filter = function('MyFilter', [2])
++  call assert_equal([3], filter([1, 2, 3], Filter))
  endfunc
  
  func MyDictFunc(arg1, arg2) dict
+@@ -60,6 +78,9 @@ func Test_partial_dict()
+   call assert_equal("hello/xxx/yyy", Cb("xxx", "yyy"))
+   call assert_fails('Cb("fff")', 'E492:')
+ 
++  let Cb = function('MyDictFunc', dict)
++  call assert_equal({"foo": "hello/foo/1", "bar": "hello/bar/2"}, map({"foo": 1, "bar": 2}, Cb))
++
+   let dict = {"tr": function('tr', ['hello', 'h', 'H'])}
+   call assert_equal("Hello", dict.tr())
+ endfunc
