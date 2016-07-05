@@ -1,0 +1,221 @@
+# HG changeset patch
+# Parent  5ebad7d753e6e1dca561c039b6ae5e99ff78b567
+
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -581,7 +581,6 @@ main
+     debug_break_level = params.use_debug_break_level;
+ #endif
+ 
+-#ifdef FEAT_MZSCHEME
+     /*
+      * Newer version of MzScheme (Racket) require earlier (trampolined)
+      * initialisation via scheme_main_setup.
+@@ -594,35 +593,31 @@ main
+ 	char *args[2];
+ 	args[0] = (char *)fname;
+ 	args[1] = (char *)&params;
++#ifdef FEAT_MZSCHEME
+ 	return mzscheme_main(2, args);
++#else
++	return vim_main2(2, args);
++#endif
+     }
+ }
+-#endif
+ #endif /* NO_VIM_MAIN */
+ 
+ /* vim_main2() needs to be produced when FEAT_MZSCHEME is defined even when
+  * NO_VIM_MAIN is defined. */
+-#ifdef FEAT_MZSCHEME
+     int
+ vim_main2(int argc UNUSED, char **argv UNUSED)
+ {
+-# ifndef NO_VIM_MAIN
+-    char_u	*fname = (char_u *)argv[0];
+-    mparm_T	params;
+-
+-    memcpy(&params, argv[1], sizeof(params));
+-# else
++#ifdef NO_VIM_MAIN
+     return 0;
+-}
+-# endif
+-#endif
+-
+-#ifndef NO_VIM_MAIN
++#else
++    char_u	*fname = (char_u *)argv[0];
++    mparm_T	*params = (mparm_T *)argv[1];
++
+     /* Execute --cmd arguments. */
+-    exe_pre_commands(&params);
++    exe_pre_commands(params);
+ 
+     /* Source startup scripts. */
+-    source_startup_scripts(&params);
++    source_startup_scripts(params);
+ 
+ #ifdef FEAT_EVAL
+     /*
+@@ -645,12 +640,12 @@ vim_main2(int argc UNUSED, char **argv U
+ 
+ #ifdef FEAT_DIFF
+     /* Decide about window layout for diff mode after reading vimrc. */
+-    if (params.diff_mode && params.window_layout == 0)
++    if (params->diff_mode && params->window_layout == 0)
+     {
+ 	if (diffopt_horizontal())
+-	    params.window_layout = WIN_HOR;	/* use horizontal split */
++	    params->window_layout = WIN_HOR;	/* use horizontal split */
+ 	else
+-	    params.window_layout = WIN_VER;	/* use vertical split */
++	    params->window_layout = WIN_VER;	/* use vertical split */
+     }
+ #endif
+ 
+@@ -676,7 +671,7 @@ vim_main2(int argc UNUSED, char **argv U
+      * "-n" argument: Disable swap file by setting 'updatecount' to 0.
+      * Note that this overrides anything from a vimrc file.
+      */
+-    if (params.no_swap_file)
++    if (params->no_swap_file)
+ 	p_uc = 0;
+ 
+ #ifdef FEAT_FKMAP
+@@ -705,7 +700,7 @@ vim_main2(int argc UNUSED, char **argv U
+ 
+ 	/* When running "evim" or "gvim -y" we need the menus, exit if we
+ 	 * don't have them. */
+-	if (!gui.in_use && params.evim_mode)
++	if (!gui.in_use && params->evim_mode)
+ 	    mch_exit(1);
+     }
+ #endif
+@@ -732,11 +727,11 @@ vim_main2(int argc UNUSED, char **argv U
+      * "-q errorfile": Load the error file now.
+      * If the error file can't be read, exit before doing anything else.
+      */
+-    if (params.edit_type == EDIT_QF)
++    if (params->edit_type == EDIT_QF)
+     {
+-	if (params.use_ef != NULL)
++	if (params->use_ef != NULL)
+ 	    set_string_option_direct((char_u *)"ef", -1,
+-					   params.use_ef, OPT_FREE, SID_CARG);
++					   params->use_ef, OPT_FREE, SID_CARG);
+ 	vim_snprintf((char *)IObuff, IOSIZE, "cfile %s", p_ef);
+ 	if (qf_init(NULL, p_ef, p_efm, TRUE, IObuff) < 0)
+ 	{
+@@ -796,7 +791,7 @@ vim_main2(int argc UNUSED, char **argv U
+ 
+ #ifdef FEAT_CLIENTSERVER
+     /* Prepare for being a Vim server. */
+-    prepare_server(&params);
++    prepare_server(params);
+ #endif
+ 
+     /*
+@@ -806,7 +801,7 @@ vim_main2(int argc UNUSED, char **argv U
+      * are the same terminal: "cat | vim -".
+      * Using autocommands here may cause trouble...
+      */
+-    if (params.edit_type == EDIT_STDIN && !recoverymode)
++    if (params->edit_type == EDIT_STDIN && !recoverymode)
+ 	read_stdin();
+ 
+ #if defined(UNIX) || defined(VMS)
+@@ -865,7 +860,7 @@ vim_main2(int argc UNUSED, char **argv U
+     }
+ 
+ #ifdef FEAT_CRYPT
+-    if (params.ask_for_key)
++    if (params->ask_for_key)
+     {
+ 	crypt_check_current_method();
+ 	(void)crypt_get_key(TRUE, TRUE);
+@@ -879,7 +874,7 @@ vim_main2(int argc UNUSED, char **argv U
+      * Create the requested number of windows and edit buffers in them.
+      * Also does recovery if "recoverymode" set.
+      */
+-    create_windows(&params);
++    create_windows(params);
+     TIME_MSG("opening buffers");
+ 
+ #ifdef FEAT_EVAL
+@@ -901,7 +896,7 @@ vim_main2(int argc UNUSED, char **argv U
+     /*
+      * When started with "-q errorfile" jump to first error now.
+      */
+-    if (params.edit_type == EDIT_QF)
++    if (params->edit_type == EDIT_QF)
+     {
+ 	qf_jump(NULL, 0, 0, FALSE);
+ 	TIME_MSG("jump to first error");
+@@ -913,12 +908,12 @@ vim_main2(int argc UNUSED, char **argv U
+      * If opened more than one window, start editing files in the other
+      * windows.
+      */
+-    edit_buffers(&params, start_dir);
++    edit_buffers(params, start_dir);
+ #endif
+     vim_free(start_dir);
+ 
+ #ifdef FEAT_DIFF
+-    if (params.diff_mode)
++    if (params->diff_mode)
+     {
+ 	win_T	*wp;
+ 
+@@ -937,13 +932,13 @@ vim_main2(int argc UNUSED, char **argv U
+      * Need to jump to the tag before executing the '-c command'.
+      * Makes "vim -c '/return' -t main" work.
+      */
+-    if (params.tagname != NULL)
++    if (params->tagname != NULL)
+     {
+ #if defined(HAS_SWAP_EXISTS_ACTION)
+ 	swap_exists_did_quit = FALSE;
+ #endif
+ 
+-	vim_snprintf((char *)IObuff, IOSIZE, "ta %s", params.tagname);
++	vim_snprintf((char *)IObuff, IOSIZE, "ta %s", params->tagname);
+ 	do_cmdline_cmd(IObuff);
+ 	TIME_MSG("jumping to tag");
+ 
+@@ -955,8 +950,8 @@ vim_main2(int argc UNUSED, char **argv U
+     }
+ 
+     /* Execute any "+", "-c" and "-S" arguments. */
+-    if (params.n_commands > 0)
+-	exe_commands(&params);
++    if (params->n_commands > 0)
++	exe_commands(params);
+ 
+     RedrawingDisabled = 0;
+     redraw_all_later(NOT_VALID);
+@@ -1055,8 +1050,8 @@ vim_main2(int argc UNUSED, char **argv U
+     main_loop(FALSE, FALSE);
+ 
+     return 0;
++#endif /* NO_VIM_MAIN */
+ }
+-#endif /* NO_VIM_MAIN */
+ #endif /* PROTO */
+ 
+ /*
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -2404,10 +2404,8 @@ typedef struct stat stat_T;
+ #define JSON_JS		1   /* use JS instead of JSON */
+ #define JSON_NO_NONE	2   /* v:none item not allowed */
+ 
+-#ifdef FEAT_MZSCHEME
+ /* this is in main.c, cproto can't handle it. */
+ int vim_main2(int argc, char **argv);
+-#endif
+ 
+ /* Used for flags of do_in_path() */
+ #define DIP_ALL	    0x01	/* all matches, not just the first one */
