@@ -38,4 +38,5 @@ matchit-respect-matchpairs.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
+func-refcount.patch
 fix-config_cache-removal.patch #+rejected

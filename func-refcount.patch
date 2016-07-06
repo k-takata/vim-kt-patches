@@ -1,0 +1,34 @@
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -20966,7 +21165,12 @@ get_callback(typval_T *arg, partial_T **
+ 	return (*pp)->pt_name;
+     }
+     *pp = NULL;
+-    if (arg->v_type == VAR_FUNC || arg->v_type == VAR_STRING)
++    if (arg->v_type == VAR_FUNC)
++    {
++	func_ref(arg->vval.v_string);
++	return arg->vval.v_string;
++    }
++    if (arg->v_type == VAR_STRING)
+ 	return arg->vval.v_string;
+     if (arg->v_type == VAR_NUMBER && arg->vval.v_number == 0)
+ 	return (char_u *)"";
+diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
+--- a/src/ex_cmds2.c
++++ b/src/ex_cmds2.c
+@@ -1121,8 +1121,11 @@ remove_timer(timer_T *timer)
+     static void
+ free_timer(timer_T *timer)
+ {
++    if (timer->tr_partial == NULL)
++	func_unref(timer->tr_callback);
++    else
++	partial_unref(timer->tr_partial);
+     vim_free(timer->tr_callback);
+-    partial_unref(timer->tr_partial);
+     vim_free(timer);
+ }
+ 
