@@ -1,0 +1,40 @@
+# HG changeset patch
+# Parent  7b8b96bb2b9f067f811b984bb7fd8cd5cc3ada81
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -21167,8 +21167,15 @@ get_callback(typval_T *arg, partial_T **
+     *pp = NULL;
+     if (arg->v_type == VAR_FUNC)
+     {
+-	func_ref(arg->vval.v_string);
+-	return arg->vval.v_string;
++	partial_T	*pt = (partial_T *)alloc_clear(sizeof(partial_T));
++
++	if (pt == NULL)
++	    return NULL;
++	pt->pt_refcount = 1;
++	pt->pt_name = arg->vval.v_string;
++	func_ref(pt->pt_name);
++	*pp = pt;
++	return pt->pt_name;
+     }
+     if (arg->v_type == VAR_STRING)
+ 	return arg->vval.v_string;
+diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
+--- a/src/ex_cmds2.c
++++ b/src/ex_cmds2.c
+@@ -1121,11 +1121,8 @@ remove_timer(timer_T *timer)
+     static void
+ free_timer(timer_T *timer)
+ {
+-    if (timer->tr_partial == NULL)
+-	func_unref(timer->tr_callback);
+-    else
+-	partial_unref(timer->tr_partial);
+     vim_free(timer->tr_callback);
++    partial_unref(timer->tr_partial);
+     vim_free(timer);
+ }
+ 
