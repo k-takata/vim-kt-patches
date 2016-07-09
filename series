@@ -38,6 +38,7 @@ matchit-respect-matchpairs.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
+fix-iscygpty-warning.patch
 func-refcount.patch
 func-refcount2.patch
 lambda2.patch
