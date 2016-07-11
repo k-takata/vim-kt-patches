@@ -40,5 +40,5 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 func-refcount.patch
 lambda2.patch
-guess-arch-on-mingw.patch
+detect-arch-on-mingw.patch
 fix-config_cache-removal.patch #+rejected

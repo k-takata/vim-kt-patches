@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  8dff2fd1baa10fd7acea82ac1bed138039b9a89f
+# Parent  b34f06ede17782809ab20fedf0f7d994936663c0
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -9,7 +9,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  # Set to one of i386, i486, i586, i686 as the minimum target processor.
  # For amd64/x64 architecture set ARCH=x86-64 .
 -ARCH=i686
-+# If not set, it will be automatically guessed. (Normally i686 or x86-64.)
++# If not set, it will be automatically detected. (Normally i686 or x86-64.)
 +#ARCH=i686
  # Set to yes to cross-compile from unix; no=native Windows (and Cygwin).
  CROSS=no
