@@ -1,8 +1,132 @@
+# HG changeset patch
+# Parent  d9b4a0d996921cfe396f34a8e888b109dadbdfee
 
+diff --git a/src/channel.c b/src/channel.c
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -1147,8 +1147,8 @@ channel_set_options(channel_T *channel, 
+     {
+ 	cbp = &channel->ch_callback;
+ 	pp = &channel->ch_partial;
++	free_callback(*cbp, *pp);
+ 	vim_free(*cbp);
+-	partial_unref(*pp);
+ 	if (opt->jo_callback != NULL && *opt->jo_callback != NUL)
+ 	    *cbp = vim_strsave(opt->jo_callback);
+ 	else
+@@ -1161,8 +1161,8 @@ channel_set_options(channel_T *channel, 
+     {
+ 	cbp = &channel->ch_part[PART_OUT].ch_callback;
+ 	pp = &channel->ch_part[PART_OUT].ch_partial;
++	free_callback(*cbp, *pp);
+ 	vim_free(*cbp);
+-	partial_unref(*pp);
+ 	if (opt->jo_out_cb != NULL && *opt->jo_out_cb != NUL)
+ 	    *cbp = vim_strsave(opt->jo_out_cb);
+ 	else
+@@ -1175,8 +1175,8 @@ channel_set_options(channel_T *channel, 
+     {
+ 	cbp = &channel->ch_part[PART_ERR].ch_callback;
+ 	pp = &channel->ch_part[PART_ERR].ch_partial;
++	free_callback(*cbp, *pp);
+ 	vim_free(*cbp);
+-	partial_unref(*pp);
+ 	if (opt->jo_err_cb != NULL && *opt->jo_err_cb != NUL)
+ 	    *cbp = vim_strsave(opt->jo_err_cb);
+ 	else
+@@ -1189,8 +1189,8 @@ channel_set_options(channel_T *channel, 
+     {
+ 	cbp = &channel->ch_close_cb;
+ 	pp = &channel->ch_close_partial;
++	free_callback(*cbp, *pp);
+ 	vim_free(*cbp);
+-	partial_unref(*pp);
+ 	if (opt->jo_close_cb != NULL && *opt->jo_close_cb != NUL)
+ 	    *cbp = vim_strsave(opt->jo_close_cb);
+ 	else
+@@ -2228,8 +2228,8 @@ invoke_one_time_callback(
+      * invokes ch_close() the list will be cleared. */
+     remove_cb_node(cbhead, item);
+     invoke_callback(channel, item->cq_callback, item->cq_partial, argv);
++    free_callback(item->cq_callback, item->cq_partial);
+     vim_free(item->cq_callback);
+-    partial_unref(item->cq_partial);
+     vim_free(item);
+ }
+ 
+@@ -2725,9 +2725,9 @@ channel_close(channel_T *channel, int in
+ 	  }
+ 
+ 	  /* the callback is only called once */
++	  free_callback(channel->ch_close_cb, channel->ch_close_partial);
+ 	  vim_free(channel->ch_close_cb);
+ 	  channel->ch_close_cb = NULL;
+-	  partial_unref(channel->ch_close_partial);
+ 	  channel->ch_close_partial = NULL;
+ 
+ 	  --channel->ch_refcount;
+@@ -2763,8 +2763,8 @@ channel_clear_one(channel_T *channel, in
+ 	cbq_T *node = cb_head->cq_next;
+ 
+ 	remove_cb_node(cb_head, node);
++	free_callback(node->cq_callback, node->cq_partial);
+ 	vim_free(node->cq_callback);
+-	partial_unref(node->cq_partial);
+ 	vim_free(node);
+     }
+ 
+@@ -2774,9 +2774,10 @@ channel_clear_one(channel_T *channel, in
+ 	remove_json_node(json_head, json_head->jq_next);
+     }
+ 
++    free_callback(channel->ch_part[part].ch_callback,
++					channel->ch_part[part].ch_partial);
+     vim_free(channel->ch_part[part].ch_callback);
+     channel->ch_part[part].ch_callback = NULL;
+-    partial_unref(channel->ch_part[part].ch_partial);
+     channel->ch_part[part].ch_partial = NULL;
+ }
+ 
+@@ -2793,13 +2794,13 @@ channel_clear(channel_T *channel)
+     channel_clear_one(channel, PART_OUT);
+     channel_clear_one(channel, PART_ERR);
+     /* there is no callback or queue for PART_IN */
++    free_callback(channel->ch_callback, channel->ch_partial);
+     vim_free(channel->ch_callback);
+     channel->ch_callback = NULL;
+-    partial_unref(channel->ch_partial);
+     channel->ch_partial = NULL;
++    free_callback(channel->ch_close_cb, channel->ch_close_partial);
+     vim_free(channel->ch_close_cb);
+     channel->ch_close_cb = NULL;
+-    partial_unref(channel->ch_close_partial);
+     channel->ch_close_partial = NULL;
+ }
+ 
+@@ -4319,8 +4320,8 @@ job_free_contents(job_T *job)
+     mch_clear_job(job);
+ 
+     vim_free(job->jv_stoponexit);
++    free_callback(job->jv_exit_cb, job->jv_exit_partial);
+     vim_free(job->jv_exit_cb);
+-    partial_unref(job->jv_exit_partial);
+ }
+ 
+     static void
+@@ -4485,8 +4486,8 @@ job_set_options(job_T *job, jobopt_T *op
+     }
+     if (opt->jo_set & JO_EXIT_CB)
+     {
++	free_callback(job->jv_exit_cb, job->jv_exit_partial);
+ 	vim_free(job->jv_exit_cb);
+-	partial_unref(job->jv_exit_partial);
+ 	if (opt->jo_exit_cb == NULL || *opt->jo_exit_cb == NUL)
+ 	{
+ 	    job->jv_exit_cb = NULL;
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -20966,7 +21165,12 @@ get_callback(typval_T *arg, partial_T **
+@@ -21182,13 +21182,30 @@ get_callback(typval_T *arg, partial_T **
  	return (*pp)->pt_name;
      }
      *pp = NULL;
@@ -16,19 +140,45 @@ diff --git a/src/eval.c b/src/eval.c
  	return arg->vval.v_string;
      if (arg->v_type == VAR_NUMBER && arg->vval.v_number == 0)
  	return (char_u *)"";
+     EMSG(_("E921: Invalid callback argument"));
+     return NULL;
+ }
++
++/*
++ * Unref "callback" and "partial" retured by get_callback().
++ */
++    void
++free_callback(char_u *callback, partial_T *partial)
++{
++    if (partial == NULL)
++	func_unref(callback);
++    else
++	partial_unref(partial);
++}
+ #endif
+ 
+ #ifdef FEAT_TIMERS
 diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 --- a/src/ex_cmds2.c
 +++ b/src/ex_cmds2.c
-@@ -1121,8 +1121,11 @@ remove_timer(timer_T *timer)
+@@ -1121,8 +1121,8 @@ remove_timer(timer_T *timer)
      static void
  free_timer(timer_T *timer)
  {
-+    if (timer->tr_partial == NULL)
-+	func_unref(timer->tr_callback);
-+    else
-+	partial_unref(timer->tr_partial);
++    free_callback(timer->tr_callback, timer->tr_partial);
      vim_free(timer->tr_callback);
 -    partial_unref(timer->tr_partial);
      vim_free(timer);
  }
  
+diff --git a/src/proto/eval.pro b/src/proto/eval.pro
+--- a/src/proto/eval.pro
++++ b/src/proto/eval.pro
+@@ -94,6 +94,7 @@ void mzscheme_call_vim(char_u *name, typ
+ float_T vim_round(float_T f);
+ long do_searchpair(char_u *spat, char_u *mpat, char_u *epat, int dir, char_u *skip, int flags, pos_T *match_pos, linenr_T lnum_stop, long time_limit);
+ char_u *get_callback(typval_T *arg, partial_T **pp);
++void free_callback(char_u *callback, partial_T *partial);
+ void set_vim_var_nr(int idx, varnumber_T val);
+ varnumber_T get_vim_var_nr(int idx);
+ char_u *get_vim_var_str(int idx);
