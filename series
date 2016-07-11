@@ -39,6 +39,5 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
 detect-arch-on-mingw.patch
-func-refcount.patch
 lambda2.patch
 fix-config_cache-removal.patch #+rejected
