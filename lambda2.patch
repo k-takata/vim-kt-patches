@@ -1,6 +1,76 @@
 # HG changeset patch
-# Parent  7fc70282dcfcc5e29f7d05da228abcddd1df7828
+# Parent  1f5e1316945ac70236a5e566b4c3a9e15619e371
 
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -140,9 +140,10 @@ You will not get an error if you try to 
+ 
+ 1.2 Function references ~
+ 					*Funcref* *E695* *E718*
+-A Funcref variable is obtained with the |function()| function.	It can be used
+-in an expression in the place of a function name, before the parenthesis
+-around the arguments, to invoke the function it refers to.  Example: >
++A Funcref variable is obtained with the |function()| function or created with
++the lambda expression |expr-lambda|.  It can be used in an expression in the
++place of a function name, before the parenthesis around the arguments, to
++invoke the function it refers to.  Example: >
+ 
+ 	:let Fn = function("MyFunc")
+ 	:echo Fn()
+@@ -694,6 +695,7 @@ Expression syntax summary, from least to
+ 	@r			contents of register 'r'
+ 	function(expr1, ...)	function call
+ 	func{ti}on(expr1, ...)	function call with curly braces
++	{args -> expr1}		lambda expression
+ 
+ 
+ ".." indicates that the operations in this level can be concatenated.
+@@ -1207,6 +1209,44 @@ function(expr1, ...)	function call
+ See below |functions|.
+ 
+ 
++lambda expression					*expr-lambda*
++-----------------
++{args -> expr1}		lambda expression
++
++DRAFT  DRAFT  DRAFT  DRAFT  DRAFT  DRAFT  DRAFT  DRAFT  DRAFT  DRAFT ~
++
++A lambda expression creates a new unnamed function which constructed with
++|expr1|, and this evaluates to a |Funcref|.  Lambda expressions are differ
++from |user-functions| in the following points:
++
++1. Body of the lambda expression is an |expr1| and not a sequence of |Ex|
++   commands.
++2. The prefix "a:" is not needed for named arguments.  E.g.: >
++	:let F = {arg1, arg2 -> arg1 - arg2}
++	:echo F(5, 2)
++<	3
++   (Currently the prefix "a:" is accepted, but it might be changed.)
++
++
++USE CASES						*lambda-use-cases*
++
++|sort()|, |map()| and |filter()| can be used with the lambda expression.
++Examples: >
++	:echo map([1, 2, 3], {idx, val -> val + 1})
++<	[2, 3, 4] >
++	:echo sort([3,7,2,1,4], {a, b -> a - b})
++<	[1, 2, 3, 4, 7]
++
++Channel, job and timer can also be used with the lambda expression.
++Example: >
++	:let timer = timer_start(500,
++			\ {-> execute("echo 'Handler called'", "")},
++			\ {'repeat': 3})
++<	Handler called
++	Handler called
++	Handler called
++
++
+ ==============================================================================
+ 3. Internal variable				*internal-variables* *E461*
+ 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
@@ -13,7 +83,7 @@ diff --git a/src/eval.c b/src/eval.c
  static char_u *echo_string_core(typval_T *tv, char_u **tofree, char_u *numbuf, int copyID, int echo_style, int restore_copyID, int dict_val);
  static char_u *echo_string(typval_T *tv, char_u **tofree, char_u *numbuf, int copyID);
  static char_u *string_quote(char_u *str, int function);
-@@ -5249,9 +5251,12 @@ eval7(
+@@ -5261,9 +5263,12 @@ eval7(
  		break;
  
      /*
@@ -27,7 +97,7 @@ diff --git a/src/eval.c b/src/eval.c
  		break;
  
      /*
-@@ -8098,6 +8103,200 @@ failret:
+@@ -8110,6 +8115,204 @@ failret:
      return OK;
  }
  
@@ -150,12 +220,14 @@ diff --git a/src/eval.c b/src/eval.c
 +    if (ret == FAIL || *start != '>')
 +	return NOTDONE;
 +
-+    /* Parse again. */
++    /* Parse the arguments again. */
 +    *arg = skipwhite(*arg + 1);
 +    ret = get_function_args(arg, '-', &newargs, &varargs, FALSE);
 +    if (ret == FAIL || **arg != '>')
 +	goto errret;
 +
++    /* Get the start and the end of a expression.
++     * TODO: Support multiple expressions. */
 +    *arg = skipwhite(*arg + 1);
 +    s = *arg;
 +    ret = skip_expr(arg);
@@ -182,6 +254,8 @@ diff --git a/src/eval.c b/src/eval.c
 +	if (ga_grow(&newlines, 1) == FAIL)
 +	    goto errret;
 +
++	/* Add "return " before the expression.
++	 * TODO: Support multiple expressions.  */
 +	len = 7 + e - s + 1;
 +	p = (char_u *)alloc(len);
 +	if (p == NULL)
@@ -189,7 +263,7 @@ diff --git a/src/eval.c b/src/eval.c
 +	((char_u **)(newlines.ga_data))[newlines.ga_len++] = p;
 +	STRCPY(p, "return ");
 +	STRNCPY(p + 7, s, e - s);
-+	p[7 + e - s] = '\0';
++	p[7 + e - s] = NUL;
 +
 +	fp->uf_refcount = 1;
 +	STRCPY(fp->uf_name, name);
@@ -228,7 +302,7 @@ diff --git a/src/eval.c b/src/eval.c
      static char *
  get_var_special_name(int nr)
  {
-@@ -24037,7 +24241,6 @@ find_option_end(char_u **arg, int *opt_f
+@@ -24270,7 +24473,6 @@ find_option_end(char_u **arg, int *opt_f
  ex_function(exarg_T *eap)
  {
      char_u	*theline;
@@ -236,7 +310,7 @@ diff --git a/src/eval.c b/src/eval.c
      int		j;
      int		c;
      int		saved_did_emsg;
-@@ -24049,7 +24252,6 @@ ex_function(exarg_T *eap)
+@@ -24282,7 +24484,6 @@ ex_function(exarg_T *eap)
      garray_T	newargs;
      garray_T	newlines;
      int		varargs = FALSE;
@@ -244,7 +318,7 @@ diff --git a/src/eval.c b/src/eval.c
      int		flags = 0;
      ufunc_T	*fp;
      int		indent;
-@@ -24230,7 +24432,6 @@ ex_function(exarg_T *eap)
+@@ -24463,7 +24664,6 @@ ex_function(exarg_T *eap)
      }
      p = skipwhite(p + 1);
  
@@ -252,7 +326,7 @@ diff --git a/src/eval.c b/src/eval.c
      ga_init2(&newlines, (int)sizeof(char_u *), 3);
  
      if (!eap->skip)
-@@ -24260,66 +24461,8 @@ ex_function(exarg_T *eap)
+@@ -24493,66 +24693,8 @@ ex_function(exarg_T *eap)
  	    EMSG(_("E862: Cannot use g: here"));
      }
  
@@ -321,7 +395,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      /* find extra arguments "range", "dict" and "abort" */
      for (;;)
-@@ -24688,6 +24831,7 @@ ex_function(exarg_T *eap)
+@@ -24921,6 +25063,7 @@ ex_function(exarg_T *eap)
  
  erret:
      ga_clear_strings(&newargs);
@@ -329,7 +403,7 @@ diff --git a/src/eval.c b/src/eval.c
      ga_clear_strings(&newlines);
  ret_free:
      vim_free(skip_until);
-@@ -25502,7 +25646,9 @@ func_unref(char_u *name)
+@@ -25735,7 +25878,9 @@ func_unref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -340,11 +414,11 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	fp = find_func(name);
  	if (fp == NULL)
-@@ -25520,6 +25666,18 @@ func_unref(char_u *name)
+@@ -25753,6 +25898,18 @@ func_unref(char_u *name)
  		func_free(fp);
  	}
      }
-+    else if (!STRNICMP(name, "<LAMBDA>", 8))
++    else if (STRNCMP(name, "<LAMBDA>", 8) == 0)
 +    {
 +	/* fail silently, when lambda function isn't found. */
 +	fp = find_func(name);
@@ -359,7 +433,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -25530,7 +25688,9 @@ func_ref(char_u *name)
+@@ -25763,7 +25920,9 @@ func_ref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -370,11 +444,11 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	fp = find_func(name);
  	if (fp == NULL)
-@@ -25538,6 +25698,13 @@ func_ref(char_u *name)
+@@ -25771,6 +25930,13 @@ func_ref(char_u *name)
  	else
  	    ++fp->uf_refcount;
      }
-+    else if (!STRNICMP(name, "<LAMBDA>", 8))
++    else if (STRNCMP(name, "<LAMBDA>", 8) == 0)
 +    {
 +	/* fail silently, when lambda function isn't found. */
 +	fp = find_func(name);
@@ -384,3 +458,49 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
+@@ -25796,6 +25962,7 @@ call_user_func(
+     int		fixvar_idx = 0;	/* index in fixvar[] */
+     int		i;
+     int		ai;
++    int		islambda = FALSE;
+     char_u	numbuf[NUMBUFLEN];
+     char_u	*name;
+     size_t	len;
+@@ -25829,6 +25996,9 @@ call_user_func(
+     fc->breakpoint = dbg_find_breakpoint(FALSE, fp->uf_name, (linenr_T)0);
+     fc->dbg_tick = debug_tick;
+ 
++    if (STRNCMP(fp->uf_name, "<LAMBDA>", 8) == 0)
++	islambda = TRUE;
++
+     /*
+      * Note about using fc->fixvar[]: This is an array of FIXVAR_CNT variables
+      * with names up to VAR_SHORT_LEN long.  This avoids having to alloc/free
+@@ -25886,10 +26056,16 @@ call_user_func(
+ 						       (varnumber_T)lastline);
+     for (i = 0; i < argcount; ++i)
+     {
++	int	addlocal = FALSE;
++
+ 	ai = i - fp->uf_args.ga_len;
+ 	if (ai < 0)
++	{
+ 	    /* named argument a:name */
+ 	    name = FUNCARG(fp, i);
++	    if (islambda)
++		addlocal = TRUE;
++	}
+ 	else
+ 	{
+ 	    /* "..." argument a:1, a:2, etc. */
+@@ -25911,6 +26087,10 @@ call_user_func(
+ 	}
+ 	STRCPY(v->di_key, name);
+ 	hash_add(&fc->l_avars.dv_hashtab, DI2HIKEY(v));
++	/* Named arguments can be accessed without the "a:" prefix in lambda
++	 * expressions.  Add to the l: dict. */
++	if (addlocal)
++	    hash_add(&fc->l_vars.dv_hashtab, DI2HIKEY(v));
+ 
+ 	/* Note: the values are copied directly to avoid alloc/free.
+ 	 * "argvars" must have VAR_FIXED for v_lock. */
