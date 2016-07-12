@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  1f5e1316945ac70236a5e566b4c3a9e15619e371
+# Parent  613a286b5d2cd9d67cee22885c2f36a4f6a061b3
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -302,7 +302,17 @@ diff --git a/src/eval.c b/src/eval.c
      static char *
  get_var_special_name(int nr)
  {
-@@ -24270,7 +24473,6 @@ find_option_end(char_u **arg, int *opt_f
+@@ -9321,7 +9524,8 @@ call_func(
+ 		    call_user_func(fp, argcount, argvars, rettv,
+ 					       firstline, lastline,
+ 				  (fp->uf_flags & FC_DICT) ? selfdict : NULL);
+-		    if (--fp->uf_calls <= 0 && isdigit(*fp->uf_name)
++		    if (--fp->uf_calls <= 0 && (isdigit(*fp->uf_name)
++				|| STRNCMP(fp->uf_name, "<LAMBDA>", 8) == 0)
+ 						      && fp->uf_refcount <= 0)
+ 			/* Function was unreferenced while being used, free it
+ 			 * now. */
+@@ -24273,7 +24477,6 @@ find_option_end(char_u **arg, int *opt_f
  ex_function(exarg_T *eap)
  {
      char_u	*theline;
@@ -310,7 +320,7 @@ diff --git a/src/eval.c b/src/eval.c
      int		j;
      int		c;
      int		saved_did_emsg;
-@@ -24282,7 +24484,6 @@ ex_function(exarg_T *eap)
+@@ -24285,7 +24488,6 @@ ex_function(exarg_T *eap)
      garray_T	newargs;
      garray_T	newlines;
      int		varargs = FALSE;
@@ -318,7 +328,7 @@ diff --git a/src/eval.c b/src/eval.c
      int		flags = 0;
      ufunc_T	*fp;
      int		indent;
-@@ -24463,7 +24664,6 @@ ex_function(exarg_T *eap)
+@@ -24466,7 +24668,6 @@ ex_function(exarg_T *eap)
      }
      p = skipwhite(p + 1);
  
@@ -326,7 +336,7 @@ diff --git a/src/eval.c b/src/eval.c
      ga_init2(&newlines, (int)sizeof(char_u *), 3);
  
      if (!eap->skip)
-@@ -24493,66 +24693,8 @@ ex_function(exarg_T *eap)
+@@ -24496,66 +24697,8 @@ ex_function(exarg_T *eap)
  	    EMSG(_("E862: Cannot use g: here"));
      }
  
@@ -395,7 +405,7 @@ diff --git a/src/eval.c b/src/eval.c
  
      /* find extra arguments "range", "dict" and "abort" */
      for (;;)
-@@ -24921,6 +25063,7 @@ ex_function(exarg_T *eap)
+@@ -24924,6 +25067,7 @@ ex_function(exarg_T *eap)
  
  erret:
      ga_clear_strings(&newargs);
@@ -403,7 +413,7 @@ diff --git a/src/eval.c b/src/eval.c
      ga_clear_strings(&newlines);
  ret_free:
      vim_free(skip_until);
-@@ -25735,7 +25878,9 @@ func_unref(char_u *name)
+@@ -25738,7 +25882,9 @@ func_unref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -414,7 +424,7 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	fp = find_func(name);
  	if (fp == NULL)
-@@ -25753,6 +25898,18 @@ func_unref(char_u *name)
+@@ -25756,6 +25902,18 @@ func_unref(char_u *name)
  		func_free(fp);
  	}
      }
@@ -433,7 +443,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -25763,7 +25920,9 @@ func_ref(char_u *name)
+@@ -25766,7 +25924,9 @@ func_ref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -444,7 +454,7 @@ diff --git a/src/eval.c b/src/eval.c
      {
  	fp = find_func(name);
  	if (fp == NULL)
-@@ -25771,6 +25930,13 @@ func_ref(char_u *name)
+@@ -25774,6 +25934,13 @@ func_ref(char_u *name)
  	else
  	    ++fp->uf_refcount;
      }
@@ -458,7 +468,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -25796,6 +25962,7 @@ call_user_func(
+@@ -25799,6 +25966,7 @@ call_user_func(
      int		fixvar_idx = 0;	/* index in fixvar[] */
      int		i;
      int		ai;
@@ -466,7 +476,7 @@ diff --git a/src/eval.c b/src/eval.c
      char_u	numbuf[NUMBUFLEN];
      char_u	*name;
      size_t	len;
-@@ -25829,6 +25996,9 @@ call_user_func(
+@@ -25832,6 +26000,9 @@ call_user_func(
      fc->breakpoint = dbg_find_breakpoint(FALSE, fp->uf_name, (linenr_T)0);
      fc->dbg_tick = debug_tick;
  
@@ -476,11 +486,12 @@ diff --git a/src/eval.c b/src/eval.c
      /*
       * Note about using fc->fixvar[]: This is an array of FIXVAR_CNT variables
       * with names up to VAR_SHORT_LEN long.  This avoids having to alloc/free
-@@ -25886,10 +26056,16 @@ call_user_func(
+@@ -25889,10 +26060,17 @@ call_user_func(
  						       (varnumber_T)lastline);
      for (i = 0; i < argcount; ++i)
      {
-+	int	addlocal = FALSE;
++	int	    addlocal = FALSE;
++	dictitem_T  *v2;
 +
  	ai = i - fp->uf_args.ga_len;
  	if (ai < 0)
@@ -493,14 +504,191 @@ diff --git a/src/eval.c b/src/eval.c
  	else
  	{
  	    /* "..." argument a:1, a:2, etc. */
-@@ -25911,6 +26087,10 @@ call_user_func(
+@@ -25903,6 +26081,9 @@ call_user_func(
+ 	{
+ 	    v = &fc->fixvar[fixvar_idx++].var;
+ 	    v->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX;
++
++	    if (addlocal)
++		v2 = v;
+ 	}
+ 	else
+ 	{
+@@ -25911,6 +26092,18 @@ call_user_func(
+ 	    if (v == NULL)
+ 		break;
+ 	    v->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX | DI_FLAGS_ALLOC;
++
++	    if (addlocal)
++	    {
++		v2 = (dictitem_T *)alloc((unsigned)(sizeof(dictitem_T)
++							     + STRLEN(name)));
++		if (v2 == NULL)
++		{
++		    vim_free(v);
++		    break;
++		}
++		v2->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX | DI_FLAGS_ALLOC;
++	    }
  	}
  	STRCPY(v->di_key, name);
  	hash_add(&fc->l_avars.dv_hashtab, DI2HIKEY(v));
+@@ -25920,6 +26113,16 @@ call_user_func(
+ 	v->di_tv = argvars[i];
+ 	v->di_tv.v_lock = VAR_FIXED;
+ 
 +	/* Named arguments can be accessed without the "a:" prefix in lambda
 +	 * expressions.  Add to the l: dict. */
 +	if (addlocal)
-+	    hash_add(&fc->l_vars.dv_hashtab, DI2HIKEY(v));
++	{
++	    STRCPY(v2->di_key, name);
++	    copy_tv(&v->di_tv, &v2->di_tv);
++	    v2->di_tv.v_lock = VAR_FIXED;
++	    hash_add(&fc->l_vars.dv_hashtab, DI2HIKEY(v2));
++	}
++
+ 	if (ai >= 0 && ai < MAX_FUNC_ARGS)
+ 	{
+ 	    list_append(&fc->l_varlist, &fc->l_listitems[ai]);
+diff --git a/src/testdir/test_alot.vim b/src/testdir/test_alot.vim
+--- a/src/testdir/test_alot.vim
++++ b/src/testdir/test_alot.vim
+@@ -19,6 +19,7 @@ source test_goto.vim
+ source test_help_tagjump.vim
+ source test_join.vim
+ source test_jumps.vim
++source test_lambda.vim
+ source test_lispwords.vim
+ source test_matchstrpos.vim
+ source test_menu.vim
+diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
+--- a/src/testdir/test_channel.vim
++++ b/src/testdir/test_channel.vim
+@@ -182,6 +182,18 @@ func s:communicate(port)
+   endif
+   call assert_equal('got it', s:responseMsg)
  
- 	/* Note: the values are copied directly to avoid alloc/free.
- 	 * "argvars" must have VAR_FIXED for v_lock. */
++  " Using lambda.
++  let s:responseMsg = ''
++  call ch_sendexpr(handle, 'hello!', {'callback': {a, b -> s:RequestHandler(a, b)}})
++  call s:waitFor('exists("s:responseHandle")')
++  if !exists('s:responseHandle')
++    call assert_false(1, 's:responseHandle was not set')
++  else
++    call assert_equal(handle, s:responseHandle)
++    unlet s:responseHandle
++  endif
++  call assert_equal('got it', s:responseMsg)
++
+   " Collect garbage, tests that our handle isn't collected.
+   call test_garbagecollect_now()
+ 
+@@ -1156,6 +1168,32 @@ func Test_read_in_close_cb()
+   endtry
+ endfunc
+ 
++func Test_out_cb_lambda()
++  if !has('job') || !exists('*lambda')
++    return
++  endif
++  call ch_log('Test_out_cb_lambda()')
++
++  let job = job_start(s:python . " test_channel_pipe.py",
++  \ {'out_cb': lambda(":let s:outmsg = 'lambda: ' . a:2"),
++  \ 'out_mode': 'json',
++  \ 'err_cb': lambda(":let s:errmsg = 'lambda: ' . a:2"),
++  \ 'err_mode': 'json'})
++  call assert_equal("run", job_status(job))
++  try
++    let s:outmsg = ''
++    let s:errmsg = ''
++    call ch_sendraw(job, "echo [0, \"hello\"]\n")
++    call ch_sendraw(job, "echoerr [0, \"there\"]\n")
++    call s:waitFor('s:outmsg != ""')
++    call assert_equal("lambda: hello", s:outmsg)
++    call s:waitFor('s:errmsg != ""')
++    call assert_equal("lambda: there", s:errmsg)
++  finally
++    call job_stop(job)
++  endtry
++endfunc
++
+ """"""""""
+ 
+ let s:unletResponse = ''
+@@ -1372,6 +1410,28 @@ func Test_collapse_buffers()
+   bwipe!
+ endfunc
+ 
++function s:test_close_lambda(port)
++  if !exists('*lambda')
++    return
++  endif
++
++  let handle = ch_open('localhost:' . a:port, s:chopt)
++  if ch_status(handle) == "fail"
++    call assert_false(1, "Can't open channel")
++    return
++  endif
++  let s:close_ret = ''
++  call ch_setoptions(handle, {'close_cb': lambda("let s:close_ret = 'closed'")})
++
++  call assert_equal('', ch_evalexpr(handle, 'close me'))
++  call s:waitFor('"closed" == s:close_ret')
++  call assert_equal('closed', s:close_ret)
++endfunc
++
++func Test_close_lambda()
++  call ch_log('Test_close_lambda()')
++  call s:run_server('s:test_close_lambda')
++endfunc
+ 
+ " Uncomment this to see what happens, output is in src/testdir/channellog.
+ " call ch_logfile('channellog', 'w')
+diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_lambda.vim
+@@ -0,0 +1,42 @@
++function! Test_lambda_with_filter()
++  let s:x = 2
++  call assert_equal([2, 3], filter([1, 2, 3], {i, v -> v >= s:x}))
++endfunction
++
++function! Test_lambda_with_map()
++  let s:x = 1
++  call assert_equal([2, 3, 4], map([1, 2, 3], {i, v -> v + s:x}))
++endfunction
++
++function! Test_lambda_with_sort()
++  call assert_equal([1, 2, 3, 4, 7], sort([3,7,2,1,4], {a, b -> a - b}))
++endfunction
++
++function! Test_lambda_with_timer()
++  if !has('timers')
++    return
++  endif
++
++  let s:n = 0
++  let s:timer_id = 0
++  function! s:Foo()
++    "let n = 0
++    let s:timer_id = timer_start(50, {-> execute("let s:n += 1 | echo s:n")}, {"repeat": -1})
++  endfunction
++
++  call s:Foo()
++  sleep 200ms
++  " do not collect lambda
++  call test_garbagecollect_now()
++  let m = s:n
++  sleep 200ms
++  call timer_stop(s:timer_id)
++  call assert_true(m > 1)
++  call assert_true(s:n > m + 1)
++  call assert_true(s:n < 9)
++endfunction
++
++function! Test_lambda_with_partial()
++  let l:Cb = function({... -> ['zero', a:1, a:2, a:3]}, ['one', 'two'])
++  call assert_equal(['zero', 'one', 'two', 'three'], l:Cb('three'))
++endfunction
