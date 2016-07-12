@@ -22,3 +22,15 @@ diff --git a/src/message.c b/src/message.c
  	    /* get parameter value, do initial processing */
  	    switch (fmt_spec)
  	    {
+diff --git a/src/testdir/test_viml.vim b/src/testdir/test_viml.vim
+--- a/src/testdir/test_viml.vim
++++ b/src/testdir/test_viml.vim
+@@ -1222,6 +1222,8 @@ func Test_num64()
+     call assert_equal(0x100000001, max(rng))
+     call assert_equal(0xFFFFffff, min(rng))
+     call assert_equal(rng, sort(range(0x100000001, 0xFFFFffff, -1), 'N'))
++
++    call assert_equal("123456789012345", printf('%d', 123456789012345))
+ endfunc
+ 
+ "-------------------------------------------------------------------------------
