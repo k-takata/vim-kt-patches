@@ -39,5 +39,4 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
 lambda2.patch
-printf-num64.patch
 fix-config_cache-removal.patch #+rejected
