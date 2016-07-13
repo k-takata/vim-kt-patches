@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  95113cd56460b4a1f1585aee1fd8bade58a433ce
+# Parent  711b300e150f92cf921094ee4b1adc7d450169b8
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1834,6 +1834,27 @@ v:swapcommand	Normal mode command to be 
+@@ -1829,6 +1829,27 @@ v:swapcommand	Normal mode command to be 
  		example, when jumping to a tag the value is ":tag tagname\r".
  		For ":edit +cmd file" the value is ":cmd\r".
  
@@ -35,10 +35,10 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -380,6 +380,16 @@ static struct vimvar
+@@ -379,6 +379,16 @@ static struct vimvar
+     {VV_NAME("none",		 VAR_SPECIAL), VV_RO},
      {VV_NAME("vim_did_enter",	 VAR_NUMBER), VV_RO},
      {VV_NAME("testing",		 VAR_NUMBER), 0},
-     {VV_NAME("max_number",	 VAR_NUMBER), VV_RO},
 +    {VV_NAME("t_number",	 VAR_NUMBER), VV_RO},
 +    {VV_NAME("t_string",	 VAR_NUMBER), VV_RO},
 +    {VV_NAME("t_func",		 VAR_NUMBER), VV_RO},
@@ -52,7 +52,7 @@ diff --git a/src/eval.c b/src/eval.c
  };
  
  /* shorthand */
-@@ -394,6 +404,21 @@ static struct vimvar
+@@ -393,6 +403,21 @@ static struct vimvar
  static dictitem_T	vimvars_var;		/* variable used for v: */
  #define vimvarht  vimvardict.dv_hashtab
  
@@ -74,9 +74,9 @@ diff --git a/src/eval.c b/src/eval.c
  static void prepare_vimvar(int idx, typval_T *save_tv);
  static void restore_vimvar(int idx, typval_T *save_tv);
  static int ex_let_vars(char_u *arg, typval_T *tv, int copy, int semicolon, int var_count, char_u *nextchars);
-@@ -1007,6 +1032,17 @@ eval_init(void)
-     set_vim_var_nr(VV_MAX_NUMBER, 0x7fffffff);
- #endif
+@@ -1000,6 +1025,17 @@ eval_init(void)
+     set_vim_var_nr(VV_NONE, VVAL_NONE);
+     set_vim_var_nr(VV_NULL, VVAL_NULL);
  
 +    set_vim_var_nr(VV_TYPE_NUMBER,  VAR_TYPE_NUMBER);
 +    set_vim_var_nr(VV_TYPE_STRING,  VAR_TYPE_STRING);
@@ -92,7 +92,7 @@ diff --git a/src/eval.c b/src/eval.c
      set_reg_var(0);  /* default for v:register is not 0 but '"' */
  
  #ifdef EBCDIC
-@@ -21684,22 +21720,22 @@ f_type(typval_T *argvars, typval_T *rett
+@@ -21677,22 +21713,22 @@ f_type(typval_T *argvars, typval_T *rett
  
      switch (argvars[0].v_type)
      {
@@ -128,22 +128,22 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1984,7 +1984,17 @@ typedef int sock_T;
+@@ -1983,7 +1983,17 @@ typedef int sock_T;
+ #define VV_NONE		68
  #define VV_VIM_DID_ENTER 69
  #define VV_TESTING	70
- #define VV_MAX_NUMBER	71
--#define VV_LEN		72	/* number of v: vars */
-+#define VV_TYPE_NUMBER	72
-+#define VV_TYPE_STRING	73
-+#define VV_TYPE_FUNC	74
-+#define VV_TYPE_LIST	75
-+#define VV_TYPE_DICT	76
-+#define VV_TYPE_FLOAT	77
-+#define VV_TYPE_BOOL	78
-+#define VV_TYPE_NONE	79
-+#define VV_TYPE_JOB	80
-+#define VV_TYPE_CHANNEL	81
-+#define VV_LEN		82	/* number of v: vars */
+-#define VV_LEN		71	/* number of v: vars */
++#define VV_TYPE_NUMBER	71
++#define VV_TYPE_STRING	72
++#define VV_TYPE_FUNC	73
++#define VV_TYPE_LIST	74
++#define VV_TYPE_DICT	75
++#define VV_TYPE_FLOAT	76
++#define VV_TYPE_BOOL	77
++#define VV_TYPE_NONE	78
++#define VV_TYPE_JOB	79
++#define VV_TYPE_CHANNEL	80
++#define VV_LEN		81	/* number of v: vars */
  
  /* used for v_number in VAR_SPECIAL */
  #define VVAL_FALSE	0L
