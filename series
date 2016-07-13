@@ -39,7 +39,6 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
 lambda2.patch
-fix-cscopequickfix.patch
 v_max_number.patch
 v_type.patch
 fix-7.4.2030.patch
