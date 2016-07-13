@@ -32,6 +32,33 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  				*v:termresponse* *termresponse-variable*
  v:termresponse	The escape sequence returned by the terminal for the |t_RV|
  		termcap entry.	It is set when Vim receives an escape sequence
+@@ -7527,16 +7548,16 @@ trunc({expr})							*trunc()*
+ 		
+ 							*type()*
+ type({expr})	The result is a Number, depending on the type of {expr}:
+-			Number:	    0
+-			String:	    1
+-			Funcref:    2
+-			List:	    3
+-			Dictionary: 4
+-			Float:	    5
+-			Boolean:    6 (v:false and v:true)
+-			None	    7 (v:null and v:none)
+-			Job	    8
+-			Channel	    9
++			Number:	    0 or |v:t_number|
++			String:	    1 or |v:t_string|
++			Funcref:    2 or |v:t_func|
++			List:	    3 or |v:t_list|
++			Dictionary: 4 or |v:t_dict|
++			Float:	    5 or |v:t_float|
++			Boolean:    6 or |v:t_bool| (v:false and v:true)
++			None	    7 or |v:t_none| (v:null and v:none)
++			Job	    8 or |v:t_job|
++			Channel	    9 or |v:t_channel|
+ 		To avoid the magic numbers it should be used this way: >
+ 			:if type(myvar) == type(0)
+ 			:if type(myvar) == type("")
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
