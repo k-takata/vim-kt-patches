@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  3992671c050acfc6f7f14744cd1ad86adbb78277
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -149,7 +149,7 @@ WINDRES_CC = $(CC)
+ 
+ # Get the default ARCH.
+ ifndef ARCH
+-ARCH := $(shell $(CC) -dumpmachine | sed -e 's/-.*//')
++ARCH := $(shell $(CC) -dumpmachine | sed -e 's/-.*//' -e 's/x86_64/x86-64/')
+ endif
+ 
+ 
