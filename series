@@ -41,5 +41,4 @@ make-main-simpler.patch
 lambda2.patch
 v_max_number.patch
 v_type.patch
-fix-7.4.2030.patch
 fix-config_cache-removal.patch #+rejected
