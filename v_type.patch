@@ -1,0 +1,149 @@
+# HG changeset patch
+# Parent  95113cd56460b4a1f1585aee1fd8bade58a433ce
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1834,6 +1834,27 @@ v:swapcommand	Normal mode command to be 
+ 		example, when jumping to a tag the value is ":tag tagname\r".
+ 		For ":edit +cmd file" the value is ":cmd\r".
+ 
++					*v:t_bool* *t_bool-varialble*
++v:t_bool	Value of Boolean type.  See: |type()|
++					*v:t_channel* *t_channel-varialble*
++v:t_channel	Value of Channel type.  See: |type()|
++					*v:t_dict* *t_dict-varialble*
++v:t_dict	Value of Dictionary type.  See: |type()|
++					*v:t_float* *t_float-varialble*
++v:t_float	Value of Float type.  See: |type()|
++					*v:t_func* *t_func-varialble*
++v:t_func	Value of Funcref type.  See: |type()|
++					*v:t_job* *t_job-varialble*
++v:t_job		Value of Job type.  See: |type()|
++					*v:t_list* *t_list-varialble*
++v:t_list	Value of List type.  See: |type()|
++					*v:t_none* *t_none-varialble*
++v:t_none	Value of None type.  See: |type()|
++					*v:t_number* *t_number-varialble*
++v:t_number	Value of Number type.  See: |type()|
++					*v:t_string* *t_string-varialble*
++v:t_string	Value of String type.  See: |type()|
++
+ 				*v:termresponse* *termresponse-variable*
+ v:termresponse	The escape sequence returned by the terminal for the |t_RV|
+ 		termcap entry.	It is set when Vim receives an escape sequence
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -380,6 +380,16 @@ static struct vimvar
+     {VV_NAME("vim_did_enter",	 VAR_NUMBER), VV_RO},
+     {VV_NAME("testing",		 VAR_NUMBER), 0},
+     {VV_NAME("max_number",	 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_number",	 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_string",	 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_func",		 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_list",		 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_dict",		 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_float",		 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_bool",		 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_none",		 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_job",		 VAR_NUMBER), VV_RO},
++    {VV_NAME("t_channel",	 VAR_NUMBER), VV_RO},
+ };
+ 
+ /* shorthand */
+@@ -394,6 +404,21 @@ static struct vimvar
+ static dictitem_T	vimvars_var;		/* variable used for v: */
+ #define vimvarht  vimvardict.dv_hashtab
+ 
++/*
++ * Type values for type().
++ */
++#define VAR_TYPE_NUMBER	    0
++#define VAR_TYPE_STRING	    1
++#define VAR_TYPE_FUNC	    2
++#define VAR_TYPE_LIST	    3
++#define VAR_TYPE_DICT	    4
++#define VAR_TYPE_FLOAT	    5
++#define VAR_TYPE_BOOL	    6
++#define VAR_TYPE_NONE	    7
++#define VAR_TYPE_JOB	    8
++#define VAR_TYPE_CHANNEL    9
++
++
+ static void prepare_vimvar(int idx, typval_T *save_tv);
+ static void restore_vimvar(int idx, typval_T *save_tv);
+ static int ex_let_vars(char_u *arg, typval_T *tv, int copy, int semicolon, int var_count, char_u *nextchars);
+@@ -1007,6 +1032,17 @@ eval_init(void)
+     set_vim_var_nr(VV_MAX_NUMBER, 0x7fffffff);
+ #endif
+ 
++    set_vim_var_nr(VV_TYPE_NUMBER,  VAR_TYPE_NUMBER);
++    set_vim_var_nr(VV_TYPE_STRING,  VAR_TYPE_STRING);
++    set_vim_var_nr(VV_TYPE_FUNC,    VAR_TYPE_FUNC);
++    set_vim_var_nr(VV_TYPE_LIST,    VAR_TYPE_LIST);
++    set_vim_var_nr(VV_TYPE_DICT,    VAR_TYPE_DICT);
++    set_vim_var_nr(VV_TYPE_FLOAT,   VAR_TYPE_FLOAT);
++    set_vim_var_nr(VV_TYPE_BOOL,    VAR_TYPE_BOOL);
++    set_vim_var_nr(VV_TYPE_NONE,    VAR_TYPE_NONE);
++    set_vim_var_nr(VV_TYPE_JOB,     VAR_TYPE_JOB);
++    set_vim_var_nr(VV_TYPE_CHANNEL, VAR_TYPE_CHANNEL);
++
+     set_reg_var(0);  /* default for v:register is not 0 but '"' */
+ 
+ #ifdef EBCDIC
+@@ -21684,22 +21720,22 @@ f_type(typval_T *argvars, typval_T *rett
+ 
+     switch (argvars[0].v_type)
+     {
+-	case VAR_NUMBER: n = 0; break;
+-	case VAR_STRING: n = 1; break;
++	case VAR_NUMBER: n = VAR_TYPE_NUMBER; break;
++	case VAR_STRING: n = VAR_TYPE_STRING; break;
+ 	case VAR_PARTIAL:
+-	case VAR_FUNC:   n = 2; break;
+-	case VAR_LIST:   n = 3; break;
+-	case VAR_DICT:   n = 4; break;
+-	case VAR_FLOAT:  n = 5; break;
++	case VAR_FUNC:   n = VAR_TYPE_FUNC; break;
++	case VAR_LIST:   n = VAR_TYPE_LIST; break;
++	case VAR_DICT:   n = VAR_TYPE_DICT; break;
++	case VAR_FLOAT:  n = VAR_TYPE_FLOAT; break;
+ 	case VAR_SPECIAL:
+ 	     if (argvars[0].vval.v_number == VVAL_FALSE
+ 		     || argvars[0].vval.v_number == VVAL_TRUE)
+-		 n = 6;
++		 n = VAR_TYPE_BOOL;
+ 	     else
+-		 n = 7;
++		 n = VAR_TYPE_NONE;
+ 	     break;
+-	case VAR_JOB:     n = 8; break;
+-	case VAR_CHANNEL: n = 9; break;
++	case VAR_JOB:     n = VAR_TYPE_JOB; break;
++	case VAR_CHANNEL: n = VAR_TYPE_CHANNEL; break;
+ 	case VAR_UNKNOWN:
+ 	     EMSG2(_(e_intern2), "f_type(UNKNOWN)");
+ 	     n = -1;
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -1984,7 +1984,17 @@ typedef int sock_T;
+ #define VV_VIM_DID_ENTER 69
+ #define VV_TESTING	70
+ #define VV_MAX_NUMBER	71
+-#define VV_LEN		72	/* number of v: vars */
++#define VV_TYPE_NUMBER	72
++#define VV_TYPE_STRING	73
++#define VV_TYPE_FUNC	74
++#define VV_TYPE_LIST	75
++#define VV_TYPE_DICT	76
++#define VV_TYPE_FLOAT	77
++#define VV_TYPE_BOOL	78
++#define VV_TYPE_NONE	79
++#define VV_TYPE_JOB	80
++#define VV_TYPE_CHANNEL	81
++#define VV_LEN		82	/* number of v: vars */
+ 
+ /* used for v_number in VAR_SPECIAL */
+ #define VVAL_FALSE	0L

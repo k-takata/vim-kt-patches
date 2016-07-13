@@ -1,0 +1,55 @@
+# HG changeset patch
+# Parent  f2d1a8bf618d620b997fe8db03472cdeed05c463
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1657,6 +1657,11 @@ v:lnum		Line number for the 'foldexpr' |
+ 		expressions is being evaluated.  Read-only when in the
+ 		|sandbox|.
+ 
++					*v:max_number* *max_number-variable*
++v:max_number	Maximum value which can be represented by a Number.
++		If the |+num64| feature is enabled the value is
++		9223372036854775807, otherwise 2147483647.
++
+ 					*v:mouse_win* *mouse_win-variable*
+ v:mouse_win	Window number for a mouse click obtained with |getchar()|.
+ 		First window has number 1, like with |winnr()|.  The value is
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -379,6 +379,7 @@ static struct vimvar
+     {VV_NAME("none",		 VAR_SPECIAL), VV_RO},
+     {VV_NAME("vim_did_enter",	 VAR_NUMBER), VV_RO},
+     {VV_NAME("testing",		 VAR_NUMBER), 0},
++    {VV_NAME("max_number",	 VAR_NUMBER), VV_RO},
+ };
+ 
+ /* shorthand */
+@@ -1000,6 +1001,12 @@ eval_init(void)
+     set_vim_var_nr(VV_NONE, VVAL_NONE);
+     set_vim_var_nr(VV_NULL, VVAL_NULL);
+ 
++#ifdef FEAT_NUM64
++    set_vim_var_nr(VV_MAX_NUMBER, 0x7fffffffffffffff);
++#else
++    set_vim_var_nr(VV_MAX_NUMBER, 0x7fffffff);
++#endif
++
+     set_reg_var(0);  /* default for v:register is not 0 but '"' */
+ 
+ #ifdef EBCDIC
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -1983,7 +1983,8 @@ typedef int sock_T;
+ #define VV_NONE		68
+ #define VV_VIM_DID_ENTER 69
+ #define VV_TESTING	70
+-#define VV_LEN		71	/* number of v: vars */
++#define VV_MAX_NUMBER	71
++#define VV_LEN		72	/* number of v: vars */
+ 
+ /* used for v_number in VAR_SPECIAL */
+ #define VVAL_FALSE	0L
