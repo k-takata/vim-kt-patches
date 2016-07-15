@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  711b300e150f92cf921094ee4b1adc7d450169b8
+# Parent  973afb2c026542b73572eda33d22ad785e033b9f
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -9,25 +9,25 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		For ":edit +cmd file" the value is ":cmd\r".
  
 +				*v:t_TYPE* *v:t_bool* *t_bool-varialble*
-+v:t_bool	Value of Boolean type.  See: |type()|
++v:t_bool	Value of Boolean type.  Read-only.  See: |type()|
 +					*v:t_channel* *t_channel-varialble*
-+v:t_channel	Value of Channel type.  See: |type()|
++v:t_channel	Value of Channel type.  Read-only.  See: |type()|
 +					*v:t_dict* *t_dict-varialble*
-+v:t_dict	Value of Dictionary type.  See: |type()|
++v:t_dict	Value of Dictionary type.  Read-only.  See: |type()|
 +					*v:t_float* *t_float-varialble*
-+v:t_float	Value of Float type.  See: |type()|
++v:t_float	Value of Float type.  Read-only.  See: |type()|
 +					*v:t_func* *t_func-varialble*
-+v:t_func	Value of Funcref type.  See: |type()|
++v:t_func	Value of Funcref type.  Read-only.  See: |type()|
 +					*v:t_job* *t_job-varialble*
-+v:t_job		Value of Job type.  See: |type()|
++v:t_job		Value of Job type.  Read-only.  See: |type()|
 +					*v:t_list* *t_list-varialble*
-+v:t_list	Value of List type.  See: |type()|
++v:t_list	Value of List type.  Read-only.  See: |type()|
 +					*v:t_none* *t_none-varialble*
-+v:t_none	Value of None type.  See: |type()|
++v:t_none	Value of None type.  Read-only.  See: |type()|
 +					*v:t_number* *t_number-varialble*
-+v:t_number	Value of Number type.  See: |type()|
++v:t_number	Value of Number type.  Read-only.  See: |type()|
 +					*v:t_string* *t_string-varialble*
-+v:t_string	Value of String type.  See: |type()|
++v:t_string	Value of String type.  Read-only.  See: |type()|
 +
  				*v:termresponse* *termresponse-variable*
  v:termresponse	The escape sequence returned by the terminal for the |t_RV|
