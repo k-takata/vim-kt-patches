@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  973afb2c026542b73572eda33d22ad785e033b9f
+# Parent  28ed80a34a9409f316d78e84c2678a939ac8d319
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1829,6 +1829,27 @@ v:swapcommand	Normal mode command to be 
+@@ -1827,6 +1827,27 @@ v:swapcommand	Normal mode command to be 
  		example, when jumping to a tag the value is ":tag tagname\r".
  		For ":edit +cmd file" the value is ":cmd\r".
  
@@ -122,7 +122,7 @@ diff --git a/src/eval.c b/src/eval.c
      set_reg_var(0);  /* default for v:register is not 0 but '"' */
  
  #ifdef EBCDIC
-@@ -21677,22 +21713,22 @@ f_type(typval_T *argvars, typval_T *rett
+@@ -21679,22 +21715,22 @@ f_type(typval_T *argvars, typval_T *rett
  
      switch (argvars[0].v_type)
      {
@@ -158,15 +158,15 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/testdir/test_channel.vim b/src/testdir/test_channel.vim
 --- a/src/testdir/test_channel.vim
 +++ b/src/testdir/test_channel.vim
-@@ -115,6 +115,7 @@ endfunc
- 
- func s:communicate(port)
+@@ -188,6 +188,7 @@ endfunc
+ " Test that we can open two channels.
+ func Ch_two_channels(port)
    let handle = ch_open('localhost:' . a:port, s:chopt)
 +  call assert_equal(v:t_channel, type(handle))
    if ch_status(handle) == "fail"
      call assert_false(1, "Can't open channel")
      return
-@@ -507,6 +508,7 @@ func Test_raw_pipe()
+@@ -420,6 +421,7 @@ func Test_raw_pipe()
    endif
    call ch_log('Test_raw_pipe()')
    let job = job_start(s:python . " test_channel_pipe.py", {'mode': 'raw'})
