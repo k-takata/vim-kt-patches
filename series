@@ -40,4 +40,5 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 v_type.patch
 vvar-readonly.patch
+fix-function-list.patch
 fix-config_cache-removal.patch #+rejected
