@@ -1,15 +1,3 @@
 # HG changeset patch
 # Parent  94d8b484c11becfc65706af768b207927ff3b1cb
 
-diff --git a/src/eval.c b/src/eval.c
---- a/src/eval.c
-+++ b/src/eval.c
-@@ -8327,7 +8327,7 @@ get_lambda_tv(char_u **arg, typval_T *re
- 	if (prof_def_func())
- 	    func_do_profile(fp);
- #endif
--	fp->uf_varargs = TRUE;
-+	fp->uf_varargs = varargs;
- 	fp->uf_flags = 0;
- 	fp->uf_calls = 0;
- 	fp->uf_script_ID = current_SID;
