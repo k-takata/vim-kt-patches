@@ -4,6 +4,15 @@
 diff --git a/src/dict.c b/src/dict.c
 --- a/src/dict.c
 +++ b/src/dict.c
+@@ -109,7 +109,7 @@ dict_free_dict(dict_T *d)
+     vim_free(d);
+ }
+ 
+-    static void
++    void
+ dict_free(dict_T *d)
+ {
+     if (!in_free_unref_items)
 @@ -188,7 +188,7 @@ dictitem_alloc(char_u *key)
  /*
   * Make a copy of a Dictionary item.
@@ -20,7 +29,7 @@ diff --git a/src/eval.c b/src/eval.c
      scid_T	uf_script_ID;	/* ID of script where function was defined,
  				   used for s: variables */
      int		uf_refcount;	/* for numbered function: reference count */
-+    dict_T	*uf_lvars;	/*  */
++    dict_T	*uf_lvars;	/* for lambda: outer scope variables */
      char_u	uf_name[1];	/* name of function (actually longer); can
  				   start with <SNR>123_ (<SNR> is K_SPECIAL
  				   KS_EXTRA KE_SNR) */
@@ -69,7 +78,7 @@ diff --git a/src/eval.c b/src/eval.c
 +    eval_lvars_dict = dict_alloc();
 +    if (eval_lvars_dict == NULL)
 +	goto errret;
-+    eval_lvars_dict->dv_refcount = 1;
++    eval_lvars_dict->dv_refcount = DO_NOT_FREE_CNT;
 +
      /* Get the start and the end of the expression. */
      *arg = skipwhite(*arg + 1);
@@ -82,7 +91,7 @@ diff --git a/src/eval.c b/src/eval.c
  
  #ifdef FEAT_PROFILE
  	fp->uf_tml_count = NULL;
-@@ -6788,14 +6804,20 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -6788,14 +6804,21 @@ get_lambda_tv(char_u **arg, typval_T *re
  	rettv->v_type = VAR_FUNC;
      }
      else
@@ -99,12 +108,13 @@ diff --git a/src/eval.c b/src/eval.c
      ga_clear_strings(&newargs);
      ga_clear_strings(&newlines);
      vim_free(fp);
-+    dict_unref(eval_lvars_dict);
++    if (eval_lvars_dict != NULL)
++	dict_free(eval_lvars_dict);
 +    eval_lvars_dict = old_eval_lvars;
      return FAIL;
  }
  
-@@ -21274,6 +21296,42 @@ get_var_tv(
+@@ -21274,6 +21297,42 @@ get_var_tv(
  }
  
  /*
@@ -147,7 +157,7 @@ diff --git a/src/eval.c b/src/eval.c
   * Handle expr[expr], expr[expr:expr] subscript and .name lookup.
   * Also handle function call with Funcref variable: func(expr)
   * Can all be combined: dict.func(expr)[idx]['func'](expr)
-@@ -23402,6 +23460,7 @@ ex_function(exarg_T *eap)
+@@ -23402,6 +23461,7 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
@@ -155,15 +165,16 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
-@@ -24208,6 +24267,7 @@ func_free(ufunc_T *fp)
+@@ -24208,6 +24268,8 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
-+    dict_unref(fp->uf_lvars);
++    if (fp->uf_lvars != NULL)
++	dict_free(fp->uf_lvars);
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -24294,6 +24354,38 @@ func_ref(char_u *name)
+@@ -24294,6 +24356,37 @@ func_ref(char_u *name)
      }
  }
  
@@ -186,10 +197,9 @@ diff --git a/src/eval.c b/src/eval.c
 +
 +	    if (!HASHITEM_EMPTY(hash_find(&to->dv_hashtab, hi->hi_key)))
 +		continue;
-+	    di = dictitem_alloc(hi->hi_key);
++	    di = dictitem_copy(HI2DI(hi));
 +	    if (di == NULL)
 +		break;
-+	    copy_tv(&HI2DI(hi)->di_tv, &di->di_tv);
 +	    if (dict_add(to, di) == FAIL)
 +	    {
 +		dictitem_free(di);
@@ -202,7 +212,7 @@ diff --git a/src/eval.c b/src/eval.c
  /*
   * Call a user function.
   */
-@@ -24481,6 +24573,7 @@ call_user_func(
+@@ -24481,6 +24574,7 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -213,7 +223,12 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/proto/dict.pro b/src/proto/dict.pro
 --- a/src/proto/dict.pro
 +++ b/src/proto/dict.pro
-@@ -5,6 +5,7 @@ void dict_unref(dict_T *d);
+@@ -1,10 +1,12 @@
+ /* dict.c */
+ dict_T *dict_alloc(void);
+ int rettv_dict_alloc(typval_T *rettv);
++void dict_free(dict_T *d);
+ void dict_unref(dict_T *d);
  int dict_free_nonref(int copyID);
  void dict_free_items(int copyID);
  dictitem_T *dictitem_alloc(char_u *key);
