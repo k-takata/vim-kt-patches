@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  cc40d157df1b56d011918bcde44c870e3380c7de
+# Parent  d3920aaf6dd9e0b64a9436acfca77075ee8c9afa
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -6934,6 +6934,7 @@ synIDattr({synID}, {what} [, {mode}])			
+@@ -7186,6 +7186,7 @@ synIDattr({synID}, {what} [, {mode}])			
  		"standout"	"1" if standout
  		"underline"	"1" if underlined
  		"undercurl"	"1" if undercurled
@@ -15,7 +15,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -4022,6 +4022,7 @@ A jump table for the options with a shor
+@@ -4011,6 +4011,7 @@ A jump table for the options with a shor
  		s	standout	(termcap entry "so" and "se")
  		u	underline	(termcap entry "us" and "ue")
  		c	undercurl	(termcap entry "Cs" and "Ce")
@@ -52,7 +52,7 @@ diff --git a/runtime/doc/syntax.txt b/runtime/doc/syntax.txt
  
  start={term-list}				*highlight-start* *E422*
  stop={term-list}				*term-list* *highlight-stop*
-@@ -4784,7 +4786,8 @@ guifg={color-name}					*highlight-guifg*
+@@ -4788,7 +4790,8 @@ guifg={color-name}					*highlight-guifg*
  guibg={color-name}					*highlight-guibg*
  guisp={color-name}					*highlight-guisp*
  	These give the foreground (guifg), background (guibg) and special
@@ -85,10 +85,10 @@ diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
  	t_IS	set icon text start				*t_IS* *'t_IS'*
  	t_IE	set icon text end				*t_IE* *'t_IE'*
  	t_WP	set window position (Y, X) in pixels		*t_WP* *'t_WP'*
-diff --git a/src/eval.c b/src/eval.c
---- a/src/eval.c
-+++ b/src/eval.c
-@@ -20062,6 +20062,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -11164,6 +11164,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
  	case 's':
  		if (TOLOWER_ASC(what[1]) == 'p')	/* sp[#] */
  		    p = highlight_color(id, what, modec);
@@ -135,7 +135,7 @@ diff --git a/src/gui.h b/src/gui.h
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -5864,6 +5864,25 @@ draw_under(int flags, int row, int col, 
+@@ -5883,6 +5883,25 @@ draw_under(int flags, int row, int col, 
  #endif
      }
  
@@ -161,7 +161,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      /* Underline: draw a line at the bottom of the character cell. */
      if (flags & DRAW_UNDERL)
      {
-@@ -5872,14 +5891,12 @@ draw_under(int flags, int row, int col, 
+@@ -5891,14 +5910,12 @@ draw_under(int flags, int row, int col, 
  	if (p_linespace > 1)
  	    y -= p_linespace - 1;
  #if GTK_CHECK_VERSION(3,0,0)
@@ -185,7 +185,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 diff --git a/src/gui_mac.c b/src/gui_mac.c
 --- a/src/gui_mac.c
 +++ b/src/gui_mac.c
-@@ -4037,6 +4037,11 @@ draw_string_QD(int row, int col, char_u 
+@@ -3893,6 +3893,11 @@ draw_string_QD(int row, int col, char_u 
  	    MoveTo(FILL_X(col), FILL_Y(row + 1) - 1);
  	    LineTo(FILL_X(col + len) - 1, FILL_Y(row + 1) - 1);
  	}
@@ -200,7 +200,7 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -6741,6 +6741,18 @@ gui_mch_draw_string(
+@@ -6636,6 +6636,18 @@ gui_mch_draw_string(
  	DeleteObject(SelectObject(s_hdc, old_pen));
      }
  
@@ -242,7 +242,7 @@ diff --git a/src/gui_x11.c b/src/gui_x11.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -3003,8 +3003,10 @@ static struct vimoption options[] =
+@@ -2999,8 +2999,10 @@ static struct vimoption options[] =
      p_term("t_so", T_SO)
      p_term("t_SR", T_CSR)
      p_term("t_sr", T_SR)
@@ -265,7 +265,7 @@ diff --git a/src/screen.c b/src/screen.c
  }
  
  /*
-@@ -7861,6 +7861,8 @@ screen_start_highlight(int attr)
+@@ -7882,6 +7882,8 @@ screen_start_highlight(int attr)
  		out_str(T_CZH);
  	    if ((attr & HL_INVERSE) && T_MR != NULL)	/* inverse (reverse) */
  		out_str(T_MR);
@@ -274,7 +274,7 @@ diff --git a/src/screen.c b/src/screen.c
  
  	    /*
  	     * Output the color or start string after bold etc., in case the
-@@ -7985,6 +7987,13 @@ screen_stop_highlight(void)
+@@ -8006,6 +8008,13 @@ screen_stop_highlight(void)
  		else
  		    out_str(T_CZR);
  	    }
@@ -304,7 +304,7 @@ diff --git a/src/syntax.c b/src/syntax.c
  
  static int get_attr_entry(garray_T *table, attrentry_T *aep);
  static void syn_unadd_group(void);
-@@ -9673,6 +9673,8 @@ highlight_changed(void)
+@@ -9666,6 +9666,8 @@ highlight_changed(void)
  				break;
  		    case 'c':	attr |= HL_UNDERCURL;
  				break;
@@ -325,7 +325,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_CZR,	IF_EB("\033|4H", ESC_STR "|4H")},   /* HL_ITALIC */
      {(int)KS_CZH,	IF_EB("\033|4h", ESC_STR "|4h")},   /* HL_ITALIC */
      {(int)KS_VB,	IF_EB("\033|f", ESC_STR "|f")},
-@@ -821,6 +823,8 @@ static struct builtin_term builtin_termc
+@@ -817,6 +819,8 @@ static struct builtin_term builtin_termc
      {(int)KS_MD,	IF_EB("\033[1m", ESC_STR "[1m")},
      {(int)KS_UE,	IF_EB("\033[m", ESC_STR "[m")},
      {(int)KS_US,	IF_EB("\033[4m", ESC_STR "[4m")},
@@ -334,7 +334,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_MS,	"y"},
      {(int)KS_UT,	"y"},
      {(int)KS_LE,	"\b"},
-@@ -1122,6 +1126,8 @@ static struct builtin_term builtin_termc
+@@ -1118,6 +1122,8 @@ static struct builtin_term builtin_termc
      {(int)KS_US,	"[US]"},
      {(int)KS_UCE,	"[UCE]"},
      {(int)KS_UCS,	"[UCS]"},
@@ -343,7 +343,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_MS,	"[MS]"},
      {(int)KS_UT,	"[UT]"},
      {(int)KS_XN,	"[XN]"},
-@@ -1672,6 +1678,7 @@ set_termname(char_u *term)
+@@ -1529,6 +1535,7 @@ set_termname(char_u *term)
  				{KS_MD, "md"}, {KS_SE, "se"}, {KS_SO, "so"},
  				{KS_CZH,"ZH"}, {KS_CZR,"ZR"}, {KS_UE, "ue"},
  				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
@@ -375,7 +375,7 @@ diff --git a/src/term.h b/src/term.h
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -667,7 +667,8 @@ extern char *(*dyn_libintl_textdomain)(c
+@@ -660,7 +660,8 @@ extern char *(*dyn_libintl_textdomain)(c
  #define HL_UNDERLINE		0x08
  #define HL_UNDERCURL		0x10
  #define HL_STANDOUT		0x20

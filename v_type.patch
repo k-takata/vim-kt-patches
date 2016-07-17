@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  28ed80a34a9409f316d78e84c2678a939ac8d319
+# Parent  f452ae4425ad8a6ca8ec4228a404977e410ddef4
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -65,7 +65,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -379,6 +379,16 @@ static struct vimvar
+@@ -177,6 +177,16 @@ static struct vimvar
      {VV_NAME("none",		 VAR_SPECIAL), VV_RO},
      {VV_NAME("vim_did_enter",	 VAR_NUMBER), VV_RO},
      {VV_NAME("testing",		 VAR_NUMBER), 0},
@@ -82,29 +82,7 @@ diff --git a/src/eval.c b/src/eval.c
  };
  
  /* shorthand */
-@@ -393,6 +403,21 @@ static struct vimvar
- static dictitem_T	vimvars_var;		/* variable used for v: */
- #define vimvarht  vimvardict.dv_hashtab
- 
-+/*
-+ * Type values for type().
-+ */
-+#define VAR_TYPE_NUMBER	    0
-+#define VAR_TYPE_STRING	    1
-+#define VAR_TYPE_FUNC	    2
-+#define VAR_TYPE_LIST	    3
-+#define VAR_TYPE_DICT	    4
-+#define VAR_TYPE_FLOAT	    5
-+#define VAR_TYPE_BOOL	    6
-+#define VAR_TYPE_NONE	    7
-+#define VAR_TYPE_JOB	    8
-+#define VAR_TYPE_CHANNEL    9
-+
-+
- static void prepare_vimvar(int idx, typval_T *save_tv);
- static void restore_vimvar(int idx, typval_T *save_tv);
- static int ex_let_vars(char_u *arg, typval_T *tv, int copy, int semicolon, int var_count, char_u *nextchars);
-@@ -1000,6 +1025,17 @@ eval_init(void)
+@@ -292,6 +302,17 @@ eval_init(void)
      set_vim_var_nr(VV_NONE, VVAL_NONE);
      set_vim_var_nr(VV_NULL, VVAL_NULL);
  
@@ -122,7 +100,10 @@ diff --git a/src/eval.c b/src/eval.c
      set_reg_var(0);  /* default for v:register is not 0 but '"' */
  
  #ifdef EBCDIC
-@@ -21679,22 +21715,22 @@ f_type(typval_T *argvars, typval_T *rett
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -12140,22 +12140,22 @@ f_type(typval_T *argvars, typval_T *rett
  
      switch (argvars[0].v_type)
      {
@@ -201,7 +182,7 @@ diff --git a/src/testdir/test_viml.vim b/src/testdir/test_viml.vim
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1983,7 +1983,17 @@ typedef int sock_T;
+@@ -1977,7 +1977,17 @@ typedef int sock_T;
  #define VV_NONE		68
  #define VV_VIM_DID_ENTER 69
  #define VV_TESTING	70
@@ -220,3 +201,22 @@ diff --git a/src/vim.h b/src/vim.h
  
  /* used for v_number in VAR_SPECIAL */
  #define VVAL_FALSE	0L
+@@ -1985,6 +1995,18 @@ typedef int sock_T;
+ #define VVAL_NONE	2L
+ #define VVAL_NULL	3L
+ 
++/* Type values for type(). */
++#define VAR_TYPE_NUMBER	    0
++#define VAR_TYPE_STRING	    1
++#define VAR_TYPE_FUNC	    2
++#define VAR_TYPE_LIST	    3
++#define VAR_TYPE_DICT	    4
++#define VAR_TYPE_FLOAT	    5
++#define VAR_TYPE_BOOL	    6
++#define VAR_TYPE_NONE	    7
++#define VAR_TYPE_JOB	    8
++#define VAR_TYPE_CHANNEL    9
++
+ #ifdef FEAT_CLIPBOARD
+ 
+ /* VIM_ATOM_NAME is the older Vim-specific selection type for X11.  Still

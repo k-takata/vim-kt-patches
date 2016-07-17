@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  bcf51158733bc62e24dba82ccd145161efd2ce89
+# Parent  42bec9aba9a8c58e269d7f531d22aea20489d556
 
 diff --git a/src/dict.c b/src/dict.c
 --- a/src/dict.c
@@ -25,15 +25,15 @@ diff --git a/src/dict.c b/src/dict.c
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -672,6 +672,7 @@ static int get_env_len(char_u **arg);
- static int get_name_len(char_u **arg, char_u **alias, int evaluate, int verbose);
+@@ -237,6 +237,7 @@ static int get_env_tv(char_u **arg, typv
+ 
+ static int get_env_len(char_u **arg);
  static char_u * make_expanded_name(char_u *in_start, char_u *expr_start, char_u *expr_end, char_u *in_end);
- static int get_var_tv(char_u *name, int len, typval_T *rettv, dictitem_T **dip, int verbose, int no_autoload);
 +static void check_lvars(char_u *name, int len);
  static typval_T *alloc_string_tv(char_u *string);
- static void init_tv(typval_T *varp);
- #ifdef FEAT_FLOAT
-@@ -4829,7 +4830,10 @@ eval7(
+ static hashtab_T *find_var_ht(char_u *name, char_u **varname);
+ static void delete_var(hashtab_T *ht, hashitem_T *hi);
+@@ -4363,7 +4364,10 @@ eval7(
  	    else if (evaluate)
  		ret = get_var_tv(s, len, rettv, NULL, TRUE, FALSE);
  	    else
@@ -44,7 +44,7 @@ diff --git a/src/eval.c b/src/eval.c
  	}
  	vim_free(alias);
      }
-@@ -20130,6 +20134,42 @@ get_var_tv(
+@@ -6791,6 +6795,42 @@ get_var_tv(
  }
  
  /*
@@ -90,7 +90,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/globals.h b/src/globals.h
 --- a/src/globals.h
 +++ b/src/globals.h
-@@ -1664,6 +1664,9 @@ EXTERN dictitem_T dumdi;
+@@ -1654,6 +1654,9 @@ EXTERN time_T time_for_testing INIT(= 0)
  
  /* Abort conversion to string after a recursion error. */
  EXTERN int  did_echo_string_emsg INIT(= FALSE);
@@ -163,7 +163,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +    {
  	ga_clear_strings(&newargs);
 -
-+	dict_unref(eval_lvars_dict);
++	dict_free(eval_lvars_dict);
 +    }
 +
 +    eval_lvars_dict = old_eval_lvars;
