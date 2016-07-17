@@ -42,5 +42,5 @@ v_type.patch
 vvar-readonly.patch
 fix-7.4.2057.patch
 lambda-update.patch
-use-offsetof.patch
+remove-dummy-variable.patch
 fix-config_cache-removal.patch #+rejected
