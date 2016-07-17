@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  cab6325c443a3810400bd3db5b90c3d0598ef8e8
+
+diff --git a/src/globals.h b/src/globals.h
+--- a/src/globals.h
++++ b/src/globals.h
+@@ -1655,9 +1655,9 @@ EXTERN time_T time_for_testing INIT(= 0)
+  * HIKEY2DI() converts a hashitem key pointer to a dictitem pointer.
+  * HI2DI() converts a hashitem pointer to a dictitem pointer.
+  */
+-EXTERN dictitem_T dumdi;
++# include <stddef.h>
+ # define DI2HIKEY(di) ((di)->di_key)
+-# define HIKEY2DI(p)  ((dictitem_T *)(p - (dumdi.di_key - (char_u *)&dumdi)))
++# define HIKEY2DI(p)  ((dictitem_T *)(p - offsetof(dictitem_T, di_key)))
+ # define HI2DI(hi)     HIKEY2DI((hi)->hi_key)
+ 
+ /* Abort conversion to string after a recursion error. */
