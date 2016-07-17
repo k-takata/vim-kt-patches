@@ -40,5 +40,6 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 v_type.patch
 vvar-readonly.patch
+fix-7.4.2057.patch
 lambda-update.patch
 fix-config_cache-removal.patch #+rejected

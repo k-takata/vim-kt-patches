@@ -1,10 +1,22 @@
 # HG changeset patch
-# Parent  94d8b484c11becfc65706af768b207927ff3b1cb
+# Parent  fc2ab824502dc923b0a3a8b8a8ef51b4de36631d
 
+diff --git a/src/dict.c b/src/dict.c
+--- a/src/dict.c
++++ b/src/dict.c
+@@ -188,7 +188,7 @@ dictitem_alloc(char_u *key)
+ /*
+  * Make a copy of a Dictionary item.
+  */
+-    static dictitem_T *
++    dictitem_T *
+ dictitem_copy(dictitem_T *org)
+ {
+     dictitem_T *di;
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -194,6 +194,7 @@ struct ufunc
+@@ -175,6 +175,7 @@ struct ufunc
      scid_T	uf_script_ID;	/* ID of script where function was defined,
  				   used for s: variables */
      int		uf_refcount;	/* for numbered function: reference count */
@@ -12,7 +24,7 @@ diff --git a/src/eval.c b/src/eval.c
      char_u	uf_name[1];	/* name of function (actually longer); can
  				   start with <SNR>123_ (<SNR> is K_SPECIAL
  				   KS_EXTRA KE_SNR) */
-@@ -231,6 +232,9 @@ static ufunc_T dumuf;
+@@ -206,6 +207,9 @@ static ufunc_T dumuf;
  #define VAR_SHORT_LEN	20	/* short variable name length */
  #define FIXVAR_CNT	12	/* number of fixed variables */
  
@@ -22,7 +34,7 @@ diff --git a/src/eval.c b/src/eval.c
  /* structure to hold info for a function that is currently being executed. */
  typedef struct funccall_S funccall_T;
  
-@@ -906,6 +910,7 @@ static char_u * make_expanded_name(char_
+@@ -853,6 +857,7 @@ static char_u * make_expanded_name(char_
  static int eval_isnamec(int c);
  static int eval_isnamec1(int c);
  static int get_var_tv(char_u *name, int len, typval_T *rettv, dictitem_T **dip, int verbose, int no_autoload);
@@ -30,7 +42,7 @@ diff --git a/src/eval.c b/src/eval.c
  static int handle_subscript(char_u **arg, typval_T *rettv, int evaluate, int verbose);
  static typval_T *alloc_string_tv(char_u *string);
  static void init_tv(typval_T *varp);
-@@ -5402,7 +5407,10 @@ eval7(
+@@ -5299,7 +5304,10 @@ eval7(
  	    else if (evaluate)
  		ret = get_var_tv(s, len, rettv, NULL, TRUE, FALSE);
  	    else
@@ -41,20 +53,19 @@ diff --git a/src/eval.c b/src/eval.c
  	}
  	vim_free(alias);
      }
-@@ -8260,6 +8268,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -6712,6 +6720,7 @@ get_lambda_tv(char_u **arg, typval_T *re
      char_u	*start = skipwhite(*arg + 1);
      char_u	*s, *e;
      static int	lambda_no = 0;
-+    dict_T	*old_eval_lvars;
++    dict_T	*old_eval_lvars = eval_lvars_dict;
  
      ga_init(&newargs);
      ga_init(&newlines);
-@@ -8275,6 +8284,13 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -6727,6 +6736,12 @@ get_lambda_tv(char_u **arg, typval_T *re
      if (ret == FAIL || **arg != '>')
  	goto errret;
  
 +    /* Prepare local vars dict. */
-+    old_eval_lvars = eval_lvars_dict;
 +    eval_lvars_dict = dict_alloc();
 +    if (eval_lvars_dict == NULL)
 +	goto errret;
@@ -63,7 +74,7 @@ diff --git a/src/eval.c b/src/eval.c
      /* Get the start and the end of the expression. */
      *arg = skipwhite(*arg + 1);
      s = *arg;
-@@ -8318,6 +8334,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -6770,6 +6785,7 @@ get_lambda_tv(char_u **arg, typval_T *re
  	hash_add(&func_hashtab, UF2HIKEY(fp));
  	fp->uf_args = newargs;
  	fp->uf_lines = newlines;
@@ -71,10 +82,16 @@ diff --git a/src/eval.c b/src/eval.c
  
  #ifdef FEAT_PROFILE
  	fp->uf_tml_count = NULL;
-@@ -8338,12 +8355,15 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -6788,14 +6804,20 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	rettv->v_type = VAR_FUNC;
+     }
      else
++    {
  	ga_clear_strings(&newargs);
- 
+-
++	dict_unref(eval_lvars_dict);
++    }
++
 +    eval_lvars_dict = old_eval_lvars;
      return OK;
  
@@ -87,7 +104,7 @@ diff --git a/src/eval.c b/src/eval.c
      return FAIL;
  }
  
-@@ -22963,6 +22983,42 @@ get_var_tv(
+@@ -21274,6 +21296,42 @@ get_var_tv(
  }
  
  /*
@@ -130,7 +147,7 @@ diff --git a/src/eval.c b/src/eval.c
   * Handle expr[expr], expr[expr:expr] subscript and .name lookup.
   * Also handle function call with Funcref variable: func(expr)
   * Can all be combined: dict.func(expr)[idx]['func'](expr)
-@@ -25091,6 +25147,7 @@ ex_function(exarg_T *eap)
+@@ -23402,6 +23460,7 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
@@ -138,7 +155,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
-@@ -25897,6 +25954,7 @@ func_free(ufunc_T *fp)
+@@ -24208,6 +24267,7 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
@@ -146,7 +163,7 @@ diff --git a/src/eval.c b/src/eval.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -25983,6 +26041,38 @@ func_ref(char_u *name)
+@@ -24294,6 +24354,38 @@ func_ref(char_u *name)
      }
  }
  
@@ -185,7 +202,7 @@ diff --git a/src/eval.c b/src/eval.c
  /*
   * Call a user function.
   */
-@@ -26170,6 +26260,7 @@ call_user_func(
+@@ -24481,6 +24573,7 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -193,3 +210,14 @@ diff --git a/src/eval.c b/src/eval.c
  
      /* Don't redraw while executing the function. */
      ++RedrawingDisabled;
+diff --git a/src/proto/dict.pro b/src/proto/dict.pro
+--- a/src/proto/dict.pro
++++ b/src/proto/dict.pro
+@@ -5,6 +5,7 @@ void dict_unref(dict_T *d);
+ int dict_free_nonref(int copyID);
+ void dict_free_items(int copyID);
+ dictitem_T *dictitem_alloc(char_u *key);
++dictitem_T *dictitem_copy(dictitem_T *org);
+ void dictitem_remove(dict_T *dict, dictitem_T *item);
+ void dictitem_free(dictitem_T *item);
+ dict_T *dict_copy(dict_T *orig, int deep, int copyID);
