@@ -1,15 +1,17 @@
 # HG changeset patch
-# Parent  2a562b89816d13bf26e1d24c4ff6d6ebd36092da
+# Parent  9819756b26caf6e906711213040448321cdeb7d0
 
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
-@@ -268,6 +268,8 @@ get_lambda_tv(char_u **arg, typval_T *re
-     ga_init(&newlines);
+@@ -234,7 +234,9 @@ get_function_args(
+ 	    break;
+ 	}
+     }
+-    ++p;	/* skip the ')' */
++    if (*p != endchar)
++	goto err_ret;
++    ++p;	/* skip "endchar" */
  
-     /* First, check if this is a lambda expression. "->" must exist. */
-+    if (*start == '"' || *start == '\'')
-+	return NOTDONE;
-     ret = get_function_args(&start, '-', NULL, NULL, TRUE);
-     if (ret == FAIL || *start != '>')
- 	return NOTDONE;
+     *argp = p;
+     return OK;
