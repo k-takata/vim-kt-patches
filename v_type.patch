@@ -4,6 +4,33 @@
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
+@@ -1535,7 +1535,7 @@ v:false		A Number with value zero. Used 
+ 			echo v:false
+ <			v:false ~
+ 		That is so that eval() can parse the string back to the same
+-		value.
++		value.  Read-only.
+ 
+ 					*v:fcs_reason* *fcs_reason-variable*
+ v:fcs_reason	The reason why the |FileChangedShell| event was triggered.
+@@ -1682,7 +1682,7 @@ v:none		An empty String. Used to put an 
+ 			echo v:none
+ <			v:none ~
+ 		That is so that eval() can parse the string back to the same
+-		value.
++		value.  Read-only.
+ 
+ 					*v:null* *null-variable*
+ v:null		An empty String. Used to put "null" in JSON.  See
+@@ -1692,7 +1692,7 @@ v:null		An empty String. Used to put "nu
+ 			echo v:null
+ <			v:null ~
+ 		That is so that eval() can parse the string back to the same
+-		value.
++		value.  Read-only.
+ 
+ 					*v:oldfiles* *oldfiles-variable*
+ v:oldfiles	List of file names that is loaded from the |viminfo| file on
 @@ -1827,6 +1827,27 @@ v:swapcommand	Normal mode command to be 
  		example, when jumping to a tag the value is ":tag tagname\r".
  		For ":edit +cmd file" the value is ":cmd\r".
@@ -32,6 +59,15 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  				*v:termresponse* *termresponse-variable*
  v:termresponse	The escape sequence returned by the terminal for the |t_RV|
  		termcap entry.	It is set when Vim receives an escape sequence
+@@ -1869,7 +1890,7 @@ v:true		A Number with value one. Used to
+ 			echo v:true
+ <			v:true ~
+ 		That is so that eval() can parse the string back to the same
+-		value.
++		value.  Read-only.
+ 						*v:val* *val-variable*
+ v:val		Value of the current item of a |List| or |Dictionary|.	Only
+ 		valid while evaluating the expression used with |map()| and
 @@ -7527,17 +7548,18 @@ trunc({expr})							*trunc()*
  		
  							*type()*
