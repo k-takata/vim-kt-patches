@@ -127,43 +127,52 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      char_u	uf_name[1];	/* name of function (actually longer); can
  				   start with <SNR>123_ (<SNR> is K_SPECIAL
  				   KS_EXTRA KE_SNR) */
-@@ -260,6 +261,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -260,6 +261,8 @@ get_lambda_tv(char_u **arg, typval_T *re
      char_u	*start = skipwhite(*arg + 1);
      char_u	*s, *e;
      static int	lambda_no = 0;
 +    dict_T	*old_eval_lvars = eval_lvars_dict;
++    dict_T	*d = NULL;
  
      ga_init(&newargs);
      ga_init(&newlines);
-@@ -275,6 +277,12 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -275,6 +278,20 @@ get_lambda_tv(char_u **arg, typval_T *re
      if (ret == FAIL || **arg != '>')
  	goto errret;
  
-+    /* Prepare local vars dict. */
-+    eval_lvars_dict = dict_alloc();
-+    if (eval_lvars_dict == NULL)
++    /* Prepare local vars dict.  Not using dict_alloc() here, because
++     * don't want to grabage collected the dict. */
++    d = (dict_T *)alloc(sizeof(dict_T));
++    if (d == NULL)
 +	goto errret;
-+    eval_lvars_dict->dv_refcount = DO_NOT_FREE_CNT;
++    d->dv_used_next = NULL;
++    d->dv_used_prev = NULL;
++    hash_init(&d->dv_hashtab);
++    d->dv_lock = 0;
++    d->dv_scope = 0;
++    d->dv_refcount = DO_NOT_FREE_CNT;
++    d->dv_copyID = 0;
++    eval_lvars_dict = d;
 +
      /* Get the start and the end of the expression. */
      *arg = skipwhite(*arg + 1);
      s = *arg;
-@@ -318,6 +326,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -318,6 +335,7 @@ get_lambda_tv(char_u **arg, typval_T *re
  	hash_add(&func_hashtab, UF2HIKEY(fp));
  	fp->uf_args = newargs;
  	fp->uf_lines = newlines;
-+	fp->uf_lvars = eval_lvars_dict;
++	fp->uf_lvars = d;
  
  #ifdef FEAT_PROFILE
  	fp->uf_tml_count = NULL;
-@@ -336,14 +345,21 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -336,14 +354,21 @@ get_lambda_tv(char_u **arg, typval_T *re
  	rettv->v_type = VAR_FUNC;
      }
      else
 +    {
  	ga_clear_strings(&newargs);
 -
-+	dict_free(eval_lvars_dict);
++	dict_free(d);
 +    }
 +
 +    eval_lvars_dict = old_eval_lvars;
@@ -173,13 +182,13 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      ga_clear_strings(&newargs);
      ga_clear_strings(&newlines);
      vim_free(fp);
-+    if (eval_lvars_dict != NULL)
-+	dict_free(eval_lvars_dict);
++    if (d != NULL)
++	dict_free(d);
 +    eval_lvars_dict = old_eval_lvars;
      return FAIL;
  }
  
-@@ -634,6 +650,37 @@ free_funccal(
+@@ -634,6 +659,37 @@ free_funccal(
      vim_free(fc);
  }
  
@@ -217,7 +226,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Call a user function.
   */
-@@ -821,6 +868,7 @@ call_user_func(
+@@ -821,6 +877,7 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -225,7 +234,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      /* Don't redraw while executing the function. */
      ++RedrawingDisabled;
-@@ -1053,6 +1101,8 @@ func_free(ufunc_T *fp)
+@@ -1053,6 +1110,8 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
@@ -234,7 +243,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -2200,6 +2250,7 @@ ex_function(exarg_T *eap)
+@@ -2200,6 +2259,7 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
