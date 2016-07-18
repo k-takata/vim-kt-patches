@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  2a562b89816d13bf26e1d24c4ff6d6ebd36092da
+
+diff --git a/src/userfunc.c b/src/userfunc.c
+--- a/src/userfunc.c
++++ b/src/userfunc.c
+@@ -268,6 +268,8 @@ get_lambda_tv(char_u **arg, typval_T *re
+     ga_init(&newlines);
+ 
+     /* First, check if this is a lambda expression. "->" must exist. */
++    if (*start == '"' || *start == '\'')
++	return NOTDONE;
+     ret = get_function_args(&start, '-', NULL, NULL, TRUE);
+     if (ret == FAIL || *start != '>')
+ 	return NOTDONE;

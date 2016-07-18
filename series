@@ -40,4 +40,5 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 v_type.patch
 lambda-update.patch
+fix-7.4.2044.patch
 fix-config_cache-removal.patch #+rejected
