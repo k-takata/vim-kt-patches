@@ -38,7 +38,7 @@ matchit-respect-matchpairs.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
-v_type.patch
+vvar-readonly.patch
 fix-7.4.2044.patch
 use-offsetof.patch
 lambda-update.patch
