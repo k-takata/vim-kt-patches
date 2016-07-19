@@ -39,7 +39,7 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
 v_type.patch
-lambda-update.patch
 fix-7.4.2044.patch
 use-offsetof.patch
+lambda-update.patch
 fix-config_cache-removal.patch #+rejected
