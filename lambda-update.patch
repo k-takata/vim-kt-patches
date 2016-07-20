@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  e39c4e8121a3897ed95f2844340f86c8a115da3e
+# Parent  78b7cccb8cd085c728dceef44838fc46be114290
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1219,10 +1219,18 @@ the following ways:
+@@ -1219,10 +1219,19 @@ the following ways:
  
  1. The body of the lambda expression is an |expr1| and not a sequence of |Ex|
     commands.
@@ -13,14 +13,15 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  	:let F = {arg1, arg2 -> arg1 - arg2}
  	:echo F(5, 2)
  <	3
-+3. Lambda expressions support closures. They can access outer scope variables
-+   and arguments.  E.g.: >
++3. Lambda expressions can get the value of outer scope variables and arguments.
++   E.g.: >
 +	:function Foo(arg)
-+	:  return {x -> x + a:arg}
++	:  let i = 3
++	:  return {x -> x + i - a:arg}
 +	:endfunction
-+	:let Bar = Foo(5)
-+	:echo Bar(2)
-+<	7
++	:let Bar = Foo(4)
++	:echo Bar(6)
++<	5
  
  The arguments are optional.  Example: >
  	:let F = {-> 'error function'}
@@ -173,6 +174,97 @@ diff --git a/src/proto/dict.pro b/src/proto/dict.pro
  void dictitem_remove(dict_T *dict, dictitem_T *item);
  void dictitem_free(dictitem_T *item);
  dict_T *dict_copy(dict_T *orig, int deep, int copyID);
+diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
+--- a/src/testdir/test_lambda.vim
++++ b/src/testdir/test_lambda.vim
+@@ -51,3 +51,87 @@ func Test_not_lamda()
+   let x = {'>' : 'foo'}
+   call assert_equal('foo', x['>'])
+ endfunc
++
++function! Test_lambda_capture_by_value()
++  let v = 1
++  let l:F = {x -> x + v}
++  let v = 2
++  call assert_equal(11, l:F(10))
++endfunction
++
++function! Test_lambda_side_effect()
++  function! s:update_and_return(arr)
++    let a:arr[1] = 5
++    return a:arr
++  endfunction
++
++  function! s:foo(arr)
++    return {-> s:update_and_return(a:arr)}
++  endfunction
++
++  let arr = [3,2,1]
++  call assert_equal([3, 5, 1], s:foo(arr)())
++endfunction
++
++function! Test_lambda_refer_local_variable_from_other_scope()
++  function! s:foo(X)
++    return a:X() " refer l:x in s:bar()
++  endfunction
++
++  function! s:bar()
++    let x = 123
++    return s:foo({-> x})
++  endfunction
++
++  call assert_equal(123, s:bar())
++endfunction
++
++function! Test_lambda_do_not_share_local_variable()
++  function! s:define_funcs()
++    let l:One = {-> split(execute("let a = 'abc' | echo a"))[0]}
++    let l:Two = {-> exists("a") ? a : "no"}
++    return [l:One, l:Two]
++  endfunction
++
++  let l:F = s:define_funcs()
++
++  call assert_equal('no', l:F[1]())
++  call assert_equal('abc', l:F[0]())
++  call assert_equal('no', l:F[1]())
++endfunction
++
++function! Test_lambda_with_a_var()
++  function! s:foo()
++    let x = 2
++    return {... -> a:000 + [x]}
++  endfunction
++  function! s:bar()
++    return s:foo()(1)
++  endfunction
++
++  call assert_equal([1, 2], s:bar())
++endfunction
++
++function! Test_lambda_call_lambda_from_lambda()
++  function! s:foo(x)
++    let l:F1 = {-> {-> a:x}}
++    return {-> l:F1()}
++  endfunction
++
++  let l:F = s:foo(1)
++  call assert_equal(1, l:F()())
++endfunction
++
++function! Test_lambda_combination()
++  call assert_equal(2, {x -> {x -> x}}(1)(2))
++  call assert_equal(10, {y -> {x -> x(y)(10)}({y -> y})}({z -> z}))
++  call assert_equal(5.0, {x -> {y -> x / y}}(10)(2.0))
++
++  call assert_equal(6, {x -> {f -> f(x)}}(3)({x -> x * 2}))
++  call assert_equal(6, {f -> {x -> f(x)}}({x -> x * 2})(3))
++
++  " Z combinator
++  let Z = {f -> {x -> f({y -> x(x)(y)})}({x -> f({y -> x(x)(y)})})}
++  let Fact = {f -> {x -> x == 0 ? 1 : x * f(x - 1)}}
++  call assert_equal(120, Z(Fact)(5))
++endfunction
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
@@ -185,7 +277,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      char_u	uf_name[1];	/* name of function (actually longer); can
  				   start with <SNR>123_ (<SNR> is K_SPECIAL
  				   KS_EXTRA KE_SNR) */
-@@ -261,6 +263,9 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -263,6 +265,9 @@ get_lambda_tv(char_u **arg, typval_T *re
      char_u	*start = skipwhite(*arg + 1);
      char_u	*s, *e;
      static int	lambda_no = 0;
@@ -195,7 +287,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      ga_init(&newargs);
      ga_init(&newlines);
-@@ -276,6 +281,24 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -278,6 +283,19 @@ get_lambda_tv(char_u **arg, typval_T *re
      if (ret == FAIL || **arg != '>')
  	goto errret;
  
@@ -211,16 +303,24 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +	init_var_dict(eval_lvars_dict, NULL, 0);
 +	init_var_dict(eval_avars_dict, NULL, 0);
 +    }
-+    else
-+    {
-+	eval_lvars_dict = NULL;
-+	eval_avars_dict = NULL;
-+    }
 +
      /* Get the start and the end of the expression. */
      *arg = skipwhite(*arg + 1);
      s = *arg;
-@@ -303,8 +326,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -295,18 +313,17 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	int	len;
+ 	char_u	*p;
+ 
+-	fp = (ufunc_T *)alloc((unsigned)(sizeof(ufunc_T) + 20));
++	sprintf((char*)name, "<lambda>%d", ++lambda_no);
++
++	fp = (ufunc_T *)alloc((unsigned)(sizeof(ufunc_T) + STRLEN(name)));
+ 	if (fp == NULL)
+ 	    goto errret;
+ 
+-	sprintf((char*)name, "<lambda>%d", ++lambda_no);
+-
+ 	ga_init2(&newlines, (int)sizeof(char_u *), 1);
  	if (ga_grow(&newlines, 1) == FAIL)
  	    goto errret;
  
@@ -230,7 +330,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	len = 7 + e - s + 1;
  	p = (char_u *)alloc(len);
  	if (p == NULL)
-@@ -319,6 +341,8 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -321,6 +338,8 @@ get_lambda_tv(char_u **arg, typval_T *re
  	hash_add(&func_hashtab, UF2HIKEY(fp));
  	fp->uf_args = newargs;
  	fp->uf_lines = newlines;
@@ -239,7 +339,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  #ifdef FEAT_PROFILE
  	fp->uf_tml_count = NULL;
-@@ -337,14 +361,26 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -339,14 +358,26 @@ get_lambda_tv(char_u **arg, typval_T *re
  	rettv->v_type = VAR_FUNC;
      }
      else
@@ -267,7 +367,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      return FAIL;
  }
  
-@@ -635,6 +671,48 @@ free_funccal(
+@@ -637,6 +668,48 @@ free_funccal(
      vim_free(fc);
  }
  
@@ -316,7 +416,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Call a user function.
   */
-@@ -753,7 +831,6 @@ call_user_func(
+@@ -755,7 +828,6 @@ call_user_func(
      for (i = 0; i < argcount; ++i)
      {
  	int	    addlocal = FALSE;
@@ -324,7 +424,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  	ai = i - fp->uf_args.ga_len;
  	if (ai < 0)
-@@ -773,9 +850,6 @@ call_user_func(
+@@ -775,9 +847,6 @@ call_user_func(
  	{
  	    v = &fc->fixvar[fixvar_idx++].var;
  	    v->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX;
@@ -334,7 +434,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	}
  	else
  	{
-@@ -784,36 +858,23 @@ call_user_func(
+@@ -786,36 +855,23 @@ call_user_func(
  	    if (v == NULL)
  		break;
  	    v->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX | DI_FLAGS_ALLOC;
@@ -377,7 +477,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  	if (ai >= 0 && ai < MAX_FUNC_ARGS)
  	{
-@@ -822,6 +883,8 @@ call_user_func(
+@@ -824,6 +880,8 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -386,7 +486,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      /* Don't redraw while executing the function. */
      ++RedrawingDisabled;
-@@ -1054,6 +1117,12 @@ func_free(ufunc_T *fp)
+@@ -1056,6 +1114,12 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
@@ -399,7 +499,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -2201,6 +2270,8 @@ ex_function(exarg_T *eap)
+@@ -2203,6 +2267,8 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
