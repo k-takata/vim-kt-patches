@@ -1,0 +1,109 @@
+# HG changeset patch
+# Parent  9764ac5df9c959e24f695c6b46384475edd2692a
+
+diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
+--- a/src/Make_bc5.mak
++++ b/src/Make_bc5.mak
+@@ -242,7 +242,7 @@ FEATURES = BIG
+ 
+ ### Set the default $(WINVER) to make it work with Bcc 5.5.
+ !ifndef WINVER
+-WINVER = 0x0400
++WINVER = 0x0501
+ !endif
+ 
+ #
+@@ -272,8 +272,8 @@ OPT = $(OPT) -vi-
+ !endif
+ !endif
+ # shouldn't have to change:
+-LIB = $(BOR)\lib
+-INCLUDE = $(BOR)\include;.;proto
++LIB = $(BOR)\lib;$(BOR)\lib\win32c\release;$(BOR)\lib\win32c\release\psdk
++INCLUDE = $(BOR)\include;proto
+ DEFINES = -DFEAT_$(FEATURES) -DWIN32 -DHAVE_PATHDEF \
+ 	  -DWINVER=$(WINVER) -D_WIN32_WINNT=$(WINVER)
+ 
+@@ -499,11 +499,11 @@ DEFINES = $(DEFINES) -DMSWINPS
+ ##### BASE COMPILER/TOOLS RULES #####
+ MAKE = $(BOR)\bin\make
+ CFLAGS = -w-aus -w-par -w-pch -w-ngu -w-csu -I$(INCLUDE)
+-BRC = $(BOR)\BIN\brc32
++BRC = $(BOR)\BIN\rc
+ !if ("$(LINK)"=="")
+ LINK	= $(BOR)\BIN\ILink32
+ !endif
+-CC   = $(BOR)\BIN\Bcc32
++CC   = $(BOR)\BIN\bcc32c
+ LFLAGS	= -OS -Tpe -c -m -L$(LIB) $(DEBUG_FLAG) $(LINK2)
+ LFLAGSDLL  = -Tpd -c -m -L$(LIB) $(DEBUG_FLAG) $(LINK2)
+ CFLAGS = $(CFLAGS) -d -RT- -k- -Oi $(HEADERS) -f-
+@@ -770,7 +770,7 @@ all: vim vimrun.exe install.exe xxd unin
+ 
+ vim: $(OSTYPE) $(OBJDIR) $(OBJDIR)\bcc.cfg $(TARGETS)
+ 	@if exist $(OBJDIR)\version.obj del $(OBJDIR)\version.obj
+-	@if exist auto\pathdef.c del auto\pathdef.c
++	@if exist pathdef.c del pathdef.c
+ 
+ $(OSTYPE):
+ 	-@md $(OSTYPE)
+@@ -902,7 +902,7 @@ clean:
+ 	cg32.lib+
+ !endif
+ # $(OSTYPE)==WIN32 causes os_mswin.c compilation. FEAT_SHORTCUT in it needs OLE
+-	ole2w32.lib +
++	ole32.lib +
+ 	import32.lib+
+ !ifdef LUA
+ 	$(LUA_LIB_FLAG)lua.lib+
+@@ -978,12 +978,10 @@ if_perl.c: if_perl.xs typemap
+ 
+ $(OBJDIR)\vim.res: vim.rc version.h tools.bmp tearoff.bmp \
+ 		vim.ico vim_error.ico vim_alert.ico vim_info.ico vim_quest.ico
+-	$(BRC) -fo$(OBJDIR)\vim.res -i $(BOR)\include -w32 -r vim.rc @&&|
+-	$(DEFINES)
+-|
++	$(BRC) -fo$(OBJDIR)\vim.res -i$(BOR)\include\windows\sdk $(DEFINES) -r vim.rc
+ 
+-$(OBJDIR)\pathdef.obj:	auto\pathdef.c
+-	$(CC) $(CCARG) $(CC1) $(CC2)$@ auto\pathdef.c
++$(OBJDIR)\pathdef.obj:	pathdef.c
++	$(CC) $(CCARG) $(CC1) $(CC2)$@ pathdef.c
+ 
+ 
+ # Need to escape both quotes and backslashes in $INTERP_DEFINES
+@@ -993,9 +991,9 @@ INTERP_DEFINES_ESC=$(INTERP_DEFINES_ESC_
+ # Note:  the silly /*"*/ below are there to trick make into accepting
+ # the # character as something other than a comment without messing up
+ # the preprocessor directive.
+-auto\pathdef.c::
++pathdef.c::
+ 	-@md auto
+-	@echo creating auto/pathdef.c
++	@echo creating pathdef.c
+ 	@copy /y &&|
+ /* pathdef.c */
+ /*"*/#include "vim.h"/*"*/
+@@ -1006,7 +1004,7 @@ char_u *all_cflags = (char_u *)"$(CC:\=\
+ char_u *all_lflags = (char_u *)"$(LINK:\=\\) $(LFLAGS:\=\\)";
+ char_u *compiled_user = (char_u *)"$(USERNAME)";
+ char_u *compiled_sys = (char_u *)"$(USERDOMAIN)";
+-| auto\pathdef.c
++| pathdef.c
+ 
+ lua.lib: $(LUA)\lib\lua$(LUA_VER).lib
+ 	coff2omf $(LUA)\lib\lua$(LUA_VER).lib $@
+@@ -1054,6 +1052,13 @@ vimrun.exe: vimrun.c
+ # The dependency on $(OBJDIR) is to have bcc.cfg generated each time.
+ $(OBJDIR)\bcc.cfg: Make_bc5.mak $(OBJDIR)
+   copy /y &&|
++	-isystem @\..\include\dinkumware64
++	-isystem @\..\include\windows\crtl
++	-isystem @\..\include\windows\sdk
++	-L@\..\lib\win32c\debug
++	-L@\..\lib\win32c\release
++	-L@\..\lib\win32c\release\psdk
++	-Xdriver -Qunused-arguments
+ 	$(CFLAGS)
+ 	-L$(LIB)
+ 	$(DEFINES)

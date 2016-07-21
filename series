@@ -40,4 +40,5 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 vvar-readonly.patch
 lambda-update.patch
+embarcadero.patch
 fix-config_cache-removal.patch #+rejected
