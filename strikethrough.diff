@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  d3920aaf6dd9e0b64a9436acfca77075ee8c9afa
+# Parent  e00db91a06a4d6216ba07fbe1c5a050bd2a069c2
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -7186,6 +7186,7 @@ synIDattr({synID}, {what} [, {mode}])			
+@@ -7207,6 +7207,7 @@ synIDattr({synID}, {what} [, {mode}])			
  		"standout"	"1" if standout
  		"underline"	"1" if underlined
  		"undercurl"	"1" if undercurled
@@ -88,7 +88,7 @@ diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -11164,6 +11164,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
+@@ -11171,6 +11171,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
  	case 's':
  		if (TOLOWER_ASC(what[1]) == 'p')	/* sp[#] */
  		    p = highlight_color(id, what, modec);
@@ -135,7 +135,7 @@ diff --git a/src/gui.h b/src/gui.h
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -5883,6 +5883,25 @@ draw_under(int flags, int row, int col, 
+@@ -5814,6 +5814,25 @@ draw_under(int flags, int row, int col, 
  #endif
      }
  
@@ -161,21 +161,25 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      /* Underline: draw a line at the bottom of the character cell. */
      if (flags & DRAW_UNDERL)
      {
-@@ -5891,14 +5910,12 @@ draw_under(int flags, int row, int col, 
+@@ -5822,16 +5841,14 @@ draw_under(int flags, int row, int col, 
  	if (p_linespace > 1)
  	    y -= p_linespace - 1;
  #if GTK_CHECK_VERSION(3,0,0)
 -	{
 -	    cairo_set_line_width(cr, 1.0);
 -	    cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
--	    set_cairo_source_rgb_from_pixel(cr, gui.fgcolor->pixel);
+-	    cairo_set_source_rgba(cr,
+-		    gui.fgcolor->red, gui.fgcolor->green, gui.fgcolor->blue,
+-		    gui.fgcolor->alpha);
 -	    cairo_move_to(cr, FILL_X(col), y + 0.5);
 -	    cairo_line_to(cr, FILL_X(col + cells), y + 0.5);
 -	    cairo_stroke(cr);
 -	}
 +	cairo_set_line_width(cr, 1.0);
 +	cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-+	set_cairo_source_rgb_from_pixel(cr, gui.fgcolor->pixel);
++	cairo_set_source_rgba(cr,
++		gui.fgcolor->red, gui.fgcolor->green, gui.fgcolor->blue,
++		gui.fgcolor->alpha);
 +	cairo_move_to(cr, FILL_X(col), y + 0.5);
 +	cairo_line_to(cr, FILL_X(col + cells), y + 0.5);
 +	cairo_stroke(cr);
