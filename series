@@ -41,4 +41,5 @@ make-main-simpler.patch
 vvar-readonly.patch
 embarcadero.patch
 lambda-update.patch
+lambda-update3.patch
 fix-config_cache-removal.patch #+rejected
