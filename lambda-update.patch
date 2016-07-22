@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  78b7cccb8cd085c728dceef44838fc46be114290
+# Parent  59621a1090036fa75d338d31cc369da074f69873
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -69,7 +69,28 @@ diff --git a/src/eval.c b/src/eval.c
  	}
  	vim_free(alias);
      }
-@@ -6791,6 +6798,57 @@ get_var_tv(
+@@ -5540,6 +5547,11 @@ set_ref_in_item(
+ 	    }
+ 	}
+     }
++    else if (tv->v_type == VAR_FUNC)
++    {
++	abort = set_ref_in_func(tv->vval.v_string,
++						copyID, ht_stack, list_stack);
++    }
+     else if (tv->v_type == VAR_PARTIAL)
+     {
+ 	partial_T	*pt = tv->vval.v_partial;
+@@ -5549,6 +5561,8 @@ set_ref_in_item(
+ 	 */
+ 	if (pt != NULL)
+ 	{
++	    abort = set_ref_in_func(pt->pt_name, copyID, ht_stack, list_stack);
++
+ 	    if (pt->pt_dict != NULL)
+ 	    {
+ 		typval_T dtv;
+@@ -6791,6 +6805,57 @@ get_var_tv(
  }
  
  /*
@@ -127,7 +148,7 @@ diff --git a/src/eval.c b/src/eval.c
   * Handle expr[expr], expr[expr:expr] subscript and .name lookup.
   * Also handle function call with Funcref variable: func(expr)
   * Can all be combined: dict.func(expr)[idx]['func'](expr)
-@@ -7457,11 +7515,15 @@ init_var_dict(dict_T *dict, dictitem_T *
+@@ -7457,11 +7522,15 @@ init_var_dict(dict_T *dict, dictitem_T *
      dict->dv_scope = scope;
      dict->dv_refcount = DO_NOT_FREE_CNT;
      dict->dv_copyID = 0;
@@ -174,10 +195,21 @@ diff --git a/src/proto/dict.pro b/src/proto/dict.pro
  void dictitem_remove(dict_T *dict, dictitem_T *item);
  void dictitem_free(dictitem_T *item);
  dict_T *dict_copy(dict_T *orig, int deep, int copyID);
+diff --git a/src/proto/userfunc.pro b/src/proto/userfunc.pro
+--- a/src/proto/userfunc.pro
++++ b/src/proto/userfunc.pro
+@@ -18,6 +18,7 @@ char_u *get_user_func_name(expand_T *xp,
+ void ex_delfunction(exarg_T *eap);
+ void func_unref(char_u *name);
+ void func_ref(char_u *name);
++int set_ref_in_func(char_u *name, int copyID, ht_stack_T **ht_stack, list_stack_T **list_stack);
+ void ex_return(exarg_T *eap);
+ void ex_call(exarg_T *eap);
+ int do_return(exarg_T *eap, int reanimate, int is_cmd, void *rettv);
 diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 --- a/src/testdir/test_lambda.vim
 +++ b/src/testdir/test_lambda.vim
-@@ -51,3 +51,87 @@ func Test_not_lamda()
+@@ -51,3 +51,101 @@ func Test_not_lamda()
    let x = {'>' : 'foo'}
    call assert_equal('foo', x['>'])
  endfunc
@@ -230,6 +262,20 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +  call assert_equal('no', l:F[1]())
 +endfunction
 +
++function! Test_lambda_closure()
++  function! s:foo()
++    let x = [0]
++    return {-> [execute("let x[0] += 1"), x[0]][-1]}
++  endfunction
++
++  let l:F = s:foo()
++  call test_garbagecollect_now()
++  call assert_equal(1, l:F())
++  call assert_equal(2, l:F())
++  call assert_equal(3, l:F())
++  call assert_equal(4, l:F())
++endfunction
++
 +function! Test_lambda_with_a_var()
 +  function! s:foo()
 +    let x = 2
@@ -277,7 +323,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      char_u	uf_name[1];	/* name of function (actually longer); can
  				   start with <SNR>123_ (<SNR> is K_SPECIAL
  				   KS_EXTRA KE_SNR) */
-@@ -263,6 +265,9 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -266,6 +268,9 @@ get_lambda_tv(char_u **arg, typval_T *re
      char_u	*start = skipwhite(*arg + 1);
      char_u	*s, *e;
      static int	lambda_no = 0;
@@ -287,13 +333,14 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      ga_init(&newargs);
      ga_init(&newlines);
-@@ -278,6 +283,19 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -281,6 +286,20 @@ get_lambda_tv(char_u **arg, typval_T *re
      if (ret == FAIL || **arg != '>')
  	goto errret;
  
 +    if (evaluate)
 +    {
-+	/* Don't use dict_alloc() here.  Avoid garbage collection. */
++	/* Don't use dict_alloc() here.  Avoid garbage collection.
++	 * These dicts have the same lifetime with "fp". */
 +	d = (dict_T *)alloc(sizeof(dict_T) * 2);
 +	if (d == NULL)
 +	    goto errret;
@@ -307,7 +354,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      /* Get the start and the end of the expression. */
      *arg = skipwhite(*arg + 1);
      s = *arg;
-@@ -295,18 +313,17 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -298,18 +317,17 @@ get_lambda_tv(char_u **arg, typval_T *re
  	int	len;
  	char_u	*p;
  
@@ -330,7 +377,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	len = 7 + e - s + 1;
  	p = (char_u *)alloc(len);
  	if (p == NULL)
-@@ -321,6 +338,8 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -324,6 +342,8 @@ get_lambda_tv(char_u **arg, typval_T *re
  	hash_add(&func_hashtab, UF2HIKEY(fp));
  	fp->uf_args = newargs;
  	fp->uf_lines = newlines;
@@ -339,7 +386,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  #ifdef FEAT_PROFILE
  	fp->uf_tml_count = NULL;
-@@ -339,14 +358,26 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -342,14 +362,26 @@ get_lambda_tv(char_u **arg, typval_T *re
  	rettv->v_type = VAR_FUNC;
      }
      else
@@ -367,7 +414,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      return FAIL;
  }
  
-@@ -637,6 +668,48 @@ free_funccal(
+@@ -640,6 +672,48 @@ free_funccal(
      vim_free(fc);
  }
  
@@ -416,7 +463,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Call a user function.
   */
-@@ -755,7 +828,6 @@ call_user_func(
+@@ -758,7 +832,6 @@ call_user_func(
      for (i = 0; i < argcount; ++i)
      {
  	int	    addlocal = FALSE;
@@ -424,7 +471,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  	ai = i - fp->uf_args.ga_len;
  	if (ai < 0)
-@@ -775,9 +847,6 @@ call_user_func(
+@@ -778,9 +851,6 @@ call_user_func(
  	{
  	    v = &fc->fixvar[fixvar_idx++].var;
  	    v->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX;
@@ -434,7 +481,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	}
  	else
  	{
-@@ -786,36 +855,23 @@ call_user_func(
+@@ -789,36 +859,23 @@ call_user_func(
  	    if (v == NULL)
  		break;
  	    v->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX | DI_FLAGS_ALLOC;
@@ -477,7 +524,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  	if (ai >= 0 && ai < MAX_FUNC_ARGS)
  	{
-@@ -824,6 +880,8 @@ call_user_func(
+@@ -827,6 +884,8 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -486,7 +533,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      /* Don't redraw while executing the function. */
      ++RedrawingDisabled;
-@@ -1056,6 +1114,12 @@ func_free(ufunc_T *fp)
+@@ -1059,6 +1118,12 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
@@ -499,7 +546,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -2203,6 +2267,8 @@ ex_function(exarg_T *eap)
+@@ -2206,6 +2271,8 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
@@ -508,3 +555,43 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
+@@ -2693,6 +2760,39 @@ func_ref(char_u *name)
+ }
+ 
+ /*
++ * Mark all lists and dicts referenced through function "name" with "copyID".
++ * "list_stack" is used to add lists to be marked.  Can be NULL.
++ * "ht_stack" is used to add hashtabs to be marked.  Can be NULL.
++ *
++ * Returns TRUE if setting references failed somehow.
++ */
++    int
++set_ref_in_func(
++    char_u	    *name,
++    int		    copyID,
++    ht_stack_T	    **ht_stack,
++    list_stack_T    **list_stack)
++{
++    ufunc_T	*fp;
++    int		abort = FALSE;
++
++    if (name == NULL)
++	return abort;
++
++    fp = find_func(name);
++    if (fp != NULL)
++    {
++	if (fp->uf_lvars != NULL)
++	    abort = abort || set_ref_in_ht(&fp->uf_lvars->dv_hashtab,
++							copyID, list_stack);
++	if (fp->uf_avars != NULL)
++	    abort = abort || set_ref_in_ht(&fp->uf_avars->dv_hashtab,
++							copyID, list_stack);
++    }
++    return abort;
++}
++
++/*
+  * Return TRUE if items in "fc" do not have "copyID".  That means they are not
+  * referenced from anywhere that is in use.
+  */
