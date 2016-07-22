@@ -38,7 +38,6 @@ matchit-respect-matchpairs.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
-vvar-readonly.patch
 embarcadero.patch
 lambda-update.patch
 fix-config_cache-removal.patch #+rejected
