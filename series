@@ -40,5 +40,6 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 embarcadero.patch
 function-noderef.patch
+dont-list-lambdas.patch
 lambda-update.patch
 fix-config_cache-removal.patch #+rejected

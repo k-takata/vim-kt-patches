@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  c72e9795077df615f71d14b62a787f6d967ff3d7
+
+diff --git a/src/userfunc.c b/src/userfunc.c
+--- a/src/userfunc.c
++++ b/src/userfunc.c
+@@ -2629,8 +2629,9 @@ get_user_func_name(expand_T *xp, int idx
+ 	    ++hi;
+ 	fp = HI2UF(hi);
+ 
+-	if (fp->uf_flags & FC_DICT)
+-	    return (char_u *)""; /* don't show dict functions */
++	if ((fp->uf_flags & FC_DICT)
++				|| STRNCMP(fp->uf_name, "<lambda>", 8) == 0)
++	    return (char_u *)""; /* don't show dict and lambda functions */
+ 
+ 	if (STRLEN(fp->uf_name) + 4 >= IOSIZE)
+ 	    return fp->uf_name;	/* prevents overflow */
