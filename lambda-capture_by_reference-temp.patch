@@ -1,0 +1,567 @@
+# HG changeset patch
+# Parent  a20f0443263d1a5f08758acb167a0d8f318e0ba8
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -239,7 +239,6 @@ static int get_env_len(char_u **arg);
+ static char_u * make_expanded_name(char_u *in_start, char_u *expr_start, char_u *expr_end, char_u *in_end);
+ static void check_vars(char_u *name, int len);
+ static typval_T *alloc_string_tv(char_u *string);
+-static hashtab_T *find_var_ht(char_u *name, char_u **varname);
+ static void delete_var(hashtab_T *ht, hashitem_T *hi);
+ static void list_one_var(dictitem_T *v, char_u *prefix, int *first);
+ static void list_one_var_a(char_u *prefix, char_u *name, int type, char_u *string, int *first);
+@@ -5549,8 +5548,7 @@ set_ref_in_item(
+     }
+     else if (tv->v_type == VAR_FUNC)
+     {
+-	abort = set_ref_in_func(tv->vval.v_string,
+-						copyID, ht_stack, list_stack);
++	abort = set_ref_in_func(tv->vval.v_string, copyID);
+     }
+     else if (tv->v_type == VAR_PARTIAL)
+     {
+@@ -5561,7 +5559,7 @@ set_ref_in_item(
+ 	 */
+ 	if (pt != NULL)
+ 	{
+-	    abort = set_ref_in_func(pt->pt_name, copyID, ht_stack, list_stack);
++	    abort = set_ref_in_func(pt->pt_name, copyID);
+ 
+ 	    if (pt->pt_dict != NULL)
+ 	    {
+@@ -6817,37 +6815,27 @@ check_vars(
+     int		cc;
+     char_u	*varname;
+     hashtab_T	*ht;
++    dictitem_T	*di;
++
++    if (eval_lavars_used == NULL)
++	return;
+ 
+     /* truncate the name, so that we can use strcmp() */
+     cc = name[len];
+     name[len] = NUL;
+ 
+     ht = find_var_ht(name, &varname);
+-    if ((ht == get_funccal_local_ht()) && (eval_lvars_dict != NULL))
+-    {
+-	dictitem_T  *di, *di2;
+-
++    if (ht == get_funccal_local_ht())
++    {
+ 	di = find_var_in_ht(ht, *name, varname, FALSE);
+-	if (di != NULL
+-		&& dict_find(eval_lvars_dict, DI2HIKEY(di), -1) == NULL)
+-	{
+-	    di2 = dictitem_copy(di);
+-	    if (di2 != NULL)
+-		dict_add(eval_lvars_dict, di2);
+-	}
+-    }
+-    else if ((ht == get_funccal_args_ht()) && (eval_avars_dict != NULL))
+-    {
+-	dictitem_T  *di, *di2;
+-
++	if (di != NULL)
++	    *eval_lavars_used = TRUE;
++    }
++    else if (ht == get_funccal_args_ht())
++    {
+ 	di = find_var_in_ht(ht, *name, varname, FALSE);
+-	if (di != NULL
+-		&& dict_find(eval_avars_dict, DI2HIKEY(di), -1) == NULL)
+-	{
+-	    di2 = dictitem_copy(di);
+-	    if (di2 != NULL)
+-		dict_add(eval_avars_dict, di2);
+-	}
++	if (di != NULL)
++	    *eval_lavars_used = TRUE;
+     }
+ 
+     name[len] = cc;
+@@ -7339,13 +7327,20 @@ find_var(char_u *name, hashtab_T **htp, 
+ {
+     char_u	*varname;
+     hashtab_T	*ht;
++    dictitem_T	*ret = NULL;
+ 
+     ht = find_var_ht(name, &varname);
+     if (htp != NULL)
+ 	*htp = ht;
+     if (ht == NULL)
+ 	return NULL;
+-    return find_var_in_ht(ht, *name, varname, no_autoload || htp != NULL);
++    ret = find_var_in_ht(ht, *name, varname, no_autoload || htp != NULL);
++    if (ret != NULL)
++	return ret;
++
++    /* Search in parent scope for lambda */
++    return find_var_in_scoped_ht(name, varname ? &varname : NULL,
++		no_autoload || htp != NULL);
+ }
+ 
+ /*
+@@ -7406,7 +7401,7 @@ find_var_in_ht(
+  * Return NULL if the name is not valid.
+  * Set "varname" to the start of name without ':'.
+  */
+-    static hashtab_T *
++    hashtab_T *
+ find_var_ht(char_u *name, char_u **varname)
+ {
+     hashitem_T	*hi;
+@@ -7686,6 +7681,10 @@ set_var(
+     }
+     v = find_var_in_ht(ht, 0, varname, TRUE);
+ 
++    /* Search in parent scope which is possible to reference from lambda */
++    if (v == NULL)
++	v = find_var_in_scoped_ht(name, varname ? &varname : NULL, TRUE);
++
+     if ((tv->v_type == VAR_FUNC || tv->v_type == VAR_PARTIAL)
+ 				      && var_check_func_name(name, v == NULL))
+ 	return;
+diff --git a/src/globals.h b/src/globals.h
+--- a/src/globals.h
++++ b/src/globals.h
+@@ -1655,10 +1655,8 @@ EXTERN time_T time_for_testing INIT(= 0)
+ /* Abort conversion to string after a recursion error. */
+ EXTERN int  did_echo_string_emsg INIT(= FALSE);
+ 
+-/* Dict for local variables used in a lambda expression. */
+-EXTERN dict_T *eval_lvars_dict INIT(= NULL);
+-/* Dict for arguments used in a lambda expression. */
+-EXTERN dict_T *eval_avars_dict INIT(= NULL);
++/* Used for checking if local variables or arguments used in a lambda. */
++EXTERN int *eval_lavars_used INIT(= NULL);
+ #endif
+ 
+ /*
+diff --git a/src/proto/eval.pro b/src/proto/eval.pro
+--- a/src/proto/eval.pro
++++ b/src/proto/eval.pro
+@@ -87,6 +87,7 @@ char_u *get_tv_string_chk(typval_T *varp
+ char_u *get_tv_string_buf_chk(typval_T *varp, char_u *buf);
+ dictitem_T *find_var(char_u *name, hashtab_T **htp, int no_autoload);
+ dictitem_T *find_var_in_ht(hashtab_T *ht, int htname, char_u *varname, int no_autoload);
++hashtab_T *find_var_ht(char_u *name, char_u **varname);
+ char_u *get_var_value(char_u *name);
+ void new_script_vars(scid_T id);
+ void init_var_dict(dict_T *dict, dictitem_T *dict_var, int scope);
+diff --git a/src/proto/userfunc.pro b/src/proto/userfunc.pro
+--- a/src/proto/userfunc.pro
++++ b/src/proto/userfunc.pro
+@@ -18,7 +18,6 @@ char_u *get_user_func_name(expand_T *xp,
+ void ex_delfunction(exarg_T *eap);
+ void func_unref(char_u *name);
+ void func_ref(char_u *name);
+-int set_ref_in_func(char_u *name, int copyID, ht_stack_T **ht_stack, list_stack_T **list_stack);
+ void ex_return(exarg_T *eap);
+ void ex_call(exarg_T *eap);
+ int do_return(exarg_T *eap, int reanimate, int is_cmd, void *rettv);
+@@ -47,7 +46,9 @@ void *clear_current_funccal(void);
+ void restore_current_funccal(void *f);
+ void list_func_vars(int *first);
+ dict_T *get_current_funccal_dict(hashtab_T *ht);
++dictitem_T *find_var_in_scoped_ht(char_u *name, char_u **varname, int no_autoload);
+ int set_ref_in_previous_funccal(int copyID);
+ int set_ref_in_call_stack(int copyID);
+ int set_ref_in_func_args(int copyID);
++int set_ref_in_func(char_u *name, int copyID);
+ /* vim: set ft=c : */
+diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
+--- a/src/testdir/test_lambda.vim
++++ b/src/testdir/test_lambda.vim
+@@ -52,11 +52,11 @@ func Test_not_lamda()
+   call assert_equal('foo', x['>'])
+ endfunc
+ 
+-function! Test_lambda_capture_by_value()
++function! Test_lambda_capture_by_reference()
+   let v = 1
+   let l:F = {x -> x + v}
+   let v = 2
+-  call assert_equal(11, l:F(10))
++  call assert_equal(12, l:F(10))
+ endfunction
+ 
+ function! Test_lambda_side_effect()
+diff --git a/src/userfunc.c b/src/userfunc.c
+--- a/src/userfunc.c
++++ b/src/userfunc.c
+@@ -15,6 +15,8 @@
+ 
+ #if defined(FEAT_EVAL) || defined(PROTO)
+ 
++typedef struct funccall_S funccall_T;
++
+ /*
+  * Structure to hold info for a user function.
+  */
+@@ -47,8 +49,7 @@ struct ufunc
+     scid_T	uf_script_ID;	/* ID of script where function was defined,
+ 				   used for s: variables */
+     int		uf_refcount;	/* for numbered function: reference count */
+-    dict_T	*uf_lvars;	/* for lambda: outer scope variables */
+-    dict_T	*uf_avars;	/* for lambda: outer scope arguments */
++    funccall_T	*uf_scoped;	/* l: local variables for closure */
+     char_u	uf_name[1];	/* name of function (actually longer); can
+ 				   start with <SNR>123_ (<SNR> is K_SPECIAL
+ 				   KS_EXTRA KE_SNR) */
+@@ -72,8 +73,6 @@ struct ufunc
+ #define FIXVAR_CNT	12	/* number of fixed variables */
+ 
+ /* structure to hold info for a function that is currently being executed. */
+-typedef struct funccall_S funccall_T;
+-
+ struct funccall_S
+ {
+     ufunc_T	*func;		/* function being called */
+@@ -98,6 +97,10 @@ struct funccall_S
+     proftime_T	prof_child;	/* time spent in a child */
+ #endif
+     funccall_T	*caller;	/* calling function or NULL */
++
++    /* for closure */
++    int		fc_refcount;
++    int		fc_copyID;	/* for garbage collection */
+ };
+ 
+ /*
+@@ -269,9 +272,8 @@ get_lambda_tv(char_u **arg, typval_T *re
+     char_u	*start = skipwhite(*arg + 1);
+     char_u	*s, *e;
+     static int	lambda_no = 0;
+-    dict_T	*old_eval_lvars = eval_lvars_dict;
+-    dict_T	*old_eval_avars = eval_avars_dict;
+-    dict_T	*dl = NULL, *da = NULL;
++    int		*old_eval_lavars = eval_lavars_used;
++    int		eval_lavars = FALSE;
+ 
+     ga_init(&newargs);
+     ga_init(&newlines);
+@@ -294,14 +296,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+     /* Set up dictionaries for checking local variables and arguments. */
+     if (evaluate)
+     {
+-	dl = dict_alloc();
+-	if (dl == NULL)
+-	    goto errret;
+-	da = dict_alloc();
+-	if (da == NULL)
+-	    goto errret;
+-	eval_lvars_dict = dl;
+-	eval_avars_dict = da;
++	eval_lavars_used = &eval_lavars;
+     }
+ 
+     /* Get the start and the end of the expression. */
+@@ -321,18 +316,6 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	int	len;
+ 	char_u	*p;
+ 
+-	/* Check if local variables and arguments were used. */
+-	if (dl->dv_hashtab.ht_used == 0)
+-	{
+-	    dict_unref(dl);
+-	    dl = NULL;
+-	}
+-	if (da->dv_hashtab.ht_used == 0)
+-	{
+-	    dict_unref(da);
+-	    da = NULL;
+-	}
+-
+ 	sprintf((char*)name, "<lambda>%d", ++lambda_no);
+ 
+ 	fp = (ufunc_T *)alloc((unsigned)(sizeof(ufunc_T) + STRLEN(name)));
+@@ -357,8 +340,13 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	hash_add(&func_hashtab, UF2HIKEY(fp));
+ 	fp->uf_args = newargs;
+ 	fp->uf_lines = newlines;
+-	fp->uf_lvars = dl;
+-	fp->uf_avars = da;
++	if (current_funccal != NULL && eval_lavars)
++	{
++	    fp->uf_scoped = current_funccal;
++	    current_funccal->fc_refcount++;
++	}
++	else
++	    fp->uf_scoped = NULL;
+ 
+ #ifdef FEAT_PROFILE
+ 	fp->uf_tml_count = NULL;
+@@ -377,18 +365,14 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	rettv->v_type = VAR_FUNC;
+     }
+ 
+-    eval_lvars_dict = old_eval_lvars;
+-    eval_avars_dict = old_eval_avars;
++    eval_lavars_used = old_eval_lavars;
+     return OK;
+ 
+ errret:
+     ga_clear_strings(&newargs);
+     ga_clear_strings(&newlines);
+     vim_free(fp);
+-    dict_unref(dl);
+-    dict_unref(da);
+-    eval_lvars_dict = old_eval_lvars;
+-    eval_avars_dict = old_eval_avars;
++    eval_lavars_used = old_eval_lavars;
+     return FAIL;
+ }
+ 
+@@ -679,48 +663,6 @@ free_funccal(
+     vim_free(fc);
+ }
+ 
+-    static void
+-copy_vars(dict_T *to, dict_T *from, int copyitem)
+-{
+-    dictitem_T	*di, *org;
+-    int		todo;
+-    hashitem_T	*hi;
+-
+-    if (from == NULL)
+-	return;
+-
+-    todo = (int)from->dv_hashtab.ht_used;
+-    for (hi = from->dv_hashtab.ht_array; todo > 0; ++hi)
+-    {
+-	if (!HASHITEM_EMPTY(hi))
+-	{
+-	    --todo;
+-
+-	    /* Skip if there is already a variable with the same name. */
+-	    if (!HASHITEM_EMPTY(hash_find(&to->dv_hashtab, hi->hi_key)))
+-		continue;
+-
+-	    org = HI2DI(hi);
+-	    di = dictitem_alloc(org->di_key);
+-	    if (di == NULL)
+-		break;
+-	    di->di_flags |= DI_FLAGS_RO | DI_FLAGS_FIX;
+-	    if (copyitem)
+-		copy_tv(&org->di_tv, &di->di_tv);
+-	    else
+-		di->di_tv = org->di_tv;
+-
+-	    if (dict_add(to, di) == FAIL)
+-	    {
+-		if (copyitem)
+-		    clear_tv(&di->di_tv);
+-		vim_free(di);
+-		break;
+-	    }
+-	}
+-    }
+-}
+-
+ /*
+  * Call a user function.
+  */
+@@ -777,6 +719,9 @@ call_user_func(
+     /* Check if this function has a breakpoint. */
+     fc->breakpoint = dbg_find_breakpoint(FALSE, fp->uf_name, (linenr_T)0);
+     fc->dbg_tick = debug_tick;
++    /* Set up fields for closure. */
++    fc->fc_refcount = 0;
++    fc->fc_copyID = 0;
+ 
+     if (STRNCMP(fp->uf_name, "<lambda>", 8) == 0)
+ 	islambda = TRUE;
+@@ -891,8 +836,6 @@ call_user_func(
+ 	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
+ 	}
+     }
+-    copy_vars(&fc->l_vars, fp->uf_lvars, TRUE);
+-    copy_vars(&fc->l_avars, fp->uf_avars, FALSE);
+ 
+     /* Don't redraw while executing the function. */
+     ++RedrawingDisabled;
+@@ -1080,7 +1023,8 @@ call_user_func(
+      * free the funccall_T and what's in it. */
+     if (fc->l_varlist.lv_refcount == DO_NOT_FREE_CNT
+ 	    && fc->l_vars.dv_refcount == DO_NOT_FREE_CNT
+-	    && fc->l_avars.dv_refcount == DO_NOT_FREE_CNT)
++	    && fc->l_avars.dv_refcount == DO_NOT_FREE_CNT
++	    && fc->fc_refcount <= 0)
+     {
+ 	free_funccal(fc, FALSE);
+     }
+@@ -1125,8 +1069,6 @@ func_free(ufunc_T *fp)
+     /* clear this function */
+     ga_clear_strings(&(fp->uf_args));
+     ga_clear_strings(&(fp->uf_lines));
+-    dict_unref(fp->uf_lvars);
+-    dict_unref(fp->uf_avars);
+ #ifdef FEAT_PROFILE
+     vim_free(fp->uf_tml_count);
+     vim_free(fp->uf_tml_total);
+@@ -1140,6 +1082,9 @@ func_free(ufunc_T *fp)
+     else
+ 	hash_remove(&func_hashtab, hi);
+ 
++    if (fp->uf_scoped != NULL)
++	--fp->uf_scoped->fc_refcount;
++
+     vim_free(fp);
+ }
+ 
+@@ -2285,8 +2230,7 @@ ex_function(exarg_T *eap)
+     }
+     fp->uf_args = newargs;
+     fp->uf_lines = newlines;
+-    fp->uf_lvars = NULL;
+-    fp->uf_avars = NULL;
++    fp->uf_scoped = NULL;
+ #ifdef FEAT_PROFILE
+     fp->uf_tml_count = NULL;
+     fp->uf_tml_total = NULL;
+@@ -2779,48 +2723,6 @@ func_ref(char_u *name)
+ }
+ 
+ /*
+- * Mark all lists and dicts referenced through function "name" with "copyID".
+- * "list_stack" is used to add lists to be marked.  Can be NULL.
+- * "ht_stack" is used to add hashtabs to be marked.  Can be NULL.
+- *
+- * Returns TRUE if setting references failed somehow.
+- */
+-    int
+-set_ref_in_func(
+-    char_u	    *name,
+-    int		    copyID,
+-    ht_stack_T	    **ht_stack,
+-    list_stack_T    **list_stack)
+-{
+-    ufunc_T	*fp;
+-    int		abort = FALSE;
+-    typval_T	dtv;
+-
+-    if (name == NULL)
+-	return abort;
+-
+-    fp = find_func(name);
+-    if (fp != NULL)
+-    {
+-	if (fp->uf_lvars != NULL)
+-	{
+-	    dtv.v_type = VAR_DICT;
+-	    dtv.vval.v_dict = fp->uf_lvars;
+-	    abort = abort ||
+-			set_ref_in_item(&dtv, copyID, ht_stack, list_stack);
+-	}
+-	if (fp->uf_avars != NULL)
+-	{
+-	    dtv.v_type = VAR_DICT;
+-	    dtv.vval.v_dict = fp->uf_avars;
+-	    abort = abort ||
+-			set_ref_in_item(&dtv, copyID, ht_stack, list_stack);
+-	}
+-    }
+-    return abort;
+-}
+-
+-/*
+  * Return TRUE if items in "fc" do not have "copyID".  That means they are not
+  * referenced from anywhere that is in use.
+  */
+@@ -2829,7 +2731,8 @@ can_free_funccal(funccall_T *fc, int cop
+ {
+     return (fc->l_varlist.lv_copyID != copyID
+ 	    && fc->l_vars.dv_copyID != copyID
+-	    && fc->l_avars.dv_copyID != copyID);
++	    && fc->l_avars.dv_copyID != copyID
++	    && (fc->fc_refcount <= 0 && fc->fc_copyID != copyID));
+ }
+ 
+ /*
+@@ -3574,6 +3477,38 @@ get_current_funccal_dict(hashtab_T *ht)
+     return NULL;
+ }
+ 
++/* Search variable in parent scope. */
++    dictitem_T*
++find_var_in_scoped_ht(char_u *name, char_u **varname, int no_autoload)
++{
++    dictitem_T	*v = NULL;
++    funccall_T	*old_current_funccal = current_funccal;
++    hashtab_T	*ht;
++
++    if (current_funccal == NULL || current_funccal->func->uf_scoped == NULL)
++	return NULL;
++
++    /* Search in parent scope which is possible to reference from lambda */
++    current_funccal = current_funccal->func->uf_scoped;
++    while (current_funccal)
++    {
++	ht = find_var_ht(name, varname ? &(*varname) : NULL);
++	if (ht != NULL)
++	{
++	    v = find_var_in_ht(ht, *name,
++		    varname ? *varname : NULL, no_autoload);
++	    if (v != NULL)
++		break;
++	}
++	if (current_funccal == current_funccal->func->uf_scoped)
++	    break;
++	current_funccal = current_funccal->func->uf_scoped;
++    }
++    current_funccal = old_current_funccal;
++
++    return v;
++}
++
+ /*
+  * Set "copyID + 1" in previous_funccal and callers.
+  */
+@@ -3604,6 +3539,7 @@ set_ref_in_call_stack(int copyID)
+ 
+     for (fc = current_funccal; fc != NULL; fc = fc->caller)
+     {
++	fc->fc_copyID = copyID + 1;
+ 	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID, NULL);
+ 	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID, NULL);
+     }
+@@ -3625,4 +3561,36 @@ set_ref_in_func_args(int copyID)
+     return abort;
+ }
+ 
++/*
++ * Mark all lists and dicts referenced through function "name" with "copyID".
++ * "list_stack" is used to add lists to be marked.  Can be NULL.
++ * "ht_stack" is used to add hashtabs to be marked.  Can be NULL.
++ *
++ * Returns TRUE if setting references failed somehow.
++ */
++    int
++set_ref_in_func(char_u *name, int copyID)
++{
++    ufunc_T	*fp;
++    funccall_T	*fc;
++
++    if (name == NULL)
++	return FALSE;
++
++    fp = find_func(name);
++    if (fp != NULL)
++    {
++	for (fc = fp->uf_scoped; fc != NULL; fc = fc->func->uf_scoped)
++	{
++	    if (fc->fc_copyID != copyID)
++	    {
++		fc->fc_copyID = copyID;
++		set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID, NULL);
++		set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID, NULL);
++	    }
++	}
++    }
++    return FALSE;
++}
++
+ #endif /* FEAT_EVAL */
