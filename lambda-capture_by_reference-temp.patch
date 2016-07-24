@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a20f0443263d1a5f08758acb167a0d8f318e0ba8
+# Parent  8af1319089e0b51687e24a4916f54897646e4eda
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -31,7 +31,7 @@ diff --git a/src/eval.c b/src/eval.c
  
  	    if (pt->pt_dict != NULL)
  	    {
-@@ -6817,37 +6815,27 @@ check_vars(
+@@ -6817,36 +6815,28 @@ check_vars(
      int		cc;
      char_u	*varname;
      hashtab_T	*ht;
@@ -49,9 +49,7 @@ diff --git a/src/eval.c b/src/eval.c
 -    {
 -	dictitem_T  *di, *di2;
 -
-+    if (ht == get_funccal_local_ht())
-+    {
- 	di = find_var_in_ht(ht, *name, varname, FALSE);
+-	di = find_var_in_ht(ht, *name, varname, FALSE);
 -	if (di != NULL
 -		&& dict_find(eval_lvars_dict, DI2HIKEY(di), -1) == NULL)
 -	{
@@ -64,25 +62,29 @@ diff --git a/src/eval.c b/src/eval.c
 -    {
 -	dictitem_T  *di, *di2;
 -
-+	if (di != NULL)
-+	    *eval_lavars_used = TRUE;
-+    }
-+    else if (ht == get_funccal_args_ht())
-+    {
- 	di = find_var_in_ht(ht, *name, varname, FALSE);
+-	di = find_var_in_ht(ht, *name, varname, FALSE);
 -	if (di != NULL
 -		&& dict_find(eval_avars_dict, DI2HIKEY(di), -1) == NULL)
 -	{
 -	    di2 = dictitem_copy(di);
 -	    if (di2 != NULL)
 -		dict_add(eval_avars_dict, di2);
--	}
-+	if (di != NULL)
++    if (ht == get_funccal_local_ht())
++    {
++	if (find_var(name, NULL, TRUE) != NULL)
++	{
 +	    *eval_lavars_used = TRUE;
++	}
++    }
++    else if (ht == get_funccal_args_ht())
++    {
++	if (find_var(name, NULL, TRUE) != NULL)
++	{
++	    *eval_lavars_used = TRUE;
+ 	}
      }
  
-     name[len] = cc;
-@@ -7339,13 +7327,20 @@ find_var(char_u *name, hashtab_T **htp, 
+@@ -7339,13 +7329,20 @@ find_var(char_u *name, hashtab_T **htp, 
  {
      char_u	*varname;
      hashtab_T	*ht;
@@ -104,7 +106,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -7406,7 +7401,7 @@ find_var_in_ht(
+@@ -7406,7 +7403,7 @@ find_var_in_ht(
   * Return NULL if the name is not valid.
   * Set "varname" to the start of name without ':'.
   */
@@ -113,7 +115,7 @@ diff --git a/src/eval.c b/src/eval.c
  find_var_ht(char_u *name, char_u **varname)
  {
      hashitem_T	*hi;
-@@ -7686,6 +7681,10 @@ set_var(
+@@ -7686,6 +7683,10 @@ set_var(
      }
      v = find_var_in_ht(ht, 0, varname, TRUE);
  
@@ -278,7 +280,14 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	sprintf((char*)name, "<lambda>%d", ++lambda_no);
  
  	fp = (ufunc_T *)alloc((unsigned)(sizeof(ufunc_T) + STRLEN(name)));
-@@ -357,8 +340,13 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -351,14 +334,22 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	((char_u **)(newlines.ga_data))[newlines.ga_len++] = p;
+ 	STRCPY(p, "return ");
+ 	vim_strncpy(p + 7, s, e - s);
++	TRACE("lambda: la:%d, name: %s, expr: %s", eval_lavars, name, p + 7);
+ 
+ 	fp->uf_refcount = 1;
+ 	STRCPY(fp->uf_name, name);
  	hash_add(&func_hashtab, UF2HIKEY(fp));
  	fp->uf_args = newargs;
  	fp->uf_lines = newlines;
@@ -288,13 +297,15 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +	{
 +	    fp->uf_scoped = current_funccal;
 +	    current_funccal->fc_refcount++;
++	    func_ref(current_funccal->func->uf_name);
++	    TRACE("name:%s, fc_refcount:%d", current_funccal->func->uf_name, current_funccal->fc_refcount);
 +	}
 +	else
 +	    fp->uf_scoped = NULL;
  
  #ifdef FEAT_PROFILE
  	fp->uf_tml_count = NULL;
-@@ -377,18 +365,14 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -377,18 +368,14 @@ get_lambda_tv(char_u **arg, typval_T *re
  	rettv->v_type = VAR_FUNC;
      }
  
@@ -315,7 +326,11 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      return FAIL;
  }
  
-@@ -679,48 +663,6 @@ free_funccal(
+@@ -676,51 +663,10 @@ free_funccal(
+ 	for (li = fc->l_varlist.lv_first; li != NULL; li = li->li_next)
+ 	    clear_tv(&li->li_tv);
+ 
++    TRACE("free_funccal: %s", fc->func->uf_name);
      vim_free(fc);
  }
  
@@ -364,7 +379,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Call a user function.
   */
-@@ -777,6 +719,9 @@ call_user_func(
+@@ -777,6 +723,9 @@ call_user_func(
      /* Check if this function has a breakpoint. */
      fc->breakpoint = dbg_find_breakpoint(FALSE, fp->uf_name, (linenr_T)0);
      fc->dbg_tick = debug_tick;
@@ -374,7 +389,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      if (STRNCMP(fp->uf_name, "<lambda>", 8) == 0)
  	islambda = TRUE;
-@@ -891,8 +836,6 @@ call_user_func(
+@@ -891,8 +840,6 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -383,7 +398,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      /* Don't redraw while executing the function. */
      ++RedrawingDisabled;
-@@ -1080,7 +1023,8 @@ call_user_func(
+@@ -1080,7 +1027,8 @@ call_user_func(
       * free the funccall_T and what's in it. */
      if (fc->l_varlist.lv_refcount == DO_NOT_FREE_CNT
  	    && fc->l_vars.dv_refcount == DO_NOT_FREE_CNT
@@ -393,7 +408,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	free_funccal(fc, FALSE);
      }
-@@ -1125,8 +1069,6 @@ func_free(ufunc_T *fp)
+@@ -1125,8 +1073,6 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
@@ -402,17 +417,22 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -1140,6 +1082,9 @@ func_free(ufunc_T *fp)
+@@ -1140,6 +1086,14 @@ func_free(ufunc_T *fp)
      else
  	hash_remove(&func_hashtab, hi);
  
 +    if (fp->uf_scoped != NULL)
++    {
 +	--fp->uf_scoped->fc_refcount;
++	func_unref(fp->uf_scoped->func->uf_name);
++    }
++
++    TRACE("func_free: %s", fp->uf_name);
 +
      vim_free(fp);
  }
  
-@@ -2285,8 +2230,7 @@ ex_function(exarg_T *eap)
+@@ -2285,8 +2239,7 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
@@ -422,7 +442,36 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
-@@ -2779,48 +2723,6 @@ func_ref(char_u *name)
+@@ -2736,6 +2689,7 @@ func_unref(char_u *name)
+ 	    if (fp->uf_calls == 0)
+ 		func_free(fp);
+ 	}
++	TRACE("func_unref'ed: %s, cnt:%d", name, fp ? fp->uf_refcount : -1);
+     }
+     else if (STRNCMP(name, "<lambda>", 8) == 0)
+     {
+@@ -2748,6 +2702,7 @@ func_unref(char_u *name)
+ 	    if (fp->uf_calls == 0)
+ 		func_free(fp);
+ 	}
++	TRACE("func_unref'ed: %s, cnt:%d", name, fp ? fp->uf_refcount : -1);
+     }
+ }
+ 
+@@ -2768,6 +2723,7 @@ func_ref(char_u *name)
+ 	    EMSG2(_(e_intern2), "func_ref()");
+ 	else
+ 	    ++fp->uf_refcount;
++	TRACE("func_ref: %s, cnt:%d", name, fp ? fp->uf_refcount : -1);
+     }
+     else if (STRNCMP(name, "<lambda>", 8) == 0)
+     {
+@@ -2775,52 +2731,11 @@ func_ref(char_u *name)
+ 	fp = find_func(name);
+ 	if (fp != NULL)
+ 	    ++fp->uf_refcount;
++	TRACE("func_ref: %s, cnt:%d", name, fp ? fp->uf_refcount : -1);
+     }
  }
  
  /*
@@ -471,7 +520,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
   * Return TRUE if items in "fc" do not have "copyID".  That means they are not
   * referenced from anywhere that is in use.
   */
-@@ -2829,7 +2731,8 @@ can_free_funccal(funccall_T *fc, int cop
+@@ -2829,7 +2744,8 @@ can_free_funccal(funccall_T *fc, int cop
  {
      return (fc->l_varlist.lv_copyID != copyID
  	    && fc->l_vars.dv_copyID != copyID
@@ -481,7 +530,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  }
  
  /*
-@@ -3574,6 +3477,38 @@ get_current_funccal_dict(hashtab_T *ht)
+@@ -3574,6 +3490,38 @@ get_current_funccal_dict(hashtab_T *ht)
      return NULL;
  }
  
@@ -520,7 +569,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Set "copyID + 1" in previous_funccal and callers.
   */
-@@ -3604,6 +3539,7 @@ set_ref_in_call_stack(int copyID)
+@@ -3604,6 +3552,7 @@ set_ref_in_call_stack(int copyID)
  
      for (fc = current_funccal; fc != NULL; fc = fc->caller)
      {
@@ -528,7 +577,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID, NULL);
  	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID, NULL);
      }
-@@ -3625,4 +3561,36 @@ set_ref_in_func_args(int copyID)
+@@ -3625,4 +3574,36 @@ set_ref_in_func_args(int copyID)
      return abort;
  }
  
