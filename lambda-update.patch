@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  9911bba7b29bb8e3d63eb24c32870ba022161726
+# Parent  21e93274d9939b6f9111e5ad8bf71ff28946d724
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -240,7 +240,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
    endfunction
  
    call s:Foo()
-@@ -51,3 +51,114 @@ func Test_not_lamda()
+@@ -51,3 +51,128 @@ func Test_not_lamda()
    let x = {'>' : 'foo'}
    call assert_equal('foo', x['>'])
  endfunc
@@ -341,6 +341,20 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +  call assert_fails(':call l:F()', 'E117:')
 +endfunction
 +
++function! Test_circular_reference()
++  function! s:Foo()
++    let d = {}
++    let d.f = {-> d}
++    return d.f
++  endfunction
++
++  call s:Foo()
++  call test_garbagecollect_now()
++  let i = 0 | while i < 10000 | call s:Foo() | let i+= 1 | endwhile
++  call test_garbagecollect_now()
++endfunction
++
++endfunction
 +function! Test_lambda_combination()
 +  call assert_equal(2, {x -> {x -> x}}(1)(2))
 +  call assert_equal(10, {y -> {x -> x(y)(10)}({y -> y})}({z -> z}))
