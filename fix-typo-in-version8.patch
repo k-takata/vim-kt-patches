@@ -1,0 +1,232 @@
+# HG changeset patch
+# Parent  5d5c195eacdba7dca005a9d4541ff67d59d69b8e
+
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -523,7 +523,7 @@ Files:	    src/diff.c
+ 
+ Patch 7.4.032
+ Problem:    NFA engine does not match the NUL character. (Jonathon Merz)
+-Solution:   Ues 0x0a instead of NUL. (Christian Brabandt)
++Solution:   Use 0x0a instead of NUL. (Christian Brabandt)
+ Files:	    src/regexp_nfa.c, src/testdir/test64.in, src/testdir/test64.ok
+ 
+ Patch 7.4.033
+@@ -566,7 +566,7 @@ Solution:   Ignore the error when locati
+ Files:	    src/normal.c, src/spell.c
+ 
+ Patch 7.4.039
+-Problem:    MS-Windows: MSCV10 and earlier can't handle symlinks to a
++Problem:    MS-Windows: MSVC10 and earlier can't handle symlinks to a
+ 	    directory properly.
+ Solution:   Add stat_symlink_aware() and wstat_symlink_aware(). (Ken Takata)
+ Files:	    src/os_mswin.c, src/os_win32.c, src/os_win32.h
+@@ -1364,7 +1364,7 @@ Solution:   Check the platform, when the
+ Files:	    src/os_mswin.c, src/os_win32.c
+ 
+ Patch 7.4.176
+-Problem:    Dictionary.update() thows an error when used without arguments.
++Problem:    Dictionary.update() throws an error when used without arguments.
+ 	    Python programmers don't expect that.
+ Solution:   Make Dictionary.update() without arguments do nothing. (ZyX)
+ Files:	    src/if_py_both.h, src/testdir/test86.in, src/testdir/test87.in
+@@ -1964,7 +1964,7 @@ Solution:   Also check the file size.
+ Files:	    src/fileio.c
+ 
+ Patch 7.4.275
+-Problem:    When changing the type of a sign that hasn't been placed ther is
++Problem:    When changing the type of a sign that hasn't been placed there is
+ 	    no error message.
+ Solution:   Add an error message. (Christian Brabandt)
+ Files:	    src/ex_cmds.c
+@@ -2372,7 +2372,7 @@ Solution:   Fix off-by-one error.  (Ozak
+ Files:	    src/window.c
+ 
+ Patch 7.4.344
+-Problem:    Unessecary initializations and other things related to
++Problem:    Unnecessary initializations and other things related to
+ 	    matchaddpos().
+ Solution:   Code cleanup. (Alexey Radkov)
+ Files:	    runtime/doc/eval.txt, src/screen.c, src/window.c
+@@ -2573,7 +2573,7 @@ Solution:   Compute the available room p
+ Files:	    src/window.c
+ 
+ Patch 7.4.378
+-Problem:    Title of quickfist list is not kept for setqflist(list, 'r').
++Problem:    Title of quickfix list is not kept for setqflist(list, 'r').
+ Solution:   Keep the title.  Add a test. (Lcd)
+ Files:	    src/quickfix.c, src/testdir/Make_amiga.mak,
+ 	    src/testdir/Make_dos.mak, src/testdir/Make_ming.mak,
+@@ -3100,7 +3100,7 @@ Files:	    src/gui_w32.c
+ 
+ Patch 7.4.465 (after 7.4.016)
+ Problem:    Crash when expanding a very long string.
+-Solution:   Use wsncpy() instead of wcscpy(). (Ken Takata)
++Solution:   Use wcsncpy() instead of wcscpy(). (Ken Takata)
+ Files:	    src/os_win32.c
+ 
+ Patch 7.4.466 (after 7.4.460)
+@@ -3555,7 +3555,7 @@ Files:	    src/ex_docmd.c
+ 
+ Patch 7.4.541
+ Problem:    Crash when doing a range assign.
+-Solution:   Check for NULL poiter. (Yukihiro Nakadaira)
++Solution:   Check for NULL pointer. (Yukihiro Nakadaira)
+ Files:	    src/eval.c, src/testdir/test55.in, src/testdir/test55.ok
+ 
+ Patch 7.4.542
+@@ -3609,7 +3609,7 @@ Files:	    src/Make_cyg_ming.mak
+ 
+ Patch 7.4.549
+ Problem:    Function name not recognized correctly when inside a function.
+-Solution:   Don't check for an alpha character.
++Solution:   Don't check for an alpha character. (Ozaki Kiichi)
+ Files:	    src/eval.c, src/testdir/test_nested_function.in,
+ 	    src/testdir/test_nested_function.ok, src/testdir/Make_amiga.mak,
+ 	    src/testdir/Make_dos.mak, src/testdir/Make_ming.mak,
+@@ -5519,7 +5519,8 @@ Files:      src/misc1.c
+ 
+ Patch 7.4.872
+ Problem:    Not using CI services available.
+-Solution:   Add configuration files for travis and appveyor. (PR #401)
++Solution:   Add configuration files for travis and appveyor. (Ken Takata,
++            vim-jp, PR #401)
+ Files:      .travis.yml, appveyor.yml, Filelist
+ 
+ Patch 7.4.873 (after 7.4.866)
+@@ -5694,7 +5695,7 @@ Files:      src/os_win32.c
+ 
+ Patch 7.4.903
+ Problem:    MS-Windows: When 'encoding' differs from the current code page,
+-            expandinig wildcards may cause illegal memory access.
++            expanding wildcards may cause illegal memory access.
+ Solution:   Allocate a longer buffer. (Ken Takata)
+ Files:      src/misc1.c
+ 
+@@ -6042,7 +6043,7 @@ Solution:   When using "zt", "zb" and "z
+ Files:      src/normal.c, src/window.c, src/proto/window.pro
+ 
+ Patch 7.4.962
+-Problem:    Cannot run the tests with gvim.  Cannot run individual new stests.
++Problem:    Cannot run the tests with gvim.  Cannot run individual new tests.
+ Solution:   Add the -f flag. Add new test targets in Makefile.
+ Files:      src/Makefile, src/testdir/Makefile
+ 
+@@ -6079,7 +6080,7 @@ Solution:   Reduce the count from 8 to 7
+ Files:      src/testdir/test86.in, src/testdir/test87.in
+ 
+ Patch 7.4.969
+-Problem:    Compiler warnings on Windowx x64 build.
++Problem:    Compiler warnings on Windows x64 build.
+ Solution:   Add type casts. (Mike Williams)
+ Files:      src/option.c
+ 
+@@ -6652,7 +6653,7 @@ Files:      src/Make_cyg_ming.mak, src/M
+ Patch 7.4.1063
+ Problem:    TCL_VER_LONG and DYNAMIC_TCL_VER are not set when building with
+             Cygwin and MingW.
+-Solution:   Add TCL_VER_LONG and DYNAMIC_TCL_VER to the makefile.
++Solution:   Add TCL_VER_LONG and DYNAMIC_TCL_VER to the makefile. (Ken Takata)
+ Files:      src/Make_cyg_ming.mak
+ 
+ Patch 7.4.1064
+@@ -6719,7 +6720,7 @@ Files:      src/misc2.c, src/vim.h, src/
+             src/testdir/test_quickfix.vim
+ 
+ Patch 7.4.1074
+-Problem:    Warning from VX2015 compiler.
++Problem:    Warning from VC2015 compiler.
+ Solution:   Add a type cast. (Mike Williams)
+ Files:      src/gui_dwrite.cpp
+ 
+@@ -7147,7 +7148,7 @@ Solution:   Move the call to gui_gtk_reg
+ Files:      src/gui_gtk_x11.c
+ 
+ Patch 7.4.1139
+-Problem:    MS-Windows: getftype() returns "file for symlink to directory.
++Problem:    MS-Windows: getftype() returns "file" for symlink to directory.
+ Solution:   Make it return "dir". (Ken Takata)
+ Files:      src/os_mswin.c
+ 
+@@ -7250,7 +7251,7 @@ Files:      src/json.c, src/eval.c, src/
+ 
+ Patch 7.4.1155
+ Problem:    Build with normal features fails.
+-Solution:   Always deinfe dict_lookup().
++Solution:   Always define dict_lookup().
+ Files:      src/eval.c
+ 
+ Patch 7.4.1156
+@@ -7356,7 +7357,7 @@ Solution:   Add a test.
+ Files:      src/testdir/test_viml.vim
+ 
+ Patch 7.4.1174
+-Problem:    Netbeans contains dead code insde #ifndef INIT_SOCKETS.
++Problem:    Netbeans contains dead code inside #ifndef INIT_SOCKETS.
+ Solution:   Remove the dead code.
+ Files:      src/netbeans.c
+ 
+@@ -8334,7 +8335,7 @@ Files:      src/os_unix.c
+ 
+ Patch 7.4.1339
+ Problem:    Warnings when building the GUI with MingW. (Cesar Romani)
+-Solution:   Add type cats. (Yasuhiro Matsumoto)
++Solution:   Add type casts. (Yasuhiro Matsumoto)
+ Files:      src/edit.c, src/gui_w32.c, src/gui_w48.c, src/os_mswin.c,
+             src/os_win32.c
+ 
+@@ -9148,7 +9149,7 @@ Files:      src/ex_cmds2.c, src/testdir/
+             src/testdir/Make_all.mak
+ 
+ Patch 7.4.1480
+-Problem:    Cannot add a pack direcory without loading a plugin.
++Problem:    Cannot add a pack directory without loading a plugin.
+ Solution:   Add the :packadd command.
+ Files:      src/ex_cmds.h, src/ex_cmds2.c, src/proto/ex_cmds2.pro,
+             src/testdir/test_loadplugin.vim, runtime/doc/repeat.txt
+@@ -9658,7 +9659,7 @@ Files:      runtime/doc/options.txt, src
+ 
+ Patch 7.4.1571
+ Problem:    No test for ":help".
+-Solution:   Add a test for what 7.4.1568 fixed. (Higashi Higashi)
++Solution:   Add a test for what 7.4.1568 fixed. (Hirohito Higashi)
+ Files:      src/testdir/test_alot.vim, src/testdir/test_help_tagjump.vim
+ 
+ Patch 7.4.1572
+@@ -9890,7 +9891,7 @@ Files:      Filelist, Contents, READMEdi
+ 
+ Patch 7.4.1610
+ Problem:    Compiler warnings for non-virtual destructor.
+-Solution:   Mark the class final. (Ken Takata)
++Solution:   Mark the classes final. (Ken Takata)
+ Files:      src/Make_cyg_ming.mak, src/gui_dwrite.cpp, src/if_ole.cpp
+ 
+ Patch 7.4.1611
+@@ -10088,7 +10089,7 @@ Patch 7.4.1644
+ Problem:    Using string() on a partial that exists in the dictionary it binds
+             results in an error. (Nikolai Pavlov)
+ Solution:   Make string() not fail on a recursively nested structure. (Ken
+-            Takta)
++            Takata)
+ Files:      src/eval.c, src/testdir/test_partial.vim
+ 
+ Patch 7.4.1645
+@@ -10609,7 +10610,7 @@ Files:      src/configure.in, src/auto/c
+ 
+ Patch 7.4.1734 (after 7.4.1730)
+ Problem:    Test fails when not using utf-8.
+-Solution:   Split test in regularand utf-8 part.
++Solution:   Split test in regular and utf-8 part.
+ Files:      src/testdir/test_expr.vim, src/testdir/test_expr_utf8.vim,
+             src/testdir/test_alot_utf8.vim
+ 
+@@ -11340,7 +11341,7 @@ Files:      src/ex_cmds2.c
+ Patch 7.4.1862
+ Problem:    string() with repeated argument does not give a result usable by
+             eval().
+-Solution:   Refactor echo_striong and tv2string(), moving the common part to
++Solution:   Refactor echo_string and tv2string(), moving the common part to
+             echo_string_core(). (Ken Takata)
+ Files:      src/eval.c, src/testdir/test_viml.vim, src/testdir/test86.ok,
+             src/testdir/test87.ok
