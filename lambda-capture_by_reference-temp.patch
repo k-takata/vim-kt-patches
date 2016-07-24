@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  8af1319089e0b51687e24a4916f54897646e4eda
+# Parent  68ecfee02e711385625a77d786b53cda27d77302
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -31,15 +31,13 @@ diff --git a/src/eval.c b/src/eval.c
  
  	    if (pt->pt_dict != NULL)
  	    {
-@@ -6817,36 +6815,28 @@ check_vars(
-     int		cc;
+@@ -6818,35 +6816,26 @@ check_vars(
      char_u	*varname;
      hashtab_T	*ht;
-+    dictitem_T	*di;
-+
+ 
 +    if (eval_lavars_used == NULL)
 +	return;
- 
++
      /* truncate the name, so that we can use strcmp() */
      cc = name[len];
      name[len] = NUL;
@@ -84,7 +82,7 @@ diff --git a/src/eval.c b/src/eval.c
  	}
      }
  
-@@ -7339,13 +7329,20 @@ find_var(char_u *name, hashtab_T **htp, 
+@@ -7339,13 +7328,20 @@ find_var(char_u *name, hashtab_T **htp, 
  {
      char_u	*varname;
      hashtab_T	*ht;
@@ -106,7 +104,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -7406,7 +7403,7 @@ find_var_in_ht(
+@@ -7406,7 +7402,7 @@ find_var_in_ht(
   * Return NULL if the name is not valid.
   * Set "varname" to the start of name without ':'.
   */
@@ -115,7 +113,7 @@ diff --git a/src/eval.c b/src/eval.c
  find_var_ht(char_u *name, char_u **varname)
  {
      hashitem_T	*hi;
-@@ -7686,6 +7683,10 @@ set_var(
+@@ -7686,6 +7682,10 @@ set_var(
      }
      v = find_var_in_ht(ht, 0, varname, TRUE);
  
