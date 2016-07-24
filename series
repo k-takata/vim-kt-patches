@@ -43,4 +43,5 @@ function-noderef.patch
 lambda-update.patch
 lambda-capture_by_reference-temp.patch
 lambda-debug-log.patch
+fixed-typos-7.4.2098-version8.txt
 fix-config_cache-removal.patch #+rejected
