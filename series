@@ -43,4 +43,5 @@ function-noderef.patch
 dont-list-lambdas.patch
 lambda-update.patch
 lambda-capture_by_reference-temp.patch
+lambda-debug-log.patch
 fix-config_cache-removal.patch #+rejected
