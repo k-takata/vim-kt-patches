@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  59621a1090036fa75d338d31cc369da074f69873
+# Parent  9911bba7b29bb8e3d63eb24c32870ba022161726
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -240,7 +240,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
    endfunction
  
    call s:Foo()
-@@ -51,3 +51,113 @@ func Test_not_lamda()
+@@ -51,3 +51,114 @@ func Test_not_lamda()
    let x = {'>' : 'foo'}
    call assert_equal('foo', x['>'])
  endfunc
@@ -345,6 +345,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +  call assert_equal(2, {x -> {x -> x}}(1)(2))
 +  call assert_equal(10, {y -> {x -> x(y)(10)}({y -> y})}({z -> z}))
 +  call assert_equal(5.0, {x -> {y -> x / y}}(10)(2.0))
++  call assert_equal(6, {x -> {y -> {z -> x + y + z}}}(1)(2)(3))
 +
 +  call assert_equal(6, {x -> {f -> f(x)}}(3)({x -> x * 2}))
 +  call assert_equal(6, {f -> {x -> f(x)}}({x -> x * 2})(3))
@@ -617,7 +618,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -2206,6 +2274,8 @@ ex_function(exarg_T *eap)
+@@ -2217,6 +2285,8 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
@@ -626,7 +627,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
-@@ -2693,6 +2763,48 @@ func_ref(char_u *name)
+@@ -2709,6 +2779,48 @@ func_ref(char_u *name)
  }
  
  /*
