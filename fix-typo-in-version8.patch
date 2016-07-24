@@ -221,6 +221,15 @@ diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
  Files:      src/testdir/test_expr.vim, src/testdir/test_expr_utf8.vim,
              src/testdir/test_alot_utf8.vim
  
+@@ -11233,7 +11234,7 @@ Files:      runtime/doc/if_pyth.txt, src
+ Patch 7.4.1844
+ Problem:    Using old function name in comment.  More functions should start
+             with test_.
+-Solution:   Rename function in comment. (Higashi Higashi) Rename
++Solution:   Rename function in comment. (Hirohito Higashi) Rename
+             disable_char_avail_for_testing() to test_disable_char_avail().
+             And alloc_fail() to test_alloc_fail().
+ Files:      src/eval.c, src/getchar.c, src/testdir/runtest.vim,
 @@ -11340,7 +11341,7 @@ Files:      src/ex_cmds2.c
  Patch 7.4.1862
  Problem:    string() with repeated argument does not give a result usable by
