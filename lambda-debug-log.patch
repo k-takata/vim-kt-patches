@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  57078b938495d3d6d97ca4e6c452a91f7a31a01f
+# Parent  6bda4f97747135531b9f71b2407514d045837a50
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -47,7 +47,16 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      vim_free(fc);
  }
  
-@@ -1089,6 +1092,8 @@ func_free(ufunc_T *fp)
+@@ -1041,6 +1044,8 @@ call_user_func(
+ 	fc->caller = previous_funccal;
+ 	previous_funccal = fc;
+ 
++	TRACE("Add to previous_funccal: %s", fc->func->uf_name);
++
+ 	/* Make a copy of the a: variables, since we didn't do that above. */
+ 	todo = (int)fc->l_avars.dv_hashtab.ht_used;
+ 	for (hi = fc->l_avars.dv_hashtab.ht_array; todo > 0; ++hi)
+@@ -1089,6 +1094,8 @@ func_free(ufunc_T *fp)
  	func_unref(fp->uf_scoped->func->uf_name);
      }
  
@@ -56,7 +65,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      vim_free(fp);
  }
  
-@@ -2684,6 +2689,7 @@ func_unref(char_u *name)
+@@ -2684,6 +2691,7 @@ func_unref(char_u *name)
  	    if (fp->uf_calls == 0)
  		func_free(fp);
  	}
@@ -64,7 +73,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      else if (STRNCMP(name, "<lambda>", 8) == 0)
      {
-@@ -2696,6 +2702,7 @@ func_unref(char_u *name)
+@@ -2696,6 +2704,7 @@ func_unref(char_u *name)
  	    if (fp->uf_calls == 0)
  		func_free(fp);
  	}
@@ -72,7 +81,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
  }
  
-@@ -2716,6 +2723,7 @@ func_ref(char_u *name)
+@@ -2716,6 +2725,7 @@ func_ref(char_u *name)
  	    EMSG2(_(e_intern2), "func_ref()");
  	else
  	    ++fp->uf_refcount;
@@ -80,7 +89,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      else if (STRNCMP(name, "<lambda>", 8) == 0)
      {
-@@ -2723,6 +2731,7 @@ func_ref(char_u *name)
+@@ -2723,6 +2733,7 @@ func_ref(char_u *name)
  	fp = find_func(name);
  	if (fp != NULL)
  	    ++fp->uf_refcount;
