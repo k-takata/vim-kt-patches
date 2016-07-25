@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  68ecfee02e711385625a77d786b53cda27d77302
+# Parent  2f56d6d54c4b3579e2cc69e2595e58169a9df249
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -189,6 +189,17 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
  endfunction
  
  function! Test_lambda_side_effect()
+@@ -102,8 +102,8 @@ endfunction
+ 
+ function! Test_lambda_closure()
+   function! s:foo()
+-    let x = [0]
+-    return {-> [execute("let x[0] += 1"), x[0]][-1]}
++    let x = 0
++    return {-> [execute("let x += 1"), x][-1]}
+   endfunction
+ 
+   let l:F = s:foo()
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
@@ -220,7 +231,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  struct funccall_S
  {
      ufunc_T	*func;		/* function being called */
-@@ -98,6 +97,10 @@ struct funccall_S
+@@ -98,6 +97,11 @@ struct funccall_S
      proftime_T	prof_child;	/* time spent in a child */
  #endif
      funccall_T	*caller;	/* calling function or NULL */
@@ -228,10 +239,11 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +    /* for closure */
 +    int		fc_refcount;
 +    int		fc_copyID;	/* for garbage collection */
++    garray_T	fc_funcs;	/* list of ufunc_T* which refer this */
  };
  
  /*
-@@ -269,9 +272,8 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -269,9 +273,8 @@ get_lambda_tv(char_u **arg, typval_T *re
      char_u	*start = skipwhite(*arg + 1);
      char_u	*s, *e;
      static int	lambda_no = 0;
@@ -243,7 +255,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      ga_init(&newargs);
      ga_init(&newlines);
-@@ -294,14 +296,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -294,14 +297,7 @@ get_lambda_tv(char_u **arg, typval_T *re
      /* Set up dictionaries for checking local variables and arguments. */
      if (evaluate)
      {
@@ -259,7 +271,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
  
      /* Get the start and the end of the expression. */
-@@ -321,18 +316,6 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -321,18 +317,6 @@ get_lambda_tv(char_u **arg, typval_T *re
  	int	len;
  	char_u	*p;
  
@@ -278,7 +290,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	sprintf((char*)name, "<lambda>%d", ++lambda_no);
  
  	fp = (ufunc_T *)alloc((unsigned)(sizeof(ufunc_T) + STRLEN(name)));
-@@ -357,8 +340,14 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -357,8 +341,18 @@ get_lambda_tv(char_u **arg, typval_T *re
  	hash_add(&func_hashtab, UF2HIKEY(fp));
  	fp->uf_args = newargs;
  	fp->uf_lines = newlines;
@@ -288,6 +300,10 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +	{
 +	    fp->uf_scoped = current_funccal;
 +	    current_funccal->fc_refcount++;
++	    if (ga_grow(&current_funccal->fc_funcs, 1) == FAIL)
++		goto errret;
++	    ((ufunc_T **)current_funccal->fc_funcs.ga_data)
++				    [current_funccal->fc_funcs.ga_len++] = fp;
 +	    func_ref(current_funccal->func->uf_name);
 +	}
 +	else
@@ -295,7 +311,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  #ifdef FEAT_PROFILE
  	fp->uf_tml_count = NULL;
-@@ -377,18 +366,14 @@ get_lambda_tv(char_u **arg, typval_T *re
+@@ -377,18 +371,14 @@ get_lambda_tv(char_u **arg, typval_T *re
  	rettv->v_type = VAR_FUNC;
      }
  
@@ -316,7 +332,20 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      return FAIL;
  }
  
-@@ -679,48 +664,6 @@ free_funccal(
+@@ -663,6 +653,12 @@ free_funccal(
+     int		free_val)  /* a: vars were allocated */
+ {
+     listitem_T	*li;
++    int		i;
++
++    for (i = 0; i < fc->fc_funcs.ga_len; ++i)
++	if (((ufunc_T **)(fc->fc_funcs.ga_data))[i] != NULL)
++	    ((ufunc_T **)(fc->fc_funcs.ga_data))[i]->uf_scoped = NULL;
++    ga_clear(&fc->fc_funcs);
+ 
+     /* The a: variables typevals may not have been allocated, only free the
+      * allocated variables. */
+@@ -679,48 +675,6 @@ free_funccal(
      vim_free(fc);
  }
  
@@ -365,17 +394,18 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Call a user function.
   */
-@@ -777,6 +720,9 @@ call_user_func(
+@@ -777,6 +731,10 @@ call_user_func(
      /* Check if this function has a breakpoint. */
      fc->breakpoint = dbg_find_breakpoint(FALSE, fp->uf_name, (linenr_T)0);
      fc->dbg_tick = debug_tick;
 +    /* Set up fields for closure. */
 +    fc->fc_refcount = 0;
 +    fc->fc_copyID = 0;
++    ga_init2(&fc->fc_funcs, sizeof(ufunc_T *), 1);
  
      if (STRNCMP(fp->uf_name, "<lambda>", 8) == 0)
  	islambda = TRUE;
-@@ -891,8 +837,6 @@ call_user_func(
+@@ -891,8 +849,6 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -384,7 +414,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      /* Don't redraw while executing the function. */
      ++RedrawingDisabled;
-@@ -1080,7 +1024,8 @@ call_user_func(
+@@ -1080,7 +1036,8 @@ call_user_func(
       * free the funccall_T and what's in it. */
      if (fc->l_varlist.lv_refcount == DO_NOT_FREE_CNT
  	    && fc->l_vars.dv_refcount == DO_NOT_FREE_CNT
@@ -394,7 +424,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	free_funccal(fc, FALSE);
      }
-@@ -1125,8 +1070,6 @@ func_free(ufunc_T *fp)
+@@ -1125,8 +1082,6 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
@@ -403,12 +433,15 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -1140,6 +1083,12 @@ func_free(ufunc_T *fp)
+@@ -1140,6 +1095,15 @@ func_free(ufunc_T *fp)
      else
  	hash_remove(&func_hashtab, hi);
  
 +    if (fp->uf_scoped != NULL)
 +    {
++	int	    i;
++	funccall_T  *fc = fp->uf_scoped;
++
 +	--fp->uf_scoped->fc_refcount;
 +	func_unref(fp->uf_scoped->func->uf_name);
 +    }
@@ -416,7 +449,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      vim_free(fp);
  }
  
-@@ -2285,8 +2234,7 @@ ex_function(exarg_T *eap)
+@@ -2285,8 +2249,7 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
@@ -426,7 +459,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
-@@ -2779,48 +2727,6 @@ func_ref(char_u *name)
+@@ -2779,48 +2742,6 @@ func_ref(char_u *name)
  }
  
  /*
@@ -475,17 +508,17 @@ diff --git a/src/userfunc.c b/src/userfunc.c
   * Return TRUE if items in "fc" do not have "copyID".  That means they are not
   * referenced from anywhere that is in use.
   */
-@@ -2829,7 +2735,8 @@ can_free_funccal(funccall_T *fc, int cop
+@@ -2829,7 +2750,8 @@ can_free_funccal(funccall_T *fc, int cop
  {
      return (fc->l_varlist.lv_copyID != copyID
  	    && fc->l_vars.dv_copyID != copyID
 -	    && fc->l_avars.dv_copyID != copyID);
 +	    && fc->l_avars.dv_copyID != copyID
-+	    && (fc->fc_refcount <= 0 && fc->fc_copyID != copyID));
++	    && fc->fc_copyID != copyID);
  }
  
  /*
-@@ -3574,6 +3481,38 @@ get_current_funccal_dict(hashtab_T *ht)
+@@ -3574,6 +3496,38 @@ get_current_funccal_dict(hashtab_T *ht)
      return NULL;
  }
  
@@ -524,15 +557,23 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Set "copyID + 1" in previous_funccal and callers.
   */
-@@ -3604,6 +3543,7 @@ set_ref_in_call_stack(int copyID)
+@@ -3585,6 +3539,7 @@ set_ref_in_previous_funccal(int copyID)
+ 
+     for (fc = previous_funccal; fc != NULL; fc = fc->caller)
+     {
++	fc->fc_copyID = copyID + 1;
+ 	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID + 1,
+ 									NULL);
+ 	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID + 1,
+@@ -3604,6 +3559,7 @@ set_ref_in_call_stack(int copyID)
  
      for (fc = current_funccal; fc != NULL; fc = fc->caller)
      {
-+	fc->fc_copyID = copyID + 1;
++	fc->fc_copyID = copyID;
  	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID, NULL);
  	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID, NULL);
      }
-@@ -3625,4 +3565,36 @@ set_ref_in_func_args(int copyID)
+@@ -3625,4 +3581,36 @@ set_ref_in_func_args(int copyID)
      return abort;
  }
  
