@@ -332,20 +332,24 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      return FAIL;
  }
  
-@@ -663,6 +653,12 @@ free_funccal(
+@@ -663,6 +653,16 @@ free_funccal(
      int		free_val)  /* a: vars were allocated */
  {
      listitem_T	*li;
 +    int		i;
 +
 +    for (i = 0; i < fc->fc_funcs.ga_len; ++i)
-+	if (((ufunc_T **)(fc->fc_funcs.ga_data))[i] != NULL)
-+	    ((ufunc_T **)(fc->fc_funcs.ga_data))[i]->uf_scoped = NULL;
++    {
++	ufunc_T	    *fp = ((ufunc_T **)(fc->fc_funcs.ga_data))[i];
++
++	if (fp != NULL)
++	    fp->uf_scoped = NULL;
++    }
 +    ga_clear(&fc->fc_funcs);
  
      /* The a: variables typevals may not have been allocated, only free the
       * allocated variables. */
-@@ -679,48 +675,6 @@ free_funccal(
+@@ -679,48 +679,6 @@ free_funccal(
      vim_free(fc);
  }
  
@@ -394,7 +398,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Call a user function.
   */
-@@ -777,6 +731,10 @@ call_user_func(
+@@ -777,6 +735,10 @@ call_user_func(
      /* Check if this function has a breakpoint. */
      fc->breakpoint = dbg_find_breakpoint(FALSE, fp->uf_name, (linenr_T)0);
      fc->dbg_tick = debug_tick;
@@ -405,7 +409,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      if (STRNCMP(fp->uf_name, "<lambda>", 8) == 0)
  	islambda = TRUE;
-@@ -891,8 +849,6 @@ call_user_func(
+@@ -891,8 +853,6 @@ call_user_func(
  	    fc->l_listitems[ai].li_tv.v_lock = VAR_FIXED;
  	}
      }
@@ -414,7 +418,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      /* Don't redraw while executing the function. */
      ++RedrawingDisabled;
-@@ -1080,7 +1036,8 @@ call_user_func(
+@@ -1080,7 +1040,8 @@ call_user_func(
       * free the funccall_T and what's in it. */
      if (fc->l_varlist.lv_refcount == DO_NOT_FREE_CNT
  	    && fc->l_vars.dv_refcount == DO_NOT_FREE_CNT
@@ -424,7 +428,41 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	free_funccal(fc, FALSE);
      }
-@@ -1125,8 +1082,6 @@ func_free(ufunc_T *fp)
+@@ -1114,6 +1075,33 @@ call_user_func(
+     }
+ }
+ 
++    void
++funccal_unref(funccall_T *fc)
++{
++    funccall_T	**pfc;
++
++    if (fc == NULL)
++	return;
++
++    func_unref(fc->func->uf_name);
++    if (--fc->fc_refcount > 0)
++	return;
++
++    for (pfc = &previous_funccal; *pfc != NULL; )
++    {
++	if (fc == *pfc
++		&& fc->l_varlist.lv_refcount == DO_NOT_FREE_CNT
++		&& fc->l_vars.dv_refcount == DO_NOT_FREE_CNT
++		&& fc->l_avars.dv_refcount == DO_NOT_FREE_CNT)
++	{
++	    *pfc = fc->caller;
++	    free_funccal(fc, TRUE);
++	}
++	else
++	    pfc = &(*pfc)->caller;
++    }
++}
++
+ /*
+  * Free a function and remove it from the list of functions.
+  */
+@@ -1125,8 +1113,6 @@ func_free(ufunc_T *fp)
      /* clear this function */
      ga_clear_strings(&(fp->uf_args));
      ga_clear_strings(&(fp->uf_lines));
@@ -433,23 +471,16 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      vim_free(fp->uf_tml_count);
      vim_free(fp->uf_tml_total);
-@@ -1140,6 +1095,15 @@ func_free(ufunc_T *fp)
+@@ -1140,6 +1126,8 @@ func_free(ufunc_T *fp)
      else
  	hash_remove(&func_hashtab, hi);
  
-+    if (fp->uf_scoped != NULL)
-+    {
-+	int	    i;
-+	funccall_T  *fc = fp->uf_scoped;
-+
-+	--fp->uf_scoped->fc_refcount;
-+	func_unref(fp->uf_scoped->func->uf_name);
-+    }
++    funccal_unref(fp->uf_scoped);
 +
      vim_free(fp);
  }
  
-@@ -2285,8 +2249,7 @@ ex_function(exarg_T *eap)
+@@ -2285,8 +2273,7 @@ ex_function(exarg_T *eap)
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
@@ -459,7 +490,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
-@@ -2779,48 +2742,6 @@ func_ref(char_u *name)
+@@ -2779,48 +2766,6 @@ func_ref(char_u *name)
  }
  
  /*
@@ -508,7 +539,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
   * Return TRUE if items in "fc" do not have "copyID".  That means they are not
   * referenced from anywhere that is in use.
   */
-@@ -2829,7 +2750,8 @@ can_free_funccal(funccall_T *fc, int cop
+@@ -2829,7 +2774,8 @@ can_free_funccal(funccall_T *fc, int cop
  {
      return (fc->l_varlist.lv_copyID != copyID
  	    && fc->l_vars.dv_copyID != copyID
@@ -518,7 +549,26 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  }
  
  /*
-@@ -3574,6 +3496,38 @@ get_current_funccal_dict(hashtab_T *ht)
+@@ -3434,6 +3380,7 @@ free_unref_funccal(int copyID, int testi
+     int		did_free = FALSE;
+     int		did_free_funccal = FALSE;
+     funccall_T	*fc, **pfc;
++    ufunc_T	*fp;
+ 
+     for (pfc = &previous_funccal; *pfc != NULL; )
+     {
+@@ -3441,7 +3388,10 @@ free_unref_funccal(int copyID, int testi
+ 	{
+ 	    fc = *pfc;
+ 	    *pfc = fc->caller;
++	    fp = fc->func;
+ 	    free_funccal(fc, TRUE);
++	    if (fp != NULL)
++		func_unref(fp->uf_name);
+ 	    did_free = TRUE;
+ 	    did_free_funccal = TRUE;
+ 	}
+@@ -3574,6 +3524,38 @@ get_current_funccal_dict(hashtab_T *ht)
      return NULL;
  }
  
@@ -557,7 +607,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Set "copyID + 1" in previous_funccal and callers.
   */
-@@ -3585,6 +3539,7 @@ set_ref_in_previous_funccal(int copyID)
+@@ -3585,6 +3567,7 @@ set_ref_in_previous_funccal(int copyID)
  
      for (fc = previous_funccal; fc != NULL; fc = fc->caller)
      {
@@ -565,7 +615,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID + 1,
  									NULL);
  	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID + 1,
-@@ -3604,6 +3559,7 @@ set_ref_in_call_stack(int copyID)
+@@ -3604,6 +3587,7 @@ set_ref_in_call_stack(int copyID)
  
      for (fc = current_funccal; fc != NULL; fc = fc->caller)
      {
@@ -573,7 +623,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID, NULL);
  	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID, NULL);
      }
-@@ -3625,4 +3581,36 @@ set_ref_in_func_args(int copyID)
+@@ -3625,4 +3609,36 @@ set_ref_in_func_args(int copyID)
      return abort;
  }
  
