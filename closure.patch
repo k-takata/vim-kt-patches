@@ -1,0 +1,88 @@
+# HG changeset patch
+# Parent  553cfffd7e3c6a60a963a3ac67b18e64c1f4e52a
+
+diff --git a/src/userfunc.c b/src/userfunc.c
+--- a/src/userfunc.c
++++ b/src/userfunc.c
+@@ -59,6 +59,7 @@ struct ufunc
+ #define FC_ABORT    1		/* abort function on error */
+ #define FC_RANGE    2		/* function accepts range */
+ #define FC_DICT	    4		/* Dict function, uses "self" */
++#define FC_CLOSURE  8		/* closure, uses outer scope variables */
+ 
+ /* From user function to hashitem and back. */
+ #define UF2HIKEY(fp) ((fp)->uf_name)
+@@ -314,7 +315,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 
+     if (evaluate)
+     {
+-	int	len;
++	int	len, flags = 0;
+ 	char_u	*p;
+ 
+ 	sprintf((char*)name, "<lambda>%d", ++lambda_no);
+@@ -344,6 +345,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	fp->uf_lines = newlines;
+ 	if (current_funccal != NULL && eval_lavars)
+ 	{
++	    flags |= FC_CLOSURE;
+ 	    fp->uf_scoped = current_funccal;
+ 	    current_funccal->fc_refcount++;
+ 	    if (ga_grow(&current_funccal->fc_funcs, 1) == FAIL)
+@@ -365,7 +367,7 @@ get_lambda_tv(char_u **arg, typval_T *re
+ 	    func_do_profile(fp);
+ #endif
+ 	fp->uf_varargs = TRUE;
+-	fp->uf_flags = 0;
++	fp->uf_flags = flags;
+ 	fp->uf_calls = 0;
+ 	fp->uf_script_ID = current_SID;
+ 
+@@ -1930,7 +1932,7 @@ ex_function(exarg_T *eap)
+     if (get_function_args(&p, ')', &newargs, &varargs, eap->skip) == FAIL)
+ 	goto errret_2;
+ 
+-    /* find extra arguments "range", "dict" and "abort" */
++    /* find extra arguments "range", "dict", "abort" and "closure" */
+     for (;;)
+     {
+ 	p = skipwhite(p);
+@@ -1949,6 +1951,11 @@ ex_function(exarg_T *eap)
+ 	    flags |= FC_ABORT;
+ 	    p += 5;
+ 	}
++	else if (STRNCMP(p, "closure", 7) == 0)
++	{
++	    flags |= FC_CLOSURE;
++	    p += 7;
++	}
+ 	else
+ 	    break;
+     }
+@@ -2281,7 +2288,25 @@ ex_function(exarg_T *eap)
+     }
+     fp->uf_args = newargs;
+     fp->uf_lines = newlines;
+-    fp->uf_scoped = NULL;
++    if ((flags & FC_CLOSURE) != 0)
++    {
++	if (current_funccal == NULL)
++	{
++	    emsg_funcname(N_("Exxx: Closure function should not be at top level: %s"),
++		    name);
++	    goto erret;
++	}
++	fp->uf_scoped = current_funccal;
++	current_funccal->fc_refcount++;
++	if (ga_grow(&current_funccal->fc_funcs, 1) == FAIL)
++	    goto erret;
++	((ufunc_T **)current_funccal->fc_funcs.ga_data)
++				[current_funccal->fc_funcs.ga_len++] = fp;
++	func_ref(current_funccal->func->uf_name);
++    }
++    else
++	fp->uf_scoped = NULL;
++
+ #ifdef FEAT_PROFILE
+     fp->uf_tml_count = NULL;
+     fp->uf_tml_total = NULL;
