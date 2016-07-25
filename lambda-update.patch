@@ -331,7 +331,8 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +
 +function! Test_lambda_delfunc()
 +  function! s:gen()
-+    let l:Foo = {-> 0}
++    let pl = l:
++    let l:Foo = {-> get(pl, "Foo", get(pl, "Bar", {-> 0}))}
 +    let l:Bar = l:Foo
 +    delfunction l:Foo
 +    return l:Bar
@@ -341,7 +342,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +  call assert_fails(':call l:F()', 'E117:')
 +endfunction
 +
-+function! Test_circular_reference()
++function! Test_lambda_circular_reference()
 +  function! s:Foo()
 +    let d = {}
 +    let d.f = {-> d}
@@ -354,7 +355,6 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +  call test_garbagecollect_now()
 +endfunction
 +
-+endfunction
 +function! Test_lambda_combination()
 +  call assert_equal(2, {x -> {x -> x}}(1)(2))
 +  call assert_equal(10, {y -> {x -> x(y)(10)}({y -> y})}({z -> z}))
