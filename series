@@ -44,5 +44,5 @@ fixed-typos-7.4.2098-version8.txt
 fix-typo-in-version8.patch
 fix-config_cache-removal.patch #+rejected
 lambda-update.patch
-lambda-capture_by_reference-temp.patch
+lambda-capture_by_reference.patch
 lambda-debug-log.patch #+lambda-debug
