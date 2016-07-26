@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  9fd843cfa8d4026d4c342826f357ce565cb2cd3f
+# Parent  241dddb323f0dbc794d9af364840b78772e17cf2
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -73,23 +73,15 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      vim_free(fp);
  }
  
-@@ -2709,6 +2717,7 @@ func_unref(char_u *name)
-     else if (isdigit(*name))
-     {
- 	fp = find_func(name);
-+	TRACE("func_unref'ing: %s, cnt:%d", name, fp ? fp->uf_refcount : -1);
- 	if (fp == NULL)
- 	{
- #ifdef EXITFREE
-@@ -2728,6 +2737,7 @@ func_unref(char_u *name)
-     {
+@@ -2722,6 +2730,7 @@ func_unref(char_u *name)
  	/* fail silently, when lambda function isn't found. */
  	fp = find_func(name);
-+	TRACE("func_unref'ing: %s, cnt:%d", name, fp ? fp->uf_refcount : -1);
- 	if (fp != NULL && --fp->uf_refcount <= 0)
- 	{
- 	    /* Only delete it when it's not being used.  Otherwise it's done
-@@ -2755,6 +2765,7 @@ func_ref(char_u *name)
+     }
++    TRACE("func_unref'ing: %s, cnt:%d", name, fp ? fp->uf_refcount : -1);
+     if (fp != NULL && --fp->uf_refcount <= 0)
+     {
+ 	/* Only delete it when it's not being used.  Otherwise it's done
+@@ -2748,6 +2757,7 @@ func_ref(char_u *name)
  	    EMSG2(_(e_intern2), "func_ref()");
  	else
  	    ++fp->uf_refcount;
@@ -97,7 +89,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      else if (STRNCMP(name, "<lambda>", 8) == 0)
      {
-@@ -2762,6 +2773,7 @@ func_ref(char_u *name)
+@@ -2755,6 +2765,7 @@ func_ref(char_u *name)
  	fp = find_func(name);
  	if (fp != NULL)
  	    ++fp->uf_refcount;
@@ -105,7 +97,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
  }
  
-@@ -2772,6 +2784,8 @@ func_ref(char_u *name)
+@@ -2765,6 +2776,8 @@ func_ref(char_u *name)
      static int
  can_free_funccal(funccall_T *fc, int copyID)
  {
@@ -114,7 +106,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      return (fc->l_varlist.lv_copyID != copyID
  	    && fc->l_vars.dv_copyID != copyID
  	    && fc->l_avars.dv_copyID != copyID
-@@ -3382,10 +3396,12 @@ free_unref_funccal(int copyID, int testi
+@@ -3375,10 +3388,12 @@ free_unref_funccal(int copyID, int testi
      funccall_T	*fc, **pfc;
      ufunc_T	*fp;
  
