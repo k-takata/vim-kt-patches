@@ -225,7 +225,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
    endfunction
  
    let l:F = s:foo()
-@@ -149,6 +149,39 @@ function! Test_lambda_delfunc()
+@@ -149,6 +149,40 @@ function! Test_lambda_delfunc()
    call assert_fails(':call l:F()', 'E117:')
  endfunction
  
@@ -245,6 +245,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +  call assert_equal(1, l:C())
 +  call assert_fails(':call l:D()', 'E15:') " E121: then E15:
 +  call assert_equal(2, l:C())
++  call test_garbagecollect_now()
 +endfunction
 +
 +function! Test_lambda_share_scope()
