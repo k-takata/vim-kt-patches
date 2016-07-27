@@ -1,6 +1,31 @@
 # HG changeset patch
-# Parent  2f56d6d54c4b3579e2cc69e2595e58169a9df249
+# Parent  c75b9075e08e924dfdfad6e26e93c7178f9e6974
 
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1223,7 +1223,7 @@ 2. The prefix "a:" should not be used fo
+ 	:let F = {arg1, arg2 -> arg1 - arg2}
+ 	:echo F(5, 2)
+ <	3
+-3. Lambda expressions can get the value of outer scope variables and arguments.
++3. Lambda expressions can access outer scope variables and arguments.
+    E.g.: >
+ 	:function Foo(arg)
+ 	:  let i = 3
+@@ -1254,6 +1254,12 @@ The lambda expression is also useful for
+ 
+ Note how execute() is used to execute an Ex command.  That's ugly though.
+ 
++
++Lambda expressions have internal names like '<lambda>42'.  If you get an error
++for a lambda expression, you can find what it is with the following command: >
++	:function {'<lambda>42'}
++See also: |numbered-function|
++
+ ==============================================================================
+ 3. Internal variable				*internal-variables* *E461*
+ 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
@@ -127,7 +152,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/globals.h b/src/globals.h
 --- a/src/globals.h
 +++ b/src/globals.h
-@@ -1655,10 +1655,8 @@ EXTERN time_T time_for_testing INIT(= 0)
+@@ -1660,10 +1660,8 @@ EXTERN time_T time_for_testing INIT(= 0)
  /* Abort conversion to string after a recursion error. */
  EXTERN int  did_echo_string_emsg INIT(= FALSE);
  
@@ -200,6 +225,46 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
    endfunction
  
    let l:F = s:foo()
+@@ -149,6 +149,39 @@ function! Test_lambda_delfunc()
+   call assert_fails(':call l:F()', 'E117:')
+ endfunction
+ 
++function! Test_lambda_scope()
++  function! s:NewCounter()
++    let c = 0
++    return {-> [execute('let c += 1'), c][-1]}
++  endfunction
++
++  function! s:NewCounter2()
++    return {-> [execute('let c += 100'), c][-1]}
++  endfunction
++
++  let l:C = s:NewCounter()
++  let l:D = s:NewCounter2()
++
++  call assert_equal(1, l:C())
++  call assert_fails(':call l:D()', 'E15:') " E121: then E15:
++  call assert_equal(2, l:C())
++endfunction
++
++function! Test_lambda_share_scope()
++  function! s:New()
++    let c = 0
++    let l:Inc0 = {-> [execute('let c += 1'), c][-1]}
++    let l:Dec0 = {-> [execute('let c -= 1'), c][-1]}
++    return [l:Inc0, l:Dec0]
++  endfunction
++
++  let [l:Inc, l:Dec] = s:New()
++
++  call assert_equal(1, l:Inc())
++  call assert_equal(2, l:Inc())
++  call assert_equal(1, l:Dec())
++endfunction
++
+ function! Test_lambda_circular_reference()
+   function! s:Foo()
+     let d = {}
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
@@ -490,7 +555,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  #ifdef FEAT_PROFILE
      fp->uf_tml_count = NULL;
      fp->uf_tml_total = NULL;
-@@ -2779,48 +2766,6 @@ func_ref(char_u *name)
+@@ -2772,48 +2759,6 @@ func_ref(char_u *name)
  }
  
  /*
@@ -539,7 +604,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
   * Return TRUE if items in "fc" do not have "copyID".  That means they are not
   * referenced from anywhere that is in use.
   */
-@@ -2829,7 +2774,8 @@ can_free_funccal(funccall_T *fc, int cop
+@@ -2822,7 +2767,8 @@ can_free_funccal(funccall_T *fc, int cop
  {
      return (fc->l_varlist.lv_copyID != copyID
  	    && fc->l_vars.dv_copyID != copyID
@@ -549,7 +614,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  }
  
  /*
-@@ -3434,6 +3380,7 @@ free_unref_funccal(int copyID, int testi
+@@ -3427,6 +3373,7 @@ free_unref_funccal(int copyID, int testi
      int		did_free = FALSE;
      int		did_free_funccal = FALSE;
      funccall_T	*fc, **pfc;
@@ -557,7 +622,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
      for (pfc = &previous_funccal; *pfc != NULL; )
      {
-@@ -3441,7 +3388,10 @@ free_unref_funccal(int copyID, int testi
+@@ -3434,7 +3381,10 @@ free_unref_funccal(int copyID, int testi
  	{
  	    fc = *pfc;
  	    *pfc = fc->caller;
@@ -568,12 +633,12 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	    did_free = TRUE;
  	    did_free_funccal = TRUE;
  	}
-@@ -3574,6 +3524,38 @@ get_current_funccal_dict(hashtab_T *ht)
+@@ -3567,6 +3517,38 @@ get_current_funccal_dict(hashtab_T *ht)
      return NULL;
  }
  
 +/* Search variable in parent scope. */
-+    dictitem_T*
++    dictitem_T *
 +find_var_in_scoped_ht(char_u *name, char_u **varname, int no_autoload)
 +{
 +    dictitem_T	*v = NULL;
@@ -607,7 +672,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  /*
   * Set "copyID + 1" in previous_funccal and callers.
   */
-@@ -3585,6 +3567,7 @@ set_ref_in_previous_funccal(int copyID)
+@@ -3578,6 +3560,7 @@ set_ref_in_previous_funccal(int copyID)
  
      for (fc = previous_funccal; fc != NULL; fc = fc->caller)
      {
@@ -615,7 +680,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID + 1,
  									NULL);
  	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID + 1,
-@@ -3604,6 +3587,7 @@ set_ref_in_call_stack(int copyID)
+@@ -3597,6 +3580,7 @@ set_ref_in_call_stack(int copyID)
  
      for (fc = current_funccal; fc != NULL; fc = fc->caller)
      {
@@ -623,7 +688,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	abort = abort || set_ref_in_ht(&fc->l_vars.dv_hashtab, copyID, NULL);
  	abort = abort || set_ref_in_ht(&fc->l_avars.dv_hashtab, copyID, NULL);
      }
-@@ -3625,4 +3609,36 @@ set_ref_in_func_args(int copyID)
+@@ -3618,4 +3602,42 @@ set_ref_in_func_args(int copyID)
      return abort;
  }
  
@@ -639,11 +704,16 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +{
 +    ufunc_T	*fp;
 +    funccall_T	*fc;
++    int		error = ERROR_NONE;
++    char_u	fname_buf[FLEN_FIXED + 1];
++    char_u	*tofree = NULL;
++    char_u	*fname;
 +
 +    if (name == NULL)
 +	return FALSE;
 +
-+    fp = find_func(name);
++    fname = fname_trans_sid(name, fname_buf, &tofree, &error);
++    fp = find_func(fname);
 +    if (fp != NULL)
 +    {
 +	for (fc = fp->uf_scoped; fc != NULL; fc = fc->func->uf_scoped)
@@ -656,6 +726,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +	    }
 +	}
 +    }
++    vim_free(tofree);
 +    return FALSE;
 +}
 +
