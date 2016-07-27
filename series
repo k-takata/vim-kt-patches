@@ -43,7 +43,7 @@ function-noderef.patch
 fixed-typos-7.4.2098-version8.txt
 fix-typo-in-version8.patch
 fix-config_cache-removal.patch #+rejected
-lambda-update.patch
+lambda-capture_by_value.patch #+capture_by_value
 lambda-capture_by_reference.patch
 closure.patch
 lambda-debug-log.patch #+lambda-debug
