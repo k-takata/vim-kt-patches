@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  00f052b14851676a7dcafc75106f2a04f701a0c3
+# Parent  cb7dabae1858ce6d2d8574490c23a2824bc1637f
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -8,14 +8,14 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  	:let F = {arg1, arg2 -> arg1 - arg2}
  	:echo F(5, 2)
  <	3
--3. Lambda expressions can get the value of outer scope variables and arguments.
+-3. Lambda expressions can access outer scope variables and arguments.
 -   E.g.: >
 +3. A lambda expression can become a closure automatically.  It can access
 +   outer scope variables and arguments.  E.g.: >
  	:function Foo(arg)
  	:  let i = 3
  	:  return {x -> x + i - a:arg}
-@@ -1232,6 +1232,7 @@ 3. Lambda expressions can get the value 
+@@ -1232,6 +1232,7 @@ 3. Lambda expressions can access outer s
  	:let Bar = Foo(4)
  	:echo Bar(6)
  <	5
@@ -23,7 +23,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  The arguments are optional.  Example: >
  	:let F = {-> 'error function'}
-@@ -8208,7 +8209,7 @@ last defined. Example: >
+@@ -8214,7 +8215,7 @@ last defined. Example: >
  See |:verbose-cmd| for more information.
  
  						*E124* *E125* *E853* *E884*
@@ -32,33 +32,33 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  			Define a new function by the name {name}.  The name
  			must be made of alphanumeric characters and '_', and
  			must start with a capital or "s:" (see above).  Note
-@@ -8251,7 +8252,25 @@ See |:verbose-cmd| for more information.
+@@ -8257,6 +8258,26 @@ See |:verbose-cmd| for more information.
  			be invoked through an entry in a |Dictionary|.	The
  			local variable "self" will then be set to the
  			dictionary.  See |Dictionary-function|.
--
 +								*:func-closure*
 +			When the [closure] argument is added, the function
 +			becomes a closure.  It can access outer scope
 +			variables and arguments.  E.g.: >
-+				function! Foo()
-+				  let x = 0
-+				  function! Bar() closure
-+				    let x += 1
-+				    return x
-+				  endfunction
-+				  return function('Bar')
-+				endfunction
++				:function! Foo()
++				:  let x = 0
++				:  function! Bar() closure
++				:    let x += 1
++				:    return x
++				:  endfunction
++				:  return function('Bar')
++				:endfunction
 +
-+				let F = Foo()
-+				echo F() " 1
-+				echo F() " 2
-+				echo F() " 3
-+				echo F() " 4
-+<
++				:let F = Foo()
++				:echo F()
++<				1 >
++				:echo F()
++<				2 >
++				:echo F()
++<				3
+ 
  						*function-search-undo*
  			The last used search pattern and the redo command "."
- 			will not be changed by the function.  This also
 diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 --- a/src/testdir/test_lambda.vim
 +++ b/src/testdir/test_lambda.vim
@@ -77,7 +77,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
    function! s:foo()
      let x = 0
      return {-> [execute("let x += 1"), x][-1]}
-@@ -176,3 +178,21 @@ function! Test_lambda_combination()
+@@ -209,3 +211,21 @@ function! Test_lambda_combination()
    let Fact = {f -> {x -> x == 0 ? 1 : x * f(x - 1)}}
    call assert_equal(120, Z(Fact)(5))
  endfunction
