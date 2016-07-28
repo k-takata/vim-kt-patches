@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  5aeac51e9ca7a66bf13ccf1bea81fdeb9af3e460
+# Parent  0ccbc6536844a72fcc1ea7489746301a6bd3c40c
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
@@ -62,7 +62,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  	if (fp != NULL)
 +	{
-+	    TRACE("free_funccal: detach2: %s (%p)", fp->uf_name, fp->uf_name);
++	    TRACE("free_funccal: detach2");
  	    func_unref(fc->func->uf_name);
 +	}
      }
