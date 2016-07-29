@@ -47,4 +47,5 @@ fix-config_cache-removal.patch #+rejected
 lambda-capture_by_value.patch #+capture_by_value
 lambda-capture_by_reference.patch
 closure.patch
+closure-unlet.patch
 lambda-debug-log.patch #+lambda-debug

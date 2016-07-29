@@ -1,0 +1,94 @@
+# HG changeset patch
+# Parent  c70f8bac11c375c684fdd07d0dbd0ef3643109e5
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -2837,7 +2837,9 @@ do_unlet(char_u *name, int forceit)
+ 	    }
+ 	}
+ 	hi = hash_find(ht, varname);
+-	if (!HASHITEM_EMPTY(hi))
++	if (HASHITEM_EMPTY(hi))
++	    hi = find_hi_in_scoped_ht(name, &varname, &ht);
++	if (hi != NULL && !HASHITEM_EMPTY(hi))
+ 	{
+ 	    di = HI2DI(hi);
+ 	    if (var_check_fixed(di->di_flags, name, FALSE)
+diff --git a/src/proto/userfunc.pro b/src/proto/userfunc.pro
+--- a/src/proto/userfunc.pro
++++ b/src/proto/userfunc.pro
+@@ -46,6 +46,7 @@ void *clear_current_funccal(void);
+ void restore_current_funccal(void *f);
+ void list_func_vars(int *first);
+ dict_T *get_current_funccal_dict(hashtab_T *ht);
++hashitem_T *find_hi_in_scoped_ht(char_u *name, char_u **varname, hashtab_T **pht);
+ dictitem_T *find_var_in_scoped_ht(char_u *name, char_u **varname, int no_autoload);
+ int set_ref_in_previous_funccal(int copyID);
+ int set_ref_in_call_stack(int copyID);
+diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
+--- a/src/testdir/test_lambda.vim
++++ b/src/testdir/test_lambda.vim
+@@ -229,3 +229,17 @@ function! Test_closure_counter()
+   call assert_equal(3, l:F())
+   call assert_equal(4, l:F())
+ endfunction
++
++function! Test_closure_unlet()
++  function! s:foo()
++    let x = 1
++    function! s:bar() closure
++      unlet x
++    endfunction
++    call s:bar()
++    return l:
++  endfunction
++
++  call assert_false(has_key(s:foo(), 'x'))
++  call test_garbagecollect_now()
++endfunction
+diff --git a/src/userfunc.c b/src/userfunc.c
+--- a/src/userfunc.c
++++ b/src/userfunc.c
+@@ -3608,6 +3608,41 @@ get_current_funccal_dict(hashtab_T *ht)
+     return NULL;
+ }
+ 
++/* Search hashitem in parent scope. */
++    hashitem_T *
++find_hi_in_scoped_ht(char_u *name, char_u **varname, hashtab_T **pht)
++{
++    dictitem_T	*v = NULL;
++    funccall_T	*old_current_funccal = current_funccal;
++    hashtab_T	*ht;
++    hashitem_T	*hi = NULL;
++
++    if (current_funccal == NULL || current_funccal->func->uf_scoped == NULL)
++      return NULL;
++
++    /* Search in parent scope which is possible to reference from lambda */
++    current_funccal = current_funccal->func->uf_scoped;
++    while (current_funccal)
++    {
++      ht = find_var_ht(name, varname);
++      if (ht != NULL && **varname != NUL)
++      {
++	  hi = hash_find(ht, *varname);
++	  if (!HASHITEM_EMPTY(hi))
++	  {
++	      *pht = ht;
++	      break;
++	  }
++      }
++      if (current_funccal == current_funccal->func->uf_scoped)
++	  break;
++      current_funccal = current_funccal->func->uf_scoped;
++    }
++    current_funccal = old_current_funccal;
++
++    return hi;
++}
++
+ /* Search variable in parent scope. */
+     dictitem_T *
+ find_var_in_scoped_ht(char_u *name, char_u **varname, int no_autoload)
