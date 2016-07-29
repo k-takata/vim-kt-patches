@@ -42,6 +42,7 @@ embarcadero.patch
 function-noderef.patch
 fixed-typos-7.4.2098-version8.txt
 fix-typo-in-version8.patch
+fix-typo-in-version8-2.patch
 fix-config_cache-removal.patch #+rejected
 lambda-capture_by_value.patch #+capture_by_value
 lambda-capture_by_reference.patch

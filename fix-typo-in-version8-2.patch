@@ -1,0 +1,27 @@
+# HG changeset patch
+# Parent  a0864123b34cda68ddfbcfc77e666dedf34aded8
+
+diff --git a/runtime/doc/starting.txt b/runtime/doc/starting.txt
+--- a/runtime/doc/starting.txt
++++ b/runtime/doc/starting.txt
+@@ -979,7 +979,7 @@ This has the side effect of setting or r
+ changed.  This has the same effect like the value of 'compatible' had this
+ value when starting Vim.
+ 
+-'compatible is NOT reset, and |defaults.vim| is not loaded:
++'compatible' is NOT reset, and |defaults.vim| is not loaded:
+ - when Vim was started with the |-u| command line argument, especially with
+   "-u NONE", or
+ - when started with the |-C| command line argument, or
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -8143,7 +8143,7 @@ Files:      src/regexp.c, src/regexp_nfa
+ 
+ Patch 7.4.1306
+ Problem:    Job control doesn't work well on MS-Windows.
+-Solution:   Various fixes. (Ken Takata, Ozaki Kiichi , Yukihiro Nakadaira,
++Solution:   Various fixes. (Ken Takata, Ozaki Kiichi, Yukihiro Nakadaira,
+             Yasuhiro Matsumoto)
+ Files:      src/Make_mvc.mak, src/eval.c, src/os_unix.c, src/os_win32.c,
+             src/proto/os_unix.pro, src/proto/os_win32.pro, src/structs.h
