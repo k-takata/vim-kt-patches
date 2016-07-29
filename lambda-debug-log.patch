@@ -1,25 +1,20 @@
 # HG changeset patch
-# Parent  0ccbc6536844a72fcc1ea7489746301a6bd3c40c
+# Parent  ada39ed0080b02e0863dd6eecdea0af1f02daf9a
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -6828,6 +6828,7 @@ check_vars(
+@@ -6826,7 +6826,10 @@ check_vars(
+     if (ht == get_funccal_local_ht() || ht == get_funccal_args_ht())
      {
  	if (find_var(name, NULL, TRUE) != NULL)
- 	{
-+	    TRACE("lvar: %s", varname);
++	{
++	    TRACE("lvar/avar: %s", varname);
  	    *eval_lavars_used = TRUE;
- 	}
++	}
      }
-@@ -6835,6 +6836,7 @@ check_vars(
-     {
- 	if (find_var(name, NULL, TRUE) != NULL)
- 	{
-+	    TRACE("avar: %s", varname);
- 	    *eval_lavars_used = TRUE;
- 	}
-     }
+ 
+     name[len] = cc;
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
