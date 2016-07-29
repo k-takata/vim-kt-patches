@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  e98f497037476eaf89e721349e7b1cc957c6143f
+# Parent  c498e2520dc5e4a47a8067465854b56f29f60f4e
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -38,18 +38,6 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  ==============================================================================
  3. Internal variable				*internal-variables* *E461*
  
-diff --git a/src/dict.c b/src/dict.c
---- a/src/dict.c
-+++ b/src/dict.c
-@@ -188,7 +188,7 @@ dictitem_alloc(char_u *key)
- /*
-  * Make a copy of a Dictionary item.
-  */
--    static dictitem_T *
-+    dictitem_T *
- dictitem_copy(dictitem_T *org)
- {
-     dictitem_T *di;
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
@@ -104,13 +92,12 @@ diff --git a/src/eval.c b/src/eval.c
  	    if (pt->pt_dict != NULL)
  	    {
  		typval_T dtv;
-@@ -6791,6 +6803,48 @@ get_var_tv(
+@@ -6791,6 +6803,36 @@ get_var_tv(
  }
  
  /*
 + * Check if variable "name" is a local variable or an argument.
-+ * If it is a local variable, store it to the "eval_lvars_dict" dict.
-+ * If it is an argument, store it to the "eval_avars_dict" dict.
++ * If so, "*eval_lavars_used" is set to TRUE.
 + */
 +    static void
 +check_vars(
@@ -129,31 +116,20 @@ diff --git a/src/eval.c b/src/eval.c
 +    name[len] = NUL;
 +
 +    ht = find_var_ht(name, &varname);
-+    if (ht == get_funccal_local_ht())
++    if (ht == get_funccal_local_ht() || ht == get_funccal_args_ht())
 +    {
 +	if (find_var(name, NULL, TRUE) != NULL)
-+	{
 +	    *eval_lavars_used = TRUE;
-+	}
-+    }
-+    else if (ht == get_funccal_args_ht())
-+    {
-+	if (find_var(name, NULL, TRUE) != NULL)
-+	{
-+	    *eval_lavars_used = TRUE;
-+	}
 +    }
 +
 +    name[len] = cc;
-+
-+    return;
 +}
 +
 +/*
   * Handle expr[expr], expr[expr:expr] subscript and .name lookup.
   * Also handle function call with Funcref variable: func(expr)
   * Can all be combined: dict.func(expr)[idx]['func'](expr)
-@@ -7274,13 +7328,20 @@ find_var(char_u *name, hashtab_T **htp, 
+@@ -7274,13 +7316,20 @@ find_var(char_u *name, hashtab_T **htp, 
  {
      char_u	*varname;
      hashtab_T	*ht;
@@ -175,7 +151,7 @@ diff --git a/src/eval.c b/src/eval.c
  }
  
  /*
-@@ -7341,7 +7402,7 @@ find_var_in_ht(
+@@ -7341,7 +7390,7 @@ find_var_in_ht(
   * Return NULL if the name is not valid.
   * Set "varname" to the start of name without ':'.
   */
@@ -184,28 +160,7 @@ diff --git a/src/eval.c b/src/eval.c
  find_var_ht(char_u *name, char_u **varname)
  {
      hashitem_T	*hi;
-@@ -7457,11 +7518,15 @@ init_var_dict(dict_T *dict, dictitem_T *
-     dict->dv_scope = scope;
-     dict->dv_refcount = DO_NOT_FREE_CNT;
-     dict->dv_copyID = 0;
--    dict_var->di_tv.vval.v_dict = dict;
--    dict_var->di_tv.v_type = VAR_DICT;
--    dict_var->di_tv.v_lock = VAR_FIXED;
--    dict_var->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX;
--    dict_var->di_key[0] = NUL;
-+
-+    if (dict_var != NULL)
-+    {
-+	dict_var->di_tv.vval.v_dict = dict;
-+	dict_var->di_tv.v_type = VAR_DICT;
-+	dict_var->di_tv.v_lock = VAR_FIXED;
-+	dict_var->di_flags = DI_FLAGS_RO | DI_FLAGS_FIX;
-+	dict_var->di_key[0] = NUL;
-+    }
- }
- 
- /*
-@@ -7617,6 +7682,10 @@ set_var(
+@@ -7617,6 +7666,10 @@ set_var(
      }
      v = find_var_in_ht(ht, 0, varname, TRUE);
  
@@ -251,17 +206,6 @@ diff --git a/src/globals.h b/src/globals.h
  #endif
  
  /*
-diff --git a/src/proto/dict.pro b/src/proto/dict.pro
---- a/src/proto/dict.pro
-+++ b/src/proto/dict.pro
-@@ -5,6 +5,7 @@ void dict_unref(dict_T *d);
- int dict_free_nonref(int copyID);
- void dict_free_items(int copyID);
- dictitem_T *dictitem_alloc(char_u *key);
-+dictitem_T *dictitem_copy(dictitem_T *org);
- void dictitem_remove(dict_T *dict, dictitem_T *item);
- void dictitem_free(dictitem_T *item);
- dict_T *dict_copy(dict_T *orig, int deep, int copyID);
 diff --git a/src/proto/eval.pro b/src/proto/eval.pro
 --- a/src/proto/eval.pro
 +++ b/src/proto/eval.pro
