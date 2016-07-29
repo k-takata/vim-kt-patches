@@ -40,12 +40,12 @@ build_script:
     start /wait .\gvim -u NONE -c "redir @a | ver | 0put a | wq!" ver.txt
     type ver.txt
     rem Print interface versions
-    start /wait .\gvim -S ..\.hg\patches\scripts\if_ver.vim -c quit
+    start /wait .\gvim -u NONE -S ..\.hg\patches\scripts\if_ver.vim -c quit
     type if_ver.txt
     rem Show vim version
     .\vim --version
     rem Print interface versions
-    .\vim --not-a-term -S ..\.hg\patches\scripts\if_ver.vim -c quit
+    .\vim --not-a-term -u NONE -S ..\.hg\patches\scripts\if_ver.vim -c quit
     type if_ver.txt
 
 test_script:
