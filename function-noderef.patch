@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  be7bb2647b1b3ef34a8cd1adde87966a74400ca6
+# Parent  d1c6064b3a8da89dae8a695667b1f7a8c226d044
 
 diff --git a/src/eval.c b/src/eval.c
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -7829,7 +7829,7 @@ var_check_func_name(
+@@ -7813,7 +7813,7 @@ var_check_func_name(
      /* Don't allow hiding a function.  When "v" is not NULL we might be
       * assigning another function to the same var, the type is checked
       * below. */
@@ -16,7 +16,7 @@ diff --git a/src/eval.c b/src/eval.c
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -2834,7 +2834,7 @@ f_exists(typval_T *argvars, typval_T *re
+@@ -2845,7 +2845,7 @@ f_exists(typval_T *argvars, typval_T *re
      }
      else if (*p == '*')			/* internal or user defined function */
      {
@@ -25,7 +25,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
      }
      else if (*p == ':')
      {
-@@ -3566,7 +3566,7 @@ f_function(typval_T *argvars, typval_T *
+@@ -3577,7 +3577,7 @@ f_function(typval_T *argvars, typval_T *
  	EMSG2(_(e_invarg2), s);
      /* Don't check an autoload name for existence here. */
      else if (use_string && vim_strchr(s, AUTOLOAD_CHAR) == NULL
@@ -46,10 +46,24 @@ diff --git a/src/proto/userfunc.pro b/src/proto/userfunc.pro
  char_u *get_expanded_name(char_u *name, int check);
  void func_dump_profile(FILE *fd);
  void prof_child_enter(proftime_T *tm);
+diff --git a/src/testdir/test_expr.vim b/src/testdir/test_expr.vim
+--- a/src/testdir/test_expr.vim
++++ b/src/testdir/test_expr.vim
+@@ -172,3 +172,10 @@ func Test_substitute_expr_arg()
+   call assert_fails("call substitute('xxx', '.', {m -> string(extend(m, ['x']))}, '')", 'E742:')
+   call assert_fails("call substitute('xxx', '.', {m -> string(remove(m, 1))}, '')", 'E742:')
+ endfunc
++
++func Test_function_with_funcref()
++  let s:f = function('type')
++  let s:fref = function(s:f)
++  call assert_equal(v:t_string, s:fref('x'))
++  call assert_fails("call function('s:f')", 'E700:')
++endfunc
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
-@@ -1485,6 +1485,7 @@ list_func_head(ufunc_T *fp, int indent)
+@@ -1504,6 +1504,7 @@ list_func_head(ufunc_T *fp, int indent)
   * TFN_INT:	    internal function name OK
   * TFN_QUIET:	    be quiet
   * TFN_NO_AUTOLOAD: do not use script autoloading
@@ -57,7 +71,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
   * Advances "pp" to just after the function name (if no error).
   */
      static char_u *
-@@ -1599,7 +1600,7 @@ trans_function_name(
+@@ -1618,7 +1619,7 @@ trans_function_name(
  	if (name == lv.ll_exp_name)
  	    name = NULL;
      }
@@ -66,7 +80,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	len = (int)(end - *pp);
  	name = deref_func_name(*pp, &len, partial, flags & TFN_NO_AUTOLOAD);
-@@ -1671,7 +1672,7 @@ trans_function_name(
+@@ -1690,7 +1691,7 @@ trans_function_name(
  								       start);
  	goto theend;
      }
@@ -75,7 +89,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	char_u *cp = vim_strchr(lv.ll_name, ':');
  
-@@ -2340,16 +2341,20 @@ translated_function_exists(char_u *name)
+@@ -2381,16 +2382,20 @@ translated_function_exists(char_u *name)
  
  /*
   * Return TRUE if a function "name" exists.
@@ -103,7 +117,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2457,6 +2457,7 @@ int vim_main2(int argc, char **argv);
+@@ -2458,6 +2458,7 @@ int vim_main2(int argc, char **argv);
  #define TFN_INT		1	/* internal function name OK */
  #define TFN_QUIET	2	/* no error messages */
  #define TFN_NO_AUTOLOAD	4	/* do not use script autoloading */
