@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  caee9641248e38101f1ecbe64c1e1726d6cffd8c
+# Parent  e31dcdab0bcfc23bdfbb4f56d5cef0c010a6b49f
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -268,15 +268,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
-@@ -2317,6 +2366,7 @@ ex_function(exarg_T *eap)
- 		    name);
- 	    goto erret;
- 	}
-+	fp->uf_refcount = 1;
- 	fp->uf_scoped = current_funccal;
- 	current_funccal->fc_refcount++;
- 	if (ga_grow(&current_funccal->fc_funcs, 1) == FAIL)
-@@ -2324,6 +2374,15 @@ ex_function(exarg_T *eap)
+@@ -2325,6 +2374,15 @@ ex_function(exarg_T *eap)
  	((ufunc_T **)current_funccal->fc_funcs.ga_data)
  				[current_funccal->fc_funcs.ga_len++] = fp;
  	func_ref(current_funccal->func->uf_name);
@@ -292,7 +284,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      else
  	fp->uf_scoped = NULL;
-@@ -2346,10 +2405,12 @@ erret:
+@@ -2347,10 +2405,12 @@ erret:
      ga_clear_strings(&newargs);
  errret_2:
      ga_clear_strings(&newlines);
@@ -305,7 +297,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      did_emsg |= saved_did_emsg;
      need_wait_return |= saved_wait_return;
  }
-@@ -2670,8 +2731,7 @@ get_user_func_name(expand_T *xp, int idx
+@@ -2671,8 +2731,7 @@ get_user_func_name(expand_T *xp, int idx
  	    ++hi;
  	fp = HI2UF(hi);
  
@@ -315,7 +307,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	    return (char_u *)""; /* don't show dict and lambda functions */
  
  	if (STRLEN(fp->uf_name) + 4 >= IOSIZE)
-@@ -2758,7 +2818,7 @@ func_unref(char_u *name)
+@@ -2759,7 +2818,7 @@ func_unref(char_u *name)
  {
      ufunc_T *fp = NULL;
  
@@ -324,7 +316,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	return;
      if (isdigit(*name))
      {
-@@ -2771,7 +2831,7 @@ func_unref(char_u *name)
+@@ -2772,7 +2831,7 @@ func_unref(char_u *name)
  		EMSG2(_(e_intern2), "func_unref()");
  	}
      }
@@ -333,7 +325,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	/* fail silently, when lambda function isn't found. */
  	fp = find_func(name);
-@@ -2793,7 +2853,7 @@ func_ref(char_u *name)
+@@ -2794,7 +2853,7 @@ func_ref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -342,7 +334,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	return;
      else if (isdigit(*name))
      {
-@@ -2803,7 +2863,7 @@ func_ref(char_u *name)
+@@ -2804,7 +2863,7 @@ func_ref(char_u *name)
  	else
  	    ++fp->uf_refcount;
      }

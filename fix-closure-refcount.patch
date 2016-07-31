@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  221afee7f90cd2b14c3c9f5a38ce3036bacf096c
+
+diff --git a/src/userfunc.c b/src/userfunc.c
+--- a/src/userfunc.c
++++ b/src/userfunc.c
+@@ -2317,6 +2317,7 @@ ex_function(exarg_T *eap)
+ 		    name);
+ 	    goto erret;
+ 	}
++	fp->uf_refcount = 1;
+ 	fp->uf_scoped = current_funccal;
+ 	current_funccal->fc_refcount++;
+ 	if (ga_grow(&current_funccal->fc_funcs, 1) == FAIL)
