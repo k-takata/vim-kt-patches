@@ -39,7 +39,6 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 make-main-simpler.patch
 embarcadero.patch
-function-noderef.patch
 fixed-typos-7.4.2098-version8.txt
 fix-typo-in-version8.patch
 fix-typo-in-version8-2.patch
