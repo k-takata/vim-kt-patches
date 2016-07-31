@@ -43,4 +43,6 @@ function-noderef.patch
 fixed-typos-7.4.2098-version8.txt
 fix-typo-in-version8.patch
 fix-typo-in-version8-2.patch
+fix-closure.patch
+lambda-debug-log.patch #+lambda-debug
 fix-config_cache-removal.patch #+rejected
