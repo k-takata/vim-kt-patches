@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  856a8d368a7fed2d8e86c05a140ca9b2d339c889
+# Parent  8c110d08b87f6194fb8a28b903583f4c9b759079
 
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
@@ -20,15 +20,15 @@ diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 -	-$(RUN_VIM) $*.in
 +	-$(RUN_VIM) $*.in > /dev/null
  
- 	# For flaky tests retry one time.
- 	@/bin/sh -c "if test -f test.out -a $* = test61; then \
- 		  if diff test.out $*.ok; \
- 		  then echo flaky test ok first time; \
- 		  else rm -rf $*.failed $(RM_ON_RUN); \
--			$(RUN_VIM) $*.in; \
-+			$(RUN_VIM) $*.in > /dev/null; \
- 		  fi \
- 		fi"
+ 	# For flaky tests retry one time.  No tests at the moment.
+ 	#@/bin/sh -c "if test -f test.out -a $* = test61; then \
+ 	#	  if diff test.out $*.ok; \
+ 	#	  then echo flaky test ok first time; \
+ 	#	  else rm -rf $*.failed $(RM_ON_RUN); \
+-	#		$(RUN_VIM) $*.in; \
++	#		$(RUN_VIM) $*.in > /dev/null; \
+ 	#	  fi \
+ 	#	fi"
  
 @@ -108,7 +108,7 @@ bench_re_freeze.out: bench_re_freeze.vim
  	# 200 msec is sufficient, but only modern sleep supports a fraction of
