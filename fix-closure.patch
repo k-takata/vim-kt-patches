@@ -185,7 +185,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      /* When there is a line break use what follows for the function body.
       * Makes 'exe "func Test()\n...\nendfunc"' work. */
      if (*p == '\n')
-@@ -2177,15 +2201,47 @@ ex_function(exarg_T *eap)
+@@ -2177,15 +2201,46 @@ ex_function(exarg_T *eap)
       */
      if (fudi.fd_dict == NULL)
      {
@@ -212,7 +212,6 @@ diff --git a/src/userfunc.c b/src/userfunc.c
 +	{
 +	    char	numbuf[22];
 +
-+	    TRACE("name: %s", name);
 +	    if ((name[0] == K_SPECIAL && name[1] == KS_EXTRA
 +						   && name[2] == (int)KE_SNR)
 +		    || ht != get_funccal_local_ht()
@@ -235,7 +234,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	if (fp != NULL)
  	{
  	    if (!eap->forceit)
-@@ -2268,6 +2324,7 @@ ex_function(exarg_T *eap)
+@@ -2268,6 +2323,7 @@ ex_function(exarg_T *eap)
  	fp = (ufunc_T *)alloc((unsigned)(sizeof(ufunc_T) + STRLEN(name)));
  	if (fp == NULL)
  	    goto erret;
@@ -243,7 +242,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  
  	if (fudi.fd_dict != NULL)
  	{
-@@ -2276,14 +2333,10 @@ ex_function(exarg_T *eap)
+@@ -2276,14 +2332,10 @@ ex_function(exarg_T *eap)
  		/* add new dict entry */
  		fudi.fd_di = dictitem_alloc(fudi.fd_newkey);
  		if (fudi.fd_di == NULL)
@@ -258,7 +257,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  		    goto erret;
  		}
  	    }
-@@ -2302,10 +2355,7 @@ ex_function(exarg_T *eap)
+@@ -2302,10 +2354,7 @@ ex_function(exarg_T *eap)
  	/* insert the new function in the function list */
  	STRCPY(fp->uf_name, name);
  	if (hash_add(&func_hashtab, UF2HIKEY(fp)) == FAIL)
@@ -269,7 +268,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
-@@ -2317,6 +2367,7 @@ ex_function(exarg_T *eap)
+@@ -2317,6 +2366,7 @@ ex_function(exarg_T *eap)
  		    name);
  	    goto erret;
  	}
@@ -277,7 +276,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	fp->uf_scoped = current_funccal;
  	current_funccal->fc_refcount++;
  	if (ga_grow(&current_funccal->fc_funcs, 1) == FAIL)
-@@ -2324,6 +2375,15 @@ ex_function(exarg_T *eap)
+@@ -2324,6 +2374,15 @@ ex_function(exarg_T *eap)
  	((ufunc_T **)current_funccal->fc_funcs.ga_data)
  				[current_funccal->fc_funcs.ga_len++] = fp;
  	func_ref(current_funccal->func->uf_name);
@@ -293,7 +292,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      else
  	fp->uf_scoped = NULL;
-@@ -2346,10 +2406,12 @@ erret:
+@@ -2346,10 +2405,12 @@ erret:
      ga_clear_strings(&newargs);
  errret_2:
      ga_clear_strings(&newlines);
@@ -306,7 +305,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      did_emsg |= saved_did_emsg;
      need_wait_return |= saved_wait_return;
  }
-@@ -2670,8 +2732,7 @@ get_user_func_name(expand_T *xp, int idx
+@@ -2670,8 +2731,7 @@ get_user_func_name(expand_T *xp, int idx
  	    ++hi;
  	fp = HI2UF(hi);
  
@@ -316,7 +315,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	    return (char_u *)""; /* don't show dict and lambda functions */
  
  	if (STRLEN(fp->uf_name) + 4 >= IOSIZE)
-@@ -2758,7 +2819,7 @@ func_unref(char_u *name)
+@@ -2758,7 +2818,7 @@ func_unref(char_u *name)
  {
      ufunc_T *fp = NULL;
  
@@ -325,7 +324,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	return;
      if (isdigit(*name))
      {
-@@ -2771,7 +2832,7 @@ func_unref(char_u *name)
+@@ -2771,7 +2831,7 @@ func_unref(char_u *name)
  		EMSG2(_(e_intern2), "func_unref()");
  	}
      }
@@ -334,7 +333,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	/* fail silently, when lambda function isn't found. */
  	fp = find_func(name);
-@@ -2793,7 +2854,7 @@ func_ref(char_u *name)
+@@ -2793,7 +2853,7 @@ func_ref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -343,7 +342,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	return;
      else if (isdigit(*name))
      {
-@@ -2803,7 +2864,7 @@ func_ref(char_u *name)
+@@ -2803,7 +2863,7 @@ func_ref(char_u *name)
  	else
  	    ++fp->uf_refcount;
      }
