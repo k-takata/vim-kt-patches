@@ -43,6 +43,6 @@ fixed-typos-7.4.2098-version8.txt
 fix-typo-in-version8.patch
 fix-typo-in-version8-2.patch
 enhance-printf-s.patch
-fix-closure.patch
+fix-closure.patch #+closure
 lambda-debug-log.patch #+lambda-debug
 fix-config_cache-removal.patch #+rejected
