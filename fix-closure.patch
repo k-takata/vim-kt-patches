@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  e31dcdab0bcfc23bdfbb4f56d5cef0c010a6b49f
+# Parent  06ca7d175b567a72c024e3aaea5106e1fb6c7c23
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -53,7 +53,7 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
    call assert_equal(3, l:F())
    call assert_equal(4, l:F())
  endfunction
-@@ -237,13 +239,47 @@ endfunction
+@@ -237,10 +239,10 @@ endfunction
  function! Test_closure_unlet()
    function! s:foo()
      let x = 1
@@ -66,10 +66,10 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
      return l:
    endfunction
  
-   call assert_false(has_key(s:foo(), 'x'))
+@@ -248,6 +250,40 @@ function! Test_closure_unlet()
    call test_garbagecollect_now()
  endfunction
-+
+ 
 +function! Test_closure_redefine()
 +  function! s:foo()
 +    function Bar() closure
@@ -103,10 +103,14 @@ diff --git a/src/testdir/test_lambda.vim b/src/testdir/test_lambda.vim
 +  call assert_fails('call s:foo1()', 'Exxx:')
 +  call assert_fails('call s:foo2()', 'Exxx:')
 +endfunction
++
+ function! LambdaFoo()
+   let x = 0
+   function! LambdaBar() closure
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
-@@ -1195,6 +1195,24 @@ builtin_function(char_u *name, int len)
+@@ -1204,6 +1204,24 @@ builtin_function(char_u *name, int len)
      return p == NULL || (len > 0 && p > name + len);
  }
  
@@ -131,7 +135,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      int
  func_call(
      char_u	*name,
-@@ -1378,8 +1396,7 @@ call_func(
+@@ -1387,8 +1405,7 @@ call_func(
  		    call_user_func(fp, argcount, argvars, rettv,
  					       firstline, lastline,
  				  (fp->uf_flags & FC_DICT) ? selfdict : NULL);
@@ -141,7 +145,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  						      && fp->uf_refcount <= 0)
  			/* Function was unreferenced while being used, free it
  			 * now. */
-@@ -1735,20 +1752,24 @@ ex_function(exarg_T *eap)
+@@ -1744,20 +1761,24 @@ ex_function(exarg_T *eap)
      int		saved_did_emsg;
      int		saved_wait_return = need_wait_return;
      char_u	*name = NULL;
@@ -166,7 +170,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      int		paren;
      hashtab_T	*ht;
      int		todo;
-@@ -1943,7 +1964,7 @@ ex_function(exarg_T *eap)
+@@ -1952,7 +1973,7 @@ ex_function(exarg_T *eap)
  						      : eval_isnamec(arg[j])))
  		++j;
  	    if (arg[j] != NUL)
@@ -175,7 +179,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	}
  	/* Disallow using the g: dict. */
  	if (fudi.fd_dict != NULL && fudi.fd_dict->dv_scope == VAR_DEF_SCOPE)
-@@ -1981,6 +2002,9 @@ ex_function(exarg_T *eap)
+@@ -1996,6 +2017,9 @@ ex_function(exarg_T *eap)
  	    break;
      }
  
@@ -185,7 +189,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      /* When there is a line break use what follows for the function body.
       * Makes 'exe "func Test()\n...\nendfunc"' work. */
      if (*p == '\n')
-@@ -2177,15 +2201,46 @@ ex_function(exarg_T *eap)
+@@ -2192,15 +2216,46 @@ ex_function(exarg_T *eap)
       */
      if (fudi.fd_dict == NULL)
      {
@@ -234,15 +238,15 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	if (fp != NULL)
  	{
  	    if (!eap->forceit)
-@@ -2268,6 +2323,7 @@ ex_function(exarg_T *eap)
- 	fp = (ufunc_T *)alloc((unsigned)(sizeof(ufunc_T) + STRLEN(name)));
+@@ -2283,6 +2338,7 @@ ex_function(exarg_T *eap)
+ 	fp = (ufunc_T *)alloc_clear((unsigned)(sizeof(ufunc_T) + STRLEN(name)));
  	if (fp == NULL)
  	    goto erret;
 +	fp_tofree = fp;
  
  	if (fudi.fd_dict != NULL)
  	{
-@@ -2276,14 +2332,10 @@ ex_function(exarg_T *eap)
+@@ -2291,14 +2347,10 @@ ex_function(exarg_T *eap)
  		/* add new dict entry */
  		fudi.fd_di = dictitem_alloc(fudi.fd_newkey);
  		if (fudi.fd_di == NULL)
@@ -257,7 +261,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  		    goto erret;
  		}
  	    }
-@@ -2302,10 +2354,7 @@ ex_function(exarg_T *eap)
+@@ -2317,10 +2369,7 @@ ex_function(exarg_T *eap)
  	/* insert the new function in the function list */
  	STRCPY(fp->uf_name, name);
  	if (hash_add(&func_hashtab, UF2HIKEY(fp)) == FAIL)
@@ -268,11 +272,10 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
-@@ -2325,6 +2374,15 @@ ex_function(exarg_T *eap)
- 	((ufunc_T **)current_funccal->fc_funcs.ga_data)
- 				[current_funccal->fc_funcs.ga_len++] = fp;
- 	func_ref(current_funccal->func->uf_name);
-+
+@@ -2330,6 +2379,14 @@ ex_function(exarg_T *eap)
+ 	    ++fp->uf_refcount;
+ 	if (register_closure(fp) == FAIL)
+ 	    goto erret;
 +	if ((flags & FC_DICT) == 0)
 +	{
 +	    typval_T    tv;
@@ -284,7 +287,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      }
      else
  	fp->uf_scoped = NULL;
-@@ -2347,10 +2405,12 @@ erret:
+@@ -2352,10 +2409,12 @@ erret:
      ga_clear_strings(&newargs);
  errret_2:
      ga_clear_strings(&newlines);
@@ -297,7 +300,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      did_emsg |= saved_did_emsg;
      need_wait_return |= saved_wait_return;
  }
-@@ -2671,8 +2731,7 @@ get_user_func_name(expand_T *xp, int idx
+@@ -2676,8 +2735,7 @@ get_user_func_name(expand_T *xp, int idx
  	    ++hi;
  	fp = HI2UF(hi);
  
@@ -307,7 +310,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	    return (char_u *)""; /* don't show dict and lambda functions */
  
  	if (STRLEN(fp->uf_name) + 4 >= IOSIZE)
-@@ -2759,7 +2818,7 @@ func_unref(char_u *name)
+@@ -2764,7 +2822,7 @@ func_unref(char_u *name)
  {
      ufunc_T *fp = NULL;
  
@@ -316,7 +319,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	return;
      if (isdigit(*name))
      {
-@@ -2772,7 +2831,7 @@ func_unref(char_u *name)
+@@ -2777,7 +2835,7 @@ func_unref(char_u *name)
  		EMSG2(_(e_intern2), "func_unref()");
  	}
      }
@@ -325,7 +328,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
      {
  	/* fail silently, when lambda function isn't found. */
  	fp = find_func(name);
-@@ -2794,7 +2853,7 @@ func_ref(char_u *name)
+@@ -2799,7 +2857,7 @@ func_ref(char_u *name)
  {
      ufunc_T *fp;
  
@@ -334,7 +337,7 @@ diff --git a/src/userfunc.c b/src/userfunc.c
  	return;
      else if (isdigit(*name))
      {
-@@ -2804,7 +2863,7 @@ func_ref(char_u *name)
+@@ -2809,7 +2867,7 @@ func_ref(char_u *name)
  	else
  	    ++fp->uf_refcount;
      }
