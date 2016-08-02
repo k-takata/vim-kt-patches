@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent  f79f1b7c404771961bb66eee2af39d7de14cc168
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -4043,7 +4043,7 @@ sub_process_writer(LPVOID param)
+ 
+     /* finished all the lines, close pipe */
+     CloseHandle(g_hChildStd_IN_Wr);
+-    ExitThread(0);
++    return 0;
+ }
+ 
+ 
+@@ -4267,8 +4267,8 @@ mch_system_piped(char_u *cmd, int option
+ 
+     if (options & SHELL_WRITE)
+     {
+-	HANDLE thread =
+-	   CreateThread(NULL,  /* security attributes */
++	HANDLE thread = (HANDLE)
++	 _beginthreadex(NULL,  /* security attributes */
+ 			0,     /* default stack size */
+ 			sub_process_writer, /* function to be executed */
+ 			g_hChildStd_IN_Wr,  /* parameter */
