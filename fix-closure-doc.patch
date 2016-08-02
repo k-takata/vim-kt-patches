@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  1cc48e330e0f4b11e4b614219980903b332974b7
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -8296,7 +8296,7 @@ See |:verbose-cmd| for more information.
+ 				:    let x += 1
+ 				:    return x
+ 				:  endfunction
+-				:  return function('Bar')
++				:  return funcref('Bar')
+ 				:endfunction
+ 
+ 				:let F = Foo()
