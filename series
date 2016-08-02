@@ -40,6 +40,5 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 embarcadero.patch
 enhance-printf-s.patch
-use-beginthreadex.patch
 fix-version8.txt.patch
 fix-config_cache-removal.patch #+rejected
