@@ -1,0 +1,28 @@
+# HG changeset patch
+# Parent  cdc74cf55ee73420058911d610479bafb967d1a1
+
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -128,9 +128,9 @@ The 'breakindent' option has been added 
+ changing the amount of indent.
+ 
+ 
+-Windows: Direct-X support ~
+-
+-This adds the 'renderoptions' option to allow for switching on Direct-X
++Windows: DirectX support ~
++
++This adds the 'renderoptions' option to allow for switching on DirectX
+ (DirectWrite) support on MS-Windows.
+ 
+ 
+@@ -8157,7 +8157,7 @@ Files:      src/regexp.c, src/regexp_nfa
+ 
+ Patch 7.4.1306
+ Problem:    Job control doesn't work well on MS-Windows.
+-Solution:   Various fixes. (Ken Takata, Ozaki Kiichi , Yukihiro Nakadaira,
++Solution:   Various fixes. (Ken Takata, Ozaki Kiichi, Yukihiro Nakadaira,
+             Yasuhiro Matsumoto)
+ Files:      src/Make_mvc.mak, src/eval.c, src/os_unix.c, src/os_win32.c,
+             src/proto/os_unix.pro, src/proto/os_win32.pro, src/structs.h
