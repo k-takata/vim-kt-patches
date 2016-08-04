@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f37d610fb91c29bcccc9b88ed7b9f0ce015b63a2
+# Parent  cc54db6e0d02246ac4ec02cfbe3edccbb6b47872
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -256,14 +256,23 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  #ifdef FEAT_AUTOCMD
 -    if (!read_stdin && !read_buffer)
-+    if (!read_stdin && !read_fifo && sfname != NULL)
++    if (!read_stdin && !read_fifo && (!read_buffer || sfname != NULL))
      {
  	int m = msg_scroll;
  	int n = msg_scrolled;
+@@ -2685,7 +2689,7 @@ failed:
+ 	if (filtering)
+ 	    apply_autocmds_exarg(EVENT_FILTERREADPOST, NULL, sfname,
+ 							  FALSE, curbuf, eap);
+-	else if (newfile)
++	else if (newfile || (read_buffer && sfname != NULL))
+ 	{
+ 	    apply_autocmds_exarg(EVENT_BUFREADPOST, NULL, sfname,
+ 							  FALSE, curbuf, eap);
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -986,7 +986,8 @@ extern char *(*dyn_libintl_textdomain)(c
+@@ -989,7 +989,8 @@ extern char *(*dyn_libintl_textdomain)(c
  #define READ_STDIN	0x04	/* read from stdin */
  #define READ_BUFFER	0x08	/* read from curbuf (converting stdin) */
  #define READ_DUMMY	0x10	/* reading into a dummy buffer */
