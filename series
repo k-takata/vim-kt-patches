@@ -42,4 +42,5 @@ embarcadero.patch
 enhance-printf-s.patch
 fix-version8.txt.patch
 read-fifo.patch
+fix-7.4.2152.patch
 fix-config_cache-removal.patch #+rejected
