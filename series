@@ -40,6 +40,6 @@ restore-unicode-chars.patch
 make-main-simpler.patch
 embarcadero.patch
 enhance-printf-s.patch
-fix-version8.txt.patch
+fix-typos.patch
 read-fifo.patch
 fix-config_cache-removal.patch #+rejected

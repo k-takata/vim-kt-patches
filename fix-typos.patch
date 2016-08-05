@@ -1,0 +1,53 @@
+# HG changeset patch
+# Parent  c5c2f8b77a8135060e4c15cd478e84eb2eb3e2b9
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -7188,7 +7188,7 @@ substitute({expr}, {pat}, {sub}, {flags}
+ 
+ 		A "~" in {sub} is not replaced with the previous {sub}.
+ 		Note that some codes in {sub} have a special meaning
+-		|sub-replace-special|.	For example, to replace something with
++		|sub-replace-special|.  For example, to replace something with
+ 		"\n" (two characters), use "\\\\n" or '\\n'.
+ 
+ 		When {pat} does not match in {expr}, {expr} is returned
+@@ -7209,9 +7209,9 @@ substitute({expr}, {pat}, {sub}, {flags}
+ 		optional argument.  Example: >
+ 		   :echo substitute(s, '%\(\x\x\)', SubNr, 'g')
+ <		The optional argument is a list which contains the whole
+-		matched string and up to nine submatches,like what
+-		|submatch()| returns. Example: >
+-		   :echo substitute(s, '\(\x\x\)', {m -> '0x' . m[1]}, 'g')
++		matched string and up to nine submatches, like what
++		|submatch()| returns.  Example: >
++		   :echo substitute(s, '%\(\x\x\)', {m -> '0x' . m[1]}, 'g')
+ 
+ synID({lnum}, {col}, {trans})				*synID()*
+ 		The result is a Number, which is the syntax ID at the position
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -128,9 +128,9 @@ The 'breakindent' option has been added 
+ changing the amount of indent.
+ 
+ 
+-Windows: Direct-X support ~
+-
+-This adds the 'renderoptions' option to allow for switching on Direct-X
++Windows: DirectX support ~
++
++This adds the 'renderoptions' option to allow for switching on DirectX
+ (DirectWrite) support on MS-Windows.
+ 
+ 
+@@ -8157,7 +8157,7 @@ Files:      src/regexp.c, src/regexp_nfa
+ 
+ Patch 7.4.1306
+ Problem:    Job control doesn't work well on MS-Windows.
+-Solution:   Various fixes. (Ken Takata, Ozaki Kiichi , Yukihiro Nakadaira,
++Solution:   Various fixes. (Ken Takata, Ozaki Kiichi, Yukihiro Nakadaira,
+             Yasuhiro Matsumoto)
+ Files:      src/Make_mvc.mak, src/eval.c, src/os_unix.c, src/os_win32.c,
+             src/proto/os_unix.pro, src/proto/os_win32.pro, src/structs.h
