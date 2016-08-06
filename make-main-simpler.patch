@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  5ebad7d753e6e1dca561c039b6ae5e99ff78b567
+# Parent  95303cbc1c89fafa193c1fdb9e2c12b607b67e2a
 
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -581,7 +581,6 @@ main
+@@ -402,7 +402,6 @@ main
      debug_break_level = params.use_debug_break_level;
  #endif
  
@@ -12,7 +12,7 @@ diff --git a/src/main.c b/src/main.c
      /*
       * Newer version of MzScheme (Racket) require earlier (trampolined)
       * initialisation via scheme_main_setup.
-@@ -594,35 +593,31 @@ main
+@@ -415,40 +414,36 @@ main
  	char *args[2];
  	args[0] = (char *)fname;
  	args[1] = (char *)&params;
@@ -33,22 +33,28 @@ diff --git a/src/main.c b/src/main.c
  vim_main2(int argc UNUSED, char **argv UNUSED)
  {
 -# ifndef NO_VIM_MAIN
--    char_u	*fname = (char_u *)argv[0];
++#ifdef NO_VIM_MAIN
++    return 0;
++#else
+     char_u	*fname = (char_u *)argv[0];
 -    mparm_T	params;
 -
 -    memcpy(&params, argv[1], sizeof(params));
 -# else
-+#ifdef NO_VIM_MAIN
-     return 0;
+-    return 0;
 -}
 -# endif
 -#endif
 -
 -#ifndef NO_VIM_MAIN
-+#else
-+    char_u	*fname = (char_u *)argv[0];
 +    mparm_T	*params = (mparm_T *)argv[1];
 +
+     /* Reset 'loadplugins' for "-u NONE" before "--cmd" arguments.
+      * Allows for setting 'loadplugins' there. */
+-    if (params.use_vimrc != NULL && STRCMP(params.use_vimrc, "NONE") == 0)
++    if (params->use_vimrc != NULL && STRCMP(params->use_vimrc, "NONE") == 0)
+ 	p_lpl = FALSE;
+ 
      /* Execute --cmd arguments. */
 -    exe_pre_commands(&params);
 +    exe_pre_commands(params);
@@ -59,7 +65,7 @@ diff --git a/src/main.c b/src/main.c
  
  #ifdef FEAT_EVAL
      /*
-@@ -645,12 +640,12 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -479,12 +474,12 @@ vim_main2(int argc UNUSED, char **argv U
  
  #ifdef FEAT_DIFF
      /* Decide about window layout for diff mode after reading vimrc. */
@@ -75,7 +81,7 @@ diff --git a/src/main.c b/src/main.c
      }
  #endif
  
-@@ -676,7 +671,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -510,7 +505,7 @@ vim_main2(int argc UNUSED, char **argv U
       * "-n" argument: Disable swap file by setting 'updatecount' to 0.
       * Note that this overrides anything from a vimrc file.
       */
@@ -84,7 +90,7 @@ diff --git a/src/main.c b/src/main.c
  	p_uc = 0;
  
  #ifdef FEAT_FKMAP
-@@ -705,7 +700,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -539,7 +534,7 @@ vim_main2(int argc UNUSED, char **argv U
  
  	/* When running "evim" or "gvim -y" we need the menus, exit if we
  	 * don't have them. */
@@ -93,7 +99,7 @@ diff --git a/src/main.c b/src/main.c
  	    mch_exit(1);
      }
  #endif
-@@ -732,11 +727,11 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -566,11 +561,11 @@ vim_main2(int argc UNUSED, char **argv U
       * "-q errorfile": Load the error file now.
       * If the error file can't be read, exit before doing anything else.
       */
@@ -108,7 +114,7 @@ diff --git a/src/main.c b/src/main.c
  	vim_snprintf((char *)IObuff, IOSIZE, "cfile %s", p_ef);
  	if (qf_init(NULL, p_ef, p_efm, TRUE, IObuff) < 0)
  	{
-@@ -796,7 +791,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -630,7 +625,7 @@ vim_main2(int argc UNUSED, char **argv U
  
  #ifdef FEAT_CLIENTSERVER
      /* Prepare for being a Vim server. */
@@ -117,7 +123,7 @@ diff --git a/src/main.c b/src/main.c
  #endif
  
      /*
-@@ -806,7 +801,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -640,7 +635,7 @@ vim_main2(int argc UNUSED, char **argv U
       * are the same terminal: "cat | vim -".
       * Using autocommands here may cause trouble...
       */
@@ -126,7 +132,7 @@ diff --git a/src/main.c b/src/main.c
  	read_stdin();
  
  #if defined(UNIX) || defined(VMS)
-@@ -865,7 +860,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -699,7 +694,7 @@ vim_main2(int argc UNUSED, char **argv U
      }
  
  #ifdef FEAT_CRYPT
@@ -135,7 +141,7 @@ diff --git a/src/main.c b/src/main.c
      {
  	crypt_check_current_method();
  	(void)crypt_get_key(TRUE, TRUE);
-@@ -879,7 +874,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -713,7 +708,7 @@ vim_main2(int argc UNUSED, char **argv U
       * Create the requested number of windows and edit buffers in them.
       * Also does recovery if "recoverymode" set.
       */
@@ -144,7 +150,7 @@ diff --git a/src/main.c b/src/main.c
      TIME_MSG("opening buffers");
  
  #ifdef FEAT_EVAL
-@@ -901,7 +896,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -735,7 +730,7 @@ vim_main2(int argc UNUSED, char **argv U
      /*
       * When started with "-q errorfile" jump to first error now.
       */
@@ -153,7 +159,7 @@ diff --git a/src/main.c b/src/main.c
      {
  	qf_jump(NULL, 0, 0, FALSE);
  	TIME_MSG("jump to first error");
-@@ -913,12 +908,12 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -747,12 +742,12 @@ vim_main2(int argc UNUSED, char **argv U
       * If opened more than one window, start editing files in the other
       * windows.
       */
@@ -168,7 +174,7 @@ diff --git a/src/main.c b/src/main.c
      {
  	win_T	*wp;
  
-@@ -937,13 +932,13 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -771,13 +766,13 @@ vim_main2(int argc UNUSED, char **argv U
       * Need to jump to the tag before executing the '-c command'.
       * Makes "vim -c '/return' -t main" work.
       */
@@ -184,7 +190,7 @@ diff --git a/src/main.c b/src/main.c
  	do_cmdline_cmd(IObuff);
  	TIME_MSG("jumping to tag");
  
-@@ -955,8 +950,8 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -789,8 +784,8 @@ vim_main2(int argc UNUSED, char **argv U
      }
  
      /* Execute any "+", "-c" and "-S" arguments. */
@@ -195,7 +201,7 @@ diff --git a/src/main.c b/src/main.c
  
      RedrawingDisabled = 0;
      redraw_all_later(NOT_VALID);
-@@ -1055,8 +1050,8 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -889,8 +884,8 @@ vim_main2(int argc UNUSED, char **argv U
      main_loop(FALSE, FALSE);
  
      return 0;
@@ -208,7 +214,7 @@ diff --git a/src/main.c b/src/main.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2404,10 +2404,8 @@ typedef struct stat stat_T;
+@@ -2448,10 +2448,8 @@ typedef enum
  #define JSON_JS		1   /* use JS instead of JSON */
  #define JSON_NO_NONE	2   /* v:none item not allowed */
  
