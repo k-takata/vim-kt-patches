@@ -18,7 +18,7 @@ diff --git a/src/main.c b/src/main.c
       */
      {
  	/* Pack up preprocessed command line arguments.
-@@ -415,40 +414,30 @@ main
+@@ -415,40 +414,36 @@ main
  	char *args[2];
  	args[0] = (char *)fname;
  	args[1] = (char *)&params;
@@ -30,16 +30,18 @@ diff --git a/src/main.c b/src/main.c
      }
  }
 -#endif
--#endif /* NO_VIM_MAIN */
--
--/* vim_main2() needs to be produced when FEAT_MZSCHEME is defined even when
-- * NO_VIM_MAIN is defined. */
+ #endif /* NO_VIM_MAIN */
+ 
+ /* vim_main2() needs to be produced when FEAT_MZSCHEME is defined even when
+  * NO_VIM_MAIN is defined. */
 -#ifdef FEAT_MZSCHEME
-+
      int
  vim_main2(int argc UNUSED, char **argv UNUSED)
  {
 -# ifndef NO_VIM_MAIN
++#ifdef NO_VIM_MAIN
++    return 0;
++#else
      char_u	*fname = (char_u *)argv[0];
 -    mparm_T	params;
 -
@@ -69,7 +71,7 @@ diff --git a/src/main.c b/src/main.c
  
  #ifdef FEAT_EVAL
      /*
-@@ -479,12 +468,12 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -479,12 +474,12 @@ vim_main2(int argc UNUSED, char **argv U
  
  #ifdef FEAT_DIFF
      /* Decide about window layout for diff mode after reading vimrc. */
@@ -85,7 +87,7 @@ diff --git a/src/main.c b/src/main.c
      }
  #endif
  
-@@ -510,7 +499,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -510,7 +505,7 @@ vim_main2(int argc UNUSED, char **argv U
       * "-n" argument: Disable swap file by setting 'updatecount' to 0.
       * Note that this overrides anything from a vimrc file.
       */
@@ -94,7 +96,7 @@ diff --git a/src/main.c b/src/main.c
  	p_uc = 0;
  
  #ifdef FEAT_FKMAP
-@@ -539,7 +528,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -539,7 +534,7 @@ vim_main2(int argc UNUSED, char **argv U
  
  	/* When running "evim" or "gvim -y" we need the menus, exit if we
  	 * don't have them. */
@@ -103,7 +105,7 @@ diff --git a/src/main.c b/src/main.c
  	    mch_exit(1);
      }
  #endif
-@@ -566,11 +555,11 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -566,11 +561,11 @@ vim_main2(int argc UNUSED, char **argv U
       * "-q errorfile": Load the error file now.
       * If the error file can't be read, exit before doing anything else.
       */
@@ -118,7 +120,7 @@ diff --git a/src/main.c b/src/main.c
  	vim_snprintf((char *)IObuff, IOSIZE, "cfile %s", p_ef);
  	if (qf_init(NULL, p_ef, p_efm, TRUE, IObuff) < 0)
  	{
-@@ -630,7 +619,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -630,7 +625,7 @@ vim_main2(int argc UNUSED, char **argv U
  
  #ifdef FEAT_CLIENTSERVER
      /* Prepare for being a Vim server. */
@@ -127,7 +129,7 @@ diff --git a/src/main.c b/src/main.c
  #endif
  
      /*
-@@ -640,7 +629,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -640,7 +635,7 @@ vim_main2(int argc UNUSED, char **argv U
       * are the same terminal: "cat | vim -".
       * Using autocommands here may cause trouble...
       */
@@ -136,7 +138,7 @@ diff --git a/src/main.c b/src/main.c
  	read_stdin();
  
  #if defined(UNIX) || defined(VMS)
-@@ -699,7 +688,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -699,7 +694,7 @@ vim_main2(int argc UNUSED, char **argv U
      }
  
  #ifdef FEAT_CRYPT
@@ -145,7 +147,7 @@ diff --git a/src/main.c b/src/main.c
      {
  	crypt_check_current_method();
  	(void)crypt_get_key(TRUE, TRUE);
-@@ -713,7 +702,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -713,7 +708,7 @@ vim_main2(int argc UNUSED, char **argv U
       * Create the requested number of windows and edit buffers in them.
       * Also does recovery if "recoverymode" set.
       */
@@ -154,7 +156,7 @@ diff --git a/src/main.c b/src/main.c
      TIME_MSG("opening buffers");
  
  #ifdef FEAT_EVAL
-@@ -735,7 +724,7 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -735,7 +730,7 @@ vim_main2(int argc UNUSED, char **argv U
      /*
       * When started with "-q errorfile" jump to first error now.
       */
@@ -163,7 +165,7 @@ diff --git a/src/main.c b/src/main.c
      {
  	qf_jump(NULL, 0, 0, FALSE);
  	TIME_MSG("jump to first error");
-@@ -747,12 +736,12 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -747,12 +742,12 @@ vim_main2(int argc UNUSED, char **argv U
       * If opened more than one window, start editing files in the other
       * windows.
       */
@@ -178,7 +180,7 @@ diff --git a/src/main.c b/src/main.c
      {
  	win_T	*wp;
  
-@@ -771,13 +760,13 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -771,13 +766,13 @@ vim_main2(int argc UNUSED, char **argv U
       * Need to jump to the tag before executing the '-c command'.
       * Makes "vim -c '/return' -t main" work.
       */
@@ -194,7 +196,7 @@ diff --git a/src/main.c b/src/main.c
  	do_cmdline_cmd(IObuff);
  	TIME_MSG("jumping to tag");
  
-@@ -789,8 +778,8 @@ vim_main2(int argc UNUSED, char **argv U
+@@ -789,8 +784,8 @@ vim_main2(int argc UNUSED, char **argv U
      }
  
      /* Execute any "+", "-c" and "-S" arguments. */
@@ -205,6 +207,16 @@ diff --git a/src/main.c b/src/main.c
  
      RedrawingDisabled = 0;
      redraw_all_later(NOT_VALID);
+@@ -889,8 +884,8 @@ vim_main2(int argc UNUSED, char **argv U
+     main_loop(FALSE, FALSE);
+ 
+     return 0;
++#endif /* NO_VIM_MAIN */
+ }
+-#endif /* NO_VIM_MAIN */
+ #endif /* PROTO */
+ 
+ /*
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
