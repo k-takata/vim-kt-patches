@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  95303cbc1c89fafa193c1fdb9e2c12b607b67e2a
+# Parent  4f65c02d7f61e666fb47f650fdcf53d7e2e994b1
 
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -402,7 +402,6 @@ main
+@@ -402,12 +402,11 @@ main
      debug_break_level = params.use_debug_break_level;
  #endif
  
@@ -12,6 +12,12 @@ diff --git a/src/main.c b/src/main.c
      /*
       * Newer version of MzScheme (Racket) require earlier (trampolined)
       * initialisation via scheme_main_setup.
+      * Implement this by initialising it as early as possible
+-     * and splitting off remaining Vim main into vim_main2
++     * and splitting off remaining Vim main into vim_main2.
+      */
+     {
+ 	/* Pack up preprocessed command line arguments.
 @@ -415,40 +414,36 @@ main
  	char *args[2];
  	args[0] = (char *)fname;
