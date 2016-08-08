@@ -291,7 +291,7 @@ diff --git a/src/testdir/test_startup_utf8.vim b/src/testdir/test_startup_utf8.v
 new file mode 100644
 --- /dev/null
 +++ b/src/testdir/test_startup_utf8.vim
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,64 @@
 +" Tests for startup using utf-8.
 +if !has('multi_byte')
 +  finish
@@ -300,10 +300,8 @@ new file mode 100644
 +source shared.vim
 +
 +func Test_read_stdin_utf8()
-+  " MS-Windows cannot handle Unicode characters in stdin.
-+  if has('win32')
-+    return
-+  endif
++  let linesin = ['テスト', '€ÀÈÌÒÙ']
++  call writefile(linesin, 'Xtestin')
 +  let before = [
 +	\ 'set enc=utf-8',
 +	\ 'set fencs=cp932,utf-8',
@@ -312,12 +310,19 @@ new file mode 100644
 +	\ 'write ++enc=utf-8 Xtestout',
 +	\ 'quit!',
 +	\ ]
-+  if RunVimPiped(before, after, '-', 'echo テスト€ÀÈÌÒÙ | ')
++  if has('win32')
++    let pipecmd = 'type Xtestin | '
++  else
++    let pipecmd = 'cat Xtestin | '
++  endif
++  if RunVimPiped(before, after, '-', pipecmd)
 +    let lines = readfile('Xtestout')
-+    " MS-Windows adds a space after the word
-+    call assert_equal(['テスト€ÀÈÌÒÙ'], split(lines[0]))
++    call assert_equal(linesin, lines)
++  else
++    call assert_equal('', 'RunVimPiped failed.')
 +  endif
 +  call delete('Xtestout')
++  call delete('Xtestin')
 +endfunc
 +
 +func Test_read_fifo_utf8()
@@ -332,6 +337,8 @@ new file mode 100644
 +  else
 +    return
 +  endif
++  let linesin = ['テスト', '€ÀÈÌÒÙ']
++  call writefile(linesin, 'Xtestin')
 +  let before = [
 +	\ 'set enc=utf-8',
 +	\ 'set fencs=cp932,utf-8',
@@ -340,13 +347,14 @@ new file mode 100644
 +	\ 'write ++enc=utf-8 Xtestout',
 +	\ 'quit!',
 +	\ ]
-+  if RunVim(before, after, '<(echo テスト€ÀÈÌÒÙ)')
++  if RunVim(before, after, '<(cat Xtestin)')
 +    let lines = readfile('Xtestout')
-+    call assert_equal(['テスト€ÀÈÌÒÙ'], lines)
++    call assert_equal(linesin, lines)
 +  else
 +    call assert_equal('', 'RunVim failed.')
 +  endif
 +  call delete('Xtestout')
++  call delete('Xtestin')
 +endfunc
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
