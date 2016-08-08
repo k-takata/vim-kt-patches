@@ -1,6 +1,17 @@
 # HG changeset patch
-# Parent  cc54db6e0d02246ac4ec02cfbe3edccbb6b47872
+# Parent  fe67d6106f686209c616b7dc937457c909b0ee31
 
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -2111,6 +2111,7 @@ test_arglist \
+ 	test_reltime \
+ 	test_ruby \
+ 	test_startup \
++	test_startup_utf8 \
+ 	test_searchpos \
+ 	test_set \
+ 	test_sort \
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
@@ -265,6 +276,90 @@ diff --git a/src/fileio.c b/src/fileio.c
  	{
  	    apply_autocmds_exarg(EVENT_BUFREADPOST, NULL, sfname,
  							  FALSE, curbuf, eap);
+diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
+--- a/src/testdir/Make_all.mak
++++ b/src/testdir/Make_all.mak
+@@ -185,6 +185,7 @@ NEW_TESTS = test_arglist.res \
+ 	    test_quickfix.res \
+ 	    test_ruby.res \
+ 	    test_startup.res \
++	    test_startup_utf8.res \
+ 	    test_stat.res \
+ 	    test_syntax.res \
+ 	    test_textobjects.res \
+diff --git a/src/testdir/shared.vim b/src/testdir/shared.vim
+--- a/src/testdir/shared.vim
++++ b/src/testdir/shared.vim
+@@ -130,7 +130,7 @@ endfunc
+ " Plugins are not loaded, unless 'loadplugins' is set in "before".
+ " Return 1 if Vim could be executed.
+ func RunVim(before, after, arguments)
+-  call RunVimPiped(a:before, a:after, a:arguments, '')
++  return RunVimPiped(a:before, a:after, a:arguments, '')
+ endfunc
+ 
+ func RunVimPiped(before, after, arguments, pipecmd)
+diff --git a/src/testdir/test_startup_utf8.vim b/src/testdir/test_startup_utf8.vim
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_startup_utf8.vim
+@@ -0,0 +1,56 @@
++" Tests for startup using utf-8.
++if !has('multi_byte')
++  finish
++endif
++
++source shared.vim
++
++func Test_read_stdin_utf8()
++  " MS-Windows cannot handle Unicode characters in stdin.
++  if has('win32')
++    return
++  endif
++  let before = [
++	\ 'set enc=utf-8',
++	\ 'set fencs=cp932,utf-8',
++	\ ]
++  let after = [
++	\ 'write ++enc=utf-8 Xtestout',
++	\ 'quit!',
++	\ ]
++  if RunVimPiped(before, after, '-', 'echo テスト€ÀÈÌÒÙ | ')
++    let lines = readfile('Xtestout')
++    " MS-Windows adds a space after the word
++    call assert_equal(['テスト€ÀÈÌÒÙ'], split(lines[0]))
++  endif
++  call delete('Xtestout')
++endfunc
++
++func Test_read_fifo_utf8()
++  if !has('unix')
++    return
++  endif
++  " Using bash/zsh's process substitution.
++  if executable('bash')
++    set shell=bash
++  elseif executable('zsh')
++    set shell=zsh
++  else
++    return
++  endif
++  let before = [
++	\ 'set enc=utf-8',
++	\ 'set fencs=cp932,utf-8',
++	\ ]
++  let after = [
++	\ 'write ++enc=utf-8 Xtestout',
++	\ 'quit!',
++	\ ]
++  if RunVim(before, after, '<(echo テスト€ÀÈÌÒÙ)')
++    let lines = readfile('Xtestout')
++    call assert_equal(['テスト€ÀÈÌÒÙ'], lines)
++  else
++    call assert_equal('', 'RunVim failed.')
++  endif
++  call delete('Xtestout')
++endfunc
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
