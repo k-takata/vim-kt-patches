@@ -42,4 +42,5 @@ enhance-printf-s.patch
 fix-typos.patch
 read-fifo.patch
 add-cmdencoding.patch
+vimrun-unicode.patch
 fix-config_cache-removal.patch #+rejected
