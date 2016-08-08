@@ -1,17 +1,17 @@
 # HG changeset patch
-# Parent  fe67d6106f686209c616b7dc937457c909b0ee31
+# Parent  f574310bd638067986318c3d8f0ecd77dae84748
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2111,6 +2111,7 @@ test_arglist \
- 	test_reltime \
- 	test_ruby \
+@@ -2114,6 +2114,7 @@ test_arglist \
+ 	test_signs \
+ 	test_sort \
  	test_startup \
 +	test_startup_utf8 \
- 	test_searchpos \
- 	test_set \
- 	test_sort \
+ 	test_stat \
+ 	test_statusline \
+ 	test_syn_attr \
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
@@ -280,25 +280,13 @@ diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
 @@ -185,6 +185,7 @@ NEW_TESTS = test_arglist.res \
- 	    test_quickfix.res \
  	    test_ruby.res \
+ 	    test_signs.res \
  	    test_startup.res \
 +	    test_startup_utf8.res \
  	    test_stat.res \
  	    test_syntax.res \
  	    test_textobjects.res \
-diff --git a/src/testdir/shared.vim b/src/testdir/shared.vim
---- a/src/testdir/shared.vim
-+++ b/src/testdir/shared.vim
-@@ -130,7 +130,7 @@ endfunc
- " Plugins are not loaded, unless 'loadplugins' is set in "before".
- " Return 1 if Vim could be executed.
- func RunVim(before, after, arguments)
--  call RunVimPiped(a:before, a:after, a:arguments, '')
-+  return RunVimPiped(a:before, a:after, a:arguments, '')
- endfunc
- 
- func RunVimPiped(before, after, arguments, pipecmd)
 diff --git a/src/testdir/test_startup_utf8.vim b/src/testdir/test_startup_utf8.vim
 new file mode 100644
 --- /dev/null
