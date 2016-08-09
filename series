@@ -39,7 +39,7 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
 enhance-printf-s.patch
-fix-typos.patch
+update-docs.patch
 read-fifo.patch
 add-cmdencoding.patch
 vimrun-unicode.patch

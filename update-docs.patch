@@ -1,10 +1,36 @@
 # HG changeset patch
-# Parent  c5c2f8b77a8135060e4c15cd478e84eb2eb3e2b9
+# Parent  bddf31cdc3f2d2104140043be1416990fef23640
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -7188,7 +7188,7 @@ substitute({expr}, {pat}, {sub}, {flags}
+@@ -140,10 +140,10 @@ You will not get an error if you try to 
+ 
+ 1.2 Function references ~
+ 					*Funcref* *E695* *E718*
+-A Funcref variable is obtained with the |function()| function or created with
+-the lambda expression |expr-lambda|.  It can be used in an expression in the
+-place of a function name, before the parenthesis around the arguments, to
+-invoke the function it refers to.  Example: >
++A Funcref variable is obtained with the |function()| function, the |funcref()|
++function or created with the lambda expression |expr-lambda|.  It can be used
++in an expression in the place of a function name, before the parenthesis
++around the arguments, to invoke the function it refers to.  Example: >
+ 
+ 	:let Fn = function("MyFunc")
+ 	:echo Fn()
+@@ -175,8 +175,8 @@ arguments: >
+ 								*Partial*
+ A Funcref optionally binds a Dictionary and/or arguments.  This is also called
+ a Partial.  This is created by passing the Dictionary and/or arguments to
+-function().  When calling the function the Dictionary and/or arguments will be
+-passed to the function.  Example: >
++function() or funcref().  When calling the function the Dictionary and/or
++arguments will be passed to the function.  Example: >
+ 
+ 	let Cb = function('Callback', ['foo'], myDict)
+ 	call Cb()
+@@ -7195,7 +7195,7 @@ substitute({expr}, {pat}, {sub}, {flags}
  
  		A "~" in {sub} is not replaced with the previous {sub}.
  		Note that some codes in {sub} have a special meaning
@@ -13,7 +39,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		"\n" (two characters), use "\\\\n" or '\\n'.
  
  		When {pat} does not match in {expr}, {expr} is returned
-@@ -7209,9 +7209,9 @@ substitute({expr}, {pat}, {sub}, {flags}
+@@ -7216,9 +7216,9 @@ substitute({expr}, {pat}, {sub}, {flags}
  		optional argument.  Example: >
  		   :echo substitute(s, '%\(\x\x\)', SubNr, 'g')
  <		The optional argument is a list which contains the whole
