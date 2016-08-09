@@ -40,7 +40,6 @@ restore-unicode-chars.patch
 embarcadero.patch
 enhance-printf-s.patch
 update-docs.patch
-read-fifo.patch
 add-cmdencoding.patch
 vimrun-unicode.patch
 fix-config_cache-removal.patch #+rejected
