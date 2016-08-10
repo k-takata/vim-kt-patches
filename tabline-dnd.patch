@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  7bea1e7e626163c886836db1f838da0324a126c6
+# Parent  5537e50173cf0443f342aaea8e86a604520868bf
 
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
-@@ -3489,6 +3489,33 @@ on_select_tab(
+@@ -3557,6 +3557,33 @@ on_select_tab(
  }
  
  /*
@@ -38,7 +38,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
   * Show or hide the tabline.
   */
      void
-@@ -3574,6 +3601,9 @@ gui_mch_update_tabline(void)
+@@ -3642,6 +3669,9 @@ gui_mch_update_tabline(void)
  		    page,
  		    event_box,
  		    nr++);
@@ -48,7 +48,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	}
  
  	event_box = gtk_notebook_get_tab_label(GTK_NOTEBOOK(gui.tabline), page);
-@@ -4007,14 +4037,19 @@ gui_mch_init(void)
+@@ -4081,14 +4111,19 @@ gui_mch_init(void)
  # endif
  	gtk_container_add(GTK_CONTAINER(event_box), label);
  	gtk_notebook_set_tab_label(GTK_NOTEBOOK(gui.tabline), page, event_box);
@@ -71,7 +71,15 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -8506,6 +8506,34 @@ initialise_tabline(void)
+@@ -257,6 +257,7 @@ typedef int FINDREPLACE;
+ typedef int HANDLE;
+ typedef int HBITMAP;
+ typedef int HBRUSH;
++typedef int HCURSOR;
+ typedef int HDROP;
+ typedef int INT;
+ typedef int LOGFONT[];
+@@ -8395,6 +8396,34 @@ initialise_tabline(void)
  # endif
  }
  
@@ -106,7 +114,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      static LRESULT CALLBACK
  tabline_wndproc(
      HWND hwnd,
-@@ -8513,7 +8541,73 @@ tabline_wndproc(
+@@ -8402,7 +8431,73 @@ tabline_wndproc(
      WPARAM wParam,
      LPARAM lParam)
  {
