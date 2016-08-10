@@ -1,0 +1,46 @@
+# HG changeset patch
+# Parent  20b84236d788862e9e492c307b105779fb1f8994
+
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -416,6 +416,7 @@ main
+ #endif
+ }
+ #endif /* NO_VIM_MAIN */
++#endif /* PROTO */
+ 
+ /*
+  * vim_main2() is needed for FEAT_MZSCHEME, but we define it always to keep
+@@ -879,7 +880,6 @@ vim_main2(void)
+ 
+     return 0;
+ }
+-#endif /* PROTO */
+ 
+ /*
+  * Initialisation shared by main() and some tests.
+diff --git a/src/proto/main.pro b/src/proto/main.pro
+--- a/src/proto/main.pro
++++ b/src/proto/main.pro
+@@ -1,5 +1,6 @@
+ /* main.c */
+-void common_init(mparm_T *params);
++int vim_main2(void);
++void common_init(mparm_T *paramp);
+ void main_loop(int cmdwin, int noexmode);
+ void getout_preserve_modified(int exitval);
+ void getout(int exitval);
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -2449,9 +2449,6 @@ typedef enum
+ #define JSON_JS		1   /* use JS instead of JSON */
+ #define JSON_NO_NONE	2   /* v:none item not allowed */
+ 
+-/* This is in main.c, cproto can't handle it. */
+-int vim_main2(void);
+-
+ /* Used for flags of do_in_path() */
+ #define DIP_ALL	    0x01	/* all matches, not just the first one */
+ #define DIP_DIR	    0x02	/* find directories instead of files. */

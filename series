@@ -42,4 +42,5 @@ enhance-printf-s.patch
 update-docs.patch
 add-cmdencoding.patch
 vimrun-unicode.patch
+cproto-vim_main2.patch
 fix-config_cache-removal.patch #+rejected
