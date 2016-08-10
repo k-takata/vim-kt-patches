@@ -41,7 +41,6 @@ embarcadero.patch
 enhance-printf-s.patch
 update-docs.patch
 add-cmdencoding.patch
-vimrun-unicode.patch
 cproto-vim_main2.patch
 cproto-on-cygwin.patch
 fix-config_cache-removal.patch #+rejected
