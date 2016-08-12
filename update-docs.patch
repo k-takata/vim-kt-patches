@@ -112,6 +112,15 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  synID({lnum}, {col}, {trans})				*synID()*
  		The result is a Number, which is the syntax ID at the position
+@@ -8206,7 +8206,7 @@ dialog_con		Compiled with console dialog
+ dialog_gui		Compiled with GUI dialog support.
+ diff			Compiled with |vimdiff| and 'diff' support.
+ digraphs		Compiled with support for digraphs.
+-directx			Compiled with support for Direct-X and 'renderoptions'.
++directx			Compiled with support for DirectX and 'renderoptions'.
+ dnd			Compiled with support for the "~ register |quote_~|.
+ ebcdic			Compiled on a machine with ebcdic character set.
+ emacs_tags		Compiled with support for Emacs tags.
 diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
 --- a/runtime/doc/version8.txt
 +++ b/runtime/doc/version8.txt
@@ -128,6 +137,15 @@ diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
  (DirectWrite) support on MS-Windows.
  
  
+@@ -2694,7 +2694,7 @@ Patch 7.4.393
+ Problem:    Text drawing on newer MS-Windows systems is suboptimal.  Some
+ 	    multi-byte characters are not displayed, even though the same font
+ 	    in Notepad can display them. (Srinath Avadhanula)
+-Solution:   Add the 'renderoptions' option to enable Direct-X drawing. (Taro
++Solution:   Add the 'renderoptions' option to enable DirectX drawing. (Taro
+ 	    Muraoka)
+ Files:	    runtime/doc/eval.txt, runtime/doc/options.txt,
+ 	    runtime/doc/various.txt, src/Make_cyg.mak, src/Make_ming.mak,
 @@ -8167,7 +8167,7 @@ Files:      src/regexp.c, src/regexp_nfa
  
  Patch 7.4.1306
