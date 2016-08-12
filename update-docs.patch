@@ -90,15 +90,6 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Create or replace or add to the location list for window {nr}.
  		{nr} can be the window number or the window ID.
  		When {nr} is zero the current window is used.
-@@ -7324,7 +7324,7 @@ substitute({expr}, {pat}, {sub}, {flags}
- 
- 		A "~" in {sub} is not replaced with the previous {sub}.
- 		Note that some codes in {sub} have a special meaning
--		|sub-replace-special|.	For example, to replace something with
-+		|sub-replace-special|.  For example, to replace something with
- 		"\n" (two characters), use "\\\\n" or '\\n'.
- 
- 		When {pat} does not match in {expr}, {expr} is returned
 @@ -7345,9 +7345,9 @@ substitute({expr}, {pat}, {sub}, {flags}
  		optional argument.  Example: >
  		   :echo substitute(s, '%\(\x\x\)', SubNr, 'g')
