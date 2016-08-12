@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  bddf31cdc3f2d2104140043be1416990fef23640
+# Parent  7ded37238c04ccd94bc19c5bb7e53ec20816617e
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -30,7 +30,67 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  	let Cb = function('Callback', ['foo'], myDict)
  	call Cb()
-@@ -7195,7 +7195,7 @@ substitute({expr}, {pat}, {sub}, {flags}
+@@ -2081,7 +2081,7 @@ garbagecollect([{atexit}])	none	free mem
+ get({list}, {idx} [, {def}])	any	get item {idx} from {list} or {def}
+ get({dict}, {key} [, {def}])	any	get item {key} from {dict} or {def}
+ get({func}, {what})		any	get property of funcref/partial {func}
+-getbufinfo( [{expr}])		List  	information about buffers
++getbufinfo([{expr}])		List  	information about buffers
+ getbufline({expr}, {lnum} [, {end}])
+ 				List	lines {lnum} to {end} of buffer {expr}
+ getbufvar({expr}, {varname} [, {def}])
+@@ -2111,12 +2111,12 @@ getqflist([{what}])		List	list of quickf
+ getreg([{regname} [, 1 [, {list}]]])
+ 				String or List   contents of register
+ getregtype([{regname}])		String	type of register
+-gettabinfo( [{expr}])		List  	list of tab pages
++gettabinfo([{expr}])		List  	list of tab pages
+ gettabvar({nr}, {varname} [, {def}])
+ 				any	variable {varname} in tab {nr} or {def}
+ gettabwinvar({tabnr}, {winnr}, {name} [, {def}])
+ 				any	{name} in {winnr} in tab page {tabnr}
+-getwininfo( [{winid}])		List  	list of windows
++getwininfo([{winid}])		List  	list of windows
+ getwinposx()			Number	X coord in pixels of GUI Vim window
+ getwinposy()			Number	Y coord in pixels of GUI Vim window
+ getwinvar({nr}, {varname} [, {def}])
+@@ -3982,7 +3982,7 @@ get({func}, {what})
+ 							*getbufinfo()*
+ getbufinfo([{expr}])
+ getbufinfo([{dict}])
+-		Get information aobut buffers as a List of Dictionaries.
++		Get information about buffers as a List of Dictionaries.
+ 
+ 		Without an argument information about all the buffers is
+ 		returned.
+@@ -4370,7 +4370,7 @@ getline({lnum} [, {end}])
+ 
+ <		To get lines from another buffer see |getbufline()|
+ 
+-getloclist({nr},[, {what}])				*getloclist()*
++getloclist({nr}[, {what}])				*getloclist()*
+ 		Returns a list with all the entries in the location list for
+ 		window {nr}.  {nr} can be the window number or the window ID.
+ 		When {nr} is zero the current window is used.
+@@ -4635,7 +4635,7 @@ glob2regpat({expr})					 *glob2regpat()*
+ <		When {expr} is an empty string the result is "^$", match an
+ 		empty string.
+ 		Note that the result depends on the system.  On MS-Windows
+-		a backslash usually means a patch separator.
++		a backslash usually means a path separator.
+ 
+ 								*globpath()*
+ globpath({path}, {expr} [, {nosuf} [, {list} [, {alllinks}]]])
+@@ -6655,7 +6655,7 @@ setline({lnum}, {text})					*setline()*
+ 			:endfor
+ <		Note: The '[ and '] marks are not set.
+ 
+-setloclist({nr}, {list} [, {action}[, {what}])		*setloclist()*
++setloclist({nr}, {list} [, {action}[, {what}]])		*setloclist()*
+ 		Create or replace or add to the location list for window {nr}.
+ 		{nr} can be the window number or the window ID.
+ 		When {nr} is zero the current window is used.
+@@ -7324,7 +7324,7 @@ substitute({expr}, {pat}, {sub}, {flags}
  
  		A "~" in {sub} is not replaced with the previous {sub}.
  		Note that some codes in {sub} have a special meaning
@@ -39,7 +99,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		"\n" (two characters), use "\\\\n" or '\\n'.
  
  		When {pat} does not match in {expr}, {expr} is returned
-@@ -7216,9 +7216,9 @@ substitute({expr}, {pat}, {sub}, {flags}
+@@ -7345,9 +7345,9 @@ substitute({expr}, {pat}, {sub}, {flags}
  		optional argument.  Example: >
  		   :echo substitute(s, '%\(\x\x\)', SubNr, 'g')
  <		The optional argument is a list which contains the whole
@@ -68,7 +128,7 @@ diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
  (DirectWrite) support on MS-Windows.
  
  
-@@ -8157,7 +8157,7 @@ Files:      src/regexp.c, src/regexp_nfa
+@@ -8167,7 +8167,7 @@ Files:      src/regexp.c, src/regexp_nfa
  
  Patch 7.4.1306
  Problem:    Job control doesn't work well on MS-Windows.
@@ -77,3 +137,41 @@ diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
              Yasuhiro Matsumoto)
  Files:      src/Make_mvc.mak, src/eval.c, src/os_unix.c, src/os_win32.c,
              src/proto/os_unix.pro, src/proto/os_win32.pro, src/structs.h
+@@ -12641,8 +12641,8 @@ Files:      src/fileio.c, src/window.c, 
+             src/testdir/test_autocmd.vim, runtime/doc/autocmd.txt
+ 
+ Patch 7.4.2078
+-Problem:    Running checks in po diretory fails.
+-Solution:   Add colors used in syntax.c to the builtiin color table.
++Problem:    Running checks in po directory fails.
++Solution:   Add colors used in syntax.c to the builtin color table.
+ Files:      src/term.c
+ 
+ Patch 7.4.2079
+@@ -12782,7 +12782,7 @@ Files:      src/search.c, src/testdir/Ma
+             src/testdir/test_gn.vim
+ 
+ Patch 7.4.2101
+-Problem:    Looping over windows, buffers and tab pages is inconsistant.
++Problem:    Looping over windows, buffers and tab pages is inconsistent.
+ Solution:   Use FOR_ALL_ macros everywhere. (Yegappan Lakshmanan)
+ Files:      src/buffer.c, src/diff.c, src/edit.c, src/eval.c, src/evalfunc.c,
+             src/ex_cmds.c, src/ex_cmds2.c, src/ex_docmd.c, src/fileio.c,
+@@ -12919,7 +12919,7 @@ Files:      src/evalfunc.c, src/version.
+ 
+ Patch 7.4.2122 (after 7.4.2118)
+ Problem:    Mac: don't get +clipboard in huge build.
+-Solution:   Move #define down below including featureh.h
++Solution:   Move #define down below including feature.h
+ Files:      src/vim.h
+ 
+ Patch 7.4.2123
+@@ -13044,7 +13044,7 @@ Files:      src/userfunc.c, src/proto/us
+             src/testdir/test_lambda.vim
+ 
+ Patch 7.4.2144
+-Problem:    On MS-Windows quickix does not handle a line with 1023 bytes
++Problem:    On MS-Windows quickfix does not handle a line with 1023 bytes
+             ending in CR-LF properly.
+ Solution:   Don't consider CR a line break. (Ken Takata)
+ Files:      src/quickfix.c
