@@ -39,7 +39,5 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
 enhance-printf-s.patch
-update-docs.patch
-doc-tab-to-spaces.patch
 add-cmdencoding.patch
 fix-config_cache-removal.patch #+rejected
