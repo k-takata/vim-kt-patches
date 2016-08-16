@@ -38,6 +38,5 @@ matchit-respect-matchpairs.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
-enhance-printf-s.patch
 add-cmdencoding.patch
 fix-config_cache-removal.patch #+rejected
