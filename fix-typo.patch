@@ -1,0 +1,27 @@
+# HG changeset patch
+# Parent  86546abc60043a9bbaba38dc1f01d73013bd0d4b
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -3116,7 +3116,7 @@ ch_setoptions({handle}, {options})			*ch
+ 		lost.
+ 
+ 		These options cannot be changed:
+-			"waittime"	only applies to "ch_open()|
++			"waittime"	only applies to |ch_open()|
+ 
+ ch_status({handle})						*ch_status()*
+ 		Return the status of {handle}:
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -14155,7 +14155,7 @@ Files:      src/gui_gtk_x11.c
+ Patch 7.4.2215
+ Problem:    It's not easy to find out if a window is a quickfix or location
+             list window.
+-Solution:   Add "loclist" and "quickfix" entries to the dict returnec by
++Solution:   Add "loclist" and "quickfix" entries to the dict returned by
+             getwininfo(). (Yegappan Lakshmanan)
+ Files:      runtime/doc/eval.txt, src/evalfunc.c,
+             src/testdir/test_bufwintabinfo.vim
