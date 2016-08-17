@@ -1,0 +1,20 @@
+# HG changeset patch
+# Parent  4b9116734e30ebc49a24b2e972c86df402d39499
+
+diff --git a/src/buffer.c b/src/buffer.c
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -216,9 +216,13 @@ open_buffer(
+ 	if (perm >= 0 && (0
+ # ifdef S_ISFIFO
+ 		      || S_ISFIFO(perm)
++# elif defined(S_IFIFO)
++		      || ((perm & S_IFMT) == S_IFIFO)
+ # endif
+ # ifdef S_ISSOCK
+ 		      || S_ISSOCK(perm)
++# elif defined(S_IFSOCK)
++		      || ((perm & S_IFMT) == S_IFSOCK)
+ # endif
+ 		    ))
+ 		read_fifo = TRUE;

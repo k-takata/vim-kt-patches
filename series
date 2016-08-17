@@ -43,4 +43,5 @@ fix-typo.patch
 remove-duplicated-patchlist.patch
 binary-number.patch
 update-teraterm.patch
+s_ififo.patch
 fix-config_cache-removal.patch #+rejected
