@@ -38,5 +38,4 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
 add-cmdencoding.patch
-fix-syntax-doc.patch
 fix-config_cache-removal.patch #+rejected
