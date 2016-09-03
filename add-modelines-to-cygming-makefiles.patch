@@ -1,0 +1,30 @@
+# HG changeset patch
+# Parent  0fb58bb166dd9506eb4d21bf27227faaf9647862
+
+diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
+--- a/src/Make_cyg.mak
++++ b/src/Make_cyg.mak
+@@ -50,3 +50,5 @@ CROSS_COMPILE = i686-pc-mingw32-
+ # Do not change this.
+ UNDER_CYGWIN = yes
+ include Make_cyg_ming.mak
++
++# vim: set noet sw=8 ts=8 sts=0 wm=0 tw=0:
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -953,3 +953,5 @@ else
+ 	@echo char_u *compiled_user = (char_u *)"$(USERNAME)"; >> pathdef.c
+ 	@echo char_u *compiled_sys = (char_u *)"$(USERDOMAIN)"; >> pathdef.c
+ endif
++
++# vim: set noet sw=8 ts=8 sts=0 wm=0 tw=0:
+diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+--- a/src/Make_ming.mak
++++ b/src/Make_ming.mak
+@@ -47,3 +47,5 @@
+ # Do not change this.
+ UNDER_CYGWIN = no
+ include Make_cyg_ming.mak
++
++# vim: set noet sw=8 ts=8 sts=0 wm=0 tw=0:

@@ -1,35 +1,35 @@
 # HG changeset patch
-# Parent  a6c34938a640cfc5ac73e4dae205650d6418d85a
+# Parent  7207a8e1950456ff5b99b933db198be7eb14fa77
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -335,9 +335,12 @@
+@@ -409,9 +409,12 @@ ifeq (19, $(word 1,$(sort 19 $(RUBY_VER)
  RUBY_19_OR_LATER = 1
  endif
  
 +ifdef RUBY_19_OR_LATER
-+RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_VER_LONG)/$(RUBY_PLATFORM)
++RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
 +# For using header files from Ruby's source code directory (w/o installing)
 +RUBYINC += -I $(RUBY)/include -I $(RUBY)/.ext/include/$(RUBY_PLATFORM)
 +else
- RUBYINC = -I $(RUBY)/lib/ruby/$(RUBY_VER_LONG)/$(RUBY_PLATFORM)
+ RUBYINC = -I $(RUBY)/lib/ruby/$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
 -ifdef RUBY_19_OR_LATER
--RUBYINC += -I $(RUBY)/include/ruby-$(RUBY_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_VER_LONG)/$(RUBY_PLATFORM)
+-RUBYINC += -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
  endif
  ifeq (no, $(DYNAMIC_RUBY))
  RUBYLIB = -L$(RUBY)/lib -l$(RUBY_INSTALL_NAME)
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -913,7 +913,9 @@
+@@ -969,7 +969,9 @@ RUBY_INSTALL_NAME = mswin32-ruby$(RUBY_A
  CFLAGS = $(CFLAGS) -DFEAT_RUBY
  RUBY_OBJ = $(OUTDIR)\if_ruby.obj
  !if $(RUBY_VER) >= 19
--RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_VER_LONG)\$(RUBY_PLATFORM)" /I "$(RUBY)\include\ruby-$(RUBY_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_VER_LONG)\$(RUBY_PLATFORM)"
-+RUBY_INC = /I "$(RUBY)\include\ruby-$(RUBY_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_VER_LONG)\$(RUBY_PLATFORM)"
+-RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
++RUBY_INC = /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
 +# For using header files from Ruby's source code directory (w/o installing)
 +RUBY_INC = $(RUBY_INC) /I "$(RUBY)\include" /I "$(RUBY)\.ext\include\$(RUBY_PLATFORM)"
  !else
- RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_VER_LONG)\$(RUBY_PLATFORM)"
+ RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
  !endif

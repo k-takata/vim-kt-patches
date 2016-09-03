@@ -29,6 +29,8 @@ bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
 make-tests-silent.patch
+rename-to-RUBY_API_VER_LONG.patch
+add-modelines-to-cygming-makefiles.patch
 update-rubyinc-dir.patch
 fix-po-msys2.patch
 fix-char_u-usage.patch
