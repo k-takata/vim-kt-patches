@@ -38,6 +38,6 @@ drop-support-for-win9x.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
-add-cmdencoding.patch
+add-makeencoding.patch
 doc-add-if-versions.patch
 fix-config_cache-removal.patch #+rejected
