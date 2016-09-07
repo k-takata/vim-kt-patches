@@ -232,17 +232,7 @@ diff --git a/src/option.c b/src/option.c
  #define PV_MA		OPT_BUF(BV_MA)
  #define PV_ML		OPT_BUF(BV_ML)
  #define PV_MOD		OPT_BUF(BV_MOD)
-@@ -318,6 +327,9 @@ static char_u	*p_flp;
- #ifdef FEAT_AUTOCMD
- static char_u	*p_ft;
- #endif
-+#ifdef FEAT_MBYTE
-+static char_u	*p_genc;
-+#endif
- static long	p_iminsert;
- static long	p_imsearch;
- #if defined(FEAT_FIND_ID) && defined(FEAT_EVAL)
-@@ -1081,6 +1093,15 @@ static struct vimoption options[] =
+@@ -1081,6 +1090,15 @@ static struct vimoption options[] =
      {"errorbells",  "eb",   P_BOOL|P_VI_DEF,
  			    (char_u *)&p_eb, PV_NONE,
  			    {(char_u *)FALSE, (char_u *)0L} SCRIPTID_INIT},
@@ -258,7 +248,7 @@ diff --git a/src/option.c b/src/option.c
      {"errorfile",   "ef",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_ef, PV_NONE,
-@@ -1282,6 +1303,15 @@ static struct vimoption options[] =
+@@ -1282,6 +1300,15 @@ static struct vimoption options[] =
  			    {(char_u *)NULL, (char_u *)0L}
  #endif
  			    SCRIPTID_INIT},
@@ -274,7 +264,7 @@ diff --git a/src/option.c b/src/option.c
      {"grepprg",	    "gp",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_gp, PV_GP,
-@@ -1798,6 +1828,15 @@ static struct vimoption options[] =
+@@ -1798,6 +1825,15 @@ static struct vimoption options[] =
  			    {(char_u *)NULL, (char_u *)0L}
  #endif
  			    SCRIPTID_INIT},
@@ -290,7 +280,7 @@ diff --git a/src/option.c b/src/option.c
      {"makeprg",	    "mp",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_mp, PV_MP,
-@@ -5556,6 +5595,11 @@ check_buf_options(buf_T *buf)
+@@ -5556,6 +5592,11 @@ check_buf_options(buf_T *buf)
      check_string_option(&buf->b_p_lw);
  #endif
      check_string_option(&buf->b_p_bkc);
@@ -302,7 +292,7 @@ diff --git a/src/option.c b/src/option.c
  }
  
  /*
-@@ -6132,7 +6176,8 @@ did_set_string_option(
+@@ -6132,7 +6173,8 @@ did_set_string_option(
  
  #ifdef FEAT_MBYTE
      /* 'encoding' and 'fileencoding' */
@@ -312,7 +302,7 @@ diff --git a/src/option.c b/src/option.c
      {
  	if (gvarp == &p_fenc)
  	{
-@@ -10186,6 +10231,17 @@ unset_global_local_option(char_u *name, 
+@@ -10186,6 +10228,17 @@ unset_global_local_option(char_u *name, 
  	    clear_string_option(&buf->b_p_lw);
  	    break;
  #endif
@@ -330,7 +320,7 @@ diff --git a/src/option.c b/src/option.c
      }
  }
  
-@@ -10238,6 +10294,11 @@ get_varp_scope(struct vimoption *p, int 
+@@ -10238,6 +10291,11 @@ get_varp_scope(struct vimoption *p, int 
  	    case PV_LW:   return (char_u *)&(curbuf->b_p_lw);
  #endif
  	    case PV_BKC:  return (char_u *)&(curbuf->b_p_bkc);
@@ -342,7 +332,7 @@ diff --git a/src/option.c b/src/option.c
  	}
  	return NULL; /* "cannot happen" */
      }
-@@ -10311,6 +10372,14 @@ get_varp(struct vimoption *p)
+@@ -10311,6 +10369,14 @@ get_varp(struct vimoption *p)
  	case PV_LW:	return *curbuf->b_p_lw != NUL
  				    ? (char_u *)&(curbuf->b_p_lw) : p->var;
  #endif
@@ -357,7 +347,7 @@ diff --git a/src/option.c b/src/option.c
  
  #ifdef FEAT_ARABIC
  	case PV_ARAB:	return (char_u *)&(curwin->w_p_arab);
-@@ -10899,6 +10968,11 @@ buf_copy_options(buf_T *buf, int flags)
+@@ -10899,6 +10965,11 @@ buf_copy_options(buf_T *buf, int flags)
  #ifdef FEAT_LISP
  	    buf->b_p_lw = empty_option;
  #endif
@@ -382,7 +372,17 @@ diff --git a/src/option.h b/src/option.h
  EXTERN int	p_eb;		/* 'errorbells' */
  #ifdef FEAT_QUICKFIX
  EXTERN char_u	*p_ef;		/* 'errorfile' */
-@@ -630,6 +633,9 @@ EXTERN char_u	*p_luadll;	/* 'luadll' */
+@@ -509,6 +512,9 @@ EXTERN char_u	*p_fp;		/* 'formatprg' */
+ EXTERN int	p_fs;		/* 'fsync' */
+ #endif
+ EXTERN int	p_gd;		/* 'gdefault' */
++#ifdef FEAT_MBYTE
++EXTERN char_u	*p_genc;	/* 'grepencoding' */
++#endif
+ #ifdef FEAT_PRINTER
+ EXTERN char_u	*p_pdev;	/* 'printdevice' */
+ # ifdef FEAT_POSTSCRIPT
+@@ -630,6 +636,9 @@ EXTERN char_u	*p_luadll;	/* 'luadll' */
  EXTERN int	p_macatsui;	/* 'macatsui' */
  #endif
  EXTERN int	p_magic;	/* 'magic' */
@@ -392,7 +392,7 @@ diff --git a/src/option.h b/src/option.h
  #ifdef FEAT_QUICKFIX
  EXTERN char_u	*p_mef;		/* 'makeef' */
  EXTERN char_u	*p_mp;		/* 'makeprg' */
-@@ -1024,6 +1030,9 @@ enum
+@@ -1024,6 +1033,9 @@ enum
      , BV_DEF
      , BV_INC
  #endif
@@ -402,7 +402,7 @@ diff --git a/src/option.h b/src/option.h
      , BV_EOL
      , BV_FIXEOL
      , BV_EP
-@@ -1039,6 +1048,9 @@ enum
+@@ -1039,6 +1051,9 @@ enum
  #ifdef FEAT_AUTOCMD
      , BV_FT
  #endif
@@ -412,7 +412,7 @@ diff --git a/src/option.h b/src/option.h
      , BV_IMI
      , BV_IMS
  #if defined(FEAT_CINDENT) && defined(FEAT_EVAL)
-@@ -1061,6 +1073,9 @@ enum
+@@ -1061,6 +1076,9 @@ enum
      , BV_LISP
      , BV_LW
  #endif
@@ -551,23 +551,25 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      unsigned	len;
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
-@@ -3453,6 +3492,15 @@ ex_make(exarg_T *eap)
+@@ -3453,6 +3492,17 @@ ex_make(exarg_T *eap)
  # endif
      }
  #endif
 +#ifdef FEAT_MBYTE
-+    enc = curbuf->b_p_menc;
++    enc = *curbuf->b_p_menc == NUL ? p_menc : curbuf->b_p_menc;
 +    if ((eap->cmdidx != CMD_make) && (eap->cmdidx != CMD_lmake))
 +    {
 +	/* Use 'genc' for grep commands if it is set. */
 +	if (*curbuf->b_p_genc != NUL)
 +	    enc = curbuf->b_p_genc;
++	else if (*p_genc != NUL)
++	    enc = p_genc;
 +    }
 +#endif
  
      if (eap->cmdidx == CMD_lmake || eap->cmdidx == CMD_lgrep
  	|| eap->cmdidx == CMD_lgrepadd)
-@@ -3500,7 +3548,7 @@ ex_make(exarg_T *eap)
+@@ -3500,7 +3550,7 @@ ex_make(exarg_T *eap)
  			    && eap->cmdidx != CMD_lmake) ? p_gefm : p_efm,
  					   (eap->cmdidx != CMD_grepadd
  					    && eap->cmdidx != CMD_lgrepadd),
@@ -576,7 +578,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      if (wp != NULL)
  	qi = GET_LOC_LIST(wp);
  #ifdef FEAT_AUTOCMD
-@@ -3839,6 +3887,7 @@ ex_cnext(exarg_T *eap)
+@@ -3839,6 +3889,7 @@ ex_cnext(exarg_T *eap)
      void
  ex_cfile(exarg_T *eap)
  {
@@ -584,19 +586,21 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
  #ifdef FEAT_AUTOCMD
-@@ -3863,6 +3912,11 @@ ex_cfile(exarg_T *eap)
+@@ -3863,6 +3914,13 @@ ex_cfile(exarg_T *eap)
      if (au_name != NULL)
  	apply_autocmds(EVENT_QUICKFIXCMDPRE, au_name, NULL, FALSE, curbuf);
  #endif
 +#ifdef FEAT_MBYTE
-+    enc = curbuf->b_p_menc;
++    enc = *curbuf->b_p_menc == NUL ? p_menc : curbuf->b_p_menc;
 +    if (*curbuf->b_p_eenc != NUL) /* Use 'eenc' if it is set. */
 +	enc = curbuf->b_p_eenc;
++    else if (*p_eenc != NUL)
++	enc = p_eenc;
 +#endif
  #ifdef FEAT_BROWSE
      if (cmdmod.browse)
      {
-@@ -3890,7 +3944,7 @@ ex_cfile(exarg_T *eap)
+@@ -3890,7 +3948,7 @@ ex_cfile(exarg_T *eap)
       */
      if (qf_init(wp, p_ef, p_efm, (eap->cmdidx != CMD_caddfile
  				  && eap->cmdidx != CMD_laddfile),
@@ -605,7 +609,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  				  && (eap->cmdidx == CMD_cfile
  					     || eap->cmdidx == CMD_lfile))
      {
-@@ -4912,7 +4966,7 @@ ex_cbuffer(exarg_T *eap)
+@@ -4912,7 +4970,7 @@ ex_cbuffer(exarg_T *eap)
  			    (eap->cmdidx != CMD_caddbuffer
  			     && eap->cmdidx != CMD_laddbuffer),
  						   eap->line1, eap->line2,
@@ -614,7 +618,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  	    {
  #ifdef FEAT_AUTOCMD
  		if (au_name != NULL)
-@@ -4981,7 +5035,8 @@ ex_cexpr(exarg_T *eap)
+@@ -4981,7 +5039,8 @@ ex_cexpr(exarg_T *eap)
  	    if (qf_init_ext(qi, NULL, NULL, tv, p_efm,
  			    (eap->cmdidx != CMD_caddexpr
  			     && eap->cmdidx != CMD_laddexpr),
