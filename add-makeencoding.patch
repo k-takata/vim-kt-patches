@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  5db21dbb2b60f5aaa5801070fe701c3c5639859e
+# Parent  35939ec273c1c3c8e010326023cfadcb27b2d66c
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
@@ -179,16 +179,15 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -556,11 +556,18 @@ vim_main2(void)
+@@ -556,11 +556,17 @@ vim_main2(void)
       */
      if (params.edit_type == EDIT_QF)
      {
 +	char_u	*enc = NULL;
 +
 +# ifdef FEAT_MBYTE
-+	enc = p_menc;
-+	if (p_eenc != NULL && *p_eenc != NUL)
-+	    enc = p_eenc;
++	/* Use 'eenc' if it is set. Otherwise use 'menc'. */
++	enc = (*p_eenc != NUL) ? p_eenc : p_menc;
 +# endif
  	if (params.use_ef != NULL)
  	    set_string_option_direct((char_u *)"ef", -1,
@@ -551,12 +550,11 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      unsigned	len;
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
-@@ -3453,6 +3492,17 @@ ex_make(exarg_T *eap)
+@@ -3453,6 +3492,18 @@ ex_make(exarg_T *eap)
  # endif
      }
  #endif
 +#ifdef FEAT_MBYTE
-+    enc = *curbuf->b_p_menc == NUL ? p_menc : curbuf->b_p_menc;
 +    if ((eap->cmdidx != CMD_make) && (eap->cmdidx != CMD_lmake))
 +    {
 +	/* Use 'genc' for grep commands if it is set. */
@@ -565,11 +563,13 @@ diff --git a/src/quickfix.c b/src/quickfix.c
 +	else if (*p_genc != NUL)
 +	    enc = p_genc;
 +    }
++    if (enc == NULL)
++	enc = (*curbuf->b_p_menc != NUL) ? curbuf->b_p_menc : p_menc;
 +#endif
  
      if (eap->cmdidx == CMD_lmake || eap->cmdidx == CMD_lgrep
  	|| eap->cmdidx == CMD_lgrepadd)
-@@ -3500,7 +3550,7 @@ ex_make(exarg_T *eap)
+@@ -3500,7 +3551,7 @@ ex_make(exarg_T *eap)
  			    && eap->cmdidx != CMD_lmake) ? p_gefm : p_efm,
  					   (eap->cmdidx != CMD_grepadd
  					    && eap->cmdidx != CMD_lgrepadd),
@@ -578,7 +578,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      if (wp != NULL)
  	qi = GET_LOC_LIST(wp);
  #ifdef FEAT_AUTOCMD
-@@ -3839,6 +3889,7 @@ ex_cnext(exarg_T *eap)
+@@ -3839,6 +3890,7 @@ ex_cnext(exarg_T *eap)
      void
  ex_cfile(exarg_T *eap)
  {
@@ -586,21 +586,25 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
  #ifdef FEAT_AUTOCMD
-@@ -3863,6 +3914,13 @@ ex_cfile(exarg_T *eap)
+@@ -3863,6 +3915,17 @@ ex_cfile(exarg_T *eap)
      if (au_name != NULL)
  	apply_autocmds(EVENT_QUICKFIXCMDPRE, au_name, NULL, FALSE, curbuf);
  #endif
 +#ifdef FEAT_MBYTE
-+    enc = *curbuf->b_p_menc == NUL ? p_menc : curbuf->b_p_menc;
-+    if (*curbuf->b_p_eenc != NUL) /* Use 'eenc' if it is set. */
++    /* Use 'eenc' if it is set. Otherwise use 'menc'. */
++    if (*curbuf->b_p_eenc != NUL)
 +	enc = curbuf->b_p_eenc;
 +    else if (*p_eenc != NUL)
 +	enc = p_eenc;
++    else if (*curbuf->b_p_menc != NUL)
++	enc = curbuf->b_p_menc;
++    else
++	enc = p_menc;
 +#endif
  #ifdef FEAT_BROWSE
      if (cmdmod.browse)
      {
-@@ -3890,7 +3948,7 @@ ex_cfile(exarg_T *eap)
+@@ -3890,7 +3953,7 @@ ex_cfile(exarg_T *eap)
       */
      if (qf_init(wp, p_ef, p_efm, (eap->cmdidx != CMD_caddfile
  				  && eap->cmdidx != CMD_laddfile),
@@ -609,7 +613,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  				  && (eap->cmdidx == CMD_cfile
  					     || eap->cmdidx == CMD_lfile))
      {
-@@ -4912,7 +4970,7 @@ ex_cbuffer(exarg_T *eap)
+@@ -4912,7 +4975,7 @@ ex_cbuffer(exarg_T *eap)
  			    (eap->cmdidx != CMD_caddbuffer
  			     && eap->cmdidx != CMD_laddbuffer),
  						   eap->line1, eap->line2,
@@ -618,7 +622,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  	    {
  #ifdef FEAT_AUTOCMD
  		if (au_name != NULL)
-@@ -4981,7 +5039,8 @@ ex_cexpr(exarg_T *eap)
+@@ -4981,7 +5044,8 @@ ex_cexpr(exarg_T *eap)
  	    if (qf_init_ext(qi, NULL, NULL, tv, p_efm,
  			    (eap->cmdidx != CMD_caddexpr
  			     && eap->cmdidx != CMD_laddexpr),
@@ -631,7 +635,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -2052,6 +2052,9 @@ struct file_buffer
+@@ -2058,6 +2058,9 @@ struct file_buffer
      char_u	*b_p_cfu;	/* 'completefunc' */
      char_u	*b_p_ofu;	/* 'omnifunc' */
  #endif
@@ -641,7 +645,7 @@ diff --git a/src/structs.h b/src/structs.h
      int		b_p_eol;	/* 'endofline' */
      int		b_p_fixeol;	/* 'fixendofline' */
      int		b_p_et;		/* 'expandtab' */
-@@ -2066,6 +2069,9 @@ struct file_buffer
+@@ -2072,6 +2075,9 @@ struct file_buffer
  #endif
      char_u	*b_p_fo;	/* 'formatoptions' */
      char_u	*b_p_flp;	/* 'formatlistpat' */
@@ -651,7 +655,7 @@ diff --git a/src/structs.h b/src/structs.h
      int		b_p_inf;	/* 'infercase' */
      char_u	*b_p_isk;	/* 'iskeyword' */
  #ifdef FEAT_FIND_ID
-@@ -2092,6 +2098,9 @@ struct file_buffer
+@@ -2098,6 +2104,9 @@ struct file_buffer
  #ifdef FEAT_LISP
      int		b_p_lisp;	/* 'lisp' */
  #endif
