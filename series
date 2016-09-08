@@ -39,6 +39,5 @@ remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
 add-makeencoding.patch
-doc-add-if-versions.patch
 update-default-if-versions.patch
 fix-config_cache-removal.patch #+rejected
