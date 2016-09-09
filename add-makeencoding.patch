@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  35939ec273c1c3c8e010326023cfadcb27b2d66c
+# Parent  a78eb9d783c2fb9e78830f1ba16b619a97122656
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
@@ -76,7 +76,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  			keep Vim running while compiling.  If you give the
  			name of the errorfile, the 'errorfile' option will
  			be set to [errorfile].  See |:cc| for [!].
-+			If the encoding of the program output differs from the
++			If the encoding of the error file differs from the
 +			'encoding' option, you can use the 'errfileencoding'
 +			option to specify the encoding.
  
@@ -86,7 +86,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  :cg[etfile] [errorfile]					*:cg* *:cgetfile*
  			Read the error file.  Just like ":cfile" but don't
  			jump to the first error.
-+			If the encoding of the program output differs from the
++			If the encoding of the error file differs from the
 +			'encoding' option, you can use the 'errfileencoding'
 +			option to specify the encoding.
  
@@ -96,7 +96,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  :caddf[ile] [errorfile]	Read the error file and add the errors from the
  			errorfile to the current quickfix list. If a quickfix
  			list is not present, then a new list is created.
-+			If the encoding of the program output differs from the
++			If the encoding of the error file differs from the
 +			'encoding' option, you can use the 'errfileencoding'
 +			option to specify the encoding.
  
