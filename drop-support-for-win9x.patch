@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  1309f9375c12c0c900c5f2e4d6c769f0db3f6f0d
+# Parent  a228e39df03180d0c122748b38e1ca570b2536c0
 
 diff --git a/runtime/doc/gui_w32.txt b/runtime/doc/gui_w32.txt
 --- a/runtime/doc/gui_w32.txt
@@ -134,7 +134,7 @@ diff --git a/runtime/doc/os_win32.txt b/runtime/doc/os_win32.txt
 -5. Running under Windows 3.1				*win32-win3.1*
 +5. Running under Windows 95				*win32-win95*
 +					*windows95* *windows98* *windowsme*
-+Windows 95 support was removed in patch 7.4.XXXX.  If you want to use it you
++Windows 95 support was removed in patch 8.0.XXXX.  If you want to use it you
 +will need to get a version older than that.
 +
 +==============================================================================
@@ -1417,7 +1417,7 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -9444,10 +9444,7 @@ prepare_to_exit(void)
+@@ -9450,10 +9450,7 @@ prepare_to_exit(void)
  	 * screen (if there are two screens).
  	 */
  	settmode(TMODE_COOK);
@@ -2959,7 +2959,7 @@ diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 diff --git a/src/version.c b/src/version.c
 --- a/src/version.c
 +++ b/src/version.c
-@@ -5605,15 +5605,10 @@ list_version(void)
+@@ -913,15 +913,10 @@ list_version(void)
      MSG(longVersion);
  #ifdef WIN3264
  # ifdef FEAT_GUI_W32
@@ -2977,7 +2977,7 @@ diff --git a/src/version.c b/src/version.c
  #  endif
  # ifdef FEAT_OLE
      MSG_PUTS(_(" with OLE support"));
-@@ -5975,10 +5970,6 @@ intro_message(
+@@ -1283,10 +1278,6 @@ intro_message(
      blanklines = (int)Rows - ((sizeof(lines) / sizeof(char *)) - 1);
      if (!p_cp)
  	blanklines += 4;  /* add 4 for not showing "Vi compatible" message */
@@ -2988,7 +2988,7 @@ diff --git a/src/version.c b/src/version.c
  
  #ifdef FEAT_WINDOWS
      /* Don't overwrite a statusline.  Depends on 'cmdheight'. */
-@@ -6027,17 +6018,6 @@ intro_message(
+@@ -1335,17 +1326,6 @@ intro_message(
  		do_intro_line(row, (char_u *)_(p), i == 2, 0);
  	    ++row;
  	}
