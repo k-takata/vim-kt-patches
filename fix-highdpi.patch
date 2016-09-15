@@ -1,0 +1,56 @@
+# HG changeset patch
+# Parent  853757477aca39d65ee863cb6f5d992154de717d
+
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -2703,7 +2703,7 @@ static const LOGFONT s_lfDefault =
+  * with an explicit size has been set. This defaults the size to this value
+  * (-12 equates to roughly 9pt).
+  */
+-int current_font_height = -12;		/* also used in gui_w48.c */
++int current_font_height = -12;		/* also used in gui_w32.c */
+ 
+ /* Convert a string representing a point size into pixels. The string should
+  * be a positive decimal number, with an optional decimal point (eg, "12", or
+@@ -2856,7 +2856,29 @@ get_logfont(
+ 
+     *lf = s_lfDefault;
+     if (name == NULL)
++    {
++	HWND	hwnd;
++	HDC	hdc;
++	float	scale;
++
++	/* Apply System DPI to the default font height. */
++	/* TODO: Support Per-Monitor DPI. */
++	if (printer_dc == NULL)
++	{
++	    hwnd = GetDesktopWindow();
++	    hdc = GetWindowDC(hwnd);
++	}
++	else
++	    hdc = printer_dc;
++	scale = GetDeviceCaps(hdc, LOGPIXELSY) / 96.0f;
++	lf->lfHeight *= scale;
++	if (printer_dc == NULL)
++	{
++	    ReleaseDC(hwnd, hdc);
++	    current_font_height = lf->lfHeight;
++	}
+ 	return OK;
++    }
+ 
+ #ifdef FEAT_MBYTE
+     /* Convert 'name' from 'encoding' to the current codepage, because
+@@ -2883,7 +2905,10 @@ get_logfont(
+ 	cf.lpLogFont = lf;
+ 	cf.nFontType = 0 ; //REGULAR_FONTTYPE;
+ 	if (ChooseFont(&cf))
++	{
+ 	    ret = OK;
++	    lf->lfQuality = PROOF_QUALITY;
++	}
+ #endif
+ 	goto theend;
+     }
