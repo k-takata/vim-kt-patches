@@ -1,0 +1,509 @@
+# HG changeset patch
+# Parent  2720a028af302b9fa05dd2944e86b49cafc2b73f
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -2236,6 +2236,7 @@ printf({fmt}, {expr1}...)	String	format 
+ pumvisible()			Number	whether popup menu is visible
+ pyeval({expr})			any	evaluate |Python| expression
+ py3eval({expr})			any	evaluate |python3| expression
++pyxeval({expr})			any	evaluate |python_x| expression
+ range({expr} [, {max} [, {stride}]])
+ 				List	items from {expr} to {max}
+ readfile({fname} [, {binary} [, {max}]])
+@@ -6127,6 +6128,13 @@ pyeval({expr})						*pyeval()*
+ 		non-string keys result in error.
+ 		{only available when compiled with the |+python| feature}
+ 
++pyxeval({expr})						*pyxeval()*
++		Evaluate |python_x| expression {expr} and return its result
++		converted to Vim data structures.
++		See also: |pyeval()|, |py3eval()|, 'pythonx'
++		{only available when compiled with the |+python| or the
++		|+python3| feature}
++
+ 							*E726* *E727*
+ range({expr} [, {max} [, {stride}]])				*range()*
+ 		Returns a |List| with Numbers:
+@@ -8358,6 +8366,7 @@ printer			Compiled with |:hardcopy| supp
+ profile			Compiled with |:profile| support.
+ python			Compiled with Python 2.x interface. |has-python|
+ python3			Compiled with Python 3.x interface. |has-python|
++pythonx			Compiled with |python_x| interface. |has-pythonx|
+ qnx			QNX version of Vim.
+ quickfix		Compiled with |quickfix| support.
+ reltime			Compiled with |reltime()| support.
+diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
+--- a/runtime/doc/if_pyth.txt
++++ b/runtime/doc/if_pyth.txt
+@@ -16,6 +16,7 @@ 7. vim.bindeval objects				|python-binde
+ 8. pyeval(), py3eval() Vim functions		|python-pyeval|
+ 9. Dynamic loading				|python-dynamic|
+ 10. Python 3					|python3|
++11. Python X					|python_x|
+ 
+ {Vi does not have any of these commands}
+ 
+@@ -812,4 +813,52 @@ loaded at a time, just checking if Pytho
+ the other one from being available.
+ 
+ ==============================================================================
++11. Python X						*python_x*
++
++Because much python code can be written so that it works with python 2.6+ and
++python 3 the pyx* functions and commands have been writen.
++They work exactly the same, but they depend on 'pythonx' setting.
++
++You should set this in your |.vimrc| to prefer python or python3 using pyx
++commands. If you change this setting at runtime you may risk that state of
++plugins (such as initialization) may be lost.
++
++If you want to use a module, you can put it in the {rtp}/pythonx directory.
++See |pythonx-directory|.
++
++							*:pyx* *:pythonx*
++The `:pyx` and `:pythonx` commands work similar to `:python`.  A simple check
++if the `:pyx` command is working: >
++	:pyx print("Hello")
++
++To see what version of Python you have: >
++	:pyx import sys
++	:pyx print(sys.version)
++<
++					*:pyxfile* *python_x-special-comments*
++The `:pyxfile` command works similar to `:pyfile`.  However you can add these
++comments to force Vim using `:pyfile` or `:py3file`: >
++  #!(any string)python2		" Shebang. Must be the top of the file.
++  #!(any string)python3		" Shebang. Must be the top of the file.
++  # requires python 2.x		" Maximum lines depend on 'modelines'.
++  # requires python 3.x		" Maximum lines depend on 'modelines'.
++Unlike normal modelines, the bottom of the file is not checked.
++If none of them are found, the 'pythonx' setting is used.
++>
++If Vim does not support that python version a silent message will be printed.
++Use |:messages| to read them.
++
++							*:pyxdo*
++The `:pyxdo` command works similar to `:pydo`.
++
++							*has-pythonx*
++You can test if pyx* commands are available with: >
++	if has('pythonx')
++	  echo 'pyx* commands are available. (Python ' . &pyx . ')'
++	endif
++
++The test depends on the 'pythonx' setting.  E.g. If 'pythonx' is 3, it tests
++if python 3 is available.
++
++==============================================================================
+  vim:tw=78:ts=8:ft=help:norl:
+diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
+--- a/runtime/doc/index.txt
++++ b/runtime/doc/index.txt
+@@ -1440,6 +1440,10 @@ tag	      command	      action ~
+ |:python|	:py[thon]	execute Python command
+ |:pydo|		:pyd[o]		execute Python command for each line
+ |:pyfile|	:pyf[ile]	execute Python script file
++|:pyx|		:pyx		execute |python_x| command
++|:pythonx|	:pythonx	same as :pyx
++|:pyxdo|	:pyxd[o]	execute |python_x| command for each line
++|:pyxfile|	:pyxf[ile]	execute |python_x| script file
+ |:quit|		:q[uit]		quit current window (when one window quit Vim)
+ |:quitall|	:quita[ll]	quit Vim
+ |:qall|		:qa[ll]		quit Vim
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -5782,6 +5782,23 @@ A jump table for the options with a shor
+ 	This option cannot be set from a |modeline| or in the |sandbox|, for
+ 	security reasons.
+ 
++						*'pythonx'*
++'pythonx'		number	(default depends on the build)
++			global
++			{not in Vi}
++			{only available when compiled with the |+python| or
++			the |+python3| feature}
++	Specifies the python version used for pyx* functions and commands
++	|python_x|.  The default is as follows:
++
++		Compiled with		    Default ~
++		|+python| and |+python3|	3
++		only |+python3|			3
++		only |+python|			2
++
++	This option cannot be set from a |modeline| or in the |sandbox|, for
++	security reasons.
++
+ 						*'quoteescape'* *'qe'*
+ 'quoteescape' 'qe'	string	(default "\")
+ 			local to buffer
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -288,6 +288,9 @@ static void f_py3eval(typval_T *argvars,
+ #ifdef FEAT_PYTHON
+ static void f_pyeval(typval_T *argvars, typval_T *rettv);
+ #endif
++#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
++static void f_pyxeval(typval_T *argvars, typval_T *rettv);
++#endif
+ static void f_range(typval_T *argvars, typval_T *rettv);
+ static void f_readfile(typval_T *argvars, typval_T *rettv);
+ static void f_reltime(typval_T *argvars, typval_T *rettv);
+@@ -714,6 +717,9 @@ static struct fst
+ #ifdef FEAT_PYTHON
+     {"pyeval",		1, 1, f_pyeval},
+ #endif
++#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
++    {"pyxeval",		1, 1, f_pyxeval},
++#endif
+     {"range",		1, 3, f_range},
+     {"readfile",	1, 3, f_readfile},
+     {"reltime",		0, 2, f_reltime},
+@@ -5745,11 +5751,13 @@ f_has(typval_T *argvars, typval_T *rettv
+ #ifdef FEAT_PYTHON
+ #ifndef DYNAMIC_PYTHON
+ 	"python",
++	"pythonx",
+ #endif
+ #endif
+ #ifdef FEAT_PYTHON3
+ #ifndef DYNAMIC_PYTHON3
+ 	"python3",
++	"pythonx",
+ #endif
+ #endif
+ #ifdef FEAT_POSTSCRIPT
+@@ -5980,12 +5988,16 @@ f_has(typval_T *argvars, typval_T *rettv
+ #ifdef DYNAMIC_PYTHON
+ 	else if (STRICMP(name, "python") == 0)
+ 	    n = python_enabled(FALSE);
++	else if (STRICMP(name, "pythonx") == 0 && p_pyx == 2)
++	    n = python_enabled(FALSE);
+ #endif
+ #endif
+ #ifdef FEAT_PYTHON3
+ #ifdef DYNAMIC_PYTHON3
+ 	else if (STRICMP(name, "python3") == 0)
+ 	    n = python3_enabled(FALSE);
++	else if (STRICMP(name, "pythonx") == 0 && p_pyx == 3)
++	    n = python3_enabled(FALSE);
+ #endif
+ #endif
+ #ifdef DYNAMIC_PERL
+@@ -8034,6 +8046,24 @@ f_pyeval(typval_T *argvars, typval_T *re
+ }
+ #endif
+ 
++#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
++/*
++ * "pyxeval()" function
++ */
++    static void
++f_pyxeval(typval_T *argvars, typval_T *rettv)
++{
++# ifdef FEAT_PYTHON
++    if (p_pyx == 2)
++	f_pyeval(argvars, rettv);
++# endif
++# ifdef FEAT_PYTHON3
++    if (p_pyx == 3)
++	f_py3eval(argvars, rettv);
++# endif
++}
++#endif
++
+ /*
+  * "range()" function
+  */
+diff --git a/src/ex_cmds.h b/src/ex_cmds.h
+--- a/src/ex_cmds.h
++++ b/src/ex_cmds.h
+@@ -1132,6 +1132,18 @@ EX(CMD_python3,		"python3",	ex_py3,
+ EX(CMD_py3file,		"py3file",	ex_py3file,
+ 			RANGE|FILE1|NEEDARG|CMDWIN,
+ 			ADDR_LINES),
++EX(CMD_pyx,		"pyx",		ex_pyx,
++			RANGE|EXTRA|NEEDARG|CMDWIN,
++			ADDR_LINES),
++EX(CMD_pyxdo,		"pyxdo",	ex_pyxdo,
++			RANGE|DFLALL|EXTRA|NEEDARG|CMDWIN,
++			ADDR_LINES),
++EX(CMD_pythonx,		"pythonx",	ex_pyx,
++			RANGE|EXTRA|NEEDARG|CMDWIN,
++			ADDR_LINES),
++EX(CMD_pyxfile,		"pyxfile",	ex_pyxfile,
++			RANGE|FILE1|NEEDARG|CMDWIN,
++			ADDR_LINES),
+ EX(CMD_quit,		"quit",		ex_quit,
+ 			BANG|RANGE|COUNT|NOTADR|TRLBAR|CMDWIN,
+ 			ADDR_WINDOWS),
+diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
+--- a/src/ex_cmds2.c
++++ b/src/ex_cmds2.c
+@@ -3675,6 +3675,167 @@ ex_options(
+ }
+ #endif
+ 
++#if defined(FEAT_PYTHON3) || defined(FEAT_PYTHON) || defined(PROTO)
++
++/*
++ * Does a file contain one of the following strings at the beginning of any
++ * line?
++ * "#!(any string)python2"  => returns 2
++ * "#!(any string)python3"  => returns 3
++ * "# requires python 2.x"  => returns 2
++ * "# requires python 3.x"  => returns 3
++ * otherwise return 0.
++ */
++    static int
++requires_py_version(char_u *filename)
++{
++    FILE    *file;
++    int	    requires_py_version = 0;
++    int	    i, lines;
++
++    lines = (int)p_mls;
++    if (lines < 0)
++	lines = 5;
++
++    file = mch_fopen((char *)filename, "r");
++    if (file != NULL)
++    {
++	for (i = 0; i < lines; i++)
++	{
++	    if (vim_fgets(IObuff, IOSIZE, file))
++		break;
++	    if (i == 0 && IObuff[0] == '#' && IObuff[1] == '!')
++	    {
++		/* Check shebang. */
++		char *p = strstr((char *)IObuff + 2, "python");
++		if (p != NULL)
++		{
++		    if (p[6] == '2')
++		    {
++			requires_py_version = 2;
++			break;
++		    }
++		    if (p[6] == '3')
++		    {
++			requires_py_version = 3;
++			break;
++		    }
++		}
++	    }
++	    IObuff[21] = '\0';
++	    if (strcmp("# requires python 2.x", IObuff) == 0)
++	    {
++		requires_py_version = 2;
++		break;
++	    }
++	    if (strcmp("# requires python 3.x", IObuff) == 0)
++	    {
++		requires_py_version = 3;
++		break;
++	    }
++	}
++	fclose(file);
++    }
++    return requires_py_version;
++}
++
++
++/*
++ * Source a python file using the requested python version.
++ */
++    static void
++source_pyx_file(char_u *fname)
++{
++    exarg_T ex;
++    int	    v = requires_py_version(fname);
++
++    if (v == 0)
++    {
++	/* user didn't choose a preference, arbitrarily prefer 3.x */
++	v = p_pyx;
++    }
++
++    /*
++     * now source, if required python version is not supported show
++     * unobtrusive message.
++     */
++    vim_memset(&ex, 0, sizeof(ex));
++    ex.arg = fname;
++    ex.cmd = v == 2 ? "pyfile" : "pyfile3";
++
++    if (v == 2)
++    {
++# ifdef FEAT_PYTHON
++	ex_pyfile(&ex);
++# else
++	vim_snprintf((char *)IObuff, IOSIZE,
++		_("Exxx: Required python version 2.x not supported, ignoring file: %s"),
++		fname);
++	MSG(IObuff);
++# endif
++	return;
++    }
++    if (v == 3)
++    {
++# ifdef FEAT_PYTHON3
++	ex_py3file(&ex);
++# else
++	vim_snprintf((char *)IObuff, IOSIZE,
++		_("Exxx: Required python version 3.x not supported, ignoring file: %s"),
++		fname);
++	MSG(IObuff);
++# endif
++	return;
++    }
++    /* This should never happen .. */
++    vim_snprintf((char *)IObuff, IOSIZE,
++	    _("Exxx: Python not supported, ignoring file: %s"), fname);
++    MSG(IObuff);
++}
++
++/*
++ * ":pyxfile {fname}"
++ */
++    void
++ex_pyxfile(exarg_T *eap)
++{
++    source_pyx_file(eap->arg);
++}
++
++/*
++ * ":pyx"
++ */
++    void
++ex_pyx(exarg_T *eap)
++{
++# ifdef FEAT_PYTHON
++    if (p_pyx == 2)
++	ex_python(eap);
++# endif
++# ifdef FEAT_PYTHON3
++    if (p_pyx == 3)
++	ex_py3(eap);
++# endif
++}
++
++/*
++ * ":pyxdo"
++ */
++    void
++ex_pyxdo(exarg_T *eap)
++{
++# ifdef FEAT_PYTHON
++    if (p_pyx == 2)
++	ex_pydo(eap);
++# endif
++# ifdef FEAT_PYTHON3
++    if (p_pyx == 3)
++	ex_py3do(eap);
++# endif
++}
++
++#endif
++
+ /*
+  * ":source {fname}"
+  */
+diff --git a/src/ex_docmd.c b/src/ex_docmd.c
+--- a/src/ex_docmd.c
++++ b/src/ex_docmd.c
+@@ -288,6 +288,11 @@ static void	ex_popup(exarg_T *eap);
+ # define ex_py3do		ex_ni
+ # define ex_py3file		ex_ni
+ #endif
++#if !defined(FEAT_PYTHON) && !defined(FEAT_PYTHON3)
++# define ex_pyx			ex_script_ni
++# define ex_pyxdo		ex_ni
++# define ex_pyxfile		ex_ni
++#endif
+ #ifndef FEAT_TCL
+ # define ex_tcl			ex_script_ni
+ # define ex_tcldo		ex_ni
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -476,6 +476,15 @@ struct vimoption
+ # define HIGHLIGHT_INIT "8:SpecialKey,@:NonText,d:Directory,e:ErrorMsg,i:IncSearch,l:Search,m:MoreMsg,M:ModeMsg,n:LineNr,N:CursorLineNr,r:Question,s:StatusLine,S:StatusLineNC,t:Title,v:Visual,w:WarningMsg,W:WildMenu,>:SignColumn,*:TabLine,#:TabLineSel,_:TabLineFill"
+ #endif
+ 
++/* Default python version */
++#ifdef FEAT_PYTHON3
++# define DEFAULT_PYTHON_V   3
++#elif defined(FEAT_PYTHON2)
++# define DEFAULT_PYTHON_V   2
++#else
++# define DEFAULT_PYTHON_V   0
++#endif
++
+ /*
+  * options[] is initialized here.
+  * The order of the options MUST be alphabetic for ":set all" and findoption().
+@@ -2140,6 +2149,14 @@ static struct vimoption options[] =
+ 			    {(char_u *)DYNAMIC_PYTHON_DLL, (char_u *)0L}
+ 			    SCRIPTID_INIT},
+ #endif
++    {"pythonx",   "pyx",   P_NUM|P_VI_DEF|P_SECURE,
++#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
++			    (char_u *)&p_pyx, PV_NONE,
++#else
++			    (char_u *)NULL, PV_NONE,
++#endif
++			    {(char_u *)DEFAULT_PYTHON_V, (char_u *)0L}
++			    SCRIPTID_INIT},
+     {"quoteescape", "qe",   P_STRING|P_ALLOCED|P_VI_DEF,
+ #ifdef FEAT_TEXTOBJ
+ 			    (char_u *)&p_qe, PV_QE,
+@@ -8769,6 +8786,20 @@ set_num_option(
+ 	mzvim_reset_timer();
+ #endif
+ 
++#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
++    /* 'pythonx' */
++    else if (pp == &p_pyx)
++    {
++# if defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)
++	if (p_pyx != 2 && p_pyx != 3)
++	    p_pyx = DEFAULT_PYTHON_V;
++# else
++	if (p_pyx != DEFAULT_PYTHON_V)
++	    p_pyx = DEFAULT_PYTHON_V;
++# endif
++    }
++#endif
++
+     /* sync undo before 'undolevels' changes */
+     else if (pp == &p_ul)
+     {
+diff --git a/src/option.h b/src/option.h
+--- a/src/option.h
++++ b/src/option.h
+@@ -694,6 +694,9 @@ EXTERN char_u	*p_py3dll;	/* 'pythonthree
+ #if defined(DYNAMIC_PYTHON)
+ EXTERN char_u	*p_pydll;	/* 'pythondll' */
+ #endif
++#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
++EXTERN long	p_pyx;		/* 'pythonx' */
++#endif
+ #ifdef FEAT_RELTIME
+ EXTERN long	p_rdt;		/* 'redrawtime' */
+ #endif
+diff --git a/src/proto/ex_cmds2.pro b/src/proto/ex_cmds2.pro
+--- a/src/proto/ex_cmds2.pro
++++ b/src/proto/ex_cmds2.pro
+@@ -75,6 +75,9 @@ int do_in_runtimepath(char_u *name, int 
+ void ex_packloadall(exarg_T *eap);
+ void ex_packadd(exarg_T *eap);
+ void ex_options(exarg_T *eap);
++void ex_pyxfile(exarg_T *eap);
++void ex_pyx(exarg_T *eap);
++void ex_pyxdo(exarg_T *eap);
+ void ex_source(exarg_T *eap);
+ linenr_T *source_breakpoint(void *cookie);
+ int *source_dbg_tick(void *cookie);

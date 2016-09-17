@@ -41,4 +41,5 @@ embarcadero.patch
 add-makeencoding.patch
 fix-highdpi.patch
 fix-py3file-tag.patch
+pythonx.patch
 fix-config_cache-removal.patch #+rejected
