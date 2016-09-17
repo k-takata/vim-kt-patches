@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  2720a028af302b9fa05dd2944e86b49cafc2b73f
+# Parent  7939ba49972dec3241554ff3a3a8b15b78cb3690
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -19,14 +19,14 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +pyxeval({expr})						*pyxeval()*
 +		Evaluate |python_x| expression {expr} and return its result
 +		converted to Vim data structures.
-+		See also: |pyeval()|, |py3eval()|, 'pythonx'
++		See also: |pyeval()|, |py3eval()|, 'pythonxversion'
 +		{only available when compiled with the |+python| or the
 +		|+python3| feature}
 +
  							*E726* *E727*
  range({expr} [, {max} [, {stride}]])				*range()*
  		Returns a |List| with Numbers:
-@@ -8358,6 +8366,7 @@ printer			Compiled with |:hardcopy| supp
+@@ -8359,6 +8367,7 @@ printer			Compiled with |:hardcopy| supp
  profile			Compiled with |:profile| support.
  python			Compiled with Python 2.x interface. |has-python|
  python3			Compiled with Python 3.x interface. |has-python|
@@ -53,7 +53,7 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +
 +Because much python code can be written so that it works with python 2.6+ and
 +python 3 the pyx* functions and commands have been writen.
-+They work exactly the same, but they depend on 'pythonx' setting.
++They work exactly the same, but they depend on 'pythonxversion' setting.
 +
 +You should set this in your |.vimrc| to prefer python or python3 using pyx
 +commands. If you change this setting at runtime you may risk that state of
@@ -74,12 +74,12 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +					*:pyxfile* *python_x-special-comments*
 +The `:pyxfile` command works similar to `:pyfile`.  However you can add these
 +comments to force Vim using `:pyfile` or `:py3file`: >
-+  #!(any string)python2		" Shebang. Must be the top of the file.
-+  #!(any string)python3		" Shebang. Must be the top of the file.
++  #!/any string/python2		" Shebang. Must be the top of the file.
++  #!/any string/python3		" Shebang. Must be the top of the file.
 +  # requires python 2.x		" Maximum lines depend on 'modelines'.
 +  # requires python 3.x		" Maximum lines depend on 'modelines'.
 +Unlike normal modelines, the bottom of the file is not checked.
-+If none of them are found, the 'pythonx' setting is used.
++If none of them are found, the 'pythonxversion' setting is used.
 +>
 +If Vim does not support that python version a silent message will be printed.
 +Use |:messages| to read them.
@@ -93,8 +93,8 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +	  echo 'pyx* commands are available. (Python ' . &pyx . ')'
 +	endif
 +
-+The test depends on the 'pythonx' setting.  E.g. If 'pythonx' is 3, it tests
-+if python 3 is available.
++The test depends on the 'pythonxversion' setting.  E.g. If 'pythonxversion' is
++3, it tests if Python 3 is available.
 +
 +==============================================================================
   vim:tw=78:ts=8:ft=help:norl:
@@ -115,12 +115,12 @@ diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -5782,6 +5782,23 @@ A jump table for the options with a shor
+@@ -5848,6 +5848,23 @@ A jump table for the options with a shor
  	This option cannot be set from a |modeline| or in the |sandbox|, for
  	security reasons.
  
-+						*'pythonx'*
-+'pythonx'		number	(default depends on the build)
++						*'pythonxversion'*
++'pythonxversion'	number	(default depends on the build)
 +			global
 +			{not in Vi}
 +			{only available when compiled with the |+python| or
@@ -139,6 +139,17 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  						*'quoteescape'* *'qe'*
  'quoteescape' 'qe'	string	(default "\")
  			local to buffer
+diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
+--- a/runtime/doc/usr_41.txt
++++ b/runtime/doc/usr_41.txt
+@@ -999,6 +999,7 @@ Various:					*various-functions*
+ 	perleval()		evaluate Perl expression (|+perl|)
+ 	py3eval()		evaluate Python expression (|+python3|)
+ 	pyeval()		evaluate Python expression (|+python|)
++	pyxeval()		evaluate |python_x| expression
+ 
+ ==============================================================================
+ *41.7*	Defining a function
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
@@ -429,51 +440,51 @@ diff --git a/src/ex_docmd.c b/src/ex_docmd.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -476,6 +476,15 @@ struct vimoption
+@@ -485,6 +485,15 @@ struct vimoption
  # define HIGHLIGHT_INIT "8:SpecialKey,@:NonText,d:Directory,e:ErrorMsg,i:IncSearch,l:Search,m:MoreMsg,M:ModeMsg,n:LineNr,N:CursorLineNr,r:Question,s:StatusLine,S:StatusLineNC,t:Title,v:Visual,w:WarningMsg,W:WildMenu,>:SignColumn,*:TabLine,#:TabLineSel,_:TabLineFill"
  #endif
  
 +/* Default python version */
 +#ifdef FEAT_PYTHON3
-+# define DEFAULT_PYTHON_V   3
++# define DEFAULT_PYTHON_VER	3
 +#elif defined(FEAT_PYTHON2)
-+# define DEFAULT_PYTHON_V   2
++# define DEFAULT_PYTHON_VER	2
 +#else
-+# define DEFAULT_PYTHON_V   0
++# define DEFAULT_PYTHON_VER	0
 +#endif
 +
  /*
   * options[] is initialized here.
   * The order of the options MUST be alphabetic for ":set all" and findoption().
-@@ -2140,6 +2149,14 @@ static struct vimoption options[] =
+@@ -2176,6 +2185,14 @@ static struct vimoption options[] =
  			    {(char_u *)DYNAMIC_PYTHON_DLL, (char_u *)0L}
  			    SCRIPTID_INIT},
  #endif
-+    {"pythonx",   "pyx",   P_NUM|P_VI_DEF|P_SECURE,
++    {"pythonxversion", "pyx", P_NUM|P_VI_DEF|P_SECURE,
 +#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
 +			    (char_u *)&p_pyx, PV_NONE,
 +#else
 +			    (char_u *)NULL, PV_NONE,
 +#endif
-+			    {(char_u *)DEFAULT_PYTHON_V, (char_u *)0L}
++			    {(char_u *)DEFAULT_PYTHON_VER, (char_u *)0L}
 +			    SCRIPTID_INIT},
      {"quoteescape", "qe",   P_STRING|P_ALLOCED|P_VI_DEF,
  #ifdef FEAT_TEXTOBJ
  			    (char_u *)&p_qe, PV_QE,
-@@ -8769,6 +8786,20 @@ set_num_option(
+@@ -8834,6 +8851,20 @@ set_num_option(
  	mzvim_reset_timer();
  #endif
  
 +#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
-+    /* 'pythonx' */
++    /* 'pythonxversion' */
 +    else if (pp == &p_pyx)
 +    {
 +# if defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)
-+	if (p_pyx != 2 && p_pyx != 3)
-+	    p_pyx = DEFAULT_PYTHON_V;
++	if (p_pyx < 2 || p_pyx > 3)
++	    errmsg = e_invarg;
 +# else
-+	if (p_pyx != DEFAULT_PYTHON_V)
-+	    p_pyx = DEFAULT_PYTHON_V;
++	if (p_pyx != DEFAULT_PYTHON_VER)
++	    errmsg = e_invarg;
 +# endif
 +    }
 +#endif
@@ -484,12 +495,12 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/option.h b/src/option.h
 --- a/src/option.h
 +++ b/src/option.h
-@@ -694,6 +694,9 @@ EXTERN char_u	*p_py3dll;	/* 'pythonthree
+@@ -703,6 +703,9 @@ EXTERN char_u	*p_py3dll;	/* 'pythonthree
  #if defined(DYNAMIC_PYTHON)
  EXTERN char_u	*p_pydll;	/* 'pythondll' */
  #endif
 +#if defined(FEAT_PYTHON) || defined(FEAT_PYTHON3)
-+EXTERN long	p_pyx;		/* 'pythonx' */
++EXTERN long	p_pyx;		/* 'pythonxversion' */
 +#endif
  #ifdef FEAT_RELTIME
  EXTERN long	p_rdt;		/* 'redrawtime' */
