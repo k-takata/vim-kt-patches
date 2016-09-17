@@ -40,4 +40,5 @@ restore-unicode-chars.patch
 embarcadero.patch
 add-makeencoding.patch
 fix-highdpi.patch
+fix-py3file-tag.patch
 fix-config_cache-removal.patch #+rejected
