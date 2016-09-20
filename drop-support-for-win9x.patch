@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a228e39df03180d0c122748b38e1ca570b2536c0
+# Parent  c4cd9a4ff84de02fd2bdc58498f0968bab912f4f
 
 diff --git a/runtime/doc/gui_w32.txt b/runtime/doc/gui_w32.txt
 --- a/runtime/doc/gui_w32.txt
@@ -273,6 +273,29 @@ diff --git a/runtime/doc/os_win32.txt b/runtime/doc/os_win32.txt
  						*windows-icon*
  Q. I don't like the Vim icon, can I change it?
  A. Yes, place your favorite icon in bitmaps/vim.ico in a directory of
+diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
+--- a/runtime/doc/todo.txt
++++ b/runtime/doc/todo.txt
+@@ -1861,10 +1861,6 @@ popup menu over it, first draw the new p
+ size and then redraw the text, skipping the characters under the popup menu.
+ This should avoid flicker.  Other solution by A.Politz, 2007 Aug 22.
+ 
+-Windows 98: pasting from the clipboard with text from another application has
+-a trailing NUL.  (Joachim Hofmann)  Perhaps the length specified for CF_TEXT
+-isn't right?
+-
+ When a register contains illegal bytes, writing viminfo in utf-8 and reading
+ it back doesn't result in utf-8. (Devin Bayer)
+ 
+@@ -2525,8 +2521,6 @@ 9   Can't paste a Visual selection from 
+ Win32 GUI known bugs:
+ -   Win32: tearoff menu window should have a scrollbar when it's taller than
+     the screen.
+-8   On Windows 98 the unicows library is needed to support functions with UCS2
+-    file names.  Can we load unicows.dll dynamically?
+ 8   The -P argument doesn't work very well with many MDI applications.
+     The last argument of CreateWindowEx() should be used, see MSDN docs.
+     Tutorial: http://win32assembly.online.fr/tut32.html
 diff --git a/src/GvimExt/Makefile b/src/GvimExt/Makefile
 --- a/src/GvimExt/Makefile
 +++ b/src/GvimExt/Makefile
@@ -2959,7 +2982,7 @@ diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 diff --git a/src/version.c b/src/version.c
 --- a/src/version.c
 +++ b/src/version.c
-@@ -913,15 +913,10 @@ list_version(void)
+@@ -924,15 +924,10 @@ list_version(void)
      MSG(longVersion);
  #ifdef WIN3264
  # ifdef FEAT_GUI_W32
@@ -2977,7 +3000,7 @@ diff --git a/src/version.c b/src/version.c
  #  endif
  # ifdef FEAT_OLE
      MSG_PUTS(_(" with OLE support"));
-@@ -1283,10 +1278,6 @@ intro_message(
+@@ -1294,10 +1289,6 @@ intro_message(
      blanklines = (int)Rows - ((sizeof(lines) / sizeof(char *)) - 1);
      if (!p_cp)
  	blanklines += 4;  /* add 4 for not showing "Vi compatible" message */
@@ -2988,7 +3011,7 @@ diff --git a/src/version.c b/src/version.c
  
  #ifdef FEAT_WINDOWS
      /* Don't overwrite a statusline.  Depends on 'cmdheight'. */
-@@ -1335,17 +1326,6 @@ intro_message(
+@@ -1346,17 +1337,6 @@ intro_message(
  		do_intro_line(row, (char_u *)_(p), i == 2, 0);
  	    ++row;
  	}
