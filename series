@@ -40,8 +40,6 @@ restore-unicode-chars.patch
 embarcadero.patch
 add-makeencoding.patch
 fix-highdpi.patch
-fix-py3file-tag.patch
 pythonx.patch
 remove-old-todos.patch
-fix-eval-txt.patch
 fix-config_cache-removal.patch #+rejected
