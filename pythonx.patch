@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  7939ba49972dec3241554ff3a3a8b15b78cb3690
+# Parent  403a546217dfe996ae631ff3ab75d46f7faffe14
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2236,6 +2236,7 @@ printf({fmt}, {expr1}...)	String	format 
+@@ -2237,6 +2237,7 @@ printf({fmt}, {expr1}...)	String	format 
  pumvisible()			Number	whether popup menu is visible
  pyeval({expr})			any	evaluate |Python| expression
  py3eval({expr})			any	evaluate |python3| expression
@@ -12,7 +12,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  range({expr} [, {max} [, {stride}]])
  				List	items from {expr} to {max}
  readfile({fname} [, {binary} [, {max}]])
-@@ -6127,6 +6128,13 @@ pyeval({expr})						*pyeval()*
+@@ -6138,6 +6139,13 @@ pyeval({expr})						*pyeval()*
  		non-string keys result in error.
  		{only available when compiled with the |+python| feature}
  
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  							*E726* *E727*
  range({expr} [, {max} [, {stride}]])				*range()*
  		Returns a |List| with Numbers:
-@@ -8359,6 +8367,7 @@ printer			Compiled with |:hardcopy| supp
+@@ -8370,6 +8378,7 @@ printer			Compiled with |:hardcopy| supp
  profile			Compiled with |:profile| support.
  python			Compiled with Python 2.x interface. |has-python|
  python3			Compiled with Python 3.x interface. |has-python|
@@ -254,7 +254,7 @@ diff --git a/src/ex_cmds.h b/src/ex_cmds.h
 diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 --- a/src/ex_cmds2.c
 +++ b/src/ex_cmds2.c
-@@ -3675,6 +3675,167 @@ ex_options(
+@@ -3675,6 +3675,179 @@ ex_options(
  }
  #endif
  
@@ -393,11 +393,17 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +{
 +# ifdef FEAT_PYTHON
 +    if (p_pyx == 2)
++    {
 +	ex_python(eap);
++	return;
++    }
 +# endif
 +# ifdef FEAT_PYTHON3
 +    if (p_pyx == 3)
++    {
 +	ex_py3(eap);
++	return;
++    }
 +# endif
 +}
 +
@@ -409,11 +415,17 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +{
 +# ifdef FEAT_PYTHON
 +    if (p_pyx == 2)
++    {
 +	ex_pydo(eap);
++	return;
++    }
 +# endif
 +# ifdef FEAT_PYTHON3
 +    if (p_pyx == 3)
++    {
 +	ex_py3do(eap);
++	return;
++    }
 +# endif
 +}
 +
