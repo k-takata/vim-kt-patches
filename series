@@ -42,4 +42,5 @@ add-makeencoding.patch
 fix-highdpi.patch
 pythonx.patch
 remove-old-todos.patch
+update-if_ruby.txt.patch
 fix-config_cache-removal.patch #+rejected
