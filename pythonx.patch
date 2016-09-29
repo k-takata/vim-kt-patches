@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  403a546217dfe996ae631ff3ab75d46f7faffe14
+# Parent  011653ab24fadb0fe7083bf3f567e0c427cf8e6f
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2237,6 +2237,7 @@ printf({fmt}, {expr1}...)	String	format 
+@@ -2238,6 +2238,7 @@ printf({fmt}, {expr1}...)	String	format 
  pumvisible()			Number	whether popup menu is visible
  pyeval({expr})			any	evaluate |Python| expression
  py3eval({expr})			any	evaluate |python3| expression
@@ -12,7 +12,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  range({expr} [, {max} [, {stride}]])
  				List	items from {expr} to {max}
  readfile({fname} [, {binary} [, {max}]])
-@@ -6138,6 +6139,13 @@ pyeval({expr})						*pyeval()*
+@@ -6146,6 +6147,13 @@ pyeval({expr})						*pyeval()*
  		non-string keys result in error.
  		{only available when compiled with the |+python| feature}
  
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  							*E726* *E727*
  range({expr} [, {max} [, {stride}]])				*range()*
  		Returns a |List| with Numbers:
-@@ -8370,6 +8378,7 @@ printer			Compiled with |:hardcopy| supp
+@@ -8378,6 +8386,7 @@ printer			Compiled with |:hardcopy| supp
  profile			Compiled with |:profile| support.
  python			Compiled with Python 2.x interface. |has-python|
  python3			Compiled with Python 3.x interface. |has-python|
@@ -139,6 +139,17 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  						*'quoteescape'* *'qe'*
  'quoteescape' 'qe'	string	(default "\")
  			local to buffer
+diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
+--- a/runtime/doc/quickref.txt
++++ b/runtime/doc/quickref.txt
+@@ -838,6 +838,7 @@ Short explanation of each option:		*opti
+ 'pumheight'	  'ph'	    maximum height of the popup menu
+ 'pythondll'		    name of the Python 2 dynamic library
+ 'pythonthreedll'	    name of the Python 3 dynamic library
++'pythonxversion'  'pyx'	    Python version used for pyx* commands
+ 'quoteescape'	  'qe'	    escape characters used in a string
+ 'readonly'	  'ro'	    disallow writing the buffer
+ 'redrawtime'	  'rdt'     timeout for 'hlsearch' and |:match| highlighting
 diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
 --- a/runtime/doc/usr_41.txt
 +++ b/runtime/doc/usr_41.txt
@@ -173,7 +184,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
      {"range",		1, 3, f_range},
      {"readfile",	1, 3, f_readfile},
      {"reltime",		0, 2, f_reltime},
-@@ -5745,11 +5751,13 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -5756,11 +5762,13 @@ f_has(typval_T *argvars, typval_T *rettv
  #ifdef FEAT_PYTHON
  #ifndef DYNAMIC_PYTHON
  	"python",
@@ -187,7 +198,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  #endif
  #endif
  #ifdef FEAT_POSTSCRIPT
-@@ -5980,12 +5988,16 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -5991,12 +5999,16 @@ f_has(typval_T *argvars, typval_T *rettv
  #ifdef DYNAMIC_PYTHON
  	else if (STRICMP(name, "python") == 0)
  	    n = python_enabled(FALSE);
@@ -204,7 +215,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  #endif
  #endif
  #ifdef DYNAMIC_PERL
-@@ -8034,6 +8046,24 @@ f_pyeval(typval_T *argvars, typval_T *re
+@@ -8045,6 +8057,24 @@ f_pyeval(typval_T *argvars, typval_T *re
  }
  #endif
  
