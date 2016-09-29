@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a78eb9d783c2fb9e78830f1ba16b619a97122656
+# Parent  dca01ed84ef503aabb8ddf6ff39b220a5322dd87
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
@@ -149,10 +149,37 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  							*:lgrepa* *:lgrepadd*
  :lgrepa[dd][!] [arguments]
  			Same as ":grepadd", except the location list for the
+diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
+--- a/runtime/doc/quickref.txt
++++ b/runtime/doc/quickref.txt
+@@ -684,6 +684,7 @@ Short explanation of each option:		*opti
+ 'endofline'	  'eol'     write <EOL> for last line in file
+ 'equalalways'	  'ea'	    windows are automatically made the same size
+ 'equalprg'	  'ep'	    external program to use for "=" command
++'errfileencoding' 'eenc'    encoding of the error file
+ 'errorbells'	  'eb'	    ring the bell for error messages
+ 'errorfile'	  'ef'	    name of the errorfile for the QuickFix mode
+ 'errorformat'	  'efm'     description of the lines in the error file
+@@ -719,6 +720,7 @@ Short explanation of each option:		*opti
+ 'formatprg'	  'fp'	    name of external program used with "gq" command
+ 'fsync'		  'fs'	    whether to invoke fsync() after file write
+ 'gdefault'	  'gd'	    the ":substitute" flag 'g' is default on
++'grepencoding'	  'genc'    encoding of external grep commands
+ 'grepformat'	  'gfm'     format of 'grepprg' output
+ 'grepprg'	  'gp'	    program to use for ":grep"
+ 'guicursor'	  'gcr'     GUI: settings for cursor shape and blinking
+@@ -782,6 +784,7 @@ Short explanation of each option:		*opti
+ 'macatsui'		    Mac GUI: use ATSUI text drawing
+ 'magic'			    changes special characters in search patterns
+ 'makeef'	  'mef'     name of the errorfile for ":make"
++'makeencoding'	  'menc'    encoding of external make commands
+ 'makeprg'	  'mp'	    program to use for the ":make" command
+ 'matchpairs'	  'mps'     pairs of characters that "%" can match
+ 'matchtime'	  'mat'     tenths of a second to show matching paren
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
-@@ -2211,6 +2211,11 @@ free_buf_options(
+@@ -2224,6 +2224,11 @@ free_buf_options(
      clear_string_option(&buf->b_p_lw);
  #endif
      clear_string_option(&buf->b_p_bkc);
@@ -613,7 +640,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  				  && (eap->cmdidx == CMD_cfile
  					     || eap->cmdidx == CMD_lfile))
      {
-@@ -4912,7 +4975,7 @@ ex_cbuffer(exarg_T *eap)
+@@ -4916,7 +4979,7 @@ ex_cbuffer(exarg_T *eap)
  			    (eap->cmdidx != CMD_caddbuffer
  			     && eap->cmdidx != CMD_laddbuffer),
  						   eap->line1, eap->line2,
@@ -622,7 +649,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  	    {
  #ifdef FEAT_AUTOCMD
  		if (au_name != NULL)
-@@ -4981,7 +5044,8 @@ ex_cexpr(exarg_T *eap)
+@@ -4985,7 +5048,8 @@ ex_cexpr(exarg_T *eap)
  	    if (qf_init_ext(qi, NULL, NULL, tv, p_efm,
  			    (eap->cmdidx != CMD_caddexpr
  			     && eap->cmdidx != CMD_laddexpr),
