@@ -1,0 +1,75 @@
+# HG changeset patch
+# Parent  ea944bca208d1f0088a7d160179f20e71e5bcfe6
+
+diff --git a/src/iscygpty.c b/src/iscygpty.c
+--- a/src/iscygpty.c
++++ b/src/iscygpty.c
+@@ -178,4 +178,4 @@ int is_cygpty_used(void)
+ 	return ret;
+ }
+ 
+-/* vi:set ts=8 sts=4 sw=4 noet: */
++/* vim: set ts=4 sw=4: */
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -2519,6 +2519,59 @@ check_tty(mparm_T *parmp)
+ #if defined(WIN3264) && !defined(FEAT_GUI_W32)
+ 	if (is_cygpty_used())
+ 	{
++# if defined(HAVE_BIND_TEXTDOMAIN_CODESET) && defined(FEAT_GETTEXT)
++	    char    *s;
++	    char_u  *p;
++	    int	    i;
++	    char    buf[50];
++
++	    /*
++	     * Set the encoding of the error message based on $LC_ALL or other
++	     * environment variables instead of 'encoding'.  Note that the
++	     * message is shown on a Cygwin terminal (e.g. mintty) which
++	     * encoding is based on $LC_ALL, not the current codepage used by
++	     * normal Win32 console programs.
++	     * This code is stolen from enc_locale() in mbyte.c.
++	     */
++	    if ((s = getenv("LC_ALL")) == NULL || *s == NUL)
++		if ((s = getenv("LC_CTYPE")) == NULL || *s == NUL)
++		    s = getenv("LANG");
++	    if (s == NULL || *s == NUL)
++		s = "utf-8";	/* Make "utf-8" as default. */
++
++	    if ((p = (char *)vim_strchr((char_u *)s, '.')) != NULL)
++	    {
++		if (p > s + 2 && STRNICMP(p + 1, "EUC", 3) == 0
++			&& !isalnum((int)p[4]) && p[4] != '-' && p[-3] == '_')
++		{
++		    /* copy "XY.EUC" to "euc-XY" to buf[10] */
++		    STRCPY(buf + 10, "euc-");
++		    buf[14] = p[-2];
++		    buf[15] = p[-1];
++		    buf[16] = 0;
++		    s = buf + 10;
++		}
++		else
++		    s = p + 1;
++	    }
++	    for (i = 0; i < (int)sizeof(buf) - 1 && s[i] != NUL; ++i)
++	    {
++		if (s[i] == '_' || s[i] == '-')
++		    buf[i] = '-';
++		else if (isalnum((int)s[i]))
++		    buf[i] = TOLOWER_ASC(s[i]);
++		else
++		    break;
++	    }
++	    buf[i] = NUL;
++
++	    p = enc_canonize((char_u *)buf);
++	    if (p != NULL)
++	    {
++		(void)bind_textdomain_codeset(VIMPACKAGE, (char *)p);
++		vim_free(p);
++	    }
++# endif
+ 	    mch_errmsg(_("Vim: Error: This version of Vim does not run in a Cygwin terminal\n"));
+ 	    exit(1);
+ 	}

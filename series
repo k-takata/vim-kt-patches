@@ -43,4 +43,5 @@ fix-highdpi.patch
 pythonx.patch
 remove-old-todos.patch
 update-if_ruby.txt.patch
+fix-cygpty-encoding.patch
 fix-config_cache-removal.patch #+rejected
