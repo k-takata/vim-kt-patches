@@ -41,7 +41,6 @@ embarcadero.patch
 add-makeencoding.patch
 fix-highdpi.patch
 pythonx.patch
-remove-old-todos.patch
-update-doc-comment.patch
+update-comment.patch
 fix-cygpty-encoding.patch
 fix-config_cache-removal.patch #+rejected
