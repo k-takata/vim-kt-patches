@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  ea944bca208d1f0088a7d160179f20e71e5bcfe6
+# Parent  b5321c1ae827e974a331f38437fc253de559c3cc
 
 diff --git a/src/iscygpty.c b/src/iscygpty.c
 --- a/src/iscygpty.c
@@ -13,63 +13,161 @@ diff --git a/src/iscygpty.c b/src/iscygpty.c
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -2519,6 +2519,59 @@ check_tty(mparm_T *parmp)
+@@ -2519,6 +2519,23 @@ check_tty(mparm_T *parmp)
  #if defined(WIN3264) && !defined(FEAT_GUI_W32)
  	if (is_cygpty_used())
  	{
 +# if defined(HAVE_BIND_TEXTDOMAIN_CODESET) && defined(FEAT_GETTEXT)
-+	    char    *s;
-+	    char_u  *p;
-+	    int	    i;
-+	    char    buf[50];
++	    char    *s, *tofree = NULL;
 +
 +	    /*
-+	     * Set the encoding of the error message based on $LC_ALL or other
-+	     * environment variables instead of 'encoding'.  Note that the
-+	     * message is shown on a Cygwin terminal (e.g. mintty) which
-+	     * encoding is based on $LC_ALL, not the current codepage used by
-+	     * normal Win32 console programs.
-+	     * This code is stolen from enc_locale() in mbyte.c.
++	     * Set the encoding of the error message based on $LC_ALL or
++	     * other environment variables instead of 'encoding'.
++	     * Note that the message is shown on a Cygwin terminal (e.g.
++	     * mintty) which encoding is based on $LC_ALL or etc., not the
++	     * current codepage used by normal Win32 console programs.
 +	     */
-+	    if ((s = getenv("LC_ALL")) == NULL || *s == NUL)
-+		if ((s = getenv("LC_CTYPE")) == NULL || *s == NUL)
-+		    s = getenv("LANG");
-+	    if (s == NULL || *s == NUL)
++	    tofree = s = enc_locale_env(NULL);
++	    if (s == NULL)
 +		s = "utf-8";	/* Make "utf-8" as default. */
 +
-+	    if ((p = (char *)vim_strchr((char_u *)s, '.')) != NULL)
-+	    {
-+		if (p > s + 2 && STRNICMP(p + 1, "EUC", 3) == 0
-+			&& !isalnum((int)p[4]) && p[4] != '-' && p[-3] == '_')
-+		{
-+		    /* copy "XY.EUC" to "euc-XY" to buf[10] */
-+		    STRCPY(buf + 10, "euc-");
-+		    buf[14] = p[-2];
-+		    buf[15] = p[-1];
-+		    buf[16] = 0;
-+		    s = buf + 10;
-+		}
-+		else
-+		    s = p + 1;
-+	    }
-+	    for (i = 0; i < (int)sizeof(buf) - 1 && s[i] != NUL; ++i)
-+	    {
-+		if (s[i] == '_' || s[i] == '-')
-+		    buf[i] = '-';
-+		else if (isalnum((int)s[i]))
-+		    buf[i] = TOLOWER_ASC(s[i]);
-+		else
-+		    break;
-+	    }
-+	    buf[i] = NUL;
-+
-+	    p = enc_canonize((char_u *)buf);
-+	    if (p != NULL)
-+	    {
-+		(void)bind_textdomain_codeset(VIMPACKAGE, (char *)p);
-+		vim_free(p);
-+	    }
++	    (void)bind_textdomain_codeset(VIMPACKAGE, s);
++	    vim_free(tofree);
 +# endif
  	    mch_errmsg(_("Vim: Error: This version of Vim does not run in a Cygwin terminal\n"));
  	    exit(1);
  	}
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -4307,45 +4307,31 @@ enc_alias_search(char_u *name)
+ 
+ #if defined(FEAT_MBYTE) || defined(PROTO)
+ 
+-#ifdef HAVE_LANGINFO_H
+-# include <langinfo.h>
+-#endif
+-
++# ifdef HAVE_LANGINFO_H
++#  include <langinfo.h>
++# endif
++
++# ifndef FEAT_GUI_W32
+ /*
+- * Get the canonicalized encoding of the current locale.
++ * Get the canonicalized encoding from the specified locale string "locale"
++ * or from the environment variables LC_ALL, LC_CTYPE and LANG.
+  * Returns an allocated string when successful, NULL when not.
+  */
+     char_u *
+-enc_locale(void)
++enc_locale_env(char *locale)
+ {
+-#ifndef WIN3264
+-    char	*s;
++    char	*s = locale;
+     char	*p;
+     int		i;
+-#endif
+     char	buf[50];
+-#ifdef WIN3264
+-    long	acp = GetACP();
+-
+-    if (acp == 1200)
+-	STRCPY(buf, "ucs-2le");
+-    else if (acp == 1252)	    /* cp1252 is used as latin1 */
+-	STRCPY(buf, "latin1");
+-    else
+-	sprintf(buf, "cp%ld", acp);
+-#else
+-# ifdef HAVE_NL_LANGINFO_CODESET
+-    if ((s = nl_langinfo(CODESET)) == NULL || *s == NUL)
+-# endif
+-#  if defined(HAVE_LOCALE_H) || defined(X_LOCALE)
+-	if ((s = setlocale(LC_CTYPE, NULL)) == NULL || *s == NUL)
+-#  endif
+-	    if ((s = getenv("LC_ALL")) == NULL || *s == NUL)
+-		if ((s = getenv("LC_CTYPE")) == NULL || *s == NUL)
+-		    s = getenv("LANG");
+ 
+     if (s == NULL || *s == NUL)
+-	return FAIL;
++	if ((s = getenv("LC_ALL")) == NULL || *s == NUL)
++	    if ((s = getenv("LC_CTYPE")) == NULL || *s == NUL)
++		s = getenv("LANG");
++
++    if (s == NULL || *s == NUL)
++	return NULL;
+ 
+     /* The most generic locale format is:
+      * language[_territory][.codeset][@modifier][+special][,[sponsor][_revision]]
+@@ -4380,12 +4366,46 @@ enc_locale(void)
+ 	    break;
+     }
+     buf[i] = NUL;
+-#endif
+ 
+     return enc_canonize((char_u *)buf);
+ }
+-
+-#if defined(WIN3264) || defined(PROTO) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
++# endif
++
++/*
++ * Get the canonicalized encoding of the current locale.
++ * Returns an allocated string when successful, NULL when not.
++ */
++    char_u *
++enc_locale(void)
++{
++# ifdef WIN3264
++    char	buf[50];
++    long	acp = GetACP();
++
++    if (acp == 1200)
++	STRCPY(buf, "ucs-2le");
++    else if (acp == 1252)	    /* cp1252 is used as latin1 */
++	STRCPY(buf, "latin1");
++    else
++	sprintf(buf, "cp%ld", acp);
++
++    return enc_canonize((char_u *)buf);
++# else
++    char	*s;
++
++#  ifdef HAVE_NL_LANGINFO_CODESET
++    if ((s = nl_langinfo(CODESET)) == NULL || *s == NUL)
++#  endif
++#  if defined(HAVE_LOCALE_H) || defined(X_LOCALE)
++	if ((s = setlocale(LC_CTYPE, NULL)) == NULL || *s == NUL)
++#  endif
++	    s = NULL;
++
++    return enc_locale_env(s);
++# endif
++}
++
++# if defined(WIN3264) || defined(PROTO) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
+ /*
+  * Convert an encoding name to an MS-Windows codepage.
+  * Returns zero if no codepage can be figured out.
+@@ -4412,7 +4432,7 @@ encname2codepage(char_u *name)
+ 	return cp;
+     return 0;
+ }
+-#endif
++# endif
+ 
+ # if defined(USE_ICONV) || defined(PROTO)
+ 
+diff --git a/src/proto/mbyte.pro b/src/proto/mbyte.pro
+--- a/src/proto/mbyte.pro
++++ b/src/proto/mbyte.pro
+@@ -68,6 +68,7 @@ int mb_lefthalve(int row, int col);
+ int mb_fix_col(int col, int row);
+ char_u *enc_skip(char_u *p);
+ char_u *enc_canonize(char_u *enc);
++char_u *enc_locale_env(char *locale);
+ char_u *enc_locale(void);
+ int encname2codepage(char_u *name);
+ void *my_iconv_open(char_u *to, char_u *from);
