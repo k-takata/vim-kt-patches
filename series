@@ -43,4 +43,5 @@ fix-highdpi.patch
 pythonx.patch
 update-comment.patch
 fix-cygpty-encoding.patch
+fix-cproto-O2.patch
 fix-config_cache-removal.patch #+rejected
