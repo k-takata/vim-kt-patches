@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  b5321c1ae827e974a331f38437fc253de559c3cc
+# Parent  12e23c09af7ba15360f6ca3ea151c6131e7bb79d
 
 diff --git a/src/iscygpty.c b/src/iscygpty.c
 --- a/src/iscygpty.c
@@ -13,11 +13,12 @@ diff --git a/src/iscygpty.c b/src/iscygpty.c
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -2519,6 +2519,23 @@ check_tty(mparm_T *parmp)
+@@ -2519,6 +2519,24 @@ check_tty(mparm_T *parmp)
  #if defined(WIN3264) && !defined(FEAT_GUI_W32)
  	if (is_cygpty_used())
  	{
-+# if defined(HAVE_BIND_TEXTDOMAIN_CODESET) && defined(FEAT_GETTEXT)
++# if defined(FEAT_MBYTE) && defined(HAVE_BIND_TEXTDOMAIN_CODESET) \
++	&& defined(FEAT_GETTEXT)
 +	    char    *s, *tofree = NULL;
 +
 +	    /*
