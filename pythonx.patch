@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  011653ab24fadb0fe7083bf3f567e0c427cf8e6f
+# Parent  3d86dea4644d23b77ebe6c43307a9b5ec102a3e1
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  							*E726* *E727*
  range({expr} [, {max} [, {stride}]])				*range()*
  		Returns a |List| with Numbers:
-@@ -8378,6 +8386,7 @@ printer			Compiled with |:hardcopy| supp
+@@ -8381,6 +8389,7 @@ printer			Compiled with |:hardcopy| supp
  profile			Compiled with |:profile| support.
  python			Compiled with Python 2.x interface. |has-python|
  python3			Compiled with Python 3.x interface. |has-python|
@@ -115,7 +115,7 @@ diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -5848,6 +5848,23 @@ A jump table for the options with a shor
+@@ -5849,6 +5849,23 @@ A jump table for the options with a shor
  	This option cannot be set from a |modeline| or in the |sandbox|, for
  	security reasons.
  
@@ -317,12 +317,12 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +		}
 +	    }
 +	    IObuff[21] = '\0';
-+	    if (strcmp("# requires python 2.x", IObuff) == 0)
++	    if (STRCMP("# requires python 2.x", IObuff) == 0)
 +	    {
 +		requires_py_version = 2;
 +		break;
 +	    }
-+	    if (strcmp("# requires python 3.x", IObuff) == 0)
++	    if (STRCMP("# requires python 3.x", IObuff) == 0)
 +	    {
 +		requires_py_version = 3;
 +		break;
@@ -355,7 +355,7 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +     */
 +    vim_memset(&ex, 0, sizeof(ex));
 +    ex.arg = fname;
-+    ex.cmd = v == 2 ? "pyfile" : "pyfile3";
++    ex.cmd = (char_u *)(v == 2 ? "pyfile" : "pyfile3");
 +
 +    if (v == 2)
 +    {
