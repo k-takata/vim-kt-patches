@@ -1,0 +1,58 @@
+# HG changeset patch
+# Parent  276c79c8ae0062ebc0809245b21a520662f7d608
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -3540,12 +3540,12 @@ gui_mch_browseW(
+     filterp = convert_filterW(filter);
+ 
+     vim_memset(&fileStruct, 0, sizeof(OPENFILENAMEW));
+-#ifdef OPENFILENAME_SIZE_VERSION_400W
++#  ifdef OPENFILENAME_SIZE_VERSION_400W
+     /* be compatible with Windows NT 4.0 */
+     fileStruct.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
+-#else
++#  else
+     fileStruct.lStructSize = sizeof(fileStruct);
+-#endif
++#  endif
+ 
+     if (title != NULL)
+ 	titlep = enc_to_utf16(title, NULL);
+@@ -3582,10 +3582,10 @@ gui_mch_browseW(
+      * Don't use OFN_OVERWRITEPROMPT, Vim has its own ":confirm" dialog.
+      */
+     fileStruct.Flags = (OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY);
+-#ifdef FEAT_SHORTCUT
++#  ifdef FEAT_SHORTCUT
+     if (curbuf->b_p_bin)
+ 	fileStruct.Flags |= OFN_NODEREFERENCELINKS;
+-#endif
++#  endif
+     if (saving)
+     {
+ 	if (!GetSaveFileNameW(&fileStruct))
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -40,7 +40,7 @@
+ #  include <dlgs.h>
+ #  include <winspool.h>
+ #  include <commdlg.h>
+-#endif
++# endif
+ 
+ #endif /* PROTO */
+ 
+@@ -1619,7 +1619,9 @@ mch_print_init(prt_settings_T *psettings
+ 
+ 	if (psettings->n_uncollated_copies == 0)
+ 	    psettings->n_uncollated_copies = 1;
+-    } else {
++    }
++    else
++    {
+ 	psettings->n_collated_copies = 1;
+ 	psettings->n_uncollated_copies = 1;
+     }
