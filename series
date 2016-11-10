@@ -44,4 +44,5 @@ fix-cygpty-encoding.patch
 fix-cproto-O2.patch
 doc-add-maillist-tag.patch
 fix-coding-style.patch
+fix-crash-with-long-fontname.patch
 fix-config_cache-removal.patch #+rejected
