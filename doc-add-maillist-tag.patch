@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  49ba1d4750b09e16685b5b4dcc5ff26c7d6048c3
+# Parent  8df7b7c143134118dc6f5e70257eca6aef18441c
 
 diff --git a/runtime/doc/intro.txt b/runtime/doc/intro.txt
 --- a/runtime/doc/intro.txt
@@ -33,12 +33,14 @@ diff --git a/runtime/doc/intro.txt b/runtime/doc/intro.txt
 diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
 --- a/runtime/doc/todo.txt
 +++ b/runtime/doc/todo.txt
-@@ -28,7 +28,7 @@ See |develop.txt| for development plans.
- be worked on, but only if you sponsor Vim development.  See |sponsor|.
+@@ -29,8 +29,8 @@ be worked on, but only if you sponsor Vi
  
  Issues can also be entered online: https://github.com/vim/vim/issues
--Updates will be forwarded to the vim_dev maillist.  Issues entered there will
-+Updates will be forwarded to the |vim_dev| maillist.  Issues entered there will
- not be repeated below, unless there is extra information.
+ Only use this for bug reports, not for questions!  Those belong on the
+-maillist.  Updates will be forwarded to the vim_dev maillist.  Issues entered
+-there will not be repeated below, unless there is extra information.
++maillist.  Updates will be forwarded to the |vim_dev| maillist.  Issues
++entered there will not be repeated below, unless there is extra information.
  
  							*known-bugs*
+ -------------------- Known bugs and current work -----------------------
