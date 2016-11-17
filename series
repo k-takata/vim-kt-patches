@@ -45,4 +45,5 @@ fix-cproto-O2.patch
 doc-add-maillist-tag.patch
 fix-coding-style.patch
 fix-encoding-of-vimrun-warning.patch
+use-multiprocess-build-on-vc10.patch
 fix-config_cache-removal.patch #+rejected
