@@ -44,7 +44,5 @@ fix-cygpty-encoding.patch
 fix-cproto-O2.patch
 doc-add-maillist-tag.patch
 fix-coding-style.patch
-fix-encoding-of-vimrun-warning.patch
-use-multiprocess-build-on-vc10.patch
 fix-quotation-without-vimrun.patch
 fix-config_cache-removal.patch #+rejected
