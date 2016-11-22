@@ -45,4 +45,5 @@ fix-cproto-O2.patch
 doc-add-maillist-tag.patch
 fix-coding-style.patch
 fix-quotation-without-vimrun.patch
+fix-CenterWindow-on-multimonitor.patch
 fix-config_cache-removal.patch #+rejected
