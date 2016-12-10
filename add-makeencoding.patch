@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  dca01ed84ef503aabb8ddf6ff39b220a5322dd87
+# Parent  ffb15a845436db793983ee918fafd2f65ba1d074
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -2784,6 +2784,19 @@ A jump table for the options with a shor
+@@ -2785,6 +2785,19 @@ A jump table for the options with a shor
  	This option cannot be set from a |modeline| or in the |sandbox|, for
  	security reasons.
  
@@ -24,7 +24,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  			*'errorbells'* *'eb'* *'noerrorbells'* *'noeb'*
  'errorbells' 'eb'	boolean	(default off)
  			global
-@@ -3467,6 +3480,17 @@ A jump table for the options with a shor
+@@ -3468,6 +3481,17 @@ A jump table for the options with a shor
  
  	NOTE: This option is reset when 'compatible' is set.
  
@@ -42,7 +42,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  						*'grepformat'* *'gfm'*
  'grepformat' 'gfm'	string	(default "%f:%l:%m,%f:%l%m,%f  %l%m")
  			global
-@@ -4968,6 +4992,26 @@ A jump table for the options with a shor
+@@ -4971,6 +4995,26 @@ A jump table for the options with a shor
  	This option cannot be set from a |modeline| or in the |sandbox|, for
  	security reasons.
  
@@ -179,7 +179,7 @@ diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
-@@ -2224,6 +2224,11 @@ free_buf_options(
+@@ -2225,6 +2225,11 @@ free_buf_options(
      clear_string_option(&buf->b_p_lw);
  #endif
      clear_string_option(&buf->b_p_bkc);
@@ -194,7 +194,7 @@ diff --git a/src/buffer.c b/src/buffer.c
 diff --git a/src/if_cscope.c b/src/if_cscope.c
 --- a/src/if_cscope.c
 +++ b/src/if_cscope.c
-@@ -1271,7 +1271,7 @@ cs_find_common(
+@@ -1242,7 +1242,7 @@ cs_find_common(
  		wp = curwin;
  	    /* '-' starts a new error list */
  	    if (qf_init(wp, tmp, (char_u *)"%f%*\\t%l%*\\t%m",
@@ -258,7 +258,7 @@ diff --git a/src/option.c b/src/option.c
  #define PV_MA		OPT_BUF(BV_MA)
  #define PV_ML		OPT_BUF(BV_ML)
  #define PV_MOD		OPT_BUF(BV_MOD)
-@@ -1081,6 +1090,15 @@ static struct vimoption options[] =
+@@ -1083,6 +1092,15 @@ static struct vimoption options[] =
      {"errorbells",  "eb",   P_BOOL|P_VI_DEF,
  			    (char_u *)&p_eb, PV_NONE,
  			    {(char_u *)FALSE, (char_u *)0L} SCRIPTID_INIT},
@@ -274,7 +274,7 @@ diff --git a/src/option.c b/src/option.c
      {"errorfile",   "ef",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_ef, PV_NONE,
-@@ -1282,6 +1300,15 @@ static struct vimoption options[] =
+@@ -1284,6 +1302,15 @@ static struct vimoption options[] =
  			    {(char_u *)NULL, (char_u *)0L}
  #endif
  			    SCRIPTID_INIT},
@@ -290,7 +290,7 @@ diff --git a/src/option.c b/src/option.c
      {"grepprg",	    "gp",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_gp, PV_GP,
-@@ -1798,6 +1825,15 @@ static struct vimoption options[] =
+@@ -1800,6 +1827,15 @@ static struct vimoption options[] =
  			    {(char_u *)NULL, (char_u *)0L}
  #endif
  			    SCRIPTID_INIT},
@@ -306,7 +306,7 @@ diff --git a/src/option.c b/src/option.c
      {"makeprg",	    "mp",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_mp, PV_MP,
-@@ -5556,6 +5592,11 @@ check_buf_options(buf_T *buf)
+@@ -5558,6 +5594,11 @@ check_buf_options(buf_T *buf)
      check_string_option(&buf->b_p_lw);
  #endif
      check_string_option(&buf->b_p_bkc);
@@ -318,7 +318,7 @@ diff --git a/src/option.c b/src/option.c
  }
  
  /*
-@@ -6132,7 +6173,8 @@ did_set_string_option(
+@@ -6155,7 +6196,8 @@ did_set_string_option(
  
  #ifdef FEAT_MBYTE
      /* 'encoding' and 'fileencoding' */
@@ -328,7 +328,7 @@ diff --git a/src/option.c b/src/option.c
      {
  	if (gvarp == &p_fenc)
  	{
-@@ -10186,6 +10228,17 @@ unset_global_local_option(char_u *name, 
+@@ -10232,6 +10274,17 @@ unset_global_local_option(char_u *name, 
  	    clear_string_option(&buf->b_p_lw);
  	    break;
  #endif
@@ -346,7 +346,7 @@ diff --git a/src/option.c b/src/option.c
      }
  }
  
-@@ -10238,6 +10291,11 @@ get_varp_scope(struct vimoption *p, int 
+@@ -10284,6 +10337,11 @@ get_varp_scope(struct vimoption *p, int 
  	    case PV_LW:   return (char_u *)&(curbuf->b_p_lw);
  #endif
  	    case PV_BKC:  return (char_u *)&(curbuf->b_p_bkc);
@@ -358,7 +358,7 @@ diff --git a/src/option.c b/src/option.c
  	}
  	return NULL; /* "cannot happen" */
      }
-@@ -10311,6 +10369,14 @@ get_varp(struct vimoption *p)
+@@ -10357,6 +10415,14 @@ get_varp(struct vimoption *p)
  	case PV_LW:	return *curbuf->b_p_lw != NUL
  				    ? (char_u *)&(curbuf->b_p_lw) : p->var;
  #endif
@@ -373,7 +373,7 @@ diff --git a/src/option.c b/src/option.c
  
  #ifdef FEAT_ARABIC
  	case PV_ARAB:	return (char_u *)&(curwin->w_p_arab);
-@@ -10899,6 +10965,11 @@ buf_copy_options(buf_T *buf, int flags)
+@@ -10957,6 +11023,11 @@ buf_copy_options(buf_T *buf, int flags)
  #ifdef FEAT_LISP
  	    buf->b_p_lw = empty_option;
  #endif
@@ -461,16 +461,16 @@ diff --git a/src/proto/quickfix.pro b/src/proto/quickfix.pro
 diff --git a/src/quickfix.c b/src/quickfix.c
 --- a/src/quickfix.c
 +++ b/src/quickfix.c
-@@ -114,7 +114,7 @@ struct efm_S
-     int		    conthere;	/* %> used */
- };
+@@ -116,7 +116,7 @@ struct efm_S
+ 
+ static efm_T	*fmt_start = NULL; /* cached across qf_parse_line() calls */
  
 -static int	qf_init_ext(qf_info_T *qi, char_u *efile, buf_T *buf, typval_T *tv, char_u *errorformat, int newlist, linenr_T lnumfirst, linenr_T lnumlast, char_u *qf_title);
 +static int	qf_init_ext(qf_info_T *qi, char_u *efile, buf_T *buf, typval_T *tv, char_u *errorformat, int newlist, linenr_T lnumfirst, linenr_T lnumlast, char_u *qf_title, char_u *enc);
  static void	qf_store_title(qf_info_T *qi, char_u *title);
  static void	qf_new_list(qf_info_T *qi, char_u *qf_title);
  static void	ll_free_all(qf_info_T **pqi);
-@@ -165,7 +165,8 @@ qf_init(
+@@ -167,7 +167,8 @@ qf_init(
      char_u	    *efile,
      char_u	    *errorformat,
      int		    newlist,		/* TRUE: start a new error list */
@@ -480,7 +480,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  {
      qf_info_T	    *qi = &ql_info;
  
-@@ -178,7 +179,7 @@ qf_init(
+@@ -180,7 +181,7 @@ qf_init(
  
      return qf_init_ext(qi, efile, curbuf, NULL, errorformat, newlist,
  						    (linenr_T)0, (linenr_T)0,
@@ -489,7 +489,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  }
  
  /*
-@@ -495,6 +496,7 @@ typedef struct {
+@@ -498,6 +499,7 @@ typedef struct {
      buf_T	*buf;
      linenr_T	buflnum;
      linenr_T	lnumlast;
@@ -497,7 +497,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  } qfstate_T;
  
      static char_u *
-@@ -710,6 +712,30 @@ qf_get_next_file_line(qfstate_T *state)
+@@ -713,6 +715,30 @@ qf_get_next_file_line(qfstate_T *state)
      else
  	state->linebuf = IObuff;
  
@@ -528,7 +528,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      return QF_OK;
  }
  
-@@ -1100,10 +1126,11 @@ qf_init_ext(
+@@ -1105,10 +1131,11 @@ qf_init_ext(
      int		    newlist,		/* TRUE: start a new error list */
      linenr_T	    lnumfirst,		/* first line number to use */
      linenr_T	    lnumlast,		/* last line number to use */
@@ -542,7 +542,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      qffields_T	    fields = {NULL, NULL, 0, 0L, 0, FALSE, NULL, 0, 0, 0};
  #ifdef FEAT_WINDOWS
      qfline_T	    *old_last = NULL;
-@@ -1113,7 +1140,14 @@ qf_init_ext(
+@@ -1119,7 +1146,14 @@ qf_init_ext(
      static char_u   *last_efm = NULL;
      int		    retval = -1;	/* default: return error flag */
      int		    status;
@@ -558,7 +558,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      fields.namebuf = alloc_id(CMDBUFFSIZE + 1, aid_qf_namebuf);
      fields.errmsglen = CMDBUFFSIZE + 1;
      fields.errmsg = alloc_id(fields.errmsglen, aid_qf_errmsg);
-@@ -1276,6 +1310,10 @@ qf_init_end:
+@@ -1286,6 +1320,10 @@ qf_init_end:
  #ifdef FEAT_WINDOWS
      qf_update_buffer(qi, old_last);
  #endif
@@ -569,7 +569,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  
      return retval;
  }
-@@ -3419,6 +3457,7 @@ ex_make(exarg_T *eap)
+@@ -3431,6 +3469,7 @@ ex_make(exarg_T *eap)
  {
      char_u	*fname;
      char_u	*cmd;
@@ -577,7 +577,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      unsigned	len;
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
-@@ -3453,6 +3492,18 @@ ex_make(exarg_T *eap)
+@@ -3464,6 +3503,18 @@ ex_make(exarg_T *eap)
  # endif
      }
  #endif
@@ -596,7 +596,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  
      if (eap->cmdidx == CMD_lmake || eap->cmdidx == CMD_lgrep
  	|| eap->cmdidx == CMD_lgrepadd)
-@@ -3500,7 +3551,7 @@ ex_make(exarg_T *eap)
+@@ -3511,7 +3562,7 @@ ex_make(exarg_T *eap)
  			    && eap->cmdidx != CMD_lmake) ? p_gefm : p_efm,
  					   (eap->cmdidx != CMD_grepadd
  					    && eap->cmdidx != CMD_lgrepadd),
@@ -605,7 +605,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      if (wp != NULL)
  	qi = GET_LOC_LIST(wp);
  #ifdef FEAT_AUTOCMD
-@@ -3839,6 +3890,7 @@ ex_cnext(exarg_T *eap)
+@@ -3850,6 +3901,7 @@ ex_cnext(exarg_T *eap)
      void
  ex_cfile(exarg_T *eap)
  {
@@ -613,7 +613,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
  #ifdef FEAT_AUTOCMD
-@@ -3863,6 +3915,17 @@ ex_cfile(exarg_T *eap)
+@@ -3874,6 +3926,17 @@ ex_cfile(exarg_T *eap)
      if (au_name != NULL)
  	apply_autocmds(EVENT_QUICKFIXCMDPRE, au_name, NULL, FALSE, curbuf);
  #endif
@@ -631,7 +631,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  #ifdef FEAT_BROWSE
      if (cmdmod.browse)
      {
-@@ -3890,7 +3953,7 @@ ex_cfile(exarg_T *eap)
+@@ -3901,7 +3964,7 @@ ex_cfile(exarg_T *eap)
       */
      if (qf_init(wp, p_ef, p_efm, (eap->cmdidx != CMD_caddfile
  				  && eap->cmdidx != CMD_laddfile),
@@ -640,7 +640,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  				  && (eap->cmdidx == CMD_cfile
  					     || eap->cmdidx == CMD_lfile))
      {
-@@ -4916,7 +4979,7 @@ ex_cbuffer(exarg_T *eap)
+@@ -4927,7 +4990,7 @@ ex_cbuffer(exarg_T *eap)
  			    (eap->cmdidx != CMD_caddbuffer
  			     && eap->cmdidx != CMD_laddbuffer),
  						   eap->line1, eap->line2,
@@ -649,7 +649,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  	    {
  #ifdef FEAT_AUTOCMD
  		if (au_name != NULL)
-@@ -4985,7 +5048,8 @@ ex_cexpr(exarg_T *eap)
+@@ -4995,7 +5058,8 @@ ex_cexpr(exarg_T *eap)
  	    if (qf_init_ext(qi, NULL, NULL, tv, p_efm,
  			    (eap->cmdidx != CMD_caddexpr
  			     && eap->cmdidx != CMD_laddexpr),
@@ -662,7 +662,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -2058,6 +2058,9 @@ struct file_buffer
+@@ -2068,6 +2068,9 @@ struct file_buffer
      char_u	*b_p_cfu;	/* 'completefunc' */
      char_u	*b_p_ofu;	/* 'omnifunc' */
  #endif
@@ -672,7 +672,7 @@ diff --git a/src/structs.h b/src/structs.h
      int		b_p_eol;	/* 'endofline' */
      int		b_p_fixeol;	/* 'fixendofline' */
      int		b_p_et;		/* 'expandtab' */
-@@ -2072,6 +2075,9 @@ struct file_buffer
+@@ -2082,6 +2085,9 @@ struct file_buffer
  #endif
      char_u	*b_p_fo;	/* 'formatoptions' */
      char_u	*b_p_flp;	/* 'formatlistpat' */
@@ -682,7 +682,7 @@ diff --git a/src/structs.h b/src/structs.h
      int		b_p_inf;	/* 'infercase' */
      char_u	*b_p_isk;	/* 'iskeyword' */
  #ifdef FEAT_FIND_ID
-@@ -2098,6 +2104,9 @@ struct file_buffer
+@@ -2108,6 +2114,9 @@ struct file_buffer
  #ifdef FEAT_LISP
      int		b_p_lisp;	/* 'lisp' */
  #endif
