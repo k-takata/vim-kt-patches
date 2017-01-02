@@ -1,0 +1,111 @@
+# HG changeset patch
+# Parent  e4df080316808234a8409f6494ed8dce6c3c79ce
+
+diff --git a/src/testdir/test_makeencoding.py b/src/testdir/test_makeencoding.py
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_makeencoding.py
+@@ -0,0 +1,64 @@
++#!/usr/bin/python
++# -*- coding: utf-8 -*-
++
++from __future__ import print_function, unicode_literals
++import locale
++import io
++import sys
++
++def set_output_encoding(enc=None):
++    """Set the encoding of stdout and stderr
++
++    arguments:
++      enc -- Encoding name.
++             If omitted, locale.getpreferredencoding() is used.
++    """
++    if enc is None:
++        enc = locale.getpreferredencoding()
++
++    def get_text_writer(fo, **kwargs):
++        kw = dict(kwargs)
++        kw.setdefault('errors', 'backslashreplace') # use \uXXXX style
++        kw.setdefault('closefd', False)
++
++        if sys.version_info[0] < 3:
++            # Work around for Python 2.x
++            # New line conversion isn't needed here. Done in somewhere else.
++            writer = io.open(fo.fileno(), mode='w', newline='', **kw)
++            write = writer.write    # save the original write() function
++            enc = locale.getpreferredencoding()
++            def convwrite(s):
++                if isinstance(s, bytes):
++                    write(s.decode(enc))    # convert to unistr
++                else:
++                    write(s)
++                try:
++                    writer.flush()  # needed on Windows
++                except IOError:
++                    pass
++            writer.write = convwrite
++        else:
++            writer = io.open(fo.fileno(), mode='w', **kw)
++        return writer
++
++    sys.stdout = get_text_writer(sys.stdout, encoding=enc)
++    sys.stderr = get_text_writer(sys.stderr, encoding=enc)
++
++
++def main():
++    enc = 'utf-8'
++    if len(sys.argv) > 1:
++        enc = sys.argv[1]
++    set_output_encoding(enc)
++
++    message_tbl = {
++            'utf-8': 'ÀÈÌÒÙ こんにちは',
++            'latin1': 'ÀÈÌÒÙ',
++            'cp932': 'こんにちは',
++            }
++
++    print('Xfoobar.c(10) : %s (%s)' % (message_tbl[enc], enc))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/testdir/test_makeencoding.vim b/src/testdir/test_makeencoding.vim
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_makeencoding.vim
+@@ -0,0 +1,34 @@
++" Tests for 'makeencoding', 'errfileencoding' and 'grepencoding'.
++if !has('multi_byte')
++  finish
++endif
++
++source shared.vim
++
++let s:python = PythonProg()
++if s:python == ''
++  " Can't run this test.
++  finish
++endif
++
++
++let s:message_tbl = {
++      \ 'utf-8': 'ÀÈÌÒÙ こんにちは',
++      \ 'latin1': 'ÀÈÌÒÙ',
++      \ 'cp932': 'こんにちは',
++      \}
++
++
++func Test_makeencoding()
++  let &makeprg = s:python
++  set errorformat=%f(%l)\ :\ %m
++
++  for enc in keys(s:message_tbl)
++    let &makeencoding = enc
++    exec "silent make! test_makeencoding.py " . enc
++    copen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    cclose
++  endfor
++endfunc
