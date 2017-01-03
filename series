@@ -45,5 +45,4 @@ fix-cproto-O2.patch
 doc-add-maillist-tag.patch
 fix-quotation-without-vimrun.patch
 getbufinfo-lnum-issue993.patch
-wip-add-test-for-makeencoding.patch
 fix-config_cache-removal.patch #+rejected
