@@ -718,9 +718,11 @@ diff --git a/src/testdir/test_makeencoding.py b/src/testdir/test_makeencoding.py
 new file mode 100644
 --- /dev/null
 +++ b/src/testdir/test_makeencoding.py
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,67 @@
 +#!/usr/bin/python
 +# -*- coding: utf-8 -*-
++
++# Test program for :make, :grep and :cgetfile.
 +
 +from __future__ import print_function, unicode_literals
 +import locale
@@ -788,7 +790,7 @@ diff --git a/src/testdir/test_makeencoding.vim b/src/testdir/test_makeencoding.v
 new file mode 100644
 --- /dev/null
 +++ b/src/testdir/test_makeencoding.vim
-@@ -0,0 +1,155 @@
+@@ -0,0 +1,156 @@
 +" Tests for 'errfileencoding', 'grepencoding' and 'makeencoding'.
 +if !has('multi_byte')
 +  finish
@@ -802,6 +804,7 @@ new file mode 100644
 +  finish
 +endif
 +
++let s:script = 'test_makeencoding.py'
 +
 +let s:message_tbl = {
 +      \ 'utf-8': 'ÀÈÌÒÙ こんにちは 你好',
@@ -820,7 +823,7 @@ new file mode 100644
 +  set errfileencoding=
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
 +    cgetfile
 +    copen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
@@ -832,7 +835,7 @@ new file mode 100644
 +  set errfileencoding=
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
 +    lgetfile
 +    lopen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
@@ -844,7 +847,7 @@ new file mode 100644
 +  set makeencoding=
 +  for enc in keys(s:message_tbl)
 +    let &errfileencoding = enc
-+    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
 +    cgetfile
 +    copen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
@@ -856,7 +859,7 @@ new file mode 100644
 +  set makeencoding=
 +  for enc in keys(s:message_tbl)
 +    let &errfileencoding = enc
-+    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
 +    lgetfile
 +    lopen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
@@ -877,7 +880,7 @@ new file mode 100644
 +  set grepencoding=
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent grep! test_makeencoding.py " . enc
++    exec "silent grep! " . s:script . " " . enc
 +    copen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
 +          \ getline('.'))
@@ -888,7 +891,7 @@ new file mode 100644
 +  set grepencoding=
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent lgrep! test_makeencoding.py " . enc
++    exec "silent lgrep! " . s:script . " " . enc
 +    lopen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
 +          \ getline('.'))
@@ -899,7 +902,7 @@ new file mode 100644
 +  set makeencoding=
 +  for enc in keys(s:message_tbl)
 +    let &grepencoding = enc
-+    exec "silent grep! test_makeencoding.py " . enc
++    exec "silent grep! " . s:script . " " . enc
 +    copen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
 +          \ getline('.'))
@@ -910,7 +913,7 @@ new file mode 100644
 +  set makeencoding=
 +  for enc in keys(s:message_tbl)
 +    let &grepencoding = enc
-+    exec "silent lgrep! test_makeencoding.py " . enc
++    exec "silent lgrep! " . s:script . " " . enc
 +    lopen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
 +          \ getline('.'))
@@ -927,7 +930,7 @@ new file mode 100644
 +  " :make
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent make! test_makeencoding.py " . enc
++    exec "silent make! " . s:script . " " . enc
 +    copen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
 +          \ getline('.'))
@@ -937,7 +940,7 @@ new file mode 100644
 +  " :lmake
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent lmake! test_makeencoding.py " . enc
++    exec "silent lmake! " . s:script . " " . enc
 +    lopen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
 +          \ getline('.'))
