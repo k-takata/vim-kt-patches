@@ -1,11 +1,33 @@
 # HG changeset patch
-# Parent  e4df080316808234a8409f6494ed8dce6c3c79ce
+# Parent  4d71f4877d644bbb1b6a31d1e6bad0aadc6c12ab
 
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -2127,6 +2127,7 @@ test_arglist \
+ 	test_langmap \
+ 	test_largefile \
+ 	test_lispwords \
++	test_makeencoding \
+ 	test_man \
+ 	test_mapping \
+ 	test_marks \
+diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
+--- a/src/testdir/Make_all.mak
++++ b/src/testdir/Make_all.mak
+@@ -164,6 +164,7 @@ NEW_TESTS = test_arglist.res \
+ 	    test_job_fails.res \
+ 	    test_json.res \
+ 	    test_langmap.res \
++	    test_makeencoding.res \
+ 	    test_man.res \
+ 	    test_marks.res \
+ 	    test_matchadd_conceal.res \
 diff --git a/src/testdir/test_makeencoding.py b/src/testdir/test_makeencoding.py
 new file mode 100644
 --- /dev/null
 +++ b/src/testdir/test_makeencoding.py
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,65 @@
 +#!/usr/bin/python
 +# -*- coding: utf-8 -*-
 +
@@ -60,9 +82,10 @@ new file mode 100644
 +    set_output_encoding(enc)
 +
 +    message_tbl = {
-+            'utf-8': 'ÀÈÌÒÙ こんにちは',
++            'utf-8': 'ÀÈÌÒÙ こんにちは 你好',
 +            'latin1': 'ÀÈÌÒÙ',
 +            'cp932': 'こんにちは',
++            'cp936': '你好',
 +            }
 +
 +    print('Xfoobar.c(10) : %s (%s)' % (message_tbl[enc], enc))
@@ -74,8 +97,8 @@ diff --git a/src/testdir/test_makeencoding.vim b/src/testdir/test_makeencoding.v
 new file mode 100644
 --- /dev/null
 +++ b/src/testdir/test_makeencoding.vim
-@@ -0,0 +1,34 @@
-+" Tests for 'makeencoding', 'errfileencoding' and 'grepencoding'.
+@@ -0,0 +1,155 @@
++" Tests for 'errfileencoding', 'grepencoding' and 'makeencoding'.
 +if !has('multi_byte')
 +  finish
 +endif
@@ -90,16 +113,127 @@ new file mode 100644
 +
 +
 +let s:message_tbl = {
-+      \ 'utf-8': 'ÀÈÌÒÙ こんにちは',
++      \ 'utf-8': 'ÀÈÌÒÙ こんにちは 你好',
 +      \ 'latin1': 'ÀÈÌÒÙ',
 +      \ 'cp932': 'こんにちは',
++      \ 'cp936': '你好',
 +      \}
 +
 +
-+func Test_makeencoding()
++" Tests for :cgetfile and :lgetfile with 'makeencoding' and 'errfileencoding'.
++func Test_getfile()
++  set errorfile=Xerror.txt
++  set errorformat=%f(%l)\ :\ %m
++
++  " :cgetfile with 'makeencoding'
++  set errfileencoding=
++  for enc in keys(s:message_tbl)
++    let &makeencoding = enc
++    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    cgetfile
++    copen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    cclose
++  endfor
++
++  " :lgetfile with 'makeencoding'
++  set errfileencoding=
++  for enc in keys(s:message_tbl)
++    let &makeencoding = enc
++    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    lgetfile
++    lopen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    lclose
++  endfor
++
++  " :cgetfile with 'errfileencoding'
++  set makeencoding=
++  for enc in keys(s:message_tbl)
++    let &errfileencoding = enc
++    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    cgetfile
++    copen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    cclose
++  endfor
++
++  " :lgetfile with 'errfileencoding'
++  set makeencoding=
++  for enc in keys(s:message_tbl)
++    let &errfileencoding = enc
++    exec "silent !" . s:python . " test_makeencoding.py " . enc . " > " . &errorfile
++    lgetfile
++    lopen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    lclose
++  endfor
++
++  call delete(&errorfile)
++endfunc
++
++
++" Tests for :grep and :lgrep with 'makeencoding' and 'grepencoding'.
++func Test_grep()
++  let &grepprg = s:python
++  set grepformat=%f(%l)\ :\ %m
++
++  " :grep with 'makeencoding'
++  set grepencoding=
++  for enc in keys(s:message_tbl)
++    let &makeencoding = enc
++    exec "silent grep! test_makeencoding.py " . enc
++    copen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    cclose
++  endfor
++
++  " :lgrep with 'makeencoding'
++  set grepencoding=
++  for enc in keys(s:message_tbl)
++    let &makeencoding = enc
++    exec "silent lgrep! test_makeencoding.py " . enc
++    lopen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    lclose
++  endfor
++
++  " :grep with 'grepencoding'
++  set makeencoding=
++  for enc in keys(s:message_tbl)
++    let &grepencoding = enc
++    exec "silent grep! test_makeencoding.py " . enc
++    copen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    cclose
++  endfor
++
++  " :lgrep with 'grepencoding'
++  set makeencoding=
++  for enc in keys(s:message_tbl)
++    let &grepencoding = enc
++    exec "silent lgrep! test_makeencoding.py " . enc
++    lopen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    lclose
++  endfor
++endfunc
++
++
++" Tests for :make and :lmake with 'makeencoding'.
++func Test_make()
 +  let &makeprg = s:python
 +  set errorformat=%f(%l)\ :\ %m
 +
++  " :make
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
 +    exec "silent make! test_makeencoding.py " . enc
@@ -107,5 +241,15 @@ new file mode 100644
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
 +          \ getline('.'))
 +    cclose
++  endfor
++
++  " :lmake
++  for enc in keys(s:message_tbl)
++    let &makeencoding = enc
++    exec "silent lmake! test_makeencoding.py " . enc
++    lopen
++    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
++          \ getline('.'))
++    lclose
 +  endfor
 +endfunc
