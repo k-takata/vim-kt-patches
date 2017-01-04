@@ -1,6 +1,18 @@
 # HG changeset patch
-# Parent  8df7b7c143134118dc6f5e70257eca6aef18441c
+# Parent  bd33e5a4a8ba86170d4313a3a4c0b45bb5f32376
 
+diff --git a/runtime/doc/develop.txt b/runtime/doc/develop.txt
+--- a/runtime/doc/develop.txt
++++ b/runtime/doc/develop.txt
+@@ -177,7 +177,7 @@ 4. Check ../doc/todo.txt if the change a
+ 5. Make a patch with "git diff".  You can also create a pull request on
+    github, but it's the diff that matters.
+ 6. Make a note about what changed, preferably mentioning the problem and the
+-   solution.  Send an email to the vim-dev maillist with an explanation and
++   solution.  Send an email to the |vim-dev| maillist with an explanation and
+    include the diff. Or create a pull request on github.
+ 
+ 
 diff --git a/runtime/doc/intro.txt b/runtime/doc/intro.txt
 --- a/runtime/doc/intro.txt
 +++ b/runtime/doc/intro.txt
