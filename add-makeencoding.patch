@@ -1,48 +1,10 @@
 # HG changeset patch
-# Parent  533dca4c48ee68ae2094e098cb069f21802aef57
+# Parent  734bd3d44352b50e1b6ecd570a831b0f54fd8b83
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -2785,6 +2785,19 @@ A jump table for the options with a shor
- 	This option cannot be set from a |modeline| or in the |sandbox|, for
- 	security reasons.
- 
-+					*'errfileencoding'* *'eenc'*
-+'errfileencoding' 'eenc'
-+			string	(default "")
-+			global or local to buffer |global-local|
-+			{only available when compiled with the |+multi_byte|
-+			feature}
-+			{not in Vi}
-+	Encoding used for reading the error file.  When empty, the value of
-+	'makeencoding' is used.
-+	This is used for `:cfile`, `:cgetfile`, `:caddfile`, `:lfile`,
-+	`:lgetfile` and `:laddfile`.
-+	See also: 'makeencoding', 'grepencoding'
-+
- 			*'errorbells'* *'eb'* *'noerrorbells'* *'noeb'*
- 'errorbells' 'eb'	boolean	(default off)
- 			global
-@@ -3468,6 +3481,17 @@ A jump table for the options with a shor
- 
- 	NOTE: This option is reset when 'compatible' is set.
- 
-+					*'grepencoding'* *'genc'*
-+'grepencoding' 'genc'	string	(default "")
-+			global or local to buffer |global-local|
-+			{only available when compiled with the |+multi_byte|
-+			feature}
-+			{not in Vi}
-+	Encoding used for reading the output of external grep commands.  When
-+	empty, the value of 'makeencoding' is used.
-+	This is used for `:grep`, `:lgrep`, `:grepadd` and `:lgrepadd`.
-+	See also: 'makeencoding', 'errfileencoding'
-+
- 						*'grepformat'* *'gfm'*
- 'grepformat' 'gfm'	string	(default "%f:%l:%m,%f:%l%m,%f  %l%m")
- 			global
-@@ -4971,6 +4995,26 @@ A jump table for the options with a shor
+@@ -4971,6 +4971,25 @@ A jump table for the options with a shor
  	This option cannot be set from a |modeline| or in the |sandbox|, for
  	security reasons.
  
@@ -54,10 +16,9 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +			{not in Vi}
 +	Encoding used for reading the output of external commands.  When empty,
 +	encoding is not converted.
-+	This is used for `:make` and `:lmake`.
-+
-+	This is also used as a default value for 'errfileencoding' and
-+	'grepencoding' if they are empty.
++	This is used for `:make`, `:lmake`, `:grep`, `:lgrep`, `:grepadd`,
++	`:lgrepadd`, `:cfile`, `:cgetfile`, `:caddfile`, `:lfile`, `:lgetfile`,
++	and `:laddfile`.
 +
 +	This would be mostly useful when you use MS-Windows and set 'encoding'
 +	to "utf-8".  If |+iconv| is enabled and GNU libiconv is used, setting
@@ -77,7 +38,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  			name of the errorfile, the 'errorfile' option will
  			be set to [errorfile].  See |:cc| for [!].
 +			If the encoding of the error file differs from the
-+			'encoding' option, you can use the 'errfileencoding'
++			'encoding' option, you can use the 'makeencoding'
 +			option to specify the encoding.
  
  							*:lf* *:lfile*
@@ -87,7 +48,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  			Read the error file.  Just like ":cfile" but don't
  			jump to the first error.
 +			If the encoding of the error file differs from the
-+			'encoding' option, you can use the 'errfileencoding'
++			'encoding' option, you can use the 'makeencoding'
 +			option to specify the encoding.
  
  
@@ -97,7 +58,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  			errorfile to the current quickfix list. If a quickfix
  			list is not present, then a new list is created.
 +			If the encoding of the error file differs from the
-+			'encoding' option, you can use the 'errfileencoding'
++			'encoding' option, you can use the 'makeencoding'
 +			option to specify the encoding.
  
  							*:laddf* *:laddfile*
@@ -133,7 +94,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  			|:vimgrep|.  Note that the pattern needs to be
  			enclosed in separator characters then.
 +			If the encoding of the program output differs from the
-+			'encoding' option, you can use the 'grepencoding'
++			'encoding' option, you can use the 'makeencoding'
 +			option to specify the encoding.
  
  							    *:lgr* *:lgrep*
@@ -143,7 +104,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  				  \ | endtry"
  <
 +			If the encoding of the program output differs from the
-+			'encoding' option, you can use the 'grepencoding'
++			'encoding' option, you can use the 'makeencoding'
 +			option to specify the encoding.
 +
  							*:lgrepa* *:lgrepadd*
@@ -152,27 +113,11 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
 diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
 --- a/runtime/doc/quickref.txt
 +++ b/runtime/doc/quickref.txt
-@@ -684,6 +684,7 @@ Short explanation of each option:		*opti
- 'endofline'	  'eol'     write <EOL> for last line in file
- 'equalalways'	  'ea'	    windows are automatically made the same size
- 'equalprg'	  'ep'	    external program to use for "=" command
-+'errfileencoding' 'eenc'    encoding of the error file
- 'errorbells'	  'eb'	    ring the bell for error messages
- 'errorfile'	  'ef'	    name of the errorfile for the QuickFix mode
- 'errorformat'	  'efm'     description of the lines in the error file
-@@ -719,6 +720,7 @@ Short explanation of each option:		*opti
- 'formatprg'	  'fp'	    name of external program used with "gq" command
- 'fsync'		  'fs'	    whether to invoke fsync() after file write
- 'gdefault'	  'gd'	    the ":substitute" flag 'g' is default on
-+'grepencoding'	  'genc'    encoding of external grep commands
- 'grepformat'	  'gfm'     format of 'grepprg' output
- 'grepprg'	  'gp'	    program to use for ":grep"
- 'guicursor'	  'gcr'     GUI: settings for cursor shape and blinking
-@@ -782,6 +784,7 @@ Short explanation of each option:		*opti
+@@ -782,6 +782,7 @@ Short explanation of each option:		*opti
  'macatsui'		    Mac GUI: use ATSUI text drawing
  'magic'			    changes special characters in search patterns
  'makeef'	  'mef'     name of the errorfile for ":make"
-+'makeencoding'	  'menc'    encoding of external make commands
++'makeencoding'	  'menc'    encoding of external make/grep commands
  'makeprg'	  'mp'	    program to use for the ":make" command
  'matchpairs'	  'mps'     pairs of characters that "%" can match
  'matchtime'	  'mat'     tenths of a second to show matching paren
@@ -190,13 +135,11 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
-@@ -2225,6 +2225,11 @@ free_buf_options(
+@@ -2225,6 +2225,9 @@ free_buf_options(
      clear_string_option(&buf->b_p_lw);
  #endif
      clear_string_option(&buf->b_p_bkc);
 +#ifdef FEAT_MBYTE
-+    clear_string_option(&buf->b_p_eenc);
-+    clear_string_option(&buf->b_p_genc);
 +    clear_string_option(&buf->b_p_menc);
 +#endif
  }
@@ -217,15 +160,14 @@ diff --git a/src/if_cscope.c b/src/if_cscope.c
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -556,11 +556,17 @@ vim_main2(void)
+@@ -556,11 +556,16 @@ vim_main2(void)
       */
      if (params.edit_type == EDIT_QF)
      {
 +	char_u	*enc = NULL;
 +
 +# ifdef FEAT_MBYTE
-+	/* Use 'eenc' if it is set. Otherwise use 'menc'. */
-+	enc = (*p_eenc != NUL) ? p_eenc : p_menc;
++	enc = p_menc;
 +# endif
  	if (params.use_ef != NULL)
  	    set_string_option_direct((char_u *)"ef", -1,
@@ -239,27 +181,7 @@ diff --git a/src/main.c b/src/main.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -97,6 +97,9 @@
- # define PV_DEF		OPT_BOTH(OPT_BUF(BV_DEF))
- # define PV_INC		OPT_BOTH(OPT_BUF(BV_INC))
- #endif
-+#ifdef FEAT_MBYTE
-+# define PV_EENC	OPT_BOTH(OPT_BUF(BV_EENC))
-+#endif
- #define PV_EOL		OPT_BUF(BV_EOL)
- #define PV_FIXEOL	OPT_BUF(BV_FIXEOL)
- #define PV_EP		OPT_BOTH(OPT_BUF(BV_EP))
-@@ -116,6 +119,9 @@
- #ifdef FEAT_AUTOCMD
- # define PV_FT		OPT_BUF(BV_FT)
- #endif
-+#ifdef FEAT_MBYTE
-+# define PV_GENC	OPT_BOTH(OPT_BUF(BV_GENC))
-+#endif
- #define PV_IMI		OPT_BUF(BV_IMI)
- #define PV_IMS		OPT_BUF(BV_IMS)
- #if defined(FEAT_CINDENT) && defined(FEAT_EVAL)
-@@ -138,6 +144,9 @@
+@@ -138,6 +138,9 @@
  # define PV_LISP	OPT_BUF(BV_LISP)
  # define PV_LW		OPT_BOTH(OPT_BUF(BV_LW))
  #endif
@@ -269,39 +191,7 @@ diff --git a/src/option.c b/src/option.c
  #define PV_MA		OPT_BUF(BV_MA)
  #define PV_ML		OPT_BUF(BV_ML)
  #define PV_MOD		OPT_BUF(BV_MOD)
-@@ -1083,6 +1092,15 @@ static struct vimoption options[] =
-     {"errorbells",  "eb",   P_BOOL|P_VI_DEF,
- 			    (char_u *)&p_eb, PV_NONE,
- 			    {(char_u *)FALSE, (char_u *)0L} SCRIPTID_INIT},
-+    {"errfileencoding", "eenc", P_STRING|P_VI_DEF,
-+#ifdef FEAT_MBYTE
-+			    (char_u *)&p_eenc, PV_EENC,
-+			    {(char_u *)"", (char_u *)0L}
-+#else
-+			    (char_u *)NULL, PV_NONE,
-+			    {(char_u *)0L, (char_u *)0L}
-+#endif
-+			    SCRIPTID_INIT},
-     {"errorfile",   "ef",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
- #ifdef FEAT_QUICKFIX
- 			    (char_u *)&p_ef, PV_NONE,
-@@ -1284,6 +1302,15 @@ static struct vimoption options[] =
- 			    {(char_u *)NULL, (char_u *)0L}
- #endif
- 			    SCRIPTID_INIT},
-+    {"grepencoding","genc", P_STRING|P_VI_DEF,
-+#ifdef FEAT_MBYTE
-+			    (char_u *)&p_genc, PV_GENC,
-+			    {(char_u *)"", (char_u *)0L}
-+#else
-+			    (char_u *)NULL, PV_NONE,
-+			    {(char_u *)0L, (char_u *)0L}
-+#endif
-+			    SCRIPTID_INIT},
-     {"grepprg",	    "gp",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
- #ifdef FEAT_QUICKFIX
- 			    (char_u *)&p_gp, PV_GP,
-@@ -1800,6 +1827,15 @@ static struct vimoption options[] =
+@@ -1800,6 +1803,15 @@ static struct vimoption options[] =
  			    {(char_u *)NULL, (char_u *)0L}
  #endif
  			    SCRIPTID_INIT},
@@ -317,39 +207,31 @@ diff --git a/src/option.c b/src/option.c
      {"makeprg",	    "mp",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_mp, PV_MP,
-@@ -5558,6 +5594,11 @@ check_buf_options(buf_T *buf)
+@@ -5558,6 +5570,9 @@ check_buf_options(buf_T *buf)
      check_string_option(&buf->b_p_lw);
  #endif
      check_string_option(&buf->b_p_bkc);
 +#ifdef FEAT_MBYTE
-+    check_string_option(&buf->b_p_eenc);
-+    check_string_option(&buf->b_p_genc);
 +    check_string_option(&buf->b_p_menc);
 +#endif
  }
  
  /*
-@@ -6155,7 +6196,8 @@ did_set_string_option(
+@@ -6155,7 +6170,8 @@ did_set_string_option(
  
  #ifdef FEAT_MBYTE
      /* 'encoding' and 'fileencoding' */
 -    else if (varp == &p_enc || gvarp == &p_fenc || varp == &p_tenc)
 +    else if (varp == &p_enc || gvarp == &p_fenc || varp == &p_tenc
-+		|| gvarp == &p_eenc || gvarp == &p_genc || gvarp == &p_menc)
++						    || gvarp == &p_menc)
      {
  	if (gvarp == &p_fenc)
  	{
-@@ -10232,6 +10274,17 @@ unset_global_local_option(char_u *name, 
+@@ -10232,6 +10248,11 @@ unset_global_local_option(char_u *name, 
  	    clear_string_option(&buf->b_p_lw);
  	    break;
  #endif
 +#ifdef FEAT_MBYTE
-+	case PV_EENC:
-+	    clear_string_option(&buf->b_p_eenc);
-+	    break;
-+	case PV_GENC:
-+	    clear_string_option(&buf->b_p_genc);
-+	    break;
 +	case PV_MENC:
 +	    clear_string_option(&buf->b_p_menc);
 +	    break;
@@ -357,40 +239,32 @@ diff --git a/src/option.c b/src/option.c
      }
  }
  
-@@ -10284,6 +10337,11 @@ get_varp_scope(struct vimoption *p, int 
+@@ -10284,6 +10305,9 @@ get_varp_scope(struct vimoption *p, int 
  	    case PV_LW:   return (char_u *)&(curbuf->b_p_lw);
  #endif
  	    case PV_BKC:  return (char_u *)&(curbuf->b_p_bkc);
 +#ifdef FEAT_MBYTE
-+	    case PV_EENC: return (char_u *)&(curbuf->b_p_eenc);
-+	    case PV_GENC: return (char_u *)&(curbuf->b_p_genc);
 +	    case PV_MENC: return (char_u *)&(curbuf->b_p_menc);
 +#endif
  	}
  	return NULL; /* "cannot happen" */
      }
-@@ -10357,6 +10415,14 @@ get_varp(struct vimoption *p)
+@@ -10357,6 +10381,10 @@ get_varp(struct vimoption *p)
  	case PV_LW:	return *curbuf->b_p_lw != NUL
  				    ? (char_u *)&(curbuf->b_p_lw) : p->var;
  #endif
 +#ifdef FEAT_MBYTE
-+	case PV_EENC:	return *curbuf->b_p_eenc != NUL
-+				    ? (char_u *)&(curbuf->b_p_eenc) : p->var;
-+	case PV_GENC:	return *curbuf->b_p_genc != NUL
-+				    ? (char_u *)&(curbuf->b_p_genc) : p->var;
 +	case PV_MENC:	return *curbuf->b_p_menc != NUL
 +				    ? (char_u *)&(curbuf->b_p_menc) : p->var;
 +#endif
  
  #ifdef FEAT_ARABIC
  	case PV_ARAB:	return (char_u *)&(curwin->w_p_arab);
-@@ -10957,6 +11023,11 @@ buf_copy_options(buf_T *buf, int flags)
+@@ -10957,6 +10985,9 @@ buf_copy_options(buf_T *buf, int flags)
  #ifdef FEAT_LISP
  	    buf->b_p_lw = empty_option;
  #endif
 +#ifdef FEAT_MBYTE
-+	    buf->b_p_eenc = empty_option;
-+	    buf->b_p_genc = empty_option;
 +	    buf->b_p_menc = empty_option;
 +#endif
  
@@ -399,27 +273,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/option.h b/src/option.h
 --- a/src/option.h
 +++ b/src/option.h
-@@ -465,6 +465,9 @@ EXTERN char_u	*p_ead;		/* 'eadirection' 
- #endif
- EXTERN int	p_ea;		/* 'equalalways' */
- EXTERN char_u	*p_ep;		/* 'equalprg' */
-+#ifdef FEAT_MBYTE
-+EXTERN char_u	*p_eenc;	/* 'errfileencoding' */
-+#endif
- EXTERN int	p_eb;		/* 'errorbells' */
- #ifdef FEAT_QUICKFIX
- EXTERN char_u	*p_ef;		/* 'errorfile' */
-@@ -509,6 +512,9 @@ EXTERN char_u	*p_fp;		/* 'formatprg' */
- EXTERN int	p_fs;		/* 'fsync' */
- #endif
- EXTERN int	p_gd;		/* 'gdefault' */
-+#ifdef FEAT_MBYTE
-+EXTERN char_u	*p_genc;	/* 'grepencoding' */
-+#endif
- #ifdef FEAT_PRINTER
- EXTERN char_u	*p_pdev;	/* 'printdevice' */
- # ifdef FEAT_POSTSCRIPT
-@@ -630,6 +636,9 @@ EXTERN char_u	*p_luadll;	/* 'luadll' */
+@@ -630,6 +630,9 @@ EXTERN char_u	*p_luadll;	/* 'luadll' */
  EXTERN int	p_macatsui;	/* 'macatsui' */
  #endif
  EXTERN int	p_magic;	/* 'magic' */
@@ -429,27 +283,7 @@ diff --git a/src/option.h b/src/option.h
  #ifdef FEAT_QUICKFIX
  EXTERN char_u	*p_mef;		/* 'makeef' */
  EXTERN char_u	*p_mp;		/* 'makeprg' */
-@@ -1024,6 +1033,9 @@ enum
-     , BV_DEF
-     , BV_INC
- #endif
-+#ifdef FEAT_MBYTE
-+    , BV_EENC
-+#endif
-     , BV_EOL
-     , BV_FIXEOL
-     , BV_EP
-@@ -1039,6 +1051,9 @@ enum
- #ifdef FEAT_AUTOCMD
-     , BV_FT
- #endif
-+#ifdef FEAT_MBYTE
-+    , BV_GENC
-+#endif
-     , BV_IMI
-     , BV_IMS
- #if defined(FEAT_CINDENT) && defined(FEAT_EVAL)
-@@ -1061,6 +1076,9 @@ enum
+@@ -1061,6 +1064,9 @@ enum
      , BV_LISP
      , BV_LW
  #endif
@@ -588,26 +422,17 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      unsigned	len;
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
-@@ -3464,6 +3503,18 @@ ex_make(exarg_T *eap)
+@@ -3464,6 +3503,9 @@ ex_make(exarg_T *eap)
  # endif
      }
  #endif
 +#ifdef FEAT_MBYTE
-+    if ((eap->cmdidx != CMD_make) && (eap->cmdidx != CMD_lmake))
-+    {
-+	/* Use 'genc' for grep commands if it is set. */
-+	if (*curbuf->b_p_genc != NUL)
-+	    enc = curbuf->b_p_genc;
-+	else if (*p_genc != NUL)
-+	    enc = p_genc;
-+    }
-+    if (enc == NULL)
-+	enc = (*curbuf->b_p_menc != NUL) ? curbuf->b_p_menc : p_menc;
++    enc = (*curbuf->b_p_menc != NUL) ? curbuf->b_p_menc : p_menc;
 +#endif
  
      if (eap->cmdidx == CMD_lmake || eap->cmdidx == CMD_lgrep
  	|| eap->cmdidx == CMD_lgrepadd)
-@@ -3511,7 +3562,7 @@ ex_make(exarg_T *eap)
+@@ -3511,7 +3553,7 @@ ex_make(exarg_T *eap)
  			    && eap->cmdidx != CMD_lmake) ? p_gefm : p_efm,
  					   (eap->cmdidx != CMD_grepadd
  					    && eap->cmdidx != CMD_lgrepadd),
@@ -616,7 +441,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      if (wp != NULL)
  	qi = GET_LOC_LIST(wp);
  #ifdef FEAT_AUTOCMD
-@@ -3850,6 +3901,7 @@ ex_cnext(exarg_T *eap)
+@@ -3850,6 +3892,7 @@ ex_cnext(exarg_T *eap)
      void
  ex_cfile(exarg_T *eap)
  {
@@ -624,25 +449,17 @@ diff --git a/src/quickfix.c b/src/quickfix.c
      win_T	*wp = NULL;
      qf_info_T	*qi = &ql_info;
  #ifdef FEAT_AUTOCMD
-@@ -3874,6 +3926,17 @@ ex_cfile(exarg_T *eap)
+@@ -3874,6 +3917,9 @@ ex_cfile(exarg_T *eap)
      if (au_name != NULL)
  	apply_autocmds(EVENT_QUICKFIXCMDPRE, au_name, NULL, FALSE, curbuf);
  #endif
 +#ifdef FEAT_MBYTE
-+    /* Use 'eenc' if it is set. Otherwise use 'menc'. */
-+    if (*curbuf->b_p_eenc != NUL)
-+	enc = curbuf->b_p_eenc;
-+    else if (*p_eenc != NUL)
-+	enc = p_eenc;
-+    else if (*curbuf->b_p_menc != NUL)
-+	enc = curbuf->b_p_menc;
-+    else
-+	enc = p_menc;
++    enc = (*curbuf->b_p_menc != NUL) ? curbuf->b_p_menc : p_menc;
 +#endif
  #ifdef FEAT_BROWSE
      if (cmdmod.browse)
      {
-@@ -3901,7 +3964,7 @@ ex_cfile(exarg_T *eap)
+@@ -3901,7 +3947,7 @@ ex_cfile(exarg_T *eap)
       */
      if (qf_init(wp, p_ef, p_efm, (eap->cmdidx != CMD_caddfile
  				  && eap->cmdidx != CMD_laddfile),
@@ -651,7 +468,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  				  && (eap->cmdidx == CMD_cfile
  					     || eap->cmdidx == CMD_lfile))
      {
-@@ -4927,7 +4990,7 @@ ex_cbuffer(exarg_T *eap)
+@@ -4927,7 +4973,7 @@ ex_cbuffer(exarg_T *eap)
  			    (eap->cmdidx != CMD_caddbuffer
  			     && eap->cmdidx != CMD_laddbuffer),
  						   eap->line1, eap->line2,
@@ -660,7 +477,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
  	    {
  #ifdef FEAT_AUTOCMD
  		if (au_name != NULL)
-@@ -4995,7 +5058,8 @@ ex_cexpr(exarg_T *eap)
+@@ -4995,7 +5041,8 @@ ex_cexpr(exarg_T *eap)
  	    if (qf_init_ext(qi, NULL, NULL, tv, p_efm,
  			    (eap->cmdidx != CMD_caddexpr
  			     && eap->cmdidx != CMD_laddexpr),
@@ -673,27 +490,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -2068,6 +2068,9 @@ struct file_buffer
-     char_u	*b_p_cfu;	/* 'completefunc' */
-     char_u	*b_p_ofu;	/* 'omnifunc' */
- #endif
-+#ifdef FEAT_MBYTE
-+    char_u	*b_p_eenc;	/* 'errfileencoding' */
-+#endif
-     int		b_p_eol;	/* 'endofline' */
-     int		b_p_fixeol;	/* 'fixendofline' */
-     int		b_p_et;		/* 'expandtab' */
-@@ -2082,6 +2085,9 @@ struct file_buffer
- #endif
-     char_u	*b_p_fo;	/* 'formatoptions' */
-     char_u	*b_p_flp;	/* 'formatlistpat' */
-+#ifdef FEAT_MBYTE
-+    char_u	*b_p_genc;	/* 'grepencoding' */
-+#endif
-     int		b_p_inf;	/* 'infercase' */
-     char_u	*b_p_isk;	/* 'iskeyword' */
- #ifdef FEAT_FIND_ID
-@@ -2108,6 +2114,9 @@ struct file_buffer
+@@ -2108,6 +2108,9 @@ struct file_buffer
  #ifdef FEAT_LISP
      int		b_p_lisp;	/* 'lisp' */
  #endif
@@ -790,8 +587,8 @@ diff --git a/src/testdir/test_makeencoding.vim b/src/testdir/test_makeencoding.v
 new file mode 100644
 --- /dev/null
 +++ b/src/testdir/test_makeencoding.vim
-@@ -0,0 +1,156 @@
-+" Tests for 'errfileencoding', 'grepencoding' and 'makeencoding'.
+@@ -0,0 +1,106 @@
++" Tests for 'makeencoding'.
 +if !has('multi_byte')
 +  finish
 +endif
@@ -814,13 +611,12 @@ new file mode 100644
 +      \}
 +
 +
-+" Tests for :cgetfile and :lgetfile with 'makeencoding' and 'errfileencoding'.
++" Tests for :cgetfile and :lgetfile.
 +func Test_getfile()
 +  set errorfile=Xerror.txt
 +  set errorformat=%f(%l)\ :\ %m
 +
-+  " :cgetfile with 'makeencoding'
-+  set errfileencoding=
++  " :cgetfile
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
 +    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
@@ -831,34 +627,9 @@ new file mode 100644
 +    cclose
 +  endfor
 +
-+  " :lgetfile with 'makeencoding'
-+  set errfileencoding=
++  " :lgetfile
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
-+    lgetfile
-+    lopen
-+    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
-+          \ getline('.'))
-+    lclose
-+  endfor
-+
-+  " :cgetfile with 'errfileencoding'
-+  set makeencoding=
-+  for enc in keys(s:message_tbl)
-+    let &errfileencoding = enc
-+    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
-+    cgetfile
-+    copen
-+    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
-+          \ getline('.'))
-+    cclose
-+  endfor
-+
-+  " :lgetfile with 'errfileencoding'
-+  set makeencoding=
-+  for enc in keys(s:message_tbl)
-+    let &errfileencoding = enc
 +    exec "silent !" . s:python . " " . s:script . " " . enc . " > " . &errorfile
 +    lgetfile
 +    lopen
@@ -871,13 +642,12 @@ new file mode 100644
 +endfunc
 +
 +
-+" Tests for :grep and :lgrep with 'makeencoding' and 'grepencoding'.
++" Tests for :grep and :lgrep.
 +func Test_grep()
 +  let &grepprg = s:python
 +  set grepformat=%f(%l)\ :\ %m
 +
-+  " :grep with 'makeencoding'
-+  set grepencoding=
++  " :grep
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
 +    exec "silent grep! " . s:script . " " . enc
@@ -887,32 +657,9 @@ new file mode 100644
 +    cclose
 +  endfor
 +
-+  " :lgrep with 'makeencoding'
-+  set grepencoding=
++  " :lgrep
 +  for enc in keys(s:message_tbl)
 +    let &makeencoding = enc
-+    exec "silent lgrep! " . s:script . " " . enc
-+    lopen
-+    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
-+          \ getline('.'))
-+    lclose
-+  endfor
-+
-+  " :grep with 'grepencoding'
-+  set makeencoding=
-+  for enc in keys(s:message_tbl)
-+    let &grepencoding = enc
-+    exec "silent grep! " . s:script . " " . enc
-+    copen
-+    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
-+          \ getline('.'))
-+    cclose
-+  endfor
-+
-+  " :lgrep with 'grepencoding'
-+  set makeencoding=
-+  for enc in keys(s:message_tbl)
-+    let &grepencoding = enc
 +    exec "silent lgrep! " . s:script . " " . enc
 +    lopen
 +    call assert_equal("Xfoobar.c|10| " . s:message_tbl[enc] . " (" . enc . ")",
@@ -922,7 +669,7 @@ new file mode 100644
 +endfunc
 +
 +
-+" Tests for :make and :lmake with 'makeencoding'.
++" Tests for :make and :lmake.
 +func Test_make()
 +  let &makeprg = s:python
 +  set errorformat=%f(%l)\ :\ %m
