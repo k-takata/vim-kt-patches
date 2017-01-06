@@ -1,6 +1,17 @@
 # HG changeset patch
 # Parent  8fe6a651db7c3409a339eaa020d096d44b56e7d1
 
+diff --git a/Filelist b/Filelist
+--- a/Filelist
++++ b/Filelist
+@@ -122,6 +122,7 @@ SRC_ALL =	\
+ 		src/testdir/pythonx/topmodule/submodule/subsubmodule/subsubsubmodule.py \
+ 		src/testdir/python_after/*.py \
+ 		src/testdir/python_before/*.py \
++		src/testdir/pyxfile/*.py \
+ 		src/testdir/bench*.in \
+ 		src/testdir/bench*.vim \
+ 		src/testdir/samples/*.txt \
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
@@ -45,11 +56,19 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
  
  {Vi does not have any of these commands}
  
-@@ -812,4 +813,60 @@ loaded at a time, just checking if Pytho
+@@ -711,6 +712,7 @@ 8. pyeval() and py3eval() Vim functions	
+ 
+ To facilitate bi-directional interface, you can use |pyeval()| and |py3eval()| 
+ functions to evaluate Python expressions and pass their values to VimL.
++|pyxeval()| is also available.
+ 
+ ==============================================================================
+ 9. Dynamic loading					*python-dynamic*
+@@ -812,4 +814,59 @@ loaded at a time, just checking if Pytho
  the other one from being available.
  
  ==============================================================================
-+11. Python X						*python_x*
++11. Python X						*python_x* *pythonx*
 +
 +Because much python code can be written so that it works with python 2.6+ and
 +python 3 the pyx* functions and commands have been writen.
@@ -74,13 +93,13 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +					*:pyxfile* *python_x-special-comments*
 +The `:pyxfile` command works similar to `:pyfile`.  However you can add these
 +comments to force Vim using `:pyfile` or `:py3file`: >
-+  #!/any string/python2		" Shebang. Must be the top of the file.
-+  #!/any string/python3		" Shebang. Must be the top of the file.
++  #!/any string/python2		" Shebang. Must be the first line of the file.
++  #!/any string/python3		" Shebang. Must be the first line of the file.
 +  # requires python 2.x		" Maximum lines depend on 'modelines'.
 +  # requires python 3.x		" Maximum lines depend on 'modelines'.
 +Unlike normal modelines, the bottom of the file is not checked.
 +If none of them are found, the 'pythonxversion' setting is used.
-+>
++							*Exxx* *Exxy* *Exxz*
 +If Vim does not support that python version a silent message will be printed.
 +Use `:messages` to read them.
 +
@@ -99,7 +118,6 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +If you want to use Python 3 as the default, and want to fallback to Python 2
 +when Python 3 is not available, you can add the following lines in your
 +|.vimrc|: >
-+
 +	if !has('pythonx')
 +	  silent! set pyx=2
 +	endif
@@ -170,6 +188,26 @@ diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
  
  ==============================================================================
  *41.7*	Defining a function
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -2146,6 +2146,8 @@ test_arglist \
+ 	test_partial \
+ 	test_perl \
+ 	test_popup \
++	test_pyx2 \
++	test_pyx3 \
+ 	test_quickfix \
+ 	test_regexp_latin \
+ 	test_regexp_utf8 \
+@@ -2746,6 +2748,7 @@ shadow:	runtime pixmaps
+ 				 ../../testdir/*.vim \
+ 				 ../../testdir/*.py \
+ 				 ../../testdir/python* \
++				 ../../testdir/pyxfile \
+ 				 ../../testdir/sautest \
+ 				 ../../testdir/samples \
+ 				 ../../testdir/test83-tags? \
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
@@ -383,7 +421,7 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +	ex_py3file(&ex);
 +# else
 +	vim_snprintf((char *)IObuff, IOSIZE,
-+		_("Exxx: Required python version 3.x not supported, ignoring file: %s"),
++		_("Exxy: Required python version 3.x not supported, ignoring file: %s"),
 +		fname);
 +	MSG(IObuff);
 +# endif
@@ -391,7 +429,7 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +    }
 +    /* This should never happen .. */
 +    vim_snprintf((char *)IObuff, IOSIZE,
-+	    _("Exxx: Python not supported, ignoring file: %s"), fname);
++	    _("Exxz: Python not supported, ignoring file: %s"), fname);
 +    MSG(IObuff);
 +}
 +
@@ -549,3 +587,230 @@ diff --git a/src/proto/ex_cmds2.pro b/src/proto/ex_cmds2.pro
  void ex_source(exarg_T *eap);
  linenr_T *source_breakpoint(void *cookie);
  int *source_dbg_tick(void *cookie);
+diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
+--- a/src/testdir/Make_all.mak
++++ b/src/testdir/Make_all.mak
+@@ -175,6 +175,8 @@ NEW_TESTS = test_arglist.res \
+ 	    test_normal.res \
+ 	    test_packadd.res \
+ 	    test_perl.res \
++	    test_pyx2.res \
++	    test_pyx3.res \
+ 	    test_quickfix.res \
+ 	    test_ruby.res \
+ 	    test_search.res \
+diff --git a/src/testdir/pyxfile/py2_magic.py b/src/testdir/pyxfile/py2_magic.py
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/pyxfile/py2_magic.py
+@@ -0,0 +1,4 @@
++# requires python 2.x
++
++import sys
++print(sys.version)
+diff --git a/src/testdir/pyxfile/py2_shebang.py b/src/testdir/pyxfile/py2_shebang.py
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/pyxfile/py2_shebang.py
+@@ -0,0 +1,4 @@
++#!/usr/bin/python2
++
++import sys
++print(sys.version)
+diff --git a/src/testdir/pyxfile/py3_magic.py b/src/testdir/pyxfile/py3_magic.py
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/pyxfile/py3_magic.py
+@@ -0,0 +1,4 @@
++# requires python 3.x
++
++import sys
++print(sys.version)
+diff --git a/src/testdir/pyxfile/py3_shebang.py b/src/testdir/pyxfile/py3_shebang.py
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/pyxfile/py3_shebang.py
+@@ -0,0 +1,4 @@
++#!/usr/bin/python3
++
++import sys
++print(sys.version)
+diff --git a/src/testdir/pyxfile/pyx.py b/src/testdir/pyxfile/pyx.py
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/pyxfile/pyx.py
+@@ -0,0 +1,2 @@
++import sys
++print(sys.version)
+diff --git a/src/testdir/test_pyx2.vim b/src/testdir/test_pyx2.vim
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_pyx2.vim
+@@ -0,0 +1,74 @@
++" Test for pyx* commands and functions with Python 2.
++
++silent! set pyx=2
++if &pyx != 2 || !has('python')
++  finish
++endif
++
++let s:py2pattern = '^2\.[0-7]\.\d\+$'
++let s:py3pattern = '^3\.\d\+\.\d\+$'
++
++
++func Test_has_pythonx()
++  call assert_true(has('pythonx'))
++endfunc
++
++
++func Test_pyx()
++  redir => var
++  pyx << EOF
++import sys
++print(sys.version)
++EOF
++  redir END
++  call assert_match(s:py2pattern, split(var)[0])
++endfunc
++
++
++func Test_pyxdo()
++  pyx import sys
++  enew
++  pyxdo return sys.version
++  call assert_match(s:py2pattern, split(getline('.'))[0])
++endfunc
++
++
++func Test_pyxeval()
++  pyx import sys
++  call assert_match(s:py2pattern, split(pyxeval('sys.version'))[0])
++endfunc
++
++
++func Test_pyxfile()
++  " No special comments nor shebangs
++  redir => var
++  pyxfile pyxfile/pyx.py
++  redir END
++  call assert_match(s:py2pattern, split(var)[0])
++
++  " Python 2 special comment
++  redir => var
++  pyxfile pyxfile/py2_magic.py
++  redir END
++  call assert_match(s:py2pattern, split(var)[0])
++
++  " Python 2 shebang
++  redir => var
++  pyxfile pyxfile/py2_shebang.py
++  redir END
++  call assert_match(s:py2pattern, split(var)[0])
++
++  if has('python3')
++    " Python 3 special comment
++    redir => var
++    pyxfile pyxfile/py3_magic.py
++    redir END
++    call assert_match(s:py3pattern, split(var)[0])
++
++    " Python 3 shebang
++    redir => var
++    pyxfile pyxfile/py3_shebang.py
++    redir END
++    call assert_match(s:py3pattern, split(var)[0])
++  endif
++endfunc
+diff --git a/src/testdir/test_pyx3.vim b/src/testdir/test_pyx3.vim
+new file mode 100644
+--- /dev/null
++++ b/src/testdir/test_pyx3.vim
+@@ -0,0 +1,74 @@
++" Test for pyx* commands and functions with Python 3.
++
++silent! set pyx=3
++if &pyx != 3 || !has('python3')
++  finish
++endif
++
++let s:py2pattern = '^2\.[0-7]\.\d\+$'
++let s:py3pattern = '^3\.\d\+\.\d\+$'
++
++
++func Test_has_pythonx()
++  call assert_true(has('pythonx'))
++endfunc
++
++
++func Test_pyx()
++  redir => var
++  pyx << EOF
++import sys
++print(sys.version)
++EOF
++  redir END
++  call assert_match(s:py3pattern, split(var)[0])
++endfunc
++
++
++func Test_pyxdo()
++  pyx import sys
++  enew
++  pyxdo return sys.version
++  call assert_match(s:py3pattern, split(getline('.'))[0])
++endfunc
++
++
++func Test_pyxeval()
++  pyx import sys
++  call assert_match(s:py3pattern, split(pyxeval('sys.version'))[0])
++endfunc
++
++
++func Test_pyxfile()
++  " No special comments nor shebangs
++  redir => var
++  pyxfile pyxfile/pyx.py
++  redir END
++  call assert_match(s:py3pattern, split(var)[0])
++
++  " Python 3 special comment
++  redir => var
++  pyxfile pyxfile/py3_magic.py
++  redir END
++  call assert_match(s:py3pattern, split(var)[0])
++
++  " Python 3 shebang
++  redir => var
++  pyxfile pyxfile/py3_shebang.py
++  redir END
++  call assert_match(s:py3pattern, split(var)[0])
++
++  if has('python')
++    " Python 2 special comment
++    redir => var
++    pyxfile pyxfile/py2_magic.py
++    redir END
++    call assert_match(s:py2pattern, split(var)[0])
++
++    " Python 2 shebang
++    redir => var
++    pyxfile pyxfile/py2_shebang.py
++    redir END
++    call assert_match(s:py2pattern, split(var)[0])
++  endif
++endfunc
+diff --git a/src/userfunc.c b/src/userfunc.c
+--- a/src/userfunc.c
++++ b/src/userfunc.c
+@@ -2097,7 +2097,9 @@ ex_function(exarg_T *eap)
+ 	    arg = skipwhite(skiptowhite(p));
+ 	    if (arg[0] == '<' && arg[1] =='<'
+ 		    && ((p[0] == 'p' && p[1] == 'y'
+-				    && (!ASCII_ISALPHA(p[2]) || p[2] == 't'))
++				    && (!ASCII_ISALNUM(p[2]) || p[2] == 't'
++					|| ((p[2] == '3' || p[2] == 'x')
++						   && !ASCII_ISALPHA(p[3]))))
+ 			|| (p[0] == 'p' && p[1] == 'e'
+ 				    && (!ASCII_ISALPHA(p[2]) || p[2] == 'r'))
+ 			|| (p[0] == 't' && p[1] == 'c'
