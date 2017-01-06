@@ -28,7 +28,6 @@ remove-useless-STRCPY.patch
 bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
-make-tests-silent.patch
 add-modelines-to-cygming-makefiles.patch
 update-rubyinc-dir.patch
 fix-po-msys2.patch
