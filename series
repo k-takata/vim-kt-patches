@@ -42,4 +42,5 @@ pythonx.patch
 fix-cygpty-encoding.patch
 fix-cproto-O2.patch
 fix-quotation-without-vimrun.patch
+win32-support-changing-locale.patch
 fix-config_cache-removal.patch #+rejected
