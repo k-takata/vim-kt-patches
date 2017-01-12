@@ -1,12 +1,85 @@
 # HG changeset patch
-# Parent  2ebc5476a6f56b8fa8fbca88d39cb744234f2553
+# Parent  aa7a2cb3596e221f600c275f8873f11b2c51b259
 
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -4305,6 +4305,84 @@ enc_alias_search(char_u *name)
- }
+@@ -4617,47 +4617,6 @@ static HINSTANCE hMsvcrtDLL = 0;
+ #   endif
+ 
+ /*
+- * Get the address of 'funcname' which is imported by 'hInst' DLL.
+- */
+-    static void *
+-get_iconv_import_func(HINSTANCE hInst, const char *funcname)
+-{
+-    PBYTE			pImage = (PBYTE)hInst;
+-    PIMAGE_DOS_HEADER		pDOS = (PIMAGE_DOS_HEADER)hInst;
+-    PIMAGE_NT_HEADERS		pPE;
+-    PIMAGE_IMPORT_DESCRIPTOR	pImpDesc;
+-    PIMAGE_THUNK_DATA		pIAT;	    /* Import Address Table */
+-    PIMAGE_THUNK_DATA		pINT;	    /* Import Name Table */
+-    PIMAGE_IMPORT_BY_NAME	pImpName;
+-
+-    if (pDOS->e_magic != IMAGE_DOS_SIGNATURE)
+-	return NULL;
+-    pPE = (PIMAGE_NT_HEADERS)(pImage + pDOS->e_lfanew);
+-    if (pPE->Signature != IMAGE_NT_SIGNATURE)
+-	return NULL;
+-    pImpDesc = (PIMAGE_IMPORT_DESCRIPTOR)(pImage
+-	    + pPE->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT]
+-							    .VirtualAddress);
+-    for (; pImpDesc->FirstThunk; ++pImpDesc)
+-    {
+-	if (!pImpDesc->OriginalFirstThunk)
+-	    continue;
+-	pIAT = (PIMAGE_THUNK_DATA)(pImage + pImpDesc->FirstThunk);
+-	pINT = (PIMAGE_THUNK_DATA)(pImage + pImpDesc->OriginalFirstThunk);
+-	for (; pIAT->u1.Function; ++pIAT, ++pINT)
+-	{
+-	    if (IMAGE_SNAP_BY_ORDINAL(pINT->u1.Ordinal))
+-		continue;
+-	    pImpName = (PIMAGE_IMPORT_BY_NAME)(pImage
+-					+ (UINT_PTR)(pINT->u1.AddressOfData));
+-	    if (strcmp((char *)pImpName->Name, funcname) == 0)
+-		return (void *)pIAT->u1.Function;
+-	}
+-    }
+-    return NULL;
+-}
+-
+-/*
+  * Try opening the iconv.dll and return TRUE if iconv() can be used.
+  */
+     int
+@@ -4704,7 +4663,7 @@ iconv_enabled(int verbose)
+     iconv_open	= (void *)GetProcAddress(hIconvDLL, "libiconv_open");
+     iconv_close	= (void *)GetProcAddress(hIconvDLL, "libiconv_close");
+     iconvctl	= (void *)GetProcAddress(hIconvDLL, "libiconvctl");
+-    iconv_errno	= get_iconv_import_func(hIconvDLL, "_errno");
++    iconv_errno	= get_dll_import_func(hIconvDLL, "_errno");
+     if (iconv_errno == NULL)
+ 	iconv_errno = (void *)GetProcAddress(hMsvcrtDLL, "_errno");
+     if (iconv == NULL || iconv_open == NULL || iconv_close == NULL
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -4455,6 +4455,9 @@ vim_setenv(char_u *name, char_u *val)
+     {
+ 	sprintf((char *)envbuf, "%s=%s", name, val);
+ 	putenv((char *)envbuf);
++# ifdef libintl_putenv
++	libintl_putenv((char *)envbuf);
++# endif
+     }
  #endif
+ #ifdef FEAT_GETTEXT
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -425,6 +425,84 @@ vimLoadLib(char *name)
+     return dll;
+ }
  
 +#if defined(DYNAMIC_ICONV) || defined(DYNAMIC_GETTEXT) || defined(PROTO)
 +/*
@@ -79,90 +152,17 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 +/*
 + * Get the address of 'funcname' which is imported by 'hInst' DLL.
 + */
-+    static void *
++    void *
 +get_dll_import_func(HINSTANCE hInst, const char *funcname)
 +{
 +    return get_imported_func_info(hInst, funcname, 0);
 +}
 +#endif
 +
- #if defined(FEAT_MBYTE) || defined(PROTO)
- 
- # ifdef HAVE_LANGINFO_H
-@@ -4617,47 +4695,6 @@ static HINSTANCE hMsvcrtDLL = 0;
- #   endif
- 
- /*
-- * Get the address of 'funcname' which is imported by 'hInst' DLL.
-- */
--    static void *
--get_iconv_import_func(HINSTANCE hInst, const char *funcname)
--{
--    PBYTE			pImage = (PBYTE)hInst;
--    PIMAGE_DOS_HEADER		pDOS = (PIMAGE_DOS_HEADER)hInst;
--    PIMAGE_NT_HEADERS		pPE;
--    PIMAGE_IMPORT_DESCRIPTOR	pImpDesc;
--    PIMAGE_THUNK_DATA		pIAT;	    /* Import Address Table */
--    PIMAGE_THUNK_DATA		pINT;	    /* Import Name Table */
--    PIMAGE_IMPORT_BY_NAME	pImpName;
--
--    if (pDOS->e_magic != IMAGE_DOS_SIGNATURE)
--	return NULL;
--    pPE = (PIMAGE_NT_HEADERS)(pImage + pDOS->e_lfanew);
--    if (pPE->Signature != IMAGE_NT_SIGNATURE)
--	return NULL;
--    pImpDesc = (PIMAGE_IMPORT_DESCRIPTOR)(pImage
--	    + pPE->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT]
--							    .VirtualAddress);
--    for (; pImpDesc->FirstThunk; ++pImpDesc)
--    {
--	if (!pImpDesc->OriginalFirstThunk)
--	    continue;
--	pIAT = (PIMAGE_THUNK_DATA)(pImage + pImpDesc->FirstThunk);
--	pINT = (PIMAGE_THUNK_DATA)(pImage + pImpDesc->OriginalFirstThunk);
--	for (; pIAT->u1.Function; ++pIAT, ++pINT)
--	{
--	    if (IMAGE_SNAP_BY_ORDINAL(pINT->u1.Ordinal))
--		continue;
--	    pImpName = (PIMAGE_IMPORT_BY_NAME)(pImage
--					+ (UINT_PTR)(pINT->u1.AddressOfData));
--	    if (strcmp((char *)pImpName->Name, funcname) == 0)
--		return (void *)pIAT->u1.Function;
--	}
--    }
--    return NULL;
--}
--
--/*
-  * Try opening the iconv.dll and return TRUE if iconv() can be used.
-  */
-     int
-@@ -4704,7 +4741,7 @@ iconv_enabled(int verbose)
-     iconv_open	= (void *)GetProcAddress(hIconvDLL, "libiconv_open");
-     iconv_close	= (void *)GetProcAddress(hIconvDLL, "libiconv_close");
-     iconvctl	= (void *)GetProcAddress(hIconvDLL, "libiconvctl");
--    iconv_errno	= get_iconv_import_func(hIconvDLL, "_errno");
-+    iconv_errno	= get_dll_import_func(hIconvDLL, "_errno");
-     if (iconv_errno == NULL)
- 	iconv_errno = (void *)GetProcAddress(hMsvcrtDLL, "_errno");
-     if (iconv == NULL || iconv_open == NULL || iconv_close == NULL
-diff --git a/src/misc1.c b/src/misc1.c
---- a/src/misc1.c
-+++ b/src/misc1.c
-@@ -4455,6 +4455,9 @@ vim_setenv(char_u *name, char_u *val)
-     {
- 	sprintf((char *)envbuf, "%s=%s", name, val);
- 	putenv((char *)envbuf);
-+# ifdef libintl_putenv
-+	libintl_putenv((char *)envbuf);
-+# endif
-     }
- #endif
- #ifdef FEAT_GETTEXT
-diff --git a/src/os_win32.c b/src/os_win32.c
---- a/src/os_win32.c
-+++ b/src/os_win32.c
-@@ -437,6 +437,7 @@ static char *null_libintl_ngettext(const
+ #if defined(DYNAMIC_GETTEXT) || defined(PROTO)
+ # ifndef GETTEXT_DLL
+ #  define GETTEXT_DLL "libintl.dll"
+@@ -437,6 +515,7 @@ static char *null_libintl_ngettext(const
  static char *null_libintl_textdomain(const char *);
  static char *null_libintl_bindtextdomain(const char *, const char *);
  static char *null_libintl_bind_textdomain_codeset(const char *, const char *);
@@ -170,7 +170,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  static HINSTANCE hLibintlDLL = NULL;
  char *(*dyn_libintl_gettext)(const char *) = null_libintl_gettext;
-@@ -447,6 +448,7 @@ char *(*dyn_libintl_bindtextdomain)(cons
+@@ -447,6 +526,7 @@ char *(*dyn_libintl_bindtextdomain)(cons
  						= null_libintl_bindtextdomain;
  char *(*dyn_libintl_bind_textdomain_codeset)(const char *, const char *)
  				       = null_libintl_bind_textdomain_codeset;
@@ -178,7 +178,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      int
  dyn_libintl_init(void)
-@@ -464,6 +466,7 @@ dyn_libintl_init(void)
+@@ -464,6 +544,7 @@ dyn_libintl_init(void)
  	{"bindtextdomain", (FARPROC*)&dyn_libintl_bindtextdomain},
  	{NULL, NULL}
      };
@@ -186,7 +186,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* No need to initialize twice. */
      if (hLibintlDLL)
-@@ -512,6 +515,13 @@ dyn_libintl_init(void)
+@@ -512,6 +593,13 @@ dyn_libintl_init(void)
  	dyn_libintl_bind_textdomain_codeset =
  					 null_libintl_bind_textdomain_codeset;
  
@@ -200,7 +200,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      return 1;
  }
  
-@@ -526,6 +536,7 @@ dyn_libintl_end(void)
+@@ -526,6 +614,7 @@ dyn_libintl_end(void)
      dyn_libintl_textdomain	= null_libintl_textdomain;
      dyn_libintl_bindtextdomain	= null_libintl_bindtextdomain;
      dyn_libintl_bind_textdomain_codeset = null_libintl_bind_textdomain_codeset;
@@ -208,7 +208,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  /*ARGSUSED*/
-@@ -567,6 +578,13 @@ null_libintl_textdomain(const char *doma
+@@ -567,6 +656,13 @@ null_libintl_textdomain(const char *doma
      return NULL;
  }
  
@@ -222,17 +222,17 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif /* DYNAMIC_GETTEXT */
  
  /* This symbol is not defined in older versions of the SDK or Visual C++ */
-diff --git a/src/proto/mbyte.pro b/src/proto/mbyte.pro
---- a/src/proto/mbyte.pro
-+++ b/src/proto/mbyte.pro
-@@ -68,6 +68,7 @@ int mb_lefthalve(int row, int col);
- int mb_fix_col(int col, int row);
- char_u *enc_skip(char_u *p);
- char_u *enc_canonize(char_u *enc);
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -1,5 +1,7 @@
+ /* os_win32.c */
+ HINSTANCE vimLoadLib(char *name);
 +HINSTANCE find_imported_module_by_funcname(HINSTANCE hInst, const char *funcname);
- char_u *enc_locale_env(char *locale);
- char_u *enc_locale(void);
- int encname2codepage(char_u *name);
++void *get_dll_import_func(HINSTANCE hInst, const char *funcname);
+ int dyn_libintl_init(void);
+ void dyn_libintl_end(void);
+ void PlatformId(void);
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
