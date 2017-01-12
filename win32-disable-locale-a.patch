@@ -1,0 +1,28 @@
+# HG changeset patch
+# Parent  ba99d30a693a67b287f7657cb85fb6df208154c5
+
+diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
+--- a/src/ex_cmds2.c
++++ b/src/ex_cmds2.c
+@@ -5277,10 +5277,13 @@ init_locales(void)
+     if (!did_init_locales)
+     {
+ 	did_init_locales = TRUE;
++#  ifndef WIN32
+ 	locales = find_locales();
++#  endif
+     }
+ }
+ 
++#  ifndef WIN32
+ /* Return an array of strings for all available locales + NULL for the
+  * last element.  Return NULL in case of error. */
+     static char_u **
+@@ -5321,6 +5324,7 @@ find_locales(void)
+     ((char_u **)locales_ga.ga_data)[locales_ga.ga_len] = NULL;
+     return (char_u **)locales_ga.ga_data;
+ }
++#  endif
+ 
+ #  if defined(EXITFREE) || defined(PROTO)
+     void
