@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  8fe6a651db7c3409a339eaa020d096d44b56e7d1
+# Parent  6f34e1dffa425b20f665e699ca7e933d6336edaa
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
@@ -23,7 +23,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  range({expr} [, {max} [, {stride}]])
  				List	items from {expr} to {max}
  readfile({fname} [, {binary} [, {max}]])
-@@ -6161,6 +6162,13 @@ pyeval({expr})						*pyeval()*
+@@ -6162,6 +6163,13 @@ pyeval({expr})						*pyeval()*
  		non-string keys result in error.
  		{only available when compiled with the |+python| feature}
  
@@ -37,7 +37,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  							*E726* *E727*
  range({expr} [, {max} [, {stride}]])				*range()*
  		Returns a |List| with Numbers:
-@@ -8396,6 +8404,7 @@ printer			Compiled with |:hardcopy| supp
+@@ -8402,6 +8410,7 @@ printer			Compiled with |:hardcopy| supp
  profile			Compiled with |:profile| support.
  python			Compiled with Python 2.x interface. |has-python|
  python3			Compiled with Python 3.x interface. |has-python|
@@ -141,7 +141,7 @@ diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -5855,6 +5855,24 @@ A jump table for the options with a shor
+@@ -5830,6 +5830,24 @@ A jump table for the options with a shor
  	This option cannot be set from a |modeline| or in the |sandbox|, for
  	security reasons.
  
@@ -169,7 +169,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
 --- a/runtime/doc/quickref.txt
 +++ b/runtime/doc/quickref.txt
-@@ -838,6 +838,7 @@ Short explanation of each option:		*opti
+@@ -836,6 +836,7 @@ Short explanation of each option:		*opti
  'pumheight'	  'ph'	    maximum height of the popup menu
  'pythondll'		    name of the Python 2 dynamic library
  'pythonthreedll'	    name of the Python 3 dynamic library
@@ -191,16 +191,16 @@ diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2146,6 +2146,8 @@ test_arglist \
- 	test_partial \
+@@ -2149,6 +2149,8 @@ test_arglist \
  	test_perl \
  	test_popup \
+ 	test_profile \
 +	test_pyx2 \
 +	test_pyx3 \
  	test_quickfix \
  	test_regexp_latin \
  	test_regexp_utf8 \
-@@ -2746,6 +2748,7 @@ shadow:	runtime pixmaps
+@@ -2750,6 +2752,7 @@ shadow:	runtime pixmaps
  				 ../../testdir/*.vim \
  				 ../../testdir/*.py \
  				 ../../testdir/python* \
@@ -231,7 +231,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
      {"range",		1, 3, f_range},
      {"readfile",	1, 3, f_readfile},
      {"reltime",		0, 2, f_reltime},
-@@ -5773,11 +5779,13 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -5746,11 +5752,13 @@ f_has(typval_T *argvars, typval_T *rettv
  #ifdef FEAT_PYTHON
  #ifndef DYNAMIC_PYTHON
  	"python",
@@ -245,7 +245,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  #endif
  #endif
  #ifdef FEAT_POSTSCRIPT
-@@ -6012,12 +6020,16 @@ f_has(typval_T *argvars, typval_T *rettv
+@@ -5985,12 +5993,16 @@ f_has(typval_T *argvars, typval_T *rettv
  #ifdef DYNAMIC_PYTHON
  	else if (STRICMP(name, "python") == 0)
  	    n = python_enabled(FALSE);
@@ -262,7 +262,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  #endif
  #endif
  #ifdef DYNAMIC_PERL
-@@ -8066,6 +8078,24 @@ f_pyeval(typval_T *argvars, typval_T *re
+@@ -8038,6 +8050,24 @@ f_pyeval(typval_T *argvars, typval_T *re
  }
  #endif
  
@@ -509,7 +509,7 @@ diff --git a/src/ex_docmd.c b/src/ex_docmd.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -487,6 +487,15 @@ struct vimoption
+@@ -482,6 +482,15 @@ struct vimoption
  # define HIGHLIGHT_INIT "8:SpecialKey,@:NonText,d:Directory,e:ErrorMsg,i:IncSearch,l:Search,m:MoreMsg,M:ModeMsg,n:LineNr,N:CursorLineNr,r:Question,s:StatusLine,S:StatusLineNC,t:Title,v:Visual,w:WarningMsg,W:WildMenu,>:SignColumn,*:TabLine,#:TabLineSel,_:TabLineFill"
  #endif
  
@@ -525,7 +525,7 @@ diff --git a/src/option.c b/src/option.c
  /*
   * options[] is initialized here.
   * The order of the options MUST be alphabetic for ":set all" and findoption().
-@@ -2178,6 +2187,14 @@ static struct vimoption options[] =
+@@ -2155,6 +2164,14 @@ static struct vimoption options[] =
  			    {(char_u *)DYNAMIC_PYTHON_DLL, (char_u *)0L}
  			    SCRIPTID_INIT},
  #endif
@@ -540,7 +540,7 @@ diff --git a/src/option.c b/src/option.c
      {"quoteescape", "qe",   P_STRING|P_ALLOCED|P_VI_DEF,
  #ifdef FEAT_TEXTOBJ
  			    (char_u *)&p_qe, PV_QE,
-@@ -8878,6 +8895,20 @@ set_num_option(
+@@ -8854,6 +8871,20 @@ set_num_option(
  	mzvim_reset_timer();
  #endif
  
@@ -564,7 +564,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/option.h b/src/option.h
 --- a/src/option.h
 +++ b/src/option.h
-@@ -703,6 +703,9 @@ EXTERN char_u	*p_py3dll;	/* 'pythonthree
+@@ -697,6 +697,9 @@ EXTERN char_u	*p_py3dll;	/* 'pythonthree
  #if defined(DYNAMIC_PYTHON)
  EXTERN char_u	*p_pydll;	/* 'pythondll' */
  #endif
@@ -590,10 +590,10 @@ diff --git a/src/proto/ex_cmds2.pro b/src/proto/ex_cmds2.pro
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -175,6 +175,8 @@ NEW_TESTS = test_arglist.res \
- 	    test_normal.res \
+@@ -177,6 +177,8 @@ NEW_TESTS = test_arglist.res \
  	    test_packadd.res \
  	    test_perl.res \
+ 	    test_profile.res \
 +	    test_pyx2.res \
 +	    test_pyx3.res \
  	    test_quickfix.res \
@@ -803,7 +803,7 @@ new file mode 100644
 diff --git a/src/userfunc.c b/src/userfunc.c
 --- a/src/userfunc.c
 +++ b/src/userfunc.c
-@@ -2097,7 +2097,9 @@ ex_function(exarg_T *eap)
+@@ -2102,7 +2102,9 @@ ex_function(exarg_T *eap)
  	    arg = skipwhite(skiptowhite(p));
  	    if (arg[0] == '<' && arg[1] =='<'
  		    && ((p[0] == 'p' && p[1] == 'y'
