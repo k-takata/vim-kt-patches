@@ -9,11 +9,16 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
-          - pwd
-          - ls ..
-          - ls
-          - ./configure
+          - cd ..
+          - hg clone https://bitbucket.org/vim-mirror/vim
+          - cd vim
+          - hg log -v -r -1:-4
+          - cp -r ../build .hg/patches
+          - cd src
+          - hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
           - make
+          - ./vim --version
+          - export -n DISPLAY
           - make test
 
 # vim: ts=2 sw=2 sts=2 et
