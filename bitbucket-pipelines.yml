@@ -10,6 +10,8 @@ pipelines:
     - step:
         script: # Modify the commands below to build your repository.
           - pwd
+          - ls ..
+          - ls
           - ./configure
           - make
           - make test
