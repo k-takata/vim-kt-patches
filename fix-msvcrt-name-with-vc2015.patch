@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  496255b3f40def79125e59ab0ff746a015455e0f
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -285,8 +285,10 @@ MSVCRT_VER = ($(MSVCVER) / 10 - 50)
+ # Base name of the msvcrXX.dll
+ !if $(MSVCRT_VER) <= 60
+ MSVCRT_NAME = msvcrt
++!elseif $(MSVCRT_VER) <= 130
++MSVCRT_NAME = msvcr$(MSVCRT_VER)
+ !else
+-MSVCRT_NAME = msvcr$(MSVCRT_VER)
++MSVCRT_NAME = vcruntime$(MSVCRT_VER)
+ !endif
+ 
+ !if $(MSVC_MAJOR) == 6
