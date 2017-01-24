@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  bab86ba57cc77b9aa98d5a2fbf98c51070131c59
+# Parent  de1d848118318b943b20f6ff6713a98e4cf18edc
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
@@ -64,7 +64,7 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
  
  ==============================================================================
  9. Dynamic loading					*python-dynamic*
-@@ -812,4 +814,54 @@ loaded at a time, just checking if Pytho
+@@ -812,4 +814,53 @@ loaded at a time, just checking if Pytho
  the other one from being available.
  
  ==============================================================================
@@ -113,9 +113,8 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +	endif
 +
 +The test depends on the 'pyxversion' setting.  If 'pyxversion' is 0, it tests
-+Python 3 first, and if it is not available then Python 2.  'pyxversion' will
-+be set to 3 or 2 depending on the result.  If 'pyxversion' is 2 or 3, it tests
-+only Python 2 or 3 respectively.
++Python 3 first, and if it is not available then Python 2.  If 'pyxversion' is
++2 or 3, it tests only Python 2 or 3 respectively.
 +
 +==============================================================================
   vim:tw=78:ts=8:ft=help:norl:
@@ -136,7 +135,7 @@ diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -5830,6 +5830,33 @@ A jump table for the options with a shor
+@@ -5830,6 +5830,34 @@ A jump table for the options with a shor
  	This option cannot be set from a |modeline| or in the |sandbox|, for
  	security reasons.
  
@@ -156,8 +155,9 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +
 +	Available values are 0, 2 and 3.
 +	If 'pyxversion' is 0, it is set to 2 or 3 after the first execution of
-+	any python2/3 commands or functions.  Note that `has('python')`,
-+	`has('python3')` and `has('pythonx')` also set this option.
++	any python2/3 commands or functions.  E.g. `:py` sets to 2, and `:py3`
++	sets to 3. `:pyx` sets to 3 if Python 3 is available, otherwise sets
++	to 2 if Python 2 is available.
 +	See also: |has-pythonx|
 +
 +	If Vim is compiled with only |+python| or |+python3|, setting
@@ -195,7 +195,7 @@ diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2152,6 +2152,8 @@ test_arglist \
+@@ -2153,6 +2153,8 @@ test_arglist \
  	test_popup \
  	test_profile \
  	test_put \
@@ -204,7 +204,7 @@ diff --git a/src/Makefile b/src/Makefile
  	test_quickfix \
  	test_regexp_latin \
  	test_regexp_utf8 \
-@@ -2754,6 +2756,7 @@ shadow:	runtime pixmaps
+@@ -2755,6 +2757,7 @@ shadow:	runtime pixmaps
  				 ../../testdir/*.vim \
  				 ../../testdir/*.py \
  				 ../../testdir/python* \
@@ -268,11 +268,11 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +	else if (STRICMP(name, "pythonx") == 0)
 +	{
 +# if defined(DYNAMIC_PYTHON) && defined(DYNAMIC_PYTHON3)
-+	    if (p_pyx == 3 || p_pyx == 0)
-+		/* p_pyx will be set to 3, if Python 3 is available. */
++	    if (p_pyx == 0)
++		n = python3_enabled(FALSE) || python_enabled(FALSE);
++	    else if (p_pyx == 3)
 +		n = python3_enabled(FALSE);
-+	    if (p_pyx == 2 || p_pyx == 0)
-+		/* p_pyx will be set to 2, if Python 2 is available. */
++	    else if (p_pyx == 2)
 +		n = python_enabled(FALSE);
 +# elif defined(DYNAMIC_PYTHON)
 +	    n = python_enabled(FALSE);
@@ -293,7 +293,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
      str = get_tv_string_buf(&argvars[0], buf);
      do_py3eval(str, rettv);
  }
-@@ -8022,11 +8046,34 @@ f_pyeval(typval_T *argvars, typval_T *re
+@@ -8022,11 +8046,35 @@ f_pyeval(typval_T *argvars, typval_T *re
      char_u	*str;
      char_u	buf[NUMBUFLEN];
  
@@ -313,6 +313,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +f_pyxeval(typval_T *argvars, typval_T *rettv)
 +{
 +# if defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)
++    init_pyxversion();
 +    if (p_pyx == 2)
 +	f_pyeval(argvars, rettv);
 +    else
@@ -353,11 +354,28 @@ diff --git a/src/ex_cmds.h b/src/ex_cmds.h
 diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 --- a/src/ex_cmds2.c
 +++ b/src/ex_cmds2.c
-@@ -3675,6 +3675,172 @@ ex_options(
+@@ -3675,6 +3675,194 @@ ex_options(
  }
  #endif
  
 +#if defined(FEAT_PYTHON3) || defined(FEAT_PYTHON) || defined(PROTO)
++
++# if (defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)) || defined(PROTO)
++/*
++ * Detect Python 3 or 2, and initialize 'pyxversion'.
++ */
++    void
++init_pyxversion(void)
++{
++    if (p_pyx == 0)
++    {
++	if (python3_enabled(FALSE))
++	    p_pyx = 3;
++	else if (python_enabled(FALSE))
++	    p_pyx = 2;
++    }
++}
++# endif
 +
 +/*
 + * Does a file contain one of the following strings at the beginning of any
@@ -427,6 +445,9 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +    exarg_T ex;
 +    int	    v = requires_py_version(fname);
 +
++# if defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)
++    init_pyxversion();
++# endif
 +    if (v == 0)
 +    {
 +# if defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)
@@ -492,6 +513,7 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +ex_pyx(exarg_T *eap)
 +{
 +# if defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)
++    init_pyxversion();
 +    if (p_pyx == 2)
 +	ex_python(eap);
 +    else
@@ -510,6 +532,7 @@ diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
 +ex_pyxdo(exarg_T *eap)
 +{
 +# if defined(FEAT_PYTHON) && defined(FEAT_PYTHON3)
++    init_pyxversion();
 +    if (p_pyx == 2)
 +	ex_pydo(eap);
 +    else
@@ -544,21 +567,7 @@ diff --git a/src/ex_docmd.c b/src/ex_docmd.c
 diff --git a/src/if_python.c b/src/if_python.c
 --- a/src/if_python.c
 +++ b/src/if_python.c
-@@ -741,7 +741,12 @@ python_runtime_link_init(char *libname, 
-     int
- python_enabled(int verbose)
- {
--    return python_runtime_link_init((char *)p_pydll, verbose) == OK;
-+    int enabled = python_runtime_link_init((char *)p_pydll, verbose) == OK;
-+
-+    if (enabled && p_pyx == 0)
-+	p_pyx = 2;
-+
-+    return enabled;
- }
- 
- /*
-@@ -1114,6 +1119,9 @@ ex_python(exarg_T *eap)
+@@ -1114,6 +1114,9 @@ ex_python(exarg_T *eap)
  {
      char_u *script;
  
@@ -568,7 +577,7 @@ diff --git a/src/if_python.c b/src/if_python.c
      script = script_get(eap, eap->arg);
      if (!eap->skip)
      {
-@@ -1137,6 +1145,9 @@ ex_pyfile(exarg_T *eap)
+@@ -1137,6 +1140,9 @@ ex_pyfile(exarg_T *eap)
      const char *file = (char *)eap->arg;
      char *p;
  
@@ -578,7 +587,7 @@ diff --git a/src/if_python.c b/src/if_python.c
      /* Have to do it like this. PyRun_SimpleFile requires you to pass a
       * stdio file pointer, but Vim and the Python DLL are compiled with
       * different options under Windows, meaning that stdio pointers aren't
-@@ -1175,6 +1186,9 @@ ex_pyfile(exarg_T *eap)
+@@ -1175,6 +1181,9 @@ ex_pyfile(exarg_T *eap)
      void
  ex_pydo(exarg_T *eap)
  {
@@ -591,21 +600,7 @@ diff --git a/src/if_python.c b/src/if_python.c
 diff --git a/src/if_python3.c b/src/if_python3.c
 --- a/src/if_python3.c
 +++ b/src/if_python3.c
-@@ -695,7 +695,12 @@ py3_runtime_link_init(char *libname, int
-     int
- python3_enabled(int verbose)
- {
--    return py3_runtime_link_init((char *)p_py3dll, verbose) == OK;
-+    int enabled = py3_runtime_link_init((char *)p_py3dll, verbose) == OK;
-+
-+    if (enabled && p_pyx == 0)
-+	p_pyx = 3;
-+
-+    return enabled;
- }
- 
- /* Load the standard Python exceptions - don't import the symbols from the
-@@ -1004,6 +1009,9 @@ ex_py3(exarg_T *eap)
+@@ -1004,6 +1004,9 @@ ex_py3(exarg_T *eap)
  {
      char_u *script;
  
@@ -615,7 +610,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
      script = script_get(eap, eap->arg);
      if (!eap->skip)
      {
-@@ -1028,6 +1036,9 @@ ex_py3file(exarg_T *eap)
+@@ -1028,6 +1031,9 @@ ex_py3file(exarg_T *eap)
      char *p;
      int i;
  
@@ -625,7 +620,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
      /* Have to do it like this. PyRun_SimpleFile requires you to pass a
       * stdio file pointer, but Vim and the Python DLL are compiled with
       * different options under Windows, meaning that stdio pointers aren't
-@@ -1080,6 +1091,9 @@ ex_py3file(exarg_T *eap)
+@@ -1080,6 +1086,9 @@ ex_py3file(exarg_T *eap)
      void
  ex_py3do(exarg_T *eap)
  {
@@ -703,10 +698,11 @@ diff --git a/src/option.h b/src/option.h
 diff --git a/src/proto/ex_cmds2.pro b/src/proto/ex_cmds2.pro
 --- a/src/proto/ex_cmds2.pro
 +++ b/src/proto/ex_cmds2.pro
-@@ -75,6 +75,9 @@ int do_in_runtimepath(char_u *name, int 
+@@ -75,6 +75,10 @@ int do_in_runtimepath(char_u *name, int 
  void ex_packloadall(exarg_T *eap);
  void ex_packadd(exarg_T *eap);
  void ex_options(exarg_T *eap);
++void init_pyxversion(void);
 +void ex_pyxfile(exarg_T *eap);
 +void ex_pyx(exarg_T *eap);
 +void ex_pyxdo(exarg_T *eap);
@@ -716,7 +712,7 @@ diff --git a/src/proto/ex_cmds2.pro b/src/proto/ex_cmds2.pro
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -177,6 +177,8 @@ NEW_TESTS = test_arglist.res \
+@@ -178,6 +178,8 @@ NEW_TESTS = test_arglist.res \
  	    test_packadd.res \
  	    test_perl.res \
  	    test_profile.res \
