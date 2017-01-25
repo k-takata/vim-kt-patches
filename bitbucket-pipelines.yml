@@ -15,6 +15,7 @@ pipelines:
           - hg log -v -r -1:-4
           - cp -r ../build .hg/patches
           - cd src
+          - hg --config extensions.mq= qselect linux
           - hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
           - make
           - ./vim --version
