@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  53208f126a452ed2ae5383834110674c8573dd94
+# Parent  0980b9ced57b3a85f2cfa5b124d3cecd2a6592e8
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
@@ -64,7 +64,7 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
  
  ==============================================================================
  9. Dynamic loading					*python-dynamic*
-@@ -812,4 +814,65 @@ loaded at a time, just checking if Pytho
+@@ -812,4 +814,63 @@ loaded at a time, just checking if Pytho
  the other one from being available.
  
  ==============================================================================
@@ -125,8 +125,6 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +	elseif has('python3')
 +	  set pyx=3
 +	endif
-+Note that this might slowdown the startup of Vim, because these has() calls
-+will try to load them.  See: |has-python|
 +
 +==============================================================================
   vim:tw=78:ts=8:ft=help:norl:
