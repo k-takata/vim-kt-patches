@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  de1d848118318b943b20f6ff6713a98e4cf18edc
+# Parent  53208f126a452ed2ae5383834110674c8573dd94
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
@@ -64,7 +64,7 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
  
  ==============================================================================
  9. Dynamic loading					*python-dynamic*
-@@ -812,4 +814,53 @@ loaded at a time, just checking if Pytho
+@@ -812,4 +814,65 @@ loaded at a time, just checking if Pytho
  the other one from being available.
  
  ==============================================================================
@@ -112,9 +112,21 @@ diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 +	  echo 'pyx* commands are available. (Python ' . &pyx . ')'
 +	endif
 +
-+The test depends on the 'pyxversion' setting.  If 'pyxversion' is 0, it tests
-+Python 3 first, and if it is not available then Python 2.  If 'pyxversion' is
-+2 or 3, it tests only Python 2 or 3 respectively.
++When compiled with only one of |+python| or |+python3|, the has() returns 1.
++When compiled with both |+python| and |+python3|, the test depends on the
++'pyxversion' setting.  If 'pyxversion' is 0, it tests Python 3 first, and if
++it is not available then Python 2.  If 'pyxversion' is 2 or 3, it tests only
++Python 2 or 3 respectively.
++
++If a user prefers Python 2 and want to fallback to Python 3, he needs to set
++'pyxversion' explicitly in his |.vimrc|.  E.g.: >
++	if has('python')
++	  set pyx=2
++	elseif has('python3')
++	  set pyx=3
++	endif
++Note that this might slowdown the startup of Vim, because these has() calls
++will try to load them.  See: |has-python|
 +
 +==============================================================================
   vim:tw=78:ts=8:ft=help:norl:
