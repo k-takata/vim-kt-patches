@@ -1,4 +1,5 @@
 " Print py3 interface version and write the result into if_ver.txt.
+" For Ubuntu. Part 2.
 
 redir! >> if_ver.txt
 echo "Python 3:"

@@ -16,13 +16,14 @@ pipelines:
           - cd vim
           - hg log -v -r -1:-4
           - cp -r $BITBUCKET_CLONE_DIR .hg/patches
+          - cp .hg/patches/scripts/*.vim src
           - cd src
           - hg --config extensions.mq= qselect linux
           - hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
           - make
           - ./vim --version
-          - ./vim -u NONE -S $BITBUCKET_CLONE_DIR/scripts/if_ver.vim -c quit
-          - ./vim -u NONE -S $BITBUCKET_CLONE_DIR/scripts/if_ver_py3.vim -c quit
+          - ./vim --not-a-term -u NONE -S if_ver-1.vim -c quit > /dev/null
+          - ./vim --not-a-term -u NONE -S if_ver-2.vim -c quit > /dev/null
           - cat if_ver.txt
           - export -n DISPLAY
           - make test
