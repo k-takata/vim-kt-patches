@@ -9,11 +9,12 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
+          - apt install libperl-dev python-dev python3-dev liblua5.2-dev lua5.2 ruby2.0-dev tcl-dev
           - cd ..
           - hg clone https://bitbucket.org/vim-mirror/vim
           - cd vim
           - hg log -v -r -1:-4
-          - cp -r ../build .hg/patches
+          - cp -r $BITBUCKET_CLONE_DIR .hg/patches
           - cd src
           - hg --config extensions.mq= qselect linux
           - hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
