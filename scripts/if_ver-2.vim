@@ -2,7 +2,7 @@
 " For Ubuntu. Part 2.
 
 redir! >> if_ver.txt
-echo "Python 3:"
+echo "\nPython 3:"
 python3 import sys; print(sys.version)
 echo "\n"
 redir END
