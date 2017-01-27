@@ -1,0 +1,25 @@
+# HG changeset patch
+# Parent  82725f150820752ba905fc2fe7756d8a60d485a0
+
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -4445,7 +4445,7 @@ vim_setenv(char_u *name, char_u *val)
+     char_u	*envbuf;
+ 
+     /*
+-     * Putenv does not copy the string, it has to remain
++     * Putenv does not copy the string (except Win32), it has to remain
+      * valid.  The allocated memory will never be freed.
+      */
+     envbuf = alloc((unsigned)(STRLEN(name) + STRLEN(val) + 2));
+@@ -4456,6 +4456,9 @@ vim_setenv(char_u *name, char_u *val)
+ # ifdef libintl_putenv
+ 	libintl_putenv((char *)envbuf);
+ # endif
++# ifdef WIN32
++	vim_free(envbuf);
++# endif
+     }
+ #endif
+ #ifdef FEAT_GETTEXT
