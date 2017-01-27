@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  0980b9ced57b3a85f2cfa5b124d3cecd2a6592e8
+# Parent  45171f626998c5864878feabeed1899eb1761fa9
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
@@ -809,7 +809,7 @@ new file mode 100644
 +func Test_pyxdo()
 +  pyx import sys
 +  enew
-+  pyxdo return sys.version
++  pyxdo return sys.version.split("\n")[0]
 +  call assert_match(s:py2pattern, split(getline('.'))[0])
 +endfunc
 +
@@ -888,7 +888,7 @@ new file mode 100644
 +func Test_pyxdo()
 +  pyx import sys
 +  enew
-+  pyxdo return sys.version
++  pyxdo return sys.version.split("\n")[0]
 +  call assert_match(s:py3pattern, split(getline('.'))[0])
 +endfunc
 +
