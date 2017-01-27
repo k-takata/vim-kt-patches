@@ -1,0 +1,7 @@
+" Print py3 interface version and write the result into if_ver.txt.
+
+redir! >> if_ver.txt
+echo "Python 3:"
+python3 import sys; print(sys.version)
+echo "\n"
+redir END
