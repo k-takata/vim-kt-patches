@@ -9,7 +9,6 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
-          - lsb_release -a
           - apt install libperl-dev python2.7-dev python3-dev liblua5.2-dev lua5.2 ruby2.0-dev tcl-dev
           - cd ..
           - hg clone https://bitbucket.org/vim-mirror/vim
