@@ -46,4 +46,5 @@ fix-msvcrt-name-with-vc2015.patch
 stop-generating-vim-lib.patch
 term-doc.patch
 free-after-putenv-on-win32.patch
+fix-pyxdo.patch
 fix-config_cache-removal.patch #+rejected
