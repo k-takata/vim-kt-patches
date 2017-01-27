@@ -3,14 +3,14 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-#image: gcc:6.1
+image: gcc:6.1
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
           - apt update
-          - apt install -y libperl-dev python2.7-dev python3-dev liblua5.2-dev lua5.2 ruby2.0-dev tcl-dev
+          - apt install -y libperl-dev python2.7-dev python3-dev liblua5.2-dev lua5.2 ruby-dev tcl-dev
           - cd ..
           - hg clone https://bitbucket.org/vim-mirror/vim
           - cd vim
@@ -21,6 +21,8 @@ pipelines:
           - hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
           - make
           - ./vim --version
+          - ./vim -u NONE -S $BITBUCKET_CLONE_DIR/scripts/if_ver.vim -c quit
+          - cat if_ver.txt
           - export -n DISPLAY
           - make test
 
