@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  734bd3d44352b50e1b6ecd570a831b0f54fd8b83
+# Parent  96b6ec9cf1a1694a863ba9bf721cd605bddf4d74
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
@@ -124,10 +124,10 @@ diff --git a/runtime/doc/quickref.txt b/runtime/doc/quickref.txt
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2127,6 +2127,7 @@ test_arglist \
- 	test_langmap \
+@@ -2148,6 +2148,7 @@ test_arglist \
  	test_largefile \
  	test_lispwords \
+ 	test_lua \
 +	test_makeencoding \
  	test_man \
  	test_mapping \
@@ -135,7 +135,7 @@ diff --git a/src/Makefile b/src/Makefile
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
-@@ -2225,6 +2225,9 @@ free_buf_options(
+@@ -2229,6 +2229,9 @@ free_buf_options(
      clear_string_option(&buf->b_p_lw);
  #endif
      clear_string_option(&buf->b_p_bkc);
@@ -181,7 +181,7 @@ diff --git a/src/main.c b/src/main.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -138,6 +138,9 @@
+@@ -139,6 +139,9 @@
  # define PV_LISP	OPT_BUF(BV_LISP)
  # define PV_LW		OPT_BOTH(OPT_BUF(BV_LW))
  #endif
@@ -191,7 +191,7 @@ diff --git a/src/option.c b/src/option.c
  #define PV_MA		OPT_BUF(BV_MA)
  #define PV_ML		OPT_BUF(BV_ML)
  #define PV_MOD		OPT_BUF(BV_MOD)
-@@ -1800,6 +1803,15 @@ static struct vimoption options[] =
+@@ -1812,6 +1815,15 @@ static struct vimoption options[] =
  			    {(char_u *)NULL, (char_u *)0L}
  #endif
  			    SCRIPTID_INIT},
@@ -207,7 +207,7 @@ diff --git a/src/option.c b/src/option.c
      {"makeprg",	    "mp",   P_STRING|P_EXPAND|P_VI_DEF|P_SECURE,
  #ifdef FEAT_QUICKFIX
  			    (char_u *)&p_mp, PV_MP,
-@@ -5558,6 +5570,9 @@ check_buf_options(buf_T *buf)
+@@ -5581,6 +5593,9 @@ check_buf_options(buf_T *buf)
      check_string_option(&buf->b_p_lw);
  #endif
      check_string_option(&buf->b_p_bkc);
@@ -217,7 +217,7 @@ diff --git a/src/option.c b/src/option.c
  }
  
  /*
-@@ -6155,7 +6170,8 @@ did_set_string_option(
+@@ -6178,7 +6193,8 @@ did_set_string_option(
  
  #ifdef FEAT_MBYTE
      /* 'encoding' and 'fileencoding' */
@@ -227,7 +227,7 @@ diff --git a/src/option.c b/src/option.c
      {
  	if (gvarp == &p_fenc)
  	{
-@@ -10232,6 +10248,11 @@ unset_global_local_option(char_u *name, 
+@@ -10276,6 +10292,11 @@ unset_global_local_option(char_u *name, 
  	    clear_string_option(&buf->b_p_lw);
  	    break;
  #endif
@@ -239,7 +239,7 @@ diff --git a/src/option.c b/src/option.c
      }
  }
  
-@@ -10284,6 +10305,9 @@ get_varp_scope(struct vimoption *p, int 
+@@ -10329,6 +10350,9 @@ get_varp_scope(struct vimoption *p, int 
  	    case PV_LW:   return (char_u *)&(curbuf->b_p_lw);
  #endif
  	    case PV_BKC:  return (char_u *)&(curbuf->b_p_bkc);
@@ -249,7 +249,7 @@ diff --git a/src/option.c b/src/option.c
  	}
  	return NULL; /* "cannot happen" */
      }
-@@ -10357,6 +10381,10 @@ get_varp(struct vimoption *p)
+@@ -10404,6 +10428,10 @@ get_varp(struct vimoption *p)
  	case PV_LW:	return *curbuf->b_p_lw != NUL
  				    ? (char_u *)&(curbuf->b_p_lw) : p->var;
  #endif
@@ -260,7 +260,7 @@ diff --git a/src/option.c b/src/option.c
  
  #ifdef FEAT_ARABIC
  	case PV_ARAB:	return (char_u *)&(curwin->w_p_arab);
-@@ -10957,6 +10985,9 @@ buf_copy_options(buf_T *buf, int flags)
+@@ -11005,6 +11033,9 @@ buf_copy_options(buf_T *buf, int flags)
  #ifdef FEAT_LISP
  	    buf->b_p_lw = empty_option;
  #endif
@@ -283,7 +283,7 @@ diff --git a/src/option.h b/src/option.h
  #ifdef FEAT_QUICKFIX
  EXTERN char_u	*p_mef;		/* 'makeef' */
  EXTERN char_u	*p_mp;		/* 'makeprg' */
-@@ -1061,6 +1064,9 @@ enum
+@@ -1065,6 +1068,9 @@ enum
      , BV_LISP
      , BV_LW
  #endif
@@ -490,7 +490,7 @@ diff --git a/src/quickfix.c b/src/quickfix.c
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -2108,6 +2108,9 @@ struct file_buffer
+@@ -2127,6 +2127,9 @@ struct file_buffer
  #ifdef FEAT_LISP
      int		b_p_lisp;	/* 'lisp' */
  #endif
@@ -503,10 +503,10 @@ diff --git a/src/structs.h b/src/structs.h
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -164,6 +164,7 @@ NEW_TESTS = test_arglist.res \
- 	    test_job_fails.res \
+@@ -165,6 +165,7 @@ NEW_TESTS = test_arglist.res \
  	    test_json.res \
  	    test_langmap.res \
+ 	    test_lua.res \
 +	    test_makeencoding.res \
  	    test_man.res \
  	    test_marks.res \
