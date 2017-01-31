@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  b61d0da6fc3d1dc199c21efdce02fbe4c98e9ae4
+
+diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
+--- a/src/testdir/Make_all.mak
++++ b/src/testdir/Make_all.mak
+@@ -55,7 +55,6 @@ SCRIPTS_ALL = \
+ 	test70.out \
+ 	test73.out \
+ 	test75.out \
+-	test77.out \
+ 	test79.out \
+ 	test80.out \
+ 	test82.out \
