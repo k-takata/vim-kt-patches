@@ -1,5 +1,6 @@
 test_reduce_test_log.patch
 disable-test77-on-pipelines.patch #+pipelines
+disable-test_channel-on-pipelines.patch #+pipelines
 disable-regexp-debug-log.patch #+noregexplog
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
