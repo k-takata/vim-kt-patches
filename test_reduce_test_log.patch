@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  da34000b61d401ab96c5b16de4e6195445ad87de
+# Parent  14c7e1c23ebbfb37775981d6b34e36df1f45cadf
 
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
@@ -17,8 +17,8 @@ diff --git a/src/testdir/Makefile b/src/testdir/Makefile
  	# 200 msec is sufficient, but only modern sleep supports a fraction of
  	# a second, fall back to a second if it fails.
  	@-/bin/sh -c "sleep .2 > /dev/null 2>&1 || sleep 1"
--	-$(RUN_VIM) $*.in
-+	-$(RUN_VIM) $*.in > /dev/null
+-	$(RUN_VIM) $*.in
++	$(RUN_VIM) $*.in > /dev/null
  
  	# For flaky tests retry one time.  No tests at the moment.
  	#@/bin/sh -c "if test -f test.out -a $* = test61; then \
@@ -34,8 +34,8 @@ diff --git a/src/testdir/Makefile b/src/testdir/Makefile
  	# 200 msec is sufficient, but only modern sleep supports a fraction of
  	# a second, fall back to a second if it fails.
  	@-/bin/sh -c "sleep .2 > /dev/null 2>&1 || sleep 1"
--	-$(RUN_VIM) $*.in
-+	-$(RUN_VIM) $*.in > /dev/null
+-	$(RUN_VIM) $*.in
++	$(RUN_VIM) $*.in > /dev/null
  	@/bin/sh -c "if test -f benchmark.out; then cat benchmark.out; fi"
  
  nolog:
