@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent 91adde2d209d301b1e834460fb1479ecb6c9951b
-# Parent  6de3321bafd78af9e647177eea87919855a480c1
+# Parent  5a17b74dfe8fc9e8e759df31de34f6aaac87469d
 
 diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
 --- a/src/Make_bc5.mak
 +++ b/src/Make_bc5.mak
-@@ -946,7 +946,7 @@ test:
+@@ -953,7 +953,7 @@ test:
  
  if_perl.c: if_perl.xs typemap
  	$(PERL)\bin\perl.exe $(PERL)\lib\ExtUtils\xsubpp -prototypes -typemap \
@@ -17,7 +17,7 @@ diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -888,7 +888,7 @@ endif
+@@ -919,7 +919,7 @@ endif
  
  if_perl.c: if_perl.xs typemap
  	$(XSUBPP) -prototypes -typemap \
@@ -25,11 +25,11 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 +	     $(PERLTYPEMAP) if_perl.xs -output $@
  
  $(OUTDIR)/iscygpty.o:	iscygpty.c $(CUI_INCL)
- 	$(CC) -c $(CFLAGS) iscygpty.c -o $(OUTDIR)/iscygpty.o -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID -DENABLE_STUB_IMPL
+ 	$(CC) -c $(CFLAGS) iscygpty.c -o $(OUTDIR)/iscygpty.o -U_WIN32_WINNT -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID -DENABLE_STUB_IMPL
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1196,7 +1196,7 @@ testclean:
+@@ -1221,7 +1221,7 @@ testclean:
  
  if_perl.c : if_perl.xs typemap
  	$(XSUBPP) -prototypes -typemap $(XSUBPP_TYPEMAP) \
