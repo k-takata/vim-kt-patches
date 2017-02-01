@@ -45,6 +45,5 @@ fix-cproto-O2.patch
 fix-quotation-without-vimrun.patch
 stop-generating-vim-lib.patch
 term-doc.patch
-win32-setenv-with-encoding.patch
 add-getpackages.patch
 fix-config_cache-removal.patch #+rejected
