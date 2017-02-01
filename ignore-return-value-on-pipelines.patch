@@ -1,0 +1,13 @@
+# HG changeset patch
+# Parent  494931cb27c087b6dd62962f62bc51f0dbd67655
+
+diff --git a/src/testdir/Makefile b/src/testdir/Makefile
+--- a/src/testdir/Makefile
++++ b/src/testdir/Makefile
+@@ -128,5 +128,5 @@ newtestssilent: $(NEW_TESTS)
+ 
+ .vim.res:
+ 	@echo "$(RUN_VIMTEST)" > vimcmd
+-	$(RUN_VIMTEST) -U NONE -S runtest.vim $*.vim > /dev/null
++	-$(RUN_VIMTEST) -U NONE -S runtest.vim $*.vim > /dev/null
+ 	@rm vimcmd
