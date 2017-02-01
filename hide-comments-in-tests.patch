@@ -1,0 +1,54 @@
+# HG changeset patch
+# Parent  6974e87488a0cd4866f4e364760f3b918e7704e4
+
+diff --git a/src/testdir/Makefile b/src/testdir/Makefile
+--- a/src/testdir/Makefile
++++ b/src/testdir/Makefile
+@@ -74,22 +74,22 @@ test1.out: test1.in
+ .in.out:
+ 	-rm -rf $*.failed test.ok $(RM_ON_RUN)
+ 	cp $*.ok test.ok
+-	# Sleep a moment to avoid that the xterm title is messed up.
+-	# 200 msec is sufficient, but only modern sleep supports a fraction of
+-	# a second, fall back to a second if it fails.
++	@# Sleep a moment to avoid that the xterm title is messed up.
++	@# 200 msec is sufficient, but only modern sleep supports a fraction of
++	@# a second, fall back to a second if it fails.
+ 	@-/bin/sh -c "sleep .2 > /dev/null 2>&1 || sleep 1"
+ 	$(RUN_VIM) $*.in
+ 
+-	# For flaky tests retry one time.  No tests at the moment.
+-	#@/bin/sh -c "if test -f test.out -a $* = test61; then \
+-	#	  if diff test.out $*.ok; \
+-	#	  then echo flaky test ok first time; \
+-	#	  else rm -rf $*.failed $(RM_ON_RUN); \
+-	#		$(RUN_VIM) $*.in; \
+-	#	  fi \
+-	#	fi"
++	@# For flaky tests retry one time.  No tests at the moment.
++	@#@/bin/sh -c "if test -f test.out -a $* = test61; then \
++	@#	  if diff test.out $*.ok; \
++	@#	  then echo flaky test ok first time; \
++	@#	  else rm -rf $*.failed $(RM_ON_RUN); \
++	@#		$(RUN_VIM) $*.in; \
++	@#	  fi \
++	@#	fi"
+ 
+-	# Check if the test.out file matches test.ok.
++	@# Check if the test.out file matches test.ok.
+ 	@/bin/sh -c "if test -f test.out; then \
+ 		  if diff test.out $*.ok; \
+ 		  then mv -f test.out $*.out; \
+@@ -104,9 +104,9 @@ test1.out: test1.in
+ 
+ bench_re_freeze.out: bench_re_freeze.vim
+ 	-rm -rf benchmark.out $(RM_ON_RUN)
+-	# Sleep a moment to avoid that the xterm title is messed up.
+-	# 200 msec is sufficient, but only modern sleep supports a fraction of
+-	# a second, fall back to a second if it fails.
++	@# Sleep a moment to avoid that the xterm title is messed up.
++	@# 200 msec is sufficient, but only modern sleep supports a fraction of
++	@# a second, fall back to a second if it fails.
+ 	@-/bin/sh -c "sleep .2 > /dev/null 2>&1 || sleep 1"
+ 	$(RUN_VIM) $*.in
+ 	@/bin/sh -c "if test -f benchmark.out; then cat benchmark.out; fi"
