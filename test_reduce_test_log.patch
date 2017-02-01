@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  be26c43ab9d202b25c698e3d13431f26db01640d
+# Parent  6974e87488a0cd4866f4e364760f3b918e7704e4
 
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
@@ -14,17 +14,17 @@ diff --git a/src/testdir/Makefile b/src/testdir/Makefile
  		then echo; \
  		echo test1 FAILED - terminal size must be 80x24 or larger; \
 @@ -78,7 +78,7 @@ test1.out: test1.in
- 	@# 200 msec is sufficient, but only modern sleep supports a fraction of
- 	@# a second, fall back to a second if it fails.
+ 	# 200 msec is sufficient, but only modern sleep supports a fraction of
+ 	# a second, fall back to a second if it fails.
  	@-/bin/sh -c "sleep .2 > /dev/null 2>&1 || sleep 1"
 -	$(RUN_VIM) $*.in
 +	$(RUN_VIM) $*.in > /dev/null
  
- 	@# For flaky tests retry one time.  No tests at the moment.
- 	@#@/bin/sh -c "if test -f test.out -a $* = test61; then \
+ 	# For flaky tests retry one time.  No tests at the moment.
+ 	#@/bin/sh -c "if test -f test.out -a $* = test61; then \
 @@ -108,7 +108,7 @@ bench_re_freeze.out: bench_re_freeze.vim
- 	@# 200 msec is sufficient, but only modern sleep supports a fraction of
- 	@# a second, fall back to a second if it fails.
+ 	# 200 msec is sufficient, but only modern sleep supports a fraction of
+ 	# a second, fall back to a second if it fails.
  	@-/bin/sh -c "sleep .2 > /dev/null 2>&1 || sleep 1"
 -	$(RUN_VIM) $*.in
 +	$(RUN_VIM) $*.in > /dev/null

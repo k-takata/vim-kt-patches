@@ -1,4 +1,3 @@
-hide-comments-in-tests.patch
 test_reduce_test_log.patch
 disable-test77-on-pipelines.patch #+pipelines
 ignore-return-value-on-pipelines.patch #+pipelines
