@@ -1,0 +1,109 @@
+# HG changeset patch
+# Parent  2e05a1b31aac4193625d47f6b35042e387877294
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -4478,6 +4478,21 @@ getmatches()						*getmatches()*
+ 			'pattern': 'FIXME', 'priority': 10, 'id': 2}] >
+ 			:unlet m
+ <
++							*getpackages()*
++getpackages([{pacname}, [{pactype}, [{plugname}]]])
++		Return a List of packages or plugins in fullpath.
++
++		{pacname} specifies a package name.  If it is not given or an
++		empty string, "*" is used.
++		{pactype} specifies a package type.  It can be "opt", "start",
++		"*" or "NONE".  If it is not given or an empty string, "*" is
++		used.  If "NONE" is specified only package directories are
++		listed.  Otherwise all plugin directories under the specified
++		packages are listed.
++		{plugname} specifies a plugin name.  If it is not given or an
++		empty string, "*" is used.
++		See: |packages|
++
+ 							*getpid()*
+ getpid()	Return a Number which is the process ID of the Vim process.
+ 		On Unix and MS-Windows this is a unique number, until Vim
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -176,6 +176,7 @@ static void f_getftype(typval_T *argvars
+ static void f_getline(typval_T *argvars, typval_T *rettv);
+ static void f_getloclist(typval_T *argvars UNUSED, typval_T *rettv UNUSED);
+ static void f_getmatches(typval_T *argvars, typval_T *rettv);
++static void f_getpackages(typval_T *argvars, typval_T *rettv);
+ static void f_getpid(typval_T *argvars, typval_T *rettv);
+ static void f_getcurpos(typval_T *argvars, typval_T *rettv);
+ static void f_getpos(typval_T *argvars, typval_T *rettv);
+@@ -605,6 +606,7 @@ static struct fst
+     {"getline",		1, 2, f_getline},
+     {"getloclist",	1, 2, f_getloclist},
+     {"getmatches",	0, 0, f_getmatches},
++    {"getpackages",	0, 3, f_getpackages},
+     {"getpid",		0, 0, f_getpid},
+     {"getpos",		1, 1, f_getpos},
+     {"getqflist",	0, 1, f_getqflist},
+@@ -4834,6 +4836,61 @@ f_getmatches(typval_T *argvars UNUSED, t
+ #endif
+ }
+ 
++
++    static void
++list_pack_plugin(char_u *fname, void *cookie)
++{
++    typval_T	*rettv = (typval_T*)cookie;
++
++    list_append_string(rettv->vval.v_list, fname, -1);
++}
++
++/*
++ * "getpackages()" function
++ */
++    static void
++f_getpackages(typval_T *argvars, typval_T *rettv)
++{
++    char_u	buf1[NUMBUFLEN], buf2[NUMBUFLEN], buf3[NUMBUFLEN];
++    char_u	*pacname = NULL, *pactype = NULL, *plugname = NULL;
++    char_u	*pat;
++    int		len;
++
++    if (rettv_list_alloc(rettv) != OK)
++	return;
++
++    if (argvars[0].v_type != VAR_UNKNOWN)
++    {
++	pacname = get_tv_string_buf_chk(&argvars[0], buf1);
++	if (argvars[1].v_type != VAR_UNKNOWN)
++	{
++	    pactype = get_tv_string_buf_chk(&argvars[1], buf2);
++	    if (argvars[2].v_type != VAR_UNKNOWN)
++		plugname = get_tv_string_buf_chk(&argvars[2], buf3);
++	}
++    }
++    if (pacname == NULL || pacname[0] == NUL)
++	pacname = "*";
++    if (pactype == NULL || pactype[0] == NUL)
++	pactype = "*";
++    if (plugname == NULL || plugname[0] == NUL)
++	plugname = "*";
++
++    len = 8 + STRLEN(pacname) + STRLEN(pactype) + STRLEN(plugname);
++    pat = alloc(len);
++    if (pat == NULL)
++	return;
++
++    if (STRCMP(pactype, "NONE") == 0)
++	/* List only packages. */
++	vim_snprintf((char*)pat, len, "pack/%s", pacname);
++    else
++	/* List all plugins under the specified packages. */
++	vim_snprintf((char*)pat, len, "pack/%s/%s/%s",
++					    pacname, pactype, plugname);
++    do_in_path(p_pp, pat, DIP_ALL + DIP_DIR, list_pack_plugin, rettv);
++}
++
+ /*
+  * "getpid()" function
+  */

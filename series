@@ -47,4 +47,5 @@ fix-msvcrt-name-with-vc2015.patch
 stop-generating-vim-lib.patch
 term-doc.patch
 win32-setenv-with-encoding.patch
+add-getpackages.patch
 fix-config_cache-removal.patch #+rejected
