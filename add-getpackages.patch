@@ -1,26 +1,35 @@
 # HG changeset patch
-# Parent  2e05a1b31aac4193625d47f6b35042e387877294
+# Parent  5686714f97cb6aedab3d56c9c25390671c4d7826
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -4478,6 +4478,21 @@ getmatches()						*getmatches()*
+@@ -2125,6 +2125,8 @@ getline({lnum})			String	line {lnum} of 
+ getline({lnum}, {end})		List	lines {lnum} to {end} of current buffer
+ getloclist({nr}[, {what}])	List	list of location list items
+ getmatches()			List	list of current matches
++getpackages([{packname}, [{packtype}, [{plugname}]]])
++				List	list of pakage/plugin directories
+ getpid()			Number	process ID of Vim
+ getpos({expr})			List	position of cursor, mark, etc.
+ getqflist([{what}])		List	list of quickfix items
+@@ -4478,6 +4480,21 @@ getmatches()						*getmatches()*
  			'pattern': 'FIXME', 'priority': 10, 'id': 2}] >
  			:unlet m
  <
 +							*getpackages()*
-+getpackages([{pacname}, [{pactype}, [{plugname}]]])
-+		Return a List of packages or plugins in fullpath.
++getpackages([{packname}, [{packtype}, [{plugname}]]])
++		Return a List of package/plugin directories in fullpath.
 +
-+		{pacname} specifies a package name.  If it is not given or an
-+		empty string, "*" is used.
-+		{pactype} specifies a package type.  It can be "opt", "start",
++		{packname} specifies a package name.  If it is not given or an
++		empty string, "*" is used.  |wildcards| can be used.
++		{packtype} specifies a package type.  It can be "opt", "start",
 +		"*" or "NONE".  If it is not given or an empty string, "*" is
 +		used.  If "NONE" is specified only package directories are
 +		listed.  Otherwise all plugin directories under the specified
 +		packages are listed.
 +		{plugname} specifies a plugin name.  If it is not given or an
-+		empty string, "*" is used.
++		empty string, "*" is used.  |wildcards| can be used.
 +		See: |packages|
 +
  							*getpid()*
@@ -65,7 +74,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +f_getpackages(typval_T *argvars, typval_T *rettv)
 +{
 +    char_u	buf1[NUMBUFLEN], buf2[NUMBUFLEN], buf3[NUMBUFLEN];
-+    char_u	*pacname = NULL, *pactype = NULL, *plugname = NULL;
++    char_u	*packname = NULL, *packtype = NULL, *plugname = NULL;
 +    char_u	*pat;
 +    int		len;
 +
@@ -74,33 +83,33 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +
 +    if (argvars[0].v_type != VAR_UNKNOWN)
 +    {
-+	pacname = get_tv_string_buf_chk(&argvars[0], buf1);
++	packname = get_tv_string_buf_chk(&argvars[0], buf1);
 +	if (argvars[1].v_type != VAR_UNKNOWN)
 +	{
-+	    pactype = get_tv_string_buf_chk(&argvars[1], buf2);
++	    packtype = get_tv_string_buf_chk(&argvars[1], buf2);
 +	    if (argvars[2].v_type != VAR_UNKNOWN)
 +		plugname = get_tv_string_buf_chk(&argvars[2], buf3);
 +	}
 +    }
-+    if (pacname == NULL || pacname[0] == NUL)
-+	pacname = "*";
-+    if (pactype == NULL || pactype[0] == NUL)
-+	pactype = "*";
++    if (packname == NULL || packname[0] == NUL)
++	packname = (char_u*)"*";
++    if (packtype == NULL || packtype[0] == NUL)
++	packtype = (char_u*)"*";
 +    if (plugname == NULL || plugname[0] == NUL)
-+	plugname = "*";
++	plugname = (char_u*)"*";
 +
-+    len = 8 + STRLEN(pacname) + STRLEN(pactype) + STRLEN(plugname);
++    len = 8 + STRLEN(packname) + STRLEN(packtype) + STRLEN(plugname);
 +    pat = alloc(len);
 +    if (pat == NULL)
 +	return;
 +
-+    if (STRCMP(pactype, "NONE") == 0)
++    if (STRCMP(packtype, "NONE") == 0)
 +	/* List only packages. */
-+	vim_snprintf((char*)pat, len, "pack/%s", pacname);
++	vim_snprintf((char*)pat, len, "pack/%s", packname);
 +    else
 +	/* List all plugins under the specified packages. */
 +	vim_snprintf((char*)pat, len, "pack/%s/%s/%s",
-+					    pacname, pactype, plugname);
++					    packname, packtype, plugname);
 +    do_in_path(p_pp, pat, DIP_ALL + DIP_DIR, list_pack_plugin, rettv);
 +}
 +
