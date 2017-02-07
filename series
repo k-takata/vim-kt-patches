@@ -46,4 +46,6 @@ fix-quotation-without-vimrun.patch
 stop-generating-vim-lib.patch
 term-doc.patch
 add-getpackages.patch
+doc-scriptencoding.patch
+doc-fix-typo.patch
 fix-config_cache-removal.patch #+rejected

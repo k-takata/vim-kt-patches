@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  f9f029acf28932a5147b4a5cba3dc16f00bfd7af
+
+diff --git a/runtime/doc/repeat.txt b/runtime/doc/repeat.txt
+--- a/runtime/doc/repeat.txt
++++ b/runtime/doc/repeat.txt
+@@ -305,6 +305,11 @@ For writing a Vim script, see chapter 41
+ 			Mark) in utf-8 format Vim will recognize it, no need
+ 			to use ":scriptencoding utf-8" then.
+ 
++			If you set the 'encoding' option in your |.vimrc|,
++			`:scriptencoding` must be placed after that. E.g.: >
++				set encoding=utf-8
++				scriptencoding utf-8
++<
+ 			When compiled without the |+multi_byte| feature this
+ 			command is ignored.
+ 			{not in Vi}

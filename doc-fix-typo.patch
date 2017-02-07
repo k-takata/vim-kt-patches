@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  8b8a02cbf29c1d8b164148b2c09a1f265c8325e2
+
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -3436,7 +3436,7 @@ Files:	    runtime/doc/options.txt, src/
+ Patch 7.4.498 (after 7.4.497)
+ Problem:    Typo in DOS makefile.
+ Solution:   Change exists to exist. (Ken Takata)
+-Files:	    src/testdirMake_dos.mak
++Files:	    src/testdir/Make_dos.mak
+ 
+ Patch 7.4.499
+ Problem:    substitute() can be slow with long strings.
