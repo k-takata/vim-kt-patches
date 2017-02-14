@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f5502dddb41fb3b8403ab6da80b6c046312ca7a7
+# Parent  aacbc728795306b8d07630a3bfdff72d4cbc38e8
 
 diff --git a/runtime/doc/mbyte.txt b/runtime/doc/mbyte.txt
 --- a/runtime/doc/mbyte.txt
@@ -102,7 +102,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 +
 +    sw = gdk_screen_get_width(gtk_widget_get_screen(preedit_window));
 +    sh = gdk_screen_get_height(gtk_widget_get_screen(preedit_window));
-+    gdk_window_get_origin(gui.drawarea->window, &x, &y);
++    gdk_window_get_origin(GTK_WINDOW(gui.drawarea), &x, &y);
 +    gtk_window_get_size(GTK_WINDOW(preedit_window), &w, &h);
 +    x = x + FILL_X(gui.col);
 +    y = y + FILL_Y(gui.row);
@@ -586,7 +586,7 @@ diff --git a/src/option.h b/src/option.h
  EXTERN char_u	*p_imak;	/* 'imactivatekey' */
  EXTERN char_u	*p_imaf;	/* 'imactivatefunc' */
  EXTERN char_u	*p_imsf;	/* 'imstatusfunc' */
-+EXTERN int	p_imst;		/* 'imstyle' */
++EXTERN long	p_imst;		/* 'imstyle' */
 +# define IM_ON_THE_SPOT		0
 +# define IM_OVER_THE_SPOT	1
  #endif
