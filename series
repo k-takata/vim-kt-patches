@@ -48,4 +48,5 @@ term-doc.patch
 add-getpackages.patch
 doc-scriptencoding.patch
 doc-fix-typo.patch
+gtk_im_over-the-spot.patch
 fix-config_cache-removal.patch #+rejected
