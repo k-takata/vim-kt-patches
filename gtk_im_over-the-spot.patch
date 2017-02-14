@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  aacbc728795306b8d07630a3bfdff72d4cbc38e8
+# Parent  11f400241291a09dcb9489594d1c2611b1949cab
 
 diff --git a/runtime/doc/mbyte.txt b/runtime/doc/mbyte.txt
 --- a/runtime/doc/mbyte.txt
@@ -88,7 +88,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      }
  }
  
-@@ -4803,12 +4811,103 @@ im_add_to_input(char_u *str, int len)
+@@ -4803,12 +4811,107 @@ im_add_to_input(char_u *str, int len)
  	gui_mch_mousehide(TRUE);
  }
  
@@ -102,7 +102,11 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 +
 +    sw = gdk_screen_get_width(gtk_widget_get_screen(preedit_window));
 +    sh = gdk_screen_get_height(gtk_widget_get_screen(preedit_window));
-+    gdk_window_get_origin(GTK_WINDOW(gui.drawarea), &x, &y);
++#if GTK_CHECK_VERSION(3,0,0)
++    gdk_window_get_origin(gtk_widget_get_window(gui.drawarea), &x, &y);
++#else
++    gdk_window_get_origin(gui.drawarea->window, &x, &y);
++#endif
 +    gtk_window_get_size(GTK_WINDOW(preedit_window), &w, &h);
 +    x = x + FILL_X(gui.col);
 +    y = y + FILL_Y(gui.row);
@@ -192,7 +196,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      if (State & NORMAL)
      {
  	im_preedit_cursor = 0;
-@@ -4881,40 +4980,43 @@ im_commit_cb(GtkIMContext *context UNUSE
+@@ -4881,40 +4984,43 @@ im_commit_cb(GtkIMContext *context UNUSE
      xim_log("im_commit_cb(): %s\n", str);
  #endif
  
@@ -267,7 +271,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      /* Is this a single character that matches a keypad key that's just
       * been pressed?  If so, we don't want it to be entered as such - let
       * us carry on processing the raw keycode so that it may be used in
-@@ -4938,14 +5040,17 @@ im_commit_cb(GtkIMContext *context UNUSE
+@@ -4938,14 +5044,17 @@ im_commit_cb(GtkIMContext *context UNUSE
      if (add_to_input)
  	im_add_to_input((char_u *)str, slen);
  
@@ -293,7 +297,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  
      if (gtk_main_level() > 0)
  	gtk_main_quit();
-@@ -4979,7 +5084,8 @@ im_preedit_end_cb(GtkIMContext *context 
+@@ -4979,7 +5088,8 @@ im_preedit_end_cb(GtkIMContext *context 
      im_delete_preedit();
  
      /* Indicate that preediting has finished */
@@ -303,7 +307,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      xim_has_preediting = FALSE;
  
  #if 0
-@@ -5040,9 +5146,14 @@ im_preedit_changed_cb(GtkIMContext *cont
+@@ -5040,9 +5150,14 @@ im_preedit_changed_cb(GtkIMContext *cont
      char_u  *p;
      int	    i;
  
@@ -321,7 +325,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  
  #ifdef XIM_DEBUG
      xim_log("im_preedit_changed_cb(): %s\n", preedit_string);
-@@ -5050,66 +5161,82 @@ im_preedit_changed_cb(GtkIMContext *cont
+@@ -5050,66 +5165,82 @@ im_preedit_changed_cb(GtkIMContext *cont
  
      g_return_if_fail(preedit_string != NULL); /* just in case */
  
@@ -455,7 +459,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      }
  
      g_free(preedit_string);
-@@ -5258,7 +5385,8 @@ im_shutdown(void)
+@@ -5258,7 +5389,8 @@ im_shutdown(void)
      }
      im_is_active = FALSE;
      im_commit_handler_id = 0;
@@ -465,7 +469,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      xim_has_preediting = FALSE;
  }
  
-@@ -5422,7 +5550,8 @@ xim_reset(void)
+@@ -5422,7 +5554,8 @@ xim_reset(void)
  	}
      }
  
@@ -475,7 +479,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      xim_has_preediting = FALSE;
  }
  
-@@ -5527,19 +5656,22 @@ xim_queue_key_press_event(GdkEventKey *e
+@@ -5527,19 +5660,22 @@ xim_queue_key_press_event(GdkEventKey *e
  	{
  	    int imresult = gtk_im_context_filter_keypress(xic, event);
  
