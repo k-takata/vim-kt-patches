@@ -44,8 +44,7 @@ fix-cygpty-encoding.patch
 fix-cproto-O2.patch
 fix-quotation-without-vimrun.patch
 stop-generating-vim-lib.patch
-term-doc.patch
 add-getpackages.patch
-doc-fix-typo.patch
 gtk_im_over-the-spot.patch
+doc-single-quotation.patch
 fix-config_cache-removal.patch #+rejected

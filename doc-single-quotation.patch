@@ -1,0 +1,244 @@
+# HG changeset patch
+# Parent  db60e75d61fc19a9161cd87e01f0c6ed1a4edc09
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -3430,7 +3430,7 @@ execute({command} [, {silent}])					*exe
+ 			""		no `:silent` used
+ 			"silent"	`:silent` used
+ 			"silent!"	`:silent!` used
+-		The default is 'silent'.  Note that with "silent!", unlike
++		The default is "silent".  Note that with "silent!", unlike
+ 		`:redir`, error messages are dropped.  When using an external
+ 		command the screen may be messed up, use `system()` instead.
+ 							*E930*
+@@ -4032,10 +4032,10 @@ get({dict}, {key} [, {default}])
+ get({func}, {what})
+ 		Get an item with from Funcref {func}.  Possible values for
+ 		{what} are:
+-			'name'	The function name
+-			'func'	The function
+-			'dict'	The dictionary
+-			'args'	The list with arguments
++			"name"	The function name
++			"func"	The function
++			"dict"	The dictionary
++			"args"	The list with arguments
+ 
+ 							*getbufinfo()*
+ getbufinfo([{expr}])
+@@ -7729,7 +7729,7 @@ taglist({expr})							*taglist()*
+ 		may appear, they give the name of the entity the tag is
+ 		contained in.
+ 
+-		The ex-command 'cmd' can be either an ex search pattern, a
++		The ex-command "cmd" can be either an ex search pattern, a
+ 		line number or a line number followed by a byte number.
+ 
+ 		If there are no matching tags, then an empty list is returned.
+diff --git a/runtime/doc/fold.txt b/runtime/doc/fold.txt
+--- a/runtime/doc/fold.txt
++++ b/runtime/doc/fold.txt
+@@ -64,7 +64,7 @@ whichever is lower.  These are empty or 
+ with a character in 'foldignore'.  White space is skipped before checking for
+ characters in 'foldignore'.  For C use "#" to ignore preprocessor lines.
+ 
+-When you want to ignore lines in another way, use the 'expr' method.  The
++When you want to ignore lines in another way, use the "expr" method.  The
+ |indent()| function can be used in 'foldexpr' to get the indent of a line.
+ 
+ 
+diff --git a/runtime/doc/hangulin.txt b/runtime/doc/hangulin.txt
+--- a/runtime/doc/hangulin.txt
++++ b/runtime/doc/hangulin.txt
+@@ -81,8 +81,8 @@ And there should be no ':set guifont'.  
+ ':set guifontset'.  It means VIM runs without fontset supporting.
+ So, you can see only English.  Hangul does not be correctly displayed.
+ 
+-After 'fontset' feature is enabled, VIM does not allow using english
+-font only in 'font' setting for syntax.
++After "fontset" feature is enabled, VIM does not allow using english
++font only in "font" setting for syntax.
+ For example, if you use >
+    :set guifontset=eng_font,your_font
+ in your .gvimrc, then you should do for syntax >
+diff --git a/runtime/doc/helphelp.txt b/runtime/doc/helphelp.txt
+--- a/runtime/doc/helphelp.txt
++++ b/runtime/doc/helphelp.txt
+@@ -314,7 +314,7 @@ the applicable Vim version.  The last fi
+ date of the file.  Each field is separated by a tab.
+ 
+ At the bottom of the help file, place a Vim modeline to set the 'textwidth'
+-and 'tabstop' options and the 'filetype' to 'help'.  Never set a global option
++and 'tabstop' options and the 'filetype' to "help".  Never set a global option
+ in such a modeline, that can have consequences undesired by whoever reads that
+ help.
+ 
+diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
+--- a/runtime/doc/if_pyth.txt
++++ b/runtime/doc/if_pyth.txt
+@@ -174,8 +174,8 @@ vim.eval(str)						*python-eval*
+ 
+ 	    :py tagList = vim.eval('taglist("eval_expr")')
+ <	The latter will return a python list of python dicts, for instance:
+-	[{'cmd': '/^eval_expr(arg, nextcmd)$/', 'static': 0, 'name':
+-	'eval_expr', 'kind': 'f', 'filename': './src/eval.c'}]
++	[{'cmd': '/^eval_expr(arg, nextcmd)$/', 'static': 0, 'name': ~
++	'eval_expr', 'kind': 'f', 'filename': './src/eval.c'}] ~
+ 
+ vim.bindeval(str)					*python-bindeval*
+ 	Like |python-eval|, but returns special objects described in 
+@@ -867,7 +867,7 @@ When compiled with both |+python| and |+
+ it is not available then Python 2.  If 'pyxversion' is 2 or 3, it tests only
+ Python 2 or 3 respectively.
+ 
+-Note that for has('pythonx') to work it may try to dynamically load Python 3
++Note that for `has('pythonx')` to work it may try to dynamically load Python 3
+ or 2.  This may have side effects, especially when Vim can only load one of
+ the two.
+ 
+diff --git a/runtime/doc/if_ruby.txt b/runtime/doc/if_ruby.txt
+--- a/runtime/doc/if_ruby.txt
++++ b/runtime/doc/if_ruby.txt
+@@ -72,7 +72,7 @@ To see what version of Ruby you have: >
+ 
+ 							*:rubyfile* *:rubyf*
+ :rubyf[ile] {file}	Execute the Ruby script in {file}.  This is the same as
+-			":ruby load 'file'", but allows file name completion.
++			`:ruby load 'file'`, but allows file name completion.
+ 
+ Executing Ruby commands is not possible in the |sandbox|.
+ 
+diff --git a/runtime/doc/insert.txt b/runtime/doc/insert.txt
+--- a/runtime/doc/insert.txt
++++ b/runtime/doc/insert.txt
+@@ -1103,7 +1103,7 @@ items:
+ 	empty		when non-zero this match will be added even when it is
+ 			an empty string
+ 
+-All of these except 'icase', 'dup' and 'empty' must be a string.  If an item
++All of these except "icase", "dup" and "empty" must be a string.  If an item
+ does not meet these requirements then an error message is given and further
+ items in the list are not used.  You can mix string and Dictionary items in
+ the returned list.
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -7096,7 +7096,7 @@ A jump table for the options with a shor
+ 			word.  The expression must evaluate to a List of
+ 			Lists, each with a suggestion and a score.
+ 			Example:
+-				[['the', 33], ['that', 44]]
++				[['the', 33], ['that', 44]] ~
+ 			Set 'verbose' and use |z=| to see the scores that the
+ 			internal methods use.  A lower score is better.
+ 			This may invoke |spellsuggest()| if you temporarily
+diff --git a/runtime/doc/scroll.txt b/runtime/doc/scroll.txt
+--- a/runtime/doc/scroll.txt
++++ b/runtime/doc/scroll.txt
+@@ -221,7 +221,7 @@ past its buffer's limits.
+ However, if a 'scrollbind' window that has a relative offset that is past its
+ buffer's limits is given the cursor focus, the other 'scrollbind' windows must
+ jump to a location where the current window's relative offset is valid.  This
+-behavior can be changed by clearing the 'jump' flag from the 'scrollopt'
++behavior can be changed by clearing the "jump" flag from the 'scrollopt'
+ option.
+ 
+ 						*syncbind* *:syncbind* *:sync*
+diff --git a/runtime/doc/syntax.txt b/runtime/doc/syntax.txt
+--- a/runtime/doc/syntax.txt
++++ b/runtime/doc/syntax.txt
+@@ -2646,9 +2646,9 @@ later, and part earlier) adds.
+ 
+ RESTRUCTURED TEXT			*rst.vim* *ft-rst-syntax*
+ 
+-You may set what syntax definitions should be used for code blocks via
++You may set what syntax definitions should be used for code blocks via >
+ 	let rst_syntax_code_list = ['vim', 'lisp', ...]
+-
++<
+ 
+ REXX						*rexx.vim* *ft-rexx-syntax*
+ 
+diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
+--- a/runtime/doc/term.txt
++++ b/runtime/doc/term.txt
+@@ -252,7 +252,7 @@ But any non-empty string means that the 
+ that the flag is not set.  't_CS' works like this too, but it isn't a termcap
+ flag.
+ 
+-OUTPUT CODES
++OUTPUT CODES						*terminal-output-codes*
+ 	option	meaning	~
+ 
+ 	t_AB	set background color (ANSI)			*t_AB* *'t_AB'*
+@@ -335,7 +335,7 @@ Added by Vim (there are no standard code
+ 	t_BD	disable bracketed paste mode			*t_BD* *'t_BD'*
+ 		|xterm-bracketed-paste|
+ 
+-KEY CODES
++KEY CODES						*terminal-key-codes*
+ Note: Use the <> form if possible
+ 
+ 	option	name		meaning	~
+@@ -426,8 +426,9 @@ Note: Use the <> form if possible
+ 	t_KK	<k8>		keypad 8		 *<k8>*	*t_KK* *'t_KK'*
+ 	t_KL	<k9>		keypad 9		 *<k9>*	*t_KL* *'t_KL'*
+ 		<Mouse>		leader of mouse code		*<Mouse>*
+-	t_PS	start of bracketed paste |xterm-bracketed-paste|  *t_PS* 't_PS'
+-	t_PE	end of bracketed paste |xterm-bracketed-paste|    *t_PE* 't_PE'
++								*t_PS* *'t_PS'*
++	t_PS	start of bracketed paste |xterm-bracketed-paste|
++	t_PE	end of bracketed paste |xterm-bracketed-paste|  *t_PE* *'t_PE'*
+ 
+ Note about t_so and t_mr: When the termcap entry "so" is not present the
+ entry for "mr" is used.  And vice versa.  The same is done for "se" and "me".
+diff --git a/runtime/doc/usr_02.txt b/runtime/doc/usr_02.txt
+--- a/runtime/doc/usr_02.txt
++++ b/runtime/doc/usr_02.txt
+@@ -663,7 +663,7 @@ 21) Quickfix commands usually start with
+ 22) Autocommand events can be found by their name: >
+      	:help BufWinLeave
+ <    To see all possible events: >
+-	:help autocommands-events
++	:help autocommand-events
+ 
+ 23) Command-line switches always start with "-".  So for the help of the -f
+     command switch of Vim use: >
+diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
+--- a/runtime/doc/usr_41.txt
++++ b/runtime/doc/usr_41.txt
+@@ -1588,7 +1588,7 @@ WHITE SPACE
+ Blank lines are allowed and ignored.
+ 
+ Leading whitespace characters (blanks and TABs) are always ignored.  The
+-whitespaces between parameters (e.g. between the 'set' and the 'cpoptions' in
++whitespaces between parameters (e.g. between the "set" and the "cpoptions" in
+ the example below) are reduced to one blank character and plays the role of a
+ separator, the whitespaces after the last (visible) character may or may not
+ be ignored depending on the situation, see below.
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -634,7 +634,7 @@ K			Run a program to lookup the keyword 
+ 			with the command >
+ 				:!{program} {keyword}
+ <			There is an example of a program to use in the tools
+-			directory of Vim.  It is called 'ref' and does a
++			directory of Vim.  It is called "ref" and does a
+ 			simple spelling check.
+ 			Special cases:
+ 			- If 'keywordprg' begins with ":" it is invoked as
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -3436,7 +3436,7 @@ Files:	    runtime/doc/options.txt, src/
+ Patch 7.4.498 (after 7.4.497)
+ Problem:    Typo in DOS makefile.
+ Solution:   Change exists to exist. (Ken Takata)
+-Files:	    src/testdirMake_dos.mak
++Files:	    src/testdir/Make_dos.mak
+ 
+ Patch 7.4.499
+ Problem:    substitute() can be slow with long strings.
