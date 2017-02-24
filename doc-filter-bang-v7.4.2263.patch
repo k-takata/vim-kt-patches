@@ -1,0 +1,27 @@
+# HG changeset patch
+# Parent  56644d740b4c69e17facd048ff2209473053d3e2
+
+diff --git a/runtime/doc/various.txt b/runtime/doc/various.txt
+--- a/runtime/doc/various.txt
++++ b/runtime/doc/various.txt
+@@ -527,8 +527,8 @@ N  *+X11*		Unix only: can restore window
+ :redi[r] END		End redirecting messages.  {not in Vi}
+ 
+ 							*:filt* *:filter*
+-:filt[er] {pat} {command}
+-:filt[er] /{pat}/ {command}
++:filt[er][!] {pat} {command}
++:filt[er][!] /{pat}/ {command}
+ 			Restrict the output of {command} to matches with {pat}.
+ 			For example, to list only xml files: >
+ 				:filter /\.xml$/ oldfiles
+@@ -547,6 +547,9 @@ N  *+X11*		Unix only: can restore window
+ 			Only normal messages are filtered, error messages are
+ 			not.
+ 
++			If the [!] is given, restrict the output of {command}
++			NOT to matches with {pat}.
++
+ 						*:sil* *:silent* *:silent!*
+ :sil[ent][!] {command}	Execute {command} silently.  Normal messages will not
+ 			be given or added to the message history.
