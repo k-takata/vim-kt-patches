@@ -1,13 +1,15 @@
 # HG changeset patch
-# Parent  494931cb27c087b6dd62962f62bc51f0dbd67655
+# Parent  1d5f950ec1e63e6e2eb75e7ad5c5e57621bfc20a
 
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
 +++ b/src/testdir/Makefile
-@@ -128,5 +128,5 @@ newtestssilent: $(NEW_TESTS)
+@@ -128,7 +128,7 @@ newtestssilent: $(NEW_TESTS)
  
  .vim.res:
  	@echo "$(RUN_VIMTEST)" > vimcmd
--	$(RUN_VIMTEST) -U NONE -S runtest.vim $*.vim > /dev/null
-+	-$(RUN_VIMTEST) -U NONE -S runtest.vim $*.vim > /dev/null
+-	$(RUN_VIMTEST) $(NO_INITS) -S runtest.vim $*.vim > /dev/null
++	-$(RUN_VIMTEST) $(NO_INITS) -S runtest.vim $*.vim > /dev/null
  	@rm vimcmd
+ 
+ test_gui.res: test_gui.vim
