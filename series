@@ -50,4 +50,5 @@ doc-single-quotation.patch
 doc-filter-bang-v7.4.2263.patch
 fix-spell-wrap.patch
 doc-version8.patch
+doc-eval-func-order.patch
 fix-config_cache-removal.patch #+rejected
