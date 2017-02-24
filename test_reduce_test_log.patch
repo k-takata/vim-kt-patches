@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  6974e87488a0cd4866f4e364760f3b918e7704e4
+# Parent  305dd0c5f52ff62057729cddfdacecd94e595720
 
 diff --git a/src/testdir/Makefile b/src/testdir/Makefile
 --- a/src/testdir/Makefile
@@ -31,10 +31,12 @@ diff --git a/src/testdir/Makefile b/src/testdir/Makefile
  	@/bin/sh -c "if test -f benchmark.out; then cat benchmark.out; fi"
  
  nolog:
-@@ -128,5 +128,5 @@ newtestssilent: $(NEW_TESTS)
+@@ -128,7 +128,7 @@ newtestssilent: $(NEW_TESTS)
  
  .vim.res:
  	@echo "$(RUN_VIMTEST)" > vimcmd
--	$(RUN_VIMTEST) -U NONE -S runtest.vim $*.vim
-+	$(RUN_VIMTEST) -U NONE -S runtest.vim $*.vim > /dev/null
+-	$(RUN_VIMTEST) $(NO_INITS) -S runtest.vim $*.vim
++	$(RUN_VIMTEST) $(NO_INITS) -S runtest.vim $*.vim > /dev/null
  	@rm vimcmd
+ 
+ test_gui.res: test_gui.vim
