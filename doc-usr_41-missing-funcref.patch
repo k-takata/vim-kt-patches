@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  8f5b95c90f28ee3d93f79d86ce18f0e62de2c784
+
+diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
+--- a/runtime/doc/usr_41.txt
++++ b/runtime/doc/usr_41.txt
+@@ -694,6 +694,7 @@ Variables:						*var-functions*
+ 	type()			type of a variable
+ 	islocked()		check if a variable is locked
+ 	function()		get a Funcref for a function name
++	funcref()		get a Funcref for a function name
+ 	getbufvar()		get a variable value from a specific buffer
+ 	setbufvar()		set a variable in a specific buffer
+ 	getwinvar()		get a variable from specific window
