@@ -51,5 +51,5 @@ doc-filter-bang-v7.4.2263.patch
 doc-version8.patch
 doc-eval-func-order.patch
 fix-8.0.0322.patch
-doc-usr_41-missing-funcref.patch
+doc-usr_41-missing-functions.patch
 fix-config_cache-removal.patch #+rejected
