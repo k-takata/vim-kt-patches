@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  8f5b95c90f28ee3d93f79d86ce18f0e62de2c784
+# Parent  d66f0a699f3354a07460d0d0b990b743ff197f4b
 
 diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
 --- a/runtime/doc/usr_41.txt
@@ -20,3 +20,15 @@ diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
  
  Inter-process communication:		    *channel-functions*
  	ch_canread()		check if there is something to read
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -426,7 +426,7 @@ When no vimrc file is found, the |defaul
+ useful default values for new users.  That includes setting 'nocompatible'.
+ Thus Vim no longer starts up in Vi compatible mode.  If you do want that,
+ either create a .vimrc file that does "set compatible" or start Vim with
+-"Vim -C".
++"vim -C".
+ 
+ 
+ Support removed ~

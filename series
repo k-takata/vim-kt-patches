@@ -50,5 +50,5 @@ doc-single-quotation.patch
 doc-filter-bang-v7.4.2263.patch
 doc-version8.patch
 doc-eval-func-order.patch
-doc-usr_41-missing-functions.patch
+doc-usr_41-version8.patch
 fix-config_cache-removal.patch #+rejected
