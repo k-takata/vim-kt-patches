@@ -38,7 +38,6 @@ remove-sync_dup_close.patch
 remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
-add-makeencoding.patch
 fix-highdpi.patch
 fix-cygpty-encoding.patch
 fix-cproto-O2.patch
