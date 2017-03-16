@@ -370,14 +370,14 @@ diff --git a/src/term.h b/src/term.h
      KS_CM,	/* cursor motion */
      KS_SR,	/* scroll reverse (backward) */
 @@ -138,6 +140,8 @@ extern char_u *(term_strings[]);    /* c
- #define T_US	(term_str(KS_US))	/* underscore (underline) mode */
- #define T_UCE	(term_str(KS_UCE))	/* exit undercurl mode */
- #define T_UCS	(term_str(KS_UCS))	/* undercurl mode */
-+#define T_STE	(term_str(KS_STE))	/* exit strikethrough mode */
-+#define T_STS	(term_str(KS_STS))	/* strikethrough mode */
- #define T_MS	(term_str(KS_MS))	/* save to move cur in reverse mode */
- #define T_CM	(term_str(KS_CM))	/* cursor motion */
- #define T_SR	(term_str(KS_SR))	/* scroll reverse (backward) */
+ #define T_US	(TERM_STR(KS_US))	/* underscore (underline) mode */
+ #define T_UCE	(TERM_STR(KS_UCE))	/* exit undercurl mode */
+ #define T_UCS	(TERM_STR(KS_UCS))	/* undercurl mode */
++#define T_STE	(TERM_STR(KS_STE))	/* exit strikethrough mode */
++#define T_STS	(TERM_STR(KS_STS))	/* strikethrough mode */
+ #define T_MS	(TERM_STR(KS_MS))	/* save to move cur in reverse mode */
+ #define T_CM	(TERM_STR(KS_CM))	/* cursor motion */
+ #define T_SR	(TERM_STR(KS_SR))	/* scroll reverse (backward) */
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h

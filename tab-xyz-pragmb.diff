@@ -87,7 +87,7 @@ diff --git a/src/message.c b/src/message.c
 +		    c = (n_extra == 0 && lcs_tab3) ? lcs_tab3 : lcs_tab1;
  		    c_extra = lcs_tab2;
 +		    c_final = lcs_tab3;
- 		    attr = hl_attr(HLF_8);
+ 		    attr = HL_ATTR(HLF_8);
  		}
  	    }
 @@ -1858,6 +1863,7 @@ msg_prt_line(char_u *s, int list)
@@ -97,7 +97,7 @@ diff --git a/src/message.c b/src/message.c
 +		c_final = NUL;
  		n_extra = 1;
  		c = lcs_eol;
- 		attr = hl_attr(HLF_AT);
+ 		attr = HL_ATTR(HLF_AT);
 @@ -1868,6 +1874,7 @@ msg_prt_line(char_u *s, int list)
  		n_extra = n - 1;
  		p_extra = transchar_byte(c);
@@ -190,7 +190,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    n_extra = 1;
  		    c_extra = cmdwin_type;
 +		    c_final = NUL;
- 		    char_attr = hl_attr(HLF_AT);
+ 		    char_attr = HL_ATTR(HLF_AT);
  		}
  	    }
 @@ -3655,6 +3658,7 @@ win_line(
@@ -198,7 +198,7 @@ diff --git a/src/screen.c b/src/screen.c
  			p_extra = p_extra_free;
  			c_extra = NUL;
 +			c_final = NUL;
- 			char_attr = hl_attr(HLF_FC);
+ 			char_attr = HL_ATTR(HLF_FC);
  		    }
  		}
 @@ -3676,6 +3680,7 @@ win_line(
@@ -206,7 +206,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    /* Draw two cells with the sign value or blank. */
  		    c_extra = ' ';
 +		    c_final = NUL;
- 		    char_attr = hl_attr(HLF_SC);
+ 		    char_attr = HL_ATTR(HLF_SC);
  		    n_extra = 2;
  
 @@ -3694,9 +3699,13 @@ win_line(
@@ -243,7 +243,7 @@ diff --git a/src/screen.c b/src/screen.c
 +			c_final = NUL;
 +		    }
  		    n_extra = number_width(wp) + 1;
- 		    char_attr = hl_attr(HLF_N);
+ 		    char_attr = HL_ATTR(HLF_N);
  #ifdef FEAT_SYN_HL
 @@ -3836,9 +3850,15 @@ win_line(
  		{
@@ -267,7 +267,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    c_extra = NUL;
 +		    c_final = NUL;
  		    n_extra = (int)STRLEN(p_sbr);
- 		    char_attr = hl_attr(HLF_AT);
+ 		    char_attr = HL_ATTR(HLF_AT);
  		    need_showbreak = FALSE;
 @@ -3881,6 +3902,7 @@ win_line(
  		    /* Continue item from end of wrapped line. */
@@ -343,7 +343,7 @@ diff --git a/src/screen.c b/src/screen.c
  			    c_extra = lcs_tab2;
 +			c_final = lcs_tab3;
  			n_attr = tab_len + 1;
- 			extra_attr = hl_attr(HLF_8);
+ 			extra_attr = HL_ATTR(HLF_8);
  			saved_attr2 = char_attr; /* save current attr */
 @@ -4772,6 +4800,7 @@ win_line(
  		    }
@@ -376,7 +376,7 @@ diff --git a/src/screen.c b/src/screen.c
 +		c_final = NUL;
  		n_extra = 1;
  		n_attr = 2;
- 		extra_attr = hl_attr(HLF_AT);
+ 		extra_attr = HL_ATTR(HLF_AT);
 @@ -5765,6 +5797,7 @@ win_line(
  	    saved_n_extra = n_extra;
  	    saved_p_extra = p_extra;
