@@ -35,7 +35,6 @@ update-rubyinc-dir.patch
 fix-po-msys2.patch
 fix-char_u-usage.patch
 remove-sync_dup_close.patch
-remove-old-doc.patch
 restore-unicode-chars.patch
 embarcadero.patch
 fix-highdpi.patch
@@ -45,4 +44,5 @@ fix-quotation-without-vimrun.patch
 stop-generating-vim-lib.patch
 add-getpackages.patch
 gtk_im_over-the-spot.patch
+doc-remove-old-items.patch
 fix-config_cache-removal.patch #+rejected

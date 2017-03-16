@@ -1,0 +1,34 @@
+# HG changeset patch
+# Parent  338302372578a6528f84476b0ef8c42e39875aa3
+
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -6525,8 +6525,7 @@ A jump table for the options with a shor
+ 	Flag passed to the shell to execute "!" and ":!" commands; e.g.,
+ 	"bash.exe -c ls" or "command.com /c dir".  For the MS-DOS-like
+ 	systems, the default is set according to the value of 'shell', to
+-	reduce the need to set this option by the user.  It's not used for
+-	OS/2 (EMX figures this out itself).
++	reduce the need to set this option by the user.
+ 	On Unix it can have more than one flag.  Each white space separated
+ 	part is passed as an argument to the shell command.
+ 	See |option-backslash| about including spaces and backslashes.
+diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
+--- a/runtime/doc/todo.txt
++++ b/runtime/doc/todo.txt
+@@ -352,14 +352,6 @@ Jul 25, #948)
+ Patch to fix wrong encoding of error message on Cygwin/MSYS terminal.
+ (Ken Takata, 2016 Oct 4)
+ 
+-Patch to introduce 'cmdencoding'. (Ken Takata, Aug 18?)
+-Better help Aug 19.
+-Problem: applies to too many commands, such as :cbuffer.
+-Updated patch with three options, 2016 Sep 8.
+-    Win32: When running ":make" and 'encoding' differs from the system locale,
+-    the output should be converted.  Esp. when 'encoding' is "utf-8". (Yongwei
+-    Wu) Should we use 'termencoding' for this?
+-
+ Patch to add 'systemencoding', convert between 'encoding' and this for file
+ names, shell commands and the like.  (Kikuchan, 2010 Oct 14)
+ Assume the system converts between the actual encoding of the filesystem to
