@@ -44,6 +44,4 @@ fix-quotation-without-vimrun.patch
 stop-generating-vim-lib.patch
 add-getpackages.patch
 gtk_im_over-the-spot.patch
-doc-remove-old-items.patch
-doc-mac-standard-mappings.patch
 fix-config_cache-removal.patch #+rejected
