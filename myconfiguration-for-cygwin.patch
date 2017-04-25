@@ -1,28 +1,29 @@
 # HG changeset patch
 # Parent 39963f43b4750a843318de4a5243dae55e86bd76
+# Parent  2d31bd06c7463eb6c626385e54749713a39eed3a
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -384,7 +384,7 @@
- # Use --with-luajit if you want to use LuaJIT instead of Lua.
+@@ -405,7 +405,7 @@ CClink = $(CC)
  # Set PATH environment variable to find lua or luajit executable.
+ # This requires at least "normal" features, "tiny" and "small" don't work.
  #CONF_OPT_LUA = --enable-luainterp
 -#CONF_OPT_LUA = --enable-luainterp=dynamic
 +CONF_OPT_LUA = --enable-luainterp=dynamic
  #CONF_OPT_LUA = --enable-luainterp --with-luajit
  #CONF_OPT_LUA = --enable-luainterp=dynamic --with-luajit
  # Lua installation dir (when not set uses $LUA_PREFIX or defaults to /usr)
-@@ -410,7 +410,7 @@
+@@ -432,7 +432,7 @@ CClink = $(CC)
  # one: "touch perl.exp".
- # This requires at least "small" features, "tiny" doesn't work.
+ # This requires at least "normal" features, "tiny" and "small" don't work.
  #CONF_OPT_PERL = --enable-perlinterp
 -#CONF_OPT_PERL = --enable-perlinterp=dynamic
 +CONF_OPT_PERL = --enable-perlinterp=dynamic
  
  # PYTHON
- # Uncomment this when you want to include the Python interface.
-@@ -425,23 +425,23 @@
+ # Uncomment lines here when you want to include the Python interface.
+@@ -446,9 +446,9 @@ CClink = $(CC)
  # However, this may still cause problems, such as "import termios" failing.
  # Build two separate versions of Vim in that case.
  #CONF_OPT_PYTHON = --enable-pythoninterp
@@ -34,8 +35,9 @@ diff --git a/src/Makefile b/src/Makefile
  
  # RUBY
  # Uncomment this when you want to include the Ruby interface.
- # First one for static linking, second one for loading when used.
+@@ -456,14 +456,14 @@ CClink = $(CC)
  # Note: you need the development package (e.g., ruby1.9.1-dev on Ubuntu).
+ # This requires at least "normal" features, "tiny" and "small" don't work.
  #CONF_OPT_RUBY = --enable-rubyinterp
 -#CONF_OPT_RUBY = --enable-rubyinterp=dynamic
 +CONF_OPT_RUBY = --enable-rubyinterp=dynamic
@@ -50,7 +52,7 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
  
  # CSCOPE
-@@ -505,7 +505,7 @@
+@@ -528,7 +528,7 @@ CClink = $(CC)
  #CONF_OPT_FEAT = --with-features=small
  #CONF_OPT_FEAT = --with-features=normal
  #CONF_OPT_FEAT = --with-features=big
