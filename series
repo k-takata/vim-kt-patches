@@ -45,4 +45,5 @@ stop-generating-vim-lib.patch
 add-getpackages.patch
 gtk_im_over-the-spot.patch
 doc-fix-eval.patch
+fix-typo-version8.patch
 fix-config_cache-removal.patch #+rejected
