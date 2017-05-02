@@ -1,33 +1,19 @@
 # HG changeset patch
-# Parent  190d2309dfff49c8c0d3304a0274a0b87ff7dd89
+# Parent  cff7f8ebced72e8cf64fb5b87f6fdadf8a696d21
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -10693,19 +10693,13 @@ missing: >
+@@ -10710,12 +10710,6 @@ When the |+eval| feature is available th
+ "while 0".  Without the |+eval| feature the "while 0" is an error, which is
+ silently ignored, and the command is executed.
  
- To execute a command only when the |+eval| feature is disabled requires a trick,
- as this example shows: >
--	if 1
--	  nnoremap : :"
--	endif
--	normal :set history=111<CR>
--	if 1
--	  nunmap :
--	endif
--
 -The "<CR>" here is a real CR character, type CTRL-V Enter to get it.
 -
 -When the |+eval| feature is available the ":" is remapped to add a double
--quote, which has the effect of commenting-out the command.  without the
+-quote, which has the effect of commenting-out the command.  Without the
 -|+eval| feature the nnoremap command is skipped and the command is executed.
-+	silent! while 0
-+	  set history=111
-+	silent! endwhile
-+
-+When the |+eval| feature is available the command is skipped because of the
-+"while 0".  Without the |+eval| feature the "while 0" is silently ignored and
-+the command is executed.
- 
+-
  ==============================================================================
  11. The sandbox					*eval-sandbox* *sandbox* *E48*
+ 
