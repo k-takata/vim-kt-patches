@@ -11,6 +11,7 @@ pipelines:
         script: # Modify the commands below to build your repository.
           - apt update -q
           - apt install -y -q libperl-dev python2.7-dev python3-dev liblua5.2-dev lua5.2 ruby-dev ruby tcl-dev man
+          - export DISPLAY=:99.0 && sh -e /etc/init.d/xvfb start && sleep 3
           - cd ..
           - hg clone https://bitbucket.org/vim-mirror/vim
           - cd vim
