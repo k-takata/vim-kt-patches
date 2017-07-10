@@ -1,25 +1,25 @@
 # HG changeset patch
-# Parent  5686714f97cb6aedab3d56c9c25390671c4d7826
+# Parent  a7289b74d1389787e365b46d8306fdce8fd07342
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2125,6 +2125,8 @@ getline({lnum})			String	line {lnum} of 
+@@ -2139,6 +2139,8 @@ getline({lnum})			String	line {lnum} of 
  getline({lnum}, {end})		List	lines {lnum} to {end} of current buffer
  getloclist({nr}[, {what}])	List	list of location list items
  getmatches()			List	list of current matches
-+getpackages([{packname}, [{packtype}, [{plugname}]]])
++getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
 +				List	list of pakage/plugin directories
  getpid()			Number	process ID of Vim
  getpos({expr})			List	position of cursor, mark, etc.
  getqflist([{what}])		List	list of quickfix items
-@@ -4478,6 +4480,21 @@ getmatches()						*getmatches()*
+@@ -4527,6 +4529,23 @@ getmatches()						*getmatches()*
  			'pattern': 'FIXME', 'priority': 10, 'id': 2}] >
  			:unlet m
  <
 +							*getpackages()*
-+getpackages([{packname}, [{packtype}, [{plugname}]]])
-+		Return a List of package/plugin directories in fullpath.
++getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
++		Return a List of package/plugin directories.
 +
 +		{packname} specifies a package name.  If it is not given or an
 +		empty string, "*" is used.  |wildcards| can be used.
@@ -30,6 +30,8 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +		packages are listed.
 +		{plugname} specifies a plugin name.  If it is not given or an
 +		empty string, "*" is used.  |wildcards| can be used.
++		If {nameonly} is |TRUE|, plugin (or package) names are listed
++		instead of the directories.
 +		See: |packages|
 +
  							*getpid()*
@@ -38,7 +40,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -176,6 +176,7 @@ static void f_getftype(typval_T *argvars
+@@ -180,6 +180,7 @@ static void f_getftype(typval_T *argvars
  static void f_getline(typval_T *argvars, typval_T *rettv);
  static void f_getloclist(typval_T *argvars UNUSED, typval_T *rettv UNUSED);
  static void f_getmatches(typval_T *argvars, typval_T *rettv);
@@ -46,15 +48,15 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  static void f_getpid(typval_T *argvars, typval_T *rettv);
  static void f_getcurpos(typval_T *argvars, typval_T *rettv);
  static void f_getpos(typval_T *argvars, typval_T *rettv);
-@@ -605,6 +606,7 @@ static struct fst
+@@ -615,6 +616,7 @@ static struct fst
      {"getline",		1, 2, f_getline},
      {"getloclist",	1, 2, f_getloclist},
      {"getmatches",	0, 0, f_getmatches},
-+    {"getpackages",	0, 3, f_getpackages},
++    {"getpackages",	0, 4, f_getpackages},
      {"getpid",		0, 0, f_getpid},
      {"getpos",		1, 1, f_getpos},
      {"getqflist",	0, 1, f_getqflist},
-@@ -4834,6 +4836,61 @@ f_getmatches(typval_T *argvars UNUSED, t
+@@ -4858,6 +4860,80 @@ f_getmatches(typval_T *argvars UNUSED, t
  #endif
  }
  
@@ -77,6 +79,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +    char_u	*packname = NULL, *packtype = NULL, *plugname = NULL;
 +    char_u	*pat;
 +    int		len;
++    int		nameonly = 0;
 +
 +    if (rettv_list_alloc(rettv) != OK)
 +	return;
@@ -88,7 +91,11 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +	{
 +	    packtype = get_tv_string_buf_chk(&argvars[1], buf2);
 +	    if (argvars[2].v_type != VAR_UNKNOWN)
++	    {
 +		plugname = get_tv_string_buf_chk(&argvars[2], buf3);
++		if (argvars[3].v_type != VAR_UNKNOWN)
++		    nameonly = (int)get_tv_number_chk(&argvars[3], NULL);
++	    }
 +	}
 +    }
 +    if (packname == NULL || packname[0] == NUL)
@@ -111,6 +118,20 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +	vim_snprintf((char*)pat, len, "pack/%s/%s/%s",
 +					    packname, packtype, plugname);
 +    do_in_path(p_pp, pat, DIP_ALL + DIP_DIR, list_pack_plugin, rettv);
++
++    if (nameonly && (rettv->v_type == VAR_LIST))
++    {
++	listitem_T	*li;
++
++	for (li = rettv->vval.v_list->lv_first; li != NULL; li = li->li_next)
++	{
++	    char_u	*p = li->li_tv.vval.v_string;
++	    li->li_tv.vval.v_string = do_string_sub(p, "^.*[/\\\\]", "",
++								NULL, "");
++	    vim_free(p);
++	}
++    }
++    vim_free(pat);
 +}
 +
  /*
