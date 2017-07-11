@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 28a8c6beb80dba152881ed895645754a06936846
-# Parent  dd4238a4cdc3563800456022a4aaceb1d9f6e0d7
+# Parent  27d09cc8e7e31faae409586b5f6c971fe5f4322b
 changeset:   5944:5bd18445ddd7
 tag:         tip
 user:        Nathaniel Braun <pragmb@gmail.com>
@@ -12,7 +12,7 @@ Add optional third tab character in "listchars"
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -4895,11 +4895,25 @@ A jump table for the options with a shor
+@@ -4927,11 +4927,25 @@ A jump table for the options with a shor
  			omitted, there is no extra character at the end of the
  			line.
  							*lcs-tab*
@@ -45,7 +45,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/globals.h b/src/globals.h
 --- a/src/globals.h
 +++ b/src/globals.h
-@@ -1182,6 +1182,7 @@ EXTERN int	lcs_nbsp INIT(= NUL);
+@@ -1184,6 +1184,7 @@ EXTERN int	lcs_nbsp INIT(= NUL);
  EXTERN int	lcs_space INIT(= NUL);
  EXTERN int	lcs_tab1 INIT(= NUL);
  EXTERN int	lcs_tab2 INIT(= NUL);
@@ -109,7 +109,7 @@ diff --git a/src/message.c b/src/message.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -7681,7 +7681,7 @@ set_chars_option(char_u **varp)
+@@ -7722,7 +7722,7 @@ set_chars_option(char_u **varp)
  {
      int		round, i, len, entries;
      char_u	*p, *s;
@@ -118,7 +118,7 @@ diff --git a/src/option.c b/src/option.c
      struct charstab
      {
  	int	*cp;
-@@ -7739,8 +7739,12 @@ set_chars_option(char_u **varp)
+@@ -7780,8 +7780,12 @@ set_chars_option(char_u **varp)
  	    for (i = 0; i < entries; ++i)
  		if (tab[i].cp != NULL)
  		    *(tab[i].cp) = (varp == &p_lcs ? NUL : ' ');
@@ -131,7 +131,7 @@ diff --git a/src/option.c b/src/option.c
  #if defined(FEAT_WINDOWS) || defined(FEAT_FOLDING)
  	    else
  		fill_diff = '-';
-@@ -7756,6 +7760,7 @@ set_chars_option(char_u **varp)
+@@ -7797,6 +7801,7 @@ set_chars_option(char_u **varp)
  			&& p[len] == ':'
  			&& p[len + 1] != NUL)
  		{
@@ -139,7 +139,7 @@ diff --git a/src/option.c b/src/option.c
  		    s = p + len + 1;
  #ifdef FEAT_MBYTE
  		    c1 = mb_ptr2char_adv(&s);
-@@ -7775,7 +7780,18 @@ set_chars_option(char_u **varp)
+@@ -7816,7 +7821,18 @@ set_chars_option(char_u **varp)
  #else
  			c2 = *s++;
  #endif
@@ -158,7 +158,7 @@ diff --git a/src/option.c b/src/option.c
  		    if (*s == ',' || *s == NUL)
  		    {
  			if (round)
-@@ -7784,6 +7800,7 @@ set_chars_option(char_u **varp)
+@@ -7825,6 +7841,7 @@ set_chars_option(char_u **varp)
  			    {
  				lcs_tab1 = c1;
  				lcs_tab2 = c2;
@@ -169,7 +169,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/screen.c b/src/screen.c
 --- a/src/screen.c
 +++ b/src/screen.c
-@@ -2921,6 +2921,7 @@ win_line(
+@@ -3011,6 +3011,7 @@ win_line(
      char_u	*p_extra = NULL;	/* string of extra chars, plus NUL */
      char_u	*p_extra_free = NULL;   /* p_extra needs to be freed */
      int		c_extra = NUL;		/* extra chars, all the same */
@@ -177,7 +177,7 @@ diff --git a/src/screen.c b/src/screen.c
      int		extra_attr = 0;		/* attributes when n_extra != 0 */
      static char_u *at_end_str = (char_u *)""; /* used for p_extra when
  					   displaying lcs_eol at end-of-line */
-@@ -2931,6 +2932,7 @@ win_line(
+@@ -3021,6 +3022,7 @@ win_line(
      int		saved_n_extra = 0;
      char_u	*saved_p_extra = NULL;
      int		saved_c_extra = 0;
@@ -185,7 +185,7 @@ diff --git a/src/screen.c b/src/screen.c
      int		saved_char_attr = 0;
  
      int		n_attr = 0;		/* chars with special attr */
-@@ -3630,6 +3632,7 @@ win_line(
+@@ -3729,6 +3731,7 @@ win_line(
  		    /* Draw the cmdline character. */
  		    n_extra = 1;
  		    c_extra = cmdwin_type;
@@ -193,7 +193,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    char_attr = HL_ATTR(HLF_AT);
  		}
  	    }
-@@ -3655,6 +3658,7 @@ win_line(
+@@ -3754,6 +3757,7 @@ win_line(
  			p_extra_free[n_extra] = NUL;
  			p_extra = p_extra_free;
  			c_extra = NUL;
@@ -201,7 +201,7 @@ diff --git a/src/screen.c b/src/screen.c
  			char_attr = HL_ATTR(HLF_FC);
  		    }
  		}
-@@ -3676,6 +3680,7 @@ win_line(
+@@ -3775,6 +3779,7 @@ win_line(
  
  		    /* Draw two cells with the sign value or blank. */
  		    c_extra = ' ';
@@ -209,7 +209,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    char_attr = HL_ATTR(HLF_SC);
  		    n_extra = 2;
  
-@@ -3694,9 +3699,13 @@ win_line(
+@@ -3793,9 +3798,13 @@ win_line(
  			{
  			    /* Use the image in this position. */
  			    c_extra = SIGN_BYTE;
@@ -223,7 +223,7 @@ diff --git a/src/screen.c b/src/screen.c
  #  endif
  			    char_attr = icon_sign;
  			}
-@@ -3708,6 +3717,7 @@ win_line(
+@@ -3807,6 +3816,7 @@ win_line(
  			    if (p_extra != NULL)
  			    {
  				c_extra = NUL;
@@ -231,7 +231,7 @@ diff --git a/src/screen.c b/src/screen.c
  				n_extra = (int)STRLEN(p_extra);
  			    }
  			    char_attr = sign_get_attr(text_sign, FALSE);
-@@ -3765,9 +3775,13 @@ win_line(
+@@ -3864,9 +3874,13 @@ win_line(
  #endif
  			p_extra = extra;
  			c_extra = NUL;
@@ -245,7 +245,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    n_extra = number_width(wp) + 1;
  		    char_attr = HL_ATTR(HLF_N);
  #ifdef FEAT_SYN_HL
-@@ -3836,9 +3850,15 @@ win_line(
+@@ -3935,9 +3949,15 @@ win_line(
  		{
  		    /* Draw "deleted" diff line(s). */
  		    if (char2cells(fill_diff) > 1)
@@ -261,7 +261,7 @@ diff --git a/src/screen.c b/src/screen.c
  #  ifdef FEAT_RIGHTLEFT
  		    if (wp->w_p_rl)
  			n_extra = col + 1;
-@@ -3854,6 +3874,7 @@ win_line(
+@@ -3953,6 +3973,7 @@ win_line(
  		    /* Draw 'showbreak' at the start of each broken line. */
  		    p_extra = p_sbr;
  		    c_extra = NUL;
@@ -269,7 +269,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    n_extra = (int)STRLEN(p_sbr);
  		    char_attr = HL_ATTR(HLF_AT);
  		    need_showbreak = FALSE;
-@@ -3881,6 +3902,7 @@ win_line(
+@@ -3980,6 +4001,7 @@ win_line(
  		    /* Continue item from end of wrapped line. */
  		    n_extra = saved_n_extra;
  		    c_extra = saved_c_extra;
@@ -277,7 +277,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    p_extra = saved_p_extra;
  		    char_attr = saved_char_attr;
  		}
-@@ -4105,15 +4127,16 @@ win_line(
+@@ -4204,15 +4226,16 @@ win_line(
  	 * The "p_extra" points to the extra stuff that is inserted to
  	 * represent special characters (non-printable stuff) and other
  	 * things.  When all characters are the same, c_extra is used.
@@ -296,8 +296,8 @@ diff --git a/src/screen.c b/src/screen.c
 +		c = (n_extra == 1 && c_final != NUL) ? c_final : c_extra;
  #ifdef FEAT_MBYTE
  		mb_c = c;	/* doesn't handle non-utf-8 multi-byte! */
- 		if (enc_utf8 && (*mb_char2len)(c) > 1)
-@@ -4281,6 +4304,7 @@ win_line(
+ 		if (enc_utf8 && utf_char2len(c) > 1)
+@@ -4380,6 +4403,7 @@ win_line(
  			mb_utf8 = (c >= 0x80);
  			n_extra = (int)STRLEN(p_extra);
  			c_extra = NUL;
@@ -305,7 +305,7 @@ diff --git a/src/screen.c b/src/screen.c
  			if (area_attr == 0 && search_attr == 0)
  			{
  			    n_attr = n_extra + 1;
-@@ -4349,6 +4373,7 @@ win_line(
+@@ -4448,6 +4472,7 @@ win_line(
  			    p_extra = extra;
  			    n_extra = (int)STRLEN(extra) - 1;
  			    c_extra = NUL;
@@ -313,7 +313,7 @@ diff --git a/src/screen.c b/src/screen.c
  			    c = *p_extra++;
  			    if (area_attr == 0 && search_attr == 0)
  			    {
-@@ -4389,6 +4414,7 @@ win_line(
+@@ -4488,6 +4513,7 @@ win_line(
  		{
  		    n_extra = 1;
  		    c_extra = MB_FILLER_CHAR;
@@ -321,7 +321,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    c = ' ';
  		    if (area_attr == 0 && search_attr == 0)
  		    {
-@@ -4577,6 +4603,7 @@ win_line(
+@@ -4680,6 +4706,7 @@ win_line(
  # else
  		    c_extra = ' ';
  # endif
@@ -329,7 +329,7 @@ diff --git a/src/screen.c b/src/screen.c
  		    if (VIM_ISWHITE(c))
  		    {
  #ifdef FEAT_CONCEAL
-@@ -4750,13 +4777,14 @@ win_line(
+@@ -4853,13 +4880,14 @@ win_line(
  #endif
  		    if (wp->w_p_list)
  		    {
@@ -345,7 +345,7 @@ diff --git a/src/screen.c b/src/screen.c
  			n_attr = tab_len + 1;
  			extra_attr = HL_ATTR(HLF_8);
  			saved_attr2 = char_attr; /* save current attr */
-@@ -4772,6 +4800,7 @@ win_line(
+@@ -4875,6 +4903,7 @@ win_line(
  		    }
  		    else
  		    {
@@ -353,7 +353,7 @@ diff --git a/src/screen.c b/src/screen.c
  			c_extra = ' ';
  			c = ' ';
  		    }
-@@ -4821,6 +4850,7 @@ win_line(
+@@ -4924,6 +4953,7 @@ win_line(
  			    p_extra = at_end_str;
  			    n_extra = 1;
  			    c_extra = NUL;
@@ -361,7 +361,7 @@ diff --git a/src/screen.c b/src/screen.c
  			}
  		    }
  		    if (wp->w_p_list && lcs_eol > 0)
-@@ -4856,6 +4886,7 @@ win_line(
+@@ -4959,6 +4989,7 @@ win_line(
  			rl_mirror(p_extra);	/* reverse "<12>" */
  #endif
  		    c_extra = NUL;
@@ -369,7 +369,7 @@ diff --git a/src/screen.c b/src/screen.c
  #ifdef FEAT_LINEBREAK
  		    if (wp->w_p_lbr)
  		    {
-@@ -5102,6 +5133,7 @@ win_line(
+@@ -5205,6 +5236,7 @@ win_line(
  		/* Double-width character being overwritten by the "precedes"
  		 * character, need to fill up half the character. */
  		c_extra = MB_FILLER_CHAR;
@@ -377,7 +377,7 @@ diff --git a/src/screen.c b/src/screen.c
  		n_extra = 1;
  		n_attr = 2;
  		extra_attr = HL_ATTR(HLF_AT);
-@@ -5765,6 +5797,7 @@ win_line(
+@@ -5869,6 +5901,7 @@ win_line(
  	    saved_n_extra = n_extra;
  	    saved_p_extra = p_extra;
  	    saved_c_extra = c_extra;

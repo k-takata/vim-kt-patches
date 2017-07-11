@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  581f8fe7d00534ab4019d331044a48b1e541405a
+# Parent  79d406e55b6572295ec1c884156b0cbd776aa0df
 
 diff --git a/src/channel.c b/src/channel.c
 --- a/src/channel.c
 +++ b/src/channel.c
-@@ -5034,7 +5034,7 @@ job_start(typval_T *argvars)
+@@ -5058,7 +5058,7 @@ job_start(typval_T *argvars)
      mch_start_job(argv, job, &opt);
  #else
      ch_logs(NULL, "Starting job: %s", (char *)cmd);
@@ -16,7 +16,7 @@ diff --git a/src/channel.c b/src/channel.c
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -419,9 +419,9 @@ mch_isFullName(char_u *fname)
+@@ -418,9 +418,9 @@ mch_isFullName(char_u *fname)
      /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
       * means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
       * UTF-8. */
@@ -28,7 +28,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  #endif
  
      /* A name like "d:/foo" and "//server/share" is absolute */
-@@ -430,7 +430,7 @@ mch_isFullName(char_u *fname)
+@@ -429,7 +429,7 @@ mch_isFullName(char_u *fname)
  	return TRUE;
  
      /* A name that can't be made absolute probably isn't absolute. */
@@ -37,7 +37,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	return FALSE;
  
      return pathcmp((const char *)fname, (const char *)szName, -1) == 0;
-@@ -598,7 +598,7 @@ vim_stat(const char *name, stat_T *stp)
+@@ -597,7 +597,7 @@ vim_stat(const char *name, stat_T *stp)
  #endif
      char_u	*p;
  
@@ -45,11 +45,11 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +    vim_strncpy(buf, (char_u *)name, sizeof(buf) - 1);
      p = buf + STRLEN(buf);
      if (p > buf)
- 	mb_ptr_back(buf, p);
+ 	MB_PTR_BACK(buf, p);
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3850,7 +3850,7 @@ mch_set_winsize_now(void)
+@@ -3976,7 +3976,7 @@ mch_set_winsize_now(void)
  
      static BOOL
  vim_create_process(
@@ -58,7 +58,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      BOOL		inherit_handles,
      DWORD		flags,
      STARTUPINFO		*si,
-@@ -3859,7 +3859,7 @@ vim_create_process(
+@@ -3985,7 +3985,7 @@ vim_create_process(
  #ifdef FEAT_MBYTE
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
      {
@@ -67,7 +67,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  	if (wcmd != NULL)
  	{
-@@ -3882,7 +3882,7 @@ vim_create_process(
+@@ -4008,7 +4008,7 @@ vim_create_process(
  #endif
      return CreateProcess(
  	NULL,			/* Executable name */
@@ -76,7 +76,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	NULL,			/* Process security attributes */
  	NULL,			/* Thread security attributes */
  	inherit_handles,	/* Inherit handles */
-@@ -3905,7 +3905,7 @@ vim_create_process(
+@@ -4053,7 +4053,7 @@ vim_shell_execute(
   *    4. Prompt the user to press a key to close the console window
   */
      static int
@@ -85,7 +85,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      STARTUPINFO		si;
      PROCESS_INFORMATION pi;
-@@ -4171,7 +4171,7 @@ dump_pipe(int	    options,
+@@ -4319,7 +4319,7 @@ dump_pipe(int	    options,
   * for communication and doesn't open any new window.
   */
      static int
@@ -94,7 +94,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      STARTUPINFO		si;
      PROCESS_INFORMATION pi;
-@@ -4193,9 +4193,9 @@ mch_system_piped(char *cmd, int options)
+@@ -4341,9 +4341,9 @@ mch_system_piped(char *cmd, int options)
      int		c;
      int		noread_cnt = 0;
      garray_T	ga;
@@ -106,7 +106,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      SECURITY_ATTRIBUTES saAttr;
  
-@@ -4238,9 +4238,9 @@ mch_system_piped(char *cmd, int options)
+@@ -4386,9 +4386,9 @@ mch_system_piped(char *cmd, int options)
  
      if (cmd != NULL)
      {
@@ -118,7 +118,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	else
  	    p = cmd;
      }
-@@ -4454,7 +4454,7 @@ mch_system_piped(char *cmd, int options)
+@@ -4602,7 +4602,7 @@ mch_system_piped(char *cmd, int options)
  }
  
      static int
@@ -127,7 +127,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      /* if we can pipe and the shelltemp option is off */
      if (!p_stmp)
-@@ -4466,7 +4466,7 @@ mch_system(char *cmd, int options)
+@@ -4614,7 +4614,7 @@ mch_system(char *cmd, int options)
  
  # ifdef FEAT_MBYTE
      static int
@@ -136,7 +136,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  {
      if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
      {
-@@ -4478,10 +4478,10 @@ mch_system(char *cmd, int options)
+@@ -4626,10 +4626,10 @@ mch_system(char *cmd, int options)
  	    return ret;
  	}
      }
@@ -149,7 +149,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  
  #endif
-@@ -4577,7 +4577,7 @@ mch_call_shell(
+@@ -4725,7 +4725,7 @@ mch_call_shell(
  
      if (cmd == NULL)
      {
@@ -158,16 +158,16 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
      else
      {
-@@ -4684,7 +4684,7 @@ mch_call_shell(
+@@ -4834,7 +4834,7 @@ mch_call_shell(
  	     * inherit our handles which causes unpleasant dangling swap
  	     * files if we exit before the spawned process
  	     */
 -	    if (vim_create_process((char *)newcmd, FALSE, flags, &si, &pi))
 +	    if (vim_create_process(newcmd, FALSE, flags, &si, &pi))
  		x = 0;
- 	    else
- 	    {
-@@ -4752,7 +4752,7 @@ mch_call_shell(
+ 	    else if (vim_shell_execute((char *)newcmd, n_show_cmd)
+ 							       > (HINSTANCE)32)
+@@ -4905,7 +4905,7 @@ mch_call_shell(
  #endif
  		    vim_snprintf((char *)newcmd, cmdlen, "%s %s %s",
  							   p_sh, p_shcf, cmd);
@@ -176,7 +176,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		vim_free(newcmd);
  	    }
  	}
-@@ -4823,7 +4823,7 @@ job_io_file_open(
+@@ -4976,7 +4976,7 @@ job_io_file_open(
  }
  
      void
@@ -188,7 +188,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 --- a/src/proto/os_win32.pro
 +++ b/src/proto/os_win32.pro
-@@ -39,7 +39,7 @@ void mch_set_shellsize(void);
+@@ -41,7 +41,7 @@ void mch_set_shellsize(void);
  void mch_new_shellsize(void);
  void mch_set_winsize_now(void);
  int mch_call_shell(char_u *cmd, int options);
