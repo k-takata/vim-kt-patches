@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a7289b74d1389787e365b46d8306fdce8fd07342
+# Parent  2374565c5f946be8184e876bf0580e3690a021c9
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -137,3 +137,89 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  /*
   * "getpid()" function
   */
+diff --git a/src/testdir/test_packadd.vim b/src/testdir/test_packadd.vim
+--- a/src/testdir/test_packadd.vim
++++ b/src/testdir/test_packadd.vim
+@@ -273,3 +273,82 @@ func Test_runtime()
+   runtime! ALL extra/bar.vim
+   call assert_equal('runstartopt', g:sequence)
+ endfunc
++
++func s:getnames(plugs)
++  return sort(map(a:plugs, {-> substitute(v:val, '^.*[/\\]', '', '')}))
++endfunc
++func Test_getpackages()
++  call delete(&packpath, 'rf')
++
++  let plugs = [
++	\ &packpath . '/pack/foo/start/plug0',
++	\ &packpath . '/pack/foo/start/plug1',
++	\ &packpath . '/pack/foo/opt/plug2',
++	\ &packpath . '/pack/foo/opt/plug3',
++	\ &packpath . '/pack/bar/start/plug4',
++	\ &packpath . '/pack/bar/start/plug5',
++	\ &packpath . '/pack/bar/opt/plug6',
++	\ &packpath . '/pack/bar/opt/plug7',
++	\ ]
++  for dir in plugs
++    call mkdir(dir, 'p')
++  endfor
++
++  " All plugins
++  let p = getpackages()
++  let exp = plugs[:]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', '', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " All packages
++  let p = getpackages('', 'NONE')
++  let exp = [&packpath . '/pack/foo', &packpath . '/pack/bar']
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', 'NONE', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " Plugins under foo
++  let p = getpackages('foo')
++  let exp = plugs[0 : 3]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('foo', '', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " 'start' plugins
++  let p = getpackages('', 'start')
++  let exp = plugs[0 : 1] + plugs[4 : 5]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', 'start', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " 'opt' plugins
++  let p = getpackages('*', 'opt', '')
++  let exp = plugs[2 : 3] + plugs[6 : 7]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('*', 'opt', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " Plugins with 'plug1*' name
++  let p = getpackages('', '', 'plug1*')
++  let exp = plugs[1 : 1]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', '', 'plug1', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " No match
++  let p = getpackages('foo', 'opt', 'plug1*')
++  let exp = []
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('foo', 'opt', 'plug1*', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  call delete(&packpath, 'rf')
++endfunc
