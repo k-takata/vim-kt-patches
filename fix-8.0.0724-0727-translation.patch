@@ -1,0 +1,64 @@
+# HG changeset patch
+# Parent  4e6d4c64fda804c62281734e90db10614c1be90d
+
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -3167,29 +3167,43 @@ op_yank(oparg_T *oap, int deleting, int 
+ 	/* Some versions of Vi use ">=" here, some don't...  */
+ 	if (yanklines > p_report)
+ 	{
+-	    char namebuf[100];
+-
+-	    if (oap->regname == NUL)
+-		*namebuf = NUL;
+-	    else
+-		vim_snprintf(namebuf, sizeof(namebuf),
+-						_(" into \"%c"), oap->regname);
+-
+ 	    /* redisplay now, so message is not deleted */
+ 	    update_topline_redraw();
+ 	    if (yanklines == 1)
+ 	    {
+ 		if (oap->block_mode)
+-		    smsg((char_u *)_("block of 1 line yanked%s"), namebuf);
++		{
++		    if (oap->regname == NUL)
++			MSG(_("block of 1 line yanked"));
++		    else
++			smsg((char_u *)_("block of 1 line yanked into \"%c"),
++								oap->regname);
++		}
+ 		else
+-		    smsg((char_u *)_("1 line yanked%s"), namebuf);
++		{
++		    if (oap->regname == NUL)
++			MSG(_("1 line yanked"));
++		    else
++			smsg((char_u *)_("1 line yanked into \"%c"),
++								oap->regname);
++		}
+ 	    }
+ 	    else if (oap->block_mode)
+-		smsg((char_u *)_("block of %ld lines yanked%s"),
+-		     yanklines, namebuf);
++	    {
++		if (oap->regname == NUL)
++		    smsg((char_u *)_("block of %ld lines yanked"), yanklines);
++		else
++		    smsg((char_u *)_("block of %ld lines yanked into \"%c"),
++						    yanklines, oap->regname);
++	    }
+ 	    else
+-		smsg((char_u *)_("%ld lines yanked%s"), yanklines,
+-		     namebuf);
++	    {
++		if (oap->regname == NUL)
++		    smsg((char_u *)_("%ld lines yanked"), yanklines);
++		else
++		    smsg((char_u *)_("%ld lines yanked into \"%c"),
++						    yanklines, oap->regname);
++	    }
+ 	}
+     }
+ 
