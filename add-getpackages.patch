@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  2374565c5f946be8184e876bf0580e3690a021c9
+# Parent  ef675749835380da3a03fea8671b4850529a684e
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -13,7 +13,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  getpid()			Number	process ID of Vim
  getpos({expr})			List	position of cursor, mark, etc.
  getqflist([{what}])		List	list of quickfix items
-@@ -4527,6 +4529,23 @@ getmatches()						*getmatches()*
+@@ -4533,6 +4535,23 @@ getmatches()						*getmatches()*
  			'pattern': 'FIXME', 'priority': 10, 'id': 2}] >
  			:unlet m
  <
@@ -126,8 +126,8 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +	for (li = rettv->vval.v_list->lv_first; li != NULL; li = li->li_next)
 +	{
 +	    char_u	*p = li->li_tv.vval.v_string;
-+	    li->li_tv.vval.v_string = do_string_sub(p, "^.*[/\\\\]", "",
-+								NULL, "");
++	    li->li_tv.vval.v_string = do_string_sub(p, (char_u *)"^.*[/\\\\]",
++					    (char_u *)"", NULL, (char_u *)"");
 +	    vim_free(p);
 +	}
 +    }
