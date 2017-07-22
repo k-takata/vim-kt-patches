@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  03ca1374f44a709ca08d7a10a2894fbc214b72c2
+# Parent  6648daf7ea3b284dd0ae7cbd1afadeef3c62d171
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -4729,7 +4729,8 @@ mch_call_shell(
+@@ -4885,7 +4885,8 @@ mch_call_shell(
  	{
  	    cmdlen = (
  #ifdef FEAT_GUI_W32
@@ -14,7 +14,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  #endif
  		STRLEN(p_sh) + STRLEN(p_shcf) + STRLEN(cmd) + 10);
  
-@@ -4766,9 +4767,12 @@ mch_call_shell(
+@@ -4924,9 +4925,12 @@ mch_call_shell(
  								 ? "-s " : "",
  			    p_sh, p_shcf, cmd);
  		else
@@ -26,6 +26,6 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +		vim_snprintf((char *)newcmd, cmdlen, "%s %s %s",
  							   p_sh, p_shcf, cmd);
 +#endif
- 		x = mch_system(newcmd, options);
+ 		x = mch_system((char *)newcmd, options);
  		vim_free(newcmd);
  	    }
