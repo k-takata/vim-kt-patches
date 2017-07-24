@@ -1,0 +1,25 @@
+# HG changeset patch
+# Parent  359564163ffa0930caf5915a9d020410229c88a0
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -356,9 +356,6 @@ CSCOPE_DEFS  = -DFEAT_CSCOPE
+ !if "$(TERMINAL)" == "yes"
+ TERMINAL_OBJ   = $(OBJDIR)/terminal.obj
+ TERMINAL_DEFS  = -DFEAT_TERMINAL
+-!if $(MSVC_MAJOR) <= 11
+-TERMINAL_DEFS = $(TERMINAL_DEFS) /I if_perl_msvc
+-!endif
+ TERMINAL_SRC   = terminal.c
+ VTERM_LIB      = libvterm/vterm.lib
+ !endif
+@@ -1554,7 +1551,7 @@ proto.h: \
+ 
+ libvterm/vterm.lib :
+ 	cd libvterm
+-	$(MAKE) /NOLOGO -f Makefile.msc "MSVC_MAJOR=$(MSVC_MAJOR)"
++	$(MAKE) /NOLOGO -f Makefile.msc
+ 	cd ..
+ 
+ # vim: set noet sw=8 ts=8 sts=0 wm=0 tw=0:
