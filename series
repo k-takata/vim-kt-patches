@@ -44,5 +44,4 @@ fix-quotation-without-vimrun.patch
 stop-generating-vim-lib.patch
 add-getpackages.patch
 gtk_im_over-the-spot.patch
-fix-terminal-win32.patch
 fix-config_cache-removal.patch #+rejected
