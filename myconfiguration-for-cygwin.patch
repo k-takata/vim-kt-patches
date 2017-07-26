@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 39963f43b4750a843318de4a5243dae55e86bd76
-# Parent  2d31bd06c7463eb6c626385e54749713a39eed3a
+# Parent  8c27dbca8ad7d0e76709e99aaa504edcce6bbd51
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
@@ -52,7 +52,16 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
  
  # CSCOPE
-@@ -528,7 +528,7 @@ CClink = $(CC)
+@@ -485,7 +485,7 @@ CClink = $(CC)
+ # TERMINAL - Terminal emulator support, :terminal command.  Requires the
+ # channel feature.
+ # Uncomment this when you want terminal emulator support.
+-#CONF_OPT_TERMINAL = --enable-terminal
++CONF_OPT_TERMINAL = --enable-terminal
+ 
+ # MULTIBYTE - To edit multi-byte characters.
+ # Uncomment this when you want to edit a multibyte language.
+@@ -533,7 +533,7 @@ CClink = $(CC)
  #CONF_OPT_FEAT = --with-features=small
  #CONF_OPT_FEAT = --with-features=normal
  #CONF_OPT_FEAT = --with-features=big
