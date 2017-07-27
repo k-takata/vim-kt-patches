@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  ef675749835380da3a03fea8671b4850529a684e
+# Parent  b38e62290217339e8252250d76acef4d67f07a49
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -78,7 +78,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +    char_u	buf1[NUMBUFLEN], buf2[NUMBUFLEN], buf3[NUMBUFLEN];
 +    char_u	*packname = NULL, *packtype = NULL, *plugname = NULL;
 +    char_u	*pat;
-+    int		len;
++    size_t	len;
 +    int		nameonly = 0;
 +
 +    if (rettv_list_alloc(rettv) != OK)
@@ -106,7 +106,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 +	plugname = (char_u*)"*";
 +
 +    len = 8 + STRLEN(packname) + STRLEN(packtype) + STRLEN(plugname);
-+    pat = alloc(len);
++    pat = alloc((int)len);
 +    if (pat == NULL)
 +	return;
 +
