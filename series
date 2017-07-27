@@ -45,6 +45,4 @@ stop-generating-vim-lib.patch
 add-getpackages.patch
 gtk_im_over-the-spot.patch
 clarify-mzscheme_ver.patch
-fix-terminal-memleak.patch
-fix-terminal-refcount.patch
 fix-config_cache-removal.patch #+rejected
