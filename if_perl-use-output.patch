@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 91adde2d209d301b1e834460fb1479ecb6c9951b
-# Parent  5868c9af19449604d4c7a7bacc1f0cb1adbe84d2
+# Parent  a03019b61ce42831560786284aa5485c9b3ee7e0
 
 diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
 --- a/src/Make_bc5.mak
@@ -14,15 +14,3 @@ diff --git a/src/Make_bc5.mak b/src/Make_bc5.mak
  
  $(OBJDIR)\if_python.obj: if_python.c if_py_both.h python.lib
  	$(CC) -I$(PYTHON)\include $(CCARG) $(CC1) $(CC2)$@ -pc if_python.c
-diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
---- a/src/Make_mvc.mak
-+++ b/src/Make_mvc.mak
-@@ -1341,7 +1341,7 @@ testclean:
- 
- if_perl.c : if_perl.xs typemap
- 	$(XSUBPP) -prototypes -typemap $(XSUBPP_TYPEMAP) \
--		-typemap typemap if_perl.xs > if_perl.c
-+		-typemap typemap if_perl.xs -output if_perl.c
- 
- $(OUTDIR)/if_perl.obj: $(OUTDIR) if_perl.c  $(INCL)
- 	$(CC) $(CFLAGS_OUTDIR) $(PERL_INC) if_perl.c
