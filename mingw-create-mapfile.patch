@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  ab84880d5d526d591c9c5b79c7815f5b265b87c7
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -868,7 +868,7 @@ uninstal.exe: uninstal.c
+ 	$(CC) $(CFLAGS) -o uninstal.exe uninstal.c $(LIB)
+ 
+ $(TARGET): $(OUTDIR) $(OBJ)
+-	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
++	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) -Wl,-Map=$(TARGET).map
+ 
+ upx: exes
+ 	upx gvim.exe

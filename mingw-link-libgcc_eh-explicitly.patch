@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  be63c9c443727c433d64b178aa36d9e98ad9b18a
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -853,7 +853,7 @@ endif
+ endif
+ 
+ ifeq (yes, $(STATIC_WINPTHREAD))
+-LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
++LIB += -lgcc_eh -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
+ endif
+ 
+ all: $(TARGET) vimrun.exe xxd/xxd.exe install.exe uninstal.exe GvimExt/gvimext.dll
