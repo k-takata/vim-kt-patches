@@ -47,4 +47,5 @@ gtk_im_over-the-spot.patch
 clarify-mzscheme_ver.patch
 mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
+color256-better-approx.patch
 fix-config_cache-removal.patch #+rejected
