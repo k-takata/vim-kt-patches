@@ -1,0 +1,45 @@
+# HG changeset patch
+# Parent  f9edcd5338304bf880352a8e1b2128b245cd1e05
+
+diff --git a/src/GvimExt/Makefile b/src/GvimExt/Makefile
+--- a/src/GvimExt/Makefile
++++ b/src/GvimExt/Makefile
+@@ -36,8 +36,16 @@ CPU = i386
+ 
+ !ifdef SDK_INCLUDE_DIR
+ !include $(SDK_INCLUDE_DIR)\Win32.mak
++!elseif "$(USE_WIN32MAK)"=="yes"
++!include <Win32.mak>
+ !else
+-!include <Win32.mak>
++cc = cl
++link = link
++rc = rc
++cflags = -nologo -c
++lflags = -incremental:no -nologo
++rcflags = /r
++olelibsdll = ole32.lib uuid.lib oleaut32.lib user32.lib gdi32.lib advapi32.lib
+ !endif
+ 
+ # include CPUARG
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -253,12 +253,15 @@ MAKEFLAGS_GVIMEXT = DEBUG=yes
+ !endif
+ 
+ 
+-# Get all sorts of useful, standard macros from the Platform SDK.
++# Get all sorts of useful, standard macros from the Platform SDK,
++# if SDK_INCLUDE_DIR is set or USE_WIN32MAK is set to "yes".
+ 
+ !ifdef SDK_INCLUDE_DIR
+ !include $(SDK_INCLUDE_DIR)\Win32.mak
++!elseif "$(USE_WIN32MAK)"=="yes"
++!include <Win32.mak>
+ !else
+-!include <Win32.mak>
++link = link
+ !endif
+ 
+ 
