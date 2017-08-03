@@ -1,0 +1,32 @@
+# HG changeset patch
+# Parent  1f825f6d2246c08a60133020d7f117fbf378bedf
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -5771,21 +5771,22 @@ write_chars(
+     DWORD written;
+ 
+ #ifdef FEAT_MBYTE
+-    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
++    if (enc_codepage >= 0 && (int)GetConsoleCP() != enc_codepage)
+     {
+ 	static WCHAR	*unicodebuf = NULL;
+ 	static int	unibuflen = 0;
+ 	int		length;
++	int		cp = enc_utf8 ? CP_UTF8 : enc_codepage;
+ 	DWORD		n, cchwritten, cells;
+ 
+-	length = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite, 0, 0);
++	length = MultiByteToWideChar(cp, 0, (LPCSTR)pchBuf, cbToWrite, 0, 0);
+ 	if (unicodebuf == NULL || length > unibuflen)
+ 	{
+ 	    vim_free(unicodebuf);
+ 	    unicodebuf = (WCHAR *)lalloc(length * sizeof(WCHAR), FALSE);
+ 	    unibuflen = length;
+ 	}
+-	MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite,
++	MultiByteToWideChar(cp, 0, (LPCSTR)pchBuf, cbToWrite,
+ 			    unicodebuf, unibuflen);
+ 
+ 	cells = mb_string2cells(pchBuf, cbToWrite);
