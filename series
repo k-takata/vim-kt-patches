@@ -48,5 +48,5 @@ mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 doc-fix-term-functions.patch
 no-win32mak.patch
-fix-7.4.852.patch
+wip-fix-7.4.852.patch
 fix-config_cache-removal.patch #+rejected
