@@ -46,8 +46,7 @@ add-getpackages.patch
 gtk_im_over-the-spot.patch
 mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
-doc-fix-typo.patch
+doc-fix-term-functions.patch
 no-win32mak.patch
 fix-7.4.852.patch
-doc-fix-term-functions.patch
 fix-config_cache-removal.patch #+rejected
