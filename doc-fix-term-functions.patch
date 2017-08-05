@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a9469527c1985a9fef49e2589ed4cd4ea6729fc4
+# Parent  dcc947b1ae31bf76b18395ca50f00df3bb43fac7
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -132,10 +132,10 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  term_start({cmd}, {options})				*term_start()*
  		Open a terminal window and run {cmd} in it.
-@@ -8029,10 +8042,12 @@ term_start({cmd}, {options})				*term_st
- 		When opening the window fails zero is returned.
- 
- 		{options} are not implemented yet.
+@@ -8045,10 +8058,12 @@ term_start({cmd}, {options})				*term_st
+ 		There is one extra option:
+ 		   "term_name"   name to use for the buffer name, instead of
+ 				 the command name.
 +		{only available when compiled with the |+terminal| feature}
  
  term_wait({buf})						*term_wait()*
