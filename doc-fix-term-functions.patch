@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  dcc947b1ae31bf76b18395ca50f00df3bb43fac7
+# Parent  4566fe9994a1231f17af840c150a094ac0762e7d
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2371,16 +2371,16 @@ tagfiles()			List	tags files used
+@@ -2371,7 +2371,7 @@ tagfiles()			List	tags files used
  tan({expr})			Float	tangent of {expr}
  tanh({expr})			Float	hyperbolic tangent of {expr}
  tempname()			String	name for a temporary file
@@ -12,19 +12,8 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +term_getattr({attr}, {what})	Number	get the value of attribute {what}
  term_getcursor({buf})		List	get the cursor position of a terminal
  term_getjob({buf})		Job	get the job associated with a terminal
--term_getline({buf}, {row})	String	get a line of text from a terminal
-+term_getline({buf} [, {row}])	String	get a line of text from a terminal
- term_getsize({buf})		List	get the size of a terminal
- term_getstatus({buf})		String	get the status of a terminal
- term_gettitle({buf})		String	get the title of a terminal
- term_gettty({buf})		String	get the tty name of a terminal
- term_list()			List	get the list of terminal buffers
--term_scrape({buf}, {row})	List	get row of a terminal screen
-+term_scrape({buf} [, {row}])	List	get row of a terminal screen
- term_sendkeys({buf}, {keys})	none	send keystrokes to a terminal
- term_start({cmd}, {options})	Job	open a terminal window and run a job
- term_wait({buf})		Number  wait for screen to be updated
-@@ -7935,32 +7935,37 @@ term_getattr({attr}, {what})				*term_ge
+ term_getline({buf}, {row})	String	get a line of text from a terminal
+@@ -7936,32 +7936,37 @@ term_getattr({attr}, {what})				*term_ge
  			underline
  			strike
  			reverse
@@ -52,24 +41,22 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Get the Job associated with terminal window {buf}.
  		{buf} is used as with |term_getsize()|.
  		Returns |v:null| when there is no job.
--
--term_getline({buf}, {row})				*term_getline()*
 +		{only available when compiled with the |+terminal| feature}
-+
-+term_getline({buf} [, {row}])				*term_getline()*
+ 
+ term_getline({buf}, {row})				*term_getline()*
  		Get a line of text from the terminal window of {buf}.
  		{buf} is used as with |term_getsize()|.
  
 -		The first line has {row} one.  When {row} "." the cursor line
 -		is used.  When {row} is invalid an empty string is returned.
-+		The first line has {row} one.  When {row} is "." or omitted
-+		the cursor line is used.  When {row} is invalid an empty
-+		string is returned.
++		The first line has {row} one.  When {row} is "." the cursor
++		line is used.  When {row} is invalid an empty string is
++		returned.
 +		{only available when compiled with the |+terminal| feature}
  
  term_getsize({buf})					*term_getsize()*
  		Get the size of terminal {buf}. Returns a list with two
-@@ -7970,6 +7975,7 @@ term_getsize({buf})					*term_getsize()*
+@@ -7971,6 +7976,7 @@ term_getsize({buf})					*term_getsize()*
  		{buf} must be the buffer number of a terminal window.  Use an
  		empty string for the current buffer.  If the buffer does not
  		exist or is not a terminal window, an empty list is returned.
@@ -77,7 +64,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  term_getstatus({buf})					*term_getstatus()*
  		Get the status of terminal {buf}. This returns a comma
-@@ -7982,6 +7988,7 @@ term_getstatus({buf})					*term_getstatu
+@@ -7983,6 +7989,7 @@ term_getstatus({buf})					*term_getstatu
  		{buf} must be the buffer number of a terminal window. If the
  		buffer does not exist or is not a terminal window, an empty
  		string is returned.
@@ -85,7 +72,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  term_gettitle({buf})					*term_gettitle()*
  		Get the title of terminal {buf}. This is the title that the
-@@ -7990,22 +7997,26 @@ term_gettitle({buf})					*term_gettitle(
+@@ -7991,22 +7998,26 @@ term_gettitle({buf})					*term_gettitle(
  		{buf} must be the buffer number of a terminal window. If the
  		buffer does not exist or is not a terminal window, an empty
  		string is returned.
@@ -100,23 +87,21 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  term_list()						*term_list()*
  		Return a list with the buffer numbers of all buffers for
  		terminal windows.
--
--term_scrape({buf}, {row})				*term_scrape()*
 +		{only available when compiled with the |+terminal| feature}
-+
-+term_scrape({buf} [, {row}])				*term_scrape()*
+ 
+ term_scrape({buf}, {row})				*term_scrape()*
  		Get the contents of {row} of terminal screen of {buf}.
  		For {buf} see |term_getsize()|.
  
 -		The first line has {row} one.  When {row} "." the cursor line
 -		is used.  When {row} is invalid an empty string is returned.
-+		The first line has {row} one.  When {row} is "." or omitted
-+		the cursor line is used.  When {row} is invalid an empty
-+		string is returned.
++		The first line has {row} one.  When {row} is "." the cursor
++		line is used.  When {row} is invalid an empty string is
++		returned.
  
  		Return a List containing a Dict for each screen cell: 
  		    "chars"	character(s) at the cell
-@@ -8014,6 +8025,7 @@ term_scrape({buf}, {row})				*term_scrap
+@@ -8015,6 +8026,7 @@ term_scrape({buf}, {row})				*term_scrap
  		    "attr"	attributes of the cell, use |term_getattr()|
  		    		to get the individual flags
  		    "width"	cell width: 1 or 2
@@ -124,7 +109,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  term_sendkeys({buf}, {keys})				*term_sendkeys()*
  		Send keystrokes {keys} to terminal {buf}.
-@@ -8021,6 +8033,7 @@ term_sendkeys({buf}, {keys})				*term_se
+@@ -8022,6 +8034,7 @@ term_sendkeys({buf}, {keys})				*term_se
  
  		{keys} are translated as key sequences. For example, "\<c-x>"
  		means the character CTRL-X.
@@ -132,7 +117,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  term_start({cmd}, {options})				*term_start()*
  		Open a terminal window and run {cmd} in it.
-@@ -8045,10 +8058,12 @@ term_start({cmd}, {options})				*term_st
+@@ -8046,10 +8059,12 @@ term_start({cmd}, {options})				*term_st
  		There is one extra option:
  		   "term_name"   name to use for the buffer name, instead of
  				 the command name.
