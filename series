@@ -45,7 +45,6 @@ add-getpackages.patch
 gtk_im_over-the-spot.patch
 mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
-doc-fix-term-functions.patch
 fix-win32-guifontname.patch
 wip-fix-7.4.852.patch
 fix-config_cache-removal.patch #+rejected
