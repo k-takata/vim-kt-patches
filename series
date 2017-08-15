@@ -45,4 +45,5 @@ gtk_im_over-the-spot.patch
 mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
+win32-check-terminal-dynamically.patch
 fix-config_cache-removal.patch #+rejected
