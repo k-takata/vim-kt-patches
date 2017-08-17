@@ -1,18 +1,6 @@
 # HG changeset patch
-# Parent  77e7664f05c55e318cdf10de63859cefaf8da711
+# Parent  9f9f2c0b0e1b5dd88271f739c9b5f068598482bd
 
-diff --git a/src/option.h b/src/option.h
---- a/src/option.h
-+++ b/src/option.h
-@@ -969,7 +969,7 @@ EXTERN long	p_wmh;		/* 'winminheight' */
- EXTERN long	p_wmw;		/* 'winminwidth' */
- EXTERN long	p_wiw;		/* 'winwidth' */
- #endif
--#if defined(WIN3264) && defined(TERMINAL)
-+#if defined(WIN3264) && defined(FEAT_TERMINAL)
- EXTERN char_u	*p_winptydll;	/* 'winptydll' */
- #endif
- EXTERN int	p_ws;		/* 'wrapscan' */
 diff --git a/src/terminal.c b/src/terminal.c
 --- a/src/terminal.c
 +++ b/src/terminal.c
