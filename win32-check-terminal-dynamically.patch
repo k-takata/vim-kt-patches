@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  6e555e32bb01f062cbc733c88cc0557f2fad6ae3
+# Parent  2170851632253b23121186dfd19575206d355b56
 
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
@@ -71,7 +71,7 @@ diff --git a/src/terminal.c b/src/terminal.c
 -	EMSG2(_(e_loadlib), *p_winptydll != NUL ?
 -		p_winptydll : (char_u*)WINPTY_DLL);
 +	if (verbose)
-+	    EMSG2(_(e_loadlib), *p_winptydll != NUL ?
++	    EMSG2(_(e_loadlib), (p_winptydll != NULL && *p_winptydll != NUL) ?
 +					    p_winptydll : (char_u*)WINPTY_DLL);
  	return 0;
      }
