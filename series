@@ -46,6 +46,5 @@ mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
 help-quit.patch
-remove-redundant-check.patch
 term-dont-set-bufhidden.patch
 fix-config_cache-removal.patch #+rejected
