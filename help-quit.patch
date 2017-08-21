@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent  4a7eaa712e47149704146733e90779494202098e
+
+diff --git a/runtime/doc/editing.txt b/runtime/doc/editing.txt
+--- a/runtime/doc/editing.txt
++++ b/runtime/doc/editing.txt
+@@ -1109,6 +1109,7 @@ 5. Writing and quitting					*write-quit*
+ 			window in the current tab page the current tab page is
+ 			closed |tab-page|.
+ 			Triggers the |QuitPre| autocommand event.
++			See also |CTRL-W_q|.
+ 
+ :conf[irm] q[uit]	Quit, but give prompt when changes have been made, or
+ 			the last file in the argument list has not been
+diff --git a/runtime/doc/windows.txt b/runtime/doc/windows.txt
+--- a/runtime/doc/windows.txt
++++ b/runtime/doc/windows.txt
+@@ -345,7 +345,7 @@ CTRL-W CTRL-C						*CTRL-W_CTRL-C*
+ :hid[e]
+ :{count}hid[e]
+ 		Quit the current window, unless it is the last window on the
+-		screen.  For {count} see |:quit| command.
++		screen.  For {count} see |:quit| command |CTRL-W_q|.
+ 		
+ 		The buffer becomes hidden (unless there is another window
+ 		editing it or 'bufhidden' is "unload", "delete" or "wipe").
