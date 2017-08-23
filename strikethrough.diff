@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  78ee03e41190542af9ebba512b80b18d81956745
+# Parent  87872f1c330f022ea9d0f566825688338dbb00ff
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -7678,6 +7678,7 @@ synIDattr({synID}, {what} [, {mode}])			
+@@ -7683,6 +7683,7 @@ synIDattr({synID}, {what} [, {mode}])			
  		"standout"	"1" if standout
  		"underline"	"1" if underlined
  		"undercurl"	"1" if undercurled
@@ -89,7 +89,7 @@ diff --git a/runtime/doc/term.txt b/runtime/doc/term.txt
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -11824,6 +11824,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
+@@ -11837,6 +11837,10 @@ f_synIDattr(typval_T *argvars UNUSED, ty
  	case 's':
  		if (TOLOWER_ASC(what[1]) == 'p')	/* sp[#] */
  		    p = highlight_color(id, what, modec);
@@ -103,7 +103,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -2379,6 +2379,7 @@ gui_outstr_nowrap(
+@@ -2396,6 +2396,7 @@ gui_outstr_nowrap(
      /* Do we underline the text? */
      if (hl_mask_todo & HL_UNDERLINE)
  	draw_flags |= DRAW_UNDERL;
@@ -111,7 +111,7 @@ diff --git a/src/gui.c b/src/gui.c
  #else
      /* Do we underline the text? */
      if ((hl_mask_todo & HL_UNDERLINE) || (hl_mask_todo & HL_ITALIC))
-@@ -2388,6 +2389,10 @@ gui_outstr_nowrap(
+@@ -2405,6 +2406,10 @@ gui_outstr_nowrap(
      if (hl_mask_todo & HL_UNDERCURL)
  	draw_flags |= DRAW_UNDERC;
  
@@ -207,7 +207,7 @@ diff --git a/src/gui_mac.c b/src/gui_mac.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -6423,6 +6423,18 @@ gui_mch_draw_string(
+@@ -6427,6 +6427,18 @@ gui_mch_draw_string(
  	DeleteObject(SelectObject(s_hdc, old_pen));
      }
  
@@ -249,7 +249,7 @@ diff --git a/src/gui_x11.c b/src/gui_x11.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -3183,8 +3183,10 @@ static struct vimoption options[] =
+@@ -3204,8 +3204,10 @@ static struct vimoption options[] =
      p_term("t_so", T_SO)
      p_term("t_SR", T_CSR)
      p_term("t_sr", T_SR)
@@ -272,7 +272,7 @@ diff --git a/src/screen.c b/src/screen.c
  }
  
  /*
-@@ -8073,6 +8073,8 @@ screen_start_highlight(int attr)
+@@ -8083,6 +8083,8 @@ screen_start_highlight(int attr)
  		out_str(T_CZH);
  	    if ((attr & HL_INVERSE) && T_MR != NULL)	/* inverse (reverse) */
  		out_str(T_MR);
@@ -281,7 +281,7 @@ diff --git a/src/screen.c b/src/screen.c
  
  	    /*
  	     * Output the color or start string after bold etc., in case the
-@@ -8197,6 +8199,13 @@ screen_stop_highlight(void)
+@@ -8207,6 +8209,13 @@ screen_stop_highlight(void)
  		else
  		    out_str(T_CZR);
  	    }
@@ -310,7 +310,7 @@ diff --git a/src/syntax.c b/src/syntax.c
  #define ATTR_COMBINE(attr_a, attr_b) ((((attr_b) & HL_NOCOMBINE) ? attr_b : (attr_a)) | (attr_b))
  
  static int get_attr_entry(garray_T *table, attrentry_T *aep);
-@@ -9874,6 +9874,8 @@ highlight_changed(void)
+@@ -9951,6 +9951,8 @@ highlight_changed(void)
  				break;
  		    case 'c':	attr |= HL_UNDERCURL;
  				break;
@@ -322,7 +322,7 @@ diff --git a/src/syntax.c b/src/syntax.c
 diff --git a/src/term.c b/src/term.c
 --- a/src/term.c
 +++ b/src/term.c
-@@ -200,6 +200,8 @@ static struct builtin_term builtin_termc
+@@ -209,6 +209,8 @@ static struct builtin_term builtin_termc
      {(int)KS_US,	IF_EB("\033|8h", ESC_STR "|8h")},   /* HL_UNDERLINE */
      {(int)KS_UCE,	IF_EB("\033|8C", ESC_STR "|8C")},   /* HL_UNDERCURL */
      {(int)KS_UCS,	IF_EB("\033|8c", ESC_STR "|8c")},   /* HL_UNDERCURL */
@@ -331,7 +331,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_CZR,	IF_EB("\033|4H", ESC_STR "|4H")},   /* HL_ITALIC */
      {(int)KS_CZH,	IF_EB("\033|4h", ESC_STR "|4h")},   /* HL_ITALIC */
      {(int)KS_VB,	IF_EB("\033|f", ESC_STR "|f")},
-@@ -814,6 +816,8 @@ static struct builtin_term builtin_termc
+@@ -823,6 +825,8 @@ static struct builtin_term builtin_termc
      {(int)KS_MD,	IF_EB("\033[1m", ESC_STR "[1m")},
      {(int)KS_UE,	IF_EB("\033[m", ESC_STR "[m")},
      {(int)KS_US,	IF_EB("\033[4m", ESC_STR "[4m")},
@@ -340,7 +340,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_MS,	"y"},
      {(int)KS_UT,	"y"},
      {(int)KS_LE,	"\b"},
-@@ -1121,6 +1125,8 @@ static struct builtin_term builtin_termc
+@@ -1142,6 +1146,8 @@ static struct builtin_term builtin_termc
      {(int)KS_US,	"[US]"},
      {(int)KS_UCE,	"[UCE]"},
      {(int)KS_UCS,	"[UCS]"},
@@ -349,7 +349,7 @@ diff --git a/src/term.c b/src/term.c
      {(int)KS_MS,	"[MS]"},
      {(int)KS_UT,	"[UT]"},
      {(int)KS_XN,	"[XN]"},
-@@ -1562,6 +1568,7 @@ set_termname(char_u *term)
+@@ -1585,6 +1591,7 @@ set_termname(char_u *term)
  				{KS_MD, "md"}, {KS_SE, "se"}, {KS_SO, "so"},
  				{KS_CZH,"ZH"}, {KS_CZR,"ZR"}, {KS_UE, "ue"},
  				{KS_US, "us"}, {KS_UCE, "Ce"}, {KS_UCS, "Cs"},
@@ -360,7 +360,7 @@ diff --git a/src/term.c b/src/term.c
 diff --git a/src/term.h b/src/term.h
 --- a/src/term.h
 +++ b/src/term.h
-@@ -51,6 +51,8 @@ enum SpecialKey
+@@ -54,6 +54,8 @@ enum SpecialKey
      KS_US,	/* underscore (underline) mode */
      KS_UCE,	/* exit undercurl mode */
      KS_UCS,	/* undercurl mode */
@@ -369,7 +369,7 @@ diff --git a/src/term.h b/src/term.h
      KS_MS,	/* save to move cur in reverse mode */
      KS_CM,	/* cursor motion */
      KS_SR,	/* scroll reverse (backward) */
-@@ -139,6 +141,8 @@ extern char_u *(term_strings[]);    /* c
+@@ -147,6 +149,8 @@ extern char_u *(term_strings[]);    /* c
  #define T_US	(TERM_STR(KS_US))	/* underscore (underline) mode */
  #define T_UCE	(TERM_STR(KS_UCE))	/* exit undercurl mode */
  #define T_UCS	(TERM_STR(KS_UCS))	/* undercurl mode */
@@ -378,6 +378,27 @@ diff --git a/src/term.h b/src/term.h
  #define T_MS	(TERM_STR(KS_MS))	/* save to move cur in reverse mode */
  #define T_CM	(TERM_STR(KS_CM))	/* cursor motion */
  #define T_SR	(TERM_STR(KS_SR))	/* scroll reverse (backward) */
+diff --git a/src/terminal.c b/src/terminal.c
+--- a/src/terminal.c
++++ b/src/terminal.c
+@@ -1682,7 +1682,7 @@ cell2attr(VTermScreenCellAttrs cellattrs
+     if (cellattrs.italic)
+ 	attr |= HL_ITALIC;
+     if (cellattrs.strike)
+-	attr |= HL_STANDOUT;
++	attr |= HL_STRIKETHROUGH;
+     if (cellattrs.reverse)
+ 	attr |= HL_INVERSE;
+ 
+@@ -2378,7 +2378,7 @@ f_term_getattr(typval_T *argvars, typval
+ 	{"bold",      HL_BOLD},
+ 	{"italic",    HL_ITALIC},
+ 	{"underline", HL_UNDERLINE},
+-	{"strike",    HL_STANDOUT},
++	{"strike",    HL_STRIKETHROUGH},
+ 	{"reverse",   HL_INVERSE},
+     };
+ 
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
