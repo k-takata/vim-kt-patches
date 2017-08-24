@@ -47,5 +47,4 @@ mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
 help-quit.patch
 term-dont-set-bufhidden.patch
-win32-cursor-blinking.patch
 fix-config_cache-removal.patch #+rejected
