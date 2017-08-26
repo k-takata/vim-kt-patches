@@ -542,7 +542,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -1531,13 +1531,21 @@ static struct vimoption options[] =
+@@ -1531,13 +1531,22 @@ static struct vimoption options[] =
  #endif
  			    SCRIPTID_INIT},
      {"imstatusfunc","imsf",P_STRING|P_VI_DEF|P_SECURE,
@@ -560,10 +560,11 @@ diff --git a/src/option.c b/src/option.c
 +    {"imstyle",	    "imst", P_NUM|P_VI_DEF|P_SECURE,
 +#if defined(FEAT_XIM) && defined(FEAT_GUI_GTK)
 +			    (char_u *)&p_imst, PV_NONE,
++			    {(char_u *)IM_OVER_THE_SPOT, (char_u *)0L}
 +#else
 +			    (char_u *)NULL, PV_NONE,
++			    {(char_u *)0L, (char_u *)0L}
 +#endif
-+			    {(char_u *)IM_OVER_THE_SPOT, (char_u *)0L}
  			    SCRIPTID_INIT},
      {"include",	    "inc",  P_STRING|P_ALLOCED|P_VI_DEF,
  #ifdef FEAT_FIND_ID
@@ -591,8 +592,8 @@ diff --git a/src/option.h b/src/option.h
  EXTERN char_u	*p_imaf;	/* 'imactivatefunc' */
  EXTERN char_u	*p_imsf;	/* 'imstatusfunc' */
 +EXTERN long	p_imst;		/* 'imstyle' */
-+# define IM_ON_THE_SPOT		0
-+# define IM_OVER_THE_SPOT	1
++# define IM_ON_THE_SPOT		0L
++# define IM_OVER_THE_SPOT	1L
  #endif
  #ifdef USE_IM_CONTROL
  EXTERN int	p_imcmdline;	/* 'imcmdline' */
