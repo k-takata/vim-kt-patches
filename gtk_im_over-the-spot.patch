@@ -22,7 +22,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  	NOTE: This function is invoked very often.  Keep it fast.
  
 +						*'imstyle'* *'imst'*
-+'imstyle' 'imst'	number (default 0)
++'imstyle' 'imst'	number (default 1)
 +			global
 +			{not in Vi}
 +			{only available when compiled with |+xim| and
@@ -563,7 +563,7 @@ diff --git a/src/option.c b/src/option.c
 +#else
 +			    (char_u *)NULL, PV_NONE,
 +#endif
-+			    {(char_u *)0L, (char_u *)0L}
++			    {(char_u *)IM_OVER_THE_SPOT, (char_u *)0L}
  			    SCRIPTID_INIT},
      {"include",	    "inc",  P_STRING|P_ALLOCED|P_VI_DEF,
  #ifdef FEAT_FIND_ID
