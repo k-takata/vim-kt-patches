@@ -1,20 +1,20 @@
 # HG changeset patch
 # Parent 5da7948e6c93fa395070e87a9bda3031c01b1946
-# Parent  f1f21fbd251e4ad40386e4c55ba4f566873dd80f
+# Parent  7f13f215a9f41ad557159f526ba6bbba849e4573
 
 diff --git a/runtime/doc/tags b/runtime/doc/tags
 --- a/runtime/doc/tags
 +++ b/runtime/doc/tags
-@@ -960,6 +960,8 @@
+@@ -980,6 +980,8 @@
  't_SR'	term.txt	/*'t_SR'*
  't_Sb'	term.txt	/*'t_Sb'*
  't_Sf'	term.txt	/*'t_Sf'*
 +'t_Te'	term.txt	/*'t_Te'*
 +'t_Ts'	term.txt	/*'t_Ts'*
+ 't_VS'	term.txt	/*'t_VS'*
  't_WP'	term.txt	/*'t_WP'*
  't_WS'	term.txt	/*'t_WS'*
- 't_ZH'	term.txt	/*'t_ZH'*
-@@ -8255,6 +8257,7 @@ strdisplaywidth()	eval.txt	/*strdisplayw
+@@ -8460,6 +8462,7 @@ strdisplaywidth()	eval.txt	/*strdisplayw
  strftime()	eval.txt	/*strftime()*
  strgetchar()	eval.txt	/*strgetchar()*
  stridx()	eval.txt	/*stridx()*
@@ -22,12 +22,12 @@ diff --git a/runtime/doc/tags b/runtime/doc/tags
  string	eval.txt	/*string*
  string()	eval.txt	/*string()*
  string-functions	usr_41.txt	/*string-functions*
-@@ -8381,6 +8384,8 @@ t_SI	term.txt	/*t_SI*
+@@ -8599,6 +8602,8 @@ t_SI	term.txt	/*t_SI*
  t_SR	term.txt	/*t_SR*
  t_Sb	term.txt	/*t_Sb*
  t_Sf	term.txt	/*t_Sf*
 +t_Te	term.txt	/*t_Te*
 +t_Ts	term.txt	/*t_Ts*
+ t_VS	term.txt	/*t_VS*
  t_WP	term.txt	/*t_WP*
  t_WS	term.txt	/*t_WS*
- t_ZH	term.txt	/*t_ZH*
