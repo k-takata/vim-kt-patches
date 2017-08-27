@@ -8,7 +8,7 @@ diff --git a/runtime/doc/mbyte.txt b/runtime/doc/mbyte.txt
  
    Currently, GUI Vim supports three styles, |OverTheSpot|, |OffTheSpot| and
    |Root|.
-+  When compiled with |+GTK_GUI| feature, GUI Vim supports two styles,
++  When compiled with |+GUI_GTK| feature, GUI Vim supports two styles,
 +  |OnTheSpot| and |OverTheSpot|.  You can select the style with the 'imstyle'
 +  option.
  
