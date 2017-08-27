@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  11f400241291a09dcb9489594d1c2611b1949cab
+# Parent  c3198b62058cba4bddb5ddc357a77a31320b371b
 
 diff --git a/runtime/doc/mbyte.txt b/runtime/doc/mbyte.txt
 --- a/runtime/doc/mbyte.txt
@@ -17,7 +17,7 @@ diff --git a/runtime/doc/mbyte.txt b/runtime/doc/mbyte.txt
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -4283,6 +4283,20 @@ A jump table for the options with a shor
+@@ -4359,6 +4359,23 @@ A jump table for the options with a shor
  <
  	NOTE: This function is invoked very often.  Keep it fast.
  
@@ -32,8 +32,11 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +	Set to one if you want to use over-the-spot style.
 +	See: |xim-input-style|
 +
-+	Sometimes on-the-spot style causes troubles if you use mappings,
-+	|single-repeat|, etc.  In that case try using over-the-spot style.
++	For a long time on-the-spot sytle had been used in GTK version of vim,
++	however, it is known that it causes troubles when using mappings,
++	|single-repeat|, etc.  Therefore over-the-spot style becomes the
++	default now.  This should work fine for most people, however if you
++	have any problem with it, try using on-the-spot style.
 +
  						*'include'* *'inc'*
  'include' 'inc'		string	(default "^\s*#\s*include")
@@ -41,7 +44,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/edit.c b/src/edit.c
 --- a/src/edit.c
 +++ b/src/edit.c
-@@ -9627,7 +9627,7 @@ ins_left(
+@@ -9683,7 +9683,7 @@ ins_left(
  #if defined(FEAT_XIM) && defined(FEAT_GUI_GTK)
  	/* Only call start_arrow() when not busy with preediting, it will
  	 * break undo.  K_LEFT is inserted in im_correct_cursor(). */
@@ -53,7 +56,7 @@ diff --git a/src/edit.c b/src/edit.c
 diff --git a/src/ex_getln.c b/src/ex_getln.c
 --- a/src/ex_getln.c
 +++ b/src/ex_getln.c
-@@ -3432,7 +3432,8 @@ cursorcmd(void)
+@@ -3468,7 +3468,8 @@ cursorcmd(void)
  
      windgoto(msg_row, msg_col);
  #if defined(FEAT_XIM) && defined(FEAT_GUI_GTK)
@@ -66,7 +69,7 @@ diff --git a/src/ex_getln.c b/src/ex_getln.c
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -4736,6 +4736,11 @@ static unsigned long im_commit_handler_i
+@@ -4821,6 +4821,11 @@ static unsigned long im_commit_handler_i
  static unsigned int  im_activatekey_keyval = GDK_VoidSymbol;
  static unsigned int  im_activatekey_state  = 0;
  
@@ -78,7 +81,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      void
  im_set_active(int active)
  {
-@@ -4773,6 +4778,9 @@ im_set_position(int row, int col)
+@@ -4858,6 +4863,9 @@ im_set_position(int row, int col)
  	area.height = gui.char_height;
  
  	gtk_im_context_set_cursor_location(xic, &area);
@@ -88,7 +91,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      }
  }
  
-@@ -4803,12 +4811,107 @@ im_add_to_input(char_u *str, int len)
+@@ -4888,12 +4896,107 @@ im_add_to_input(char_u *str, int len)
  	gui_mch_mousehide(TRUE);
  }
  
@@ -196,7 +199,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      if (State & NORMAL)
      {
  	im_preedit_cursor = 0;
-@@ -4881,40 +4984,43 @@ im_commit_cb(GtkIMContext *context UNUSE
+@@ -4966,40 +5069,43 @@ im_commit_cb(GtkIMContext *context UNUSE
      xim_log("im_commit_cb(): %s\n", str);
  #endif
  
@@ -271,7 +274,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      /* Is this a single character that matches a keypad key that's just
       * been pressed?  If so, we don't want it to be entered as such - let
       * us carry on processing the raw keycode so that it may be used in
-@@ -4938,14 +5044,17 @@ im_commit_cb(GtkIMContext *context UNUSE
+@@ -5023,14 +5129,17 @@ im_commit_cb(GtkIMContext *context UNUSE
      if (add_to_input)
  	im_add_to_input((char_u *)str, slen);
  
@@ -297,7 +300,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  
      if (gtk_main_level() > 0)
  	gtk_main_quit();
-@@ -4979,7 +5088,8 @@ im_preedit_end_cb(GtkIMContext *context 
+@@ -5064,7 +5173,8 @@ im_preedit_end_cb(GtkIMContext *context 
      im_delete_preedit();
  
      /* Indicate that preediting has finished */
@@ -307,7 +310,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      xim_has_preediting = FALSE;
  
  #if 0
-@@ -5040,9 +5150,14 @@ im_preedit_changed_cb(GtkIMContext *cont
+@@ -5125,9 +5235,14 @@ im_preedit_changed_cb(GtkIMContext *cont
      char_u  *p;
      int	    i;
  
@@ -325,7 +328,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  
  #ifdef XIM_DEBUG
      xim_log("im_preedit_changed_cb(): %s\n", preedit_string);
-@@ -5050,66 +5165,82 @@ im_preedit_changed_cb(GtkIMContext *cont
+@@ -5135,66 +5250,82 @@ im_preedit_changed_cb(GtkIMContext *cont
  
      g_return_if_fail(preedit_string != NULL); /* just in case */
  
@@ -459,7 +462,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      }
  
      g_free(preedit_string);
-@@ -5258,7 +5389,8 @@ im_shutdown(void)
+@@ -5343,7 +5474,8 @@ im_shutdown(void)
      }
      im_is_active = FALSE;
      im_commit_handler_id = 0;
@@ -469,7 +472,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      xim_has_preediting = FALSE;
  }
  
-@@ -5422,7 +5554,8 @@ xim_reset(void)
+@@ -5498,7 +5630,8 @@ xim_reset(void)
  	}
      }
  
@@ -479,7 +482,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      xim_has_preediting = FALSE;
  }
  
-@@ -5527,19 +5660,22 @@ xim_queue_key_press_event(GdkEventKey *e
+@@ -5603,19 +5736,22 @@ xim_queue_key_press_event(GdkEventKey *e
  	{
  	    int imresult = gtk_im_context_filter_keypress(xic, event);
  
@@ -517,7 +520,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -2723,12 +2723,15 @@ skip_to_option_part(char_u *p)
+@@ -2730,12 +2730,15 @@ skip_to_option_part(char_u *p)
  changed(void)
  {
  #if defined(FEAT_XIM) && defined(FEAT_GUI_GTK)
@@ -542,7 +545,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -1531,13 +1531,22 @@ static struct vimoption options[] =
+@@ -1606,13 +1606,22 @@ static struct vimoption options[] =
  #endif
  			    SCRIPTID_INIT},
      {"imstatusfunc","imsf",P_STRING|P_VI_DEF|P_SECURE,
@@ -568,7 +571,7 @@ diff --git a/src/option.c b/src/option.c
  			    SCRIPTID_INIT},
      {"include",	    "inc",  P_STRING|P_ALLOCED|P_VI_DEF,
  #ifdef FEAT_FIND_ID
-@@ -8801,6 +8809,15 @@ set_num_option(
+@@ -9010,6 +9019,15 @@ set_num_option(
  #endif
      }
  
@@ -587,7 +590,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/option.h b/src/option.h
 --- a/src/option.h
 +++ b/src/option.h
-@@ -588,6 +588,9 @@ EXTERN int	p_ic;		/* 'ignorecase' */
+@@ -581,6 +581,9 @@ EXTERN int	p_ic;		/* 'ignorecase' */
  EXTERN char_u	*p_imak;	/* 'imactivatekey' */
  EXTERN char_u	*p_imaf;	/* 'imactivatefunc' */
  EXTERN char_u	*p_imsf;	/* 'imstatusfunc' */
@@ -600,7 +603,7 @@ diff --git a/src/option.h b/src/option.h
 diff --git a/src/screen.c b/src/screen.c
 --- a/src/screen.c
 +++ b/src/screen.c
-@@ -5062,7 +5062,8 @@ win_line(
+@@ -5226,7 +5226,8 @@ win_line(
  	/* XIM don't send preedit_start and preedit_end, but they send
  	 * preedit_changed and commit.  Thus Vim can't set "im_is_active", use
  	 * im_is_preediting() here. */
@@ -613,7 +616,7 @@ diff --git a/src/screen.c b/src/screen.c
 diff --git a/src/undo.c b/src/undo.c
 --- a/src/undo.c
 +++ b/src/undo.c
-@@ -2976,7 +2976,7 @@ u_sync(
+@@ -2985,7 +2985,7 @@ u_sync(
      if (curbuf->b_u_synced || (!force && no_u_sync > 0))
  	return;
  #if defined(FEAT_XIM) && defined(FEAT_GUI_GTK)
