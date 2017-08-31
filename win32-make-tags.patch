@@ -1,0 +1,50 @@
+# HG changeset patch
+# Parent  8eef86026bf54d426d614fc9bee8c91645e1c226
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -76,6 +76,9 @@ endif
+ # Set to yes to enable terminal support.
+ TERMINAL=no
+ 
++ifndef CTAGS
++CTAGS = ctags -I INIT+ --fields=+S
++endif
+ 
+ # Link against the shared version of libstdc++ by default.  Set
+ # STATIC_STDCPLUS to "yes" to link against static version instead.
+@@ -888,6 +891,12 @@ xxd/xxd.exe: xxd/xxd.c
+ GvimExt/gvimext.dll: GvimExt/gvimext.cpp GvimExt/gvimext.rc GvimExt/gvimext.h
+ 	$(MAKE) -C GvimExt -f Make_ming.mak CROSS=$(CROSS) CROSS_COMPILE=$(CROSS_COMPILE) CXX='$(CXX)' STATIC_STDCPLUS=$(STATIC_STDCPLUS)
+ 
++tags: notags
++	$(CTAGS) *.c *.cpp *.h if_perl.xs
++
++notags:
++	-$(DEL) tags
++
+ clean:
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.o
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -344,7 +344,7 @@ FEATURES = HUGE
+ !endif
+ 
+ !ifndef CTAGS
+-CTAGS = ctags
++CTAGS = ctags -I INIT+ --fields=+S
+ !endif
+ 
+ !ifndef CSCOPE
+@@ -1222,7 +1222,7 @@ GvimExt/gvimext.dll: GvimExt/gvimext.cpp
+ 
+ 
+ tags: notags
+-	$(CTAGS) *.c *.cpp *.h if_perl.xs proto\*.pro
++	$(CTAGS) *.c *.cpp *.h if_perl.xs
+ 
+ notags:
+ 	- if exist tags del tags
