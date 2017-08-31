@@ -1,15 +1,6 @@
 # HG changeset patch
 # Parent  12e23c09af7ba15360f6ca3ea151c6131e7bb79d
 
-diff --git a/src/iscygpty.c b/src/iscygpty.c
---- a/src/iscygpty.c
-+++ b/src/iscygpty.c
-@@ -178,4 +178,4 @@ int is_cygpty_used(void)
- 	return ret;
- }
- 
--/* vi:set ts=8 sts=4 sw=4 noet: */
-+/* vim: set ts=4 sw=4: */
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
