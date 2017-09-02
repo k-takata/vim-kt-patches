@@ -16,9 +16,6 @@ cpo-N-update-tags.patch #+rejected
 if_perl-use-output.patch
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
-strikethrough.diff
-strikethrough-mark.diff
-strikethrough-update-tags.patch
 tab-xyz-pragmb.diff #-tab-xyz
 tab-xyz.diff #+tab-xyz
 tabline-dnd.patch

@@ -1,8 +1,0 @@
-diff --git a/src/version.c b/src/version.c
---- a/src/version.c
-+++ b/src/version.c
-@@ -861,2 +861,4 @@
- {   /* Add your patch description below this line */
-+/**/
-+    "strikethrough",
- /**/
