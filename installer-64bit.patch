@@ -1,6 +1,189 @@
 # HG changeset patch
-# Parent  a0b06df257c60653e2e8b0d3ea7a158cdea72ef3
+# Parent  2c7c0ec76ac83ba28038f1c75406a53bdd00c16c
 
+diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
+--- a/src/GvimExt/gvimext.cpp
++++ b/src/GvimExt/gvimext.cpp
+@@ -212,7 +212,11 @@ dyn_libintl_init(char *dir)
+     if (buf != NULL && buf2 != NULL)
+     {
+ 	GetEnvironmentVariableW(L"PATH", buf, len);
+-	_snwprintf(buf2, len2, L"%S;%s", dir, buf);
++#ifdef _WIN64
++	_snwprintf(buf2, len2, L"%S\\GvimExt64;%s", dir, buf);
++#else
++	_snwprintf(buf2, len2, L"%S\\GvimExt32;%s", dir, buf);
++#endif
+ 	SetEnvironmentVariableW(L"PATH", buf2);
+ 	hLibintlDLL = LoadLibrary(GETTEXT_DLL);
+ #ifdef GETTEXT_DLL_ALT
+diff --git a/src/dosinst.c b/src/dosinst.c
+--- a/src/dosinst.c
++++ b/src/dosinst.c
+@@ -1329,7 +1329,8 @@ init_vimrc_choices(void)
+ reg_create_key(
+     HKEY root,
+     const char *subkey,
+-    PHKEY phKey)
++    PHKEY phKey,
++    DWORD flag)
+ {
+     DWORD disp;
+ 
+@@ -1337,7 +1338,7 @@ reg_create_key(
+     return RegCreateKeyEx(
+ 		root, subkey,
+ 		0, NULL, REG_OPTION_NON_VOLATILE,
+-		KEY_WOW64_64KEY | KEY_WRITE,
++		flag | KEY_WRITE,
+ 		NULL, phKey, &disp);
+ }
+ 
+@@ -1356,10 +1357,11 @@ reg_create_key_and_value(
+     HKEY hRootKey,
+     const char *subkey,
+     const char *value_name,
+-    const char *data)
++    const char *data,
++    DWORD flag)
+ {
+     HKEY hKey;
+-    LONG lRet = reg_create_key(hRootKey, subkey, &hKey);
++    LONG lRet = reg_create_key(hRootKey, subkey, &hKey, flag);
+ 
+     if (ERROR_SUCCESS == lRet)
+     {
+@@ -1375,21 +1377,22 @@ register_inproc_server(
+     const char *clsid,
+     const char *extname,
+     const char *module,
+-    const char *threading_model)
++    const char *threading_model,
++    DWORD flag)
+ {
+     CHAR subkey[BUFSIZE];
+     LONG lRet;
+ 
+     sprintf(subkey, "CLSID\\%s", clsid);
+-    lRet = reg_create_key_and_value(hRootKey, subkey, NULL, extname);
++    lRet = reg_create_key_and_value(hRootKey, subkey, NULL, extname, flag);
+     if (ERROR_SUCCESS == lRet)
+     {
+ 	sprintf(subkey, "CLSID\\%s\\InProcServer32", clsid);
+-	lRet = reg_create_key_and_value(hRootKey, subkey, NULL, module);
++	lRet = reg_create_key_and_value(hRootKey, subkey, NULL, module, flag);
+ 	if (ERROR_SUCCESS == lRet)
+ 	{
+ 	    lRet = reg_create_key_and_value(hRootKey, subkey,
+-					   "ThreadingModel", threading_model);
++					   "ThreadingModel", threading_model, flag);
+ 	}
+     }
+     return lRet;
+@@ -1400,13 +1403,15 @@ register_shellex(
+     HKEY hRootKey,
+     const char *clsid,
+     const char *name,
+-    const char *exe_path)
++    const char *exe_path,
++    DWORD flag)
+ {
+     LONG lRet = reg_create_key_and_value(
+ 	    hRootKey,
+ 	    "*\\shellex\\ContextMenuHandlers\\gvim",
+ 	    NULL,
+-	    clsid);
++	    clsid,
++	    flag);
+ 
+     if (ERROR_SUCCESS == lRet)
+     {
+@@ -1414,7 +1419,8 @@ register_shellex(
+ 		HKEY_LOCAL_MACHINE,
+ 		"Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+ 		clsid,
+-		name);
++		name,
++		flag);
+ 
+ 	if (ERROR_SUCCESS == lRet)
+ 	{
+@@ -1422,7 +1428,8 @@ register_shellex(
+ 		    HKEY_LOCAL_MACHINE,
+ 		    "Software\\Vim\\Gvim",
+ 		    "path",
+-		    exe_path);
++		    exe_path,
++		    flag);
+ 	}
+     }
+     return lRet;
+@@ -1431,7 +1438,8 @@ register_shellex(
+     static LONG
+ register_openwith(
+     HKEY hRootKey,
+-    const char *exe_path)
++    const char *exe_path,
++    DWORD flag)
+ {
+     char	exe_cmd[BUFSIZE];
+     LONG	lRet;
+@@ -1441,7 +1449,8 @@ register_openwith(
+ 	    hRootKey,
+ 	    "Applications\\gvim.exe\\shell\\edit\\command",
+ 	    NULL,
+-	    exe_cmd);
++	    exe_cmd,
++	    flag);
+ 
+     if (ERROR_SUCCESS == lRet)
+     {
+@@ -1455,7 +1464,7 @@ register_openwith(
+ 	for (i = 0; ERROR_SUCCESS == lRet
+ 			   && i < sizeof(openwith) / sizeof(openwith[0]); i++)
+ 	{
+-	    lRet = reg_create_key_and_value(hRootKey, openwith[i], NULL, "");
++	    lRet = reg_create_key_and_value(hRootKey, openwith[i], NULL, "", flag);
+ 	}
+     }
+ 
+@@ -1470,11 +1479,11 @@ register_uninstall(
+     const char *uninstall_string)
+ {
+     LONG lRet = reg_create_key_and_value(hRootKey, appname,
+-						 "DisplayName", display_name);
++						 "DisplayName", display_name, KEY_WOW64_64KEY);
+ 
+     if (ERROR_SUCCESS == lRet)
+ 	lRet = reg_create_key_and_value(hRootKey, appname,
+-					 "UninstallString", uninstall_string);
++					 "UninstallString", uninstall_string, KEY_WOW64_64KEY);
+     return lRet;
+ }
+ #endif /* WIN3264 */
+@@ -1515,11 +1524,11 @@ install_registry(void)
+ 
+ 	lRet = register_inproc_server(
+ 	    HKEY_CLASSES_ROOT, vim_ext_clsid, vim_ext_name,
+-						bufg, vim_ext_ThreadingModel);
++						bufg, vim_ext_ThreadingModel, KEY_WOW64_64KEY);
+ 	if (ERROR_SUCCESS != lRet)
+ 	    return FAIL;
+ 	lRet = register_shellex(
+-	    HKEY_CLASSES_ROOT, vim_ext_clsid, vim_ext_name, vim_exe_path);
++	    HKEY_CLASSES_ROOT, vim_ext_clsid, vim_ext_name, vim_exe_path, KEY_WOW64_64KEY);
+ 	if (ERROR_SUCCESS != lRet)
+ 	    return FAIL;
+     }
+@@ -1528,7 +1537,7 @@ install_registry(void)
+     {
+ 	printf("Creating \"Open with ...\" list entry\n");
+ 
+-	lRet = register_openwith(HKEY_CLASSES_ROOT, vim_exe_path);
++	lRet = register_openwith(HKEY_CLASSES_ROOT, vim_exe_path, KEY_WOW64_64KEY);
+ 	if (ERROR_SUCCESS != lRet)
+ 	    return FAIL;
+     }
 diff --git a/src/dosinst.h b/src/dosinst.h
 --- a/src/dosinst.h
 +++ b/src/dosinst.h
@@ -42,3 +225,80 @@ diff --git a/src/dosinst.h b/src/dosinst.h
  # ifdef __BORLANDC__
  /* Borland defines its own searchpath() in dir.h */
  #  include <dir.h>
+diff --git a/src/uninstal.c b/src/uninstal.c
+--- a/src/uninstal.c
++++ b/src/uninstal.c
+@@ -35,7 +35,7 @@ confirm(void)
+ #ifdef WIN3264
+ 
+     static int
+-reg_delete_key(HKEY hRootKey, const char *key)
++reg_delete_key(HKEY hRootKey, const char *key, DWORD flag)
+ {
+     static int did_load = FALSE;
+     static HANDLE advapi_lib = NULL;
+@@ -113,11 +113,11 @@ remove_popup(void)
+     int		fail = 0;
+     HKEY	kh;
+ 
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "CLSID\\{51EEE242-AD87-11d3-9C1E-0090278BBD99}\\InProcServer32") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "CLSID\\{51EEE242-AD87-11d3-9C1E-0090278BBD99}\\InProcServer32", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "CLSID\\{51EEE242-AD87-11d3-9C1E-0090278BBD99}") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "CLSID\\{51EEE242-AD87-11d3-9C1E-0090278BBD99}", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "*\\shellex\\ContextMenuHandlers\\gvim") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "*\\shellex\\ContextMenuHandlers\\gvim", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved", 0,
+ 		      KEY_WOW64_64KEY | KEY_ALL_ACCESS, &kh) != ERROR_SUCCESS)
+@@ -128,9 +128,9 @@ remove_popup(void)
+ 	    ++fail;
+ 	RegCloseKey(kh);
+     }
+-    if (reg_delete_key(HKEY_LOCAL_MACHINE, "Software\\Vim\\Gvim") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_LOCAL_MACHINE, "Software\\Vim\\Gvim", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+-    if (reg_delete_key(HKEY_LOCAL_MACHINE, "Software\\Vim") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_LOCAL_MACHINE, "Software\\Vim", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+ 
+     if (fail == 6)
+@@ -146,19 +146,19 @@ remove_openwith(void)
+ {
+     int		fail = 0;
+ 
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe\\shell\\edit\\command") != ERROR_SUCCESS)
+-	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe\\shell\\edit") != ERROR_SUCCESS)
+-	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe\\shell") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe\\shell\\edit\\command", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe\\shell\\edit", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, ".htm\\OpenWithList\\gvim.exe") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe\\shell", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, ".vim\\OpenWithList\\gvim.exe") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "Applications\\gvim.exe", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+-    if (reg_delete_key(HKEY_CLASSES_ROOT, "*\\OpenWithList\\gvim.exe") != ERROR_SUCCESS)
++    if (reg_delete_key(HKEY_CLASSES_ROOT, ".htm\\OpenWithList\\gvim.exe", KEY_WOW64_64KEY) != ERROR_SUCCESS)
++	++fail;
++    if (reg_delete_key(HKEY_CLASSES_ROOT, ".vim\\OpenWithList\\gvim.exe", KEY_WOW64_64KEY) != ERROR_SUCCESS)
++	++fail;
++    if (reg_delete_key(HKEY_CLASSES_ROOT, "*\\OpenWithList\\gvim.exe", KEY_WOW64_64KEY) != ERROR_SUCCESS)
+ 	++fail;
+ 
+     if (fail == 7)
+@@ -289,7 +289,7 @@ remove_start_menu(void)
+     static void
+ delete_uninstall_key(void)
+ {
+-    reg_delete_key(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Vim " VIM_VERSION_SHORT);
++    reg_delete_key(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Vim " VIM_VERSION_SHORT, KEY_WOW64_64KEY);
+ }
+ 
+     int
