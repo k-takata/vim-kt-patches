@@ -1,0 +1,44 @@
+# HG changeset patch
+# Parent  a0b06df257c60653e2e8b0d3ea7a158cdea72ef3
+
+diff --git a/src/dosinst.h b/src/dosinst.h
+--- a/src/dosinst.h
++++ b/src/dosinst.h
+@@ -88,6 +88,9 @@ char *searchpath(char *name);
+ # ifndef KEY_WOW64_64KEY
+ #  define KEY_WOW64_64KEY 0x0100
+ # endif
++# ifndef KEY_WOW64_32KEY
++#  define KEY_WOW64_32KEY 0x0200
++# endif
+ 
+ #define VIM_STARTMENU "Programs\\Vim " VIM_VERSION_SHORT
+ 
+@@ -164,6 +167,27 @@ PlatformId(void)
+     }
+ }
+ 
++typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS)(HANDLE, PBOOL);
++/*
++ * Check if this is a 64-bit OS.
++ */
++    static BOOL
++is_64bit_os(void)
++{
++#ifdef _WIN64
++    return TRUE;
++#else
++    BOOL bIsWow64 = FALSE;
++    LPFN_ISWOW64PROCESS pIsWow64Process;
++
++    pIsWow64Process = (LPFN_ISWOW64PROCESS)GetProcAddress(
++	    GetModuleHandle("kernel32"), "IsWow64Process");
++    if (pIsWow64Process != NULL)
++	pIsWow64Process(GetCurrentProcess(), &bIsWow64);
++    return bIsWow64;
++#endif
++}
++
+ # ifdef __BORLANDC__
+ /* Borland defines its own searchpath() in dir.h */
+ #  include <dir.h>
