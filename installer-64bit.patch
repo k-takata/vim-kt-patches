@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  2c7c0ec76ac83ba28038f1c75406a53bdd00c16c
+# Parent  158028b2bea0e87c850560d0726a6345bbdaeb0b
 
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 --- a/src/GvimExt/gvimext.cpp
@@ -152,12 +152,12 @@ diff --git a/src/dosinst.c b/src/dosinst.c
  {
      LONG lRet = reg_create_key_and_value(hRootKey, appname,
 -						 "DisplayName", display_name);
-+						 "DisplayName", display_name, KEY_WOW64_64KEY);
++			     "DisplayName", display_name, KEY_WOW64_64KEY);
  
      if (ERROR_SUCCESS == lRet)
  	lRet = reg_create_key_and_value(hRootKey, appname,
 -					 "UninstallString", uninstall_string);
-+					 "UninstallString", uninstall_string, KEY_WOW64_64KEY);
++		     "UninstallString", uninstall_string, KEY_WOW64_64KEY);
      return lRet;
  }
  #endif /* WIN3264 */
@@ -237,6 +237,15 @@ diff --git a/src/uninstal.c b/src/uninstal.c
  {
      static int did_load = FALSE;
      static HANDLE advapi_lib = NULL;
+@@ -52,7 +52,7 @@ reg_delete_key(HKEY hRootKey, const char
+ 	    delete_key_ex = (LONG (WINAPI *)(HKEY, LPCTSTR, REGSAM, DWORD))GetProcAddress(advapi_lib, "RegDeleteKeyExA");
+     }
+     if (delete_key_ex != NULL) {
+-	return (*delete_key_ex)(hRootKey, key, KEY_WOW64_64KEY, 0);
++	return (*delete_key_ex)(hRootKey, key, flag, 0);
+     }
+     return RegDeleteKey(hRootKey, key);
+ }
 @@ -113,11 +113,11 @@ remove_popup(void)
      int		fail = 0;
      HKEY	kh;
