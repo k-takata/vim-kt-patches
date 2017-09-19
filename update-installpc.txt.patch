@@ -1,0 +1,58 @@
+# HG changeset patch
+# Parent  c753cfac42df15676c1258d964e58e0a2959d80e
+
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -127,16 +127,21 @@ follows:
+     LINK ... /subsystem:console,5.01
+ 
+ Make_mvc.mak now supports a macro SUBSYSTEM_VER to pass the Windows version.
+-Use lines like follows to target Windows XP (assuming using Visual C++ 2012
+-under 64-bit Windows):
++Use lines like follows to target Windows XP x86 (assuming using Visual C++
++2012 under 64-bit Windows):
+     set WinSdk71=%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A
+-    set SDK_INCLUDE_DIR=%WinSdk71%\Include
+     set INCLUDE=%WinSdk71%\Include;%INCLUDE%
+     set LIB=%WinSdk71%\Lib;%LIB%
+-    set PATH=%WinSdk71%\Bin;%PATH%
+     set CL=/D_USING_V110_SDK71_
+     nmake -f Make_mvc.mak ... WINVER=0x0501 SUBSYSTEM_VER=5.01
+ 
++To target Windows XP x64 instead of x86, you need to change the settings of
++LIB and SUBSYSTEM_VER:
++    ...
++    set LIB=%WinSdk71%\Lib\x64;%LIB%
++    ...
++    nmake -f Make_mvc.mak ... WINVER=0x0501 SUBSYSTEM_VER=5.02
++
+ The following Visual C++ team blog can serve as a reference page:
+     http://blogs.msdn.com/b/vcblog/archive/2012/10/08/windows-xp-targeting-with-c-in-visual-studio-2012.aspx
+ 
+@@ -482,7 +487,7 @@ You need to set the following variables:
+                        E.g. C:\Program Files (x86)\Racket
+     DYNAMIC_MZSCHEME:  Whether dynamic linking is used. Usually, set to yes.
+     MZSCHEME_VER:      Racket DLL version which is used for the file name.
+-                       E.g. 3m_9z0ds0 for Racket 6.3.
++                       See below for a list of MZSCHEME_VER.
+                        The DLL can be found under the lib directory. E.g.
+                        C:\Program Files (x86)\Racket\lib\libracket3m_XXXXXX.dll
+     MZSCHEME_COLLECTS: (Optional) Path of the collects directory used at
+@@ -490,6 +495,16 @@ You need to set the following variables:
+                        User can override this with the PLTCOLLECTS environment
+                        variable.
+ 
++List of MZSCHEME_VER (incomplete):
++
++    Racket ver. | MZSCHEME_VER
++    ==========================
++    6.3         | 3m_9z0ds0
++    6.6         | 3m_a0solc
++    6.8         | 3m_a1zjsw
++    6.10        | 3m_a36fs8
++
++
+ E.g. When using MSVC (as one line):
+ 
+     nmake -f Make_mvc.mak

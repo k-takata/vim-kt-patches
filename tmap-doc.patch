@@ -1,0 +1,63 @@
+# HG changeset patch
+# Parent  3097625b80a6708c7a8a239b697cc1ae1fd6f392
+
+diff --git a/runtime/doc/index.txt b/runtime/doc/index.txt
+--- a/runtime/doc/index.txt
++++ b/runtime/doc/index.txt
+@@ -1583,13 +1583,17 @@ tag	      command	      action ~
+ |:tjump|	:tj[ump]	like ":tselect", but jump directly when there
+ 				is only one match
+ |:tlast|	:tl[ast]	jump to last matching tag
++|:tmapclear|	:tmapc[lear]	remove all mappings for Terminal-Job mode
++|:tmap|		:tma[p]		like ":map" but for Terminal-Job mode
+ |:tmenu|	:tm[enu]	define menu tooltip
+ |:tnext|	:tn[ext]	jump to next matching tag
++|:tnoremap|	:tno[remap]	like ":noremap" but for Terminal-Job mode
+ |:topleft|	:to[pleft]	make split window appear at top or far left
+ |:tprevious|	:tp[revious]	jump to previous matching tag
+ |:trewind|	:tr[ewind]	jump to first matching tag
+ |:try|		:try		execute commands, abort on error or exception
+ |:tselect|	:ts[elect]	list matching tags and select one
++|:tunmap|	:tunma[p]	like ":unmap" but for Terminal-Job mode
+ |:tunmenu|	:tu[nmenu]	remove menu tooltip
+ |:undo|		:u[ndo]		undo last change(s)
+ |:undojoin|	:undoj[oin]	join next change with previous undo block
+diff --git a/runtime/doc/map.txt b/runtime/doc/map.txt
+--- a/runtime/doc/map.txt
++++ b/runtime/doc/map.txt
+@@ -55,7 +55,7 @@ modes.
+ :im[ap]	{lhs} {rhs}		|mapmode-i|		*:im* *:imap*
+ :lm[ap]	{lhs} {rhs}		|mapmode-l|		*:lm* *:lmap*
+ :cm[ap]	{lhs} {rhs}		|mapmode-c|		*:cm* *:cmap*
+-:tm[ap]	{lhs} {rhs}		|mapmode-t|		*:tma* *:tmap*
++:tma[p]	{lhs} {rhs}		|mapmode-t|		*:tma* *:tmap*
+ 			Map the key sequence {lhs} to {rhs} for the modes
+ 			where the map command applies.  The result, including
+ 			{rhs}, is then further scanned for mappings.  This
+@@ -89,7 +89,7 @@ modes.
+ :iu[nmap] {lhs}			|mapmode-i|		*:iu*   *:iunmap*
+ :lu[nmap] {lhs}			|mapmode-l|		*:lu*   *:lunmap*
+ :cu[nmap] {lhs}			|mapmode-c|		*:cu*   *:cunmap*
+-:tu[nmap] {lhs}			|mapmode-t|		*:tunma* *:tunmap*
++:tunma[p] {lhs}			|mapmode-t|		*:tunma* *:tunmap*
+ 			Remove the mapping of {lhs} for the modes where the
+ 			map command applies.  The mapping may remain defined
+ 			for other modes where it applies.
+@@ -125,7 +125,7 @@ modes.
+ :im[ap]				|mapmode-i|
+ :lm[ap]				|mapmode-l|
+ :cm[ap]				|mapmode-c|
+-:tm[ap]				|mapmode-t|
++:tma[p]				|mapmode-t|
+ 			List all key mappings for the modes where the map
+ 			command applies.  Note that ":map" and ":map!" are
+ 			used most often, because they include the other modes.
+@@ -140,7 +140,7 @@ modes.
+ :im[ap] {lhs}			|mapmode-i|		*:imap_l*
+ :lm[ap] {lhs}			|mapmode-l|		*:lmap_l*
+ :cm[ap] {lhs}			|mapmode-c|		*:cmap_l*
+-:tm[ap] {lhs}			|mapmode-t|		*:tmap_l*
++:tma[p] {lhs}			|mapmode-t|		*:tmap_l*
+ 			List the key mappings for the key sequences starting
+ 			with {lhs} in the modes where the map command applies.
+ 			{not in Vi}
