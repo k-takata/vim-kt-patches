@@ -42,6 +42,5 @@ mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
 installer-64bit.patch
-win32-add-msvc2015.bat.patch
-win32-pass-subsystem_ver-to-gvimext.patch
+win32-improve-vc2015-support.patch
 fix-config_cache-removal.patch #+rejected
