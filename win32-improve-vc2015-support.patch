@@ -168,7 +168,7 @@ new file mode 100644
 +) else (
 +	set "WinSdk71=%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A"
 +)
-+if not exist "%WinSdk71%\nul" (
++if not exist "%WinSdk71%" (
 +	echo Windows SDK 7.1A is not found.  Targeting Windows Vista and later.
 +	goto :eof
 +)
