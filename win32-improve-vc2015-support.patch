@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  51b19b91a5722476eaf085f88c41d741e9458b2c
+# Parent  3dff6cc592ab65c07dad84c1ca23badfe7a50651
 
 diff --git a/src/GvimExt/Makefile b/src/GvimExt/Makefile
 --- a/src/GvimExt/Makefile
@@ -148,7 +148,7 @@ diff --git a/src/msvc2015.bat b/src/msvc2015.bat
 new file mode 100644
 --- /dev/null
 +++ b/src/msvc2015.bat
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,33 @@
 +@echo off
 +rem To be used on MS-Windows for Visual C++ 2015 (either Express or Community)
 +rem See INSTALLpc.txt for information.
@@ -168,6 +168,11 @@ new file mode 100644
 +) else (
 +	set "WinSdk71=%ProgramFiles(x86)%\Microsoft SDKs\Windows\v7.1A"
 +)
++if not exist "%WinSdk71%\nul" (
++	echo Windows SDK 7.1A is not found.  Targeting Windows Vista and later.
++	goto :eof
++)
++
 +set INCLUDE=%WinSdk71%\Include;%INCLUDE%
 +if "%Platform%"=="x64" (
 +	set "LIB=%WinSdk71%\Lib\x64;%LIB%"
