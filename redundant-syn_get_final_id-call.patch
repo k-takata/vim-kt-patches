@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  657ab55e3e166ff7e6e99152449ac0e4fa37cc17
+
+diff --git a/src/syntax.c b/src/syntax.c
+--- a/src/syntax.c
++++ b/src/syntax.c
+@@ -9547,7 +9547,7 @@ syn_name2attr(char_u *name)
+     int id = syn_name2id(name);
+ 
+     if (id != 0)
+-	return syn_id2attr(syn_get_final_id(id));
++	return syn_id2attr(id);
+     return 0;
+ }
+ 
