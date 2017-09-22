@@ -43,5 +43,4 @@ mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
 win32-improve-vc2015-support.patch
 win32-intstall-gvimext3264.patch
-redundant-syn_get_final_id-call.patch
 fix-config_cache-removal.patch #+rejected
