@@ -1,0 +1,100 @@
+# HG changeset patch
+# Parent  657ab55e3e166ff7e6e99152449ac0e4fa37cc17
+
+diff --git a/src/regexp.h b/src/regexp.h
+--- a/src/regexp.h
++++ b/src/regexp.h
+@@ -118,6 +118,11 @@ typedef struct
+     int			nsubexp;	/* number of () */
+     int			nstate;
+     nfa_state_T		state[1];	/* actually longer.. */
++#ifdef FEAT_RELTIME
++    proftime_T		*time_limit;
++    int			*timed_out;
++    int			time_count;
++#endif
+ } nfa_regprog_T;
+ 
+ /*
+diff --git a/src/regexp_nfa.c b/src/regexp_nfa.c
+--- a/src/regexp_nfa.c
++++ b/src/regexp_nfa.c
+@@ -3967,11 +3967,6 @@ pim_info(nfa_pim_T *pim)
+ 
+ /* Used during execution: whether a match has been found. */
+ static int nfa_match;
+-#ifdef FEAT_RELTIME
+-static proftime_T  *nfa_time_limit;
+-static int	   *nfa_timed_out;
+-static int         nfa_time_count;
+-#endif
+ 
+ static void copy_pim(nfa_pim_T *to, nfa_pim_T *from);
+ static void clear_sub(regsub_T *sub);
+@@ -5521,12 +5516,12 @@ find_match_text(colnr_T startcol, int re
+ 
+ #ifdef FEAT_RELTIME
+     static int
+-nfa_did_time_out()
++nfa_did_time_out(nfa_regprog_T	*prog)
+ {
+-    if (nfa_time_limit != NULL && profile_passed_limit(nfa_time_limit))
++    if (prog->time_limit != NULL && profile_passed_limit(prog->time_limit))
+     {
+-	if (nfa_timed_out != NULL)
+-	    *nfa_timed_out = TRUE;
++	if (prog->timed_out != NULL)
++	    *prog->timed_out = TRUE;
+ 	return TRUE;
+     }
+     return FALSE;
+@@ -5576,7 +5571,7 @@ nfa_regmatch(
+     if (got_int)
+ 	return FALSE;
+ #ifdef FEAT_RELTIME
+-    if (nfa_did_time_out())
++    if (nfa_did_time_out(prog))
+ 	return FALSE;
+ #endif
+ 
+@@ -5725,10 +5720,10 @@ nfa_regmatch(
+ 	    if (got_int)
+ 		break;
+ #ifdef FEAT_RELTIME
+-	    if (nfa_time_limit != NULL && ++nfa_time_count == 20)
++	    if (prog->time_limit != NULL && ++prog->time_count == 20)
+ 	    {
+-		nfa_time_count = 0;
+-		if (nfa_did_time_out())
++		prog->time_count = 0;
++		if (nfa_did_time_out(prog))
+ 		    break;
+ 	    }
+ #endif
+@@ -6950,10 +6945,10 @@ nextchar:
+ 	    break;
+ #ifdef FEAT_RELTIME
+ 	/* Check for timeout once in a twenty times to avoid overhead. */
+-	if (nfa_time_limit != NULL && ++nfa_time_count == 20)
++	if (prog->time_limit != NULL && ++prog->time_count == 20)
+ 	{
+-	    nfa_time_count = 0;
+-	    if (nfa_did_time_out())
++	    prog->time_count = 0;
++	    if (nfa_did_time_out(prog))
+ 		break;
+ 	}
+ #endif
+@@ -6999,9 +6994,9 @@ nfa_regtry(
+ 
+     reginput = regline + col;
+ #ifdef FEAT_RELTIME
+-    nfa_time_limit = tm;
+-    nfa_timed_out = timed_out;
+-    nfa_time_count = 0;
++    prog->time_limit = tm;
++    prog->timed_out = timed_out;
++    prog->time_count = 0;
+ #endif
+ 
+ #ifdef ENABLE_LOG
