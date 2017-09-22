@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  13fe4467499c4e995dc42532a36c8cb607ef2f1a
+# Parent  3cd1e45566a570fca712662ed6f9c10da3f65c16
 
 diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
 --- a/nsis/gvim.nsi
@@ -89,6 +89,27 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	SetOverwrite lastused
  
  	# We don't have a separate entry for the "Open With..." menu, assume
+@@ -396,7 +437,7 @@ SectionEnd
+ 		SetOutPath $0
+ 		File ${VIMRT}\libintl-8.dll
+ 		File ${VIMRT}\libiconv-2.dll
+-		File /nonfatal ${VIMRT}\libwinpthread-1.dll
++		#File /nonfatal ${VIMRT}\libwinpthread-1.dll
+ 		File /nonfatal ${VIMRT}\libgcc_s_sjlj-1.dll
+ 	SectionEnd
+ !endif
+@@ -437,6 +478,11 @@ Section Uninstall
+ 	   $\nIt contains the Vim executables and runtime files." IDNO NoRemoveExes
+ 
+ 	Delete /REBOOTOK $0\*.dll
++	Delete /REBOOTOK $0\GvimExt32\*.dll
++	${If} ${RunningX64}
++	  Delete /REBOOTOK $0\GvimExt64\*.dll
++	${EndIf}
++
+ 	ClearErrors
+ 	# Remove everything but *.dll files.  Avoids that
+ 	# a lot remains when gvimext.dll cannot be deleted.
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
 --- a/src/GvimExt/gvimext.cpp
 +++ b/src/GvimExt/gvimext.cpp
