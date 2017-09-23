@@ -79,7 +79,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  
  # Remove -D__IID_DEFINED__ for newer versions of the w32api
 -$(OUTDIR)/if_ole.o: if_ole.cpp $(INCL)
-+$(OUTDIR)/if_ole.o:	if_ole.cpp $(INCL)
++$(OUTDIR)/if_ole.o:	if_ole.cpp $(INCL) if_ole.h
  	$(CC) $(CFLAGS) $(CXXFLAGS) -c -o $(OUTDIR)/if_ole.o if_ole.cpp
  
 -if_perl.c: if_perl.xs typemap
