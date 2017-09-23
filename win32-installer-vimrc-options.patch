@@ -211,7 +211,7 @@ diff --git a/src/dosinst.c b/src/dosinst.c
  	}
 +	else if (strcmp(argv[i], "-vimrc-noremap") == 0)
 +	{
-+	    remap_choise = remap_no;
++	    remap_choice = remap_no;
 +	}
 +	else if (strcmp(argv[i], "-vimrc-behave") == 0)
 +	{
