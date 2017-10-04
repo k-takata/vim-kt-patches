@@ -42,5 +42,6 @@ wip-fix-7.4.852.patch
 win32-improve-vc2015-support.patch
 win32-install-gvimext3264.patch
 win32-installer-vimrc-options.patch
+doc-updates.patch
 fix-matchpairs.patch
 fix-config_cache-removal.patch #+rejected
