@@ -44,5 +44,6 @@ win32-install-gvimext3264.patch
 win32-installer-vimrc-options.patch
 doc-updates.patch
 doc-file-list.patch
+win32-enable-terminal-by-default.patch
 fix-matchpairs.patch
 fix-config_cache-removal.patch #+rejected
