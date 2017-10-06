@@ -43,9 +43,7 @@ win32-improve-vc2015-support.patch
 win32-install-gvimext3264.patch
 win32-installer-vimrc-options.patch
 doc-updates.patch
-doc-file-list.patch
 win32-enable-terminal-by-default.patch
 pr-2010.diff
 fix-matchpairs.patch
-doc-non-zero-arg.patch
 fix-config_cache-removal.patch #+rejected

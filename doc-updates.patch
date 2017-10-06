@@ -1,10 +1,22 @@
 # HG changeset patch
-# Parent  9c0af38511b4c586b1828e306ba7d19461f1d021
+# Parent  6db4080930c88e59268f76f8abbe9b04b8bf280b
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2069,7 +2069,7 @@ ch_setoptions({handle}, {options})
+@@ -120,9 +120,8 @@ To test for a non-empty string, use empt
+ Function arguments often behave slightly different from |TRUE|: If the
+ argument is present and it evaluates to a non-zero Number, |v:true| or a
+ non-empty String, then the value is considered to be TRUE.
+-Note that " " and "0" are also non-empty strings, thus cause the mode to be
+-cleared.  A List, Dictionary or Float is not a Number or String, thus
+-evaluates to FALSE.
++Note that " " and "0" are also non-empty strings, thus considered to be TRUE.
++A List, Dictionary or Float is not a Number or String, thus evaluates to FALSE.
+ 
+ 		*E745* *E728* *E703* *E729* *E730* *E731* *E908* *E910* *E913*
+ List, Dictionary, Funcref, Job and Channel types are not automatically
+@@ -2069,7 +2068,7 @@ ch_setoptions({handle}, {options})
  ch_status({handle} [, {options}])
  				String	status of channel {handle}
  changenr()			Number	current change number
@@ -13,7 +25,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  cindent({lnum})			Number	C indent for line {lnum}
  clearmatches()			none	clear all matches
  col({expr})			Number	column nr of cursor or mark
-@@ -2111,9 +2111,9 @@ filereadable({file})		Number	|TRUE| if {
+@@ -2111,9 +2110,9 @@ filereadable({file})		Number	|TRUE| if {
  filewritable({file})		Number	|TRUE| if {file} is a writable file
  filter({expr1}, {expr2})	List/Dict  remove items from {expr1} where
  					{expr2} is 0
@@ -25,7 +37,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  				String	find file {name} in {path}
  float2nr({expr})		Number	convert Float {expr} to a Number
  floor({expr})			Float	round {expr} down
-@@ -2157,7 +2157,7 @@ getftime({fname})		Number	last modificat
+@@ -2157,7 +2156,7 @@ getftime({fname})		Number	last modificat
  getftype({fname})		String	description of type of file {fname}
  getline({lnum})			String	line {lnum} of current buffer
  getline({lnum}, {end})		List	lines {lnum} to {end} of current buffer
@@ -34,7 +46,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  getmatches()			List	list of current matches
  getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
  				List	list of pakage/plugin directories
-@@ -2235,28 +2235,28 @@ lispindent({lnum})		Number	Lisp indent f
+@@ -2235,28 +2234,28 @@ lispindent({lnum})		Number	Lisp indent f
  localtime()			Number	current time
  log({expr})			Float	natural logarithm (base e) of {expr}
  log10({expr})			Float	logarithm of Float {expr} to base 10
@@ -73,7 +85,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  				List	{count}'th match of {pat} in {expr}
  max({expr})			Number	maximum value of items in {expr}
  min({expr})			Number	minimum value of items in {expr}
-@@ -2265,7 +2265,7 @@ mkdir({name} [, {path} [, {prot}]])
+@@ -2265,7 +2264,7 @@ mkdir({name} [, {path} [, {prot}]])
  mode([expr])			String	current editing mode
  mzeval({expr})			any	evaluate |MzScheme| expression
  nextnonblank({lnum})		Number	line nr of non-blank line >= {lnum}
@@ -82,7 +94,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  or({expr}, {expr})		Number	bitwise OR
  pathshorten({expr})		String	shorten directory names in a path
  perleval({expr})		any	evaluate |Perl| expression
-@@ -2327,13 +2327,13 @@ setcharsearch({dict})		Dict	set characte
+@@ -2327,13 +2326,13 @@ setcharsearch({dict})		Dict	set characte
  setcmdpos({pos})		Number	set cursor position in command-line
  setfperm({fname}, {mode})	Number	set {fname} file permissions to {mode}
  setline({lnum}, {line})		Number	set line {lnum} to {line}
@@ -99,7 +111,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  settabvar({nr}, {varname}, {val}) none	set {varname} in tab page {nr} to {val}
  settabwinvar({tabnr}, {winnr}, {varname}, {val})
  				none	set {varname} in window {winnr} in tab
-@@ -2359,22 +2359,22 @@ sqrt({expr})			Float	square root of {exp
+@@ -2359,22 +2358,22 @@ sqrt({expr})			Float	square root of {exp
  str2float({expr})		Float	convert String to Float
  str2nr({expr} [, {base}])	Number	convert String to Number
  strchars({expr} [, {skipcc}])	Number	character length of the String {expr}
@@ -127,7 +139,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  					specific match in ":s" or substitute()
  substitute({expr}, {pat}, {sub}, {flags})
  				String	all {pat} in {expr} replaced with {sub}
-@@ -2388,8 +2388,8 @@ system({expr} [, {input}])	String	output
+@@ -2388,8 +2387,8 @@ system({expr} [, {input}])	String	output
  systemlist({expr} [, {input}])	List	output of shell command/filter {expr}
  tabpagebuflist([{arg}])		List	list of buffer numbers in tab page
  tabpagenr([{arg}])		Number	number of current or last tab page
@@ -138,7 +150,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  tagfiles()			List	tags files used
  tan({expr})			Float	tangent of {expr}
  tanh({expr})			Float	hyperbolic tangent of {expr}
-@@ -2403,7 +2403,7 @@ term_getscrolled({buf})		Number	get the 
+@@ -2403,7 +2402,7 @@ term_getscrolled({buf})		Number	get the 
  term_getsize({buf})		List	get the size of a terminal
  term_getstatus({buf})		String	get the status of a terminal
  term_gettitle({buf})		String	get the title of a terminal
@@ -147,7 +159,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  term_list()			List	get the list of terminal buffers
  term_scrape({buf}, {row})	List	get row of a terminal screen
  term_sendkeys({buf}, {keys})	none	send keystrokes to a terminal
-@@ -3098,7 +3098,7 @@ changenr()						*changenr()*
+@@ -3098,7 +3097,7 @@ changenr()						*changenr()*
  		redo it is the number of the redone change.  After undo it is
  		one less than the number of the undone change.
  
@@ -156,7 +168,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Return number value of the first char in {expr}.  Examples: >
  			char2nr(" ")		returns 32
  			char2nr("ABC")		returns 65
-@@ -3377,7 +3377,7 @@ cursor({list})
+@@ -3377,7 +3376,7 @@ cursor({list})
  		Returns 0 when the position could be set, -1 otherwise.
  
  
@@ -165,7 +177,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Make a copy of {expr}.  For Numbers and Strings this isn't
  		different from using {expr} directly.
  		When {expr} is a |List| a full copy is created.  This means
-@@ -3455,6 +3455,7 @@ empty({expr})						*empty()*
+@@ -3455,6 +3454,7 @@ empty({expr})						*empty()*
  		Return the Number 1 if {expr} is empty, zero otherwise.
  		- A |List| or |Dictionary| is empty when it does not have any
  		  items.
@@ -173,7 +185,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		- A Number and Float is empty when its value is zero.
  		- |v:false|, |v:none| and |v:null| are empty, |v:true| is not.
  		- A Job is empty when it failed to start.
-@@ -3859,7 +3860,7 @@ filter({expr1}, {expr2})				*filter()*
+@@ -3859,7 +3859,7 @@ filter({expr1}, {expr2})				*filter()*
  		defined with the "abort" flag.
  
  
@@ -182,7 +194,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Find directory {name} in {path}.  Supports both downwards and
  		upwards recursive directory searches.  See |file-searching|
  		for the syntax of {path}.
-@@ -3874,7 +3875,7 @@ finddir({name}[, {path}[, {count}]])				
+@@ -3874,7 +3874,7 @@ finddir({name}[, {path}[, {count}]])				
  		{only available when compiled with the |+file_in_path|
  		feature}
  
@@ -191,7 +203,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Just like |finddir()|, but find a file instead of a directory.
  		Uses 'suffixesadd'.
  		Example: >
-@@ -4545,7 +4546,7 @@ getline({lnum} [, {end}])
+@@ -4545,7 +4545,7 @@ getline({lnum} [, {end}])
  
  <		To get lines from another buffer see |getbufline()|
  
@@ -200,7 +212,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Returns a list with all the entries in the location list for
  		window {nr}.  {nr} can be the window number or the |window-ID|.
  		When {nr} is zero the current window is used.
-@@ -5619,7 +5620,7 @@ log10({expr})						*log10()*
+@@ -5619,7 +5619,7 @@ log10({expr})						*log10()*
  <			-2.0
  		{only available when compiled with the |+float| feature}
  		
@@ -209,7 +221,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Evaluate Lua expression {expr} and return its result converted 
  		to Vim data structures. Second {expr} may hold additional 
  		argument accessible as _A inside first {expr}.
-@@ -5676,7 +5677,7 @@ map({expr1}, {expr2})					*map()*
+@@ -5676,7 +5676,7 @@ map({expr1}, {expr2})					*map()*
  		defined with the "abort" flag.
  
  
@@ -218,7 +230,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		When {dict} is omitted or zero: Return the rhs of mapping
  		{name} in mode {mode}.  The returned String has special
  		characters translated like in the output of the ":map" command
-@@ -5731,7 +5732,7 @@ maparg({name}[, {mode} [, {abbr} [, {dic
+@@ -5731,7 +5731,7 @@ maparg({name}[, {mode} [, {abbr} [, {dic
  			exe 'nnoremap <Tab> ==' . maparg('<Tab>', 'n')
  
  
@@ -227,7 +239,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Check if there is a mapping that matches with {name} in mode
  		{mode}.  See |maparg()| for {mode} and special names in
  		{name}.
-@@ -5763,7 +5764,7 @@ mapcheck({name}[, {mode} [, {abbr}]])			
+@@ -5763,7 +5763,7 @@ mapcheck({name}[, {mode} [, {abbr}]])			
  <		This avoids adding the "_vv" mapping when there already is a
  		mapping for "_v" or for "_vvv".
  
@@ -236,7 +248,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		When {expr} is a |List| then this returns the index of the
  		first item where {pat} matches.  Each item is used as a
  		String, |Lists| and |Dictionaries| are used as echoed.
-@@ -5819,7 +5820,7 @@ match({expr}, {pat}[, {start}[, {count}]
+@@ -5819,7 +5819,7 @@ match({expr}, {pat}[, {start}[, {count}]
  		done like 'magic' is set and 'cpoptions' is empty.
  
  					*matchadd()* *E798* *E799* *E801*
@@ -245,7 +257,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Defines a pattern to be highlighted in the current window (a
  		"match").  It will be highlighted with {group}.  Returns an
  		identification number (ID), which can be used to delete the
-@@ -5872,7 +5873,7 @@ matchadd({group}, {pattern}[, {priority}
+@@ -5872,7 +5872,7 @@ matchadd({group}, {pattern}[, {priority}
  		one operation by |clearmatches()|.
  
  							*matchaddpos()*
@@ -254,7 +266,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Same as |matchadd()|, but requires a list of positions {pos}
  		instead of a pattern. This command is faster than |matchadd()|
  		because it does not require to handle regular expressions and
-@@ -5925,7 +5926,7 @@ matchdelete({id})			       *matchdelete(
+@@ -5925,7 +5925,7 @@ matchdelete({id})			       *matchdelete(
  		otherwise -1.  See example for |matchadd()|.  All matches can
  		be deleted in one operation by |clearmatches()|.
  
@@ -263,7 +275,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Same as |match()|, but return the index of first character
  		after the match.  Example: >
  			:echo matchend("testing", "ing")
-@@ -5944,7 +5945,7 @@ matchend({expr}, {pat}[, {start}[, {coun
+@@ -5944,7 +5944,7 @@ matchend({expr}, {pat}[, {start}[, {coun
  <		result is "-1".
  		When {expr} is a |List| the result is equal to |match()|.
  
@@ -272,7 +284,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Same as |match()|, but return a |List|.  The first item in the
  		list is the matched string, same as what matchstr() would
  		return.  Following items are submatches, like "\1", "\2", etc.
-@@ -5954,7 +5955,7 @@ matchlist({expr}, {pat}[, {start}[, {cou
+@@ -5954,7 +5954,7 @@ matchlist({expr}, {pat}[, {start}[, {cou
  <		Results in: ['acd', 'a', '', 'c', 'd', '', '', '', '', '']
  		When there is no match an empty list is returned.
  
@@ -281,7 +293,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Same as |match()|, but return the matched string.  Example: >
  			:echo matchstr("testing", "ing")
  <		results in "ing".
-@@ -5967,7 +5968,7 @@ matchstr({expr}, {pat}[, {start}[, {coun
+@@ -5967,7 +5967,7 @@ matchstr({expr}, {pat}[, {start}[, {coun
  		When {expr} is a |List| then the matching item is returned.
  		The type isn't changed, it's not necessarily a String.
  
@@ -290,7 +302,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Same as |matchstr()|, but return the matched string, the start
  		position and the end position of the match.  Example: >
  			:echo matchstrpos("testing", "ing")
-@@ -6077,7 +6078,7 @@ nextnonblank({lnum})					*nextnonblank()
+@@ -6077,7 +6077,7 @@ nextnonblank({lnum})					*nextnonblank()
  		below it, zero is returned.
  		See also |prevnonblank()|.
  
@@ -299,7 +311,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Return a string with a single character, which has the number
  		value {expr}.  Examples: >
  			nr2char(64)		returns "@"
-@@ -6619,12 +6620,12 @@ round({expr})							*round()*
+@@ -6619,12 +6619,12 @@ round({expr})							*round()*
  <			-5.0
  		{only available when compiled with the |+float| feature}
  
@@ -314,7 +326,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		The result is a Number, which is the character at position
  		[row, col] on the screen.  This works for every possible
  		screen position, also status lines, window separators and the
-@@ -6996,7 +6997,7 @@ setline({lnum}, {text})					*setline()*
+@@ -6996,7 +6996,7 @@ setline({lnum}, {text})					*setline()*
  
  <		Note: The '[ and '] marks are not set.
  
@@ -323,7 +335,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Create or replace or add to the location list for window {nr}.
  		{nr} can be the window number or the |window-ID|.
  		When {nr} is zero the current window is used.
-@@ -7064,7 +7065,7 @@ setpos({expr}, {list})
+@@ -7064,7 +7064,7 @@ setpos({expr}, {list})
  		also set the preferred column.  Also see the "curswant" key in
  		|winrestview()|.
  
@@ -332,7 +344,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Create or replace or add to the quickfix list.
  		
  		When {what} is not present, use the items in {list}.  Each
-@@ -7518,7 +7519,7 @@ strchars({expr} [, {skipcc}])					*strch
+@@ -7518,7 +7518,7 @@ strchars({expr} [, {skipcc}])					*strch
  		      endfunction
  		    endif
  <
@@ -341,7 +353,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Like |strpart()| but using character index and length instead
  		of byte index and length.
  		When a character index is used where a character does not
-@@ -7526,7 +7527,7 @@ strcharpart({src}, {start}[, {len}])			*
+@@ -7526,7 +7526,7 @@ strcharpart({src}, {start}[, {len}])			*
  			strcharpart('abc', -1, 2)
  <		results in 'a'.
  
@@ -350,7 +362,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		The result is a Number, which is the number of display cells
  		String {expr} occupies on the screen when it starts at {col}.
  		When {col} is omitted zero is used.  Otherwise it is the
-@@ -7610,7 +7611,7 @@ strlen({expr})	The result is a Number, w
+@@ -7610,7 +7610,7 @@ strlen({expr})	The result is a Number, w
  		|strchars()|.
  		Also see |len()|, |strdisplaywidth()| and |strwidth()|.
  
@@ -359,7 +371,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		The result is a String, which is part of {src}, starting from
  		byte {start}, with the byte length {len}.
  		To count characters instead of bytes use |strcharpart()|.
-@@ -7662,7 +7663,7 @@ strwidth({expr})					*strwidth()*
+@@ -7662,7 +7662,7 @@ strwidth({expr})					*strwidth()*
  		Ambiguous, this function's return value depends on 'ambiwidth'.
  		Also see |strlen()|, |strdisplaywidth()| and |strchars()|.
  
@@ -368,7 +380,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Only for an expression in a |:substitute| command or
  		substitute() function.
  		Returns the {nr}'th submatch of the matched text.  When {nr}
-@@ -7948,7 +7949,7 @@ tagfiles()	Returns a |List| with the fil
+@@ -7948,7 +7948,7 @@ tagfiles()	Returns a |List| with the fil
  		for the current buffer.  This is the 'tags' option expanded.
  
  
@@ -377,7 +389,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Returns a list of tags matching the regular expression {expr}.
  
  		If {filename} is passed it is used to prioritize the results
-@@ -8760,7 +8761,7 @@ writefile({list}, {fname} [, {flags}])
+@@ -8760,7 +8760,7 @@ writefile({list}, {fname} [, {flags}])
  		appended to the file: >
  			:call writefile(["foo"], "event.log", "a")
  			:call writefile(["bar"], "event.log", "a")
@@ -398,6 +410,33 @@ diff --git a/runtime/doc/gui.txt b/runtime/doc/gui.txt
  between typing a character and it being recognized by the application.
  
  One workaround that has been successful, for unknown reasons, is to prevent
+diff --git a/runtime/doc/help.txt b/runtime/doc/help.txt
+--- a/runtime/doc/help.txt
++++ b/runtime/doc/help.txt
+@@ -142,6 +142,7 @@ Special issues ~
+ |print.txt|	printing
+ |remote.txt|	using Vim as a server or client
+ |term.txt|	using different terminals and mice
++|terminal.txt|	Terminal window support
+ |digraph.txt|	list of available digraphs
+ |mbyte.txt|	multi-byte text support
+ |mlang.txt|	non-English language support
+@@ -150,6 +151,7 @@ Special issues ~
+ |hebrew.txt|	Hebrew language support and editing
+ |russian.txt|	Russian language support and editing
+ |ft_ada.txt|	Ada (the programming language) support
++|ft_rust.txt|	Filetype plugin for Rust
+ |ft_sql.txt|	about the SQL filetype plugin
+ |hangulin.txt|	Hangul (Korean) input mode
+ |rileft.txt|	right-to-left editing mode
+@@ -202,6 +204,7 @@ Standard plugins ~
+ |pi_logipat.txt|   Logical operators on patterns
+ |pi_netrw.txt|     Reading and writing files over a network
+ |pi_paren.txt|     Highlight matching parens
++|pi_spec.txt|      Filetype plugin to work with rpm spec files
+ |pi_tar.txt|       Tar file explorer
+ |pi_vimball.txt|   Create a self-installing Vim script
+ |pi_zip.txt|       Zip archive explorer
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
