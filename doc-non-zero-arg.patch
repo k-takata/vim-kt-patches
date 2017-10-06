@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  e310582410a176eaf239e80a37d99e2997c8b9f2
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -120,9 +120,8 @@ To test for a non-empty string, use empt
+ Function arguments often behave slightly different from |TRUE|: If the
+ argument is present and it evaluates to a non-zero Number, |v:true| or a
+ non-empty String, then the value is considered to be TRUE.
+-Note that " " and "0" are also non-empty strings, thus cause the mode to be
+-cleared.  A List, Dictionary or Float is not a Number or String, thus
+-evaluates to FALSE.
++Note that " " and "0" are also non-empty strings, thus considered to be TRUE.
++A List, Dictionary or Float is not a Number or String, thus evaluates to FALSE.
+ 
+ 		*E745* *E728* *E703* *E729* *E730* *E731* *E908* *E910* *E913*
+ List, Dictionary, Funcref, Job and Channel types are not automatically
