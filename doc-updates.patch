@@ -94,6 +94,15 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  or({expr}, {expr})		Number	bitwise OR
  pathshorten({expr})		String	shorten directory names in a path
  perleval({expr})		any	evaluate |Perl| expression
+@@ -2318,7 +2317,7 @@ searchpos({pattern} [, {flags} [, {stopl
+ server2client({clientid}, {string})
+ 				Number	send reply string
+ serverlist()			String	get a list of available servers
+-setbufline( {expr}, {lnum}, {line})
++setbufline({expr}, {lnum}, {line})
+ 				Number	set line {lnum} to {line} in buffer
+ 					{expr}
+ setbufvar({expr}, {varname}, {val})
 @@ -2327,13 +2326,13 @@ setcharsearch({dict})		Dict	set characte
  setcmdpos({pos})		Number	set cursor position in command-line
  setfperm({fname}, {mode})	Number	set {fname} file permissions to {mode}
