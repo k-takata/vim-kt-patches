@@ -1,0 +1,17 @@
+# HG changeset patch
+# Parent  cfd1ef10ae7198180534047f0b3d4c210b4f98cf
+
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -721,6 +721,10 @@ When building, you need to set the follo
+     TCL_VER:      Tcl version in a short format. E.g. 86 for Tcl 8.6.X.
+     TCL_VER_LONG: Tcl version in a long format. E.g. 8.6 for Tcl 8.6.X.
+ 
++Sometimes the Tcl dll name changes.  E.g. ActiveTcl 8.6.4 comes with tcl86.dll
++but ActiveTcl 8.6.6 comes with tcl86t.dll.  You can set the dll name by settin
++the TCL_DLL variable.  (Default: tcl86.dll)
++
+ E.g. When using MSVC (as one line):
+ 
+     nmake -f Make_mvc.mak
