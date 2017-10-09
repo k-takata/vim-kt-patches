@@ -45,4 +45,5 @@ doc-updates.patch
 win32-enable-terminal-by-default.patch
 pr-2010.diff
 fix-matchpairs.patch
+update-installpc.patch
 fix-config_cache-removal.patch #+rejected

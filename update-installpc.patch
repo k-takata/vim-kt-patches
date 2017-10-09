@@ -1,0 +1,91 @@
+# HG changeset patch
+# Parent  46745fa483408cf384144a4e912a8f0faacba995
+
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -16,7 +16,7 @@ XP/2003/Vista/7/8/10).  There are also i
+ they might no longer work.
+ 
+ The recommended way is to build a 32 bit Vim, also on 64 bit systems.  You can
+-build a 64 bit Vim if you like, the executable will be bigger and Vim wan't be
++build a 64 bit Vim if you like, the executable will be bigger and Vim won't be
+ any faster, but you can edit files larger than 2 Gbyte.
+ 
+ 
+@@ -42,7 +42,7 @@ 16. Installing after building from sourc
+ 
+ The currently recommended way (that means it has been verified to work) is
+ using the "Visual Studio Community 2015" installation.  This includes the SDK
+-needed to target Windows XP.  But not older Windows versions (95, 97), see
++needed to target Windows XP.  But not older Windows versions (95, 98), see
+ |msvc-2008-express| below for that
+ 
+ 
+@@ -287,13 +287,13 @@ or on NT/2000/XP, go to the Control Pane
+ System, Advanced, and edit the environment from there. If you use msys2
+ compilers, set your installed paths:
+ 
+-    C:\msys2\mingw32\bin
++    C:\msys32\mingw32\bin
+ or
+     C:\msys64\mingw32\bin
+ 
+ for 32bit. And 64bit:
+ 
+-    C:\msys2\mingw64\bin
++    C:\msys32\mingw64\bin
+ or
+     C:\msys64\mingw64\bin
+ 
+@@ -590,7 +590,7 @@ E.g. When using MSVC (as one line):
+ Or when using MinGW (as one line):
+ 
+     mingw32-make -f Make_ming.mak
+-        LUA=C:\projects\lua53 DYNAMIC_LUA=yes LUA_VER=53
++        LUA=C:/projects/lua53 DYNAMIC_LUA=yes LUA_VER=53
+ 
+ 
+ Or when using Cygwin (as one line) (untested):
+@@ -622,7 +622,7 @@ E.g. When using MSVC (as one line):
+ Or when using MinGW (as one line):
+ 
+     mingw32-make -f Make_ming.mak
+-        PERL=C:\Perl DYNAMIC_PERL=yes PERL_VER=522
++        PERL=C:/Perl DYNAMIC_PERL=yes PERL_VER=522
+ 
+ 
+ 11. Building with Ruby support
+@@ -684,12 +684,12 @@ config.h and Ruby's DLL name. Here are t
+ 
+     Note that ruby_2_4 is the branch name for Ruby 2.4.X's source code.
+     There is no need to build whole Ruby, just config.h is needed.
+-    If you use 32-bit MSVC10, the config.h is generated in the
++    If you use 32-bit MSVC 2015, the config.h is generated in the
+     .ext\include\i386-mswin32_140 directory.
+ 
+   3) Install the generated config.h.
+ 
+-      xcopy /s .ext\include E:\Ruby24\include\ruby-2.4.0
++      xcopy /s .ext\include C:\Ruby24\include\ruby-2.4.0
+ 
+     Note that 2.4.0 is Ruby API version of Ruby 2.4.X.
+     You may need to close the console and reopen it to pick up the new $PATH.
+@@ -712,7 +712,7 @@ Using MinGW is easier than using MSVC wh
+ After you install RubyInstaller, just type this (as one line):
+ 
+     mingw32-make -f Make_ming.mak
+-        RUBY=C:/Ruby22 DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_API_VER_LONG=2.2.0
++        RUBY=C:/Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
+         WINVER=0x501
+ 
+ If you set WINVER explicitly, it must be set to >=0x500, when building with
+@@ -749,7 +749,7 @@ E.g. When using MSVC (as one line):
+ Or when using MinGW (as one line):
+ 
+     mingw32-make -f Make_ming.mak
+-        TCL=C:\Tcl86 DYNAMIC_TCL=yes TCL_VER=86 TCL_VER_LONG=8.6
++        TCL=C:/Tcl86 DYNAMIC_TCL=yes TCL_VER=86 TCL_VER_LONG=8.6
+ 
+ 
+ 13. Building with Terminal support
