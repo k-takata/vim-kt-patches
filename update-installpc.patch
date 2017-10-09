@@ -22,23 +22,40 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  |msvc-2008-express| below for that
  
  
-@@ -287,13 +287,13 @@ or on NT/2000/XP, go to the Control Pane
+@@ -285,17 +285,11 @@ your AUTOEXEC.BAT file with a line like:
+ 
+ or on NT/2000/XP, go to the Control Panel, (Performance and Maintenance),
  System, Advanced, and edit the environment from there. If you use msys2
- compilers, set your installed paths:
- 
+-compilers, set your installed paths:
+-
 -    C:\msys2\mingw32\bin
-+    C:\msys32\mingw32\bin
- or
-     C:\msys64\mingw32\bin
+-or
+-    C:\msys64\mingw32\bin
++compilers, set your installed paths (normally one of the following):
  
- for 32bit. And 64bit:
- 
+-for 32bit. And 64bit:
+-
 -    C:\msys2\mingw64\bin
-+    C:\msys32\mingw64\bin
- or
-     C:\msys64\mingw64\bin
+-or
+-    C:\msys64\mingw64\bin
++    C:\msys32\mingw32\bin   (32-bit msys2, targeting 32-bit builds)
++    C:\msys64\mingw32\bin   (64-bit msys2, targeting 32-bit builds)
++    C:\msys64\mingw64\bin   (64-bit msys2, targeting 64-bit builds)
  
-@@ -590,7 +590,7 @@ E.g. When using MSVC (as one line):
+ Test if gcc is on your path.  From a CMD (or COMMAND on '95/98) window:
+ 
+@@ -430,9 +424,9 @@ And if you use msys2 to build python sup
+         DYNAMIC_PYTHON=yes
+         PYTHON_VER=27
+         DYNAMIC_PYTHON_DLL=libpython2.7.dll
+-        ARCH=x86-64
+         STATIC_STDCPLUS=yes
+ 
++(This is for 64-bit builds.  For 32-bit builds, replace mingw64 with mingw32.)
+ You will end up with a Python-enabled, Win32 version. Enjoy!
+ 
+ 
+@@ -590,7 +584,7 @@ E.g. When using MSVC (as one line):
  Or when using MinGW (as one line):
  
      mingw32-make -f Make_ming.mak
@@ -47,7 +64,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  
  Or when using Cygwin (as one line) (untested):
-@@ -622,7 +622,7 @@ E.g. When using MSVC (as one line):
+@@ -622,7 +616,7 @@ E.g. When using MSVC (as one line):
  Or when using MinGW (as one line):
  
      mingw32-make -f Make_ming.mak
@@ -56,7 +73,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  
  11. Building with Ruby support
-@@ -684,12 +684,12 @@ config.h and Ruby's DLL name. Here are t
+@@ -684,12 +678,12 @@ config.h and Ruby's DLL name. Here are t
  
      Note that ruby_2_4 is the branch name for Ruby 2.4.X's source code.
      There is no need to build whole Ruby, just config.h is needed.
@@ -71,7 +88,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
      Note that 2.4.0 is Ruby API version of Ruby 2.4.X.
      You may need to close the console and reopen it to pick up the new $PATH.
-@@ -712,7 +712,7 @@ Using MinGW is easier than using MSVC wh
+@@ -712,7 +706,7 @@ Using MinGW is easier than using MSVC wh
  After you install RubyInstaller, just type this (as one line):
  
      mingw32-make -f Make_ming.mak
@@ -80,7 +97,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
          WINVER=0x501
  
  If you set WINVER explicitly, it must be set to >=0x500, when building with
-@@ -749,7 +749,7 @@ E.g. When using MSVC (as one line):
+@@ -749,7 +743,7 @@ E.g. When using MSVC (as one line):
  Or when using MinGW (as one line):
  
      mingw32-make -f Make_ming.mak
