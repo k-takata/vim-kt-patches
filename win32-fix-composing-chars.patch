@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  4b114265182e41a942b0af8f0a61d8bdd695d04c
+# Parent  b1850262be7d7904c4718a9072e9c280af81c26f
 
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
@@ -100,7 +100,27 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	int		i;
  	int		wlen;	/* string length in words */
  	int		clen;	/* string length in characters */
-@@ -6338,7 +6338,7 @@ gui_mch_draw_string(
+@@ -6321,9 +6321,16 @@ gui_mch_draw_string(
+ 	    {
+ 		unicodebuf[wlen++] = c;
+ 	    }
+-	    cw = utf_char2cells(c);
+-	    if (cw > 2)		/* don't use 4 for unprintable char */
+-		cw = 1;
++
++	    if (utf_iscomposing(c))
++		cw = 0;
++	    else
++	    {
++		cw = utf_char2cells(c);
++		if (cw > 2)		/* don't use 4 for unprintable char */
++		    cw = 1;
++	    }
++
+ 	    if (unicodepdy != NULL)
+ 	    {
+ 		/* Use unicodepdy to make characters fit as we expect, even
+@@ -6338,7 +6345,7 @@ gui_mch_draw_string(
  		    unicodepdy[wlen - 1] = cw * gui.char_width;
  	    }
  	    cells += cw;
