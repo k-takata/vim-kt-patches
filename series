@@ -46,4 +46,6 @@ win32-enable-terminal-by-default.patch
 pr-2010.diff
 fix-matchpairs.patch
 update-installpc.patch
+win32-fix-composing-chars.patch
+win32-fix-tearoff-menu.patch
 fix-config_cache-removal.patch #+rejected
