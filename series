@@ -39,7 +39,6 @@ add-getpackages.patch
 mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
-win32-install-gvimext3264.patch
 win32-installer-vimrc-options.patch
 doc-updates.patch
 win32-enable-terminal-by-default.patch

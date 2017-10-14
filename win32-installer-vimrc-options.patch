@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  dd0cce4bb4facbbb9164e7869c6938620ecf382d
+# Parent  0793db764915eac796bed5e6e21e544a3ad7ffe2
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
 +++ b/Filelist
-@@ -450,6 +450,7 @@ SRC_DOS =	\
+@@ -451,6 +451,7 @@ SRC_DOS =	\
  		src/xxd/Make_mvc.mak \
  		nsis/gvim.nsi \
  		nsis/gvim_version.nsh \
@@ -165,12 +165,9 @@ new file mode 100644
 diff --git a/src/dosinst.c b/src/dosinst.c
 --- a/src/dosinst.c
 +++ b/src/dosinst.c
-@@ -78,23 +78,25 @@ char	*(remap_choices[]) =
- {
-     "\nChoose:",
+@@ -80,21 +80,23 @@ char	*(remap_choices[]) =
      "Do not remap keys for Windows behavior",
--    "Remap a few keys for Windows behavior (<C-V>, <C-C>, etc)",
-+    "Remap a few keys for Windows behavior (<C-V>, <C-C>, <C-A>, <C-S>, <C-F>, etc)",
+     "Remap a few keys for Windows behavior (CTRL-V, CTRL-C, CTRL-F, etc)",
  };
 -int	remap_choice = (int)remap_win;
 +int	remap_choice = (int)remap_no;
