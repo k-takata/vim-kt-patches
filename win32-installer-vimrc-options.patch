@@ -117,7 +117,7 @@ new file mode 100644
 +
 +[Field 3]
 +Type=radiobutton
-+Text=Remap a few keys for Windows behavior (<C-V>, <C-C>, <C-A>, <C-S>, <C-F>, etc)
++Text=Remap a few keys for Windows behavior (CTRL-V, CTRL-C, CTRL-F, etc)
 +Left=10
 +Right=-10
 +Top=30
