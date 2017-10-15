@@ -1,15 +1,15 @@
 # HG changeset patch
-# Parent e51be89c4f65bffe50219bea62fe965a208a92e6
+# Parent adf01bc5cbfeb59ef097c1547dbd6ca2f88127de
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -351,7 +351,7 @@
- # If the selected GUI isn't found, the GUI is disabled automatically
- #CONF_OPT_GUI = --enable-gui=gtk2
+@@ -368,7 +368,7 @@ CClink = $(CC)
  #CONF_OPT_GUI = --enable-gui=gtk2 --disable-gtktest
--#CONF_OPT_GUI = --enable-gui=gnome2
-+CONF_OPT_GUI = --enable-gui=gnome2
+ #CONF_OPT_GUI = --enable-gui=gnome2
  #CONF_OPT_GUI = --enable-gui=gnome2 --disable-gtktest
+-#CONF_OPT_GUI = --enable-gui=gtk3
++CONF_OPT_GUI = --enable-gui=gtk3
+ #CONF_OPT_GUI = --enable-gui=gtk3 --disable-gtktest
  #CONF_OPT_GUI = --enable-gui=motif
  #CONF_OPT_GUI = --enable-gui=motif --with-motif-lib="-static -lXm -shared"
