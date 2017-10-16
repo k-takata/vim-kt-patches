@@ -46,4 +46,5 @@ fix-matchpairs.patch
 update-installpc.patch
 win32-fix-composing-chars.patch
 win32-fix-tearoff-menu.patch
+doc-menu-issue1959.patch
 fix-config_cache-removal.patch #+rejected
