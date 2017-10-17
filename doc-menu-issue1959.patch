@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  371c0ca13eb53fe247a57c0ac91adbffe6a0f681
+# Parent  0d921c7d6b97b5d052a7cda0addb55a0edca6c45
 
 diff --git a/runtime/doc/filetype.txt b/runtime/doc/filetype.txt
 --- a/runtime/doc/filetype.txt
@@ -30,9 +30,9 @@ diff --git a/runtime/doc/gui.txt b/runtime/doc/gui.txt
  	:let do_syntax_sel_menu = 1
 +<
 +Note that the menu.vim is sourced when `:syntax on` or `:filetype on` is
-+executed or after your .vimrc file is sourced.  This means that the
-+'encoding' option and the setting of `:messages language` must be set before
-+that.
++executed or after your .vimrc file is sourced.  This means that the 'encoding'
++option and the language of messages (`:language messages`) must be set before
++that (if you want to change them).
  
 -<
  							*console-menus*
