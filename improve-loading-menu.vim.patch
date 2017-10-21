@@ -1,0 +1,144 @@
+# HG changeset patch
+# Parent  c384bf35d5d0cd99dc94b2a2ad4365d13d2773fb
+
+diff --git a/runtime/menu.vim b/runtime/menu.vim
+--- a/runtime/menu.vim
++++ b/runtime/menu.vim
+@@ -341,47 +341,52 @@ endfun
+ 
+ 
+ " Setup the Edit.Color Scheme submenu
++func! s:SetupColorScheme()
++  " get NL separated string with file names
++  let n = globpath(&runtimepath, "colors/*.vim")
+ 
+-" get NL separated string with file names
+-let s:n = globpath(&runtimepath, "colors/*.vim")
+-
+-" split at NL, Ignore case for VMS and windows, sort on name
+-let s:names = sort(map(split(s:n, "\n"), 'substitute(v:val, "\\c.*[/\\\\:\\]]\\([^/\\\\:]*\\)\\.vim", "\\1", "")'), 1)
++  " split at NL, Ignore case for VMS and windows, sort on name
++  let names = sort(map(split(n, "\n"), 'substitute(v:val, "\\c.*[/\\\\:\\]]\\([^/\\\\:]*\\)\\.vim", "\\1", "")'), 1)
+ 
+-" define all the submenu entries
+-let s:idx = 100
+-for s:name in s:names
+-  exe "an 20.450." . s:idx . ' &Edit.C&olor\ Scheme.' . s:name . " :colors " . s:name . "<CR>"
+-  let s:idx = s:idx + 10
+-endfor
+-unlet s:name s:names s:n s:idx
++  " define all the submenu entries
++  let idx = 100
++  for name in names
++    exe "an 20.450." . idx . ' &Edit.C&olor\ Scheme.' . name . " :colors " . name . "<CR>"
++    let idx = idx + 10
++  endfor
++  unlet name names n idx
++endfun
++an <silent> 20.450 &Edit.Show\ C&olor\ Schemes\ in\ Menu :call <SID>SetupColorScheme()<Bar>aunmenu &Edit.Show\ C&olor\ Schemes\ in\ Menu<CR>
+ 
+ 
+ " Setup the Edit.Keymap submenu
+ if has("keymap")
+-  let s:n = globpath(&runtimepath, "keymap/*.vim")
+-  if s:n != ""
+-    let s:idx = 100
+-    an 20.460.90 &Edit.&Keymap.None :set keymap=<CR>
+-    while strlen(s:n) > 0
+-      let s:i = stridx(s:n, "\n")
+-      if s:i < 0
+-	let s:name = s:n
+-	let s:n = ""
+-      else
+-	let s:name = strpart(s:n, 0, s:i)
+-	let s:n = strpart(s:n, s:i + 1, 19999)
+-      endif
+-      " Ignore case for VMS and windows
+-      let s:name = substitute(s:name, '\c.*[/\\:\]]\([^/\\:_]*\)\(_[0-9a-zA-Z-]*\)\=\.vim', '\1', '')
+-      exe "an 20.460." . s:idx . ' &Edit.&Keymap.' . s:name . " :set keymap=" . s:name . "<CR>"
+-      unlet s:name
+-      unlet s:i
+-      let s:idx = s:idx + 10
+-    endwhile
+-    unlet s:idx
+-  endif
+-  unlet s:n
++  func! s:SetupKeymap()
++    let n = globpath(&runtimepath, "keymap/*.vim")
++    if n != ""
++      let idx = 100
++      an 20.460.90 &Edit.&Keymap.None :set keymap=<CR>
++      while strlen(n) > 0
++	let i = stridx(n, "\n")
++	if i < 0
++	  let name = n
++	  let n = ""
++	else
++	  let name = strpart(n, 0, i)
++	  let n = strpart(n, i + 1, 19999)
++	endif
++	" Ignore case for VMS and windows
++	let name = substitute(name, '\c.*[/\\:\]]\([^/\\:_]*\)\(_[0-9a-zA-Z-]*\)\=\.vim', '\1', '')
++	exe "an 20.460." . idx . ' &Edit.&Keymap.' . name . " :set keymap=" . name . "<CR>"
++	unlet name
++	unlet i
++	let idx = idx + 10
++      endwhile
++      unlet idx
++    endif
++    unlet n
++  endfun
++  an <silent> 20.460 &Edit.Show\ &Keymaps\ in\ Menu :call <SID>SetupKeymap()<Bar>aunmenu &Edit.Show\ &Keymaps\ in\ Menu<CR>
+ endif
+ if has("win32") || has("win16") || has("gui_motif") || has("gui_gtk") || has("gui_kde") || has("gui_photon") || has("gui_mac")
+   an 20.470 &Edit.Select\ Fo&nt\.\.\.	:set guifont=*<CR>
+@@ -575,26 +580,29 @@ func! s:XxdFind()
+ endfun
+ 
+ " Setup the Tools.Compiler submenu
+-let s:n = globpath(&runtimepath, "compiler/*.vim")
+-let s:idx = 100
+-while strlen(s:n) > 0
+-  let s:i = stridx(s:n, "\n")
+-  if s:i < 0
+-    let s:name = s:n
+-    let s:n = ""
+-  else
+-    let s:name = strpart(s:n, 0, s:i)
+-    let s:n = strpart(s:n, s:i + 1, 19999)
+-  endif
+-  " Ignore case for VMS and windows
+-  let s:name = substitute(s:name, '\c.*[/\\:\]]\([^/\\:]*\)\.vim', '\1', '')
+-  exe "an 30.440." . s:idx . ' &Tools.Se&t\ Compiler.' . s:name . " :compiler " . s:name . "<CR>"
+-  unlet s:name
+-  unlet s:i
+-  let s:idx = s:idx + 10
+-endwhile
+-unlet s:n
+-unlet s:idx
++func! s:SetupCompiler()
++  let n = globpath(&runtimepath, "compiler/*.vim")
++  let idx = 100
++  while strlen(n) > 0
++    let i = stridx(n, "\n")
++    if i < 0
++      let name = n
++      let n = ""
++    else
++      let name = strpart(n, 0, i)
++      let n = strpart(n, i + 1, 19999)
++    endif
++    " Ignore case for VMS and windows
++    let name = substitute(name, '\c.*[/\\:\]]\([^/\\:]*\)\.vim', '\1', '')
++    exe "an 30.440." . idx . ' &Tools.Se&t\ Compiler.' . name . " :compiler " . name . "<CR>"
++    unlet name
++    unlet i
++    let idx = idx + 10
++  endwhile
++  unlet n
++  unlet idx
++endfun
++an <silent> 30.440 &Tools.Show\ Compiler\ Se&ttings\ in\ Menu :call <SID>SetupCompiler()<Bar>aunmenu &Tools.Show\ Compiler\ Se&ttings\ in\ Menu<CR>
+ 
+ if !exists("no_buffers_menu")
+ 
