@@ -18,8 +18,6 @@ redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 tab-xyz-pragmb.diff #-tab-xyz
 tab-xyz.diff #+tab-xyz
-tabline-dnd.patch
-tabline-dnd-mark.diff
 subpixel-artifacts.patch
 fix-italic-overhang-before-space.patch
 remove-useless-STRCPY.patch
@@ -49,4 +47,5 @@ win32-fix-tearoff-menu.patch
 doc-menu-issue1959.patch
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
+2060.diff
 fix-config_cache-removal.patch #+rejected
