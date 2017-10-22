@@ -46,5 +46,4 @@ win32-fix-composing-chars.patch
 doc-menu-issue1959.patch
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
-2060.diff
 fix-config_cache-removal.patch #+rejected
