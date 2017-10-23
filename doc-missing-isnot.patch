@@ -1,0 +1,27 @@
+# HG changeset patch
+# Parent  c5227bca725fdd88837aa82a19f0119547b69bb8
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -814,14 +814,15 @@ Examples:
+ "abc" == "Abc"	  evaluates to 1 if 'ignorecase' is set, 0 otherwise
+ 
+ 							*E691* *E692*
+-A |List| can only be compared with a |List| and only "equal", "not equal" and
+-"is" can be used.  This compares the values of the list, recursively.
+-Ignoring case means case is ignored when comparing item values.
++A |List| can only be compared with a |List| and only "equal", "not equal",
++"is" and "isnot" can be used.  This compares the values of the list,
++recursively.  Ignoring case means case is ignored when comparing item values.
+ 
+ 							*E735* *E736*
+ A |Dictionary| can only be compared with a |Dictionary| and only "equal", "not
+-equal" and "is" can be used.  This compares the key/values of the |Dictionary|
+-recursively.  Ignoring case means case is ignored when comparing item values.
++equal", "is" and "isnot" can be used.  This compares the key/values of the
++|Dictionary| recursively.  Ignoring case means case is ignored when comparing
++item values.
+ 
+ 							*E694*
+ A |Funcref| can only be compared with a |Funcref| and only "equal", "not
