@@ -1,0 +1,66 @@
+# HG changeset patch
+# Parent  b2833a0a34fe95e85e2ae390fdd56d74bfffafb8
+
+diff --git a/runtime/menu.vim b/runtime/menu.vim
+--- a/runtime/menu.vim
++++ b/runtime/menu.vim
+@@ -355,11 +355,12 @@ func! s:SetupColorScheme()
+     let idx = idx + 10
+   endfor
+   unlet name names n idx
++  silent! aunmenu &Edit.Show\ C&olor\ Schemes\ in\ Menu
+ endfun
+ if exists("do_globpath_menus")
+   call s:SetupColorScheme()
+ else
+-  an <silent> 20.450 &Edit.Show\ C&olor\ Schemes\ in\ Menu :call <SID>SetupColorScheme()<Bar>aunmenu &Edit.Show\ C&olor\ Schemes\ in\ Menu<CR>
++  an <silent> 20.450 &Edit.Show\ C&olor\ Schemes\ in\ Menu :call <SID>SetupColorScheme()<CR>
+ endif
+ 
+ 
+@@ -389,11 +390,12 @@ if has("keymap")
+       unlet idx
+     endif
+     unlet n
++    silent! aunmenu &Edit.Show\ &Keymaps\ in\ Menu
+   endfun
+   if exists("do_globpath_menus")
+     call s:SetupKeymap()
+   else
+-    an <silent> 20.460 &Edit.Show\ &Keymaps\ in\ Menu :call <SID>SetupKeymap()<Bar>aunmenu &Edit.Show\ &Keymaps\ in\ Menu<CR>
++    an <silent> 20.460 &Edit.Show\ &Keymaps\ in\ Menu :call <SID>SetupKeymap()<CR>
+   endif
+ endif
+ if has("win32") || has("win16") || has("gui_motif") || has("gui_gtk") || has("gui_kde") || has("gui_photon") || has("gui_mac")
+@@ -609,13 +611,30 @@ func! s:SetupCompiler()
+   endwhile
+   unlet n
+   unlet idx
++  silent! aunmenu &Tools.Show\ Compiler\ Se&ttings\ in\ Menu
+ endfun
+ if exists("do_globpath_menus")
+   call s:SetupCompiler()
+ else
+-  an <silent> 30.440 &Tools.Show\ Compiler\ Se&ttings\ in\ Menu :call <SID>SetupCompiler()<Bar>aunmenu &Tools.Show\ Compiler\ Se&ttings\ in\ Menu<CR>
++  an <silent> 30.440 &Tools.Show\ Compiler\ Se&ttings\ in\ Menu :call <SID>SetupCompiler()<CR>
+ endif
+ 
++" Load ColorScheme, Compiler Setting and Keymap menus when idle.
++if !exists("do_globpath_menus")
++  func! s:SetupGlobpathMenus()
++    call s:SetupColorScheme()
++    call s:SetupCompiler()
++    if has("keymap")
++      call s:SetupKeymap()
++    endif
++  endfunc
++  augroup SetupGlobpathMenus
++    au!
++    au CursorHold,CursorHoldI * call <SID>SetupGlobpathMenus() | au! SetupGlobpathMenus
++  augroup END
++endif
++
++
+ if !exists("no_buffers_menu")
+ 
+ " Buffer list menu -- Setup functions & actions
