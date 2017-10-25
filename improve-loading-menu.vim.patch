@@ -1,26 +1,45 @@
 # HG changeset patch
-# Parent  c504c1f75515601e066cc512c67f2c66c77e3e3b
+# Parent  bfcde3e2704cbfa48c0bfb67848cc2736dcaa775
 
 diff --git a/runtime/doc/gui.txt b/runtime/doc/gui.txt
 --- a/runtime/doc/gui.txt
 +++ b/runtime/doc/gui.txt
-@@ -498,3 +498,12 @@ The first item in the Syntax menu can be
+@@ -498,3 +498,13 @@ The first item in the Syntax menu can be
  in the menu (which can take a bit of time to load).  If you want to have all
  filetypes already present at startup, add: >
  	:let do_syntax_sel_menu = 1
-+The following menuitems can be used to show all available colorschemes,
-+keymaps and compiler settings:
-+	Edit > Show Color Schemes in Menu ~
-+	Edit > Show Keymaps in Menu ~
-+	Tools > Show Compiler Settings in Menu ~
-+These can also take a bit of time to load, because they use |globpath()| to
-+search all related files in all 'runtimepath's.  If you want to have all these
-+items already present at startup, add: >
-+	:let do_globpath_menus = 1
++The following menuitems show all available color schemes, keymaps and compiler
++settings:
++	Edit > Color Scheme ~
++	Edit > Keymap ~
++	Tools > Set Compiler ~
++However, they can also take a bit of time to load, because they search all
++related files from the directories in 'runtimepath'.  Therefore they are
++loaded lazily (by the |CursorHold| event), or you can also load them manually.
++If you want to have all these items already present at startup, add: >
++	:let do_lazyload_menus = 1
 diff --git a/runtime/menu.vim b/runtime/menu.vim
 --- a/runtime/menu.vim
 +++ b/runtime/menu.vim
-@@ -341,47 +341,60 @@ endfun
+@@ -159,7 +159,7 @@ nnoremenu 20.370 &Edit.Put\ &Before<Tab>
+ inoremenu	 &Edit.Put\ &Before<Tab>[p	<C-O>[p
+ nnoremenu 20.380 &Edit.Put\ &After<Tab>]p	]p
+ inoremenu	 &Edit.Put\ &After<Tab>]p	<C-O>]p
+-if has("win32") || has("win16")
++if has("win32")
+   vnoremenu 20.390 &Edit.&Delete<Tab>x		x
+ endif
+ noremenu  <script> <silent> 20.400 &Edit.&Select\ All<Tab>ggVG	:<C-U>call <SID>SelectAll()<CR>
+@@ -167,7 +167,7 @@ inoremenu <script> <silent> 20.400 &Edit
+ cnoremenu <script> <silent> 20.400 &Edit.&Select\ All<Tab>ggVG	<C-U>call <SID>SelectAll()<CR>
+ 
+ an 20.405	 &Edit.-SEP2-				<Nop>
+-if has("win32")  || has("win16") || has("gui_gtk") || has("gui_kde") || has("gui_motif")
++if has("win32") || has("gui_gtk") || has("gui_kde") || has("gui_motif")
+   an 20.410	 &Edit.&Find\.\.\.			:promptfind<CR>
+   vunmenu	 &Edit.&Find\.\.\.
+   vnoremenu <silent>	 &Edit.&Find\.\.\.		y:promptfind <C-R>=<SID>FixFText()<CR><CR>
+@@ -341,49 +341,64 @@ endfun
  
  
  " Setup the Edit.Color Scheme submenu
@@ -50,11 +69,12 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
 +    let idx = idx + 10
 +  endfor
 +  unlet name names n idx
++  silent! aunmenu &Edit.Show\ C&olor\ Schemes\ in\ Menu
 +endfun
-+if exists("do_globpath_menus")
++if exists("do_lazyload_menus")
 +  call s:SetupColorScheme()
 +else
-+  an <silent> 20.450 &Edit.Show\ C&olor\ Schemes\ in\ Menu :call <SID>SetupColorScheme()<Bar>aunmenu &Edit.Show\ C&olor\ Schemes\ in\ Menu<CR>
++  an <silent> 20.450 &Edit.Show\ C&olor\ Schemes\ in\ Menu :call <SID>SetupColorScheme()<CR>
 +endif
  
  
@@ -105,17 +125,21 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
 +      unlet idx
 +    endif
 +    unlet n
++    silent! aunmenu &Edit.Show\ &Keymaps\ in\ Menu
 +  endfun
-+  if exists("do_globpath_menus")
++  if exists("do_lazyload_menus")
 +    call s:SetupKeymap()
 +  else
-+    an <silent> 20.460 &Edit.Show\ &Keymaps\ in\ Menu :call <SID>SetupKeymap()<Bar>aunmenu &Edit.Show\ &Keymaps\ in\ Menu<CR>
++    an <silent> 20.460 &Edit.Show\ &Keymaps\ in\ Menu :call <SID>SetupKeymap()<CR>
    endif
 -  unlet s:n
  endif
- if has("win32") || has("win16") || has("gui_motif") || has("gui_gtk") || has("gui_kde") || has("gui_photon") || has("gui_mac")
+-if has("win32") || has("win16") || has("gui_motif") || has("gui_gtk") || has("gui_kde") || has("gui_photon") || has("gui_mac")
++if has("win32") || has("gui_motif") || has("gui_gtk") || has("gui_kde") || has("gui_photon") || has("gui_mac")
    an 20.470 &Edit.Select\ Fo&nt\.\.\.	:set guifont=*<CR>
-@@ -575,26 +588,33 @@ func! s:XxdFind()
+ endif
+ 
+@@ -575,26 +590,50 @@ func! s:XxdFind()
  endfun
  
  " Setup the Tools.Compiler submenu
@@ -160,12 +184,38 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
 +  endwhile
 +  unlet n
 +  unlet idx
++  silent! aunmenu &Tools.Show\ Compiler\ Se&ttings\ in\ Menu
 +endfun
-+if exists("do_globpath_menus")
++if exists("do_lazyload_menus")
 +  call s:SetupCompiler()
 +else
-+  an <silent> 30.440 &Tools.Show\ Compiler\ Se&ttings\ in\ Menu :call <SID>SetupCompiler()<Bar>aunmenu &Tools.Show\ Compiler\ Se&ttings\ in\ Menu<CR>
++  an <silent> 30.440 &Tools.Show\ Compiler\ Se&ttings\ in\ Menu :call <SID>SetupCompiler()<CR>
 +endif
++
++" Load ColorScheme, Compiler Setting and Keymap menus when idle.
++if !exists("do_lazyload_menus")
++  func! s:SetupLazyloadMenus()
++    call s:SetupColorScheme()
++    call s:SetupCompiler()
++    if has("keymap")
++      call s:SetupKeymap()
++    endif
++  endfunc
++  augroup SetupLazyloadMenus
++    au!
++    au CursorHold,CursorHoldI * call <SID>SetupLazyloadMenus() | au! SetupLazyloadMenus
++  augroup END
++endif
++
  
  if !exists("no_buffers_menu")
+ 
+@@ -1095,7 +1134,7 @@ if (exists("did_load_filetypes") || exis
+ if exists("do_syntax_sel_menu")
+   runtime! synmenu.vim
+ else
+-  an 50.10 &Syntax.&Show\ File\ Types\ in\ Menu	:let do_syntax_sel_menu = 1<Bar>runtime! synmenu.vim<Bar>aunmenu &Syntax.&Show\ File\ Types\ in\ Menu<CR>
++  an <silent> 50.10 &Syntax.&Show\ File\ Types\ in\ Menu	:let do_syntax_sel_menu = 1<Bar>runtime! synmenu.vim<Bar>aunmenu &Syntax.&Show\ File\ Types\ in\ Menu<CR>
+   an 50.195 &Syntax.-SEP1-		<Nop>
+ endif
  
