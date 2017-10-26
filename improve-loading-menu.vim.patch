@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  bfcde3e2704cbfa48c0bfb67848cc2736dcaa775
+# Parent  eb868f94ed9b02b07e9df71f3c1fa2429a8c9be1
 
 diff --git a/runtime/doc/gui.txt b/runtime/doc/gui.txt
 --- a/runtime/doc/gui.txt
@@ -17,7 +17,7 @@ diff --git a/runtime/doc/gui.txt b/runtime/doc/gui.txt
 +related files from the directories in 'runtimepath'.  Therefore they are
 +loaded lazily (by the |CursorHold| event), or you can also load them manually.
 +If you want to have all these items already present at startup, add: >
-+	:let do_lazyload_menus = 1
++	:let do_no_lazyload_menus = 1
 diff --git a/runtime/menu.vim b/runtime/menu.vim
 --- a/runtime/menu.vim
 +++ b/runtime/menu.vim
@@ -39,21 +39,20 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
    an 20.410	 &Edit.&Find\.\.\.			:promptfind<CR>
    vunmenu	 &Edit.&Find\.\.\.
    vnoremenu <silent>	 &Edit.&Find\.\.\.		y:promptfind <C-R>=<SID>FixFText()<CR><CR>
-@@ -341,49 +341,64 @@ endfun
+@@ -341,49 +341,50 @@ endfun
  
  
  " Setup the Edit.Color Scheme submenu
-+func! s:SetupColorScheme()
-+  " get NL separated string with file names
-+  let n = globpath(&runtimepath, "colors/*.vim")
++func! s:SetupColorScheme() abort
++  let n = globpath(&runtimepath, "colors/*.vim", 1, 1)
  
 -" get NL separated string with file names
 -let s:n = globpath(&runtimepath, "colors/*.vim")
 -
 -" split at NL, Ignore case for VMS and windows, sort on name
 -let s:names = sort(map(split(s:n, "\n"), 'substitute(v:val, "\\c.*[/\\\\:\\]]\\([^/\\\\:]*\\)\\.vim", "\\1", "")'), 1)
-+  " split at NL, Ignore case for VMS and windows, sort on name
-+  let names = sort(map(split(n, "\n"), 'substitute(v:val, "\\c.*[/\\\\:\\]]\\([^/\\\\:]*\\)\\.vim", "\\1", "")'), 1)
++  " Ignore case for VMS and windows, sort on name
++  let names = sort(map(n, 'substitute(v:val, "\\c.*[/\\\\:\\]]\\([^/\\\\:]*\\)\\.vim", "\\1", "")'), 1)
  
 -" define all the submenu entries
 -let s:idx = 100
@@ -68,10 +67,9 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
 +    exe "an 20.450." . idx . ' &Edit.C&olor\ Scheme.' . name . " :colors " . name . "<CR>"
 +    let idx = idx + 10
 +  endfor
-+  unlet name names n idx
 +  silent! aunmenu &Edit.Show\ C&olor\ Schemes\ in\ Menu
 +endfun
-+if exists("do_lazyload_menus")
++if exists("do_no_lazyload_menus")
 +  call s:SetupColorScheme()
 +else
 +  an <silent> 20.450 &Edit.Show\ C&olor\ Schemes\ in\ Menu :call <SID>SetupColorScheme()<CR>
@@ -101,33 +99,21 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
 -      let s:idx = s:idx + 10
 -    endwhile
 -    unlet s:idx
-+  func! s:SetupKeymap()
-+    let n = globpath(&runtimepath, "keymap/*.vim")
-+    if n != ""
++  func! s:SetupKeymap() abort
++    let n = globpath(&runtimepath, "keymap/*.vim", 1, 1)
++    if !empty(n)
 +      let idx = 100
 +      an 20.460.90 &Edit.&Keymap.None :set keymap=<CR>
-+      while strlen(n) > 0
-+	let i = stridx(n, "\n")
-+	if i < 0
-+	  let name = n
-+	  let n = ""
-+	else
-+	  let name = strpart(n, 0, i)
-+	  let n = strpart(n, i + 1, 19999)
-+	endif
++      for name in n
 +	" Ignore case for VMS and windows
 +	let name = substitute(name, '\c.*[/\\:\]]\([^/\\:_]*\)\(_[0-9a-zA-Z-]*\)\=\.vim', '\1', '')
 +	exe "an 20.460." . idx . ' &Edit.&Keymap.' . name . " :set keymap=" . name . "<CR>"
-+	unlet name
-+	unlet i
 +	let idx = idx + 10
-+      endwhile
-+      unlet idx
++      endfor
 +    endif
-+    unlet n
 +    silent! aunmenu &Edit.Show\ &Keymaps\ in\ Menu
 +  endfun
-+  if exists("do_lazyload_menus")
++  if exists("do_no_lazyload_menus")
 +    call s:SetupKeymap()
 +  else
 +    an <silent> 20.460 &Edit.Show\ &Keymaps\ in\ Menu :call <SID>SetupKeymap()<CR>
@@ -139,7 +125,21 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
    an 20.470 &Edit.Select\ Fo&nt\.\.\.	:set guifont=*<CR>
  endif
  
-@@ -575,26 +590,50 @@ func! s:XxdFind()
+@@ -441,10 +442,10 @@ if has("spell")
+     endif
+ 
+     let found = 0
+-    let s = globpath(&rtp, "spell/*." . enc . ".spl")
+-    if s != ""
++    let s = globpath(&runtimepath, "spell/*." . enc . ".spl", 1, 1)
++    if !empty(s)
+       let n = 300
+-      for f in split(s, "\n")
++      for f in s
+ 	let nm = substitute(f, '.*spell[/\\]\(..\)\.[^/\\]*\.spl', '\1', "")
+ 	if nm != "en" && nm !~ '/'
+           let _nm = nm
+@@ -575,26 +576,38 @@ func! s:XxdFind()
  endfun
  
  " Setup the Tools.Compiler submenu
@@ -163,37 +163,25 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
 -endwhile
 -unlet s:n
 -unlet s:idx
-+func! s:SetupCompiler()
-+  let n = globpath(&runtimepath, "compiler/*.vim")
++func! s:SetupCompiler() abort
++  let n = globpath(&runtimepath, "compiler/*.vim", 1, 1)
 +  let idx = 100
-+  while strlen(n) > 0
-+    let i = stridx(n, "\n")
-+    if i < 0
-+      let name = n
-+      let n = ""
-+    else
-+      let name = strpart(n, 0, i)
-+      let n = strpart(n, i + 1, 19999)
-+    endif
++  for name in n
 +    " Ignore case for VMS and windows
 +    let name = substitute(name, '\c.*[/\\:\]]\([^/\\:]*\)\.vim', '\1', '')
 +    exe "an 30.440." . idx . ' &Tools.Se&t\ Compiler.' . name . " :compiler " . name . "<CR>"
-+    unlet name
-+    unlet i
 +    let idx = idx + 10
-+  endwhile
-+  unlet n
-+  unlet idx
++  endfor
 +  silent! aunmenu &Tools.Show\ Compiler\ Se&ttings\ in\ Menu
 +endfun
-+if exists("do_lazyload_menus")
++if exists("do_no_lazyload_menus")
 +  call s:SetupCompiler()
 +else
 +  an <silent> 30.440 &Tools.Show\ Compiler\ Se&ttings\ in\ Menu :call <SID>SetupCompiler()<CR>
 +endif
 +
 +" Load ColorScheme, Compiler Setting and Keymap menus when idle.
-+if !exists("do_lazyload_menus")
++if !exists("do_no_lazyload_menus")
 +  func! s:SetupLazyloadMenus()
 +    call s:SetupColorScheme()
 +    call s:SetupCompiler()
@@ -210,7 +198,7 @@ diff --git a/runtime/menu.vim b/runtime/menu.vim
  
  if !exists("no_buffers_menu")
  
-@@ -1095,7 +1134,7 @@ if (exists("did_load_filetypes") || exis
+@@ -1095,7 +1108,7 @@ if (exists("did_load_filetypes") || exis
  if exists("do_syntax_sel_menu")
    runtime! synmenu.vim
  else
