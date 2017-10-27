@@ -47,4 +47,5 @@ doc-menu-issue1959.patch
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
 doc-missing-isnot.patch
+doc-win32-cmds.patch
 fix-config_cache-removal.patch #+rejected
