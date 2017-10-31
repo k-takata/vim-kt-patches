@@ -26,6 +26,7 @@ fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
 update-rubyinc-dir.patch
 fix-po-msys2.patch
+fix-po-makefiles.patch
 fix-char_u-usage.patch #+disabled
 remove-sync_dup_close.patch
 embarcadero.patch
@@ -46,5 +47,4 @@ improve-loading-menu.vim.patch
 mingw-lua-dir.patch
 doc-missing-isnot.patch
 doc-win32-cmds.patch
-fix-po-makefiles.patch
 fix-config_cache-removal.patch #+rejected
