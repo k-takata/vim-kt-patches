@@ -38,11 +38,7 @@ mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
 doc-updates.patch
 pr-2010.diff
-fix-matchpairs.patch
 update-installpc.patch
-doc-menu-issue1959.patch
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
-doc-missing-isnot.patch
-doc-win32-cmds.patch
 fix-config_cache-removal.patch #+rejected
