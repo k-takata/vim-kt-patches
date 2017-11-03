@@ -39,6 +39,7 @@ wip-fix-7.4.852.patch
 doc-updates.patch
 pr-2010.diff
 update-installpc.patch
+update-installpc2.patch
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
 fix-config_cache-removal.patch #+rejected
