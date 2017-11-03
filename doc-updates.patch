@@ -398,6 +398,18 @@ diff --git a/runtime/doc/gui.txt b/runtime/doc/gui.txt
  between typing a character and it being recognized by the application.
  
  One workaround that has been successful, for unknown reasons, is to prevent
+diff --git a/runtime/doc/message.txt b/runtime/doc/message.txt
+--- a/runtime/doc/message.txt
++++ b/runtime/doc/message.txt
+@@ -640,7 +640,7 @@ starts.  It can be fixed in one of these
+   write the file twice and set the clock back.
+ 
+ If you get W11 all the time, you may need to disable "Acronis Active
+-Protection" or register vim  as a trusted service/application.
++Protection" or register vim as a trusted service/application.
+ 
+ 							*W12*  >
+   Warning: File "{filename}" has changed and the buffer was changed in Vim as well
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
@@ -413,7 +425,17 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/todo.txt b/runtime/doc/todo.txt
 --- a/runtime/doc/todo.txt
 +++ b/runtime/doc/todo.txt
-@@ -629,9 +629,6 @@ Patch to add ":syn foldlevel" to use fol
+@@ -163,9 +163,6 @@ with packages under "start". (xtal8, #19
+ 
+ Patch to test autocommand effects. (James McCoy, 2017 Oct 31, #2271)
+ 
+-After 8.0.0962 pasting leaves the cursor in another position. (Ken Takata,
+-2017 Aug 23, #2015) Also (zdm, 2017 Aug 23)
+-
+ fold at end of the buffer behaves inconsistently. (James McCoy, 2017 Oct 9)
+ 
+ With foldmethod=syntax and nofoldenable comment highlighting isn't removed.
+@@ -629,9 +626,6 @@ Patch to add ":syn foldlevel" to use fol
  Completion for input() does not expand environment variables. (chdiza, 2016
  Jul 25, #948)
  
