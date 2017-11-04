@@ -1,0 +1,491 @@
+# HG changeset patch
+# Parent  2e5d7e34e15f3fac067f85ef81688cbd7995999e
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1048,7 +1048,7 @@ When expr8 is a |Funcref| type variable,
+ 							*expr9*
+ number
+ ------
+-number			number constant			*expr-number* 
++number			number constant			*expr-number*
+ 				*hex-number* *octal-number* *binary-number*
+ 
+ Decimal, Hexadecimal (starting with 0x or 0X), Binary (starting with 0b or 0B)
+@@ -1647,7 +1647,7 @@ v:foldstart	Used for 'foldtext': first l
+ 		Read-only in the |sandbox|. |fold-foldtext|
+ 
+ 					*v:hlsearch* *hlsearch-variable*
+-v:hlsearch	Variable that indicates whether search highlighting is on. 
++v:hlsearch	Variable that indicates whether search highlighting is on.
+ 		Setting it makes sense only if 'hlsearch' is enabled which
+ 		requires |+extra_search|. Setting this variable to zero acts
+ 		like the |:nohlsearch| command, setting it to one acts like >
+@@ -1818,7 +1818,7 @@ v:scrollstart	String describing the scri
+ v:servername	The resulting registered |client-server-name| if any.
+ 		Read-only.
+ 
+-		
++
+ v:searchforward			*v:searchforward* *searchforward-variable*
+ 		Search direction:  1 after a forward search, 0 after a
+ 		backward search.  It is reset to forward when directly setting
+@@ -1930,7 +1930,7 @@ v:termu7resp	The escape sequence returne
+ 					*v:testing* *testing-variable*
+ v:testing	Must be set before using `test_garbagecollect_now()`.
+ 		Also, when set certain error messages won't be shown for 2
+-		seconds. (e.g. "'dictionary' option is empty") 
++		seconds. (e.g. "'dictionary' option is empty")
+ 
+ 				*v:this_session* *this_session-variable*
+ v:this_session	Full filename of the last loaded or saved session file.  See
+@@ -2953,7 +2953,7 @@ ch_evalraw({handle}, {string} [, {option
+ 		in NL mode, the caller must do that.  The NL in the response
+ 		is removed.
+ 		Note that Vim does not know when the text received on a raw
+-		channel is complete, it may only return the first part and you 
++		channel is complete, it may only return the first part and you
+ 		need to use ch_readraw() to fetch the rest.
+ 		See |channel-use|.
+ 
+@@ -3300,7 +3300,7 @@ cosh({expr})						*cosh()*
+ <			-1.127626
+ 		{only available when compiled with the |+float| feature}
+ 
+-		
++
+ count({comp}, {expr} [, {ic} [, {start}]])			*count()*
+ 		Return the number of times an item with value {expr} appears
+ 		in |String|, |List| or |Dictionary| {comp}.
+@@ -3412,14 +3412,14 @@ delete({fname} [, {flags}])					*delete(
+ 
+ 		When {flags} is "d": Deletes the directory by the name
+ 		{fname}.  This fails when directory {fname} is not empty.
+-		
++
+ 		When {flags} is "rf": Deletes the directory by the name
+ 		{fname} and everything in it, recursively.  BE CAREFUL!
+ 		Note: on MS-Windows it is not possible to delete a directory
+ 		that is being used.
+ 
+ 		A symbolic link itself is deleted, not what it points to.
+-		
++
+ 		The result is a Number, which is 0 if the delete operation was
+ 		successful and -1 when the deletion failed or partly failed.
+ 
+@@ -3826,7 +3826,7 @@ filter({expr1}, {expr2})				*filter()*
+ 		For each item in {expr1} evaluate {expr2} and when the result
+ 		is zero remove the item from the |List| or |Dictionary|.
+ 		{expr2} must be a |string| or |Funcref|.
+-		
++
+ 		If {expr2} is a |string|, inside {expr2} |v:val| has the value
+ 		of the current item.  For a |Dictionary| |v:key| has the key
+ 		of the current item and for a |List| |v:key| has the index of
+@@ -3926,7 +3926,7 @@ floor({expr})							*floor()*
+ 			echo floor(4.0)
+ <			4.0
+ 		{only available when compiled with the |+float| feature}
+-		
++
+ 
+ fmod({expr1}, {expr2})					*fmod()*
+ 		Return the remainder of {expr1} / {expr2}, even if the
+@@ -4055,7 +4055,7 @@ function({name} [, {arglist}] [, {dict}]
+ 		When {arglist} or {dict} is present this creates a partial.
+ 		That means the argument list and/or the dictionary is stored in
+ 		the Funcref and will be used when the Funcref is called.
+-		
++
+ 		The arguments are passed to the function in front of other
+ 		arguments.  Example: >
+ 			func Callback(arg1, arg2, name)
+@@ -4107,7 +4107,7 @@ function({name} [, {arglist}] [, {dict}]
+ garbagecollect([{atexit}])				*garbagecollect()*
+ 		Cleanup unused |Lists|, |Dictionaries|, |Channels| and |Jobs|
+ 		that have circular references.
+-		
++
+ 		There is hardly ever a need to invoke this function, as it is
+ 		automatically done when Vim runs out of memory or is waiting
+ 		for the user to press a key after 'updatetime'.  Items without
+@@ -5336,7 +5336,7 @@ job_status({job})					*job_status()* *E9
+ 			"run"	job is running
+ 			"fail"	job failed to start
+ 			"dead"	job died or was stopped after running
+-		
++
+ 		On Unix a non-existing command results in "dead" instead of
+ 		"fail", because a fork happens before the failure can be
+ 		detected.
+@@ -5575,7 +5575,7 @@ line({expr})	The result is a Number, whi
+ 		This autocommand jumps to the last known position in a file
+ 		just after opening it, if the '" mark is set: >
+      :au BufReadPost *
+-	 \ if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit' 
++	 \ if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+ 	 \ |   exe "normal! g`\""
+ 	 \ | endif
+ 
+@@ -5627,16 +5627,16 @@ log10({expr})						*log10()*
+ 			:echo log10(0.01)
+ <			-2.0
+ 		{only available when compiled with the |+float| feature}
+-		
++
+ luaeval({expr} [, {expr}])					*luaeval()*
+-		Evaluate Lua expression {expr} and return its result converted 
+-		to Vim data structures. Second {expr} may hold additional 
++		Evaluate Lua expression {expr} and return its result converted
++		to Vim data structures. Second {expr} may hold additional
+ 		argument accessible as _A inside first {expr}.
+ 		Strings are returned as they are.
+ 		Boolean objects are converted to numbers.
+-		Numbers are converted to |Float| values if vim was compiled 
++		Numbers are converted to |Float| values if vim was compiled
+ 		with |+float| and to numbers otherwise.
+-		Dictionaries and lists obtained by vim.eval() are returned 
++		Dictionaries and lists obtained by vim.eval() are returned
+ 		as-is.
+ 		Other objects are returned as zero without any errors.
+ 		See |lua-luaeval| for more details.
+@@ -5646,7 +5646,7 @@ map({expr1}, {expr2})					*map()*
+ 		{expr1} must be a |List| or a |Dictionary|.
+ 		Replace each item in {expr1} with the result of evaluating
+ 		{expr2}.  {expr2} must be a |string| or |Funcref|.
+-		
++
+ 		If {expr2} is a |string|, inside {expr2} |v:val| has the value
+ 		of the current item.  For a |Dictionary| |v:key| has the key
+ 		of the current item and for a |List| |v:key| has the index of
+@@ -5690,7 +5690,7 @@ maparg({name} [, {mode} [, {abbr} [, {di
+ 		{name} in mode {mode}.  The returned String has special
+ 		characters translated like in the output of the ":map" command
+ 		listing.
+-		
++
+ 		When there is no mapping for {name}, an empty String is
+ 		returned.
+ 
+@@ -5901,7 +5901,7 @@ matchaddpos({group}, {pos} [, {priority}
+ 		  be highlighted.
+ 		- A list with three numbers, e.g., [23, 11, 3]. As above, but
+ 		  the third number gives the length of the highlight in bytes.
+-		
++
+ 		The maximum number of positions is 8.
+ 
+ 		Example: >
+@@ -6138,7 +6138,7 @@ pow({x}, {y})						*pow()*
+ 			:echo pow(32, 0.20)
+ <			2.0
+ 		{only available when compiled with the |+float| feature}
+-		
++
+ prevnonblank({lnum})					*prevnonblank()*
+ 		Return the line number of the first line at or above {lnum}
+ 		that is not blank.  Example: >
+@@ -6298,7 +6298,7 @@ printf({fmt}, {expr1} ...)				*printf()*
+ 			feature works just like 's'.
+ 
+ 							*printf-f* *E807*
+-		f F	The Float argument is converted into a string of the 
++		f F	The Float argument is converted into a string of the
+ 			form 123.456.  The precision specifies the number of
+ 			digits after the decimal point.  When the precision is
+ 			zero the decimal point is omitted.  When the precision
+@@ -6352,11 +6352,11 @@ pumvisible()						*pumvisible()*
+ py3eval({expr})						*py3eval()*
+ 		Evaluate Python expression {expr} and return its result
+ 		converted to Vim data structures.
+-		Numbers and strings are returned as they are (strings are 
+-		copied though, Unicode strings are additionally converted to 
++		Numbers and strings are returned as they are (strings are
++		copied though, Unicode strings are additionally converted to
+ 		'encoding').
+ 		Lists are represented as Vim |List| type.
+-		Dictionaries are represented as Vim |Dictionary| type with 
++		Dictionaries are represented as Vim |Dictionary| type with
+ 		keys converted to strings.
+ 		{only available when compiled with the |+python3| feature}
+ 
+@@ -6364,10 +6364,10 @@ py3eval({expr})						*py3eval()*
+ pyeval({expr})						*pyeval()*
+ 		Evaluate Python expression {expr} and return its result
+ 		converted to Vim data structures.
+-		Numbers and strings are returned as they are (strings are 
++		Numbers and strings are returned as they are (strings are
+ 		copied though).
+ 		Lists are represented as Vim |List| type.
+-		Dictionaries are represented as Vim |Dictionary| type, 
++		Dictionaries are represented as Vim |Dictionary| type,
+ 		non-string keys result in error.
+ 		{only available when compiled with the |+python| feature}
+ 
+@@ -6488,7 +6488,7 @@ remote_expr({server}, {string} [, {idvar
+ 		and the result will be the empty string.
+ 
+ 		Variables will be evaluated in the global namespace,
+-		independent of a function currently being activel.  Except
++		independent of a function currently being active.  Except
+ 		when in debug mode, then local function variables and
+ 		arguments can be evaluated.
+ 
+@@ -6695,7 +6695,7 @@ search({pattern} [, {flags} [, {stopline
+ 		flag.
+ 
+ 		'ignorecase', 'smartcase' and 'magic' are used.
+-		
++
+ 		When the 'z' flag is not given, searching always starts in
+ 		column zero and then matches before the cursor are skipped.
+ 		When the 'c' flag is present in 'cpo' the next search starts
+@@ -7082,7 +7082,7 @@ setpos({expr}, {list})
+ 
+ setqflist({list} [, {action} [, {what}]])		*setqflist()*
+ 		Create or replace or add to the quickfix list.
+-		
++
+ 		When {what} is not present, use the items in {list}.  Each
+ 		item must be a dictionary.  Non-dictionary items in {list} are
+ 		ignored.  Each dictionary item can contain the following
+@@ -7121,12 +7121,12 @@ setqflist({list} [, {action} [, {what}]]
+ 		'a'	The items from {list} are added to the existing
+ 			quickfix list. If there is no existing list, then a
+ 			new list is created.
+-		
++
+ 		'r'	The items from the current quickfix list are replaced
+ 			with the items from {list}.  This can also be used to
+ 			clear the list: >
+ 				:call setqflist([], 'r')
+-<	
++<
+ 		'f'	All the quickfix lists in the quickfix stack are
+ 			freed.
+ 
+@@ -7177,7 +7177,7 @@ setqflist({list} [, {action} [, {what}]]
+ 							*setreg()*
+ setreg({regname}, {value} [, {options}])
+ 		Set the register {regname} to {value}.
+-		{value} may be any value returned by |getreg()|, including 
++		{value} may be any value returned by |getreg()|, including
+ 		a |List|.
+ 		If {options} contains "a" or {regname} is upper case,
+ 		then the value is appended.
+@@ -7191,14 +7191,14 @@ setreg({regname}, {value} [, {options}])
+ 		in the longest line (counting a <Tab> as 1 character).
+ 
+ 		If {options} contains no register settings, then the default
+-		is to use character mode unless {value} ends in a <NL> for 
+-		string {value} and linewise mode for list {value}. Blockwise 
++		is to use character mode unless {value} ends in a <NL> for
++		string {value} and linewise mode for list {value}. Blockwise
+ 		mode is never selected automatically.
+ 		Returns zero for success, non-zero for failure.
+ 
+ 							*E883*
+-		Note: you may not use |List| containing more than one item to 
+-		      set search and expression registers. Lists containing no 
++		Note: you may not use |List| containing more than one item to
++		      set search and expression registers. Lists containing no
+ 		      items act like empty strings.
+ 
+ 		Examples: >
+@@ -7212,8 +7212,8 @@ setreg({regname}, {value} [, {options}])
+ 			:let var_amode = getregtype('a')
+ 			    ....
+ 			:call setreg('a', var_a, var_amode)
+-<		Note: you may not reliably restore register value 
+-		without using the third argument to |getreg()| as without it 
++<		Note: you may not reliably restore register value
++		without using the third argument to |getreg()| as without it
+ 		newlines are represented as newlines AND Nul bytes are
+ 		represented as newlines as well, see |NL-used-for-Nul|.
+ 
+@@ -7318,7 +7318,7 @@ sin({expr})						*sin()*
+ 			:echo sin(-4.01)
+ <			0.763301
+ 		{only available when compiled with the |+float| feature}
+-		
++
+ 
+ sinh({expr})						*sinh()*
+ 		Return the hyperbolic sine of {expr} as a |Float| in the range
+@@ -7334,7 +7334,7 @@ sinh({expr})						*sinh()*
+ 
+ sort({list} [, {func} [, {dict}]])			*sort()* *E702*
+ 		Sort the items in {list} in-place.  Returns {list}.
+-		
++
+ 		If you want a list to remain unmodified make a copy first: >
+ 			:let sortedlist = sort(copy(mylist))
+ 
+@@ -7345,7 +7345,7 @@ sort({list} [, {func} [, {dict}]])			*so
+ 
+ 		When {func} is given and it is '1' or 'i' then case is
+ 		ignored.
+-		
++
+ 		When {func} is given and it is 'n' then all items will be
+ 		sorted numerical (Implementation detail: This uses the
+ 		strtod() function to parse numbers, Strings, Lists, Dicts and
+@@ -7480,7 +7480,7 @@ sqrt({expr})						*sqrt()*
+ <			nan
+ 		"nan" may be different, it depends on system libraries.
+ 		{only available when compiled with the |+float| feature}
+-		
++
+ 
+ str2float({expr})					*str2float()*
+ 		Convert String {expr} to a Float.  This mostly works the same
+@@ -7517,7 +7517,7 @@ strchars({expr} [, {skipcc}])					*strch
+ 		counted separately.
+ 		When {skipcc} set to 1, Composing characters are ignored.
+ 		Also see |strlen()|, |strdisplaywidth()| and |strwidth()|.
+-		
++
+ 		{skipcc} is only available after 7.4.755.  For backward
+ 		compatibility, you can define a wrapper function: >
+ 		    if has("patch-7.4.755")
+@@ -7687,8 +7687,8 @@ submatch({nr} [, {list}])			*submatch()*
+ 		multi-line match or a NUL character in the text.
+ 		Also see |sub-replace-expression|.
+ 
+-		If {list} is present and non-zero then submatch() returns 
+-		a list of strings, similar to |getline()| with two arguments. 
++		If {list} is present and non-zero then submatch() returns
++		a list of strings, similar to |getline()| with two arguments.
+ 		NL characters in the text represent NUL characters in the
+ 		text.
+ 		Only returns more than one item for |:substitute|, inside
+@@ -7708,7 +7708,7 @@ substitute({expr}, {pat}, {sub}, {flags}
+ 		the first match of {pat} is replaced with {sub}.
+ 		When {flags} is "g", all matches of {pat} in {expr} are
+ 		replaced.  Otherwise {flags} should be "".
+-		
++
+ 		This works like the ":substitute" command (without any flags).
+ 		But the matching with {pat} is always done like the 'magic'
+ 		option is set and 'cpoptions' is empty (to make scripts
+@@ -7857,9 +7857,9 @@ system({expr} [, {input}])				*system()*
+ 		Get the output of the shell command {expr} as a string.  See
+ 		|systemlist()| to get the output as a List.
+ 
+-		When {input} is given and is a string this string is written 
+-		to a file and passed as stdin to the command.  The string is 
+-		written as-is, you need to take care of using the correct line 
++		When {input} is given and is a string this string is written
++		to a file and passed as stdin to the command.  The string is
++		written as-is, you need to take care of using the correct line
+ 		separators yourself.
+ 		If {input} is given and is a |List| it is written to the file
+ 		in a way |writefile()| does with {binary} set to "b" (i.e.
+@@ -7878,10 +7878,10 @@ system({expr} [, {input}])				*system()*
+ 		up on the screen which require |CTRL-L| to remove. >
+ 			:silent let f = system('ls *.vim')
+ <
+-		Note: Use |shellescape()| or |::S| with |expand()| or 
+-		|fnamemodify()| to escape special characters in a command 
+-		argument.  Newlines in {expr} may cause the command to fail.  
+-		The characters in 'shellquote' and 'shellxquote' may also 
++		Note: Use |shellescape()| or |::S| with |expand()| or
++		|fnamemodify()| to escape special characters in a command
++		argument.  Newlines in {expr} may cause the command to fail.
++		The characters in 'shellquote' and 'shellxquote' may also
+ 		cause trouble.
+ 		This is not to be used for interactive commands.
+ 
+@@ -7915,9 +7915,9 @@ system({expr} [, {input}])				*system()*
+ 
+ 
+ systemlist({expr} [, {input}])				*systemlist()*
+-		Same as |system()|, but returns a |List| with lines (parts of 
+-		output separated by NL) with NULs transformed into NLs. Output 
+-		is the same as |readfile()| will output with {binary} argument 
++		Same as |system()|, but returns a |List| with lines (parts of
++		output separated by NL) with NULs transformed into NLs. Output
++		is the same as |readfile()| will output with {binary} argument
+ 		set to "b".  Note that on MS-Windows you may get trailing CR
+ 		characters.
+ 
+@@ -8159,7 +8159,7 @@ term_scrape({buf}, {row})				*term_scrap
+ 		line is used.  When {row} is invalid an empty string is
+ 		returned.
+ 
+-		Return a List containing a Dict for each screen cell: 
++		Return a List containing a Dict for each screen cell:
+ 		    "chars"	character(s) at the cell
+ 		    "fg"	foreground color as #rrggbb
+ 		    "bg"	background color as #rrggbb
+@@ -8299,7 +8299,7 @@ test_override({name}, {val})				*test_ov
+ 		to run tests. Only to be used for testing Vim!
+ 		The override is enabled when {val} is non-zero and removed
+ 		when {val} is zero.
+-		Current supported values for name are: 
++		Current supported values for name are:
+ 
+ 		name	     effect when {val} is non-zero ~
+ 		redraw       disable the redrawing() function
+@@ -8444,7 +8444,7 @@ trunc({expr})							*trunc()*
+ 			echo trunc(4.0)
+ <			4.0
+ 		{only available when compiled with the |+float| feature}
+-		
++
+ 							*type()*
+ type({expr})	The result is a Number representing the type of {expr}.
+ 		Instead of using the number directly, it is better to use the
+@@ -8497,7 +8497,7 @@ undotree()						*undotree()*
+ 		  "save_last"	Number of the last file write.  Zero when no
+ 				write yet.
+ 		  "save_cur"	Number of the current position in the undo
+-				tree.  
++				tree.
+ 		  "synced"	Non-zero when the last undo block was synced.
+ 				This happens when waiting from input from the
+ 				user.  See |undo-blocks|.
+@@ -9092,7 +9092,7 @@ See |:verbose-cmd| for more information.
+ 			Define a new function by the name {name}.  The body of
+ 			the function follows in the next lines, until the
+ 			matching |:endfunction|.
+-			
++
+ 			The name must be made of alphanumeric characters and
+ 			'_', and must start with a capital or "s:" (see
+ 			above).  Note that using "b:" or "g:" is not allowed.
+@@ -11079,7 +11079,7 @@ code can be used: >
+     redir => scriptnames_output
+     silent scriptnames
+     redir END
+-    
++
+     " Split the output into lines and parse each line.	Add an entry to the
+     " "scripts" dictionary.
+     let scripts = {}
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -5508,7 +5508,7 @@ A jump table for the options with a shor
+ 	Specifies the name of the MzScheme shared library. The default is
+ 	DYNAMIC_MZSCH_DLL which was specified at compile time.
+ 	Environment variables are expanded |:set_env|.
+-	The value must be set in the |vimrc| script or ealier.  In the
++	The value must be set in the |vimrc| script or earlier.  In the
+ 	startup, before the |load-plugins| step.
+ 	This option cannot be set from a |modeline| or in the |sandbox|, for
+ 	security reasons.
+diff --git a/runtime/doc/starting.txt b/runtime/doc/starting.txt
+--- a/runtime/doc/starting.txt
++++ b/runtime/doc/starting.txt
+@@ -873,7 +873,7 @@ 3. Execute Ex commands, from environment
+      (*) Using this file or environment variable will cause 'compatible' to be
+ 	 off by default.  See |compatible-default|.
+ 
+-     Note: When using the |mzscheme| interface, it is initialzed after loading
++     Note: When using the |mzscheme| interface, it is initialized after loading
+      the vimrc file.  Changing 'mzschemedll' later has no effect.
+ 
+ 4. Load the plugin scripts.					*load-plugins*

@@ -42,4 +42,5 @@ update-installpc.patch
 update-installpc2.patch
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
+doc-fix-typos.patch
 fix-config_cache-removal.patch #+rejected
