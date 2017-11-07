@@ -39,7 +39,6 @@ wip-fix-7.4.852.patch
 pr-2010.diff
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
-fix-2246-py-none.patch
 2060.diff
 2060-2.diff
 fix-config_cache-removal.patch #+rejected
