@@ -1,0 +1,456 @@
+# HG changeset patch
+# Parent  c44bc2fe1a21e8c29202c58aa3ccdb01e79bfedb
+
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -8651,6 +8651,11 @@ set_bool_option(
+     /* 'termguicolors' */
+     else if ((int *)varp == &p_tgc)
+     {
++# if !defined(FEAT_GUI) && defined(WIN3264)
++	/* Do not turn on 'tgc' when 24-bit colors are not supported. */
++	if (!vcon_get_stat())
++	    p_tgc = 0;
++# endif
+ # ifdef FEAT_GUI
+ 	if (!gui.in_use && !gui.starting)
+ # endif
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -207,7 +207,8 @@ static int win32_getattrs(char_u *name);
+ static int win32_setattrs(char_u *name, int attrs);
+ static int win32_set_archive(char_u *name);
+ 
+-#if !defined(FEAT_GUI)
++#ifndef FEAT_GUI_W32
++/* Virtual console functions for supporting 24-bit colors. */
+ static int has_vcon = 0;
+ static void vcon_init();
+ static void vcon_exit();
+@@ -217,13 +218,13 @@ static void vcon_sgr_bulk(int argc, int 
+ static guicolor_T save_console_bg_rgb;
+ static guicolor_T save_console_fg_rgb;
+ 
+-#ifdef FEAT_TERMGUICOLORS
+-# define USE_VCON		(has_vcon && p_tgc)
+-#else
+-# define USE_VCON		0
+-#endif
+-#define VCON_HUB(f)		do { if (USE_VCON) vcon_##f(); else f(); } while (0)
+-#define VCON_HUB2(f, p)		do { if (USE_VCON) vcon_##f((p)); else f((p)); } while (0)
++# ifdef FEAT_TERMGUICOLORS
++#  define USE_VCON		(has_vcon && p_tgc)
++# else
++#  define USE_VCON		0
++# endif
++# define VCON_HUB(f)		do { if (USE_VCON) vcon_##f(); else f(); } while (0)
++# define VCON_HUB2(f, p)	do { if (USE_VCON) vcon_##f((p)); else f((p)); } while (0)
+ 
+ static void vcon_normvideo(void);
+ static void vcon_textattr_normal(void);
+@@ -251,15 +252,14 @@ static void vcon_standout(void);
+ static void vcon_standend(void);
+ static void hub_gotoxy(unsigned x, unsigned y);
+ static void vcon_gotoxy(unsigned x, unsigned y);
+-#endif
+-#ifndef FEAT_GUI_W32
++
+ static void set_console_color_rgb(void);
+ static void reset_console_color_rgb(void);
+ #endif
+ 
+-/* This flags newly created from Windows 10 */
++/* This flag is newly created from Windows 10. */
+ #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
++# define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+ #endif
+ 
+ #ifndef FEAT_GUI_W32
+@@ -270,7 +270,7 @@ static char_u *exe_path = NULL;
+ 
+ static BOOL win8_or_later = FALSE;
+ 
+-#ifndef FEAT_GUI
++#ifndef FEAT_GUI_W32
+ /* Dynamic loading for portability */
+ typedef struct _DYN_CONSOLE_SCREEN_BUFFER_INFOEX
+ {
+@@ -284,18 +284,17 @@ typedef struct _DYN_CONSOLE_SCREEN_BUFFE
+     BOOL bFullscreenSupported;
+     COLORREF ColorTable[16];
+ } DYN_CONSOLE_SCREEN_BUFFER_INFOEX, *PDYN_CONSOLE_SCREEN_BUFFER_INFOEX;
+-typedef BOOL (WINAPI *PfnDynGetConsoleScreenBufferInfoEx)(HANDLE, PDYN_CONSOLE_SCREEN_BUFFER_INFOEX);
+-static PfnDynGetConsoleScreenBufferInfoEx pDynGetConsoleScreenBufferInfoEx;
+-typedef BOOL (WINAPI *PfnDynSetConsoleScreenBufferInfoEx)(HANDLE, PDYN_CONSOLE_SCREEN_BUFFER_INFOEX);
+-static PfnDynSetConsoleScreenBufferInfoEx pDynSetConsoleScreenBufferInfoEx;
++typedef BOOL (WINAPI *PfnGetConsoleScreenBufferInfoEx)(HANDLE, PDYN_CONSOLE_SCREEN_BUFFER_INFOEX);
++static PfnGetConsoleScreenBufferInfoEx pGetConsoleScreenBufferInfoEx;
++typedef BOOL (WINAPI *PfnSetConsoleScreenBufferInfoEx)(HANDLE, PDYN_CONSOLE_SCREEN_BUFFER_INFOEX);
++static PfnSetConsoleScreenBufferInfoEx pSetConsoleScreenBufferInfoEx;
+ static BOOL has_csbiex = FALSE;
+-#endif
+-
+-/* This can be removed when used with FEAT_GUI. */
+-#if !defined(FEAT_GUI)
++
+ 
+ /*
+- * Get verion number including build number
++ * Get version number including build number.
++ * GetVersionEx() may not return true OS version when proper manifest doesn't
++ * exist.  Use RtlGetVersion() instead.
+  */
+ typedef BOOL (WINAPI *PfnRtlGetVersion)(LPOSVERSIONINFOW);
+ # define MAKE_VER(major, minor, build) \
+@@ -322,9 +321,8 @@ get_build_number(
+     }
+     return ver;
+ }
+-#endif
+-
+-#ifndef FEAT_GUI_W32
++
++
+ /*
+  * Version of ReadConsoleInput() that works with IME.
+  * Works around problems on Windows 8.
+@@ -3940,9 +3938,12 @@ mch_settmode(int tmode)
+ 	    cmodein |= ENABLE_MOUSE_INPUT;
+ #endif
+ 	cmodeout &= ~(
+-#if !defined(FEAT_GUI) && defined(FEAT_TERMGUICOLORS)
+-	    /* Do not turn off when using VCON */
++#ifdef FEAT_TERMGUICOLORS
++	    /* Do not turn off the ENABLE_PROCESSED_OUTPUT flag when using
++	     * virtual console. */
+ 	    ((has_vcon) ? 0 : ENABLE_PROCESSED_OUTPUT) |
++#else
++	    ENABLE_PROCESSED_OUTPUT |
+ #endif
+ 	    ENABLE_WRAP_AT_EOL_OUTPUT);
+ 	bEnableHandler = TRUE;
+@@ -5882,16 +5883,14 @@ textattr(WORD wAttr)
+ 
+ 
+     static void
+-textattr_normal(
+-    void)
++textattr_normal(void)
+ {
+     SetConsoleTextAttribute(g_hConOut, g_attrCurrent & 0xff);
+ }
+ 
+ 
+     static void
+-textattr_reverse(
+-    void)
++textattr_reverse(void)
+ {
+     g_attrCurrent = (((g_attrCurrent & 0x0f) << 4)
+ 	    | ((g_attrCurrent & 0xf0) >> 4)) & 0xff;
+@@ -5901,8 +5900,7 @@ textattr_reverse(
+ 
+ 
+     static void
+-textattr_bold(
+-    void)
++textattr_bold(void)
+ {
+     g_attrCurrent = (g_attrCurrent | 0x08) & 0xff;  /* FOREGROUND_INTENSITY */
+ 
+@@ -5911,8 +5909,7 @@ textattr_bold(
+ 
+ 
+     static void
+-textattr_italic(
+-    void)
++textattr_italic(void)
+ {
+     g_attrCurrent = 225;	/* blue text on yellow */
+ 
+@@ -5921,8 +5918,7 @@ textattr_italic(
+ 
+ 
+     static void
+-textattr_underscore(
+-    void)
++textattr_underscore(void)
+ {
+     g_attrCurrent = 67;		/* cyan text on red */
+ 
+@@ -6257,7 +6253,7 @@ mch_write(
+ 			VCON_HUB(normvideo);
+ 		    else if (argc == 1)
+ 			VCON_HUB2(textcolor, (WORD) arg1);
+-		    else
++		    else if (USE_VCON)
+ 			vcon_sgr_bulk(argc, args);
+ 		}
+ 		else if (argc == 2 && *p == 'H')
+@@ -7437,41 +7433,42 @@ mch_setenv(char *var, char *value, int x
+ 
+ #ifndef FEAT_GUI_W32
+ 
+-# define VTP_FIRST_SUPPORT_BUILD MAKE_VER(10, 0, 10563)
++/* Support for 256 colors and 24-bit colors was added in Windows 10
++ * version 1703 (Creators Update). */
++# define VCON_FIRST_SUPPORT_BUILD   MAKE_VER(10, 0, 15063)
+ 
+     static void
+-vcon_init(
+-    void)
++vcon_init(void)
+ {
+     DWORD   ver, mode;
+     HMODULE hKerneldll;
+     DYN_CONSOLE_SCREEN_BUFFER_INFOEX csbi;
+ 
+     ver = get_build_number();
+-    has_vcon = (ver >= VTP_FIRST_SUPPORT_BUILD) ? 1 : 0;
++    has_vcon = (ver >= VCON_FIRST_SUPPORT_BUILD) ? 1 : 0;
+     GetConsoleMode(g_hConOut, &mode);
+     mode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+-    if (SetConsoleMode(g_hConOut, mode) == 0)
++    if (has_vcon && SetConsoleMode(g_hConOut, mode) == 0)
+ 	has_vcon = 0;
+ 
+     /* Use functions supported from Vista */
+     hKerneldll = GetModuleHandle("kernel32.dll");
+     if (hKerneldll != NULL)
+     {
+-	pDynGetConsoleScreenBufferInfoEx =
+-		(PfnDynGetConsoleScreenBufferInfoEx)GetProcAddress(
++	pGetConsoleScreenBufferInfoEx =
++		(PfnGetConsoleScreenBufferInfoEx)GetProcAddress(
+ 		hKerneldll, "GetConsoleScreenBufferInfoEx");
+-	pDynSetConsoleScreenBufferInfoEx =
+-		(PfnDynSetConsoleScreenBufferInfoEx)GetProcAddress(
++	pSetConsoleScreenBufferInfoEx =
++		(PfnSetConsoleScreenBufferInfoEx)GetProcAddress(
+ 		hKerneldll, "SetConsoleScreenBufferInfoEx");
+-	if (pDynGetConsoleScreenBufferInfoEx != NULL
+-		&& pDynSetConsoleScreenBufferInfoEx != NULL)
++	if (pGetConsoleScreenBufferInfoEx != NULL
++		&& pSetConsoleScreenBufferInfoEx != NULL)
+ 	    has_csbiex = TRUE;
+     }
+ 
+     csbi.cbSize = sizeof(csbi);
+     if (has_csbiex)
+-	pDynGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++	pGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
+     save_console_bg_rgb = (guicolor_T)csbi.ColorTable[0];
+     save_console_fg_rgb = (guicolor_T)csbi.ColorTable[7];
+ 
+@@ -7479,8 +7476,7 @@ vcon_init(
+ }
+ 
+     static void
+-vcon_exit(
+-    void)
++vcon_exit(void)
+ {
+     reset_console_color_rgb();
+ }
+@@ -7504,8 +7500,7 @@ vcon_printf(
+     static void
+ vcon_sgr_bulk(
+     int argc,
+-    int *args
+-)
++    int *args)
+ {
+     /* 2('\033[') + 4('255.') * 16 + NUL */
+     char_u buf[2 + (4 * 16) + 1];
+@@ -7528,8 +7523,7 @@ vcon_sgr_bulk(
+ }
+ 
+     static void
+-vcon_normvideo(
+-    void)
++vcon_normvideo(void)
+ {
+     int args[1];
+ 
+@@ -7538,36 +7532,31 @@ vcon_normvideo(
+ }
+ 
+     static void
+-vcon_textattr_normal(
+-    void)
++vcon_textattr_normal(void)
+ {
+     vcon_printf("\033[0m");	/* default color */
+ }
+ 
+     static void
+-vcon_textattr_reverse(
+-    void)
++vcon_textattr_reverse(void)
+ {
+     vcon_printf("\033[7m");	/* reverse */
+ }
+ 
+     static void
+-vcon_textattr_bold(
+-    void)
++vcon_textattr_bold(void)
+ {
+     vcon_printf("\033[1m");	/* bold */
+ }
+ 
+     static void
+-vcon_textattr_italic(
+-    void)
++vcon_textattr_italic(void)
+ {
+     vcon_printf("\033[95m");	/* bright magenta text */
+ }
+ 
+     static void
+-vcon_textattr_underscore(
+-    void)
++vcon_textattr_underscore(void)
+ {
+     vcon_printf("\033[4m");	/* underscore */
+ }
+@@ -7697,8 +7686,7 @@ vcon_delete_lines(
+ }
+ 
+     static void
+-vcon_visual_bell(
+-    void)
++vcon_visual_bell(void)
+ {
+     COORD   coordOrigin = {0, 0};
+     WORD    attrFlash = ~g_attrCurrent & 0xff;
+@@ -7792,8 +7780,7 @@ vcon_write_chars(
+ }
+ 
+     static void
+-vcon_clear_screen(
+-    void)
++vcon_clear_screen(void)
+ {
+     set_console_color_rgb();
+     vcon_gotoxy(1, 1);
+@@ -7801,8 +7788,7 @@ vcon_clear_screen(
+ }
+ 
+     static void
+-vcon_clear_to_end_of_display(
+-    void)
++vcon_clear_to_end_of_display(void)
+ {
+     COORD save = g_coord;
+ 
+@@ -7815,8 +7801,7 @@ vcon_clear_to_end_of_display(
+ }
+ 
+     static void
+-vcon_clear_to_end_of_line(
+-    void)
++vcon_clear_to_end_of_line(void)
+ {
+     COORD save = g_coord;
+ 
+@@ -7841,15 +7826,13 @@ vcon_scroll(
+ }
+ 
+     static void
+-vcon_standout(
+-    void)
++vcon_standout(void)
+ {
+     vcon_printf("\033[91m");	/* bright red text */
+ }
+ 
+     static void
+-vcon_standend(
+-    void)
++vcon_standend(void)
+ {
+     vcon_printf("\033[39m");	/* default color */
+ }
+@@ -7880,8 +7863,7 @@ vcon_gotoxy(
+ }
+ 
+     static void
+-set_console_color_rgb(
+-    void)
++set_console_color_rgb(void)
+ {
+ # ifdef FEAT_TERMGUICOLORS
+     DYN_CONSOLE_SCREEN_BUFFER_INFOEX csbi;
+@@ -7901,7 +7883,7 @@ set_console_color_rgb(
+ 
+     csbi.cbSize = sizeof(csbi);
+     if (has_csbiex)
+-	pDynGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++	pGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
+ 
+     csbi.cbSize = sizeof(csbi);
+     csbi.srWindow.Right += 1;
+@@ -7909,20 +7891,19 @@ set_console_color_rgb(
+     csbi.ColorTable[0] = (COLORREF)bg;
+     csbi.ColorTable[7] = (COLORREF)fg;
+     if (has_csbiex)
+-	pDynSetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++	pSetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
+ # endif
+ }
+ 
+     static void
+-reset_console_color_rgb(
+-    void)
++reset_console_color_rgb(void)
+ {
+ # ifdef FEAT_TERMGUICOLORS
+     DYN_CONSOLE_SCREEN_BUFFER_INFOEX csbi;
+ 
+     csbi.cbSize = sizeof(csbi);
+     if (has_csbiex)
+-	pDynGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++	pGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
+ 
+     csbi.cbSize = sizeof(csbi);
+     csbi.srWindow.Right += 1;
+@@ -7930,13 +7911,12 @@ reset_console_color_rgb(
+     csbi.ColorTable[0] = (COLORREF)save_console_bg_rgb;
+     csbi.ColorTable[7] = (COLORREF)save_console_fg_rgb;
+     if (has_csbiex)
+-	pDynSetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++	pSetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
+ # endif
+ }
+ 
+     void
+-control_console_color_rgb(
+-    void)
++control_console_color_rgb(void)
+ {
+     if (USE_VCON)
+ 	set_console_color_rgb();
+@@ -7945,8 +7925,7 @@ control_console_color_rgb(
+ }
+ 
+     int
+-vcon_get_stat(
+-    void)
++vcon_get_stat(void)
+ {
+     return has_vcon;
+ }
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -68,4 +68,6 @@ void set_alist_count(void);
+ void fix_arg_enc(void);
+ int mch_setenv(char *var, char *value, int x);
+ void win32_build_env(dict_T *l, garray_T *gap);
++void control_console_color_rgb(void);
++int vcon_get_stat(void);
+ /* vim: set ft=c : */

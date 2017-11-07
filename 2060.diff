@@ -1,0 +1,1270 @@
+# HG changeset patch
+# Parent  baee31d5f859e78c9016e723ab027354de7dd12b
+
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -3696,7 +3696,21 @@ vim_beep(
+ 			&& !(gui.in_use && gui.starting)
+ #endif
+ 			)
++		{
+ 		    out_str_cf(T_VB);
++#if defined(WIN3264) && !defined(FEAT_GUI)
++		    /* No restore color information, refresh the screen. */
++		    if (vcon_get_stat() != 0
++# ifdef FEAT_TERMGUICOLORS
++			    && p_tgc
++# endif
++			)
++		    {
++			redraw_later(CLEAR);
++			update_screen(0);
++		    }
++#endif
++		}
+ 		else
+ 		    out_char(BELL);
+ #ifdef ELAPSED_FUNC
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -8655,6 +8655,12 @@ set_bool_option(
+ 	if (!gui.in_use && !gui.starting)
+ # endif
+ 	    highlight_gui_started();
++# if !defined(FEAT_GUI) && defined(WIN3264)
++	control_console_color_rgb();
++	/* reset t_Co */
++	if (STRCMP(T_NAME, "win32") == 0)
++	    set_termname(T_NAME);
++# endif
+     }
+ #endif
+ 
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -182,6 +182,11 @@ static void delete_lines(unsigned cLines
+ static void gotoxy(unsigned x, unsigned y);
+ static void normvideo(void);
+ static void textattr(WORD wAttr);
++static void textattr_normal(void);
++static void textattr_reverse(void);
++static void textattr_bold(void);
++static void textattr_italic(void);
++static void textattr_underscore(void);
+ static void textcolor(WORD wAttr);
+ static void textbackground(WORD wAttr);
+ static void standout(void);
+@@ -202,6 +207,61 @@ static int win32_getattrs(char_u *name);
+ static int win32_setattrs(char_u *name, int attrs);
+ static int win32_set_archive(char_u *name);
+ 
++#if !defined(FEAT_GUI)
++static int has_vcon = 0;
++static void vcon_init();
++static void vcon_exit();
++static int vcon_printf(char *format, ...);
++static void vcon_sgr_bulk(int argc, int *argv);
++
++static guicolor_T save_console_bg_rgb;
++static guicolor_T save_console_fg_rgb;
++
++#ifdef FEAT_TERMGUICOLORS
++# define USE_VCON		(has_vcon && p_tgc)
++#else
++# define USE_VCON		0
++#endif
++#define VCON_HUB(f)		do { if (USE_VCON) vcon_##f(); else f(); } while (0)
++#define VCON_HUB2(f, p)		do { if (USE_VCON) vcon_##f((p)); else f((p)); } while (0)
++
++static void vcon_normvideo(void);
++static void vcon_textattr_normal(void);
++static void vcon_textattr_reverse(void);
++static void vcon_textattr_bold(void);
++static void vcon_textattr_italic(void);
++static void vcon_textattr_underscore(void);
++static void vcon_textcolor(WORD wAttr);
++static void vcon_textbackground(WORD wAttr);
++static void vcon_clear_chars(COORD coord, DWORD n);
++static void hub_set_scroll_region(unsigned left, unsigned top,
++				  unsigned right, unsigned bottom);
++static void vcon_set_scroll_region(unsigned left, unsigned top,
++				   unsigned right, unsigned bottom);
++static void vcon_insert_lines(unsigned cLines);
++static void vcon_delete_lines(unsigned cLines);
++static void vcon_visual_bell(void);
++static DWORD hub_write_chars(char_u *pchBuf, DWORD cbToWrite);
++static DWORD vcon_write_chars(char_u *pchBuf, DWORD cbToWrite);
++static void vcon_clear_screen(void);
++static void vcon_clear_to_end_of_display(void);
++static void vcon_clear_to_end_of_line(void);
++static void vcon_scroll(unsigned cLines);
++static void vcon_standout(void);
++static void vcon_standend(void);
++static void hub_gotoxy(unsigned x, unsigned y);
++static void vcon_gotoxy(unsigned x, unsigned y);
++#endif
++#ifndef FEAT_GUI_W32
++static void set_console_color_rgb(void);
++static void reset_console_color_rgb(void);
++#endif
++
++/* This flags newly created from Windows 10 */
++#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
++#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
++#endif
++
+ #ifndef FEAT_GUI_W32
+ static int suppress_winsize = 1;	/* don't fiddle with console */
+ #endif
+@@ -210,6 +270,60 @@ static char_u *exe_path = NULL;
+ 
+ static BOOL win8_or_later = FALSE;
+ 
++#ifndef FEAT_GUI
++/* Dynamic loading for portability */
++typedef struct _DYN_CONSOLE_SCREEN_BUFFER_INFOEX
++{
++    ULONG cbSize;
++    COORD dwSize;
++    COORD dwCursorPosition;
++    WORD wAttributes;
++    SMALL_RECT srWindow;
++    COORD dwMaximumWindowSize;
++    WORD wPopupAttributes;
++    BOOL bFullscreenSupported;
++    COLORREF ColorTable[16];
++} DYN_CONSOLE_SCREEN_BUFFER_INFOEX, *PDYN_CONSOLE_SCREEN_BUFFER_INFOEX;
++typedef BOOL (WINAPI *PfnDynGetConsoleScreenBufferInfoEx)(HANDLE, PDYN_CONSOLE_SCREEN_BUFFER_INFOEX);
++static PfnDynGetConsoleScreenBufferInfoEx pDynGetConsoleScreenBufferInfoEx;
++typedef BOOL (WINAPI *PfnDynSetConsoleScreenBufferInfoEx)(HANDLE, PDYN_CONSOLE_SCREEN_BUFFER_INFOEX);
++static PfnDynSetConsoleScreenBufferInfoEx pDynSetConsoleScreenBufferInfoEx;
++static BOOL has_csbiex = FALSE;
++#endif
++
++/* This can be removed when used with FEAT_GUI. */
++#if !defined(FEAT_GUI)
++
++/*
++ * Get verion number including build number
++ */
++typedef BOOL (WINAPI *PfnRtlGetVersion)(LPOSVERSIONINFOW);
++# define MAKE_VER(major, minor, build) \
++    (((major) << 24) | ((minor) << 16) | (build))
++
++    static DWORD
++get_build_number(
++    void)
++{
++    OSVERSIONINFOW	osver = {sizeof(OSVERSIONINFOW)};
++    HMODULE		hNtdll;
++    PfnRtlGetVersion	pRtlGetVersion;
++    DWORD		ver = MAKE_VER(0, 0, 0);
++
++    hNtdll = GetModuleHandle("ntdll.dll");
++    if (hNtdll != NULL)
++    {
++	pRtlGetVersion =
++	    (PfnRtlGetVersion)GetProcAddress(hNtdll, "RtlGetVersion");
++	pRtlGetVersion(&osver);
++	ver = MAKE_VER(min(osver.dwMajorVersion, 255),
++		       min(osver.dwMinorVersion, 255),
++		       min(osver.dwBuildNumber, 32767));
++    }
++    return ver;
++}
++#endif
++
+ #ifndef FEAT_GUI_W32
+ /*
+  * Version of ReadConsoleInput() that works with IME.
+@@ -2551,9 +2665,6 @@ mch_init(void)
+     if (cterm_normal_bg_color == 0)
+ 	cterm_normal_bg_color = ((g_attrCurrent >> 4) & 0xf) + 1;
+ 
+-    /* set termcap codes to current text attributes */
+-    update_tcap(g_attrCurrent);
+-
+     GetConsoleCursorInfo(g_hConOut, &g_cci);
+     GetConsoleMode(g_hConIn,  &g_cmodein);
+     GetConsoleMode(g_hConOut, &g_cmodeout);
+@@ -2593,6 +2704,8 @@ mch_init(void)
+ #ifdef FEAT_CLIPBOARD
+     win_clip_init();
+ #endif
++
++    vcon_init();
+ }
+ 
+ /*
+@@ -2605,6 +2718,8 @@ mch_exit(int r)
+ {
+     exiting = TRUE;
+ 
++    vcon_exit();
++
+     stoptermcap();
+     if (g_fWindInitCalled)
+ 	settmode(TMODE_COOK);
+@@ -3824,7 +3939,12 @@ mch_settmode(int tmode)
+ 	if (g_fMouseActive)
+ 	    cmodein |= ENABLE_MOUSE_INPUT;
+ #endif
+-	cmodeout &= ~(ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
++	cmodeout &= ~(
++#if !defined(FEAT_GUI) && defined(FEAT_TERMGUICOLORS)
++	    /* Do not turn off when using VCON */
++	    ((has_vcon) ? 0 : ENABLE_PROCESSED_OUTPUT) |
++#endif
++	    ENABLE_WRAP_AT_EOL_OUTPUT);
+ 	bEnableHandler = TRUE;
+     }
+     else /* cooked */
+@@ -4002,7 +4122,7 @@ mch_set_shellsize(void)
+     void
+ mch_new_shellsize(void)
+ {
+-    set_scroll_region(0, 0, Columns - 1, Rows - 1);
++    hub_set_scroll_region(0, 0, Columns - 1, Rows - 1);
+ }
+ 
+ 
+@@ -5454,6 +5574,7 @@ termcap_mode_start(void)
+ 	 * to restore the actual contents of the buffer.
+ 	 */
+ 	RestoreConsoleBuffer(&g_cbTermcap, FALSE);
++	reset_console_color_rgb();
+ 	SetConsoleWindowInfo(g_hConOut, TRUE, &g_cbTermcap.Info.srWindow);
+ 	Rows = g_cbTermcap.Info.dwSize.Y;
+ 	Columns = g_cbTermcap.Info.dwSize.X;
+@@ -5466,6 +5587,7 @@ termcap_mode_start(void)
+ 	 * size.  We will use this as the size of our editing environment.
+ 	 */
+ 	ClearConsoleBuffer(g_attrCurrent);
++	set_console_color_rgb();
+ 	ResizeConBufAndWindow(g_hConOut, Columns, Rows);
+     }
+ 
+@@ -5514,6 +5636,7 @@ termcap_mode_end(void)
+     cb = &g_cbNonTermcap;
+ #endif
+     RestoreConsoleBuffer(cb, p_rs);
++    reset_console_color_rgb();
+     SetConsoleCursorInfo(g_hConOut, &g_cci);
+ 
+     if (p_rs || exiting)
+@@ -5759,6 +5882,55 @@ textattr(WORD wAttr)
+ 
+ 
+     static void
++textattr_normal(
++    void)
++{
++    SetConsoleTextAttribute(g_hConOut, g_attrCurrent & 0xff);
++}
++
++
++    static void
++textattr_reverse(
++    void)
++{
++    g_attrCurrent = (((g_attrCurrent & 0x0f) << 4)
++	    | ((g_attrCurrent & 0xf0) >> 4)) & 0xff;
++
++    SetConsoleTextAttribute(g_hConOut, g_attrCurrent);
++}
++
++
++    static void
++textattr_bold(
++    void)
++{
++    g_attrCurrent = (g_attrCurrent | 0x08) & 0xff;  /* FOREGROUND_INTENSITY */
++
++    SetConsoleTextAttribute(g_hConOut, g_attrCurrent);
++}
++
++
++    static void
++textattr_italic(
++    void)
++{
++    g_attrCurrent = 225;	/* blue text on yellow */
++
++    SetConsoleTextAttribute(g_hConOut, g_attrCurrent);
++}
++
++
++    static void
++textattr_underscore(
++    void)
++{
++    g_attrCurrent = 67;		/* cyan text on red */
++
++    SetConsoleTextAttribute(g_hConOut, g_attrCurrent);
++}
++
++
++    static void
+ textcolor(WORD wAttr)
+ {
+     g_attrCurrent = (g_attrCurrent & 0xf0) + (wAttr & 0x0f);
+@@ -5814,26 +5986,17 @@ standend(void)
+ 
+ 
+ /*
+- * Set normal fg/bg color, based on T_ME.  Called when t_me has been set.
++ * Set normal fg/bg color
+  */
+     void
+ mch_set_normal_colors(void)
+ {
+-    char_u	*p;
+-    int		n;
+-
+-    cterm_normal_fg_color = (g_attrDefault & 0xf) + 1;
+-    cterm_normal_bg_color = ((g_attrDefault >> 4) & 0xf) + 1;
+-    if (T_ME[0] == ESC && T_ME[1] == '|')
+-    {
+-	p = T_ME + 2;
+-	n = getdigits(&p);
+-	if (*p == 'm' && n > 0)
+-	{
+-	    cterm_normal_fg_color = (n & 0xf) + 1;
+-	    cterm_normal_bg_color = ((n >> 4) & 0xf) + 1;
+-	}
+-    }
++    cterm_normal_fg_color = (g_attrDefault & 0x0f) + 1;
++    cterm_normal_bg_color = ((g_attrDefault >> 4) & 0x0f) + 1;
++#ifdef FEAT_TERMGUICOLORS
++    cterm_normal_fg_gui_color = INVALCOLOR;
++    cterm_normal_bg_gui_color = INVALCOLOR;
++#endif
+ }
+ 
+ 
+@@ -5994,7 +6157,7 @@ mch_write(
+ 	{
+ 	    DWORD nWritten;
+ 
+-	    nWritten = write_chars(s, prefix);
++	    nWritten = hub_write_chars(s, prefix);
+ #ifdef MCH_WRITE_DUMP
+ 	    if (fdDump)
+ 	    {
+@@ -6011,12 +6174,12 @@ mch_write(
+ 	    /* \n, newline: go to the beginning of the next line or scroll */
+ 	    if (g_coord.Y == g_srScrollRegion.Bottom)
+ 	    {
+-		scroll(1);
+-		gotoxy(g_srScrollRegion.Left + 1, g_srScrollRegion.Bottom + 1);
++		VCON_HUB2(scroll, 1);
++		hub_gotoxy(g_srScrollRegion.Left + 1, g_srScrollRegion.Bottom + 1);
+ 	    }
+ 	    else
+ 	    {
+-		gotoxy(g_srScrollRegion.Left + 1, g_coord.Y + 2);
++		hub_gotoxy(g_srScrollRegion.Left + 1, g_coord.Y + 2);
+ 	    }
+ #ifdef MCH_WRITE_DUMP
+ 	    if (fdDump)
+@@ -6027,7 +6190,7 @@ mch_write(
+ 	else if (s[0] == '\r')
+ 	{
+ 	    /* \r, carriage return: go to beginning of line */
+-	    gotoxy(g_srScrollRegion.Left+1, g_coord.Y + 1);
++	    hub_gotoxy(g_srScrollRegion.Left+1, g_coord.Y + 1);
+ #ifdef MCH_WRITE_DUMP
+ 	    if (fdDump)
+ 		fputs("\\r\n", fdDump);
+@@ -6044,7 +6207,7 @@ mch_write(
+ 		g_coord.X = g_srScrollRegion.Right;
+ 		g_coord.Y--;
+ 	    }
+-	    gotoxy(g_coord.X + 1, g_coord.Y + 1);
++	    hub_gotoxy(g_coord.X + 1, g_coord.Y + 1);
+ #ifdef MCH_WRITE_DUMP
+ 	    if (fdDump)
+ 		fputs("\\b\n", fdDump);
+@@ -6067,91 +6230,113 @@ mch_write(
+ 	    char_u  *old_s = s;
+ #endif
+ 	    char_u  *p;
+-	    int	    arg1 = 0, arg2 = 0;
++	    int	    arg1 = 0, arg2 = 0, argc = 0, args[16];
+ 
+ 	    switch (s[2])
+ 	    {
+-	    /* one or two numeric arguments, separated by ';' */
+-
+ 	    case '0': case '1': case '2': case '3': case '4':
+ 	    case '5': case '6': case '7': case '8': case '9':
+-		p = s + 2;
+-		arg1 = getdigits(&p);	    /* no check for length! */
+-		if (p > s + len)
+-		    break;
+-
+-		if (*p == ';')
++		p = s + 1;
++		do
+ 		{
+ 		    ++p;
+-		    arg2 = getdigits(&p);   /* no check for length! */
++		    args[argc] = getdigits(&p);
++		    argc += (argc < 15) ? 1 : 0;
+ 		    if (p > s + len)
+ 			break;
+-
+-		    if (*p == 'H')
+-			gotoxy(arg2, arg1);
+-		    else if (*p == 'r')
+-			set_scroll_region(0, arg1 - 1, Columns - 1, arg2 - 1);
++		} while (*p == ';');
++
++		if (p > s + len)
++		    break;
++
++		arg1 = args[0];
++		arg2 = args[1];
++		if (*p == 'm')
++		{
++		    if (argc == 1 && args[0] == 0)
++			VCON_HUB(normvideo);
++		    else if (argc == 1)
++			VCON_HUB2(textcolor, (WORD) arg1);
++		    else
++			vcon_sgr_bulk(argc, args);
+ 		}
+-		else if (*p == 'A')
++		else if (argc == 2 && *p == 'H')
++		{
++		    hub_gotoxy(arg2, arg1);
++		}
++		else if (argc == 2 && *p == 'r')
+ 		{
+-		    /* move cursor up arg1 lines in same column */
+-		    gotoxy(g_coord.X + 1,
++		    hub_set_scroll_region(0, arg1 - 1, Columns - 1, arg2 - 1);
++		}
++		else if (argc == 1 && *p == 'A')
++		{
++		    hub_gotoxy(g_coord.X + 1,
+ 			   max(g_srScrollRegion.Top, g_coord.Y - arg1) + 1);
+ 		}
+-		else if (*p == 'C')
++		else if (argc == 1 && *p == 'B')
+ 		{
+-		    /* move cursor right arg1 columns in same line */
+-		    gotoxy(min(g_srScrollRegion.Right, g_coord.X + arg1) + 1,
++		    if (args[0] == 0)
++		    {
++			VCON_HUB(textattr_normal);
++		    }
++		    else if (args[0] == 1)
++		    {
++			VCON_HUB(textattr_reverse);
++		    }
++		    else if (args[0] == 2)
++		    {
++			VCON_HUB(textattr_bold);
++		    }
++		    else if (args[0] == 3)
++		    {
++			VCON_HUB(textattr_italic);
++		    }
++		    else if (args[0] == 4)
++		    {
++			VCON_HUB(textattr_underscore);
++		    }
++		}
++		else if (argc == 1 && *p == 'b')
++		{
++		    VCON_HUB2(textbackground, (WORD) arg1);
++		}
++		else if (argc == 1 && *p == 'C')
++		{
++		    hub_gotoxy(min(g_srScrollRegion.Right, g_coord.X + arg1) + 1,
+ 			   g_coord.Y + 1);
+ 		}
+-		else if (*p == 'H')
++		else if (argc == 1 && *p == 'f')
+ 		{
+-		    gotoxy(1, arg1);
++		    VCON_HUB2(textcolor, (WORD) arg1);
+ 		}
+-		else if (*p == 'L')
+-		{
+-		    insert_lines(arg1);
+-		}
+-		else if (*p == 'm')
++		else if (argc == 1 && *p == 'H')
+ 		{
+-		    if (arg1 == 0)
+-			normvideo();
+-		    else
+-			textattr((WORD) arg1);
++		    hub_gotoxy(1, arg1);
+ 		}
+-		else if (*p == 'f')
++		else if (argc == 1 && *p == 'L')
+ 		{
+-		    textcolor((WORD) arg1);
++		    VCON_HUB2(insert_lines, arg1);
+ 		}
+-		else if (*p == 'b')
++		else if (argc == 1 && *p == 'M')
+ 		{
+-		    textbackground((WORD) arg1);
+-		}
+-		else if (*p == 'M')
+-		{
+-		    delete_lines(arg1);
++		    VCON_HUB2(delete_lines, arg1);
+ 		}
+ 
+ 		len -= (int)(p - s);
+ 		s = p + 1;
+ 		break;
+ 
+-
+-	    /* Three-character escape sequences */
+-
+ 	    case 'A':
+-		/* move cursor up one line in same column */
+-		gotoxy(g_coord.X + 1,
++		hub_gotoxy(g_coord.X + 1,
+ 		       max(g_srScrollRegion.Top, g_coord.Y - 1) + 1);
+ 		goto got3;
+ 
+ 	    case 'B':
+-		visual_bell();
++		VCON_HUB(visual_bell);
+ 		goto got3;
+ 
+ 	    case 'C':
+-		/* move cursor right one column in same line */
+-		gotoxy(min(g_srScrollRegion.Right, g_coord.X + 1) + 1,
++		hub_gotoxy(min(g_srScrollRegion.Right, g_coord.X + 1) + 1,
+ 		       g_coord.Y + 1);
+ 		goto got3;
+ 
+@@ -6160,35 +6345,35 @@ mch_write(
+ 		goto got3;
+ 
+ 	    case 'F':
+-		standout();
++		VCON_HUB(standout);
+ 		goto got3;
+ 
+ 	    case 'f':
+-		standend();
++		VCON_HUB(standend);
+ 		goto got3;
+ 
+ 	    case 'H':
+-		gotoxy(1, 1);
++		hub_gotoxy(1, 1);
+ 		goto got3;
+ 
+ 	    case 'j':
+-		clear_to_end_of_display();
++		VCON_HUB(clear_to_end_of_display);
+ 		goto got3;
+ 
+ 	    case 'J':
+-		clear_screen();
++		VCON_HUB(clear_screen);
+ 		goto got3;
+ 
+ 	    case 'K':
+-		clear_to_end_of_line();
++		VCON_HUB(clear_to_end_of_line);
+ 		goto got3;
+ 
+ 	    case 'L':
+-		insert_lines(1);
++		VCON_HUB2(insert_lines, 1);
+ 		goto got3;
+ 
+ 	    case 'M':
+-		delete_lines(1);
++		VCON_HUB2(delete_lines, 1);
+ 		goto got3;
+ 
+ 	    case 'S':
+@@ -6222,7 +6407,7 @@ mch_write(
+ 	    /* Write a single character */
+ 	    DWORD nWritten;
+ 
+-	    nWritten = write_chars(s, 1);
++	    nWritten = hub_write_chars(s, 1);
+ #ifdef MCH_WRITE_DUMP
+ 	    if (fdDump)
+ 	    {
+@@ -7249,3 +7434,521 @@ mch_setenv(char *var, char *value, int x
+ 
+     return 0;
+ }
++
++#ifndef FEAT_GUI_W32
++
++# define VTP_FIRST_SUPPORT_BUILD MAKE_VER(10, 0, 10563)
++
++    static void
++vcon_init(
++    void)
++{
++    DWORD   ver, mode;
++    HMODULE hKerneldll;
++    DYN_CONSOLE_SCREEN_BUFFER_INFOEX csbi;
++
++    ver = get_build_number();
++    has_vcon = (ver >= VTP_FIRST_SUPPORT_BUILD) ? 1 : 0;
++    GetConsoleMode(g_hConOut, &mode);
++    mode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
++    if (SetConsoleMode(g_hConOut, mode) == 0)
++	has_vcon = 0;
++
++    /* Use functions supported from Vista */
++    hKerneldll = GetModuleHandle("kernel32.dll");
++    if (hKerneldll != NULL)
++    {
++	pDynGetConsoleScreenBufferInfoEx =
++		(PfnDynGetConsoleScreenBufferInfoEx)GetProcAddress(
++		hKerneldll, "GetConsoleScreenBufferInfoEx");
++	pDynSetConsoleScreenBufferInfoEx =
++		(PfnDynSetConsoleScreenBufferInfoEx)GetProcAddress(
++		hKerneldll, "SetConsoleScreenBufferInfoEx");
++	if (pDynGetConsoleScreenBufferInfoEx != NULL
++		&& pDynSetConsoleScreenBufferInfoEx != NULL)
++	    has_csbiex = TRUE;
++    }
++
++    csbi.cbSize = sizeof(csbi);
++    if (has_csbiex)
++	pDynGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++    save_console_bg_rgb = (guicolor_T)csbi.ColorTable[0];
++    save_console_fg_rgb = (guicolor_T)csbi.ColorTable[7];
++
++    set_console_color_rgb();
++}
++
++    static void
++vcon_exit(
++    void)
++{
++    reset_console_color_rgb();
++}
++
++    static int
++vcon_printf(
++    char *format,
++    ...)
++{
++    char_u  buf[100];
++    va_list list;
++    DWORD   result;
++
++    va_start(list, format);
++    vim_vsnprintf((char *)buf, 100, (char *)format, list);
++    va_end(list);
++    WriteConsoleA(g_hConOut, buf, (DWORD)STRLEN(buf), &result, NULL);
++    return (int)result;
++}
++
++    static void
++vcon_sgr_bulk(
++    int argc,
++    int *args
++)
++{
++    /* 2('\033[') + 4('255.') * 16 + NUL */
++    char_u buf[2 + (4 * 16) + 1];
++    char_u *p;
++    int    i;
++
++    p = buf;
++    *p++ = '\033';
++    *p++ = '[';
++
++    for (i = 0; i < argc; ++i)
++    {
++	p += vim_snprintf((char *)p, 4, "%d", args[i] & 0xff);
++	*p++ = ';';
++    }
++    p--;
++    *p++ = 'm';
++    *p = NUL;
++    vcon_printf((char *)buf);
++}
++
++    static void
++vcon_normvideo(
++    void)
++{
++    int args[1];
++
++    args[0] = 0;
++    vcon_sgr_bulk(1, args);
++}
++
++    static void
++vcon_textattr_normal(
++    void)
++{
++    vcon_printf("\033[0m");	/* default color */
++}
++
++    static void
++vcon_textattr_reverse(
++    void)
++{
++    vcon_printf("\033[7m");	/* reverse */
++}
++
++    static void
++vcon_textattr_bold(
++    void)
++{
++    vcon_printf("\033[1m");	/* bold */
++}
++
++    static void
++vcon_textattr_italic(
++    void)
++{
++    vcon_printf("\033[95m");	/* bright magenta text */
++}
++
++    static void
++vcon_textattr_underscore(
++    void)
++{
++    vcon_printf("\033[4m");	/* underscore */
++}
++
++    static void
++vcon_textcolor(
++    WORD wAttr)
++{
++    int args[1];
++
++    args[0] = wAttr;
++    vcon_sgr_bulk(1, args);
++}
++
++    static void
++vcon_textbackground(
++    WORD wAttr)
++{
++    int args[1];
++
++    args[0] = wAttr;
++    vcon_sgr_bulk(1, args);
++}
++
++    static void
++vcon_clear_chars(
++    COORD coord,
++    DWORD n)
++{
++    DWORD dwDummy;
++
++    FillConsoleOutputCharacter(g_hConOut, ' ', n, coord, &dwDummy);
++    FillConsoleOutputAttribute(g_hConOut, 0, n, coord, &dwDummy);
++}
++
++    static void
++hub_set_scroll_region(
++    unsigned left,
++    unsigned top,
++    unsigned right,
++    unsigned bottom)
++{
++    if (USE_VCON)
++	vcon_set_scroll_region(left, top, right, bottom);
++    else
++	set_scroll_region(left, top, right, bottom);
++}
++
++    static void
++vcon_set_scroll_region(
++    unsigned left,
++    unsigned top,
++    unsigned right,
++    unsigned bottom)
++{
++    if (left >= right
++	    || top >= bottom
++	    || right > (unsigned) Columns - 1
++	    || bottom > (unsigned) Rows - 1)
++	return;
++
++    g_srScrollRegion.Left =   left;
++    g_srScrollRegion.Top =    top;
++    g_srScrollRegion.Right =  right;
++    g_srScrollRegion.Bottom = bottom;
++
++    vcon_printf("\033[%d;%dr", top + 1, bottom + 1);
++}
++
++    static void
++vcon_insert_lines(
++    unsigned cLines)
++{
++    SMALL_RECT	source;
++    COORD	dest, coord;
++
++    dest.X = 0;
++    dest.Y = g_coord.Y + cLines;
++
++    source.Left   = 0;
++    source.Top    = g_coord.Y;
++    source.Right  = g_srScrollRegion.Right;
++    source.Bottom = g_srScrollRegion.Bottom - cLines;
++
++    set_console_color_rgb();
++
++    vcon_gotoxy(1, source.Top + 1);
++    vcon_printf("\033[%dT", cLines);
++
++    if (source.Bottom < dest.Y)
++    {
++	coord.X = 0;
++	coord.Y = source.Bottom;
++	vcon_clear_chars(coord, Columns * (dest.Y - source.Bottom));
++    }
++}
++
++    static void
++vcon_delete_lines(
++    unsigned cLines)
++{
++    SMALL_RECT	source;
++    COORD	dest, coord;
++    int		nb;
++
++    dest.X = 0;
++    dest.Y = g_coord.Y;
++
++    source.Left   = 0;
++    source.Top    = g_coord.Y + cLines;
++    source.Right  = g_srScrollRegion.Right;
++    source.Bottom = g_srScrollRegion.Bottom;
++
++    set_console_color_rgb();
++
++    vcon_gotoxy(1, source.Top + 1);
++    vcon_printf("\033[%dS", cLines);
++
++    nb = dest.Y + (source.Bottom - source.Top) + 1;
++
++    if (nb < source.Top)
++    {
++	coord.X = 0;
++	coord.Y = nb;
++	vcon_clear_chars(coord, Columns * (source.Top - nb));
++    }
++}
++
++    static void
++vcon_visual_bell(
++    void)
++{
++    COORD   coordOrigin = {0, 0};
++    WORD    attrFlash = ~g_attrCurrent & 0xff;
++
++    DWORD   dwDummy;
++
++    FillConsoleOutputAttribute(g_hConOut, attrFlash, Rows * Columns,
++			       coordOrigin, &dwDummy);
++
++    Sleep((1000 / 60) * 2); /* 2 frame in many environments */
++
++    /* restore by caller */
++}
++
++    static DWORD
++hub_write_chars(
++    char_u *pchBuf,
++    DWORD  cbToWrite)
++{
++    if (USE_VCON)
++	return vcon_write_chars(pchBuf, cbToWrite);
++    else
++	return write_chars(pchBuf, cbToWrite);
++}
++
++    static DWORD
++vcon_write_chars(
++    char_u *pchBuf,
++    DWORD  cbToWrite)
++{
++    DWORD written;
++
++#ifdef FEAT_MBYTE
++    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
++    {
++	static WCHAR	*unicodebuf = NULL;
++	static int	unibuflen = 0;
++	int		length;
++	DWORD		n, cchwritten, cells;
++
++	length = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite, 0, 0);
++	if (unicodebuf == NULL || length > unibuflen)
++	{
++	    vim_free(unicodebuf);
++	    unicodebuf = (WCHAR *)lalloc(length * sizeof(WCHAR), FALSE);
++	    unibuflen = length;
++	}
++	MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite,
++			    unicodebuf, unibuflen);
++
++	cells = mb_string2cells(pchBuf, cbToWrite);
++
++	if (WriteConsoleW(g_hConOut, unicodebuf, length, &cchwritten,
++		NULL) == 0 || cchwritten == 0)
++	    cchwritten = 1;
++
++	if (cchwritten == length)
++	{
++	    written = cbToWrite;
++	    g_coord.X += (SHORT)cells;
++	}
++	else
++	{
++	    char_u *p = pchBuf;
++	    for (n = 0; n < cchwritten; n++)
++		MB_CPTR_ADV(p);
++	    written = p - pchBuf;
++	    g_coord.X += (SHORT)mb_string2cells(pchBuf, written);
++	}
++    }
++    else
++#endif
++    {
++	if (WriteConsole(g_hConOut, (LPCSTR)pchBuf, cbToWrite, &written,
++		NULL) == 0 || written == 0)
++	    written = 1;
++
++	g_coord.X += (SHORT) written;
++    }
++
++    while (g_coord.X > g_srScrollRegion.Right)
++    {
++	g_coord.X -= (SHORT) Columns;
++	if (g_coord.Y < g_srScrollRegion.Bottom)
++	    g_coord.Y++;
++    }
++
++    vcon_gotoxy(g_coord.X + 1, g_coord.Y + 1);
++
++    return written;
++}
++
++    static void
++vcon_clear_screen(
++    void)
++{
++    set_console_color_rgb();
++    vcon_gotoxy(1, 1);
++    vcon_printf("\033[2J");
++}
++
++    static void
++vcon_clear_to_end_of_display(
++    void)
++{
++    COORD save = g_coord;
++
++    set_console_color_rgb();
++    vcon_gotoxy(g_coord.X + 1, g_coord.Y + 1);
++    vcon_printf("\033[0J");
++
++    vcon_gotoxy(save.X + 1, save.Y + 1);
++    g_coord = save;
++}
++
++    static void
++vcon_clear_to_end_of_line(
++    void)
++{
++    COORD save = g_coord;
++
++    set_console_color_rgb();
++    vcon_gotoxy(g_coord.X + 1, g_coord.Y + 1);
++    vcon_printf("\033[0K");
++
++    vcon_gotoxy(save.X + 1, save.Y + 1);
++    g_coord = save;
++}
++
++    static void
++vcon_scroll(
++    unsigned cLines)
++{
++    COORD oldcoord = g_coord;
++
++    vcon_gotoxy(g_srScrollRegion.Left + 1, g_srScrollRegion.Top + 1);
++    vcon_delete_lines(cLines);
++
++    g_coord = oldcoord;
++}
++
++    static void
++vcon_standout(
++    void)
++{
++    vcon_printf("\033[91m");	/* bright red text */
++}
++
++    static void
++vcon_standend(
++    void)
++{
++    vcon_printf("\033[39m");	/* default color */
++}
++
++    static void
++hub_gotoxy(
++    unsigned x,
++    unsigned y)
++{
++    if (USE_VCON)
++	vcon_gotoxy(x, y);
++    else
++	gotoxy(x, y);
++}
++
++    static void
++vcon_gotoxy(
++    unsigned x,
++    unsigned y)
++{
++    if (x < 1 || x > (unsigned)Columns || y < 1 || y > (unsigned)Rows)
++	return;
++
++    g_coord.X = x - 1;
++    g_coord.Y = y - 1;
++
++    vcon_printf("\033[%d;%dH", y, x);
++}
++
++    static void
++set_console_color_rgb(
++    void)
++{
++# ifdef FEAT_TERMGUICOLORS
++    DYN_CONSOLE_SCREEN_BUFFER_INFOEX csbi;
++    int id;
++    guicolor_T fg = INVALCOLOR;
++    guicolor_T bg = INVALCOLOR;
++
++    id = syn_name2id((char_u *)"Normal");
++    if (id > 0)
++	syn_id2colors(id, &fg, &bg);
++    if (fg == INVALCOLOR)
++	fg = 0xc0c0c0;	    /* white text */
++    if (bg == INVALCOLOR)
++	bg = 0x000000;	    /* black background */
++    fg = (GetRValue(fg) << 16) | (GetGValue(fg) << 8) | GetBValue(fg);
++    bg = (GetRValue(bg) << 16) | (GetGValue(bg) << 8) | GetBValue(bg);
++
++    csbi.cbSize = sizeof(csbi);
++    if (has_csbiex)
++	pDynGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++
++    csbi.cbSize = sizeof(csbi);
++    csbi.srWindow.Right += 1;
++    csbi.srWindow.Bottom += 1;
++    csbi.ColorTable[0] = (COLORREF)bg;
++    csbi.ColorTable[7] = (COLORREF)fg;
++    if (has_csbiex)
++	pDynSetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++# endif
++}
++
++    static void
++reset_console_color_rgb(
++    void)
++{
++# ifdef FEAT_TERMGUICOLORS
++    DYN_CONSOLE_SCREEN_BUFFER_INFOEX csbi;
++
++    csbi.cbSize = sizeof(csbi);
++    if (has_csbiex)
++	pDynGetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++
++    csbi.cbSize = sizeof(csbi);
++    csbi.srWindow.Right += 1;
++    csbi.srWindow.Bottom += 1;
++    csbi.ColorTable[0] = (COLORREF)save_console_bg_rgb;
++    csbi.ColorTable[7] = (COLORREF)save_console_fg_rgb;
++    if (has_csbiex)
++	pDynSetConsoleScreenBufferInfoEx(g_hConOut, &csbi);
++# endif
++}
++
++    void
++control_console_color_rgb(
++    void)
++{
++    if (USE_VCON)
++	set_console_color_rgb();
++    else
++	reset_console_color_rgb();
++}
++
++    int
++vcon_get_stat(
++    void)
++{
++    return has_vcon;
++}
++
++#endif
+diff --git a/src/proto/term.pro b/src/proto/term.pro
+--- a/src/proto/term.pro
++++ b/src/proto/term.pro
+@@ -71,7 +71,6 @@ int find_term_bykeys(char_u *src);
+ void show_termcodes(void);
+ int show_one_termcode(char_u *name, char_u *code, int printit);
+ char_u *translate_mapping(char_u *str, int expmap);
+-void update_tcap(int attr);
+ guicolor_T gui_get_color_cmn(char_u *name);
+ guicolor_T gui_get_rgb_color_cmn(int r, int g, int b);
+ /* vim: set ft=c : */
+diff --git a/src/syntax.c b/src/syntax.c
+--- a/src/syntax.c
++++ b/src/syntax.c
+@@ -8927,6 +8927,10 @@ get_cterm_attr_idx(int attr, int fg, int
+     attrentry_T		at_en;
+ 
+     vim_memset(&at_en, 0, sizeof(attrentry_T));
++#ifdef FEAT_TERMGUICOLORS
++    at_en.ae_u.cterm.fg_rgb = INVALCOLOR;
++    at_en.ae_u.cterm.bg_rgb = INVALCOLOR;
++#endif
+     at_en.ae_attr = attr;
+     at_en.ae_u.cterm.fg_color = fg;
+     at_en.ae_u.cterm.bg_color = bg;
+@@ -9566,6 +9570,23 @@ set_hl_attr(
+ 	at_en.ae_u.cterm.fg_color = sgp->sg_cterm_fg;
+ 	at_en.ae_u.cterm.bg_color = sgp->sg_cterm_bg;
+ # ifdef FEAT_TERMGUICOLORS
++#  ifdef WIN3264
++	{
++	    int id;
++	    guicolor_T fg, bg;
++
++	    id = syn_name2id((char_u *)"Normal");
++	    if (id > 0)
++	    {
++		syn_id2colors(id, &fg, &bg);
++		if (sgp->sg_gui_fg == INVALCOLOR)
++		    sgp->sg_gui_fg = fg;
++		if (sgp->sg_gui_bg == INVALCOLOR)
++		    sgp->sg_gui_bg = bg;
++	    }
++
++	}
++#  endif
+ 	at_en.ae_u.cterm.fg_rgb = GUI_MCH_GET_RGB2(sgp->sg_gui_fg);
+ 	at_en.ae_u.cterm.bg_rgb = GUI_MCH_GET_RGB2(sgp->sg_gui_bg);
+ # endif
+diff --git a/src/term.c b/src/term.c
+--- a/src/term.c
++++ b/src/term.c
+@@ -560,20 +560,15 @@ static struct builtin_term builtin_termc
+     {(int)KS_VI,	"\033|v"},	/* cursor invisible */
+     {(int)KS_VE,	"\033|V"},	/* cursor visible */
+ 
+-    {(int)KS_ME,	"\033|0m"},	/* normal */
+-    {(int)KS_MR,	"\033|112m"},	/* reverse: black on lightgray */
+-    {(int)KS_MD,	"\033|15m"},	/* bold: white on black */
+-#if 1
+-    {(int)KS_SO,	"\033|31m"},	/* standout: white on blue */
+-    {(int)KS_SE,	"\033|0m"},	/* standout end */
+-#else
+-    {(int)KS_SO,	"\033|F"},	/* standout: high intensity */
++    {(int)KS_ME,	"\033|0B"},	/* normal */
++    {(int)KS_MR,	"\033|1B"},	/* reverse */
++    {(int)KS_MD,	"\033|2B"},	/* bold */
++    {(int)KS_SO,	"\033|F"},	/* standout */
+     {(int)KS_SE,	"\033|f"},	/* standout end */
+-#endif
+-    {(int)KS_CZH,	"\033|225m"},	/* italic: blue text on yellow */
++    {(int)KS_CZH,	"\033|3B"},	/* italic */
+     {(int)KS_CZR,	"\033|0m"},	/* italic end */
+-    {(int)KS_US,	"\033|67m"},	/* underscore: cyan text on red */
+-    {(int)KS_UE,	"\033|0m"},	/* underscore end */
++    {(int)KS_US,	"\033|4B"},	/* underscore */
++    {(int)KS_UE,	"\033|24m"},	/* underscore end */
+     {(int)KS_CCO,	"16"},		/* allow 16 colors */
+ #  ifdef TERMINFO
+     {(int)KS_CAB,	"\033|%p1%db"},	/* set background color */
+@@ -600,6 +595,10 @@ static struct builtin_term builtin_termc
+ #  else
+     {(int)KS_CS,	"\033|%i%d;%dr"},/* scroll region */
+ #  endif
++#  ifdef FEAT_TERMGUICOLORS
++    {(int)KS_8F,	"\033|38;2;%lu;%lu;%lum"},
++    {(int)KS_8B,	"\033|48;2;%lu;%lu;%lum"},
++#  endif
+ 
+     {K_UP,		"\316H"},
+     {K_DOWN,		"\316P"},
+@@ -2007,6 +2006,11 @@ set_termname(char_u *term)
+     may_req_termresponse();
+ #endif
+ 
++#if defined(WIN3264) && !defined(FEAT_GUI) && defined(FEAT_TERMGUICOLORS)
++    if (STRCMP(term, "win32") == 0)
++	set_color_count((p_tgc) ? 256 : 16);
++#endif
++
+     return OK;
+ }
+ 
+@@ -6538,39 +6542,6 @@ translate_mapping(
+ }
+ #endif
+ 
+-#if (defined(WIN3264) && !defined(FEAT_GUI)) || defined(PROTO)
+-static char ksme_str[20];
+-static char ksmr_str[20];
+-static char ksmd_str[20];
+-
+-/*
+- * For Win32 console: update termcap codes for existing console attributes.
+- */
+-    void
+-update_tcap(int attr)
+-{
+-    struct builtin_term *p;
+-
+-    p = find_builtin_term(DEFAULT_TERM);
+-    sprintf(ksme_str, IF_EB("\033|%dm", ESC_STR "|%dm"), attr);
+-    sprintf(ksmd_str, IF_EB("\033|%dm", ESC_STR "|%dm"),
+-				     attr | 0x08);  /* FOREGROUND_INTENSITY */
+-    sprintf(ksmr_str, IF_EB("\033|%dm", ESC_STR "|%dm"),
+-				 ((attr & 0x0F) << 4) | ((attr & 0xF0) >> 4));
+-
+-    while (p->bt_string != NULL)
+-    {
+-      if (p->bt_entry == (int)KS_ME)
+-	  p->bt_string = &ksme_str[0];
+-      else if (p->bt_entry == (int)KS_MR)
+-	  p->bt_string = &ksmr_str[0];
+-      else if (p->bt_entry == (int)KS_MD)
+-	  p->bt_string = &ksmd_str[0];
+-      ++p;
+-    }
+-}
+-#endif
+-
+ #if defined(FEAT_GUI) || defined(FEAT_TERMGUICOLORS) || defined(PROTO)
+     static int
+ hex_digit(int c)
