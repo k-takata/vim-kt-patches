@@ -2,7 +2,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 index f33fd3b9e6..54ea38e27c 100644
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -3696,7 +3696,22 @@ vim_beep(
+@@ -3696,7 +3696,21 @@ vim_beep(
  			&& !(gui.in_use && gui.starting)
  #endif
  			)
@@ -18,7 +18,6 @@ index f33fd3b9e6..54ea38e27c 100644
 +		    {
 +			redraw_later(CLEAR);
 +			update_screen(0);
-+			redrawcmd();
 +		    }
 +#endif
 +		}
