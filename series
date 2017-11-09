@@ -37,7 +37,6 @@ mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
 pr-2010.diff
-improve-loading-menu.vim.patch
 mingw-lua-dir.patch
 2060.diff
 fix-config_cache-removal.patch #+rejected
