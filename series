@@ -40,5 +40,4 @@ pr-2010.diff
 improve-loading-menu.vim.patch
 mingw-lua-dir.patch
 2060.diff
-2060-4.diff
 fix-config_cache-removal.patch #+rejected
