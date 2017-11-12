@@ -78,7 +78,7 @@ index ceafea389e..57a2783d48 100644
  #endif
  
 diff --git a/src/os_win32.c b/src/os_win32.c
-index 7654c31002..6fbca9c3ac 100644
+index 7654c31002..683119eed3 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
 @@ -182,6 +182,11 @@ static void delete_lines(unsigned cLines);
@@ -367,14 +367,14 @@ index 7654c31002..6fbca9c3ac 100644
 +    {
 +	fill.Char.AsciiChar = ' ';
 +	fill.Attributes = g_attrCurrent;
-+
+ 
+-    ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
 +	ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
 +    }
 +    else
 +    {
 +	set_console_color_rgb();
- 
--    ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
++
 +	gotoxy(1, source.Top + 1);
 +	vtp_printf("\033[%dS", cLines);
 +    }
@@ -678,12 +678,12 @@ index 7654c31002..6fbca9c3ac 100644
 +			textcolor((WORD) arg1);
 +		    else if (USE_VTP)
 +			vtp_sgr_bulks(argc, args);
- 		}
--		else if (*p == 'A')
++		}
 +		else if (argc == 2 && *p == 'H')
 +		{
 +		    gotoxy(arg2, arg1);
-+		}
+ 		}
+-		else if (*p == 'A')
 +		else if (argc == 2 && *p == 'r')
 +		{
 +		    set_scroll_region(0, arg1 - 1, Columns - 1, arg2 - 1);
@@ -780,7 +780,7 @@ index 7654c31002..6fbca9c3ac 100644
  		gotoxy(min(g_srScrollRegion.Right, g_coord.X + 1) + 1,
  		       g_coord.Y + 1);
  		goto got3;
-@@ -7232,3 +7495,175 @@ mch_setenv(char *var, char *value, int x)
+@@ -7232,3 +7495,184 @@ mch_setenv(char *var, char *value, int x)
  
      return 0;
  }
@@ -896,6 +896,9 @@ index 7654c31002..6fbca9c3ac 100644
 +    guicolor_T fg = INVALCOLOR;
 +    guicolor_T bg = INVALCOLOR;
 +
++    if (!USE_VTP)
++	return;
++
 +    id = syn_name2id((char_u *)"Normal");
 +    if (id > 0)
 +	syn_id2colors(id, &fg, &bg);
@@ -955,17 +958,24 @@ index 7654c31002..6fbca9c3ac 100644
 +    return has_vtp;
 +}
 +
++    int
++vtp_use_stat(void)
++{
++    return (USE_VTP);
++}
++
 +#endif
 diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
-index 188a45be06..53af719578 100644
+index 188a45be06..f04fac3063 100644
 --- a/src/proto/os_win32.pro
 +++ b/src/proto/os_win32.pro
-@@ -68,4 +68,6 @@ void set_alist_count(void);
+@@ -68,4 +68,7 @@ void set_alist_count(void);
  void fix_arg_enc(void);
  int mch_setenv(char *var, char *value, int x);
  void win32_build_env(dict_T *l, garray_T *gap);
 +void control_console_color_rgb(void);
 +int vtp_get_stat(void);
++int vtp_use_stat(void);
  /* vim: set ft=c : */
 diff --git a/src/proto/term.pro b/src/proto/term.pro
 index ef74f5647c..8f5b78028c 100644
@@ -979,6 +989,36 @@ index ef74f5647c..8f5b78028c 100644
  guicolor_T gui_get_color_cmn(char_u *name);
  guicolor_T gui_get_rgb_color_cmn(int r, int g, int b);
  /* vim: set ft=c : */
+diff --git a/src/screen.c b/src/screen.c
+index 05853d442e..96186c55f5 100644
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -2170,6 +2170,25 @@ win_update(win_T *wp)
+      * End of loop over all window lines.
+      */
+ 
++#if !defined(FEAT_GUI) && defined(WIN3264)
++    /* Rewrite the character at the end of the screen line. */
++    if (vtp_use_stat())
++    {
++	int i;
++
++	for (i = 0; i < Rows; ++i)
++# ifdef FEAT_MBYTE
++	    if (enc_utf8)
++		if ((*mb_off2cells)(LineOffset[i] + Columns - 2,
++					   LineOffset[i] + screen_Columns) > 1)
++		    screen_draw_rectangle(i, Columns - 2, 1, 2, FALSE);
++		else
++		    screen_draw_rectangle(i, Columns - 1, 1, 1, FALSE);
++	    else
++# endif
++		screen_char(LineOffset[i] + Columns - 1, i, Columns - 1);
++    }
++#endif
+ 
+     if (idx > wp->w_lines_valid)
+ 	wp->w_lines_valid = idx;
 diff --git a/src/syntax.c b/src/syntax.c
 index 8444db38c6..1fda2e8c62 100644
 --- a/src/syntax.c
@@ -1113,3 +1153,15 @@ index ef88705ffd..8b3b9ae88e 100644
  #if defined(FEAT_GUI) || defined(FEAT_TERMGUICOLORS) || defined(PROTO)
      static int
  hex_digit(int c)
+diff --git a/src/testdir/gen_opt_test.vim b/src/testdir/gen_opt_test.vim
+index 32283c99bf..ac8b7c6e70 100644
+--- a/src/testdir/gen_opt_test.vim
++++ b/src/testdir/gen_opt_test.vim
+@@ -125,6 +125,7 @@ let test_values = {
+       \ 'switchbuf': [['', 'useopen', 'split,newtab'], ['xxx']],
+       \ 'tagcase': [['smart', 'match'], ['', 'xxx', 'smart,match']],
+       \ 'term': [[], []],
++      \ 'termguicolors': [[], []],
+       \ 'termsize': [['', '24x80', '0x80', '32x0', '0x0'], ['xxx', '80', '8ax9', '24x80b']],
+       \ 'toolbar': [['', 'icons', 'text'], ['xxx']],
+       \ 'toolbariconsize': [['', 'tiny', 'huge'], ['xxx']],
