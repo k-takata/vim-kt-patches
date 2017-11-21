@@ -1,8 +1,10 @@
+# HG changeset patch
+# Parent  8122943bd5420e1d06dd925ffd5c4bea724dff40
+
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index 6bd9f762fc..5e7c9531bd 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -7811,7 +7811,7 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -7849,7 +7849,7 @@ A jump table for the options with a shor
  		:set encoding=utf-8
  <	You need to do this when your system has no locale support for UTF-8.
  
@@ -11,7 +13,7 @@ index 6bd9f762fc..5e7c9531bd 100644
  'termguicolors' 'tgc'	boolean (default off)
  			global
  			{not in Vi}
-@@ -7819,7 +7819,8 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -7857,7 +7857,8 @@ A jump table for the options with a shor
  			|+termguicolors| feature}
  	When on, uses |highlight-guifg| and |highlight-guibg| attributes in
  	the terminal (thus using 24-bit color). Requires a ISO-8613-3
@@ -22,10 +24,9 @@ index 6bd9f762fc..5e7c9531bd 100644
  	reading |xterm-true-color| might help.
  	Note that the "cterm" attributes are still used, not the "gui" ones.
 diff --git a/src/misc1.c b/src/misc1.c
-index f33fd3b9e6..fc3ba67454 100644
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -3696,7 +3696,22 @@ vim_beep(
+@@ -3697,7 +3697,22 @@ vim_beep(
  			&& !(gui.in_use && gui.starting)
  #endif
  			)
@@ -49,10 +50,9 @@ index f33fd3b9e6..fc3ba67454 100644
  		    out_char(BELL);
  #ifdef ELAPSED_FUNC
 diff --git a/src/option.c b/src/option.c
-index ceafea389e..57a2783d48 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -8630,10 +8630,24 @@ set_bool_option(
+@@ -8670,10 +8670,24 @@ set_bool_option(
      /* 'termguicolors' */
      else if ((int *)varp == &p_tgc)
      {
@@ -78,10 +78,9 @@ index ceafea389e..57a2783d48 100644
  #endif
  
 diff --git a/src/os_win32.c b/src/os_win32.c
-index 7654c31002..683119eed3 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -182,6 +182,11 @@ static void delete_lines(unsigned cLines);
+@@ -182,6 +182,11 @@ static void delete_lines(unsigned cLines
  static void gotoxy(unsigned x, unsigned y);
  static void normvideo(void);
  static void textattr(WORD wAttr);
@@ -93,7 +92,7 @@ index 7654c31002..683119eed3 100644
  static void textcolor(WORD wAttr);
  static void textbackground(WORD wAttr);
  static void standout(void);
-@@ -203,6 +208,32 @@ static int win32_setattrs(char_u *name, int attrs);
+@@ -203,6 +208,32 @@ static int win32_setattrs(char_u *name, 
  static int win32_set_archive(char_u *name);
  
  #ifndef FEAT_GUI_W32
@@ -181,7 +180,7 @@ index 7654c31002..683119eed3 100644
  /*
   * Version of ReadConsoleInput() that works with IME.
   * Works around problems on Windows 8.
-@@ -2546,9 +2625,6 @@ mch_init(void)
+@@ -2551,9 +2630,6 @@ mch_init(void)
      if (cterm_normal_bg_color == 0)
  	cterm_normal_bg_color = ((g_attrCurrent >> 4) & 0xf) + 1;
  
@@ -191,7 +190,7 @@ index 7654c31002..683119eed3 100644
      GetConsoleCursorInfo(g_hConOut, &g_cci);
      GetConsoleMode(g_hConIn,  &g_cmodein);
      GetConsoleMode(g_hConOut, &g_cmodeout);
-@@ -2588,6 +2664,8 @@ mch_init(void)
+@@ -2593,6 +2669,8 @@ mch_init(void)
  #ifdef FEAT_CLIPBOARD
      win_clip_init();
  #endif
@@ -200,7 +199,7 @@ index 7654c31002..683119eed3 100644
  }
  
  /*
-@@ -2600,6 +2678,8 @@ mch_exit(int r)
+@@ -2605,6 +2683,8 @@ mch_exit(int r)
  {
      exiting = TRUE;
  
@@ -209,7 +208,7 @@ index 7654c31002..683119eed3 100644
      stoptermcap();
      if (g_fWindInitCalled)
  	settmode(TMODE_COOK);
-@@ -3812,7 +3892,15 @@ mch_settmode(int tmode)
+@@ -3824,7 +3904,15 @@ mch_settmode(int tmode)
  	if (g_fMouseActive)
  	    cmodein |= ENABLE_MOUSE_INPUT;
  #endif
@@ -226,7 +225,7 @@ index 7654c31002..683119eed3 100644
  	bEnableHandler = TRUE;
      }
      else /* cooked */
-@@ -5438,6 +5526,7 @@ termcap_mode_start(void)
+@@ -5475,6 +5563,7 @@ termcap_mode_start(void)
  	 * to restore the actual contents of the buffer.
  	 */
  	RestoreConsoleBuffer(&g_cbTermcap, FALSE);
@@ -234,7 +233,7 @@ index 7654c31002..683119eed3 100644
  	SetConsoleWindowInfo(g_hConOut, TRUE, &g_cbTermcap.Info.srWindow);
  	Rows = g_cbTermcap.Info.dwSize.Y;
  	Columns = g_cbTermcap.Info.dwSize.X;
-@@ -5450,6 +5539,7 @@ termcap_mode_start(void)
+@@ -5487,6 +5576,7 @@ termcap_mode_start(void)
  	 * size.  We will use this as the size of our editing environment.
  	 */
  	ClearConsoleBuffer(g_attrCurrent);
@@ -242,7 +241,7 @@ index 7654c31002..683119eed3 100644
  	ResizeConBufAndWindow(g_hConOut, Columns, Rows);
      }
  
-@@ -5498,6 +5588,7 @@ termcap_mode_end(void)
+@@ -5535,6 +5625,7 @@ termcap_mode_end(void)
      cb = &g_cbNonTermcap;
  #endif
      RestoreConsoleBuffer(cb, p_rs);
@@ -250,7 +249,7 @@ index 7654c31002..683119eed3 100644
      SetConsoleCursorInfo(g_hConOut, &g_cci);
  
      if (p_rs || exiting)
-@@ -5552,7 +5643,11 @@ clear_chars(
+@@ -5589,7 +5680,11 @@ clear_chars(
      DWORD dwDummy;
  
      FillConsoleOutputCharacter(g_hConOut, ' ', n, coord, &dwDummy);
@@ -263,7 +262,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5563,7 +5658,15 @@ clear_chars(
+@@ -5600,7 +5695,15 @@ clear_chars(
  clear_screen(void)
  {
      g_coord.X = g_coord.Y = 0;
@@ -280,7 +279,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5573,8 +5676,20 @@ clear_screen(void)
+@@ -5610,8 +5713,20 @@ clear_screen(void)
      static void
  clear_to_end_of_display(void)
  {
@@ -302,7 +301,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5584,7 +5699,19 @@ clear_to_end_of_display(void)
+@@ -5621,7 +5736,19 @@ clear_to_end_of_display(void)
      static void
  clear_to_end_of_line(void)
  {
@@ -323,7 +322,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5623,6 +5750,9 @@ set_scroll_region(
+@@ -5660,6 +5787,9 @@ set_scroll_region(
      g_srScrollRegion.Top =    top;
      g_srScrollRegion.Right =  right;
      g_srScrollRegion.Bottom = bottom;
@@ -333,18 +332,19 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5644,10 +5774,20 @@ insert_lines(unsigned cLines)
+@@ -5681,10 +5811,20 @@ insert_lines(unsigned cLines)
      source.Right  = g_srScrollRegion.Right;
      source.Bottom = g_srScrollRegion.Bottom - cLines;
  
 -    fill.Char.AsciiChar = ' ';
 -    fill.Attributes = g_attrCurrent;
+-
+-    ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
 +    if (!USE_VTP)
 +    {
 +	fill.Char.AsciiChar = ' ';
 +	fill.Attributes = g_attrCurrent;
- 
--    ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
++
 +	ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
 +    }
 +    else
@@ -357,18 +357,19 @@ index 7654c31002..683119eed3 100644
  
      /* Here we have to deal with a win32 console flake: If the scroll
       * region looks like abc and we scroll c to a and fill with d we get
-@@ -5686,10 +5826,20 @@ delete_lines(unsigned cLines)
+@@ -5723,10 +5863,20 @@ delete_lines(unsigned cLines)
      source.Right  = g_srScrollRegion.Right;
      source.Bottom = g_srScrollRegion.Bottom;
  
 -    fill.Char.AsciiChar = ' ';
 -    fill.Attributes = g_attrCurrent;
+-
+-    ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
 +    if (!USE_VTP)
 +    {
 +	fill.Char.AsciiChar = ' ';
 +	fill.Attributes = g_attrCurrent;
- 
--    ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
++
 +	ScrollConsoleScreenBuffer(g_hConOut, &source, NULL, dest, &fill);
 +    }
 +    else
@@ -381,7 +382,7 @@ index 7654c31002..683119eed3 100644
  
      /* Here we have to deal with a win32 console flake: If the scroll
       * region looks like abc and we scroll c to a and fill with d we get
-@@ -5725,7 +5875,11 @@ gotoxy(
+@@ -5762,7 +5912,11 @@ gotoxy(
      /* external cursor coords are 1-based; internal are 0-based */
      g_coord.X = x - 1;
      g_coord.Y = y - 1;
@@ -394,7 +395,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5743,11 +5897,73 @@ textattr(WORD wAttr)
+@@ -5780,11 +5934,73 @@ textattr(WORD wAttr)
  
  
      static void
@@ -469,7 +470,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5756,7 +5972,10 @@ textbackground(WORD wAttr)
+@@ -5793,7 +6009,10 @@ textbackground(WORD wAttr)
  {
      g_attrCurrent = (g_attrCurrent & 0x0f) + ((wAttr & 0x0f) << 4);
  
@@ -481,7 +482,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5766,7 +5985,10 @@ textbackground(WORD wAttr)
+@@ -5803,7 +6022,10 @@ textbackground(WORD wAttr)
      static void
  normvideo(void)
  {
@@ -493,7 +494,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5779,7 +6001,11 @@ static WORD g_attrPreStandout = 0;
+@@ -5816,7 +6038,11 @@ static WORD g_attrPreStandout = 0;
  standout(void)
  {
      g_attrPreStandout = g_attrCurrent;
@@ -506,18 +507,20 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5789,35 +6015,30 @@ standout(void)
+@@ -5826,35 +6052,30 @@ standout(void)
      static void
  standend(void)
  {
 -    if (g_attrPreStandout)
-+    if (!USE_VTP)
-     {
+-    {
 -	textattr(g_attrPreStandout);
 -	g_attrPreStandout = 0;
+-    }
++    if (!USE_VTP)
++    {
 +	if (g_attrPreStandout)
 +	    textattr(g_attrPreStandout);
-     }
++    }
 +    else
 +	vtp_printf("\033[39m");	/* default color */
 +
@@ -556,7 +559,7 @@ index 7654c31002..683119eed3 100644
  }
  
  
-@@ -5841,7 +6062,8 @@ visual_bell(void)
+@@ -5878,7 +6099,8 @@ visual_bell(void)
  			       coordOrigin, &dwDummy);
  
      Sleep(15);	    /* wait for 15 msec */
@@ -566,7 +569,7 @@ index 7654c31002..683119eed3 100644
  				coordOrigin, &dwDummy);
      vim_free(oldattrs);
  }
-@@ -5891,14 +6113,24 @@ write_chars(
+@@ -5929,14 +6151,24 @@ write_chars(
  			    unicodebuf, unibuflen);
  
  	cells = mb_string2cells(pchBuf, cbToWrite);
@@ -599,7 +602,7 @@ index 7654c31002..683119eed3 100644
  
  	if (cchwritten == length)
  	{
-@@ -5917,14 +6149,23 @@ write_chars(
+@@ -5955,14 +6187,23 @@ write_chars(
      else
  #endif
      {
@@ -631,7 +634,7 @@ index 7654c31002..683119eed3 100644
  
  	g_coord.X += (SHORT) written;
      }
-@@ -6050,67 +6291,94 @@ mch_write(
+@@ -6088,67 +6329,94 @@ mch_write(
  	    char_u  *old_s = s;
  #endif
  	    char_u  *p;
@@ -659,15 +662,16 @@ index 7654c31002..683119eed3 100644
 +		    argc += (argc < 15) ? 1 : 0;
  		    if (p > s + len)
  			break;
-+		} while (*p == ';');
-+
-+		if (p > s + len)
-+		    break;
- 
+-
 -		    if (*p == 'H')
 -			gotoxy(arg2, arg1);
 -		    else if (*p == 'r')
 -			set_scroll_region(0, arg1 - 1, Columns - 1, arg2 - 1);
++		} while (*p == ';');
++
++		if (p > s + len)
++		    break;
++
 +		arg1 = args[0];
 +		arg2 = args[1];
 +		if (*p == 'm')
@@ -678,19 +682,19 @@ index 7654c31002..683119eed3 100644
 +			textcolor((WORD) arg1);
 +		    else if (USE_VTP)
 +			vtp_sgr_bulks(argc, args);
-+		}
-+		else if (argc == 2 && *p == 'H')
-+		{
-+		    gotoxy(arg2, arg1);
  		}
 -		else if (*p == 'A')
++		else if (argc == 2 && *p == 'H')
+ 		{
+-		    /* move cursor up arg1 lines in same column */
++		    gotoxy(arg2, arg1);
++		}
 +		else if (argc == 2 && *p == 'r')
 +		{
 +		    set_scroll_region(0, arg1 - 1, Columns - 1, arg2 - 1);
 +		}
 +		else if (argc == 1 && *p == 'A')
- 		{
--		    /* move cursor up arg1 lines in same column */
++		{
  		    gotoxy(g_coord.X + 1,
  			   max(g_srScrollRegion.Top, g_coord.Y - arg1) + 1);
  		}
@@ -698,8 +702,6 @@ index 7654c31002..683119eed3 100644
 +		else if (argc == 1 && *p == 'B')
  		{
 -		    /* move cursor right arg1 columns in same line */
--		    gotoxy(min(g_srScrollRegion.Right, g_coord.X + arg1) + 1,
--			   g_coord.Y + 1);
 +		    if (args[0] == 0)
 +		    {
 +			textattr_normal();
@@ -720,47 +722,51 @@ index 7654c31002..683119eed3 100644
 +		    {
 +			textattr_underscore();
 +		    }
++		}
++		else if (argc == 1 && *p == 'b')
++		{
++		    textbackground((WORD) arg1);
++		}
++		else if (argc == 1 && *p == 'C')
++		{
+ 		    gotoxy(min(g_srScrollRegion.Right, g_coord.X + arg1) + 1,
+ 			   g_coord.Y + 1);
  		}
 -		else if (*p == 'H')
-+		else if (argc == 1 && *p == 'b')
++		else if (argc == 1 && *p == 'f')
++		{
++		    textcolor((WORD) arg1);
++		}
++		else if (argc == 1 && *p == 'H')
  		{
--		    gotoxy(1, arg1);
-+		    textbackground((WORD) arg1);
+ 		    gotoxy(1, arg1);
  		}
 -		else if (*p == 'L')
-+		else if (argc == 1 && *p == 'C')
++		else if (argc == 1 && *p == 'L')
  		{
--		    insert_lines(arg1);
-+		    gotoxy(min(g_srScrollRegion.Right, g_coord.X + arg1) + 1,
-+			   g_coord.Y + 1);
+ 		    insert_lines(arg1);
  		}
 -		else if (*p == 'm')
-+		else if (argc == 1 && *p == 'f')
- 		{
+-		{
 -		    if (arg1 == 0)
 -			normvideo();
 -		    else
 -			textattr((WORD) arg1);
-+		    textcolor((WORD) arg1);
- 		}
+-		}
 -		else if (*p == 'f')
-+		else if (argc == 1 && *p == 'H')
- 		{
+-		{
 -		    textcolor((WORD) arg1);
-+		    gotoxy(1, arg1);
- 		}
+-		}
 -		else if (*p == 'b')
-+		else if (argc == 1 && *p == 'L')
- 		{
+-		{
 -		    textbackground((WORD) arg1);
-+		    insert_lines(arg1);
- 		}
+-		}
 -		else if (*p == 'M')
 +		else if (argc == 1 && *p == 'M')
  		{
  		    delete_lines(arg1);
  		}
-@@ -6119,11 +6387,7 @@ mch_write(
+@@ -6157,11 +6425,7 @@ mch_write(
  		s = p + 1;
  		break;
  
@@ -772,7 +778,7 @@ index 7654c31002..683119eed3 100644
  		gotoxy(g_coord.X + 1,
  		       max(g_srScrollRegion.Top, g_coord.Y - 1) + 1);
  		goto got3;
-@@ -6133,7 +6397,6 @@ mch_write(
+@@ -6171,7 +6435,6 @@ mch_write(
  		goto got3;
  
  	    case 'C':
@@ -780,7 +786,7 @@ index 7654c31002..683119eed3 100644
  		gotoxy(min(g_srScrollRegion.Right, g_coord.X + 1) + 1,
  		       g_coord.Y + 1);
  		goto got3;
-@@ -7232,3 +7495,184 @@ mch_setenv(char *var, char *value, int x)
+@@ -7270,3 +7533,184 @@ mch_setenv(char *var, char *value, int x
  
      return 0;
  }
@@ -966,19 +972,17 @@ index 7654c31002..683119eed3 100644
 +
 +#endif
 diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
-index 188a45be06..f04fac3063 100644
 --- a/src/proto/os_win32.pro
 +++ b/src/proto/os_win32.pro
 @@ -68,4 +68,7 @@ void set_alist_count(void);
  void fix_arg_enc(void);
  int mch_setenv(char *var, char *value, int x);
- void win32_build_env(dict_T *l, garray_T *gap);
+ void win32_build_env(dict_T *l, garray_T *gap, int is_terminal);
 +void control_console_color_rgb(void);
 +int vtp_get_stat(void);
 +int vtp_use_stat(void);
  /* vim: set ft=c : */
 diff --git a/src/proto/term.pro b/src/proto/term.pro
-index ef74f5647c..8f5b78028c 100644
 --- a/src/proto/term.pro
 +++ b/src/proto/term.pro
 @@ -71,7 +71,6 @@ int find_term_bykeys(char_u *src);
@@ -990,7 +994,6 @@ index ef74f5647c..8f5b78028c 100644
  guicolor_T gui_get_rgb_color_cmn(int r, int g, int b);
  /* vim: set ft=c : */
 diff --git a/src/screen.c b/src/screen.c
-index 05853d442e..96186c55f5 100644
 --- a/src/screen.c
 +++ b/src/screen.c
 @@ -2170,6 +2170,25 @@ win_update(win_T *wp)
@@ -1020,10 +1023,9 @@ index 05853d442e..96186c55f5 100644
      if (idx > wp->w_lines_valid)
  	wp->w_lines_valid = idx;
 diff --git a/src/syntax.c b/src/syntax.c
-index 8444db38c6..1fda2e8c62 100644
 --- a/src/syntax.c
 +++ b/src/syntax.c
-@@ -8927,6 +8927,10 @@ get_cterm_attr_idx(int attr, int fg, int bg)
+@@ -8927,6 +8927,10 @@ get_cterm_attr_idx(int attr, int fg, int
      attrentry_T		at_en;
  
      vim_memset(&at_en, 0, sizeof(attrentry_T));
@@ -1059,10 +1061,9 @@ index 8444db38c6..1fda2e8c62 100644
  	at_en.ae_u.cterm.bg_rgb = GUI_MCH_GET_RGB2(sgp->sg_gui_bg);
  # endif
 diff --git a/src/term.c b/src/term.c
-index ef88705ffd..8b3b9ae88e 100644
 --- a/src/term.c
 +++ b/src/term.c
-@@ -560,20 +560,15 @@ static struct builtin_term builtin_termcaps[] =
+@@ -560,20 +560,15 @@ static struct builtin_term builtin_termc
      {(int)KS_VI,	"\033|v"},	/* cursor invisible */
      {(int)KS_VE,	"\033|V"},	/* cursor visible */
  
@@ -1090,7 +1091,7 @@ index ef88705ffd..8b3b9ae88e 100644
      {(int)KS_CCO,	"16"},		/* allow 16 colors */
  #  ifdef TERMINFO
      {(int)KS_CAB,	"\033|%p1%db"},	/* set background color */
-@@ -600,6 +595,10 @@ static struct builtin_term builtin_termcaps[] =
+@@ -600,6 +595,10 @@ static struct builtin_term builtin_termc
  #  else
      {(int)KS_CS,	"\033|%i%d;%dr"},/* scroll region */
  #  endif
@@ -1113,7 +1114,7 @@ index ef88705ffd..8b3b9ae88e 100644
      return OK;
  }
  
-@@ -6538,39 +6542,6 @@ translate_mapping(
+@@ -6559,39 +6563,6 @@ translate_mapping(
  }
  #endif
  
@@ -1154,7 +1155,6 @@ index ef88705ffd..8b3b9ae88e 100644
      static int
  hex_digit(int c)
 diff --git a/src/testdir/gen_opt_test.vim b/src/testdir/gen_opt_test.vim
-index 32283c99bf..ac8b7c6e70 100644
 --- a/src/testdir/gen_opt_test.vim
 +++ b/src/testdir/gen_opt_test.vim
 @@ -125,6 +125,7 @@ let test_values = {
