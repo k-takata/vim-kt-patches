@@ -677,7 +677,7 @@ index 647f479a6..725308cc8 100644
  
  void DWriteContext_SetRenderingParams(
 diff --git a/src/gui_w32.c b/src/gui_w32.c
-index d1c9605ca..e302d76f2 100644
+index d1c9605ca..73f85c6b3 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
 @@ -34,28 +34,14 @@ static DWriteContext *s_dwc = NULL;
@@ -879,28 +879,42 @@ index d1c9605ca..e302d76f2 100644
      GetPixel(s_hdc, FILL_X(gui.col), FILL_Y(gui.row));
  }
  
-@@ -6170,6 +6218,20 @@ gui_mch_draw_string(
+@@ -6126,6 +6174,17 @@ RevOut( HDC s_hdc,
+ }
+ #endif
+ 
++    static int
++gui_is_outline_font_selected(HDC hdc)
++{
++    TEXTMETRIC tm;
++
++    GetTextMetrics(hdc, &tm);
++    if (tm.tmPitchAndFamily & (TMPF_TRUETYPE | TMPF_VECTOR))
++	return 1;
++    return 0;
++}
++
+     void
+ gui_mch_draw_string(
+     int		row,
+@@ -6170,6 +6229,16 @@ gui_mch_draw_string(
      HBRUSH		hbr;
      RECT		rc;
  
++    SelectFont(s_hdc, gui.currFont);
 +#ifdef FEAT_DIRECTX
 +    if (IS_ENABLE_DIRECTX())
 +    {
-+	TEXTMETRIC tm;
-+
-+	GetTextMetrics(s_hdc, &tm);
-+	if (tm.tmPitchAndFamily & (TMPF_TRUETYPE | TMPF_VECTOR))
-+	{
-+	    font_is_ttf_or_vector = 1;
++	font_is_ttf_or_vector = gui_is_outline_font_selected(s_hdc);
++	if (font_is_ttf_or_vector)
 +	    DWriteContext_SetFont(s_dwc, (HFONT)gui.currFont);
-+	}
 +    }
 +#endif
 +
      if (!(flags & DRAW_TRANSP))
      {
  	/*
-@@ -6210,6 +6272,11 @@ gui_mch_draw_string(
+@@ -6210,6 +6279,11 @@ gui_mch_draw_string(
  	    hbr = hbr_cache[brush_lru];
  	    brush_lru = !brush_lru;
  	}
@@ -912,10 +926,12 @@ index d1c9605ca..e302d76f2 100644
  	FillRect(s_hdc, &rc, hbr);
  
  	SetBkMode(s_hdc, TRANSPARENT);
-@@ -6227,20 +6294,6 @@ gui_mch_draw_string(
+@@ -6225,21 +6299,6 @@ gui_mch_draw_string(
+ 	}
+     }
      SetTextColor(s_hdc, gui.currFgColor);
-     SelectFont(s_hdc, gui.currFont);
- 
+-    SelectFont(s_hdc, gui.currFont);
+-
 -#ifdef FEAT_DIRECTX
 -    if (IS_ENABLE_DIRECTX())
 -    {
@@ -929,11 +945,10 @@ index d1c9605ca..e302d76f2 100644
 -	}
 -    }
 -#endif
--
+ 
      if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
      {
- 	vim_free(padding);
-@@ -6352,7 +6405,7 @@ gui_mch_draw_string(
+@@ -6352,7 +6411,7 @@ gui_mch_draw_string(
  	if (IS_ENABLE_DIRECTX() && font_is_ttf_or_vector)
  	{
  	    /* Add one to "cells" for italics. */
@@ -942,7 +957,7 @@ index d1c9605ca..e302d76f2 100644
  		    TEXT_X(col), TEXT_Y(row), FILL_X(cells + 1), FILL_Y(1),
  		    gui.char_width, gui.currFgColor);
  	}
-@@ -6413,6 +6466,12 @@ gui_mch_draw_string(
+@@ -6413,6 +6472,12 @@ gui_mch_draw_string(
  			 foptions, pcliprect, (char *)text, len, padding);
      }
  
@@ -955,7 +970,7 @@ index d1c9605ca..e302d76f2 100644
      /* Underline */
      if (flags & DRAW_UNDERL)
      {
-@@ -6475,6 +6534,11 @@ gui_mch_flush(void)
+@@ -6475,6 +6540,11 @@ gui_mch_flush(void)
      BOOL  __stdcall GdiFlush(void);
  #   endif
  
@@ -967,19 +982,19 @@ index d1c9605ca..e302d76f2 100644
      GdiFlush();
  }
  
-@@ -6483,6 +6547,11 @@ clear_rect(RECT *rcp)
+@@ -6483,6 +6553,11 @@ clear_rect(RECT *rcp)
  {
      HBRUSH  hbr;
  
 +#if defined(FEAT_DIRECTX)
-+    if (IS_ENABLE_DIRECTX())
++    if (IS_ENABLE_DIRECTX() && gui_is_outline_font_selected(s_hdc))
 +	DWriteContext_FillRect(s_dwc, rcp, gui.back_pixel);
 +#endif
 +
      hbr = CreateSolidBrush(gui.back_pixel);
      FillRect(s_hdc, rcp, hbr);
      DeleteBrush(hbr);
-@@ -8388,6 +8457,11 @@ gui_mch_drawsign(int row, int col, int typenr)
+@@ -8388,6 +8463,11 @@ gui_mch_drawsign(int row, int col, int typenr)
      if (!gui.in_use || (sign = (signicon_t *)sign_get_image(typenr)) == NULL)
  	return;
  
@@ -991,7 +1006,7 @@ index d1c9605ca..e302d76f2 100644
      x = TEXT_X(col);
      y = TEXT_Y(row);
      w = gui.char_width * 2;
-@@ -8867,6 +8941,11 @@ netbeans_draw_multisign_indicator(int row)
+@@ -8867,6 +8947,11 @@ netbeans_draw_multisign_indicator(int row)
      x = 0;
      y = TEXT_Y(row);
  
