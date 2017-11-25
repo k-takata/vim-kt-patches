@@ -1,51 +1,5 @@
-diff --git a/.gitignore b/.gitignore
-index f31e233bb..30a4469c6 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -39,6 +39,8 @@ src/Obj*/pathdef.c
- gvimext.dll
- gvimext.lib
- gvim.lib
-+gvimd.lib
-+vimd.lib
- runtime/doc/uganda.nsis.txt
- 
- # Borland C++
-diff --git a/src/emoji.vim b/src/emoji.vim
-new file mode 100644
-index 000000000..1b313c772
---- /dev/null
-+++ b/src/emoji.vim
-@@ -0,0 +1,27 @@
-+" gvim -u emoji.vim -U NONE --noplugin
-+
-+set encoding=utf-8
-+scriptencoding utf-8
-+set guioptions=
-+set gfn=Segoe_UI_Mono:h18
-+set buftype=nofile
-+set linespace=0
-+set lines=19 columns=36
-+set rop=type:directx,renmode:5
-+
-+call append(line('$'), '  🌀🌁🌂🌃🌄🌅🌆🌇🌈🌉🌊🌋🌌🌍🌎🌏')
-+call append(line('$'), '  🌐🌑🌒🌓🌔🌕🌖🌗🌘🌙🌚🌛🌜🌝🌞🌟')
-+call append(line('$'), '  🌠🌡🌢🌣🌤🌥🌦🌧🌨🌩🌪🌫🌬🌭🌮🌯')
-+call append(line('$'), '  🌰🌱🌲🌳🌴🌵🌶🌷🌸🌹🌺🌻🌼🌽🌾🌿')
-+call append(line('$'), '  🍀🍁🍂🍃🍄🍅🍆🍇🍈🍉🍊🍋🍌🍍🍎🍏')
-+call append(line('$'), '  🍐🍑🍒🍓🍔🍕🍖🍗🍘🍙🍚🍛🍜🍝🍞🍟')
-+call append(line('$'), '  🍠🍡🍢🍣🍤🍥🍦🍧🍨🍩🍪🍫🍬🍭🍮🍯')
-+call append(line('$'), '  🍰🍱🍲🍳🍴🍵🍶🍷🍸🍹🍺🍻🍼🍽🍾🍿')
-+call append(line('$'), '  🎀🎁🎂🎃🎄🎅🎆🎇🎈🎉🎊🎋🎌🎍🎎🎏')
-+call append(line('$'), '  🎐🎑🎒🎓🎔🎕🎖🎗🎘🎙🎚🎛🎜🎝🎞🎟')
-+call append(line('$'), '  🎠🎡🎢🎣🎤🎥🎦🎧🎨🎩🎪🎫🎬🎭🎮🎯')
-+call append(line('$'), '  🎰🎱🎲🎳🎴🎵🎶🎷🎸🎹🎺🎻🎼🎽🎾🎿')
-+call append(line('$'), '  🏀🏁🏂🏃🏄🏅🏆🏇🏈🏉🏊🏋🏌🏍🏎🏏')
-+call append(line('$'), '  🏐🏑🏒🏓🏔🏕🏖🏗🏘🏙🏚🏛🏜🏝🏞🏟')
-+call append(line('$'), '  🏠🏡🏢🏣🏤🏥🏦🏧🏨🏩🏪🏫🏬🏭🏮🏯')
-+call append(line('$'), '  🏰🏱🏲🏳🏴🏵🏶🏷🏸🏹🏺🏻🏼🏽🏾🏿')
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
-index 9873c6728..8fa291a84 100644
+index 9873c6728..655a1c5f3 100644
 --- a/src/gui_dwrite.cpp
 +++ b/src/gui_dwrite.cpp
 @@ -4,6 +4,7 @@
@@ -62,7 +16,7 @@ index 9873c6728..8fa291a84 100644
  #include <d2d1helper.h>
 -#include <dwrite.h>
 +
-+// Disable these macros to compile by old VC with newer SDK (V8.1 or later).
++// Disable these macros to compile with old VC and newer SDK (V8.1 or later).
 +#if defined(_MSC_VER) && (_MSC_VER < 1700)
 +# define _COM_Outptr_ __out
 +# define _In_reads_(s)
@@ -96,7 +50,7 @@ index 9873c6728..8fa291a84 100644
      static DWRITE_PIXEL_GEOMETRY
  ToPixelGeometry(int value)
  {
-@@ -184,6 +189,62 @@ ToInt(DWRITE_RENDERING_MODE value)
+@@ -184,17 +189,76 @@ ToInt(DWRITE_RENDERING_MODE value)
      }
  }
  
@@ -159,17 +113,49 @@ index 9873c6728..8fa291a84 100644
  class AdjustedGlyphRun : public DWRITE_GLYPH_RUN
  {
  private:
-@@ -228,26 +289,27 @@ public:
++    FLOAT &mAccum;
+     FLOAT mDelta;
+     FLOAT *mAdjustedAdvances;
+ 
+ public:
+     AdjustedGlyphRun(
+ 	    const DWRITE_GLYPH_RUN *glyphRun,
+-	    FLOAT cellWidth) :
++	    FLOAT cellWidth,
++	    FLOAT &accum) :
+ 	DWRITE_GLYPH_RUN(*glyphRun),
++	mAccum(accum),
+ 	mDelta(0.0f),
+ 	mAdjustedAdvances(new FLOAT[glyphRun->glyphCount])
+     {
+@@ -211,14 +275,10 @@ public:
+ 
+     ~AdjustedGlyphRun(void)
+     {
++	mAccum += mDelta;
+ 	delete[] mAdjustedAdvances;
+     }
+ 
+-    FLOAT getDelta(void) const
+-    {
+-	return mDelta;
+-    }
+-
+     static FLOAT adjustToCell(FLOAT value, FLOAT cellWidth)
+     {
+ 	int cellCount = (int)floor(value / cellWidth + 0.5f);
+@@ -228,26 +288,29 @@ public:
      }
  };
  
 -class GdiTextRenderer FINAL : public IDWriteTextRenderer
 +struct TextRendererContext {
-+    FLOAT   cellWidth;
++    // const fields.
 +    COLORREF color;
++    FLOAT cellWidth;
 +
 +    // working fields.
-+    FLOAT   offsetX;
++    FLOAT offsetX;
 +};
 +
 +class TextRenderer FINAL : public IDWriteTextRenderer
@@ -190,7 +176,7 @@ index 9873c6728..8fa291a84 100644
  	AddRef();
      }
  
--    // add "virtual" to avoid a compiler warning
+     // add "virtual" to avoid a compiler warning
 -    virtual ~GdiTextRenderer()
 +    virtual ~TextRenderer()
      {
@@ -199,7 +185,7 @@ index 9873c6728..8fa291a84 100644
      }
  
      IFACEMETHOD(IsPixelSnappingDisabled)(
-@@ -263,7 +325,8 @@ public:
+@@ -263,7 +326,8 @@ public:
  	__out DWRITE_MATRIX* transform)
      {
  	// forward the render target's transform
@@ -209,13 +195,14 @@ index 9873c6728..8fa291a84 100644
  	return S_OK;
      }
  
-@@ -271,43 +334,11 @@ public:
+@@ -271,43 +335,12 @@ public:
  	__maybenull void* clientDrawingContext,
  	__out FLOAT* pixelsPerDip)
      {
 -	*pixelsPerDip = pRenderTarget_->GetPixelsPerDip();
-+	float unused;
-+	pDWC_->mRT->GetDpi(pixelsPerDip, &unused);
++	float dpiX, unused;
++	pDWC_->mRT->GetDpi(&dpiX, &unused);
++	*pixelsPerDip = dpiX / 96.0f;
  	return S_OK;
      }
  
@@ -255,7 +242,7 @@ index 9873c6728..8fa291a84 100644
      IFACEMETHOD(DrawUnderline)(
  	__maybenull void* clientDrawingContext,
  	FLOAT baselineOriginX,
-@@ -340,6 +371,71 @@ public:
+@@ -340,6 +373,69 @@ public:
  	return E_NOTIMPL;
      }
  
@@ -271,16 +258,16 @@ index 9873c6728..8fa291a84 100644
 +	TextRendererContext *context =
 +	    reinterpret_cast<TextRendererContext*>(clientDrawingContext);
 +
-+	AdjustedGlyphRun adjustedGlyphRun(glyphRun, context->cellWidth);
++	AdjustedGlyphRun adjustedGlyphRun(glyphRun, context->cellWidth,
++		context->offsetX);
 +
-+	BOOL written = FALSE;
 +	if (pDWC_->mDWriteFactory2 != NULL)
 +	{
-+	    IDWriteColorGlyphRunEnumerator	*enumerator = NULL;
++	    IDWriteColorGlyphRunEnumerator *enumerator = NULL;
 +	    HRESULT hr = pDWC_->mDWriteFactory2->TranslateColorGlyphRun(
 +		baselineOriginX + context->offsetX,
 +		baselineOriginY,
-+		glyphRun,
++		&adjustedGlyphRun,
 +		NULL,
 +		DWRITE_MEASURING_MODE_GDI_NATURAL,
 +		NULL,
@@ -288,6 +275,7 @@ index 9873c6728..8fa291a84 100644
 +		&enumerator);
 +	    if (SUCCEEDED(hr))
 +	    {
++		// Draw by IDWriteFactory2 for color emoji
 +		BOOL hasRun = TRUE;
 +		enumerator->MoveNext(&hasRun);
 +		while (hasRun)
@@ -305,22 +293,19 @@ index 9873c6728..8fa291a84 100644
 +			    DWRITE_MEASURING_MODE_NATURAL);
 +		    enumerator->MoveNext(&hasRun);
 +		}
-+		written = TRUE;
++		SafeRelease(&enumerator);
++		return S_OK;
 +	    }
 +	}
 +
-+	if (!written)
-+	{
-+	    pDWC_->mRT->DrawGlyphRun(
-+		    D2D1::Point2F(
-+			baselineOriginX + context->offsetX,
-+			baselineOriginY),
-+		    &adjustedGlyphRun,
-+		    pDWC_->SolidBrush(context->color),
-+		    DWRITE_MEASURING_MODE_NATURAL);
-+	}
-+	context->offsetX += adjustedGlyphRun.getDelta();
-+
++	// Draw by IDWriteFactory (without color emoji)
++	pDWC_->mRT->DrawGlyphRun(
++		D2D1::Point2F(
++		    baselineOriginX + context->offsetX,
++		    baselineOriginY),
++		&adjustedGlyphRun,
++		pDWC_->SolidBrush(context->color),
++		DWRITE_MEASURING_MODE_NATURAL);
 +	return S_OK;
 +    }
 +
@@ -407,7 +392,7 @@ index 9873c6728..8fa291a84 100644
      hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
  	    __uuidof(ID2D1Factory), NULL,
  	    reinterpret_cast<void**>(&mD2D1Factory));
-@@ -495,6 +537,14 @@ DWriteContext::DWriteContext() :
+@@ -495,6 +537,15 @@ DWriteContext::DWriteContext() :
  		mDWriteFactory);
      }
  
@@ -417,12 +402,13 @@ index 9873c6728..8fa291a84 100644
 +		DWRITE_FACTORY_TYPE_SHARED,
 +		__uuidof(IDWriteFactory2),
 +		reinterpret_cast<IUnknown**>(&mDWriteFactory2));
++	_RPT1(_CRT_WARN, "IDWriteFactory2: %s\n", SUCCEEDED(hr) ? "available" : "not available");
 +    }
 +
      if (SUCCEEDED(hr))
      {
  	hr = mDWriteFactory->GetGdiInterop(&mGdiInterop);
-@@ -515,6 +565,7 @@ DWriteContext::~DWriteContext()
+@@ -515,6 +566,7 @@ DWriteContext::~DWriteContext()
      SafeRelease(&mRenderingParams);
      SafeRelease(&mGdiInterop);
      SafeRelease(&mDWriteFactory);
@@ -430,7 +416,7 @@ index 9873c6728..8fa291a84 100644
      SafeRelease(&mBrush);
      SafeRelease(&mRT);
      SafeRelease(&mD2D1Factory);
-@@ -564,8 +615,8 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
+@@ -564,8 +616,8 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
  	// If no font size was passed in use the lfHeight of the LOGFONT.
  	if (fontSize == 0)
  	{
@@ -441,7 +427,7 @@ index 9873c6728..8fa291a84 100644
  	    if (fontSize < 0)
  	    {
  		// Negative lfHeight represents the size of the em unit.
-@@ -663,72 +714,75 @@ DWriteContext::SetFont(const LOGFONTW &logFont)
+@@ -663,72 +715,75 @@ DWriteContext::SetFont(const LOGFONTW &logFont)
  }
  
      void
@@ -531,7 +517,7 @@ index 9873c6728..8fa291a84 100644
  
 -	SafeRelease(&textLayout);
 +	TextRenderer renderer(this);
-+	TextRendererContext context = { (FLOAT)cellWidth, color, 0.0f };
++	TextRendererContext context = { color, (FLOAT)cellWidth, 0.0f };
 +	textLayout->Draw(&context, &renderer, (FLOAT)x, (FLOAT)y);
      }
  
@@ -566,7 +552,7 @@ index 9873c6728..8fa291a84 100644
  }
  
      void
-@@ -757,6 +811,10 @@ DWriteContext::SetRenderingParams(
+@@ -757,6 +812,10 @@ DWriteContext::SetRenderingParams(
  	SafeRelease(&mRenderingParams);
  	mRenderingParams = renderingParams;
  	mTextAntialiasMode = textAntialiasMode;
@@ -577,7 +563,7 @@ index 9873c6728..8fa291a84 100644
      }
  }
  
-@@ -824,40 +882,23 @@ DWriteContext_Open(void)
+@@ -824,40 +883,23 @@ DWriteContext_Open(void)
      return new DWriteContext();
  }
  
@@ -620,7 +606,7 @@ index 9873c6728..8fa291a84 100644
  	const WCHAR* text,
  	int len,
  	int x,
-@@ -868,17 +909,21 @@ DWriteContext_DrawText(
+@@ -868,17 +910,21 @@ DWriteContext_DrawText(
  	COLORREF color)
  {
      if (ctx != NULL)
@@ -677,7 +663,7 @@ index 647f479a6..725308cc8 100644
  
  void DWriteContext_SetRenderingParams(
 diff --git a/src/gui_w32.c b/src/gui_w32.c
-index d1c9605ca..73f85c6b3 100644
+index d1c9605ca..8e11848e8 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
 @@ -34,28 +34,14 @@ static DWriteContext *s_dwc = NULL;
@@ -711,7 +697,25 @@ index d1c9605ca..73f85c6b3 100644
  #if defined(FEAT_RENDER_OPTIONS) || defined(PROTO)
      int
  gui_mch_set_rendering_options(char_u *s)
-@@ -369,6 +355,34 @@ static int allow_scrollbar = FALSE;
+@@ -130,6 +116,17 @@ gui_mch_set_rendering_options(char_u *s)
+ 	    dx_taamode = atoi((char *)value);
+ 	    if (dx_taamode < 0 || dx_taamode > 3)
+ 		return FAIL;
++
++	    /* D2D1_TEXT_ANTIALIAS_MODE_ALIASED */
++	    if (dx_taamode == 3)
++	    {
++		LOGFONTW lf;
++		if (GetObjectW((HFONT)gui.currFont, sizeof(lf), &lf))
++		{
++		    if (lf.lfQuality & ANTIALIASED_QUALITY)
++			return FAIL;
++		}
++	    }
+ 	}
+ 	else
+ 	    return FAIL;
+@@ -369,6 +366,34 @@ static int allow_scrollbar = FALSE;
  # define MyTranslateMessage(x) TranslateMessage(x)
  #endif
  
@@ -746,7 +750,7 @@ index d1c9605ca..73f85c6b3 100644
  #if defined(FEAT_MBYTE) || defined(GLOBAL_IME)
    /* use of WindowProc depends on wide_WindowProc */
  # define MyWindowProc vim_WindowProc
-@@ -591,6 +605,10 @@ _OnBlinkTimer(
+@@ -591,6 +616,10 @@ _OnBlinkTimer(
  	blink_timer = (UINT) SetTimer(NULL, 0, (UINT)blink_ontime,
  						    (TIMERPROC)_OnBlinkTimer);
      }
@@ -757,7 +761,7 @@ index d1c9605ca..73f85c6b3 100644
  }
  
      static void
-@@ -1002,6 +1020,19 @@ _OnMouseMoveOrRelease(
+@@ -1002,6 +1031,19 @@ _OnMouseMoveOrRelease(
      _OnMouseEvent(button, x, y, FALSE, keyFlags);
  }
  
@@ -777,7 +781,7 @@ index d1c9605ca..73f85c6b3 100644
  #ifdef FEAT_MENU
  /*
   * Find the vimmenu_T with the given id
-@@ -1236,6 +1267,7 @@ _TextAreaWndProc(
+@@ -1236,6 +1278,7 @@ _TextAreaWndProc(
  	HANDLE_MSG(hwnd, WM_XBUTTONDBLCLK,_OnMouseButtonDown);
  	HANDLE_MSG(hwnd, WM_XBUTTONDOWN,_OnMouseButtonDown);
  	HANDLE_MSG(hwnd, WM_XBUTTONUP,	_OnMouseMoveOrRelease);
@@ -785,7 +789,7 @@ index d1c9605ca..73f85c6b3 100644
  
  #ifdef FEAT_BEVAL_GUI
  	case WM_NOTIFY: Handle_WM_Notify(hwnd, (LPNMHDR)lParam);
-@@ -1635,6 +1667,11 @@ gui_mch_invert_rectangle(
+@@ -1635,6 +1678,11 @@ gui_mch_invert_rectangle(
  {
      RECT    rc;
  
@@ -797,7 +801,7 @@ index d1c9605ca..73f85c6b3 100644
      /*
       * Note: InvertRect() excludes right and bottom of rectangle.
       */
-@@ -1663,6 +1700,11 @@ gui_mch_draw_hollow_cursor(guicolor_T color)
+@@ -1663,6 +1711,11 @@ gui_mch_draw_hollow_cursor(guicolor_T color)
      HBRUSH  hbr;
      RECT    rc;
  
@@ -809,7 +813,7 @@ index d1c9605ca..73f85c6b3 100644
      /*
       * Note: FrameRect() excludes right and bottom of rectangle.
       */
-@@ -1703,6 +1745,15 @@ gui_mch_draw_part_cursor(
+@@ -1703,6 +1756,15 @@ gui_mch_draw_part_cursor(
      rc.top = FILL_Y(gui.row) + gui.char_height - h;
      rc.right = rc.left + w;
      rc.bottom = rc.top + h;
@@ -817,15 +821,15 @@ index d1c9605ca..73f85c6b3 100644
 +#if defined(FEAT_DIRECTX)
 +    if (IS_ENABLE_DIRECTX())
 +    {
-+	DWriteContext_Flush(s_dwc);
 +	DWriteContext_FillRect(s_dwc, &rc, color);
++	return;
 +    }
 +#endif
 +
      hbr = CreateSolidBrush(color);
      FillRect(s_hdc, &rc, hbr);
      DeleteBrush(hbr);
-@@ -2858,10 +2909,6 @@ _OnPaint(
+@@ -2858,10 +2920,6 @@ _OnPaint(
  
  	out_flush();	    /* make sure all output has been processed */
  	(void)BeginPaint(hwnd, &ps);
@@ -836,7 +840,7 @@ index d1c9605ca..73f85c6b3 100644
  
  #ifdef FEAT_MBYTE
  	/* prevent multi-byte characters from misprinting on an invalid
-@@ -2878,19 +2925,11 @@ _OnPaint(
+@@ -2878,19 +2936,11 @@ _OnPaint(
  
  	if (!IsRectEmpty(&ps.rcPaint))
  	{
@@ -856,7 +860,7 @@ index d1c9605ca..73f85c6b3 100644
  	EndPaint(hwnd, &ps);
      }
  }
-@@ -3012,6 +3051,11 @@ gui_mch_flash(int msec)
+@@ -3012,6 +3062,11 @@ gui_mch_flash(int msec)
  {
      RECT    rc;
  
@@ -868,18 +872,33 @@ index d1c9605ca..73f85c6b3 100644
      /*
       * Note: InvertRect() excludes right and bottom of rectangle.
       */
-@@ -3068,6 +3112,10 @@ get_scroll_flags(void)
-     static void
- intel_gpu_workaround(void)
- {
+@@ -3084,6 +3139,12 @@ gui_mch_delete_lines(
+ 
+     intel_gpu_workaround();
+ 
 +#if defined(FEAT_DIRECTX)
++    // Commit drawing queue before ScrollWindowEx.
 +    if (IS_ENABLE_DIRECTX())
 +	DWriteContext_Flush(s_dwc);
 +#endif
-     GetPixel(s_hdc, FILL_X(gui.col), FILL_Y(gui.row));
- }
++
+     rc.left = FILL_X(gui.scroll_region_left);
+     rc.right = FILL_X(gui.scroll_region_right + 1);
+     rc.top = FILL_Y(row);
+@@ -3117,6 +3178,12 @@ gui_mch_insert_lines(
  
-@@ -6126,6 +6174,17 @@ RevOut( HDC s_hdc,
+     intel_gpu_workaround();
+ 
++#if defined(FEAT_DIRECTX)
++    // Commit drawing queue before ScrollWindowEx.
++    if (IS_ENABLE_DIRECTX())
++	DWriteContext_Flush(s_dwc);
++#endif
++
+     rc.left = FILL_X(gui.scroll_region_left);
+     rc.right = FILL_X(gui.scroll_region_right + 1);
+     rc.top = FILL_Y(row);
+@@ -6126,6 +6193,17 @@ RevOut( HDC s_hdc,
  }
  #endif
  
@@ -897,7 +916,7 @@ index d1c9605ca..73f85c6b3 100644
      void
  gui_mch_draw_string(
      int		row,
-@@ -6170,6 +6229,16 @@ gui_mch_draw_string(
+@@ -6170,6 +6248,16 @@ gui_mch_draw_string(
      HBRUSH		hbr;
      RECT		rc;
  
@@ -914,7 +933,7 @@ index d1c9605ca..73f85c6b3 100644
      if (!(flags & DRAW_TRANSP))
      {
  	/*
-@@ -6210,6 +6279,11 @@ gui_mch_draw_string(
+@@ -6210,6 +6298,11 @@ gui_mch_draw_string(
  	    hbr = hbr_cache[brush_lru];
  	    brush_lru = !brush_lru;
  	}
@@ -926,7 +945,7 @@ index d1c9605ca..73f85c6b3 100644
  	FillRect(s_hdc, &rc, hbr);
  
  	SetBkMode(s_hdc, TRANSPARENT);
-@@ -6225,21 +6299,6 @@ gui_mch_draw_string(
+@@ -6225,21 +6318,6 @@ gui_mch_draw_string(
  	}
      }
      SetTextColor(s_hdc, gui.currFgColor);
@@ -948,7 +967,7 @@ index d1c9605ca..73f85c6b3 100644
  
      if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
      {
-@@ -6352,7 +6411,7 @@ gui_mch_draw_string(
+@@ -6352,7 +6430,7 @@ gui_mch_draw_string(
  	if (IS_ENABLE_DIRECTX() && font_is_ttf_or_vector)
  	{
  	    /* Add one to "cells" for italics. */
@@ -957,7 +976,7 @@ index d1c9605ca..73f85c6b3 100644
  		    TEXT_X(col), TEXT_Y(row), FILL_X(cells + 1), FILL_Y(1),
  		    gui.char_width, gui.currFgColor);
  	}
-@@ -6413,6 +6472,12 @@ gui_mch_draw_string(
+@@ -6413,6 +6491,12 @@ gui_mch_draw_string(
  			 foptions, pcliprect, (char *)text, len, padding);
      }
  
@@ -970,7 +989,7 @@ index d1c9605ca..73f85c6b3 100644
      /* Underline */
      if (flags & DRAW_UNDERL)
      {
-@@ -6475,6 +6540,11 @@ gui_mch_flush(void)
+@@ -6475,6 +6559,11 @@ gui_mch_flush(void)
      BOOL  __stdcall GdiFlush(void);
  #   endif
  
@@ -982,19 +1001,22 @@ index d1c9605ca..73f85c6b3 100644
      GdiFlush();
  }
  
-@@ -6483,6 +6553,11 @@ clear_rect(RECT *rcp)
+@@ -6483,6 +6572,14 @@ clear_rect(RECT *rcp)
  {
      HBRUSH  hbr;
  
 +#if defined(FEAT_DIRECTX)
 +    if (IS_ENABLE_DIRECTX() && gui_is_outline_font_selected(s_hdc))
++    {
 +	DWriteContext_FillRect(s_dwc, rcp, gui.back_pixel);
++	return;
++    }
 +#endif
 +
      hbr = CreateSolidBrush(gui.back_pixel);
      FillRect(s_hdc, rcp, hbr);
      DeleteBrush(hbr);
-@@ -8388,6 +8463,11 @@ gui_mch_drawsign(int row, int col, int typenr)
+@@ -8388,6 +8485,11 @@ gui_mch_drawsign(int row, int col, int typenr)
      if (!gui.in_use || (sign = (signicon_t *)sign_get_image(typenr)) == NULL)
  	return;
  
@@ -1006,7 +1028,7 @@ index d1c9605ca..73f85c6b3 100644
      x = TEXT_X(col);
      y = TEXT_Y(row);
      w = gui.char_width * 2;
-@@ -8867,6 +8947,11 @@ netbeans_draw_multisign_indicator(int row)
+@@ -8867,6 +8969,11 @@ netbeans_draw_multisign_indicator(int row)
      x = 0;
      y = TEXT_Y(row);
  
