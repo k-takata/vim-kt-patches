@@ -1,7 +1,59 @@
-# HG changeset patch
-# Parent  f1c5cbbf0c9f9cb664daee32a2f58a7076b7c98e
-
+diff --git a/appveyor.yml b/appveyor.yml
+index 31ea0a923..bdeb1621f 100644
+--- a/appveyor.yml
++++ b/appveyor.yml
+@@ -16,6 +16,7 @@ matrix:
+ 
+ before_build:
+   - '"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 /release'
++  - 'set INCLUDE=%INCLUDE%C:\Program Files (x86)\Windows Kits\8.1\Include\um'
+ 
+ build_script:
+   - src/appveyor.bat
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+index f9acff818..751fc014b 100644
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -6154,11 +6154,34 @@ A jump table for the options with a short description can be found at |Q_op|.
+ 
+ 		Example: >
+ 		  set encoding=utf-8
+-		  set gfn=Ricty_Diminished:h12:cSHIFTJIS
++		  set gfn=Ricty_Diminished:h12
+ 		  set rop=type:directx
+ <
+-		If select a raster font (Courier, Terminal or FixedSys) to
+-		'guifont', it fallbacks to be drawn by GDI automatically.
++		If select a raster font (Courier, Terminal or FixedSys which
++		have ".fon" extension in file name) to 'guifont', it will be
++		drawn by GDI as a fallback.  This fallback will cause
++		significant slow down on drawing.
++
++		NOTE: It is known that some fonts and options combination
++		causes trouble on drawing glyphs.
++
++		  - 'rendmode:5' and 'renmode:6' will not work with some
++		    special made fonts (True-Type fonts which includes only
++		    bitmap glyphs).
++		  - 'taamode:3' will not work with some vector fonts.
++
++		NOTE: With this option, you can display colored emoji
++		(emoticon) in Windows 8.1 or later.  To display colored emoji,
++		there are some conditions which you should notice.
++
++		  - If your font includes non-colored emoji already, it will
++		    be used.
++		  - If your font doesn't have emoji, the system chooses an
++		    alternative symbol font.  On Windows 10, "Segoe UI Emoji"
++		    will be used.
++		  - When this alternative font didn't have fixed width glyph,
++		    emoji might be rendered beyond the bounding box of drawing
++		    cell.
+ 
+ 	Other render types are currently not supported.
+ 
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+index 9873c6728..28bccf1fc 100644
 --- a/src/gui_dwrite.cpp
 +++ b/src/gui_dwrite.cpp
 @@ -4,6 +4,7 @@
@@ -35,7 +87,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  
  #include "gui_dwrite.h"
  
-@@ -79,16 +94,6 @@ template <class T> inline void SafeRelea
+@@ -79,16 +94,6 @@ template <class T> inline void SafeRelease(T **ppT)
      }
  }
  
@@ -52,15 +104,88 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      static DWRITE_PIXEL_GEOMETRY
  ToPixelGeometry(int value)
  {
-@@ -184,17 +189,76 @@ ToInt(DWRITE_RENDERING_MODE value)
+@@ -184,17 +189,151 @@ ToInt(DWRITE_RENDERING_MODE value)
      }
  }
  
-+struct DWriteContext {
-+    bool mDrawing;
++class FontCache {
++public:
++    struct Item {
++	HFONT              hFont;
++	IDWriteTextFormat* pTextFormat;
++	DWRITE_FONT_WEIGHT fontWeight;
++	DWRITE_FONT_STYLE  fontStyle;
++	Item(void) : hFont(NULL), pTextFormat(NULL) {}
++    };
 +
-+    FLOAT mDpiScaleX;
-+    FLOAT mDpiScaleY;
++private:
++    int mSize;
++    Item *mItems;
++
++public:
++    FontCache(int size = 2) :
++	mSize(size),
++	mItems(new Item[size])
++    {
++    }
++
++    ~FontCache(void)
++    {
++	for (int i = 0; i < mSize; ++i)
++	    SafeRelease(&mItems[i].pTextFormat);
++	delete[] mItems;
++    }
++
++    bool get(HFONT hFont, Item &item)
++    {
++	int n = find(hFont);
++	if (n < 0)
++	    return false;
++	item = mItems[n];
++	slide(n);
++	return true;
++    }
++
++    void put(const Item& item)
++    {
++	int n = find(item.hFont);
++	if (n < 0)
++	    n = mSize - 1;
++	if (mItems[n].pTextFormat != item.pTextFormat)
++	{
++	    SafeRelease(&mItems[n].pTextFormat);
++	    item.pTextFormat->AddRef();
++	}
++	mItems[n] = item;
++	slide(n);
++    }
++
++private:
++    int find(HFONT hFont)
++    {
++	for (int i = 0; i < mSize; ++i)
++	{
++	    if (mItems[i].hFont == hFont)
++		return i;
++	}
++	return -1;
++    }
++
++    void slide(int nextTop)
++    {
++	if (nextTop == 0)
++	    return;
++	Item tmp = mItems[nextTop];
++	for (int i = nextTop - 1; i >= 0; --i)
++	    mItems[i + 1] = mItems[i];
++	mItems[0] = tmp;
++    }
++};
++
++struct DWriteContext {
++    HDC mHDC;
++    bool mDrawing;
++    bool mFallbackDC;
 +
 +    ID2D1Factory *mD2D1Factory;
 +
@@ -72,9 +197,9 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 +
 +    IDWriteGdiInterop *mGdiInterop;
 +    IDWriteRenderingParams *mRenderingParams;
-+    IDWriteTextFormat *mTextFormat;
 +
-+    HFONT mLastHFont;
++    FontCache mFontCache;
++    IDWriteTextFormat *mTextFormat;
 +    DWRITE_FONT_WEIGHT mFontWeight;
 +    DWRITE_FONT_STYLE mFontStyle;
 +
@@ -86,11 +211,12 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 +
 +    virtual ~DWriteContext();
 +
-+    HRESULT SetLOGFONT(const LOGFONTW &logFont, float fontSize);
++    HRESULT CreateTextFormatFromLOGFONT(const LOGFONTW &logFont,
++	    IDWriteTextFormat **ppTextFormat);
++
++    HRESULT SetFontByLOGFONT(const LOGFONTW &logFont);
 +
 +    void SetFont(HFONT hFont);
-+
-+    void SetFont(const LOGFONTW &logFont);
 +
 +    void BindDC(HDC hdc, RECT *rect);
 +
@@ -99,7 +225,8 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 +    ID2D1Brush* SolidBrush(COLORREF color);
 +
 +    void DrawText(const WCHAR* text, int len,
-+	int x, int y, int w, int h, int cellWidth, COLORREF color);
++	int x, int y, int w, int h, int cellWidth, COLORREF color,
++	UINT fuOptions, CONST RECT *lprc, CONST INT * lpDx);
 +
 +    void FillRect(RECT *rc, COLORREF color);
 +
@@ -130,7 +257,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  	mDelta(0.0f),
  	mAdjustedAdvances(new FLOAT[glyphRun->glyphCount])
      {
-@@ -211,14 +275,10 @@ public:
+@@ -211,43 +350,42 @@ public:
  
      ~AdjustedGlyphRun(void)
      {
@@ -145,8 +272,11 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 -
      static FLOAT adjustToCell(FLOAT value, FLOAT cellWidth)
      {
- 	int cellCount = (int)floor(value / cellWidth + 0.5f);
-@@ -228,26 +288,29 @@ public:
+-	int cellCount = (int)floor(value / cellWidth + 0.5f);
++	int cellCount = int(floor(value / cellWidth + 0.5f));
+ 	if (cellCount < 1)
+ 	    cellCount = 1;
+ 	return cellCount * cellWidth;
      }
  };
  
@@ -187,7 +317,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      }
  
      IFACEMETHOD(IsPixelSnappingDisabled)(
-@@ -263,7 +326,8 @@ public:
+@@ -263,7 +401,8 @@ public:
  	__out DWRITE_MATRIX* transform)
      {
  	// forward the render target's transform
@@ -197,7 +327,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  	return S_OK;
      }
  
-@@ -271,43 +335,12 @@ public:
+@@ -271,43 +410,12 @@ public:
  	__maybenull void* clientDrawingContext,
  	__out FLOAT* pixelsPerDip)
      {
@@ -244,7 +374,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      IFACEMETHOD(DrawUnderline)(
  	__maybenull void* clientDrawingContext,
  	FLOAT baselineOriginX,
-@@ -340,6 +373,69 @@ public:
+@@ -340,6 +448,69 @@ public:
  	return E_NOTIMPL;
      }
  
@@ -314,7 +444,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  public:
      IFACEMETHOD_(unsigned long, AddRef) ()
      {
-@@ -385,65 +481,16 @@ public:
+@@ -385,80 +556,28 @@ public:
  
  private:
      long cRefCount_;
@@ -373,7 +503,9 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  DWriteContext::DWriteContext() :
 -    mDpiScaleX(1.f),
 -    mDpiScaleY(1.f),
++    mHDC(NULL),
      mDrawing(false),
++    mFallbackDC(false),
      mD2D1Factory(NULL),
      mRT(NULL),
      mBrush(NULL),
@@ -381,8 +513,12 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 +    mDWriteFactory2(NULL),
      mGdiInterop(NULL),
      mRenderingParams(NULL),
++    mFontCache(8),
      mTextFormat(NULL),
-@@ -454,11 +501,6 @@ DWriteContext::DWriteContext() :
+-    mLastHFont(NULL),
+     mFontWeight(DWRITE_FONT_WEIGHT_NORMAL),
+     mFontStyle(DWRITE_FONT_STYLE_NORMAL),
+     mTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_DEFAULT)
  {
      HRESULT hr;
  
@@ -394,10 +530,12 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
  	    __uuidof(ID2D1Factory), NULL,
  	    reinterpret_cast<void**>(&mD2D1Factory));
-@@ -497,6 +539,15 @@ DWriteContext::DWriteContext() :
+@@ -495,6 +614,15 @@ DWriteContext::DWriteContext() :
+ 		mDWriteFactory);
+     }
  
-     if (SUCCEEDED(hr))
-     {
++    if (SUCCEEDED(hr))
++    {
 +	DWriteCreateFactory(
 +		DWRITE_FACTORY_TYPE_SHARED,
 +		__uuidof(IDWriteFactory2),
@@ -405,12 +543,10 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 +	_RPT1(_CRT_WARN, "IDWriteFactory2: %s\n", SUCCEEDED(hr) ? "available" : "not available");
 +    }
 +
-+    if (SUCCEEDED(hr))
-+    {
+     if (SUCCEEDED(hr))
+     {
  	hr = mDWriteFactory->GetGdiInterop(&mGdiInterop);
- 	_RPT2(_CRT_WARN, "GetGdiInterop: hr=%p p=%p\n", hr, mGdiInterop);
-     }
-@@ -515,6 +566,7 @@ DWriteContext::~DWriteContext()
+@@ -515,20 +643,23 @@ DWriteContext::~DWriteContext()
      SafeRelease(&mRenderingParams);
      SafeRelease(&mGdiInterop);
      SafeRelease(&mDWriteFactory);
@@ -418,29 +554,197 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      SafeRelease(&mBrush);
      SafeRelease(&mRT);
      SafeRelease(&mD2D1Factory);
-@@ -564,8 +616,8 @@ DWriteContext::SetLOGFONT(const LOGFONTW
- 	// If no font size was passed in use the lfHeight of the LOGFONT.
- 	if (fontSize == 0)
+ }
+ 
+     HRESULT
+-DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
++DWriteContext::CreateTextFormatFromLOGFONT(const LOGFONTW &logFont, IDWriteTextFormat **ppTextFormat)
+ {
+-    // Most of this function is copy from: http://msdn.microsoft.com/en-us/library/windows/desktop/dd941783(v=vs.85).aspx
++    // Most of this function is copy from: https://github.com/Microsoft/Windows-classic-samples/blob/master/Samples/Win7Samples/multimedia/DirectWrite/RenderTest/TextHelpers.cpp
+     HRESULT hr = S_OK;
++    IDWriteTextFormat *pTextFormat = NULL;
+ 
+     IDWriteFont *font = NULL;
+     IDWriteFontFamily *fontFamily = NULL;
+     IDWriteLocalizedStrings *localizedFamilyNames = NULL;
++    float fontSize = 0;
+ 
+     if (SUCCEEDED(hr))
+     {
+@@ -561,33 +692,30 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
+ 
+     if (SUCCEEDED(hr))
+     {
+-	// If no font size was passed in use the lfHeight of the LOGFONT.
+-	if (fontSize == 0)
++	// use lfHeight of the LOGFONT as font size.
++	fontSize = float(logFont.lfHeight);
++
++	if (fontSize < 0)
  	{
 -	    // Convert from pixels to DIPs.
 -	    fontSize = PixelsToDipsY(logFont.lfHeight);
-+	    fontSize = (float)logFont.lfHeight;
+-	    if (fontSize < 0)
+-	    {
+-		// Negative lfHeight represents the size of the em unit.
+-		fontSize = -fontSize;
+-	    }
+-	    else
+-	    {
+-		// Positive lfHeight represents the cell height (ascent +
+-		// descent).
+-		DWRITE_FONT_METRICS fontMetrics;
+-		font->GetMetrics(&fontMetrics);
+-
+-		// Convert the cell height (ascent + descent) from design units
+-		// to ems.
+-		float cellHeight = static_cast<float>(
+-			fontMetrics.ascent + fontMetrics.descent)
+-					       / fontMetrics.designUnitsPerEm;
+-
+-		// Divide the font size by the cell height to get the font em
+-		// size.
+-		fontSize /= cellHeight;
+-	    }
++	    // Negative lfHeight represents the size of the em unit.
++	    fontSize = -fontSize;
++	}
++	else
++	{
++	    // Positive lfHeight represents the cell height (ascent +
++	    // descent).
++	    DWRITE_FONT_METRICS fontMetrics;
++	    font->GetMetrics(&fontMetrics);
 +
- 	    if (fontSize < 0)
- 	    {
- 		// Negative lfHeight represents the size of the em unit.
-@@ -663,72 +715,75 @@ DWriteContext::SetFont(const LOGFONTW &l
++	    // Convert the cell height (ascent + descent) from design units
++	    // to ems.
++	    float cellHeight = static_cast<float>(
++		    fontMetrics.ascent + fontMetrics.descent)
++		/ fontMetrics.designUnitsPerEm;
++
++	    // Divide the font size by the cell height to get the font em
++	    // size.
++	    fontSize /= cellHeight;
+ 	}
+     }
+ 
+@@ -612,19 +740,49 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
+ 		font->GetStretch(),
+ 		fontSize,
+ 		localeName,
+-		&mTextFormat);
++		&pTextFormat);
+     }
+ 
++    if (SUCCEEDED(hr))
++	hr = pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
++
++    if (SUCCEEDED(hr))
++	hr = pTextFormat->SetParagraphAlignment(
++		DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
++
++    if (SUCCEEDED(hr))
++	hr = pTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
++
++    SafeRelease(&localizedFamilyNames);
++    SafeRelease(&fontFamily);
++    SafeRelease(&font);
++
++    if (SUCCEEDED(hr))
++	*ppTextFormat = pTextFormat;
++    else
++	SafeRelease(&pTextFormat);
++
++    return hr;
++}
++
++    HRESULT
++DWriteContext::SetFontByLOGFONT(const LOGFONTW &logFont)
++{
++    HRESULT hr = S_OK;
++    IDWriteTextFormat *pTextFormat = NULL;
++
++    hr = CreateTextFormatFromLOGFONT(logFont, &pTextFormat);
++
+     if (SUCCEEDED(hr))
+     {
++	SafeRelease(&mTextFormat);
++	mTextFormat = pTextFormat;
+ 	mFontWeight = static_cast<DWRITE_FONT_WEIGHT>(logFont.lfWeight);
+ 	mFontStyle = logFont.lfItalic ? DWRITE_FONT_STYLE_ITALIC
+ 	    : DWRITE_FONT_STYLE_NORMAL;
+     }
+-
+-    SafeRelease(&localizedFamilyNames);
+-    SafeRelease(&fontFamily);
+-    SafeRelease(&font);
++    else
++	SafeRelease(&pTextFormat);
+ 
+     return hr;
+ }
+@@ -632,103 +790,117 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
+     void
+ DWriteContext::SetFont(HFONT hFont)
+ {
+-    if (mLastHFont != hFont)
++    FontCache::Item item;
++    if (mFontCache.get(hFont, item))
+     {
+-	LOGFONTW lf;
+-	if (GetObjectW(hFont, sizeof(lf), &lf))
++	if (item.pTextFormat != NULL)
+ 	{
+-	    SetFont(lf);
+-	    mLastHFont = hFont;
++	    item.pTextFormat->AddRef();
++	    SafeRelease(&mTextFormat);
++	    mTextFormat = item.pTextFormat;
++	    mFontWeight = item.fontWeight;
++	    mFontStyle = item.fontStyle;
++	    mFallbackDC = false;
+ 	}
++	else
++	    mFallbackDC = true;
++	return;
+     }
++
++    HRESULT hr = E_FAIL;
++    LOGFONTW lf;
++    if (GetObjectW(hFont, sizeof(lf), &lf))
++	hr = SetFontByLOGFONT(lf);
++
++    item.hFont = hFont;
++    if (SUCCEEDED(hr))
++    {
++	item.pTextFormat = mTextFormat;
++	item.fontWeight = mFontWeight;
++	item.fontStyle = mFontStyle;
++    }
++    mFontCache.put(item);
  }
  
      void
--DWriteContext::DrawText(HDC hdc, const WCHAR* text, int len,
+-DWriteContext::SetFont(const LOGFONTW &logFont)
 +DWriteContext::BindDC(HDC hdc, RECT *rect)
-+{
+ {
+-    SafeRelease(&mTextFormat);
+-    mLastHFont = NULL;
+-
+-    HRESULT hr = SetLOGFONT(logFont, 0.f);
+-
+-    if (SUCCEEDED(hr))
+-	hr = mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 +    Flush();
 +    mRT->BindDC(hdc, rect);
 +    mRT->SetTransform(D2D1::IdentityMatrix());
++    mHDC = hdc;
 +}
-+
+ 
+-    if (SUCCEEDED(hr))
+-	hr = mTextFormat->SetParagraphAlignment(
+-		DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 +    void
 +DWriteContext::AssureDrawing(void)
 +{
@@ -450,35 +754,46 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 +	mDrawing = true;
 +    }
 +}
-+
+ 
+-    if (SUCCEEDED(hr))
+-	hr = mTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 +    ID2D1Brush*
 +DWriteContext::SolidBrush(COLORREF color)
 +{
 +    mBrush->SetColor(D2D1::ColorF(UINT32(GetRValue(color)) << 16 |
 +		UINT32(GetGValue(color)) << 8 | UINT32(GetBValue(color))));
 +    return mBrush;
-+}
-+
-+    void
+ }
+ 
+     void
+-DWriteContext::DrawText(HDC hdc, const WCHAR* text, int len,
+-	int x, int y, int w, int h, int cellWidth, COLORREF color)
 +DWriteContext::DrawText(const WCHAR* text, int len,
- 	int x, int y, int w, int h, int cellWidth, COLORREF color)
++	int x, int y, int w, int h, int cellWidth, COLORREF color,
++	UINT fuOptions, CONST RECT *lprc, CONST INT * lpDx)
  {
 -    HRESULT hr = S_OK;
 -    IDWriteBitmapRenderTarget *bmpRT = NULL;
 -
 -    // Skip when any fonts are not set.
 -    if (mTextFormat == NULL)
--	return;
-+    AssureDrawing();
++    if (mFallbackDC)
++    {
++	Flush();
++	ExtTextOutW(mHDC, x, y, fuOptions, lprc, text, len, lpDx);
+ 	return;
++    }
  
 -    // Check possibility of zero divided error.
 -    if (cellWidth == 0 || mDpiScaleX == 0.0f || mDpiScaleY == 0.0f)
 -	return;
-+    HRESULT hr;
-+    IDWriteTextLayout *textLayout = NULL;
++    AssureDrawing();
  
 -    if (SUCCEEDED(hr))
 -	hr = mGdiInterop->CreateBitmapRenderTarget(hdc, w, h, &bmpRT);
++    HRESULT hr;
++    IDWriteTextLayout *textLayout = NULL;
++
 +    hr = mDWriteFactory->CreateTextLayout(text, len, mTextFormat,
 +	    FLOAT(w), FLOAT(h), &textLayout);
  
@@ -499,10 +814,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 -	    textLayout->SetFontWeight(mFontWeight, textRange);
 -	    textLayout->SetFontStyle(mFontStyle, textRange);
 -	}
-+	DWRITE_TEXT_RANGE textRange = { 0, (UINT32)len };
-+	textLayout->SetFontWeight(mFontWeight, textRange);
-+	textLayout->SetFontStyle(mFontStyle, textRange);
- 
+-
 -	if (SUCCEEDED(hr))
 -	{
 -	    GdiTextRenderer *renderer = new GdiTextRenderer(bmpRT,
@@ -515,13 +827,16 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 -	    textLayout->Draw(&data, renderer, 0, 0);
 -	    SafeRelease(&renderer);
 -	}
--
++	DWRITE_TEXT_RANGE textRange = { 0, UINT32(len) };
++	textLayout->SetFontWeight(mFontWeight, textRange);
++	textLayout->SetFontStyle(mFontStyle, textRange);
+ 
 -	BitBlt(hdc, x, y, w, h, memdc, 0, 0, SRCCOPY);
 -
 -	SafeRelease(&textLayout);
 +	TextRenderer renderer(this);
-+	TextRendererContext context = { color, (FLOAT)cellWidth, 0.0f };
-+	textLayout->Draw(&context, &renderer, (FLOAT)x, (FLOAT)y);
++	TextRendererContext context = { color, FLOAT(cellWidth), 0.0f };
++	textLayout->Draw(&context, &renderer, FLOAT(x), FLOAT(y));
      }
  
 -    SafeRelease(&bmpRT);
@@ -536,8 +851,8 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 -    return x / mDpiScaleX;
 +    AssureDrawing();
 +    mRT->FillRectangle(
-+	    D2D1::RectF((FLOAT)rc->left, (FLOAT)rc->top,
-+		(FLOAT)rc->right, (FLOAT)rc->bottom),
++	    D2D1::RectF(FLOAT(rc->left), FLOAT(rc->top),
++		FLOAT(rc->right), FLOAT(rc->bottom)),
 +	    SolidBrush(color));
  }
  
@@ -555,7 +870,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  }
  
      void
-@@ -757,6 +812,10 @@ DWriteContext::SetRenderingParams(
+@@ -757,6 +929,10 @@ DWriteContext::SetRenderingParams(
  	SafeRelease(&mRenderingParams);
  	mRenderingParams = renderingParams;
  	mTextAntialiasMode = textAntialiasMode;
@@ -566,10 +881,11 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      }
  }
  
-@@ -825,39 +884,22 @@ DWriteContext_Open(void)
+@@ -824,40 +1000,23 @@ DWriteContext_Open(void)
+     return new DWriteContext();
  }
  
-     void
+-    void
 -DWriteContext_BeginDraw(DWriteContext *ctx)
 -{
 -    if (ctx != NULL && ctx->mRT != NULL)
@@ -580,7 +896,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 -    }
 -}
 -
--    void
+     void
  DWriteContext_BindDC(DWriteContext *ctx, HDC hdc, RECT *rect)
  {
 -    if (ctx != NULL && ctx->mRT != NULL)
@@ -608,12 +924,20 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  	const WCHAR* text,
  	int len,
  	int x,
-@@ -868,17 +910,21 @@ DWriteContext_DrawText(
- 	COLORREF color)
+@@ -865,20 +1024,28 @@ DWriteContext_DrawText(
+ 	int w,
+ 	int h,
+ 	int cellWidth,
+-	COLORREF color)
++	COLORREF color,
++	UINT fuOptions,
++	CONST RECT *lprc,
++	CONST INT * lpDx)
  {
      if (ctx != NULL)
 -	ctx->DrawText(hdc, text, len, x, y, w, h, cellWidth, color);
-+	ctx->DrawText(text, len, x, y, w, h, cellWidth, color);
++	ctx->DrawText(text, len, x, y, w, h, cellWidth, color,
++		fuOptions, lprc, lpDx);
  }
  
      void
@@ -638,9 +962,18 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  
      void
 diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
+index 647f479a6..8ab2864d8 100644
 --- a/src/gui_dwrite.h
 +++ b/src/gui_dwrite.h
-@@ -54,12 +54,10 @@ void DWrite_Init(void);
+@@ -4,6 +4,7 @@
+  *
+  * Contributors:
+  *  - Ken Takata
++ *  - Yasuhiro Matsumoto
+  *
+  * Copyright (C) 2013 MURAOKA Taro <koron.kaoriya@gmail.com>
+  * THIS FILE IS DISTRIBUTED UNDER THE VIM LICENSE.
+@@ -54,12 +55,10 @@ void DWrite_Init(void);
  void DWrite_Final(void);
  
  DWriteContext *DWriteContext_Open(void);
@@ -653,17 +986,23 @@ diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
  	const WCHAR* text,
  	int len,
  	int x,
-@@ -68,7 +66,8 @@ void DWriteContext_DrawText(
+@@ -67,8 +66,12 @@ void DWriteContext_DrawText(
+ 	int w,
  	int h,
  	int cellWidth,
- 	COLORREF color);
+-	COLORREF color);
 -void DWriteContext_EndDraw(DWriteContext *ctx);
++	COLORREF color,
++	UINT fuOptions,
++	CONST RECT *lprc,
++	CONST INT * lpDx);
 +void DWriteContext_FillRect(DWriteContext *ctx, RECT *rc, COLORREF color);
 +void DWriteContext_Flush(DWriteContext *ctx);
  void DWriteContext_Close(DWriteContext *ctx);
  
  void DWriteContext_SetRenderingParams(
 diff --git a/src/gui_w32.c b/src/gui_w32.c
+index d1c9605ca..20372e981 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
 @@ -34,28 +34,14 @@ static DWriteContext *s_dwc = NULL;
@@ -697,25 +1036,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #if defined(FEAT_RENDER_OPTIONS) || defined(PROTO)
      int
  gui_mch_set_rendering_options(char_u *s)
-@@ -130,6 +116,17 @@ gui_mch_set_rendering_options(char_u *s)
- 	    dx_taamode = atoi((char *)value);
- 	    if (dx_taamode < 0 || dx_taamode > 3)
- 		return FAIL;
-+
-+	    /* D2D1_TEXT_ANTIALIAS_MODE_ALIASED */
-+	    if (dx_taamode == 3)
-+	    {
-+		LOGFONTW lf;
-+		if (GetObjectW((HFONT)gui.currFont, sizeof(lf), &lf))
-+		{
-+		    if (lf.lfQuality & ANTIALIASED_QUALITY)
-+			return FAIL;
-+		}
-+	    }
- 	}
- 	else
- 	    return FAIL;
-@@ -369,6 +366,34 @@ static int allow_scrollbar = FALSE;
+@@ -369,6 +355,34 @@ static int allow_scrollbar = FALSE;
  # define MyTranslateMessage(x) TranslateMessage(x)
  #endif
  
@@ -750,7 +1071,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #if defined(FEAT_MBYTE) || defined(GLOBAL_IME)
    /* use of WindowProc depends on wide_WindowProc */
  # define MyWindowProc vim_WindowProc
-@@ -591,6 +616,10 @@ gui_mch_set_blinking(long wait, long on,
+@@ -591,6 +605,10 @@ _OnBlinkTimer(
  	blink_timer = (UINT) SetTimer(NULL, 0, (UINT)blink_ontime,
  						    (TIMERPROC)_OnBlinkTimer);
      }
@@ -761,7 +1082,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
      static void
-@@ -1002,6 +1031,19 @@ char_to_string(int ch, char_u *string, i
+@@ -1002,6 +1020,19 @@ _OnMouseMoveOrRelease(
      _OnMouseEvent(button, x, y, FALSE, keyFlags);
  }
  
@@ -781,7 +1102,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  /*
   * Find the vimmenu_T with the given id
-@@ -1236,6 +1278,7 @@ HandleMouseHide(UINT uMsg, LPARAM lParam
+@@ -1236,6 +1267,7 @@ _TextAreaWndProc(
  	HANDLE_MSG(hwnd, WM_XBUTTONDBLCLK,_OnMouseButtonDown);
  	HANDLE_MSG(hwnd, WM_XBUTTONDOWN,_OnMouseButtonDown);
  	HANDLE_MSG(hwnd, WM_XBUTTONUP,	_OnMouseMoveOrRelease);
@@ -789,7 +1110,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  #ifdef FEAT_BEVAL_GUI
  	case WM_NOTIFY: Handle_WM_Notify(hwnd, (LPNMHDR)lParam);
-@@ -1635,6 +1678,11 @@ gui_mch_invert_rectangle(
+@@ -1635,6 +1667,11 @@ gui_mch_invert_rectangle(
  {
      RECT    rc;
  
@@ -801,7 +1122,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /*
       * Note: InvertRect() excludes right and bottom of rectangle.
       */
-@@ -1663,6 +1711,11 @@ gui_mch_draw_hollow_cursor(guicolor_T co
+@@ -1663,6 +1700,11 @@ gui_mch_draw_hollow_cursor(guicolor_T color)
      HBRUSH  hbr;
      RECT    rc;
  
@@ -813,7 +1134,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /*
       * Note: FrameRect() excludes right and bottom of rectangle.
       */
-@@ -1703,6 +1756,12 @@ gui_mch_draw_part_cursor(
+@@ -1703,6 +1745,12 @@ gui_mch_draw_part_cursor(
      rc.top = FILL_Y(gui.row) + gui.char_height - h;
      rc.right = rc.left + w;
      rc.bottom = rc.top + h;
@@ -826,7 +1147,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      hbr = CreateSolidBrush(color);
      FillRect(s_hdc, &rc, hbr);
      DeleteBrush(hbr);
-@@ -2858,10 +2917,6 @@ gui_mch_show_popupmenu_at(vimmenu_T *men
+@@ -2858,10 +2906,6 @@ _OnPaint(
  
  	out_flush();	    /* make sure all output has been processed */
  	(void)BeginPaint(hwnd, &ps);
@@ -837,7 +1158,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  #ifdef FEAT_MBYTE
  	/* prevent multi-byte characters from misprinting on an invalid
-@@ -2878,19 +2933,11 @@ gui_mch_show_popupmenu_at(vimmenu_T *men
+@@ -2878,19 +2922,11 @@ _OnPaint(
  
  	if (!IsRectEmpty(&ps.rcPaint))
  	{
@@ -857,7 +1178,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	EndPaint(hwnd, &ps);
      }
  }
-@@ -3012,6 +3059,11 @@ gui_mch_flash(int msec)
+@@ -3012,6 +3048,11 @@ gui_mch_flash(int msec)
  {
      RECT    rc;
  
@@ -869,7 +1190,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /*
       * Note: InvertRect() excludes right and bottom of rectangle.
       */
-@@ -3084,6 +3136,12 @@ gui_mch_delete_lines(
+@@ -3084,6 +3125,12 @@ gui_mch_delete_lines(
  
      intel_gpu_workaround();
  
@@ -882,7 +1203,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      rc.left = FILL_X(gui.scroll_region_left);
      rc.right = FILL_X(gui.scroll_region_right + 1);
      rc.top = FILL_Y(row);
-@@ -3117,6 +3175,12 @@ gui_mch_insert_lines(
+@@ -3117,6 +3164,12 @@ gui_mch_insert_lines(
  
      intel_gpu_workaround();
  
@@ -895,61 +1216,32 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      rc.left = FILL_X(gui.scroll_region_left);
      rc.right = FILL_X(gui.scroll_region_right + 1);
      rc.top = FILL_Y(row);
-@@ -6179,6 +6243,17 @@ RevOut( HDC s_hdc,
- }
+@@ -6147,9 +6200,6 @@ gui_mch_draw_string(
  #endif
+     HPEN	hpen, old_pen;
+     int		y;
+-#ifdef FEAT_DIRECTX
+-    int		font_is_ttf_or_vector = 0;
+-#endif
  
-+    static int
-+gui_is_outline_font_selected(HDC hdc)
-+{
-+    TEXTMETRIC tm;
-+
-+    GetTextMetrics(hdc, &tm);
-+    if (tm.tmPitchAndFamily & (TMPF_TRUETYPE | TMPF_VECTOR))
-+	return 1;
-+    return 0;
-+}
-+
-     void
- gui_mch_draw_string(
-     int		row,
-@@ -6223,6 +6298,16 @@ gui_mch_draw_string(
-     HBRUSH		hbr;
-     RECT		rc;
- 
-+    SelectFont(s_hdc, gui.currFont);
-+#ifdef FEAT_DIRECTX
-+    if (IS_ENABLE_DIRECTX())
-+    {
-+	font_is_ttf_or_vector = gui_is_outline_font_selected(s_hdc);
-+	if (font_is_ttf_or_vector)
-+	    DWriteContext_SetFont(s_dwc, (HFONT)gui.currFont);
-+    }
-+#endif
-+
-     if (!(flags & DRAW_TRANSP))
-     {
- 	/*
-@@ -6263,6 +6348,11 @@ gui_mch_draw_string(
+     /*
+      * Italic and bold text seems to have an extra row of pixels at the bottom
+@@ -6210,6 +6260,11 @@ gui_mch_draw_string(
  	    hbr = hbr_cache[brush_lru];
  	    brush_lru = !brush_lru;
  	}
 +
 +#if defined(FEAT_DIRECTX)
-+	if (IS_ENABLE_DIRECTX() && font_is_ttf_or_vector)
++	if (IS_ENABLE_DIRECTX())
 +	    DWriteContext_FillRect(s_dwc, &rc, gui.currBgColor);
 +#endif
  	FillRect(s_hdc, &rc, hbr);
  
  	SetBkMode(s_hdc, TRANSPARENT);
-@@ -6278,21 +6368,6 @@ gui_mch_draw_string(
- 	}
-     }
-     SetTextColor(s_hdc, gui.currFgColor);
--    SelectFont(s_hdc, gui.currFont);
--
--#ifdef FEAT_DIRECTX
--    if (IS_ENABLE_DIRECTX())
+@@ -6229,16 +6284,7 @@ gui_mch_draw_string(
+ 
+ #ifdef FEAT_DIRECTX
+     if (IS_ENABLE_DIRECTX())
 -    {
 -	TEXTMETRIC tm;
 -
@@ -960,25 +1252,33 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -	    DWriteContext_SetFont(s_dwc, (HFONT)gui.currFont);
 -	}
 -    }
--#endif
++	DWriteContext_SetFont(s_dwc, (HFONT)gui.currFont);
+ #endif
  
      if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
-     {
-@@ -6405,7 +6480,7 @@ gui_mch_draw_string(
- 	if (IS_ENABLE_DIRECTX() && font_is_ttf_or_vector)
+@@ -6349,12 +6395,13 @@ gui_mch_draw_string(
+ 	    ++clen;
+ 	}
+ #if defined(FEAT_DIRECTX)
+-	if (IS_ENABLE_DIRECTX() && font_is_ttf_or_vector)
++	if (IS_ENABLE_DIRECTX())
  	{
  	    /* Add one to "cells" for italics. */
 -	    DWriteContext_DrawText(s_dwc, s_hdc, unicodebuf, wlen,
 +	    DWriteContext_DrawText(s_dwc, unicodebuf, wlen,
  		    TEXT_X(col), TEXT_Y(row), FILL_X(cells + 1), FILL_Y(1),
- 		    gui.char_width, gui.currFgColor);
+-		    gui.char_width, gui.currFgColor);
++		    gui.char_width, gui.currFgColor,
++		    foptions, pcliprect, unicodepdy);
  	}
-@@ -6466,6 +6541,12 @@ gui_mch_draw_string(
+ 	else
+ #endif
+@@ -6413,6 +6460,12 @@ gui_mch_draw_string(
  			 foptions, pcliprect, (char *)text, len, padding);
      }
  
 +#if defined(FEAT_DIRECTX)
-+    if (IS_ENABLE_DIRECTX() && font_is_ttf_or_vector &&
++    if (IS_ENABLE_DIRECTX() &&
 +	    (flags & (DRAW_UNDERL | DRAW_STRIKE | DRAW_UNDERC | DRAW_CURSOR)))
 +	DWriteContext_Flush(s_dwc);
 +#endif
@@ -986,7 +1286,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /* Underline */
      if (flags & DRAW_UNDERL)
      {
-@@ -6528,6 +6609,11 @@ gui_mch_flush(void)
+@@ -6475,6 +6528,11 @@ gui_mch_flush(void)
      BOOL  __stdcall GdiFlush(void);
  #   endif
  
@@ -998,12 +1298,12 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      GdiFlush();
  }
  
-@@ -6536,6 +6622,14 @@ clear_rect(RECT *rcp)
+@@ -6483,6 +6541,14 @@ clear_rect(RECT *rcp)
  {
      HBRUSH  hbr;
  
 +#if defined(FEAT_DIRECTX)
-+    if (IS_ENABLE_DIRECTX() && gui_is_outline_font_selected(s_hdc))
++    if (IS_ENABLE_DIRECTX())
 +    {
 +	DWriteContext_FillRect(s_dwc, rcp, gui.back_pixel);
 +	return;
@@ -1013,7 +1313,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      hbr = CreateSolidBrush(gui.back_pixel);
      FillRect(s_hdc, rcp, hbr);
      DeleteBrush(hbr);
-@@ -8441,6 +8535,11 @@ gui_mch_drawsign(int row, int col, int t
+@@ -8388,6 +8454,11 @@ gui_mch_drawsign(int row, int col, int typenr)
      if (!gui.in_use || (sign = (signicon_t *)sign_get_image(typenr)) == NULL)
  	return;
  
@@ -1025,7 +1325,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      x = TEXT_X(col);
      y = TEXT_Y(row);
      w = gui.char_width * 2;
-@@ -8920,6 +9019,11 @@ netbeans_draw_multisign_indicator(int ro
+@@ -8867,6 +8938,11 @@ netbeans_draw_multisign_indicator(int row)
      x = 0;
      y = TEXT_Y(row);
  
@@ -1038,6 +1338,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	SetPixel(s_hdc, x+2, y++, gui.currFgColor);
  
 diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
+index 3528b5fa2..969045067 100644
 --- a/src/proto/gui_w32.pro
 +++ b/src/proto/gui_w32.pro
 @@ -1,5 +1,4 @@
