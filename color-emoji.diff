@@ -53,7 +53,7 @@ index f9acff818..751fc014b 100644
  	Other render types are currently not supported.
  
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
-index 9873c6728..2465e9f7e 100644
+index 9873c6728..bd76383c5 100644
 --- a/src/gui_dwrite.cpp
 +++ b/src/gui_dwrite.cpp
 @@ -4,6 +4,7 @@
@@ -549,7 +549,7 @@ index 9873c6728..2465e9f7e 100644
      if (SUCCEEDED(hr))
      {
  	hr = mDWriteFactory->GetGdiInterop(&mGdiInterop);
-@@ -515,20 +643,23 @@ DWriteContext::~DWriteContext()
+@@ -515,20 +643,24 @@ DWriteContext::~DWriteContext()
      SafeRelease(&mRenderingParams);
      SafeRelease(&mGdiInterop);
      SafeRelease(&mDWriteFactory);
@@ -561,10 +561,11 @@ index 9873c6728..2465e9f7e 100644
  
      HRESULT
 -DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
-+DWriteContext::CreateTextFormatFromLOGFONT(const LOGFONTW &logFont, IDWriteTextFormat **ppTextFormat)
++DWriteContext::CreateTextFormatFromLOGFONT(const LOGFONTW &logFont,
++	IDWriteTextFormat **ppTextFormat)
  {
 -    // Most of this function is copy from: http://msdn.microsoft.com/en-us/library/windows/desktop/dd941783(v=vs.85).aspx
-+    // Most of this function is copy from: https://github.com/Microsoft/Windows-classic-samples/blob/master/Samples/Win7Samples/multimedia/DirectWrite/RenderTest/TextHelpers.cpp
++    // Most of this function is copied from: https://github.com/Microsoft/Windows-classic-samples/blob/master/Samples/Win7Samples/multimedia/DirectWrite/RenderTest/TextHelpers.cpp
      HRESULT hr = S_OK;
 +    IDWriteTextFormat *pTextFormat = NULL;
  
@@ -575,13 +576,13 @@ index 9873c6728..2465e9f7e 100644
  
      if (SUCCEEDED(hr))
      {
-@@ -561,33 +692,30 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
+@@ -561,33 +693,30 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
  
      if (SUCCEEDED(hr))
      {
 -	// If no font size was passed in use the lfHeight of the LOGFONT.
 -	if (fontSize == 0)
-+	// use lfHeight of the LOGFONT as font size.
++	// Use lfHeight of the LOGFONT as font size.
 +	fontSize = float(logFont.lfHeight);
 +
 +	if (fontSize < 0)
@@ -632,7 +633,7 @@ index 9873c6728..2465e9f7e 100644
  	}
      }
  
-@@ -612,19 +740,49 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
+@@ -612,123 +741,165 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
  		font->GetStretch(),
  		fontSize,
  		localeName,
@@ -678,16 +679,14 @@ index 9873c6728..2465e9f7e 100644
  	mFontStyle = logFont.lfItalic ? DWRITE_FONT_STYLE_ITALIC
  	    : DWRITE_FONT_STYLE_NORMAL;
      }
--
+ 
 -    SafeRelease(&localizedFamilyNames);
 -    SafeRelease(&fontFamily);
 -    SafeRelease(&font);
-+    else
-+	SafeRelease(&pTextFormat);
- 
+-
      return hr;
  }
-@@ -632,103 +790,117 @@ DWriteContext::SetLOGFONT(const LOGFONTW &logFont, float fontSize)
+ 
      void
  DWriteContext::SetFont(HFONT hFont)
  {
@@ -873,7 +872,7 @@ index 9873c6728..2465e9f7e 100644
  }
  
      void
-@@ -757,6 +929,10 @@ DWriteContext::SetRenderingParams(
+@@ -757,6 +928,10 @@ DWriteContext::SetRenderingParams(
  	SafeRelease(&mRenderingParams);
  	mRenderingParams = renderingParams;
  	mTextAntialiasMode = textAntialiasMode;
@@ -884,7 +883,7 @@ index 9873c6728..2465e9f7e 100644
      }
  }
  
-@@ -824,40 +1000,23 @@ DWriteContext_Open(void)
+@@ -824,40 +999,23 @@ DWriteContext_Open(void)
      return new DWriteContext();
  }
  
@@ -927,7 +926,7 @@ index 9873c6728..2465e9f7e 100644
  	const WCHAR* text,
  	int len,
  	int x,
-@@ -865,20 +1024,28 @@ DWriteContext_DrawText(
+@@ -865,20 +1023,28 @@ DWriteContext_DrawText(
  	int w,
  	int h,
  	int cellWidth,
