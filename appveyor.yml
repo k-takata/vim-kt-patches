@@ -12,6 +12,7 @@ environment:
 install:
 - cmd: |-
     "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /%ARCH% /release
+    set "INCLUDE=%INCLUDE%C:\Program Files (x86)\Windows Kits\8.1\Include\um"
 
 build_script:
 - cmd: |-
