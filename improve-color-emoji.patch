@@ -1,0 +1,613 @@
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+index c4ceb5f39..27a9509d3 100644
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -6159,8 +6159,7 @@ A jump table for the options with a short description can be found at |Q_op|.
+ <
+ 		If select a raster font (Courier, Terminal or FixedSys which
+ 		have ".fon" extension in file name) to 'guifont', it will be
+-		drawn by GDI as a fallback.  This fallback will cause
+-		significant slow down on drawing.
++		drawn by GDI as a fallback.
+ 
+ 		NOTE: It is known that some fonts and options combination
+ 		causes trouble on drawing glyphs.
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+index bd76383c5..0092cde88 100644
+--- a/src/gui_dwrite.cpp
++++ b/src/gui_dwrite.cpp
+@@ -263,14 +263,23 @@ private:
+     }
+ };
+ 
++enum DrawingMode {
++    DM_GDI = 0,
++    DM_DIRECTX = 1,
++    DM_INTEROP = 2,
++};
++
+ struct DWriteContext {
+     HDC mHDC;
++    DrawingMode mDMode;
++    HDC mInteropHDC;
+     bool mDrawing;
+     bool mFallbackDC;
+ 
+     ID2D1Factory *mD2D1Factory;
+ 
+     ID2D1DCRenderTarget *mRT;
++    ID2D1GdiInteropRenderTarget *mGDIRT;
+     ID2D1SolidColorBrush *mBrush;
+ 
+     IDWriteFactory *mDWriteFactory;
+@@ -299,17 +308,21 @@ struct DWriteContext {
+ 
+     void SetFont(HFONT hFont);
+ 
+-    void BindDC(HDC hdc, RECT *rect);
++    void BindDC(HDC hdc, const RECT *rect);
+ 
+-    void AssureDrawing();
++    HRESULT SetDrawingMode(DrawingMode mode);
+ 
+     ID2D1Brush* SolidBrush(COLORREF color);
+ 
+-    void DrawText(const WCHAR* text, int len,
++    void DrawText(const WCHAR *text, int len,
+ 	int x, int y, int w, int h, int cellWidth, COLORREF color,
+-	UINT fuOptions, CONST RECT *lprc, CONST INT * lpDx);
++	UINT fuOptions, const RECT *lprc, const INT *lpDx);
++
++    void FillRect(const RECT *rc, COLORREF color);
+ 
+-    void FillRect(RECT *rc, COLORREF color);
++    void DrawLine(int x1, int y1, int x2, int y2, COLORREF color);
++
++    void SetPixel(int x, int y, COLORREF color);
+ 
+     void Flush();
+ 
+@@ -561,10 +574,13 @@ private:
+ 
+ DWriteContext::DWriteContext() :
+     mHDC(NULL),
++    mDMode(DM_GDI),
++    mInteropHDC(NULL),
+     mDrawing(false),
+     mFallbackDC(false),
+     mD2D1Factory(NULL),
+     mRT(NULL),
++    mGDIRT(NULL),
+     mBrush(NULL),
+     mDWriteFactory(NULL),
+     mDWriteFactory2(NULL),
+@@ -589,13 +605,21 @@ DWriteContext::DWriteContext() :
+ 	    D2D1_RENDER_TARGET_TYPE_DEFAULT,
+ 	    { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE },
+ 	    0, 0,
+-	    D2D1_RENDER_TARGET_USAGE_NONE,
++	    D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
+ 	    D2D1_FEATURE_LEVEL_DEFAULT
+ 	};
+ 	hr = mD2D1Factory->CreateDCRenderTarget(&props, &mRT);
+ 	_RPT2(_CRT_WARN, "CreateDCRenderTarget: hr=%p p=%p\n", hr, mRT);
+     }
+ 
++    if (SUCCEEDED(hr))
++    {
++	// This always succeeds.
++	mRT->QueryInterface(
++		__uuidof(ID2D1GdiInteropRenderTarget),
++		reinterpret_cast<void**>(&mGDIRT));
++    }
++
+     if (SUCCEEDED(hr))
+     {
+ 	hr = mRT->CreateSolidColorBrush(
+@@ -645,6 +669,7 @@ DWriteContext::~DWriteContext()
+     SafeRelease(&mDWriteFactory);
+     SafeRelease(&mDWriteFactory2);
+     SafeRelease(&mBrush);
++    SafeRelease(&mGDIRT);
+     SafeRelease(&mRT);
+     SafeRelease(&mD2D1Factory);
+ }
+@@ -817,12 +842,15 @@ DWriteContext::SetFont(HFONT hFont)
+ 	item.pTextFormat = mTextFormat;
+ 	item.fontWeight = mFontWeight;
+ 	item.fontStyle = mFontStyle;
++	mFallbackDC = false;
+     }
++    else
++	mFallbackDC = true;
+     mFontCache.put(item);
+ }
+ 
+     void
+-DWriteContext::BindDC(HDC hdc, RECT *rect)
++DWriteContext::BindDC(HDC hdc, const RECT *rect)
+ {
+     Flush();
+     mRT->BindDC(hdc, rect);
+@@ -830,14 +858,52 @@ DWriteContext::BindDC(HDC hdc, RECT *rect)
+     mHDC = hdc;
+ }
+ 
+-    void
+-DWriteContext::AssureDrawing()
++    HRESULT
++DWriteContext::SetDrawingMode(DrawingMode mode)
+ {
+-    if (mDrawing == false)
++    HRESULT hr = S_OK;
++
++    switch (mode)
+     {
+-	mRT->BeginDraw();
+-	mDrawing = true;
++	default:
++	case DM_GDI:
++	    if (mInteropHDC != NULL)
++	    {
++		mGDIRT->ReleaseDC(NULL);
++		mInteropHDC = NULL;
++	    }
++	    if (mDrawing)
++	    {
++		mRT->EndDraw();
++		mDrawing = false;
++	    }
++	    break;
++
++	case DM_DIRECTX:
++	    if (mInteropHDC != NULL)
++	    {
++		mGDIRT->ReleaseDC(NULL);
++		mInteropHDC = NULL;
++	    }
++	    else if (mDrawing == false)
++	    {
++		mRT->BeginDraw();
++		mDrawing = true;
++	    }
++	    break;
++
++	case DM_INTEROP:
++	    if (mDrawing == false)
++	    {
++		mRT->BeginDraw();
++		mDrawing = true;
++	    }
++	    if (mInteropHDC == NULL)
++		hr = mGDIRT->GetDC(D2D1_DC_INITIALIZE_MODE_COPY, &mInteropHDC);
++	    break;
+     }
++    mDMode = mode;
++    return hr;
+ }
+ 
+     ID2D1Brush*
+@@ -849,22 +915,31 @@ DWriteContext::SolidBrush(COLORREF color)
+ }
+ 
+     void
+-DWriteContext::DrawText(const WCHAR* text, int len,
++DWriteContext::DrawText(const WCHAR *text, int len,
+ 	int x, int y, int w, int h, int cellWidth, COLORREF color,
+-	UINT fuOptions, CONST RECT *lprc, CONST INT * lpDx)
++	UINT fuOptions, const RECT *lprc, const INT *lpDx)
+ {
+     if (mFallbackDC)
+     {
+-	Flush();
+-	ExtTextOutW(mHDC, x, y, fuOptions, lprc, text, len, lpDx);
++	// Fall back to GDI rendering.
++	HRESULT hr = SetDrawingMode(DM_INTEROP);
++	if (SUCCEEDED(hr))
++	{
++	    HGDIOBJ hFont = ::GetCurrentObject(mHDC, OBJ_FONT);
++	    HGDIOBJ hOldFont = ::SelectObject(mInteropHDC, hFont);
++	    ::SetTextColor(mInteropHDC, color);
++	    ::SetBkMode(mInteropHDC, ::GetBkMode(mHDC));
++	    ::ExtTextOutW(mInteropHDC, x, y, fuOptions, lprc, text, len, lpDx);
++	    ::SelectObject(mInteropHDC, hOldFont);
++	}
+ 	return;
+     }
+ 
+-    AssureDrawing();
+-
+     HRESULT hr;
+     IDWriteTextLayout *textLayout = NULL;
+ 
++    SetDrawingMode(DM_DIRECTX);
++
+     hr = mDWriteFactory->CreateTextLayout(text, len, mTextFormat,
+ 	    FLOAT(w), FLOAT(h), &textLayout);
+ 
+@@ -883,25 +958,76 @@ DWriteContext::DrawText(const WCHAR* text, int len,
+ }
+ 
+     void
+-DWriteContext::FillRect(RECT *rc, COLORREF color)
++DWriteContext::FillRect(const RECT *rc, COLORREF color)
+ {
+-    AssureDrawing();
+-    mRT->FillRectangle(
+-	    D2D1::RectF(FLOAT(rc->left), FLOAT(rc->top),
+-		FLOAT(rc->right), FLOAT(rc->bottom)),
+-	    SolidBrush(color));
++    if (mDMode == DM_INTEROP)
++    {
++	// GDI functions are used before this call.  Keep using GDI.
++	// (Switching to Direct2D causes terrible slowdown.)
++	HBRUSH hbr = ::CreateSolidBrush(color);
++	::FillRect(mInteropHDC, rc, hbr);
++	::DeleteObject(HGDIOBJ(hbr));
++    }
++    else
++    {
++	SetDrawingMode(DM_DIRECTX);
++	mRT->FillRectangle(
++		D2D1::RectF(FLOAT(rc->left), FLOAT(rc->top),
++		    FLOAT(rc->right), FLOAT(rc->bottom)),
++		SolidBrush(color));
++    }
+ }
+ 
+     void
+-DWriteContext::Flush()
++DWriteContext::DrawLine(int x1, int y1, int x2, int y2, COLORREF color)
++{
++    if (mDMode == DM_INTEROP)
++    {
++	// GDI functions are used before this call.  Keep using GDI.
++	// (Switching to Direct2D causes terrible slowdown.)
++	HPEN hpen = ::CreatePen(PS_SOLID, 1, color);
++	HGDIOBJ old_pen = ::SelectObject(mInteropHDC, HGDIOBJ(hpen));
++	::MoveToEx(mInteropHDC, x1, y1, NULL);
++	::LineTo(mInteropHDC, x2, y2);
++	::SelectObject(mInteropHDC, old_pen);
++	::DeleteObject(HGDIOBJ(hpen));
++    }
++    else
++    {
++	SetDrawingMode(DM_DIRECTX);
++	mRT->DrawLine(
++		D2D1::Point2F(FLOAT(x1), FLOAT(y1) + 0.5f),
++		D2D1::Point2F(FLOAT(x2), FLOAT(y2) + 0.5f),
++		SolidBrush(color));
++    }
++}
++
++    void
++DWriteContext::SetPixel(int x, int y, COLORREF color)
+ {
+-    if (mDrawing)
++    if (mDMode == DM_INTEROP)
++    {
++	// GDI functions are used before this call.  Keep using GDI.
++	// (Switching to Direct2D causes terrible slowdown.)
++	::SetPixel(mInteropHDC, x, y, color);
++    }
++    else
+     {
+-	mRT->EndDraw();
+-	mDrawing = false;
++	SetDrawingMode(DM_DIRECTX);
++	// Direct2D doesn't have SetPixel API.  Use DrawLine instead.
++	mRT->DrawLine(
++		D2D1::Point2F(FLOAT(x), FLOAT(y) + 0.5f),
++		D2D1::Point2F(FLOAT(x+1), FLOAT(y) + 0.5f),
++		SolidBrush(color));
+     }
+ }
+ 
++    void
++DWriteContext::Flush()
++{
++    SetDrawingMode(DM_GDI);
++}
++
+     void
+ DWriteContext::SetRenderingParams(
+ 	const DWriteRenderingParams *params)
+@@ -1000,7 +1126,7 @@ DWriteContext_Open(void)
+ }
+ 
+     void
+-DWriteContext_BindDC(DWriteContext *ctx, HDC hdc, RECT *rect)
++DWriteContext_BindDC(DWriteContext *ctx, HDC hdc, const RECT *rect)
+ {
+     if (ctx != NULL)
+ 	ctx->BindDC(hdc, rect);
+@@ -1016,7 +1142,7 @@ DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont)
+     void
+ DWriteContext_DrawText(
+ 	DWriteContext *ctx,
+-	const WCHAR* text,
++	const WCHAR *text,
+ 	int len,
+ 	int x,
+ 	int y,
+@@ -1025,8 +1151,8 @@ DWriteContext_DrawText(
+ 	int cellWidth,
+ 	COLORREF color,
+ 	UINT fuOptions,
+-	CONST RECT *lprc,
+-	CONST INT * lpDx)
++	const RECT *lprc,
++	const INT *lpDx)
+ {
+     if (ctx != NULL)
+ 	ctx->DrawText(text, len, x, y, w, h, cellWidth, color,
+@@ -1034,12 +1160,27 @@ DWriteContext_DrawText(
+ }
+ 
+     void
+-DWriteContext_FillRect(DWriteContext *ctx, RECT *rc, COLORREF color)
++DWriteContext_FillRect(DWriteContext *ctx, const RECT *rc, COLORREF color)
+ {
+     if (ctx != NULL)
+ 	ctx->FillRect(rc, color);
+ }
+ 
++    void
++DWriteContext_DrawLine(DWriteContext *ctx, int x1, int y1, int x2, int y2,
++	COLORREF color)
++{
++    if (ctx != NULL)
++	ctx->DrawLine(x1, y1, x2, y2, color);
++}
++
++    void
++DWriteContext_SetPixel(DWriteContext *ctx, int x, int y, COLORREF color)
++{
++    if (ctx != NULL)
++	ctx->SetPixel(x, y, color);
++}
++
+     void
+ DWriteContext_Flush(DWriteContext *ctx)
+ {
+diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
+index 8ab2864d8..9c98c4ce0 100644
+--- a/src/gui_dwrite.h
++++ b/src/gui_dwrite.h
+@@ -55,11 +55,11 @@ void DWrite_Init(void);
+ void DWrite_Final(void);
+ 
+ DWriteContext *DWriteContext_Open(void);
+-void DWriteContext_BindDC(DWriteContext *ctx, HDC hdc, RECT *rect);
++void DWriteContext_BindDC(DWriteContext *ctx, HDC hdc, const RECT *rect);
+ void DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont);
+ void DWriteContext_DrawText(
+ 	DWriteContext *ctx,
+-	const WCHAR* text,
++	const WCHAR *text,
+ 	int len,
+ 	int x,
+ 	int y,
+@@ -68,9 +68,12 @@ void DWriteContext_DrawText(
+ 	int cellWidth,
+ 	COLORREF color,
+ 	UINT fuOptions,
+-	CONST RECT *lprc,
+-	CONST INT * lpDx);
+-void DWriteContext_FillRect(DWriteContext *ctx, RECT *rc, COLORREF color);
++	const RECT *lprc,
++	const INT *lpDx);
++void DWriteContext_FillRect(DWriteContext *ctx, const RECT *rc, COLORREF color);
++void DWriteContext_DrawLine(DWriteContext *ctx, int x1, int y1, int x2, int y2,
++	COLORREF color);
++void DWriteContext_SetPixel(DWriteContext *ctx, int x, int y, COLORREF color);
+ void DWriteContext_Flush(DWriteContext *ctx);
+ void DWriteContext_Close(DWriteContext *ctx);
+ 
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+index 7610b18fd..ae766b16f 100644
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -283,6 +283,7 @@ typedef int UINT_PTR;
+ #endif
+ 
+ static void _OnPaint( HWND hwnd);
++static void fill_rect(const RECT *rcp, HBRUSH hbr, COLORREF color);
+ static void clear_rect(RECT *rcp);
+ 
+ static WORD		s_dlgfntheight;		/* height of the dialog font */
+@@ -1728,7 +1729,6 @@ gui_mch_draw_part_cursor(
+     int		h,
+     guicolor_T	color)
+ {
+-    HBRUSH	hbr;
+     RECT	rc;
+ 
+     /*
+@@ -1744,14 +1744,12 @@ gui_mch_draw_part_cursor(
+     rc.right = rc.left + w;
+     rc.bottom = rc.top + h;
+ 
++    fill_rect(&rc, NULL, color);
++
+ #if defined(FEAT_DIRECTX)
+     if (IS_ENABLE_DIRECTX())
+ 	DWriteContext_Flush(s_dwc);
+ #endif
+-
+-    hbr = CreateSolidBrush(color);
+-    FillRect(s_hdc, &rc, hbr);
+-    DeleteBrush(hbr);
+ }
+ 
+ 
+@@ -6177,6 +6175,67 @@ RevOut( HDC s_hdc,
+ }
+ #endif
+ 
++    static void
++draw_line(
++    int		x1,
++    int	    	y1,
++    int	    	x2,
++    int	    	y2,
++    COLORREF	color)
++{
++#if defined(FEAT_DIRECTX)
++    if (IS_ENABLE_DIRECTX())
++	DWriteContext_DrawLine(s_dwc, x1, y1, x2, y2, color);
++    else
++#endif
++    {
++	HPEN	hpen = CreatePen(PS_SOLID, 1, color);
++	HPEN	old_pen = SelectObject(s_hdc, hpen);
++	MoveToEx(s_hdc, x1, y1, NULL);
++	/* Note: LineTo() excludes the last pixel in the line. */
++	LineTo(s_hdc, x2, y2);
++	DeleteObject(SelectObject(s_hdc, old_pen));
++    }
++}
++
++    static void
++set_pixel(
++    int		x,
++    int	    	y,
++    COLORREF	color)
++{
++#if defined(FEAT_DIRECTX)
++    if (IS_ENABLE_DIRECTX())
++	DWriteContext_SetPixel(s_dwc, x, y, color);
++    else
++#endif
++	SetPixel(s_hdc, x, y, color);
++}
++
++    static void
++fill_rect(
++    const RECT	*rcp,
++    HBRUSH    	hbr,
++    COLORREF	color)
++{
++#if defined(FEAT_DIRECTX)
++    if (IS_ENABLE_DIRECTX())
++	DWriteContext_FillRect(s_dwc, rcp, color);
++    else
++#endif
++    {
++	HBRUSH	hbr2;
++
++	if (hbr == NULL)
++	    hbr2 = CreateSolidBrush(color);
++	else
++	    hbr2 = hbr;
++	FillRect(s_hdc, rcp, hbr2);
++	if (hbr == NULL)
++	    DeleteBrush(hbr2);
++    }
++}
++
+     void
+ gui_mch_draw_string(
+     int		row,
+@@ -6196,7 +6255,6 @@ gui_mch_draw_string(
+     static int	unibuflen = 0;
+     int		n = 0;
+ #endif
+-    HPEN	hpen, old_pen;
+     int		y;
+ 
+     /*
+@@ -6259,11 +6317,7 @@ gui_mch_draw_string(
+ 	    brush_lru = !brush_lru;
+ 	}
+ 
+-#if defined(FEAT_DIRECTX)
+-	if (IS_ENABLE_DIRECTX())
+-	    DWriteContext_FillRect(s_dwc, &rc, gui.currBgColor);
+-#endif
+-	FillRect(s_hdc, &rc, hbr);
++	fill_rect(&rc, hbr, gui.currBgColor);
+ 
+ 	SetBkMode(s_hdc, TRANSPARENT);
+ 
+@@ -6458,38 +6512,22 @@ gui_mch_draw_string(
+ 			 foptions, pcliprect, (char *)text, len, padding);
+     }
+ 
+-#if defined(FEAT_DIRECTX)
+-    if (IS_ENABLE_DIRECTX() &&
+-	    (flags & (DRAW_UNDERL | DRAW_STRIKE | DRAW_UNDERC | DRAW_CURSOR)))
+-	DWriteContext_Flush(s_dwc);
+-#endif
+-
+     /* Underline */
+     if (flags & DRAW_UNDERL)
+     {
+-	hpen = CreatePen(PS_SOLID, 1, gui.currFgColor);
+-	old_pen = SelectObject(s_hdc, hpen);
+ 	/* When p_linespace is 0, overwrite the bottom row of pixels.
+ 	 * Otherwise put the line just below the character. */
+ 	y = FILL_Y(row + 1) - 1;
+ 	if (p_linespace > 1)
+ 	    y -= p_linespace - 1;
+-	MoveToEx(s_hdc, FILL_X(col), y, NULL);
+-	/* Note: LineTo() excludes the last pixel in the line. */
+-	LineTo(s_hdc, FILL_X(col + len), y);
+-	DeleteObject(SelectObject(s_hdc, old_pen));
++	draw_line(FILL_X(col), y, FILL_X(col + len), y, gui.currFgColor);
+     }
+ 
+     /* Strikethrough */
+     if (flags & DRAW_STRIKE)
+     {
+-	hpen = CreatePen(PS_SOLID, 1, gui.currSpColor);
+-	old_pen = SelectObject(s_hdc, hpen);
+ 	y = FILL_Y(row + 1) - gui.char_height/2;
+-	MoveToEx(s_hdc, FILL_X(col), y, NULL);
+-	/* Note: LineTo() excludes the last pixel in the line. */
+-	LineTo(s_hdc, FILL_X(col + len), y);
+-	DeleteObject(SelectObject(s_hdc, old_pen));
++	draw_line(FILL_X(col), y, FILL_X(col + len), y, gui.currSpColor);
+     }
+ 
+     /* Undercurl */
+@@ -6503,9 +6541,17 @@ gui_mch_draw_string(
+ 	for (x = FILL_X(col); x < FILL_X(col + len); ++x)
+ 	{
+ 	    offset = val[x % 8];
+-	    SetPixel(s_hdc, x, y - offset, gui.currSpColor);
++	    set_pixel(x, y - offset, gui.currSpColor);
+ 	}
+     }
++
++#if defined(FEAT_DIRECTX)
++    if (IS_ENABLE_DIRECTX())
++    {
++	if (flags & DRAW_CURSOR)
++	    DWriteContext_Flush(s_dwc);
++    }
++#endif
+ }
+ 
+ 
+@@ -6537,19 +6583,7 @@ gui_mch_flush(void)
+     static void
+ clear_rect(RECT *rcp)
+ {
+-    HBRUSH  hbr;
+-
+-#if defined(FEAT_DIRECTX)
+-    if (IS_ENABLE_DIRECTX())
+-    {
+-	DWriteContext_FillRect(s_dwc, rcp, gui.back_pixel);
+-	return;
+-    }
+-#endif
+-
+-    hbr = CreateSolidBrush(gui.back_pixel);
+-    FillRect(s_hdc, rcp, hbr);
+-    DeleteBrush(hbr);
++    fill_rect(rcp, NULL, gui.back_pixel);
+ }
+ 
+ 
