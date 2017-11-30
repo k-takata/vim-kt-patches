@@ -1,8 +1,62 @@
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index c4ceb5f39..27a9509d3 100644
+index c4ceb5f39..2b9a6c093 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6159,8 +6159,7 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -6119,9 +6119,10 @@ A jump table for the options with a short description can be found at |Q_op|.
+ 		  geom	    pixelGeometry	int	0 - 2 (see below)
+ 		  renmode   renderingMode	int	0 - 6 (see below)
+ 		  taamode   textAntialiasMode	int	0 - 3 (see below)
++		  scrlines  Scroll Lines	int	>= 0  (see below)
+ 
+-		See this URL for detail:
+-		  http://msdn.microsoft.com/en-us/library/dd368190.aspx
++		See this URL for detail (except for scrlines):
++		  https://msdn.microsoft.com/en-us/library/dd368190.aspx
+ 
+ 		For geom: structure of a device pixel.
+ 		  0 - DWRITE_PIXEL_GEOMETRY_FLAT
+@@ -6129,7 +6130,7 @@ A jump table for the options with a short description can be found at |Q_op|.
+ 		  2 - DWRITE_PIXEL_GEOMETRY_BGR
+ 
+ 		See this URL for detail:
+-		  http://msdn.microsoft.com/en-us/library/dd368114.aspx
++		  https://msdn.microsoft.com/en-us/library/dd368114.aspx
+ 
+ 		For renmode: method of rendering glyphs.
+ 		  0 - DWRITE_RENDERING_MODE_DEFAULT
+@@ -6141,7 +6142,7 @@ A jump table for the options with a short description can be found at |Q_op|.
+ 		  6 - DWRITE_RENDERING_MODE_OUTLINE
+ 
+ 		See this URL for detail:
+-		  http://msdn.microsoft.com/en-us/library/dd368118.aspx
++		  https://msdn.microsoft.com/en-us/library/dd368118.aspx
+ 
+ 		For taamode: antialiasing mode used for drawing text.
+ 		  0 - D2D1_TEXT_ANTIALIAS_MODE_DEFAULT
+@@ -6150,7 +6151,21 @@ A jump table for the options with a short description can be found at |Q_op|.
+ 		  3 - D2D1_TEXT_ANTIALIAS_MODE_ALIASED
+ 
+ 		See this URL for detail:
+-		  http://msdn.microsoft.com/en-us/library/dd368170.aspx
++		  https://msdn.microsoft.com/en-us/library/dd368170.aspx
++
++		For scrlines: set the threshold for lines to be scrolled.
++		Vim normally uses the ScrollWindowEx API to scroll lines.
++		However, redrawing is faster than scrolling in some conditions.
++		It might depend on the lines to be scrolled, your GPU and/or
++		CPU.  (Using the ScrollWindowEx API might become slower when
++		the lines to be scrolled are increased.)  You can optimize the
++		behavior by changing this value:
++
++		    0 - Always use the ScrollWindowEx API. (default)
++		    1 - Always use the RedrawWindow API.
++		  > 1 - If the lines to be scrolled is grater or equal to the
++			specified value, use the RedrawWindow API.  Otherwise
++			use the ScrollWindowEx API.
+ 
+ 		Example: >
+ 		  set encoding=utf-8
+@@ -6159,13 +6174,12 @@ A jump table for the options with a short description can be found at |Q_op|.
  <
  		If select a raster font (Courier, Terminal or FixedSys which
  		have ".fon" extension in file name) to 'guifont', it will be
@@ -12,6 +66,12 @@ index c4ceb5f39..27a9509d3 100644
  
  		NOTE: It is known that some fonts and options combination
  		causes trouble on drawing glyphs.
+ 
+-		  - 'rendmode:5' and 'renmode:6' will not work with some
++		  - 'renmode:5' and 'renmode:6' will not work with some
+ 		    special made fonts (True-Type fonts which includes only
+ 		    bitmap glyphs).
+ 		  - 'taamode:3' will not work with some vector fonts.
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 index bd76383c5..0092cde88 100644
 --- a/src/gui_dwrite.cpp
@@ -405,10 +465,45 @@ index 8ab2864d8..9c98c4ce0 100644
  void DWriteContext_Close(DWriteContext *ctx);
  
 diff --git a/src/gui_w32.c b/src/gui_w32.c
-index 7610b18fd..d7bbc0cfe 100644
+index 7610b18fd..294f6bf19 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -283,6 +283,7 @@ typedef int UINT_PTR;
+@@ -33,6 +33,7 @@
+ static DWriteContext *s_dwc = NULL;
+ static int s_directx_enabled = 0;
+ static int s_directx_load_attempted = 0;
++static int s_directx_scrlines = 0;
+ # define IS_ENABLE_DIRECTX() (s_directx_enabled && s_dwc != NULL)
+ static int directx_enabled(void);
+ static void directx_binddc(void);
+@@ -57,6 +58,7 @@ gui_mch_set_rendering_options(char_u *s)
+     int	    dx_geom = 0;
+     int	    dx_renmode = 0;
+     int	    dx_taamode = 0;
++    int	    dx_scrlines = 0;
+ 
+     /* parse string as rendering options. */
+     for (p = s; p != NULL && *p != NUL; )
+@@ -117,6 +119,10 @@ gui_mch_set_rendering_options(char_u *s)
+ 	    if (dx_taamode < 0 || dx_taamode > 3)
+ 		return FAIL;
+ 	}
++	else if (STRCMP(name, "scrlines") == 0)
++	{
++	    dx_scrlines = atoi((char *)value);
++	}
+ 	else
+ 	    return FAIL;
+     }
+@@ -147,6 +153,7 @@ gui_mch_set_rendering_options(char_u *s)
+ 	}
+     }
+     s_directx_enabled = dx_enable;
++    s_directx_scrlines = dx_scrlines;
+ 
+     return OK;
+ #else
+@@ -283,6 +290,7 @@ typedef int UINT_PTR;
  #endif
  
  static void _OnPaint( HWND hwnd);
@@ -416,7 +511,7 @@ index 7610b18fd..d7bbc0cfe 100644
  static void clear_rect(RECT *rcp);
  
  static WORD		s_dlgfntheight;		/* height of the dialog font */
-@@ -1728,7 +1729,6 @@ gui_mch_draw_part_cursor(
+@@ -1728,7 +1736,6 @@ gui_mch_draw_part_cursor(
      int		h,
      guicolor_T	color)
  {
@@ -424,46 +519,54 @@ index 7610b18fd..d7bbc0cfe 100644
      RECT	rc;
  
      /*
-@@ -1744,14 +1744,12 @@ gui_mch_draw_part_cursor(
+@@ -1744,14 +1751,7 @@ gui_mch_draw_part_cursor(
      rc.right = rc.left + w;
      rc.bottom = rc.top + h;
  
-+    fill_rect(&rc, NULL, color);
-+
- #if defined(FEAT_DIRECTX)
-     if (IS_ENABLE_DIRECTX())
- 	DWriteContext_Flush(s_dwc);
- #endif
--
--    hbr = CreateSolidBrush(color);
--    FillRect(s_hdc, &rc, hbr);
--    DeleteBrush(hbr);
- }
- 
- 
-@@ -3121,21 +3119,22 @@ gui_mch_delete_lines(
- {
-     RECT	rc;
- 
--    intel_gpu_workaround();
--
 -#if defined(FEAT_DIRECTX)
--    // Commit drawing queue before ScrollWindowEx.
 -    if (IS_ENABLE_DIRECTX())
 -	DWriteContext_Flush(s_dwc);
 -#endif
 -
+-    hbr = CreateSolidBrush(color);
+-    FillRect(s_hdc, &rc, hbr);
+-    DeleteBrush(hbr);
++    fill_rect(&rc, NULL, color);
+ }
+ 
+ 
+@@ -3120,13 +3120,8 @@ gui_mch_delete_lines(
+     int	    num_lines)
+ {
+     RECT	rc;
+-
+-    intel_gpu_workaround();
+-
+ #if defined(FEAT_DIRECTX)
+-    // Commit drawing queue before ScrollWindowEx.
+-    if (IS_ENABLE_DIRECTX())
+-	DWriteContext_Flush(s_dwc);
++    int		use_redraw = 0;
+ #endif
+ 
      rc.left = FILL_X(gui.scroll_region_left);
-     rc.right = FILL_X(gui.scroll_region_right + 1);
+@@ -3134,8 +3129,24 @@ gui_mch_delete_lines(
      rc.top = FILL_Y(row);
      rc.bottom = FILL_Y(gui.scroll_region_bot + 1);
  
 -    ScrollWindowEx(s_textArea, 0, -num_lines * gui.char_height,
 +#if defined(FEAT_DIRECTX)
 +    if (IS_ENABLE_DIRECTX())
-+	/* Redrawing is faster than scrolling. */
-+	RedrawWindow(s_textArea, &rc, NULL, RDW_INVALIDATE);
-+    else
++    {
++	if (s_directx_scrlines > 0 && s_directx_scrlines <= num_lines)
++	{
++	    RedrawWindow(s_textArea, &rc, NULL, RDW_INVALIDATE);
++	    use_redraw = 1;
++	}
++	else
++	    DWriteContext_Flush(s_dwc);
++    }
++    if (!use_redraw)
 +#endif
 +    {
 +	intel_gpu_workaround();
@@ -473,18 +576,20 @@ index 7610b18fd..d7bbc0cfe 100644
  
      UpdateWindow(s_textArea);
      /* This seems to be required to avoid the cursor disappearing when
-@@ -3160,22 +3159,24 @@ gui_mch_insert_lines(
+@@ -3159,23 +3170,35 @@ gui_mch_insert_lines(
+     int		num_lines)
  {
      RECT	rc;
- 
+-
 -    intel_gpu_workaround();
 -
--#if defined(FEAT_DIRECTX)
+ #if defined(FEAT_DIRECTX)
 -    // Commit drawing queue before ScrollWindowEx.
 -    if (IS_ENABLE_DIRECTX())
 -	DWriteContext_Flush(s_dwc);
--#endif
--
++    int		use_redraw = 0;
+ #endif
+ 
      rc.left = FILL_X(gui.scroll_region_left);
      rc.right = FILL_X(gui.scroll_region_right + 1);
      rc.top = FILL_Y(row);
@@ -495,9 +600,16 @@ index 7610b18fd..d7bbc0cfe 100644
 +
 +#if defined(FEAT_DIRECTX)
 +    if (IS_ENABLE_DIRECTX())
-+	/* Redrawing is faster than scrolling. */
-+	RedrawWindow(s_textArea, &rc, NULL, RDW_INVALIDATE);
-+    else
++    {
++	if (s_directx_scrlines > 0 && s_directx_scrlines <= num_lines)
++	{
++	    RedrawWindow(s_textArea, &rc, NULL, RDW_INVALIDATE);
++	    use_redraw = 1;
++	}
++	else
++	    DWriteContext_Flush(s_dwc);
++    }
++    if (!use_redraw)
 +#endif
 +    {
 +	intel_gpu_workaround();
@@ -509,7 +621,7 @@ index 7610b18fd..d7bbc0cfe 100644
  
      UpdateWindow(s_textArea);
  
-@@ -6177,6 +6178,67 @@ RevOut( HDC s_hdc,
+@@ -6177,6 +6200,67 @@ RevOut( HDC s_hdc,
  }
  #endif
  
@@ -577,7 +689,7 @@ index 7610b18fd..d7bbc0cfe 100644
      void
  gui_mch_draw_string(
      int		row,
-@@ -6196,7 +6258,6 @@ gui_mch_draw_string(
+@@ -6196,7 +6280,6 @@ gui_mch_draw_string(
      static int	unibuflen = 0;
      int		n = 0;
  #endif
@@ -585,7 +697,7 @@ index 7610b18fd..d7bbc0cfe 100644
      int		y;
  
      /*
-@@ -6259,11 +6320,7 @@ gui_mch_draw_string(
+@@ -6259,11 +6342,7 @@ gui_mch_draw_string(
  	    brush_lru = !brush_lru;
  	}
  
@@ -598,7 +710,7 @@ index 7610b18fd..d7bbc0cfe 100644
  
  	SetBkMode(s_hdc, TRANSPARENT);
  
-@@ -6458,38 +6515,22 @@ gui_mch_draw_string(
+@@ -6458,38 +6537,22 @@ gui_mch_draw_string(
  			 foptions, pcliprect, (char *)text, len, padding);
      }
  
@@ -639,7 +751,7 @@ index 7610b18fd..d7bbc0cfe 100644
      }
  
      /* Undercurl */
-@@ -6503,9 +6544,17 @@ gui_mch_draw_string(
+@@ -6503,7 +6566,7 @@ gui_mch_draw_string(
  	for (x = FILL_X(col); x < FILL_X(col + len); ++x)
  	{
  	    offset = val[x % 8];
@@ -647,18 +759,8 @@ index 7610b18fd..d7bbc0cfe 100644
 +	    set_pixel(x, y - offset, gui.currSpColor);
  	}
      }
-+
-+#if defined(FEAT_DIRECTX)
-+    if (IS_ENABLE_DIRECTX())
-+    {
-+	if (flags & DRAW_CURSOR)
-+	    DWriteContext_Flush(s_dwc);
-+    }
-+#endif
  }
- 
- 
-@@ -6537,19 +6586,7 @@ gui_mch_flush(void)
+@@ -6537,19 +6600,7 @@ gui_mch_flush(void)
      static void
  clear_rect(RECT *rcp)
  {
