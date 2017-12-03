@@ -1,5 +1,5 @@
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index c4ceb5f39..2b9a6c093 100644
+index c4ceb5f39..c1b6a52eb 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
 @@ -6119,9 +6119,10 @@ A jump table for the options with a short description can be found at |Q_op|.
@@ -33,30 +33,34 @@ index c4ceb5f39..2b9a6c093 100644
  
  		For taamode: antialiasing mode used for drawing text.
  		  0 - D2D1_TEXT_ANTIALIAS_MODE_DEFAULT
-@@ -6150,7 +6151,21 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -6150,7 +6151,25 @@ A jump table for the options with a short description can be found at |Q_op|.
  		  3 - D2D1_TEXT_ANTIALIAS_MODE_ALIASED
  
  		See this URL for detail:
 -		  http://msdn.microsoft.com/en-us/library/dd368170.aspx
 +		  https://msdn.microsoft.com/en-us/library/dd368170.aspx
 +
-+		For scrlines: set the threshold for lines to be scrolled.
-+		Vim normally uses the ScrollWindowEx API to scroll lines.
-+		However, redrawing is faster than scrolling in some conditions.
-+		It might depend on the lines to be scrolled, your GPU and/or
-+		CPU.  (Using the ScrollWindowEx API might become slower when
-+		the lines to be scrolled are increased.)  You can optimize the
-+		behavior by changing this value:
-+
-+		    0 - Always use the ScrollWindowEx API. (default)
-+		    1 - Always use the RedrawWindow API.
++		For scrlines: threshold for lines to be scrolled.
++		    0 - Always use scrolling. (default)
++		    1 - Use full page redrawing.
 +		  > 1 - If the lines to be scrolled is grater or equal to the
-+			specified value, use the RedrawWindow API.  Otherwise
-+			use the ScrollWindowEx API.
++			specified value, use redrawing.  Otherwise use
++			scrolling.
++
++		If you feel scrolling a page (CTRL-F) is too slow with DirectX
++		renderer, try this "scrlines" option.
++		When set it "1", Vim uses full page redrawing instead of
++		scrolling.  Redrawing a page is faster than scrolling a
++		page in some environments.
++		After that, when you feel scrolling lines (CTRL-Y) becomes
++		slow, please try "2" or greater value for this option.
++		It works threshold line number to switch scrolling to
++		redrawing.  Scrolling a few lines might be faster than
++		redrawing a page in some environments.
  
  		Example: >
  		  set encoding=utf-8
-@@ -6159,13 +6174,12 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -6159,13 +6178,12 @@ A jump table for the options with a short description can be found at |Q_op|.
  <
  		If select a raster font (Courier, Terminal or FixedSys which
  		have ".fon" extension in file name) to 'guifont', it will be
@@ -73,7 +77,7 @@ index c4ceb5f39..2b9a6c093 100644
  		    bitmap glyphs).
  		  - 'taamode:3' will not work with some vector fonts.
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
-index bd76383c5..0092cde88 100644
+index bd76383c5..90fe3f1bb 100644
 --- a/src/gui_dwrite.cpp
 +++ b/src/gui_dwrite.cpp
 @@ -263,14 +263,23 @@ private:
@@ -100,7 +104,18 @@ index bd76383c5..0092cde88 100644
      ID2D1SolidColorBrush *mBrush;
  
      IDWriteFactory *mDWriteFactory;
-@@ -299,17 +308,21 @@ struct DWriteContext {
+@@ -292,6 +301,10 @@ struct DWriteContext {
+ 
+     virtual ~DWriteContext();
+ 
++    HRESULT CreateDeviceResources();
++
++    void DiscardDeviceResources();
++
+     HRESULT CreateTextFormatFromLOGFONT(const LOGFONTW &logFont,
+ 	    IDWriteTextFormat **ppTextFormat);
+ 
+@@ -299,17 +312,21 @@ struct DWriteContext {
  
      void SetFont(HFONT hFont);
  
@@ -117,17 +132,17 @@ index bd76383c5..0092cde88 100644
  	int x, int y, int w, int h, int cellWidth, COLORREF color,
 -	UINT fuOptions, CONST RECT *lprc, CONST INT * lpDx);
 +	UINT fuOptions, const RECT *lprc, const INT *lpDx);
-+
-+    void FillRect(const RECT *rc, COLORREF color);
  
 -    void FillRect(RECT *rc, COLORREF color);
++    void FillRect(const RECT *rc, COLORREF color);
++
 +    void DrawLine(int x1, int y1, int x2, int y2, COLORREF color);
 +
 +    void SetPixel(int x, int y, COLORREF color);
  
      void Flush();
  
-@@ -561,10 +574,13 @@ private:
+@@ -561,10 +578,13 @@ private:
  
  DWriteContext::DWriteContext() :
      mHDC(NULL),
@@ -141,18 +156,60 @@ index bd76383c5..0092cde88 100644
      mBrush(NULL),
      mDWriteFactory(NULL),
      mDWriteFactory2(NULL),
-@@ -589,13 +605,21 @@ DWriteContext::DWriteContext() :
- 	    D2D1_RENDER_TARGET_TYPE_DEFAULT,
- 	    { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE },
- 	    0, 0,
--	    D2D1_RENDER_TARGET_USAGE_NONE,
-+	    D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
- 	    D2D1_FEATURE_LEVEL_DEFAULT
- 	};
- 	hr = mD2D1Factory->CreateDCRenderTarget(&props, &mRT);
- 	_RPT2(_CRT_WARN, "CreateDCRenderTarget: hr=%p p=%p\n", hr, mRT);
-     }
+@@ -584,25 +604,7 @@ DWriteContext::DWriteContext() :
+     _RPT2(_CRT_WARN, "D2D1CreateFactory: hr=%p p=%p\n", hr, mD2D1Factory);
  
+     if (SUCCEEDED(hr))
+-    {
+-	D2D1_RENDER_TARGET_PROPERTIES props = {
+-	    D2D1_RENDER_TARGET_TYPE_DEFAULT,
+-	    { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE },
+-	    0, 0,
+-	    D2D1_RENDER_TARGET_USAGE_NONE,
+-	    D2D1_FEATURE_LEVEL_DEFAULT
+-	};
+-	hr = mD2D1Factory->CreateDCRenderTarget(&props, &mRT);
+-	_RPT2(_CRT_WARN, "CreateDCRenderTarget: hr=%p p=%p\n", hr, mRT);
+-    }
+-
+-    if (SUCCEEDED(hr))
+-    {
+-	hr = mRT->CreateSolidColorBrush(
+-		D2D1::ColorF(D2D1::ColorF::Black),
+-		&mBrush);
+-	_RPT2(_CRT_WARN, "CreateSolidColorBrush: hr=%p p=%p\n", hr, mBrush);
+-    }
++	hr = CreateDeviceResources();
+ 
+     if (SUCCEEDED(hr))
+     {
+@@ -645,10 +647,56 @@ DWriteContext::~DWriteContext()
+     SafeRelease(&mDWriteFactory);
+     SafeRelease(&mDWriteFactory2);
+     SafeRelease(&mBrush);
++    SafeRelease(&mGDIRT);
+     SafeRelease(&mRT);
+     SafeRelease(&mD2D1Factory);
+ }
+ 
++    HRESULT
++DWriteContext::CreateDeviceResources()
++{
++    HRESULT hr;
++
++    if (mRT != NULL)
++	return S_OK;
++
++    D2D1_RENDER_TARGET_PROPERTIES props = {
++	D2D1_RENDER_TARGET_TYPE_DEFAULT,
++	{ DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE },
++	0, 0,
++	D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
++	D2D1_FEATURE_LEVEL_DEFAULT
++    };
++    hr = mD2D1Factory->CreateDCRenderTarget(&props, &mRT);
++    _RPT2(_CRT_WARN, "CreateDCRenderTarget: hr=%p p=%p\n", hr, mRT);
++
 +    if (SUCCEEDED(hr))
 +    {
 +	// This always succeeds.
@@ -161,18 +218,29 @@ index bd76383c5..0092cde88 100644
 +		reinterpret_cast<void**>(&mGDIRT));
 +    }
 +
-     if (SUCCEEDED(hr))
-     {
- 	hr = mRT->CreateSolidColorBrush(
-@@ -645,6 +669,7 @@ DWriteContext::~DWriteContext()
-     SafeRelease(&mDWriteFactory);
-     SafeRelease(&mDWriteFactory2);
-     SafeRelease(&mBrush);
++    if (SUCCEEDED(hr))
++    {
++	hr = mRT->CreateSolidColorBrush(
++		D2D1::ColorF(D2D1::ColorF::Black),
++		&mBrush);
++	_RPT2(_CRT_WARN, "CreateSolidColorBrush: hr=%p p=%p\n", hr, mBrush);
++    }
++
++    return hr;
++}
++
++    void
++DWriteContext::DiscardDeviceResources()
++{
++    SafeRelease(&mBrush);
 +    SafeRelease(&mGDIRT);
-     SafeRelease(&mRT);
-     SafeRelease(&mD2D1Factory);
- }
-@@ -817,12 +842,15 @@ DWriteContext::SetFont(HFONT hFont)
++    SafeRelease(&mRT);
++}
++
+     HRESULT
+ DWriteContext::CreateTextFormatFromLOGFONT(const LOGFONTW &logFont,
+ 	IDWriteTextFormat **ppTextFormat)
+@@ -817,12 +865,15 @@ DWriteContext::SetFont(HFONT hFont)
  	item.pTextFormat = mTextFormat;
  	item.fontWeight = mFontWeight;
  	item.fontStyle = mFontStyle;
@@ -189,7 +257,7 @@ index bd76383c5..0092cde88 100644
  {
      Flush();
      mRT->BindDC(hdc, rect);
-@@ -830,14 +858,52 @@ DWriteContext::BindDC(HDC hdc, RECT *rect)
+@@ -830,14 +881,59 @@ DWriteContext::BindDC(HDC hdc, RECT *rect)
      mHDC = hdc;
  }
  
@@ -200,6 +268,8 @@ index bd76383c5..0092cde88 100644
  {
 -    if (mDrawing == false)
 +    HRESULT hr = S_OK;
++
++    CreateDeviceResources();
 +
 +    switch (mode)
      {
@@ -214,7 +284,12 @@ index bd76383c5..0092cde88 100644
 +	    }
 +	    if (mDrawing)
 +	    {
-+		mRT->EndDraw();
++		hr = mRT->EndDraw();
++		if (hr == D2DERR_RECREATE_TARGET)
++		{
++		    hr = S_OK;
++		    DiscardDeviceResources();
++		}
 +		mDrawing = false;
 +	    }
 +	    break;
@@ -247,7 +322,7 @@ index bd76383c5..0092cde88 100644
  }
  
      ID2D1Brush*
-@@ -849,22 +915,31 @@ DWriteContext::SolidBrush(COLORREF color)
+@@ -849,22 +945,31 @@ DWriteContext::SolidBrush(COLORREF color)
  }
  
      void
@@ -285,7 +360,7 @@ index bd76383c5..0092cde88 100644
      hr = mDWriteFactory->CreateTextLayout(text, len, mTextFormat,
  	    FLOAT(w), FLOAT(h), &textLayout);
  
-@@ -883,25 +958,76 @@ DWriteContext::DrawText(const WCHAR* text, int len,
+@@ -883,25 +988,76 @@ DWriteContext::DrawText(const WCHAR* text, int len,
  }
  
      void
@@ -372,7 +447,7 @@ index bd76383c5..0092cde88 100644
      void
  DWriteContext::SetRenderingParams(
  	const DWriteRenderingParams *params)
-@@ -1000,7 +1126,7 @@ DWriteContext_Open(void)
+@@ -1000,7 +1156,7 @@ DWriteContext_Open(void)
  }
  
      void
@@ -381,7 +456,7 @@ index bd76383c5..0092cde88 100644
  {
      if (ctx != NULL)
  	ctx->BindDC(hdc, rect);
-@@ -1016,7 +1142,7 @@ DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont)
+@@ -1016,7 +1172,7 @@ DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont)
      void
  DWriteContext_DrawText(
  	DWriteContext *ctx,
@@ -390,7 +465,7 @@ index bd76383c5..0092cde88 100644
  	int len,
  	int x,
  	int y,
-@@ -1025,8 +1151,8 @@ DWriteContext_DrawText(
+@@ -1025,8 +1181,8 @@ DWriteContext_DrawText(
  	int cellWidth,
  	COLORREF color,
  	UINT fuOptions,
@@ -401,7 +476,7 @@ index bd76383c5..0092cde88 100644
  {
      if (ctx != NULL)
  	ctx->DrawText(text, len, x, y, w, h, cellWidth, color,
-@@ -1034,12 +1160,27 @@ DWriteContext_DrawText(
+@@ -1034,12 +1190,27 @@ DWriteContext_DrawText(
  }
  
      void
