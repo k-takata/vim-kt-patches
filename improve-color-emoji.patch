@@ -77,10 +77,10 @@ index c4ceb5f39..c1b6a52eb 100644
  		    bitmap glyphs).
  		  - 'taamode:3' will not work with some vector fonts.
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
-index bd76383c5..90fe3f1bb 100644
+index bd76383c5..9b6876b05 100644
 --- a/src/gui_dwrite.cpp
 +++ b/src/gui_dwrite.cpp
-@@ -263,14 +263,23 @@ private:
+@@ -263,14 +263,24 @@ private:
      }
  };
  
@@ -92,6 +92,7 @@ index bd76383c5..90fe3f1bb 100644
 +
  struct DWriteContext {
      HDC mHDC;
++    RECT mBindRect;
 +    DrawingMode mDMode;
 +    HDC mInteropHDC;
      bool mDrawing;
@@ -104,7 +105,7 @@ index bd76383c5..90fe3f1bb 100644
      ID2D1SolidColorBrush *mBrush;
  
      IDWriteFactory *mDWriteFactory;
-@@ -292,6 +301,10 @@ struct DWriteContext {
+@@ -292,6 +302,10 @@ struct DWriteContext {
  
      virtual ~DWriteContext();
  
@@ -115,7 +116,7 @@ index bd76383c5..90fe3f1bb 100644
      HRESULT CreateTextFormatFromLOGFONT(const LOGFONTW &logFont,
  	    IDWriteTextFormat **ppTextFormat);
  
-@@ -299,17 +312,21 @@ struct DWriteContext {
+@@ -299,17 +313,21 @@ struct DWriteContext {
  
      void SetFont(HFONT hFont);
  
@@ -142,10 +143,11 @@ index bd76383c5..90fe3f1bb 100644
  
      void Flush();
  
-@@ -561,10 +578,13 @@ private:
+@@ -561,10 +579,14 @@ private:
  
  DWriteContext::DWriteContext() :
      mHDC(NULL),
++    mBindRect(),
 +    mDMode(DM_GDI),
 +    mInteropHDC(NULL),
      mDrawing(false),
@@ -156,7 +158,7 @@ index bd76383c5..90fe3f1bb 100644
      mBrush(NULL),
      mDWriteFactory(NULL),
      mDWriteFactory2(NULL),
-@@ -584,25 +604,7 @@ DWriteContext::DWriteContext() :
+@@ -584,25 +606,7 @@ DWriteContext::DWriteContext() :
      _RPT2(_CRT_WARN, "D2D1CreateFactory: hr=%p p=%p\n", hr, mD2D1Factory);
  
      if (SUCCEEDED(hr))
@@ -183,7 +185,7 @@ index bd76383c5..90fe3f1bb 100644
  
      if (SUCCEEDED(hr))
      {
-@@ -645,10 +647,56 @@ DWriteContext::~DWriteContext()
+@@ -645,10 +649,66 @@ DWriteContext::~DWriteContext()
      SafeRelease(&mDWriteFactory);
      SafeRelease(&mDWriteFactory2);
      SafeRelease(&mBrush);
@@ -216,6 +218,7 @@ index bd76383c5..90fe3f1bb 100644
 +	mRT->QueryInterface(
 +		__uuidof(ID2D1GdiInteropRenderTarget),
 +		reinterpret_cast<void**>(&mGDIRT));
++	_RPT1(_CRT_WARN, "GdiInteropRenderTarget: p=%p\n", mGDIRT);
 +    }
 +
 +    if (SUCCEEDED(hr))
@@ -224,6 +227,15 @@ index bd76383c5..90fe3f1bb 100644
 +		D2D1::ColorF(D2D1::ColorF::Black),
 +		&mBrush);
 +	_RPT2(_CRT_WARN, "CreateSolidColorBrush: hr=%p p=%p\n", hr, mBrush);
++    }
++
++    if (SUCCEEDED(hr))
++    {
++	if (mHDC != NULL)
++	{
++	    mRT->BindDC(mHDC, &mBindRect);
++	    mRT->SetTransform(D2D1::IdentityMatrix());
++	}
 +    }
 +
 +    return hr;
@@ -240,7 +252,7 @@ index bd76383c5..90fe3f1bb 100644
      HRESULT
  DWriteContext::CreateTextFormatFromLOGFONT(const LOGFONTW &logFont,
  	IDWriteTextFormat **ppTextFormat)
-@@ -817,12 +865,15 @@ DWriteContext::SetFont(HFONT hFont)
+@@ -817,27 +877,76 @@ DWriteContext::SetFont(HFONT hFont)
  	item.pTextFormat = mTextFormat;
  	item.fontWeight = mFontWeight;
  	item.fontStyle = mFontStyle;
@@ -257,8 +269,9 @@ index bd76383c5..90fe3f1bb 100644
  {
      Flush();
      mRT->BindDC(hdc, rect);
-@@ -830,14 +881,59 @@ DWriteContext::BindDC(HDC hdc, RECT *rect)
+     mRT->SetTransform(D2D1::IdentityMatrix());
      mHDC = hdc;
++    mBindRect = *rect;
  }
  
 -    void
@@ -322,7 +335,7 @@ index bd76383c5..90fe3f1bb 100644
  }
  
      ID2D1Brush*
-@@ -849,22 +945,31 @@ DWriteContext::SolidBrush(COLORREF color)
+@@ -849,22 +958,31 @@ DWriteContext::SolidBrush(COLORREF color)
  }
  
      void
@@ -360,7 +373,7 @@ index bd76383c5..90fe3f1bb 100644
      hr = mDWriteFactory->CreateTextLayout(text, len, mTextFormat,
  	    FLOAT(w), FLOAT(h), &textLayout);
  
-@@ -883,25 +988,76 @@ DWriteContext::DrawText(const WCHAR* text, int len,
+@@ -883,25 +1001,76 @@ DWriteContext::DrawText(const WCHAR* text, int len,
  }
  
      void
@@ -393,9 +406,12 @@ index bd76383c5..90fe3f1bb 100644
      void
 -DWriteContext::Flush()
 +DWriteContext::DrawLine(int x1, int y1, int x2, int y2, COLORREF color)
-+{
+ {
+-    if (mDrawing)
 +    if (mDMode == DM_INTEROP)
-+    {
+     {
+-	mRT->EndDraw();
+-	mDrawing = false;
 +	// GDI functions are used before this call.  Keep using GDI.
 +	// (Switching to Direct2D causes terrible slowdown.)
 +	HPEN hpen = ::CreatePen(PS_SOLID, 1, color);
@@ -417,8 +433,7 @@ index bd76383c5..90fe3f1bb 100644
 +
 +    void
 +DWriteContext::SetPixel(int x, int y, COLORREF color)
- {
--    if (mDrawing)
++{
 +    if (mDMode == DM_INTEROP)
 +    {
 +	// GDI functions are used before this call.  Keep using GDI.
@@ -426,9 +441,7 @@ index bd76383c5..90fe3f1bb 100644
 +	::SetPixel(mInteropHDC, x, y, color);
 +    }
 +    else
-     {
--	mRT->EndDraw();
--	mDrawing = false;
++    {
 +	SetDrawingMode(DM_DIRECTX);
 +	// Direct2D doesn't have SetPixel API.  Use DrawLine instead.
 +	mRT->DrawLine(
@@ -447,7 +460,7 @@ index bd76383c5..90fe3f1bb 100644
      void
  DWriteContext::SetRenderingParams(
  	const DWriteRenderingParams *params)
-@@ -1000,7 +1156,7 @@ DWriteContext_Open(void)
+@@ -1000,7 +1169,7 @@ DWriteContext_Open(void)
  }
  
      void
@@ -456,7 +469,7 @@ index bd76383c5..90fe3f1bb 100644
  {
      if (ctx != NULL)
  	ctx->BindDC(hdc, rect);
-@@ -1016,7 +1172,7 @@ DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont)
+@@ -1016,7 +1185,7 @@ DWriteContext_SetFont(DWriteContext *ctx, HFONT hFont)
      void
  DWriteContext_DrawText(
  	DWriteContext *ctx,
@@ -465,7 +478,7 @@ index bd76383c5..90fe3f1bb 100644
  	int len,
  	int x,
  	int y,
-@@ -1025,8 +1181,8 @@ DWriteContext_DrawText(
+@@ -1025,8 +1194,8 @@ DWriteContext_DrawText(
  	int cellWidth,
  	COLORREF color,
  	UINT fuOptions,
@@ -476,7 +489,7 @@ index bd76383c5..90fe3f1bb 100644
  {
      if (ctx != NULL)
  	ctx->DrawText(text, len, x, y, w, h, cellWidth, color,
-@@ -1034,12 +1190,27 @@ DWriteContext_DrawText(
+@@ -1034,12 +1203,27 @@ DWriteContext_DrawText(
  }
  
      void
