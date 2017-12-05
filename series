@@ -41,7 +41,6 @@ mingw-lua-dir.patch
 2060.diff
 win32-dont-resize-if-not-needed.patch
 make-scroll-faster.patch
-fix-cursor-on-terminal.patch
 update-installpc.txt.patch
 doc-fix-typo.patch
 fix-config_cache-removal.patch #+rejected
