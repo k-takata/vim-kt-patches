@@ -1,0 +1,442 @@
+# HG changeset patch
+# Parent  5654ed4519e5ce70835a72b05d49bffe432b0385
+
+diff --git a/src/channel.c b/src/channel.c
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -2207,14 +2207,7 @@ channel_exe_cmd(channel_T *channel, ch_p
+ 	ex_redraw(&ea);
+ 	showruler(FALSE);
+ 	setcursor();
+-	out_flush();
+-#ifdef FEAT_GUI
+-	if (gui.in_use)
+-	{
+-	    gui_update_cursor(TRUE, FALSE);
+-	    gui_mch_flush();
+-	}
+-#endif
++	out_flush_cursor(TRUE, FALSE);
+     }
+     else if (STRCMP(cmd, "expr") == 0 || STRCMP(cmd, "call") == 0)
+     {
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -3553,8 +3553,7 @@ ins_compl_new_leader(void)
+ 	{
+ 	    /* Show the cursor after the match, not after the redrawn text. */
+ 	    setcursor();
+-	    out_flush();
+-	    gui_update_cursor(FALSE, FALSE);
++	    out_flush_cursor(FALSE, FALSE);
+ 	}
+ #endif
+ 	compl_restarting = TRUE;
+@@ -4936,8 +4935,7 @@ ins_compl_next(
+ 	{
+ 	    /* Show the cursor after the match, not after the redrawn text. */
+ 	    setcursor();
+-	    out_flush();
+-	    gui_update_cursor(FALSE, FALSE);
++	    out_flush_cursor(FALSE, FALSE);
+ 	}
+ #endif
+ 
+diff --git a/src/getchar.c b/src/getchar.c
+--- a/src/getchar.c
++++ b/src/getchar.c
+@@ -2972,16 +2972,10 @@ inchar(
+     if (wait_time == -1L || wait_time > 100L)  /* flush output before waiting */
+     {
+ 	cursor_on();
+-	out_flush();
+-#ifdef FEAT_GUI
+-	if (gui.in_use)
+-	{
+-	    gui_update_cursor(FALSE, FALSE);
+-# ifdef FEAT_MOUSESHAPE
+-	    if (postponed_mouseshape)
+-		update_mouseshape(-1);
+-# endif
+-	}
++	out_flush_cursor(FALSE, FALSE);
++#if defined(FEAT_GUI) && defined(FEAT_MOUSESHAPE)
++	if (gui.in_use && postponed_mouseshape)
++	    update_mouseshape(-1);
+ #endif
+     }
+ 
+diff --git a/src/gui.c b/src/gui.c
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -55,6 +55,7 @@ enum {
+ static void gui_attempt_start(void);
+ 
+ static int can_update_cursor = TRUE; /* can display the cursor */
++static int cursor_updating = FALSE;
+ 
+ /*
+  * The Athena scrollbars can move the thumb to after the end of the scrollbar,
+@@ -1976,7 +1977,8 @@ gui_write(
+     gui.dragged_sb = SBAR_NONE;
+ #endif
+ 
+-    gui_mch_flush();		    /* In case vim decides to take a nap */
++    if (!cursor_updating)
++	gui_mch_flush();	    /* In case vim decides to take a nap */
+ }
+ 
+ /*
+@@ -2004,6 +2006,24 @@ gui_can_update_cursor(void)
+      * after scrolling. */
+ }
+ 
++/*
++ * Start updating the cursor.  No need to call gui_mch_flush() yet.
++ */
++    void
++gui_start_updating_cursor(void)
++{
++    cursor_updating = TRUE;
++}
++
++/*
++ * End updating the cursor.  gui_mch_flush() can be called.
++ */
++    void
++gui_end_updating_cursor(void)
++{
++    cursor_updating = FALSE;
++}
++
+     static void
+ gui_outstr(char_u *s, int len)
+ {
+@@ -4111,8 +4131,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
+ 	setcursor();
+     }
+ # endif
+-    out_flush();
+-    gui_update_cursor(FALSE, TRUE);
++    out_flush_cursor(FALSE, TRUE);
+ #else
+     add_to_input_buf(bytes, byte_count);
+     add_long_to_buf((long_u)value, bytes);
+@@ -4786,8 +4805,7 @@ gui_focus_change(int in_focus)
+  */
+ #if 1
+     gui.in_focus = in_focus;
+-    out_flush();		/* make sure output has been written */
+-    gui_update_cursor(TRUE, FALSE);
++    out_flush_cursor(TRUE, FALSE);
+ 
+ # ifdef FEAT_XIM
+     xim_set_focus(in_focus);
+@@ -5146,9 +5164,7 @@ gui_update_screen(void)
+ 	curwin->w_valid &= ~VALID_CROW;
+     }
+ # endif
+-    out_flush();		/* make sure output has been written */
+-    gui_update_cursor(TRUE, FALSE);
+-    gui_mch_flush();
++    out_flush_cursor(TRUE, FALSE);
+ }
+ #endif
+ 
+@@ -5505,9 +5521,7 @@ gui_handle_drop(
+ 	maketitle();
+ #endif
+ 	setcursor();
+-	out_flush();
+-	gui_update_cursor(FALSE, FALSE);
+-	gui_mch_flush();
++	out_flush_cursor(FALSE, FALSE);
+     }
+ 
+     entered = FALSE;
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -1283,11 +1283,18 @@ main_loop(
+ 			|| conceal_cursor_line(curwin)
+ 			|| need_cursor_line_redraw))
+ 	    {
++#  ifdef FEAT_GUI
++		/* Stop issuing gui_mch_flush(). */
++		gui_start_updating_cursor();
++#  endif
+ 		if (conceal_old_cursor_line != conceal_new_cursor_line
+ 			&& conceal_old_cursor_line
+ 						<= curbuf->b_ml.ml_line_count)
+ 		    update_single_line(curwin, conceal_old_cursor_line);
+ 		update_single_line(curwin, conceal_new_cursor_line);
++#  ifdef FEAT_GUI
++		gui_end_updating_cursor();
++#  endif
+ 		curwin->w_valid &= ~VALID_CROW;
+ 	    }
+ # endif
+@@ -4207,11 +4214,7 @@ eval_client_expr_to_string(char_u *expr)
+     /* A client can tell us to redraw, but not to display the cursor, so do
+      * that here. */
+     setcursor();
+-    out_flush();
+-#ifdef FEAT_GUI
+-    if (gui.in_use)
+-	gui_update_cursor(FALSE, FALSE);
+-#endif
++    out_flush_cursor(FALSE, FALSE);
+ 
+     return res;
+ }
+diff --git a/src/netbeans.c b/src/netbeans.c
+--- a/src/netbeans.c
++++ b/src/netbeans.c
+@@ -121,14 +121,7 @@ netbeans_close(void)
+     update_screen(CLEAR);
+     setcursor();
+     cursor_on();
+-    out_flush();
+-#ifdef FEAT_GUI
+-    if (gui.in_use)
+-    {
+-	gui_update_cursor(TRUE, FALSE);
+-	gui_mch_flush();
+-    }
+-#endif
++    out_flush_cursor(TRUE, FALSE);
+ }
+ 
+ #define NB_DEF_HOST "localhost"
+@@ -1848,14 +1841,8 @@ nb_do_cmd(
+ 	    update_screen(VALID);
+ 	    setcursor();
+ 	    cursor_on();
+-	    out_flush();
+-#ifdef FEAT_GUI
+-	    if (gui.in_use)
+-	    {
+-		gui_update_cursor(TRUE, FALSE);
+-		gui_mch_flush();
+-	    }
+-#endif
++	    out_flush_cursor(TRUE, FALSE);
++
+ 	    /* Quit a hit-return or more prompt. */
+ 	    if (State == HITRETURN || State == ASKMORE)
+ 	    {
+@@ -2248,14 +2235,8 @@ nb_do_cmd(
+ 	update_screen(NOT_VALID);
+ 	setcursor();
+ 	cursor_on();
+-	out_flush();
+-#ifdef FEAT_GUI
+-	if (gui.in_use)
+-	{
+-	    gui_update_cursor(TRUE, FALSE);
+-	    gui_mch_flush();
+-	}
+-#endif
++	out_flush_cursor(TRUE, FALSE);
++
+ 	/* Quit a hit-return or more prompt. */
+ 	if (State == HITRETURN || State == ASKMORE)
+ 	{
+@@ -2307,15 +2288,7 @@ coloncmd(char *cmd, ...)
+ /*     ALT_INPUT_LOCK_OFF; */
+ 
+     setcursor();		/* restore the cursor position */
+-    out_flush();		/* make sure output has been written */
+-
+-#ifdef FEAT_GUI
+-    if (gui.in_use)
+-    {
+-	gui_update_cursor(TRUE, FALSE);
+-	gui_mch_flush();
+-    }
+-#endif
++    out_flush_cursor(TRUE, FALSE);
+ }
+ 
+ 
+@@ -2569,14 +2542,7 @@ netbeans_open(char *params, int doabort)
+     update_screen(CLEAR);
+     setcursor();
+     cursor_on();
+-    out_flush();
+-#ifdef FEAT_GUI
+-    if (gui.in_use)
+-    {
+-	gui_update_cursor(TRUE, FALSE);
+-	gui_mch_flush();
+-    }
+-#endif
++    out_flush_cursor(TRUE, FALSE);
+ }
+ 
+ /*
+diff --git a/src/proto/gui.pro b/src/proto/gui.pro
+--- a/src/proto/gui.pro
++++ b/src/proto/gui.pro
+@@ -25,6 +25,8 @@ void gui_update_cursor_later(void);
+ void gui_write(char_u *s, int len);
+ void gui_dont_update_cursor(int undraw);
+ void gui_can_update_cursor(void);
++void gui_start_updating_cursor(void);
++void gui_end_updating_cursor(void);
+ int gui_outstr_nowrap(char_u *s, int len, int flags, guicolor_T fg, guicolor_T bg, int back);
+ void gui_undraw_cursor(void);
+ void gui_redraw(int x, int y, int w, int h);
+diff --git a/src/proto/term.pro b/src/proto/term.pro
+--- a/src/proto/term.pro
++++ b/src/proto/term.pro
+@@ -12,6 +12,7 @@ int term_is_gui(char_u *name);
+ char_u *tltoa(unsigned long i);
+ void termcapinit(char_u *name);
+ void out_flush(void);
++void out_flush_cursor(int force, int clear_selection);
+ void out_flush_check(void);
+ void out_trash(void);
+ void out_char(unsigned c);
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -468,16 +468,14 @@ redraw_after_callback(int call_update_sc
+ 	setcursor();
+     }
+     cursor_on();
+-    out_flush();
+ #ifdef FEAT_GUI
+-    if (gui.in_use)
+-    {
++    if (gui.in_use && !gui_mch_is_blink_off())
+ 	/* Don't update the cursor when it is blinking and off to avoid
+ 	 * flicker. */
+-	if (!gui_mch_is_blink_off())
+-	    gui_update_cursor(FALSE, FALSE);
+-	gui_mch_flush();
+-    }
++	out_flush_cursor(FALSE, FALSE);
++    else
++#else
++	out_flush();
+ #endif
+ 
+     --redrawing_for_callback;
+@@ -800,7 +798,6 @@ update_screen(int type_arg)
+      * done. */
+     if (gui.in_use)
+     {
+-	out_flush();	/* required before updating the cursor */
+ 	if (did_undraw && !gui_mch_is_blink_off())
+ 	{
+ 	    /* Put the GUI position where the cursor was, gui_update_cursor()
+@@ -810,10 +807,12 @@ update_screen(int type_arg)
+ # ifdef FEAT_MBYTE
+ 	    gui.col = mb_fix_col(gui.col, gui.row);
+ # endif
+-	    gui_update_cursor(FALSE, FALSE);
++	    out_flush_cursor(FALSE, FALSE);
+ 	    screen_cur_col = gui.col;
+ 	    screen_cur_row = gui.row;
+ 	}
++	else
++	    out_flush();
+ 	gui_update_scrollbars(FALSE);
+     }
+ #endif
+@@ -863,8 +862,7 @@ update_finish(void)
+      * done. */
+     if (gui.in_use)
+     {
+-	out_flush();	/* required before updating the cursor */
+-	gui_update_cursor(FALSE, FALSE);
++	out_flush_cursor(FALSE, FALSE);
+ 	gui_update_scrollbars(FALSE);
+     }
+ # endif
+diff --git a/src/search.c b/src/search.c
+--- a/src/search.c
++++ b/src/search.c
+@@ -2675,14 +2675,8 @@ showmatch(
+ 	    showruler(FALSE);
+ 	    setcursor();
+ 	    cursor_on();		/* make sure that the cursor is shown */
+-	    out_flush();
+-#ifdef FEAT_GUI
+-	    if (gui.in_use)
+-	    {
+-		gui_update_cursor(TRUE, FALSE);
+-		gui_mch_flush();
+-	    }
+-#endif
++	    out_flush_cursor(TRUE, FALSE);
++
+ 	    /* Restore dollar_vcol(), because setcursor() may call curs_rows()
+ 	     * which resets it if the matching position is in a previous line
+ 	     * and has a higher column number. */
+diff --git a/src/term.c b/src/term.c
+--- a/src/term.c
++++ b/src/term.c
+@@ -2505,6 +2505,29 @@ out_flush(void)
+     }
+ }
+ 
++/*
++ * out_flush_cursor(): flush the output buffer and redraw the cursor
++ */
++    void
++out_flush_cursor(
++    int		force,		/* when TRUE, update even when not moved */
++    int		clear_selection)/* clear selection under cursor */
++{
++#ifdef FEAT_GUI
++    gui_start_updating_cursor();
++#endif
++    out_flush();
++#ifdef FEAT_GUI
++    gui_end_updating_cursor();
++    if (gui.in_use)
++    {
++	gui_update_cursor(force, clear_selection);
++	gui_mch_flush();
++    }
++#endif
++}
++
++
+ #if defined(FEAT_MBYTE) || defined(PROTO)
+ /*
+  * Sometimes a byte out of a multi-byte character is written with out_char().
+diff --git a/src/ui.c b/src/ui.c
+--- a/src/ui.c
++++ b/src/ui.c
+@@ -537,11 +537,7 @@ clip_lose_selection(VimClipboard *cbd)
+ 	    update_curbuf(INVERTED_ALL);
+ 	    setcursor();
+ 	    cursor_on();
+-	    out_flush();
+-# ifdef FEAT_GUI
+-	    if (gui.in_use)
+-		gui_update_cursor(TRUE, FALSE);
+-# endif
++	    out_flush_cursor(TRUE, FALSE);
+ 	}
+     }
+ #endif
+@@ -3290,13 +3286,10 @@ ui_focus_change(
+ 	    setcursor();
+ 	}
+ 	cursor_on();	    /* redrawing may have switched it off */
+-	out_flush();
++	out_flush_cursor(FALSE, TRUE);
+ # ifdef FEAT_GUI
+ 	if (gui.in_use)
+-	{
+-	    gui_update_cursor(FALSE, TRUE);
+ 	    gui_update_scrollbars(FALSE);
+-	}
+ # endif
+     }
+ #ifdef FEAT_TITLE
