@@ -1,6 +1,7 @@
 test_reduce_test_log.patch
 ignore-return-value-on-pipelines.patch #+pipelines
 disable-regexp-debug-log.patch #+noregexplog
+debug-enable-Trace-also-on-release-build.patch
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
 myconfiguration-private-install.patch #+private-install

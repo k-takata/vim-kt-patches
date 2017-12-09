@@ -1,0 +1,28 @@
+# HG changeset patch
+# Parent  2236a6c66a57b544d19eb74ea842fc5ed8d8483b
+
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -1028,7 +1028,7 @@ DumpPutS(const char *psz UNUSED)
+ # endif
+ }
+ 
+-#ifdef _DEBUG
++#if 1 //#ifdef _DEBUG
+ 
+ void __cdecl
+ Trace(
+diff --git a/src/os_win32.h b/src/os_win32.h
+--- a/src/os_win32.h
++++ b/src/os_win32.h
+@@ -192,6 +192,9 @@ Trace(char *pszFormat, ...);
+ # define TRACE3(sz, p1, p2, p3)
+ # define TRACE4(sz, p1, p2, p3, p4)
+ 
++void __cdecl
++Trace(char *pszFormat, ...);
++
+ #endif /* !_DEBUG */
+ 
+ 
