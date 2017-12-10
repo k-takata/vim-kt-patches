@@ -45,4 +45,5 @@ make-scroll-faster.patch
 update-installpc.txt.patch
 doc-fix-typo.patch
 optimize-directx.patch
+directx-alignment.patch
 fix-config_cache-removal.patch #+rejected

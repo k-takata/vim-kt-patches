@@ -1,0 +1,13 @@
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+index e1d19db8d..e3e965902 100644
+--- a/src/gui_dwrite.cpp
++++ b/src/gui_dwrite.cpp
+@@ -995,7 +995,7 @@ DWriteContext::DrawText(const WCHAR *text, int len,
+ 
+ 	TextRenderer renderer(this);
+ 	TextRendererContext context = { color, FLOAT(cellWidth), 0.0f };
+-	textLayout->Draw(&context, &renderer, FLOAT(x), FLOAT(y));
++	textLayout->Draw(&context, &renderer, FLOAT(x), FLOAT(y) - 0.5f);
+     }
+ 
+     SafeRelease(&textLayout);
