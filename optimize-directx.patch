@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  5654ed4519e5ce70835a72b05d49bffe432b0385
+# Parent  0b437e6f08b78d4ab4add01fa0d789705bb0628a
 
 diff --git a/src/channel.c b/src/channel.c
 --- a/src/channel.c
@@ -324,20 +324,25 @@ diff --git a/src/screen.c b/src/screen.c
  #endif
  
      --redrawing_for_callback;
-@@ -800,7 +798,6 @@ update_screen(int type_arg)
+@@ -800,9 +798,12 @@ update_screen(int type_arg)
       * done. */
      if (gui.in_use)
      {
 -	out_flush();	/* required before updating the cursor */
  	if (did_undraw && !gui_mch_is_blink_off())
  	{
++	    gui_start_updating_cursor();
++	    out_flush();	/* required before updating the cursor */
++	    gui_end_updating_cursor();
++
  	    /* Put the GUI position where the cursor was, gui_update_cursor()
-@@ -810,10 +807,12 @@ update_screen(int type_arg)
- # ifdef FEAT_MBYTE
+ 	     * uses that. */
+ 	    gui.col = gui_cursor_col;
+@@ -811,9 +812,12 @@ update_screen(int type_arg)
  	    gui.col = mb_fix_col(gui.col, gui.row);
  # endif
--	    gui_update_cursor(FALSE, FALSE);
-+	    out_flush_cursor(FALSE, FALSE);
+ 	    gui_update_cursor(FALSE, FALSE);
++	    gui_mch_flush();
  	    screen_cur_col = gui.col;
  	    screen_cur_row = gui.row;
  	}
@@ -346,7 +351,7 @@ diff --git a/src/screen.c b/src/screen.c
  	gui_update_scrollbars(FALSE);
      }
  #endif
-@@ -863,8 +862,7 @@ update_finish(void)
+@@ -863,8 +867,7 @@ update_finish(void)
       * done. */
      if (gui.in_use)
      {
