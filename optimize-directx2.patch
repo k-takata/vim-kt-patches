@@ -1,0 +1,118 @@
+# HG changeset patch
+# Parent  e13a1bf0c8473042e162d75dec5731aefd9b5613
+
+diff --git a/src/gui.c b/src/gui.c
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -55,7 +55,7 @@ enum {
+ static void gui_attempt_start(void);
+ 
+ static int can_update_cursor = TRUE; /* can display the cursor */
+-static int cursor_updating = FALSE;
++static int cursor_updating = 0;
+ 
+ /*
+  * The Athena scrollbars can move the thumb to after the end of the scrollbar,
+@@ -1977,7 +1977,7 @@ gui_write(
+     gui.dragged_sb = SBAR_NONE;
+ #endif
+ 
+-    if (!cursor_updating)
++    if (!gui_is_updating_cursor())
+ 	gui_mch_flush();	    /* In case vim decides to take a nap */
+ }
+ 
+@@ -2012,7 +2012,7 @@ gui_can_update_cursor(void)
+     void
+ gui_start_updating_cursor(void)
+ {
+-    cursor_updating = TRUE;
++    ++cursor_updating;
+ }
+ 
+ /*
+@@ -2021,7 +2021,16 @@ gui_start_updating_cursor(void)
+     void
+ gui_end_updating_cursor(void)
+ {
+-    cursor_updating = FALSE;
++    --cursor_updating;
++}
++
++/*
++ * Return whether updating the cursor.
++ */
++    int
++gui_is_updating_cursor(void)
++{
++    return cursor_updating > 0;
+ }
+ 
+     static void
+@@ -4494,7 +4503,9 @@ gui_do_scroll(void)
+ 	 * disappear when losing focus after a scrollbar drag. */
+ 	if (wp->w_redr_type < type)
+ 	    wp->w_redr_type = type;
++	gui_start_updating_cursor();
+ 	updateWindow(wp);   /* update window, status line, and cmdline */
++	gui_end_updating_cursor();
+     }
+ 
+ #ifdef FEAT_INS_EXPAND
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -1242,7 +1242,16 @@ main_loop(
+ 	    if (VIsual_active)
+ 		update_curbuf(INVERTED);/* update inverted part */
+ 	    else if (must_redraw)
++	    {
++#ifdef FEAT_GUI
++		/* Stop issuing gui_mch_flush(). */
++		gui_start_updating_cursor();
++#endif
+ 		update_screen(0);
++#ifdef FEAT_GUI
++		gui_end_updating_cursor();
++#endif
++	    }
+ 	    else if (redraw_cmdline || clear_cmdline)
+ 		showmode();
+ 	    redraw_statuslines();
+diff --git a/src/proto/gui.pro b/src/proto/gui.pro
+--- a/src/proto/gui.pro
++++ b/src/proto/gui.pro
+@@ -27,6 +27,7 @@ void gui_dont_update_cursor(int undraw);
+ void gui_can_update_cursor(void);
+ void gui_start_updating_cursor(void);
+ void gui_end_updating_cursor(void);
++int gui_is_updating_cursor(void);
+ int gui_outstr_nowrap(char_u *s, int len, int flags, guicolor_T fg, guicolor_T bg, int back);
+ void gui_undraw_cursor(void);
+ void gui_redraw(int x, int y, int w, int h);
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -812,7 +812,8 @@ update_screen(int type_arg)
+ 	    gui.col = mb_fix_col(gui.col, gui.row);
+ # endif
+ 	    gui_update_cursor(FALSE, FALSE);
+-	    gui_mch_flush();
++	    if (!gui_is_updating_cursor())
++		gui_mch_flush();
+ 	    screen_cur_col = gui.col;
+ 	    screen_cur_row = gui.row;
+ 	}
+diff --git a/src/term.c b/src/term.c
+--- a/src/term.c
++++ b/src/term.c
+@@ -2522,7 +2522,8 @@ out_flush_cursor(
+     if (gui.in_use)
+     {
+ 	gui_update_cursor(force, clear_selection);
+-	gui_mch_flush();
++	if (!gui_is_updating_cursor())
++	    gui_mch_flush();
+     }
+ #endif
+ }

@@ -44,4 +44,5 @@ win32-dont-resize-if-not-needed.patch
 make-scroll-faster.patch
 optimize-directx.patch
 directx-alignment.patch
+optimize-directx2.patch
 fix-config_cache-removal.patch #+rejected
