@@ -45,4 +45,5 @@ make-scroll-faster.patch
 optimize-directx.patch
 directx-alignment.patch
 optimize-directx2.patch
+debug-add-trace-log.diff
 fix-config_cache-removal.patch #+rejected
