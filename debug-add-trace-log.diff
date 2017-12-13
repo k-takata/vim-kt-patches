@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  7666a548b4c0e8ee22542d75687d7c59dd57bda1
+# Parent  d5c084733f01155dcd906da35581a23e8a3651ad
 
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
@@ -34,11 +34,11 @@ diff --git a/src/gui.c b/src/gui.c
      gui.dragged_sb = SBAR_NONE;
  #endif
  
-+    Trace("in gui_write > gui_mch_flush");
-     if (!gui_is_updating_cursor())
- 	gui_mch_flush();	    /* In case vim decides to take a nap */
++    Trace("in gui_write > gui_may_flush");
+     gui_may_flush();		    /* In case vim decides to take a nap */
  }
-@@ -1992,8 +1997,10 @@ gui_dont_update_cursor(int undraw)
+ 
+@@ -1991,8 +1996,10 @@ gui_dont_update_cursor(int undraw)
      if (gui.in_use)
      {
  	/* Undraw the cursor now, we probably can't do it after the change. */
@@ -71,9 +71,9 @@ diff --git a/src/gui.c b/src/gui.c
  	 * outstanding instructions first. (esp. clear screen) */
 +	Trace("in gui_update_tabline");
  	out_flush();
- 	gui_mch_flush();
  
-@@ -4108,6 +4118,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
+ 	if (!showit != !shown)
+@@ -4107,6 +4117,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
  	}
  	if (old_leftcol != curwin->w_leftcol)
  	{
@@ -81,7 +81,7 @@ diff --git a/src/gui.c b/src/gui.c
  	    updateWindow(curwin);   /* update window, status and cmdline */
  	    setcursor();
  	}
-@@ -4132,6 +4143,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
+@@ -4131,6 +4142,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
  #  endif
  			))))
      {
@@ -89,7 +89,7 @@ diff --git a/src/gui.c b/src/gui.c
  	do_check_scrollbind(TRUE);
  	/* need to update the window right here */
  	FOR_ALL_WINDOWS(wp)
-@@ -4140,6 +4152,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
+@@ -4139,6 +4151,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
  	setcursor();
      }
  # endif
@@ -97,19 +97,19 @@ diff --git a/src/gui.c b/src/gui.c
      out_flush_cursor(FALSE, TRUE);
  #else
      add_to_input_buf(bytes, byte_count);
-@@ -4503,9 +4516,11 @@ gui_do_scroll(void)
+@@ -4502,9 +4515,11 @@ gui_do_scroll(void)
  	 * disappear when losing focus after a scrollbar drag. */
  	if (wp->w_redr_type < type)
  	    wp->w_redr_type = type;
 +	Trace("> in gui_do_scroll");
- 	gui_start_updating_cursor();
+ 	gui_disable_flush();
  	updateWindow(wp);   /* update window, status line, and cmdline */
- 	gui_end_updating_cursor();
+ 	gui_enable_flush();
 +	Trace("< in gui_do_scroll");
      }
  
  #ifdef FEAT_INS_EXPAND
-@@ -4816,6 +4831,7 @@ gui_focus_change(int in_focus)
+@@ -4815,6 +4830,7 @@ gui_focus_change(int in_focus)
   */
  #if 1
      gui.in_focus = in_focus;
@@ -117,7 +117,7 @@ diff --git a/src/gui.c b/src/gui.c
      out_flush_cursor(TRUE, FALSE);
  
  # ifdef FEAT_XIM
-@@ -5161,6 +5177,7 @@ gui_update_screen(void)
+@@ -5160,6 +5176,7 @@ gui_update_screen(void)
      }
  #endif
  
@@ -125,7 +125,7 @@ diff --git a/src/gui.c b/src/gui.c
      update_screen(0);	/* may need to update the screen */
      setcursor();
  # if defined(FEAT_CONCEAL)
-@@ -5175,6 +5192,7 @@ gui_update_screen(void)
+@@ -5174,6 +5191,7 @@ gui_update_screen(void)
  	curwin->w_valid &= ~VALID_CROW;
      }
  # endif
@@ -136,7 +136,7 @@ diff --git a/src/gui.c b/src/gui.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -6417,6 +6417,7 @@ gui_mch_draw_string(
+@@ -6420,6 +6420,7 @@ gui_mch_draw_string(
  	{
  	    pcliprect = &rc;
  	    foptions = ETO_CLIPPED;
@@ -144,7 +144,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
      }
      SetTextColor(s_hdc, gui.currFgColor);
-@@ -6652,6 +6653,7 @@ gui_mch_flush(void)
+@@ -6655,6 +6656,7 @@ gui_mch_flush(void)
      BOOL  __stdcall GdiFlush(void);
  #   endif
  
@@ -162,7 +162,7 @@ diff --git a/src/main.c b/src/main.c
 +		Trace("in main_loop > update_screen");
  #ifdef FEAT_GUI
  		/* Stop issuing gui_mch_flush(). */
- 		gui_start_updating_cursor();
+ 		gui_disable_flush();
 diff --git a/src/message.c b/src/message.c
 --- a/src/message.c
 +++ b/src/message.c
@@ -227,18 +227,17 @@ diff --git a/src/screen.c b/src/screen.c
  	}
  
  	/* redraw status line after the window to minimize cursor movement */
-@@ -812,8 +820,10 @@ update_screen(int type_arg)
+@@ -812,7 +820,9 @@ update_screen(int type_arg)
  	    gui.col = mb_fix_col(gui.col, gui.row);
  # endif
  	    gui_update_cursor(FALSE, FALSE);
-+	    Trace("in update_screen > gui_mch_flush: col:%d, row:%d", gui.col, gui.row);
- 	    if (!gui_is_updating_cursor())
- 		gui_mch_flush();
-+	    Trace("in update_screen < gui_mch_flush: col:%d, row:%d", gui.col, gui.row);
++	    Trace("in update_screen > gui_may_flush: col:%d, row:%d", gui.col, gui.row);
+ 	    gui_may_flush();
++	    Trace("in update_screen < gui_may_flush: col:%d, row:%d", gui.col, gui.row);
  	    screen_cur_col = gui.col;
  	    screen_cur_row = gui.row;
  	}
-@@ -838,6 +848,7 @@ update_prepare(void)
+@@ -837,6 +847,7 @@ update_prepare(void)
  #ifdef FEAT_GUI
      /* Remove the cursor before starting to do anything, because scrolling may
       * make it difficult to redraw the text under it. */
@@ -246,7 +245,7 @@ diff --git a/src/screen.c b/src/screen.c
      if (gui.in_use)
  	gui_undraw_cursor();
  #endif
-@@ -868,6 +879,7 @@ update_finish(void)
+@@ -867,6 +878,7 @@ update_finish(void)
       * done. */
      if (gui.in_use)
      {
@@ -254,7 +253,7 @@ diff --git a/src/screen.c b/src/screen.c
  	out_flush_cursor(FALSE, FALSE);
  	gui_update_scrollbars(FALSE);
      }
-@@ -958,6 +970,7 @@ update_single_line(win_T *wp, linenr_T l
+@@ -957,6 +969,7 @@ update_single_line(win_T *wp, linenr_T l
  	    row += wp->w_lines[j].wl_size;
  	}
  
@@ -262,7 +261,7 @@ diff --git a/src/screen.c b/src/screen.c
  	update_finish();
  
  #ifdef SYN_TIME_LIMIT
-@@ -1066,6 +1079,7 @@ updateWindow(win_T *wp)
+@@ -1065,6 +1078,7 @@ updateWindow(win_T *wp)
  	    )
  	win_redr_status(wp);
  
@@ -270,7 +269,7 @@ diff --git a/src/screen.c b/src/screen.c
      update_finish();
  }
  #endif
-@@ -9894,6 +9908,7 @@ screen_ins_lines(
+@@ -9893,6 +9907,7 @@ screen_ins_lines(
  #ifdef FEAT_GUI
      /* Don't update the GUI cursor here, ScreenLines[] is invalid until the
       * scrolling is actually carried out. */
@@ -278,7 +277,7 @@ diff --git a/src/screen.c b/src/screen.c
      gui_dont_update_cursor(row + off <= gui.cursor_row);
  #endif
  
-@@ -10110,8 +10125,10 @@ screen_del_lines(
+@@ -10109,8 +10124,10 @@ screen_del_lines(
  #ifdef FEAT_GUI
      /* Don't update the GUI cursor here, ScreenLines[] is invalid until the
       * scrolling is actually carried out. */
@@ -289,7 +288,7 @@ diff --git a/src/screen.c b/src/screen.c
  #endif
  
      if (*T_CCS != NUL)	    /* cursor relative to region */
-@@ -10231,8 +10248,10 @@ screen_del_lines(
+@@ -10230,8 +10247,10 @@ screen_del_lines(
  
  #ifdef FEAT_GUI
      gui_can_update_cursor();
@@ -303,14 +302,13 @@ diff --git a/src/screen.c b/src/screen.c
 diff --git a/src/term.c b/src/term.c
 --- a/src/term.c
 +++ b/src/term.c
-@@ -2521,9 +2521,11 @@ out_flush_cursor(
-     gui_end_updating_cursor();
+@@ -2521,8 +2521,10 @@ out_flush_cursor(
+     gui_enable_flush();
      if (gui.in_use)
      {
 +	Trace("in out_flush_cursor >");
  	gui_update_cursor(force, clear_selection);
- 	if (!gui_is_updating_cursor())
- 	    gui_mch_flush();
+ 	gui_may_flush();
 +	Trace("in out_flush_cursor <");
      }
  #endif
