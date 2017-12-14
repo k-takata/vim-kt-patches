@@ -41,9 +41,6 @@ pr-2010.diff
 mingw-lua-dir.patch
 2060.diff
 win32-dont-resize-if-not-needed.patch
-make-scroll-faster.patch
 optimize-directx.patch
-directx-alignment.patch
-fix-directx-with-non-utf8-encoding.patch
 debug-add-trace-log.diff
 fix-config_cache-removal.patch #+rejected
