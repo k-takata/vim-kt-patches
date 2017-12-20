@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  0b437e6f08b78d4ab4add01fa0d789705bb0628a
+# Parent  6ff820768d5a34bdaaccf34a0f53316abab2e2f5
 
 diff --git a/src/channel.c b/src/channel.c
 --- a/src/channel.c
@@ -182,6 +182,25 @@ diff --git a/src/gui.c b/src/gui.c
      }
  
      entered = FALSE;
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -3145,6 +3145,7 @@ gui_mch_delete_lines(
+ 	{
+ 	    gui_redraw(rc.left, rc.top,
+ 		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
++	    gui_undraw_cursor();
+ 	    use_redraw = 1;
+ 	}
+ 	else
+@@ -3196,6 +3197,7 @@ gui_mch_insert_lines(
+ 	{
+ 	    gui_redraw(rc.left, rc.top,
+ 		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
++	    gui_undraw_cursor();
+ 	    use_redraw = 1;
+ 	}
+ 	else
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
