@@ -1,5 +1,11 @@
 # HG changeset patch
-# Parent  6ff820768d5a34bdaaccf34a0f53316abab2e2f5
+# Parent  bb4c4d2a9fb8da6d299171873289e962285a04fa
+[PATCH] Make scroll faster when scrlines:0
+From 8c85149a32ca46f47a78c12fac6aaeac46f4f760 Mon Sep 17 00:00:00 2001
+---
+ src/gui_w32.c | 12 ++++++++----
+ src/message.c |  4 ++++
+ 2 files changed, 12 insertions(+), 4 deletions(-)
 
 diff --git a/src/channel.c b/src/channel.c
 --- a/src/channel.c
@@ -122,7 +128,7 @@ diff --git a/src/gui.c b/src/gui.c
      static void
  gui_outstr(char_u *s, int len)
  {
-@@ -3671,7 +3700,6 @@ gui_update_tabline(void)
+@@ -3686,7 +3715,6 @@ gui_update_tabline(void)
  	/* Updating the tabline uses direct GUI commands, flush
  	 * outstanding instructions first. (esp. clear screen) */
  	out_flush();
@@ -130,7 +136,7 @@ diff --git a/src/gui.c b/src/gui.c
  
  	if (!showit != !shown)
  	    gui_mch_show_tabline(showit);
-@@ -4111,8 +4139,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
+@@ -4126,8 +4154,7 @@ gui_drag_scrollbar(scrollbar_T *sb, long
  	setcursor();
      }
  # endif
@@ -140,7 +146,7 @@ diff --git a/src/gui.c b/src/gui.c
  #else
      add_to_input_buf(bytes, byte_count);
      add_long_to_buf((long_u)value, bytes);
-@@ -4475,7 +4502,9 @@ gui_do_scroll(void)
+@@ -4490,7 +4517,9 @@ gui_do_scroll(void)
  	 * disappear when losing focus after a scrollbar drag. */
  	if (wp->w_redr_type < type)
  	    wp->w_redr_type = type;
@@ -150,7 +156,7 @@ diff --git a/src/gui.c b/src/gui.c
      }
  
  #ifdef FEAT_INS_EXPAND
-@@ -4786,8 +4815,7 @@ gui_focus_change(int in_focus)
+@@ -4801,8 +4830,7 @@ gui_focus_change(int in_focus)
   */
  #if 1
      gui.in_focus = in_focus;
@@ -160,7 +166,7 @@ diff --git a/src/gui.c b/src/gui.c
  
  # ifdef FEAT_XIM
      xim_set_focus(in_focus);
-@@ -5146,9 +5174,7 @@ gui_update_screen(void)
+@@ -5161,9 +5189,7 @@ gui_update_screen(void)
  	curwin->w_valid &= ~VALID_CROW;
      }
  # endif
@@ -171,7 +177,7 @@ diff --git a/src/gui.c b/src/gui.c
  }
  #endif
  
-@@ -5505,9 +5531,7 @@ gui_handle_drop(
+@@ -5520,9 +5546,7 @@ gui_handle_drop(
  	maketitle();
  #endif
  	setcursor();
@@ -185,22 +191,96 @@ diff --git a/src/gui.c b/src/gui.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -3145,6 +3145,7 @@ gui_mch_delete_lines(
+@@ -3129,9 +3129,6 @@ gui_mch_delete_lines(
+     int	    num_lines)
+ {
+     RECT	rc;
+-#if defined(FEAT_DIRECTX)
+-    int		use_redraw = 0;
+-#endif
+ 
+     rc.left = FILL_X(gui.scroll_region_left);
+     rc.right = FILL_X(gui.scroll_region_right + 1);
+@@ -3145,12 +3142,17 @@ gui_mch_delete_lines(
  	{
  	    gui_redraw(rc.left, rc.top,
  		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+-	    use_redraw = 1;
 +	    gui_undraw_cursor();
- 	    use_redraw = 1;
++	    DWriteContext_Flush(s_dwc);
  	}
  	else
-@@ -3196,6 +3197,7 @@ gui_mch_insert_lines(
++	{
+ 	    DWriteContext_Flush(s_dwc);
+-    }
+-    if (!use_redraw)
++	    ScrollWindowEx(s_textArea, 0, -num_lines * gui.char_height,
++				    &rc, &rc, NULL, NULL, 0);
++	}
++    }
++    else
+ #endif
+     {
+ 	intel_gpu_workaround();
+@@ -3180,9 +3182,6 @@ gui_mch_insert_lines(
+     int		num_lines)
+ {
+     RECT	rc;
+-#if defined(FEAT_DIRECTX)
+-    int		use_redraw = 0;
+-#endif
+ 
+     rc.left = FILL_X(gui.scroll_region_left);
+     rc.right = FILL_X(gui.scroll_region_right + 1);
+@@ -3196,12 +3195,17 @@ gui_mch_insert_lines(
  	{
  	    gui_redraw(rc.left, rc.top,
  		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+-	    use_redraw = 1;
 +	    gui_undraw_cursor();
- 	    use_redraw = 1;
++	    DWriteContext_Flush(s_dwc);
  	}
  	else
++	{
+ 	    DWriteContext_Flush(s_dwc);
+-    }
+-    if (!use_redraw)
++	    ScrollWindowEx(s_textArea, 0, num_lines * gui.char_height,
++				    &rc, &rc, NULL, NULL, 0);
++	}
++    }
++    else
+ #endif
+     {
+ 	intel_gpu_workaround();
+@@ -4024,7 +4028,10 @@ gui_mch_browse(
+      * position, but don't actually scroll by setting "dont_scroll". */
+     dont_scroll = !allow_scrollbar;
+ 
++    gui_disable_flush();
+     gui_drag_scrollbar(sb, val, dragging);
++    gui_enable_flush();
++    gui_may_flush();
+ 
+     s_busy_processing = FALSE;
+     dont_scroll = dont_scroll_save;
+@@ -4651,6 +4658,7 @@ init_mouse_wheel(void)
+     if (mouse_scroll_lines == 0)
+ 	init_mouse_wheel();
+ 
++    gui_disable_flush();
+     if (mouse_scroll_lines > 0
+ 	    && mouse_scroll_lines < (size > 2 ? size - 2 : 1))
+     {
+@@ -4659,6 +4667,8 @@ init_mouse_wheel(void)
+     }
+     else
+ 	_OnScroll(hwnd, hwndCtl, zDelta >= 0 ? SB_PAGEUP : SB_PAGEDOWN, 0);
++    gui_enable_flush();
++    gui_may_flush();
+ }
+ 
+ #ifdef USE_SYSMENU_FONT
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
@@ -240,7 +320,7 @@ diff --git a/src/main.c b/src/main.c
  		curwin->w_valid &= ~VALID_CROW;
  	    }
  # endif
-@@ -4207,11 +4223,7 @@ eval_client_expr_to_string(char_u *expr)
+@@ -4212,11 +4228,7 @@ eval_client_expr_to_string(char_u *expr)
      /* A client can tell us to redraw, but not to display the cursor, so do
       * that here. */
      setcursor();
@@ -253,6 +333,23 @@ diff --git a/src/main.c b/src/main.c
  
      return res;
  }
+diff --git a/src/message.c b/src/message.c
+--- a/src/message.c
++++ b/src/message.c
+@@ -2321,9 +2321,13 @@ msg_scroll_up(void)
+      * to become invalid. */
+     if (gui.in_use)
+ 	gui_undraw_cursor();
++    gui_disable_flush();
+ #endif
+     /* scrolling up always works */
+     screen_del_lines(0, 0, 1, (int)Rows, TRUE, 0, NULL);
++#ifdef FEAT_GUI
++    gui_enable_flush();
++#endif
+ 
+     if (!can_clear((char_u *)" "))
+     {
 diff --git a/src/netbeans.c b/src/netbeans.c
 --- a/src/netbeans.c
 +++ b/src/netbeans.c
@@ -481,7 +578,7 @@ diff --git a/src/term.c b/src/term.c
 diff --git a/src/ui.c b/src/ui.c
 --- a/src/ui.c
 +++ b/src/ui.c
-@@ -537,11 +537,7 @@ clip_lose_selection(VimClipboard *cbd)
+@@ -578,11 +578,7 @@ clip_lose_selection(VimClipboard *cbd)
  	    update_curbuf(INVERTED_ALL);
  	    setcursor();
  	    cursor_on();
@@ -494,7 +591,7 @@ diff --git a/src/ui.c b/src/ui.c
  	}
      }
  #endif
-@@ -3290,13 +3286,10 @@ ui_focus_change(
+@@ -3331,13 +3327,10 @@ ui_focus_change(
  	    setcursor();
  	}
  	cursor_on();	    /* redrawing may have switched it off */
