@@ -42,5 +42,6 @@ mingw-lua-dir.patch
 2060.diff
 win32-dont-resize-if-not-needed.patch
 optimize-directx.patch
+directx-scroll.patch
 debug-add-trace-log.diff
 fix-config_cache-removal.patch #+rejected

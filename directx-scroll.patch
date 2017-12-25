@@ -1,0 +1,235 @@
+# HG changeset patch
+# Parent  81c2f3b98f6a9d834ff85f47a239fc2b591cc985
+
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+--- a/src/gui_dwrite.cpp
++++ b/src/gui_dwrite.cpp
+@@ -286,6 +286,7 @@ struct DWriteContext {
+     ID2D1DCRenderTarget *mRT;
+     ID2D1GdiInteropRenderTarget *mGDIRT;
+     ID2D1SolidColorBrush *mBrush;
++    ID2D1Bitmap *mBitmap;
+ 
+     IDWriteFactory *mDWriteFactory;
+ #ifdef FEAT_DIRECTX_COLOR_EMOJI
+@@ -319,6 +320,8 @@ struct DWriteContext {
+ 
+     void SetFont(HFONT hFont);
+ 
++    void Rebind();
++
+     void BindDC(HDC hdc, const RECT *rect);
+ 
+     HRESULT SetDrawingMode(DrawingMode mode);
+@@ -335,6 +338,8 @@ struct DWriteContext {
+ 
+     void SetPixel(int x, int y, COLORREF color);
+ 
++    void Scroll(int x, int y, const RECT *rc);
++
+     void Flush();
+ 
+     void SetRenderingParams(
+@@ -596,6 +601,7 @@ DWriteContext::DWriteContext() :
+     mRT(NULL),
+     mGDIRT(NULL),
+     mBrush(NULL),
++    mBitmap(NULL),
+     mDWriteFactory(NULL),
+ #ifdef FEAT_DIRECTX_COLOR_EMOJI
+     mDWriteFactory2(NULL),
+@@ -616,9 +622,6 @@ DWriteContext::DWriteContext() :
+     _RPT2(_CRT_WARN, "D2D1CreateFactory: hr=%p p=%p\n", hr, mD2D1Factory);
+ 
+     if (SUCCEEDED(hr))
+-	hr = CreateDeviceResources();
+-
+-    if (SUCCEEDED(hr))
+     {
+ 	hr = DWriteCreateFactory(
+ 		DWRITE_FACTORY_TYPE_SHARED,
+@@ -662,6 +665,7 @@ DWriteContext::~DWriteContext()
+ #ifdef FEAT_DIRECTX_COLOR_EMOJI
+     SafeRelease(&mDWriteFactory2);
+ #endif
++    SafeRelease(&mBitmap);
+     SafeRelease(&mBrush);
+     SafeRelease(&mGDIRT);
+     SafeRelease(&mRT);
+@@ -704,13 +708,7 @@ DWriteContext::CreateDeviceResources()
+     }
+ 
+     if (SUCCEEDED(hr))
+-    {
+-	if (mHDC != NULL)
+-	{
+-	    mRT->BindDC(mHDC, &mBindRect);
+-	    mRT->SetTransform(D2D1::IdentityMatrix());
+-	}
+-    }
++	Rebind();
+ 
+     return hr;
+ }
+@@ -718,6 +716,7 @@ DWriteContext::CreateDeviceResources()
+     void
+ DWriteContext::DiscardDeviceResources()
+ {
++    SafeRelease(&mBitmap);
+     SafeRelease(&mBrush);
+     SafeRelease(&mGDIRT);
+     SafeRelease(&mRT);
+@@ -899,13 +898,36 @@ DWriteContext::SetFont(HFONT hFont)
+ }
+ 
+     void
++DWriteContext::Rebind()
++{
++    SafeRelease(&mBitmap);
++
++    mRT->BindDC(mHDC, &mBindRect);
++    mRT->SetTransform(D2D1::IdentityMatrix());
++
++    D2D1_BITMAP_PROPERTIES props = {
++	{DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE},
++	96.0f, 96.0f
++    };
++    mRT->CreateBitmap(
++	    D2D1::SizeU(mBindRect.right - mBindRect.left,
++		mBindRect.bottom - mBindRect.top),
++	    props, &mBitmap);
++}
++
++    void
+ DWriteContext::BindDC(HDC hdc, const RECT *rect)
+ {
+-    Flush();
+-    mRT->BindDC(hdc, rect);
+-    mRT->SetTransform(D2D1::IdentityMatrix());
+     mHDC = hdc;
+     mBindRect = *rect;
++
++    if (mRT == NULL)
++	CreateDeviceResources();
++    else
++    {
++	Flush();
++	Rebind();
++    }
+ }
+ 
+     HRESULT
+@@ -1081,6 +1103,49 @@ DWriteContext::SetPixel(int x, int y, CO
+ }
+ 
+     void
++DWriteContext::Scroll(int x, int y, const RECT *rc)
++{
++    SetDrawingMode(DM_DIRECTX);
++    mRT->Flush();
++
++    D2D1_RECT_U srcRect;
++    D2D1_POINT_2U destPoint;
++    if (x >= 0)
++    {
++	srcRect.left = rc->left;
++	srcRect.right = rc->right - x;
++	destPoint.x = rc->left + x;
++    }
++    else
++    {
++	srcRect.left = rc->left - x;
++	srcRect.right = rc->right;
++	destPoint.x = rc->left;
++    }
++    if (y >= 0)
++    {
++	srcRect.top = rc->top;
++	srcRect.bottom = rc->bottom - y;
++	destPoint.y = rc->top + y;
++    }
++    else
++    {
++	srcRect.top = rc->top - y;
++	srcRect.bottom = rc->bottom;
++	destPoint.y = rc->top;
++    }
++    mBitmap->CopyFromRenderTarget(&destPoint, mRT, &srcRect);
++
++    D2D1_RECT_F destRect = {
++	    FLOAT(destPoint.x), FLOAT(destPoint.y),
++	    FLOAT(destPoint.x + srcRect.right - srcRect.left),
++	    FLOAT(destPoint.y + srcRect.bottom - srcRect.top)
++    };
++    mRT->DrawBitmap(mBitmap, destRect, 1.0F,
++	    D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, destRect);
++}
++
++    void
+ DWriteContext::Flush()
+ {
+     SetDrawingMode(DM_GDI);
+@@ -1240,6 +1305,13 @@ DWriteContext_SetPixel(DWriteContext *ct
+ }
+ 
+     void
++DWriteContext_Scroll(DWriteContext *ctx, int x, int y, const RECT *rc)
++{
++    if (ctx != NULL)
++	ctx->Scroll(x, y, rc);
++}
++
++    void
+ DWriteContext_Flush(DWriteContext *ctx)
+ {
+     if (ctx != NULL)
+diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
+--- a/src/gui_dwrite.h
++++ b/src/gui_dwrite.h
+@@ -74,6 +74,7 @@ void DWriteContext_FillRect(DWriteContex
+ void DWriteContext_DrawLine(DWriteContext *ctx, int x1, int y1, int x2, int y2,
+ 	COLORREF color);
+ void DWriteContext_SetPixel(DWriteContext *ctx, int x, int y, COLORREF color);
++void DWriteContext_Scroll(DWriteContext *ctx, int x, int y, const RECT *rc);
+ void DWriteContext_Flush(DWriteContext *ctx);
+ void DWriteContext_Close(DWriteContext *ctx);
+ 
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -3143,14 +3143,11 @@ gui_mch_delete_lines(
+ 	    gui_redraw(rc.left, rc.top,
+ 		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+ 	    gui_undraw_cursor();
+-	    DWriteContext_Flush(s_dwc);
+ 	}
+ 	else
+-	{
+-	    DWriteContext_Flush(s_dwc);
+-	    ScrollWindowEx(s_textArea, 0, -num_lines * gui.char_height,
+-				    &rc, &rc, NULL, NULL, 0);
+-	}
++	    DWriteContext_Scroll(s_dwc, 0, -num_lines * gui.char_height, &rc);
++
++	DWriteContext_Flush(s_dwc);
+     }
+     else
+ #endif
+@@ -3196,14 +3193,11 @@ gui_mch_insert_lines(
+ 	    gui_redraw(rc.left, rc.top,
+ 		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+ 	    gui_undraw_cursor();
+-	    DWriteContext_Flush(s_dwc);
+ 	}
+ 	else
+-	{
+-	    DWriteContext_Flush(s_dwc);
+-	    ScrollWindowEx(s_textArea, 0, num_lines * gui.char_height,
+-				    &rc, &rc, NULL, NULL, 0);
+-	}
++	    DWriteContext_Scroll(s_dwc, 0, num_lines * gui.char_height, &rc);
++
++	DWriteContext_Flush(s_dwc);
+     }
+     else
+ #endif
