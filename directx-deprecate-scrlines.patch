@@ -1,0 +1,112 @@
+# HG changeset patch
+# Parent  f942f6843889663d57253f5ee1d35505d7001238
+
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -6143,7 +6143,7 @@ A jump table for the options with a shor
+ 		  geom	    pixelGeometry	int	0 - 2 (see below)
+ 		  renmode   renderingMode	int	0 - 6 (see below)
+ 		  taamode   textAntialiasMode	int	0 - 3 (see below)
+-		  scrlines  Scroll Lines	int	>= 0  (see below)
++		  scrlines  Scroll Lines	int	(deprecated)
+ 
+ 		See this URL for detail (except for scrlines):
+ 		  https://msdn.microsoft.com/en-us/library/dd368190.aspx
+@@ -6177,23 +6177,9 @@ A jump table for the options with a shor
+ 		See this URL for detail:
+ 		  https://msdn.microsoft.com/en-us/library/dd368170.aspx
+ 
+-		For scrlines: threshold for lines to be scrolled.
+-		    0 - Always use scrolling. (default)
+-		    1 - Use full page redrawing.
+-		  > 1 - If the lines to be scrolled is grater or equal to the
+-			specified value, use redrawing.  Otherwise use
+-			scrolling.
+-
+-		If you feel scrolling a page (CTRL-F) is too slow with DirectX
+-		renderer, try this "scrlines" option.
+-		When set it "1", Vim uses full page redrawing instead of
+-		scrolling.  Redrawing a page is faster than scrolling a
+-		page in some environments.
+-		After that, when you feel scrolling lines (CTRL-Y) becomes
+-		slow, please try "2" or greater value for this option.
+-		It works threshold line number to switch scrolling to
+-		redrawing.  Scrolling a few lines might be faster than
+-		redrawing a page in some environments.
++		For scrlines:
++		This was used for optimizing scrolling behavior, however this
++		is now deprecated.  If specified, it is simply ignored.
+ 
+ 		Example: >
+ 		  set encoding=utf-8
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -36,7 +36,6 @@
+ static DWriteContext *s_dwc = NULL;
+ static int s_directx_enabled = 0;
+ static int s_directx_load_attempted = 0;
+-static int s_directx_scrlines = 0;
+ # define IS_ENABLE_DIRECTX() (s_directx_enabled && s_dwc != NULL && enc_utf8)
+ static int directx_enabled(void);
+ static void directx_binddc(void);
+@@ -61,7 +60,6 @@ gui_mch_set_rendering_options(char_u *s)
+     int	    dx_geom = 0;
+     int	    dx_renmode = 0;
+     int	    dx_taamode = 0;
+-    int	    dx_scrlines = 0;
+ 
+     /* parse string as rendering options. */
+     for (p = s; p != NULL && *p != NUL; )
+@@ -124,7 +122,7 @@ gui_mch_set_rendering_options(char_u *s)
+ 	}
+ 	else if (STRCMP(name, "scrlines") == 0)
+ 	{
+-	    dx_scrlines = atoi((char *)value);
++	    /* Deprecated.  Simply ignore it. */
+ 	}
+ 	else
+ 	    return FAIL;
+@@ -159,7 +157,6 @@ gui_mch_set_rendering_options(char_u *s)
+ 	}
+     }
+     s_directx_enabled = dx_enable;
+-    s_directx_scrlines = dx_scrlines;
+ 
+     return OK;
+ # else
+@@ -3138,15 +3135,7 @@ gui_mch_delete_lines(
+ #if defined(FEAT_DIRECTX)
+     if (IS_ENABLE_DIRECTX())
+     {
+-	if (s_directx_scrlines > 0 && s_directx_scrlines <= num_lines)
+-	{
+-	    gui_redraw(rc.left, rc.top,
+-		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+-	    gui_undraw_cursor();
+-	}
+-	else
+-	    DWriteContext_Scroll(s_dwc, 0, -num_lines * gui.char_height, &rc);
+-
++	DWriteContext_Scroll(s_dwc, 0, -num_lines * gui.char_height, &rc);
+ 	DWriteContext_Flush(s_dwc);
+     }
+     else
+@@ -3188,15 +3177,7 @@ gui_mch_insert_lines(
+ #if defined(FEAT_DIRECTX)
+     if (IS_ENABLE_DIRECTX())
+     {
+-	if (s_directx_scrlines > 0 && s_directx_scrlines <= num_lines)
+-	{
+-	    gui_redraw(rc.left, rc.top,
+-		    rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+-	    gui_undraw_cursor();
+-	}
+-	else
+-	    DWriteContext_Scroll(s_dwc, 0, num_lines * gui.char_height, &rc);
+-
++	DWriteContext_Scroll(s_dwc, 0, num_lines * gui.char_height, &rc);
+ 	DWriteContext_Flush(s_dwc);
+     }
+     else

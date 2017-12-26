@@ -43,5 +43,6 @@ mingw-lua-dir.patch
 win32-dont-resize-if-not-needed.patch
 optimize-directx.patch
 directx-scroll.patch
+directx-deprecate-scrlines.patch
 debug-add-trace-log.diff
 fix-config_cache-removal.patch #+rejected
