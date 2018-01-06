@@ -45,5 +45,6 @@ optimize-directx.patch
 directx-scroll.patch
 directx-deprecate-scrlines.patch
 make-installer-faster.patch
+win32-disable-highentropyva.patch
 debug-add-trace-log.diff
 fix-config_cache-removal.patch #+rejected

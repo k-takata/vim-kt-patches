@@ -1,0 +1,20 @@
+# HG changeset patch
+# Parent  bf10cdba58c33ee38011fb6adb895cb1e94225d7
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1181,6 +1181,13 @@ LINKARGS1 = $(LINKARGS1) /LTCG:STATUS
+ !endif
+ !endif
+ 
++!if $(MSVC_MAJOR) >= 11 && "$(CPU)" == "AMD64" && "$(GUI)" == "yes"
++# This option is required for VC2012 or later so that 64-bit gvim can
++# accept D&D from 32-bit applications.  NOTE: This disables 64-bit ASLR,
++# therefore the security level becomes as same as VC2010.
++LINKARGS1 = $(LINKARGS1) /HIGHENTROPYVA:NO
++!endif
++
+ all:	$(VIM).exe \
+ 	vimrun.exe \
+ 	install.exe \
