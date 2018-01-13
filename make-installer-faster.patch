@@ -1,5 +1,7 @@
+# HG changeset patch
+# Parent  f3f699bf363eab11f9ec0bb186cd2c20a1c0493a
+
 diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
-index 871ce673a..83ef4e706 100644
 --- a/nsis/gvim.nsi
 +++ b/nsis/gvim.nsi
 @@ -89,6 +89,11 @@ Page instfiles
@@ -13,4 +15,23 @@ index 871ce673a..83ef4e706 100644
 +
  ##########################################################
  # Functions
+ 
+@@ -475,14 +480,12 @@ Function SetCustom
+ 	# Display the InstallOptions dialog
+ 
+ 	# Check if a _vimrc should be created
+-	SectionGetFlags ${sec_vimrc_id} $0
+-	IntOp $0 $0 & 1
+-	StrCmp $0 "1" +2 0
++	SectionGetFlags ${sec_vimrc_id} $3
++	IntOp $3 $3 & 1
++	StrCmp $3 "1" +2 0
+ 	  Abort
+ 
+-	Push $3
+-	  InstallOptions::dialog "$PLUGINSDIR\vimrc.ini"
+-	  Pop $3
++	InstallOptions::dialog "$PLUGINSDIR\vimrc.ini"
+ 	Pop $3
+ FunctionEnd
  
