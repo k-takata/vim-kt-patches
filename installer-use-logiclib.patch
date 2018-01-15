@@ -34,7 +34,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	StrCpy $2 "$2 vim view vimdiff"
  SectionEnd
  
-@@ -359,21 +351,21 @@ Section "Add an Edit-with-Vim context me
+@@ -359,25 +351,23 @@ Section "Add an Edit-with-Vim context me
  	  File ${GETTEXT}\gettext64\libiconv-2.dll
  !endif
  
@@ -68,8 +68,12 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
 +	  ${EndIf}
  	${EndIf}
  
- 	GvimExt64Done:
-@@ -389,26 +381,24 @@ Section "Add an Edit-with-Vim context me
+-	GvimExt64Done:
+-
+ 	# Install 32-bit gvimext.dll into the GvimExt32 directory.
+ 	SetOutPath $0\GvimExt32
+ 	ClearErrors
+@@ -389,26 +379,24 @@ Section "Add an Edit-with-Vim context me
  	File ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
  !endif
  
@@ -112,7 +116,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	SetOverwrite lastused
  
  	# We don't have a separate entry for the "Open With..." menu, assume
-@@ -448,20 +438,20 @@ SectionEnd
+@@ -448,20 +436,20 @@ SectionEnd
  
  ##########################################################
  !ifdef HAVE_NLS
@@ -146,7 +150,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  !endif
  
  ##########################################################
-@@ -482,8 +472,9 @@ Function SetCustom
+@@ -482,8 +470,9 @@ Function SetCustom
  	# Check if a _vimrc should be created
  	SectionGetFlags ${sec_vimrc_id} $3
  	IntOp $3 $3 & 1
@@ -157,7 +161,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  
  	InstallOptions::dialog "$PLUGINSDIR\vimrc.ini"
  	Pop $3
-@@ -491,25 +482,23 @@ FunctionEnd
+@@ -491,25 +480,23 @@ FunctionEnd
  
  Function ValidateCustom
  	ReadINIStr $3 "$PLUGINSDIR\vimrc.ini" "Field 2" "State"
@@ -191,7 +195,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  FunctionEnd
  
  ##########################################################
-@@ -519,11 +508,9 @@ Section Uninstall
+@@ -519,11 +506,9 @@ Section Uninstall
  	StrCpy $0 "$INSTDIR"
  
  	# If VisVim was installed, unregister the DLL.
@@ -206,7 +210,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  
  	# delete the context menu entry and batch files
  	ExecWait "$0\uninstal.exe -nsis"
-@@ -565,11 +552,10 @@ Section Uninstall
+@@ -565,11 +550,10 @@ Section Uninstall
  	Delete $0\*.vim
  	Delete $0\*.txt
  
@@ -221,7 +225,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  
  	# No error message if the "vim62" directory can't be removed, the
  	# gvimext.dll may still be there.
-@@ -584,18 +570,17 @@ Section Uninstall
+@@ -584,18 +568,17 @@ Section Uninstall
  
  	# if a plugin dir was created at installation ask the user to remove it
  	# first look in the root of the installation then in HOME
