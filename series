@@ -41,12 +41,8 @@ pr-2010.diff
 mingw-lua-dir.patch
 2060.diff
 win32-dont-resize-if-not-needed.patch
-optimize-directx.patch
-directx-scroll.patch
-directx-deprecate-scrlines.patch
 make-installer-faster.patch
 installer-use-logiclib.patch
 win32-disable-highentropyva.patch
 fix-CursorIM.patch
-debug-add-trace-log.diff
 fix-config_cache-removal.patch #+rejected
