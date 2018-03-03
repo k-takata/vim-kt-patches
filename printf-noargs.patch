@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent  547dea9e2ac0ed50617da1bbd717dd63939f1ef7
+
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -740,7 +740,7 @@ static struct fst
+     {"pow",		2, 2, f_pow},
+ #endif
+     {"prevnonblank",	1, 1, f_prevnonblank},
+-    {"printf",		2, 19, f_printf},
++    {"printf",		1, 19, f_printf},
+     {"pumvisible",	0, 0, f_pumvisible},
+ #ifdef FEAT_PYTHON3
+     {"py3eval",		1, 1, f_py3eval},
+diff --git a/src/testdir/test_expr.vim b/src/testdir/test_expr.vim
+--- a/src/testdir/test_expr.vim
++++ b/src/testdir/test_expr.vim
+@@ -131,6 +131,7 @@ func Test_option_value()
+ endfunc
+ 
+ function Test_printf_misc()
++  call assert_equal('123', printf('123'))
+   call assert_equal('123', printf('%d', 123))
+   call assert_equal('123', printf('%i', 123))
+   call assert_equal('123', printf('%D', 123))
