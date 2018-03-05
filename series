@@ -40,4 +40,5 @@ wip-fix-7.4.852.patch
 pr-2010.diff
 mingw-lua-dir.patch
 installer-use-logiclib.patch
+doc-fix-typo.patch
 fix-config_cache-removal.patch #+rejected
