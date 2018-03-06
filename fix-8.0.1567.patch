@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  522ab48095227ef1bdf6f8198899a6f0a29fdaf5
+
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -2136,6 +2136,8 @@ typedef enum {
+ 
+ #if defined(FEAT_MBYTE) && (defined(FEAT_XIM) \
+ 	|| defined(IME_WITHOUT_XIM) \
++	|| (defined(FEAT_GUI_W32) \
++	    && (defined(FEAT_MBYTE_IME) || defined(GLOBAL_IME))) \
+ 	|| defined(FEAT_GUI_MAC))
+ /* im_set_active() is available */
+ # define HAVE_INPUT_METHOD
