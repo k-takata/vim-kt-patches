@@ -1,0 +1,47 @@
+# HG changeset patch
+# Parent  8d02495f2344918d3b8c90d04a0528daa939ad6d
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -20,7 +20,7 @@
+ #
+ # "make upx" makes *compressed* versions of the 32 bit GUI and console EXEs,
+ # using the excellent UPX compressor:
+-#     http://upx.sourceforge.net/
++#     https://upx.github.io/
+ # "make mpress" uses the MPRESS compressor for 32- and 64-bit EXEs:
+ #     http://www.matcode.com/mpress.htm
+ #
+@@ -36,7 +36,7 @@ OPTIMIZE=MAXSPEED
+ GUI=yes
+ # set to yes if you want to use DirectWrite (DirectX)
+ # MinGW-w64 is needed, and ARCH should be set to i686 or x86-64.
+-DIRECTX=no
++DIRECTX=yes
+ # FEATURES=[TINY | SMALL | NORMAL | BIG | HUGE]
+ # Set to TINY to make minimal version (few features).
+ FEATURES=HUGE
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -26,7 +26,7 @@
+ #	GUI interface: GUI=yes (default is no)
+ #
+ #	GUI with DirectWrite (DirectX): DIRECTX=yes
+-#	  (default is no, requires GUI=yes and MBYTE=yes)
++#	  (default is yes if GUI=yes, requires GUI=yes and MBYTE=yes)
+ #
+ #	Color emoji support: COLOR_EMOJI=yes
+ #	  (default is yes if DIRECTX=yes, requires WinSDK 8.1 or later.)
+@@ -180,6 +180,10 @@
+ 
+ TARGETOS = WINNT
+ 
++!ifndef DIRECTX
++DIRECTX = $(GUI)
++!endif
++
+ # Select one of eight object code directories, depends on GUI, OLE, DEBUG and
+ # interfaces.
+ # If you change something else, do "make clean" first!
