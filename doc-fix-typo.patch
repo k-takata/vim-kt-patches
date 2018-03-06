@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  615344319c70d338817fc55124265781bcf4a610
+# Parent  7787bd1ba9f98459eca6faf7b11672438db2dbc3
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -13,6 +13,16 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  getwinposx()			Number	X coord in pixels of the Vim window
  getwinposy()			Number	Y coord in pixels of the Vim window
  getwinvar({nr}, {varname} [, {def}])
+@@ -9451,8 +9451,7 @@ may be larger.
+ It is also possible to define a function without any arguments.  You must
+ still supply the () then.
+ 
+-It is allowed to define another function inside a function
+-body.
++It is allowed to define another function inside a function body.
+ 
+ 							*local-variables*
+ Inside a function local variables can be used.  These will disappear when the
 diff --git a/runtime/doc/terminal.txt b/runtime/doc/terminal.txt
 --- a/runtime/doc/terminal.txt
 +++ b/runtime/doc/terminal.txt
