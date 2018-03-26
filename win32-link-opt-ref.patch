@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  abac550bd9d58fcf1ad5fbb978ac57364339bf79
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1160,7 +1160,7 @@ LINK_PDB = /PDB:$(VIM).pdb -debug
+ # CFLAGS with /Fo$(OUTDIR)/
+ CFLAGS_OUTDIR=$(CFLAGS) /Fo$(OUTDIR)/
+ 
+-conflags = /nologo /subsystem:$(SUBSYSTEM)
++conflags = /nologo /subsystem:$(SUBSYSTEM) /opt:ref
+ 
+ PATHDEF_SRC = $(OUTDIR)\pathdef.c
+ 
