@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent  804077ce6f266a617c4baef8e8e5a5b3015b58ae
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -459,8 +459,8 @@ endif
+ #>>>>> end of choices
+ ###########################################################################
+ 
+-CFLAGS = -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall
+-CXXFLAGS = -std=gnu++11
++CFLAGS = -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall -ffunction-sections -fno-asynchronous-unwind-tables
++CXXFLAGS = -fasynchronous-unwind-tables -std=gnu++11
+ WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
+ EXTRA_LIBS =
+ 
+@@ -862,6 +862,8 @@ endif
+ DEFINES+=-DDYNAMIC_ICONV
+ endif
+ 
++LFLAGS += -Wl,--gc-sections
++
+ ifeq (yes, $(USE_STDCPLUS))
+ ifeq (yes, $(STATIC_STDCPLUS))
+ LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
