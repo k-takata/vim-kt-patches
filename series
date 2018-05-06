@@ -37,7 +37,6 @@ add-getpackages.patch
 mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
-pr-2010.diff
 mingw-lua-dir.patch
 installer-use-logiclib.patch
 mingw-gc-sections.patch
