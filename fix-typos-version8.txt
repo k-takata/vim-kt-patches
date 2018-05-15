@@ -1,0 +1,366 @@
+# HG changeset patch
+# Parent  7a0c45f260ac17b0d662fb9b16e773cc1618d4ea
+
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -18201,7 +18201,7 @@ Files:      src/ex_docmd.c, runtime/file
+ 
+ Patch 8.0.0614
+ Problem:    float2nr() is not exactly right.
+-Solution:   Make float2nr() more accurate.  Turn test64 into a new style test.
++Solution:   Make float2nr() more accurate.  Turn test65 into a new style test.
+             (Hirohito Higashi, closes #1688)
+ Files:      src/Makefile, src/evalfunc.c, src/testdir/Make_all.mak,
+             src/testdir/Make_vms.mms, src/testdir/test65.in,
+@@ -18238,7 +18238,7 @@ Solution:   Check tb_change_cnt in one m
+ Files:      src/gui.c
+ 
+ Patch 8.0.0620
+-Problem:    Since we only support GTK versions that have it, the ckeck for
++Problem:    Since we only support GTK versions that have it, the check for
+             HAVE_GTK_MULTIHEAD is no longer needed.
+ Solution:   Remove HAVE_GTK_MULTIHEAD. (Kazunobu Kuriyama)
+ Files:      src/config.h.in, src/configure.ac, src/auto/configure,
+@@ -18464,7 +18464,7 @@ Files:      src/userfunc.c, src/ex_cmds.
+ 
+ Patch 8.0.0656
+ Problem:    Cannot use ! after some user commands.
+-Solution:   Properly check for existing command. (Higashi Higashi)
++Solution:   Properly check for existing command. (Hirohito Higashi)
+ Files:      src/ex_docmd.c, src/testdir/test_vimscript.vim
+ 
+ Patch 8.0.0657
+@@ -19275,7 +19275,7 @@ Files:      src/terminal.c
+ 
+ Patch 8.0.0779
+ Problem:    :term without an argument uses empty buffer name but runs the
+-            snell.
++            shell.
+ Solution:   Change the command to the shell earlier.
+ Files:      src/terminal.c
+ 
+@@ -19314,12 +19314,12 @@ Files:      src/ex_cmds.h, src/ex_docmd.
+ 
+ Patch 8.0.0786
+ Problem:    Build failures on Travis.
+-Solution:   Go back to precise termporarily.  Disable coverage with clang.
++Solution:   Go back to precise temporarily.  Disable coverage with clang.
+ Files:      .travis.yml
+ 
+ Patch 8.0.0787
+ Problem:    Cannot send CTRL-W command to terminal job.
+-Solution:   Make CTRL-W . a prefex for sending a key to the job.
++Solution:   Make CTRL-W . a prefix for sending a key to the job.
+ Files:      src/terminal.c, runtime/doc/terminal.txt, src/option.c
+ 
+ Patch 8.0.0788
+@@ -19604,7 +19604,7 @@ Solution:   don't redraw at a prompt or 
+ Files:      src/screen.c
+ 
+ Patch 8.0.0838
+-Problem:    Buffer hangs around whem terminal window is closed.
++Problem:    Buffer hangs around when terminal window is closed.
+ Solution:   When the job has ended wipe out a terminal buffer when the window
+             is closed.
+ Files:      src/buffer.c, src/terminal.c, src/proto/terminal.pro,
+@@ -19812,7 +19812,7 @@ Files:      src/screen.c
+ Patch 8.0.0872
+ Problem:    Using mouse scroll while a terminal window has focus and the mouse
+             pointer is on another window does not work.  Same for focus in a
+-            non-terminal window ahd the mouse pointer is over a terminal
++            non-terminal window and the mouse pointer is over a terminal
+             window.
+ Solution:   Send the scroll action to the right window.
+ Files:      src/terminal.c, src/normal.c, src/proto/terminal.pro
+@@ -19882,7 +19882,7 @@ Files:      src/misc1.c
+ 
+ Patch 8.0.0884
+ Problem:    Can't specify the wait time for term_wait().
+-Solution:   Add an otional second argument.
++Solution:   Add an optional second argument.
+ Files:      src/evalfunc.c, src/terminal.c, runtime/doc/eval.txt
+ 
+ Patch 8.0.0885
+@@ -19949,9 +19949,9 @@ Solution:   Fix file names.
+ Files:      src/testdir/test_filetype.vim
+ 
+ Patch 8.0.0896
+-Problem:    Cannot automaticlaly close a terminal window when the job ends.
++Problem:    Cannot automatically close a terminal window when the job ends.
+ Solution:   Add the ++close argument to :term.  Add the term_finish option to
+-            term_start(). (Yasuhiro  Matsumoto, closes #1950)  Also add
++            term_start(). (Yasuhiro Matsumoto, closes #1950)  Also add
+             ++open.
+ Files:      runtime/doc/eval.txt, runtime/doc/terminal.txt, src/channel.c,
+             src/structs.h, src/terminal.c, src/testdir/test_terminal.vim
+@@ -20095,7 +20095,7 @@ Files:      src/term.c
+ 
+ Patch 8.0.0920
+ Problem:    The cursor shape is wrong after switch back from an alternate
+-            screen in a terminal window. (arius Gedminas)
++            screen in a terminal window. (Marius Gedminas)
+ Solution:   Change bitfield to unsigned.  Set flag that cursor shape was set.
+ Files:      src/terminal.c, src/libvterm/src/vterm_internal.h
+ 
+@@ -20242,7 +20242,7 @@ Files:      src/main.c
+ 
+ Patch 8.0.0947
+ Problem:    When in Insert mode and using CTRL-O CTRL-W CTRL-W to move to a
+-            termainal window, get in a weird Insert mode.
++            terminal window, get in a weird Insert mode.
+ Solution:   Don't go to Insert mode in a terminal window. (closes #1977)
+ Files:      src/normal.c
+ 
+@@ -20440,7 +20440,7 @@ Files:      src/terminal.c
+ 
+ Patch 8.0.0982
+ Problem:    When 'encoding' is set to a multi-byte encoding other than utf-8
+-            the characters from ther terminal are messed up.
++            the characters from their terminal are messed up.
+ Solution:   Convert displayed text from utf-8 to 'encoding' for MS-Windows.
+             (Yasuhiro Matsumoto, close #2000)
+ Files:      src/terminal.c
+@@ -20521,7 +20521,7 @@ Solution:   Add workaround: sleep a mome
+ Files:      src/testdir/test_terminal.vim
+ 
+ Patch 8.0.0996
+-Problem:    Mac: t_RS is echoed on the screne in Terminal.app.  Even though
++Problem:    Mac: t_RS is echoed on the screen in Terminal.app.  Even though
+             $TERM is set to "xterm-256colors" it cannot handle this xterm
+             escape sequence.
+ Solution:   Recognize Terminal.app from the termresponse and skip sending t_RS
+@@ -20580,7 +20580,7 @@ Solution:   Poll for input when a channe
+ Files:      src/channel.c, src/proto/channel.pro, src/gui_gtk_x11.c
+ 
+ Patch 8.0.1006
+-Problem:    Cannot parse text with 'erroformat' without changing a quickfix
++Problem:    Cannot parse text with 'errorformat' without changing a quickfix
+             list.
+ Solution:   Add the "text" argument to getqflist(). (Yegappan Lakshmanan)
+ Files:      runtime/doc/eval.txt, src/evalfunc.c, src/proto/quickfix.pro,
+@@ -20695,7 +20695,7 @@ Files:      src/testdir/test_mksession.v
+ 
+ Patch 8.0.1026
+ Problem:    GTK on-the-spot input has problems. (Gerd Wachsmuth)
+-Solution:   Support over-the-spot. (Yukihiro Nakadaira, Ketn Takata, closes
++Solution:   Support over-the-spot. (Yukihiro Nakadaira, Ken Takata, closes
+             #1215)
+ Files:      runtime/doc/mbyte.txt, runtime/doc/options.txt, src/edit.c,
+             src/ex_getln.c, src/mbyte.c, src/misc1.c, src/option.c,
+@@ -20899,7 +20899,7 @@ Solution:   Lower version limit from 280
+ Files:      src/term.c
+ 
+ Patch 8.0.1060
+-Problem:    When imstyle is one, mapping <Left> breaks preediting.
++Problem:    When imstyle is zero, mapping <Left> breaks preediting.
+ Solution:   Pass though preediting key-events. (Yasuhiro Matsumoto, closes
+             #2064, closes #2063)
+ Files:      src/getchar.c, src/mbyte.c
+@@ -21107,7 +21107,7 @@ Solution:   Also detect Terminal.app on 
+ Files:      src/term.c
+ 
+ Patch 8.0.1095
+-Problem:    Terminal multibyte escrape test is flaky.
++Problem:    Terminal multibyte scrape test is flaky.
+ Solution:   Add another condition to wait for.
+ Files:      src/testdir/test_terminal.vim
+ 
+@@ -21311,7 +21311,7 @@ Solution:   Set a flag to prevent resizi
+ Files:      src/terminal.c
+ 
+ Patch 8.0.1127
+-Problem:    Test_peek_and_get_char fails on 32 bit system. (Eliminate
++Problem:    Test_peek_and_get_char fails on 32 bit system. (Elimar
+             Riesebieter)
+ Solution:   Avoid an integer overflow. (James McCoy, closes #2116)
+ Files:      src/ex_cmds2.c
+@@ -21415,7 +21415,7 @@ Files:      src/vim.h, src/structs.h, sr
+ Patch 8.0.1144
+ Problem:    Using wrong #ifdef for computing length.
+ Solution:   use BACKSLASH_IN_FILENAME instead of COLON_IN_FILENAME. (Yasuhiro
+-            Matsomoto, closes #2153)
++            Matsumoto, closes #2153)
+ Files:      src/quickfix.c
+ 
+ Patch 8.0.1145
+@@ -21447,7 +21447,7 @@ Files:      src/terminal.c, src/libvterm
+ Patch 8.0.1150
+ Problem:    MS-Windows GUI: dialog font size is incorrect.
+ Solution:   Pass flag to indicate 'encoding' or active codepage. (Yasuhiro
+-            Matsomoto, closes #2160)
++            Matsumoto, closes #2160)
+ Files:      src/gui_w32.c
+ 
+ Patch 8.0.1151
+@@ -21754,7 +21754,7 @@ Solution:   Don't use 'scrolloff' when a
+ Files:      src/normal.c, runtime/doc/motion.txt
+ 
+ Patch 8.0.1202
+-Problem:    :wall gives an errof for a terminal window. (Marius Gedminas)
++Problem:    :wall gives an error for a terminal window. (Marius Gedminas)
+ Solution:   Don't try writing a buffer that can't be written. (Yasuhiro
+             Matsumoto, closes #2190)
+ Files:      src/ex_cmds.c, src/testdir/test_terminal.vim
+@@ -22001,7 +22001,7 @@ Files:      src/Makefile, src/option.c, 
+ Patch 8.0.1238
+ Problem:    Incremental search only shows one match.
+ Solution:   When 'incsearch' and 'hlsearch' are both set highlight all
+-            matches. (haya14busa, closes #2198)
++            matches. (haya14busa, itchyny closes #2198)
+ Files:      runtime/doc/options.txt, src/ex_getln.c, src/proto/search.pro,
+             src/search.c, src/testdir/test_search.vim
+ 
+@@ -22256,7 +22256,7 @@ Files:      runtime/doc/options.txt, src
+ Patch 8.0.1279
+ Problem:    Initializing menus can be slow, especially when there are many
+             keymaps, color schemes, etc.
+-Solution:   Do the globbing for runtime files lazlily. (Ken Takata)
++Solution:   Do the globbing for runtime files lazily. (Ken Takata)
+ Files:      runtime/doc/gui.txt, runtime/menu.vim
+ 
+ Patch 8.0.1280
+@@ -22271,7 +22271,7 @@ Solution:   Move functions to an autoloa
+ Files:      runtime/filetype.vim, runtime/autoload/filetype.vim,
+             runtime/scripts.vim
+ 
+-Patch 8.0.1282 (after 8.0.1282)
++Patch 8.0.1282 (after 8.0.1281)
+ Problem:    script-local variable defined in the wrong script
+ Solution:   Move variable to autoload/filetype.vim.
+ Files:      runtime/filetype.vim, runtime/autoload/filetype.vim
+@@ -22805,7 +22805,7 @@ Solution:   Adjust mouse row and column 
+ Files:      src/terminal.c
+ 
+ Patch 8.0.1369
+-Problem:    MS-Windows: drawing underline, curl and strike-throw is slow,
++Problem:    MS-Windows: drawing underline, curl and strikethrough is slow,
+             mFallbackDC not properly updated.
+ Solution:   Several performance improvements. (Ken Takata, Taro Muraoka,
+             Yasuhiro Matsumoto, closes #2401)
+@@ -22814,7 +22814,7 @@ Files:      runtime/doc/options.txt, src
+ 
+ Patch 8.0.1370
+ Problem:    Channel test for callback is flaky.
+-Solution:   Add the test to thelist of flaky tests.
++Solution:   Add the test to the list of flaky tests.
+ Files:      src/testdir/runtest.vim
+ 
+ Patch 8.0.1371
+@@ -22829,7 +22829,7 @@ Solution:   Find the start of the charac
+ Files:      src/ex_cmds2.c, src/testdir/test_profile.vim
+ 
+ Patch 8.0.1373
+-Problem:    No error when settting 'renderoptions' to an invalid value before
++Problem:    No error when setting 'renderoptions' to an invalid value before
+             starting the GUI.
+ Solution:   Always check the value. (Ken Takata, closes #2413)
+ Files:      src/gui_w32.c, src/option.c
+@@ -23428,7 +23428,7 @@ Files:      src/gui.c
+ 
+ Patch 8.0.1472
+ Problem:    MS-Windows: nsis installer is a bit slow.
+-Solution:   Use ReserveFile for vimrc.ini. (closes #2522)
++Solution:   Use ReserveFile for vimrc.ini. (Ken Takata, closes #2522)
+ Files:      nsis/gvim.nsi
+ 
+ Patch 8.0.1473
+@@ -23693,7 +23693,7 @@ Files:      runtime/doc/eval.txt, runtim
+ 
+ Patch 8.0.1515
+ Problem:    BufWinEnter event fired when opening hidden terminal.
+-Solution:   Do not fire BufWinEnter when the terminal is midden and does not
++Solution:   Do not fire BufWinEnter when the terminal is hidden and does not
+             open a window. (Kenta Sato, closes #2636)
+ Files:      src/terminal.c
+ 
+@@ -23860,7 +23860,7 @@ Files:      src/syntax.c
+ 
+ Patch 8.0.1542
+ Problem:    Terminal screen dump does not include cursor position.
+-Solution:   Mark the cursor position in the cump.
++Solution:   Mark the cursor position in the dump.
+ Files:      src/terminal.c,
+             src/testdir/dumps/Test_popup_position_01.dump,
+             src/testdir/dumps/Test_popup_position_02.dump,
+@@ -23892,7 +23892,7 @@ Files:      src/getchar.c, src/terminal.
+ 
+ Patch 8.0.1547
+ Problem:    Undo in the options window makes it empty.
+-Solution:   Set 'undolevels' while filling the buffer. (Yasuhiro Matthew,
++Solution:   Set 'undolevels' while filling the buffer. (Yasuhiro Matsumoto,
+             closes #2645)
+ Files:      runtime/optwin.vim
+ 
+@@ -23925,7 +23925,7 @@ Files:      src/os_unix.c
+ 
+ Patch 8.0.1552
+ Problem:    May leak file descriptors when executing job.
+-Solution:   Close more file descriptors. (Ozaki Kiichi, closes #2531)
++Solution:   Close more file descriptors. (Ozaki Kiichi, closes #2651)
+ Files:      src/os_unix.c, src/testdir/test_channel.vim
+ 
+ Patch 8.0.1553
+@@ -24121,7 +24121,7 @@ Files:      src/quickfix.c
+ 
+ Patch 8.0.1584
+ Problem:    Using C99 in Mac file gives compiler warning messages.
+-Solution:   Add #prama's to avoid the warnings. (Kazunobu Kuriyama)
++Solution:   Add #pragmas to avoid the warnings. (Kazunobu Kuriyama)
+ Files:      src/os_macosx.m
+ 
+ Patch 8.0.1585
+@@ -24191,7 +24191,7 @@ Files:      src/ex_docmd.c, src/fileio.c
+ 
+ Patch 8.0.1596
+ Problem:    No autocommand specifically for opening a terminal window.
+-Solution:   Add TerminalOpen. (?, closes #2484)
++Solution:   Add TerminalOpen. (Yasuhiro Matsumoto, closes #2484)
+ Files:      runtime/doc/autocmd.txt, src/fileio.c, src/terminal.c,
+             src/testdir/test_terminal.vim, src/vim.h
+ 
+@@ -24382,7 +24382,7 @@ Files:      src/os_unix.c
+ 
+ Patch 8.0.1630
+ Problem:    Trimming white space is not that easy.
+-Solution:   Add the trim() function. (Bukn, closes #1280)
++Solution:   Add the trim() function. (Bukn, Yasuhiro Matsumoto, closes #1280)
+ Files:      src/evalfunc.c, runtime/doc/eval.txt,
+             src/testdir/test_functions.vim
+ 
+@@ -24400,7 +24400,7 @@ Files:      src/terminal.c
+ Patch 8.0.1633
+ Problem:    A TextChanged autocmd triggers when it is defined after creating a
+             buffer.
+-Solution:   Set b_last_changedtick when opening a buffer. (Hirohito Highlight,
++Solution:   Set b_last_changedtick when opening a buffer. (Hirohito Higashi,
+             closes #2742)
+ Files:      src/buffer.c, src/testdir/test_autocmd.vim
+ 
+@@ -24764,7 +24764,7 @@ Solution:   Use xxd.exe if it exists.
+ Files:      src/testdir/test_xxd.vim
+ 
+ Patch 8.0.1696
+-Problem:    Coverate statistics don't work.
++Problem:    Coverage statistics don't work.
+ Solution:   Include the xxd directory. (Christian Brabandt)
+ Files:      .travis.yml
+ 
+@@ -24776,7 +24776,7 @@ Files:      src/testdir/shared.vim, src/
+             src/testdir/test_quotestar.vim, src/testdir/test_terminal.vim
+ 
+ Patch 8.0.1698
+-Problem:    Coverate statistics don't work on coveralls.
++Problem:    Coverage statistics don't work on coveralls.
+ Solution:   Use curly braces for $SRCDIR.
+ Files:      .travis.yml
+ 
+@@ -24787,7 +24787,7 @@ Files:      src/Makefile, src/config.aap
+             src/configure.ac, src/auto/configure
+ 
+ Patch 8.0.1700
+-Problem:    Coverate statistics still don't work on coveralls.
++Problem:    Coverage statistics still don't work on coveralls.
+ Solution:   Exclude the xxd directory again.
+ Files:      .travis.yml
+ 
