@@ -1,0 +1,299 @@
+diff --git a/runtime/doc/version8.txt b/runtime/doc/version8.txt
+index 2f72d14a8..e0530c19c 100644
+--- a/runtime/doc/version8.txt
++++ b/runtime/doc/version8.txt
+@@ -1410,7 +1410,7 @@ Files:	    src/os_win32.c
+ Patch 7.4.161
+ Problem:    Crash in Python exception handling.
+ Solution:   Only use exception variables if did_throw is set. (ZyX)
+-Files:	    if_py_both.h
++Files:	    src/if_py_both.h
+ 
+ Patch 7.4.162
+ Problem:    Running tests in shadow dir doesn't work.
+@@ -4274,7 +4274,7 @@ Files:	    src/normal.c
+ Patch 7.4.642
+ Problem:    When using "gf" escaped spaces are not handled.
+ Solution:   Recognize escaped spaces.
+-Files:	    src/vim.h, src/normal.h, src/window.c, src/misc2.c
++Files:	    src/vim.h, src/window.c, src/misc2.c
+ 
+ Patch 7.4.643
+ Problem:    Using the default file format for Mac files. (Issue 77)
+@@ -6694,7 +6694,7 @@ Files:      .travis.yml
+ Patch 7.4.1046
+ Problem:    No test coverage for menus.
+ Solution:   Load the standard menus and check there is no error.
+-Files:      testdir/test_menu.vim, testdir/test_alot.vim
++Files:      src/testdir/test_menu.vim, src/testdir/test_alot.vim
+ 
+ Patch 7.4.1047 (after patch 7.4.1042)
+ Problem:    Tests fail on MS-Windows.
+@@ -7107,7 +7107,7 @@ Files:      src/misc1.c, src/fileio.c, src/vim.h
+ Patch 7.4.1117 (after 7.4.1116)
+ Problem:    No longer get "." and ".." in directory list.
+ Solution:   Do not skip "." and ".." unless EW_DODOT is set.
+-Files:      src/mics1.c
++Files:      src/misc1.c
+ 
+ Patch 7.4.1118
+ Problem:    Tests hang in 24 line terminal.
+@@ -15856,13 +15856,13 @@ Patch 8.0.0226
+ Problem:    The test for patch 8.0.0224 misses the CR characters and passes
+             even without the fix. (Christian Brabandt)
+ Solution:   Use double quotes and \<CR>.
+-Files:      src/testidr/test_fileformat.vim
++Files:      src/testdir/test_fileformat.vim
+ 
+ Patch 8.0.0227
+ Problem:    Crash when 'fileformat' is forced to "dos" and the first line in
+             the file is empty and does not have a CR character.
+ Solution:   Don't check for CR before the start of the buffer.
+-Files:      src/fileio.c, src/testidr/test_fileformat.vim
++Files:      src/fileio.c, src/testdir/test_fileformat.vim
+ 
+ Patch 8.0.0228 (after 8.0.0210)
+ Problem:    When pasting test in an xterm on the command line it is surrounded
+@@ -18296,7 +18296,7 @@ Files:      src/getchar.c
+ 
+ 
+ Patch 8.0.0629 (after 8.0.0611)
+-Problem:    Checking for ambigous width is not working. (Hirohito Higashi)
++Problem:    Checking for ambiguous width is not working. (Hirohito Higashi)
+ Solution:   Reset "starting" earlier.
+ Files:      src/main.c
+ 
+@@ -18977,7 +18977,7 @@ Files:      src/configure.ac, src/auto/configure
+ 
+ Patch 8.0.0730
+ Problem:    Terminal feature only supports Unix-like systems.
+-Solution:   Prepare for adding an MS-Windows implementaiton.
++Solution:   Prepare for adding an MS-Windows implementation.
+ Files:      src/terminal.c
+ 
+ Patch 8.0.0731
+@@ -19204,7 +19204,7 @@ Files:      src/option.c
+ 
+ Patch 8.0.0767
+ Problem:    Build failure with Athena and Motif.
+-Solution:   Move local variable delcarations. (Kazunobu Kuriyama)
++Solution:   Move local variable declarations. (Kazunobu Kuriyama)
+ Files:      src/gui_x11.c
+ 
+ Patch 8.0.0768
+@@ -19251,7 +19251,7 @@ Files:      src/term.c
+ 
+ Patch 8.0.0775
+ Problem:    In a terminal the cursor is updated too often.
+-Solution:   Only flush when needed. (Yasuhiro Matsumoto).  Remeber whether the
++Solution:   Only flush when needed. (Yasuhiro Matsumoto).  Remember whether the
+             cursor is visible. (closes #1873)
+ Files:      src/terminal.c
+ 
+@@ -19963,7 +19963,7 @@ Files:      src/channel.c
+ 
+ Patch 8.0.0898
+ Problem:    Can't use the alternate screen in a terminal window.
+-Solution:   Initialze the alternate screen. (Yasuhiro Matsumoto, closes
++Solution:   Initialize the alternate screen. (Yasuhiro Matsumoto, closes
+             #1957)  Add term_getaltscreen().
+ Files:      src/libvterm/include/vterm.h, src/terminal.c,
+             src/proto/terminal.pro, src/evalfunc.c, runtime/doc/eval.txt
+@@ -20529,7 +20529,7 @@ Solution:   Recognize Terminal.app from the termresponse and skip sending t_RS
+ Files:      src/term.c
+ 
+ Patch 8.0.0997 (after 8.0.0996)
+-Problem:    Libvterm and Terminal.app not regognized from termresponse.
++Problem:    Libvterm and Terminal.app not recognized from termresponse.
+ Solution:   Adjust string compare.
+ Files:      src/term.c
+ 
+@@ -20614,7 +20614,7 @@ Solution:   Ignore the error for the input context. (Kazunobu Kuriyama)
+ Files:      src/testdir/test_terminal.vim
+ 
+ Patch 8.0.1012
+-Problem:    MS-Windows: Problem with $HOME when is was set internally.
++Problem:    MS-Windows: Problem with $HOME when it was set internally.
+ Solution:   Only use the $HOME default internally. (Yasuhiro Matsumoto, closes
+             #2013)
+ Files:      src/misc1.c, src/testdir/Make_all.mak, src/Makefile,
+@@ -20665,7 +20665,7 @@ Solution:   Increment tb_change_cnt in inchar(). (closes #1940)
+ Files:      src/getchar.c
+ 
+ Patch 8.0.1021
+-Problem:    Older Gnome terminal still echoes t_RC. (Fracois Ingelrest)
++Problem:    Older Gnome terminal still echoes t_RC. (François Ingelrest)
+ Solution:   Check for version > 3000 instead of 4000.
+ Files:      src/term.c
+ 
+@@ -20877,7 +20877,7 @@ Solution:   Avoid message for writing file.  Source shared.vim when running
+ Files:      src/testdir/test_bufline.vim, src/testdir/test_timers.vim
+ 
+ Patch 8.0.1056
+-Problem:    Cannot build with the diff feature but without the mutli-byte
++Problem:    Cannot build with the diff feature but without the multi-byte
+             feature.
+ Solution:   Remove #ifdefs. (John Marriott)
+ Files:      src/diff.c
+@@ -21113,7 +21113,7 @@ Files:      src/testdir/test_terminal.vim
+ 
+ Patch 8.0.1096
+ Problem:    Terminal window in Normal mode has wrong background.
+-Solution:   Store the default background and use it for clearning until the
++Solution:   Store the default background and use it for clearing until the
+             end of the line.  Not for below the last line, since there is no
+             text there.
+ Files:      src/screen.c, src/terminal.c
+@@ -21178,7 +21178,7 @@ Files:      src/terminal.c
+ 
+ Patch 8.0.1107
+ Problem:    Terminal debugger jumps to non-existing file.
+-Solution:   Check that the file exists.  Add an option to make the Vim wide
++Solution:   Check that the file exists.  Add an option to make the Vim width
+             wide. Fix removing highlight groups.
+ Files:      runtime/pack/dist/opt/termdebug/plugin/termdebug.vim,
+             runtime/doc/terminal.txt
+@@ -21420,7 +21420,7 @@ Files:      src/quickfix.c
+ 
+ Patch 8.0.1145
+ Problem:    Warning when compiling with Perl.
+-Solution:   Remove unused variable. (Ken Takata0
++Solution:   Remove unused variable. (Ken Takata)
+ Files:      src/if_perl.xs
+ 
+ Patch 8.0.1146
+@@ -21546,7 +21546,7 @@ Files:      src/pty.c
+ 
+ Patch 8.0.1167
+ Problem:    Motif: typing in terminal window is slow.
+-Solution:   Do not redraw the whole terminal window but only was was changed.
++Solution:   Do not redraw the whole terminal window but only what was changed.
+ Files:      src/terminal.c
+ 
+ Patch 8.0.1168
+@@ -21557,7 +21557,7 @@ Files:      src/screen.c, src/testdir/test_highlight.vim,
+             src/testdir/view_util.vim
+ 
+ Patch 8.0.1169
+-Problem:    Highlignting one char too many with 'list' and 'cul'.
++Problem:    Highlighting one char too many with 'list' and 'cul'.
+ Solution:   Check for 'list' being active. (Ozaki Kiichi, closes #2177)
+ Files:      src/screen.c, src/testdir/test_highlight.vim
+ 
+@@ -21717,7 +21717,7 @@ Files:      src/term.c, src/terminal.c
+ Patch 8.0.1196 (after 8.0.1194)
+ Problem:    Crash when t_RF is not set. (Brian Pina)
+ Solution:   Add t_RF to the list of terminal options. (Hirohito Higashi)
+-Files:      src/options.c
++Files:      src/option.c
+ 
+ Patch 8.0.1197
+ Problem:    MS-Windows build instructions are not up to date.
+@@ -22000,7 +22000,7 @@ Files:      src/Makefile, src/option.c, src/testdir/test_alot.vim,
+ 
+ Patch 8.0.1238
+ Problem:    Incremental search only shows one match.
+-Solution:   When 'incsearch' and and 'hlsearch' are both set highlight all
++Solution:   When 'incsearch' and 'hlsearch' are both set highlight all
+             matches. (haya14busa, closes #2198)
+ Files:      runtime/doc/options.txt, src/ex_getln.c, src/proto/search.pro,
+             src/search.c, src/testdir/test_search.vim
+@@ -22067,7 +22067,7 @@ Files:      README.md
+ 
+ Patch 8.0.1249
+ Problem:    No error when WaitFor() gets an invalid wrong expression.
+-Solution:   Do not ignore errors in evaluationg the expression.  Fix places
++Solution:   Do not ignore errors in evaluation of the expression.  Fix places
+             where the expression was wrong.
+ Files:      src/testdir/shared.vim, src/testdir/test_netbeans.vim
+ 
+@@ -22080,7 +22080,7 @@ Files:      runtime/doc/options.txt, src/ex_getln.c,
+             src/testdir/test_search.vim
+ 
+ Patch 8.0.1251 (after 8.0.1249)
+-Problem:    Invalid expressin passed to WaitFor().
++Problem:    Invalid expression passed to WaitFor().
+ Solution:   Check if the variable exists.
+ Files:      src/testdir/test_clientserver.vim
+ 
+@@ -22492,7 +22492,7 @@ Solution:   Remove bogus typedef.
+ Files:      src/os_macosx.m
+ 
+ Patch 8.0.1316 (after 8.0.1312)
+-Problem:    Build still still fails on Mac. (chdiza)
++Problem:    Build still fails on Mac. (chdiza)
+ Solution:   Remove another bogus typedef.
+ Files:      src/os_mac_conv.c
+ 
+@@ -23258,7 +23258,7 @@ Files:      runtime/doc/autocmd.txt, src/ex_getln.c, src/fileio.c,
+             src/testdir/test_autocmd.vim, src/vim.h
+ 
+ Patch 8.0.1446
+-Problem:    Acessing freed memory after window command in auto command.
++Problem:    Accessing freed memory after window command in auto command.
+             (gy741)
+ Solution:   Adjust the pointer in the parent frame. (Christian Brabandt,
+             closes #2467)
+@@ -23496,7 +23496,7 @@ Solution:   When the second search times out, do not accept a match from the
+ Files:      src/search.c
+ 
+ Patch 8.0.1484
+-Problem:    Reduntant conditions.
++Problem:    Redundant conditions.
+ Solution:   Remove them. (Dominique Pelle)
+ Files:      src/terminal.c
+ 
+@@ -23703,7 +23703,7 @@ Solution:   Add more specific error messages.
+ Files:      src/channel.c, src/globals.h
+ 
+ Patch 8.0.1517
+-Problem:    Invalid memory acces with pattern using look-behind match.
++Problem:    Invalid memory access with pattern using look-behind match.
+             (Dominique Pelle)
+ Solution:   Get a pointer to the right line.
+ Files:      src/regexp.c
+@@ -23832,7 +23832,7 @@ Files:      src/xxd/xxd.c
+ Patch 8.0.1538
+ Problem:    Popupmenu is too far left when completion is long. (Linwei)
+ Solution:   Adjust column computations. (Hirohito Higashi, closes #2661)
+-Files:      src/popupmenu.c
++Files:      src/popupmnu.c
+ 
+ Patch 8.0.1539
+ Problem:    No test for the popup menu positioning.
+@@ -23978,7 +23978,7 @@ Solution:   Adjust #ifdef for vcol2col().
+ Files:      src/ui.c
+ 
+ Patch 8.0.1561
+-Problem:    Crash with rust syntax highligting. (Edd Barrett)
++Problem:    Crash with rust syntax highlighting. (Edd Barrett)
+ Solution:   Avoid going past the end of an empty line.
+ Files:      src/syntax.c
+ 
+@@ -24672,7 +24672,7 @@ Files:      src/ops.c
+ 
+ Patch 8.0.1680
+ Problem:    Memory allocated by libvterm does not show up in profile.
+-Solution:   Pass allocater functions to vterm_new().
++Solution:   Pass allocator functions to vterm_new().
+ Files:      src/terminal.c
+ 
+ Patch 8.0.1681
+@@ -24743,7 +24743,7 @@ Solution:   Wipe out the XXDfile buffer.
+ Files:      src/testdir/test_xxd.vim
+ 
+ Patch 8.0.1692 (after 8.0.1686)
+-Problem:    Python may not work when using statically linked library .
++Problem:    Python may not work when using statically linked library.
+ Solution:   Do not define PYTHON_HOME and PYTHON3_HOME in configure if the
+             Python library is linked statically.
+ Files:      src/configure.ac, src/auto/configure
+@@ -24820,7 +24820,7 @@ Solution:   Only reset clear_cmdline when filling all columns of the last
+ Files:      src/screen.c, src/testdir/test_window_cmd.vim
+ 
+ Patch 8.0.1706
+-Problem:    Cannot sent CTRL-\ to a terminal window.
++Problem:    Cannot send CTRL-\ to a terminal window.
+ Solution:   Make CTRL-W CTRL-\ send CTRL-\ to a terminal window.
+ Files:      src/terminal.c, runtime/doc/terminal.txt
+ 
