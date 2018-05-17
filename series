@@ -40,6 +40,4 @@ wip-fix-7.4.852.patch
 mingw-lua-dir.patch
 installer-use-logiclib.patch
 mingw-gc-sections.patch
-fix-typos-version8.txt-8.0.1842.patch
-fix-typos-version8.txt.patch
 fix-config_cache-removal.patch #+rejected
