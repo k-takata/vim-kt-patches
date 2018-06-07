@@ -1,0 +1,62 @@
+# HG changeset patch
+# Parent  6660fb48a0a878a88839a45d48f8246ed0e24e28
+
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -1927,9 +1927,11 @@ vim_str2nr(
+ 	    n += 2;	    /* skip over "0b" */
+ 	while ('0' <= *ptr && *ptr <= '1')
+ 	{
++	    uvarnumber_T    digit = (uvarnumber_T)(*ptr - '0');
+ 	    /* avoid ubsan error for overflow */
+-	    if (un < UVARNUM_MAX / 2)
+-		un = 2 * un + (unsigned long)(*ptr - '0');
++	    if (un < UVARNUM_MAX / 2 ||
++		    (un == UVARNUM_MAX / 2 && digit <= UVARNUM_MAX % 2))
++		un = 2 * un + digit;
+ 	    else
+ 		un = UVARNUM_MAX;
+ 	    ++ptr;
+@@ -1942,9 +1944,11 @@ vim_str2nr(
+ 	/* octal */
+ 	while ('0' <= *ptr && *ptr <= '7')
+ 	{
++	    uvarnumber_T    digit = (uvarnumber_T)(*ptr - '0');
+ 	    /* avoid ubsan error for overflow */
+-	    if (un < UVARNUM_MAX / 8)
+-		un = 8 * un + (uvarnumber_T)(*ptr - '0');
++	    if (un < UVARNUM_MAX / 8 ||
++		    (un == UVARNUM_MAX / 8 && digit <= UVARNUM_MAX % 8))
++		un = 8 * un + digit;
+ 	    else
+ 		un = UVARNUM_MAX;
+ 	    ++ptr;
+@@ -1959,9 +1963,11 @@ vim_str2nr(
+ 	    n += 2;	    /* skip over "0x" */
+ 	while (vim_isxdigit(*ptr))
+ 	{
++	    uvarnumber_T    digit = (uvarnumber_T)hex2nr(*ptr);
+ 	    /* avoid ubsan error for overflow */
+-	    if (un < UVARNUM_MAX / 16)
+-		un = 16 * un + (uvarnumber_T)hex2nr(*ptr);
++	    if (un < UVARNUM_MAX / 16 ||
++		    (un == UVARNUM_MAX / 16 && digit <= UVARNUM_MAX % 16))
++		un = 16 * un + digit;
+ 	    else
+ 		un = UVARNUM_MAX;
+ 	    ++ptr;
+@@ -1974,9 +1980,11 @@ vim_str2nr(
+ 	/* decimal */
+ 	while (VIM_ISDIGIT(*ptr))
+ 	{
++	    uvarnumber_T    digit = (uvarnumber_T)(*ptr - '0');
+ 	    /* avoid ubsan error for overflow */
+-	    if (un < UVARNUM_MAX / 10)
+-		un = 10 * un + (uvarnumber_T)(*ptr - '0');
++	    if (un < UVARNUM_MAX / 10 ||
++		    (un == UVARNUM_MAX / 10 && digit <= UVARNUM_MAX % 10))
++		un = 10 * un + digit;
+ 	    else
+ 		un = UVARNUM_MAX;
+ 	    ++ptr;
