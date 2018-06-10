@@ -42,5 +42,4 @@ installer-use-logiclib.patch
 mingw-gc-sections.patch
 fix-version8.patch
 fix-2746.patch
-if_py_window_width.patch
 fix-config_cache-removal.patch #+rejected
