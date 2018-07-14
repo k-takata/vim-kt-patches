@@ -1,0 +1,21 @@
+# HG changeset patch
+# Parent  4d6ca69a8ab8e24607d460ae61e8c7688e9191d4
+
+diff --git a/src/eval.c b/src/eval.c
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -725,13 +725,8 @@ eval_expr_typval(typval_T *expr, typval_
+ 	if (s == NULL)
+ 	    return FAIL;
+ 	s = skipwhite(s);
+-	if (eval1(&s, rettv, TRUE) == FAIL)
++	if (eval0(s, rettv, NULL, TRUE) == FAIL)
+ 	    return FAIL;
+-	if (*s != NUL)  /* check for trailing chars after expr */
+-	{
+-	    EMSG2(_(e_invexpr2), s);
+-	    return FAIL;
+-	}
+     }
+     return OK;
+ }
