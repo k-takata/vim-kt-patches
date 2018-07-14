@@ -40,6 +40,5 @@ wip-fix-7.4.852.patch
 mingw-lua-dir.patch
 installer-use-logiclib.patch
 mingw-gc-sections.patch
-fix-3190.patch
 update-installpc.patch
 fix-config_cache-removal.patch #+rejected
