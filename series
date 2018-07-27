@@ -41,5 +41,4 @@ mingw-lua-dir.patch
 installer-use-logiclib.patch
 mingw-gc-sections.patch
 update-installpc.patch
-fix-getchar-indent.patch
 fix-config_cache-removal.patch #+rejected
