@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  ea2f615c8fa9c2e392ef1300c6a66c01ca75c0a4
+# Parent  21978ee72e9bd647e9a87c2d1d4c61a979fadd47
 
 diff --git a/src/gui_beval.c b/src/gui_beval.c
 --- a/src/gui_beval.c
@@ -118,7 +118,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  	return;
  
 -    gui_gtk_get_screen_size_of_win(preedit_window, &sw, &sh);
-+    gui_gtk_get_screen_geom_of_win(preedit_window, &sx, &sy, &sw, &sh);
++    gui_gtk_get_screen_geom_of_win(gui.drawarea, &sx, &sy, &sw, &sh);
  #if GTK_CHECK_VERSION(3,0,0)
      gdk_window_get_origin(gtk_widget_get_window(gui.drawarea), &x, &y);
  #else
