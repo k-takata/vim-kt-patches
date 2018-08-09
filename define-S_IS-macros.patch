@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  d21caeeec1b224cab2b0ea0a2d7f6691df968018
+# Parent  34bc927d7ee4da3b742028ba8c88ea3730c0c239
 
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
@@ -50,9 +50,8 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 -# endif
 -# ifdef S_ISSOCK
  	else if (S_ISSOCK(st.st_mode))
--	    t = "fifo";
+ 	    t = "socket";
 -# endif
-+	    t = "socket";
  	else
  	    t = "other";
  #else
