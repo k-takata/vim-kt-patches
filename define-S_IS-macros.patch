@@ -22,12 +22,11 @@ diff --git a/src/buffer.c b/src/buffer.c
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -5090,62 +5090,28 @@ f_getftype(typval_T *argvars, typval_T *
+@@ -5090,63 +5090,22 @@ f_getftype(typval_T *argvars, typval_T *
      rettv->v_type = VAR_STRING;
      if (mch_lstat((char *)fname, &st) >= 0)
      {
 -#ifdef S_ISREG
-+#ifdef S_IFMT
  	if (S_ISREG(st.st_mode))
  	    t = "file";
  	else if (S_ISDIR(st.st_mode))
@@ -54,7 +53,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 -# endif
  	else
  	    t = "other";
- #else
+-#else
 -# ifdef S_IFMT
 -	switch (st.st_mode & S_IFMT)
 -	{
@@ -78,14 +77,15 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 -	    default: t = "other";
 -	}
 -# else
- 	if (mch_isdir(fname))
- 	    t = "dir";
- 	else
- 	    t = "file";
+-	if (mch_isdir(fname))
+-	    t = "dir";
+-	else
+-	    t = "file";
 -# endif
- #endif
+-#endif
  	type = vim_strsave((char_u *)t);
      }
+     rettv->vval.v_string = type;
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
