@@ -42,5 +42,4 @@ installer-use-logiclib.patch
 mingw-gc-sections.patch
 update-installpc.patch
 fix-gtk-multidisplay-support.patch
-define-S_IS-macros.patch
 fix-config_cache-removal.patch #+rejected
