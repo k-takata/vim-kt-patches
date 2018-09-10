@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  faae921cf897489a7613e0dbf978c9bb6cbbda6f
+# Parent  f66663b537fb29a2d96126ac44a5db7fd11d3a77
 
 diff --git a/src/gui_beval.c b/src/gui_beval.c
 --- a/src/gui_beval.c
@@ -340,7 +340,14 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	return;
  
      gui_mch_set_fg_color(color);
-@@ -6885,13 +6802,8 @@ gui_gtk_window_clear(GdkWindow *win)
+@@ -6880,18 +6797,15 @@ gui_gtk_window_clear(GdkWindow *win)
+     if (!gui.by_signal)
+ 	gdk_window_invalidate_rect(win, &rect, FALSE);
+ }
++#else
++# define gui_gtk_window_clear(win)  gdk_window_clear(win)
+ #endif
+ 
      void
  gui_mch_clear_all(void)
  {
@@ -354,7 +361,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  }
  
  #if !GTK_CHECK_VERSION(3,0,0)
-@@ -7084,12 +6996,8 @@ clip_mch_request_selection(VimClipboard 
+@@ -7084,12 +6998,8 @@ clip_mch_request_selection(VimClipboard 
      }
  
      /* Final fallback position - use the X CUT_BUFFER0 store */
@@ -367,7 +374,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  }
  
  /*
-@@ -7269,15 +7177,9 @@ gui_mch_setmouse(int x, int y)
+@@ -7269,15 +7179,9 @@ gui_mch_setmouse(int x, int y)
      /* Sorry for the Xlib call, but we can't avoid it, since there is no
       * internal GDK mechanism present to accomplish this.  (and for good
       * reason...) */
@@ -383,7 +390,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  }
  
  
-@@ -7298,23 +7200,14 @@ gui_mch_mousehide(int hide)
+@@ -7298,23 +7202,14 @@ gui_mch_mousehide(int hide)
      if (gui.pointer_hidden != hide)
      {
  	gui.pointer_hidden = hide;
@@ -407,7 +414,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  		gdk_window_set_cursor(gtk_widget_get_window(gui.drawarea), NULL);
  #else
  		gdk_window_set_cursor(gui.drawarea->window, NULL);
-@@ -7354,20 +7247,12 @@ mch_set_mouse_shape(int shape)
+@@ -7354,20 +7249,12 @@ mch_set_mouse_shape(int shape)
      int		   id;
      GdkCursor	   *c;
  
@@ -428,7 +435,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      else
      {
  	if (shape >= MSHAPE_NUMBERED)
-@@ -7384,11 +7269,7 @@ mch_set_mouse_shape(int shape)
+@@ -7384,11 +7271,7 @@ mch_set_mouse_shape(int shape)
  	    return;
  	c = gdk_cursor_new_for_display(
  		gtk_widget_get_display(gui.drawarea), (GdkCursorType)id);
@@ -440,7 +447,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  # if GTK_CHECK_VERSION(3,0,0)
  	g_object_unref(G_OBJECT(c));
  # else
-@@ -7420,12 +7301,8 @@ gui_mch_drawsign(int row, int col, int t
+@@ -7420,12 +7303,8 @@ gui_mch_drawsign(int row, int col, int t
  
      sign = (GdkPixbuf *)sign_get_image(typenr);
  
