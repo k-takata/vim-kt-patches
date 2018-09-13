@@ -1,6 +1,149 @@
 # HG changeset patch
 # Parent  4730d54167481be2f52e22eb7911d5044d455fc3
 
+diff --git a/src/gui_beval.c b/src/gui_beval.c
+--- a/src/gui_beval.c
++++ b/src/gui_beval.c
+@@ -1061,11 +1061,7 @@ createBalloonEvalWindow(BalloonEval *bev
+     gtk_window_set_policy(GTK_WINDOW(beval->balloonShell), FALSE, FALSE, TRUE);
+ # endif
+     gtk_widget_set_name(beval->balloonShell, "gtk-tooltips");
+-# if GTK_CHECK_VERSION(3,0,0)
+     gtk_container_set_border_width(GTK_CONTAINER(beval->balloonShell), 4);
+-# else
+-    gtk_container_border_width(GTK_CONTAINER(beval->balloonShell), 4);
+-# endif
+ 
+ # if GTK_CHECK_VERSION(3,0,0)
+     g_signal_connect(G_OBJECT(beval->balloonShell), "draw",
+diff --git a/src/gui_gtk.c b/src/gui_gtk.c
+--- a/src/gui_gtk.c
++++ b/src/gui_gtk.c
+@@ -2203,17 +2203,10 @@ find_replace_dialog_create(char_u *arg, 
+ 	if (entry_text != NULL)
+ 	{
+ 	    gtk_entry_set_text(GTK_ENTRY(frdp->what), (char *)entry_text);
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frdp->wword),
+ 							     (gboolean)wword);
+ 	    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frdp->mcase),
+ 							     (gboolean)mcase);
+-#else
+-	    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(frdp->wword),
+-							     (gboolean)wword);
+-	    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(frdp->mcase),
+-							     (gboolean)mcase);
+-#endif
+ 	}
+ 	gtk_window_present(GTK_WINDOW(frdp->dialog));
+ 
+@@ -2278,11 +2271,7 @@ find_replace_dialog_create(char_u *arg, 
+ 	table = gtk_table_new(1024, 3, FALSE);
+ #endif
+     gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_container_set_border_width(GTK_CONTAINER(table), 4);
+-#else
+-    gtk_container_border_width(GTK_CONTAINER(table), 4);
+-#endif
+ 
+     tmp = gtk_label_new(CONV(_("Find what:")));
+ #if GTK_CHECK_VERSION(3,16,0)
+@@ -2417,13 +2406,8 @@ find_replace_dialog_create(char_u *arg, 
+ 
+     /* whole word only button */
+     frdp->wword = gtk_check_button_new_with_label(CONV(_("Match whole word only")));
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frdp->wword),
+ 							(gboolean)wword);
+-#else
+-    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(frdp->wword),
+-							(gboolean)wword);
+-#endif
+     if (do_replace)
+ #if GTK_CHECK_VERSION(3,4,0)
+ 	gtk_grid_attach(GTK_GRID(table), frdp->wword, 0, 2, 5, 1);
+@@ -2441,13 +2425,8 @@ find_replace_dialog_create(char_u *arg, 
+ 
+     /* match case button */
+     frdp->mcase = gtk_check_button_new_with_label(CONV(_("Match case")));
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frdp->mcase),
+ 							     (gboolean)mcase);
+-#else
+-    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(frdp->mcase),
+-							     (gboolean)mcase);
+-#endif
+     if (do_replace)
+ #if GTK_CHECK_VERSION(3,4,0)
+ 	gtk_grid_attach(GTK_GRID(table), frdp->mcase, 0, 3, 5, 1);
+@@ -2484,30 +2463,16 @@ find_replace_dialog_create(char_u *arg, 
+ #else
+     vbox = gtk_vbox_new(FALSE, 0);
+ #endif
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_container_set_border_width(GTK_CONTAINER(vbox), 0);
+-#else
+-    gtk_container_border_width(GTK_CONTAINER(vbox), 0);
+-#endif
+     gtk_container_add(GTK_CONTAINER(tmp), vbox);
+ 
+     /* 'Up' and 'Down' buttons */
+     frdp->up = gtk_radio_button_new_with_label(NULL, CONV(_("Up")));
+     gtk_box_pack_start(GTK_BOX(vbox), frdp->up, TRUE, TRUE, 0);
+-#if GTK_CHECK_VERSION(3,0,0)
+     frdp->down = gtk_radio_button_new_with_label(
+ 			gtk_radio_button_get_group(GTK_RADIO_BUTTON(frdp->up)),
+ 			CONV(_("Down")));
+-#else
+-    frdp->down = gtk_radio_button_new_with_label(
+-			gtk_radio_button_group(GTK_RADIO_BUTTON(frdp->up)),
+-			CONV(_("Down")));
+-#endif
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frdp->down), TRUE);
+-#else
+-    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(frdp->down), TRUE);
+-#endif
+     gtk_container_set_border_width(GTK_CONTAINER(vbox), 2);
+     gtk_box_pack_start(GTK_BOX(vbox), frdp->down, TRUE, TRUE, 0);
+ 
+@@ -2517,11 +2482,7 @@ find_replace_dialog_create(char_u *arg, 
+ #else
+     actionarea = gtk_vbutton_box_new();
+ #endif
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_container_set_border_width(GTK_CONTAINER(actionarea), 2);
+-#else
+-    gtk_container_border_width(GTK_CONTAINER(actionarea), 2);
+-#endif
+     gtk_box_pack_end(GTK_BOX(hbox), actionarea, FALSE, FALSE, 0);
+ 
+     /* 'Find Next' button */
+@@ -2693,23 +2654,11 @@ find_replace_cb(GtkWidget *widget UNUSED
+     }
+ 
+     find_text = (char_u *)gtk_entry_get_text(GTK_ENTRY(sfr->what));
+-#if GTK_CHECK_VERSION(3,0,0)
+     direction_down = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(sfr->down));
+-#else
+-    direction_down = GTK_TOGGLE_BUTTON(sfr->down)->active;
+-#endif
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(sfr->wword)))
+-#else
+-    if (GTK_TOGGLE_BUTTON(sfr->wword)->active)
+-#endif
+ 	flags |= FRD_WHOLE_WORD;
+-#if GTK_CHECK_VERSION(3,0,0)
+     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(sfr->mcase)))
+-#else
+-    if (GTK_TOGGLE_BUTTON(sfr->mcase)->active)
+-#endif
+ 	flags |= FRD_MATCH_CASE;
+ 
+     repl_text = CONVERT_FROM_UTF8(repl_text);
 diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
 --- a/src/gui_gtk_f.c
 +++ b/src/gui_gtk_f.c
@@ -357,17 +500,18 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
  	offshoot = dx > dy ? dx : dy;
  
-@@ -1907,6 +1869,9 @@ gui_gtk_window_at_position(GtkWidget *wi
+@@ -1907,6 +1869,10 @@ gui_gtk_window_at_position(GtkWidget *wi
      return gdk_device_get_window_at_position(dev, x, y);
  }
  # endif
 +#else /* !GTK_CHECK_VERSION(3,0,0) */
 +# define gui_gtk_get_pointer(wid, x, y, s) \
 +    gdk_window_get_pointer((wid)->window, x, y, s)
++# define gui_gtk_window_at_position(wid, x, y)	gdk_window_at_pointer(x, y)
  #endif
  
  /*
-@@ -1919,11 +1884,7 @@ motion_repeat_timer_cb(gpointer data UNU
+@@ -1919,11 +1885,7 @@ motion_repeat_timer_cb(gpointer data UNU
      int		    y;
      GdkModifierType state;
  
@@ -379,7 +523,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      if (!(state & (GDK_BUTTON1_MASK | GDK_BUTTON2_MASK |
  		   GDK_BUTTON3_MASK | GDK_BUTTON4_MASK |
-@@ -1968,11 +1929,7 @@ motion_notify_event(GtkWidget *widget,
+@@ -1968,11 +1930,7 @@ motion_notify_event(GtkWidget *widget,
  	int		y;
  	GdkModifierType	state;
  
@@ -391,7 +535,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	process_motion_notify(x, y, state);
      }
      else
-@@ -2003,11 +1960,7 @@ button_press_event(GtkWidget *widget,
+@@ -2003,11 +1961,7 @@ button_press_event(GtkWidget *widget,
      gui.event_time = event->time;
  
      /* Make sure we have focus now we've been selected */
@@ -403,7 +547,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	gtk_widget_grab_focus(widget);
  
      /*
-@@ -2069,11 +2022,7 @@ scroll_event(GtkWidget *widget,
+@@ -2069,11 +2023,7 @@ scroll_event(GtkWidget *widget,
      int	    button;
      int_u   vim_modifiers;
  
@@ -415,7 +559,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	gtk_widget_grab_focus(widget);
  
      switch (event->direction)
-@@ -2239,13 +2188,9 @@ drag_handle_uri_list(GdkDragContext	*con
+@@ -2239,13 +2189,9 @@ drag_handle_uri_list(GdkDragContext	*con
      char_u  **fnames;
      int	    nfiles = 0;
  
@@ -429,7 +573,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      if (fnames != NULL && nfiles > 0)
      {
-@@ -2272,19 +2217,10 @@ drag_handle_text(GdkDragContext	    *con
+@@ -2272,19 +2218,10 @@ drag_handle_text(GdkDragContext	    *con
      int	    len;
      char_u  *tmpbuf = NULL;
  
@@ -450,7 +594,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (input_conv.vc_type != CONV_NONE)
  	    tmpbuf = string_convert(&input_conv, text, &len);
-@@ -2320,7 +2256,6 @@ drag_data_received_cb(GtkWidget		*widget
+@@ -2320,7 +2257,6 @@ drag_data_received_cb(GtkWidget		*widget
      GdkModifierType state;
  
      /* Guard against trash */
@@ -458,7 +602,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      const guchar * const data_data = gtk_selection_data_get_data(data);
      const gint data_length = gtk_selection_data_get_length(data);
      const gint data_format = gtk_selection_data_get_format(data);
-@@ -2329,12 +2264,6 @@ drag_data_received_cb(GtkWidget		*widget
+@@ -2329,12 +2265,6 @@ drag_data_received_cb(GtkWidget		*widget
  	    || data_length <= 0
  	    || data_format != 8
  	    || data_data[data_length] != '\0')
@@ -471,7 +615,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	gtk_drag_finish(context, FALSE, FALSE, time_);
  	return;
-@@ -2342,11 +2271,7 @@ drag_data_received_cb(GtkWidget		*widget
+@@ -2342,11 +2272,7 @@ drag_data_received_cb(GtkWidget		*widget
  
      /* Get the current modifier state for proper distinguishment between
       * different operations later. */
@@ -483,7 +627,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      /* Not sure about the role of "text/plain" here... */
      if (info == (guint)TARGET_TEXT_URI_LIST)
-@@ -2935,9 +2860,7 @@ mainwin_screen_changed_cb(GtkWidget  *wi
+@@ -2935,9 +2861,7 @@ mainwin_screen_changed_cb(GtkWidget  *wi
  drawarea_realize_cb(GtkWidget *widget, gpointer data UNUSED)
  {
      GtkWidget *sbar;
@@ -493,7 +637,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
  #ifdef FEAT_XIM
      xim_init();
-@@ -2962,23 +2885,13 @@ drawarea_realize_cb(GtkWidget *widget, g
+@@ -2962,23 +2886,13 @@ drawarea_realize_cb(GtkWidget *widget, g
      if (!sbar || (!gui.which_scrollbars[SBAR_LEFT]
  				    && firstwin->w_scrollbars[SBAR_RIGHT].id))
  	sbar = firstwin->w_scrollbars[SBAR_RIGHT].id;
@@ -517,7 +661,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  }
  
  /*
-@@ -3142,17 +3055,10 @@ get_item_dimensions(GtkWidget *widget, G
+@@ -3142,32 +3056,21 @@ get_item_dimensions(GtkWidget *widget, G
  #  define item_orientation GTK_ORIENTATION_HORIZONTAL
  # endif
  
@@ -532,10 +676,91 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 -	    && GTK_WIDGET_REALIZED(widget)
 -	    && GTK_WIDGET_VISIBLE(widget))
 -# endif
-     {
- # if GTK_CHECK_VERSION(3,0,0)
+-    {
+-# if GTK_CHECK_VERSION(3,0,0)
++    {
++# if GTK_CHECK_VERSION(3,0,0) || !defined(FEAT_GUI_GNOME)
  	GtkAllocation allocation;
-@@ -5036,11 +4942,7 @@ gui_mch_enable_menu(int showit)
+ 
+ 	gtk_widget_get_allocation(widget, &allocation);
+ 	return allocation.height;
+ # else
+-#  ifdef FEAT_GUI_GNOME
+ 	if (orientation == GTK_ORIENTATION_HORIZONTAL)
+ 	    return widget->allocation.height;
+ 	else
+ 	    return widget->allocation.width;
+-#  else
+-	return widget->allocation.height;
+-#  endif
+ # endif
+     }
+     return 0;
+@@ -3488,11 +3391,7 @@ on_tabline_menu(GtkWidget *widget, GdkEv
+ 	   )
+ 	    return TRUE;
+ 
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	tabwin = gui_gtk_window_at_position(gui.mainwin, &x, &y);
+-# else
+-	tabwin = gdk_window_at_pointer(&x, &y);
+-# endif
+ 
+ 	gdk_window_get_user_data(tabwin, (gpointer)&tabwidget);
+ # if GTK_CHECK_VERSION(3,0,0)
+@@ -3695,13 +3594,8 @@ gui_mch_update_tabline(void)
+     while (gtk_notebook_get_nth_page(GTK_NOTEBOOK(gui.tabline), nr) != NULL)
+ 	gtk_notebook_remove_page(GTK_NOTEBOOK(gui.tabline), nr);
+ 
+-# if GTK_CHECK_VERSION(3,0,0)
+     if (gtk_notebook_get_current_page(GTK_NOTEBOOK(gui.tabline)) != curtabidx)
+ 	gtk_notebook_set_current_page(GTK_NOTEBOOK(gui.tabline), curtabidx);
+-# else
+-    if (gtk_notebook_current_page(GTK_NOTEBOOK(gui.tabline)) != curtabidx)
+-	gtk_notebook_set_page(GTK_NOTEBOOK(gui.tabline), curtabidx);
+-# endif
+ 
+     /* Make sure everything is in place before drawing text. */
+     gui_mch_update();
+@@ -3719,13 +3613,8 @@ gui_mch_set_curtab(int nr)
+ 	return;
+ 
+     ignore_tabline_evt = TRUE;
+-# if GTK_CHECK_VERSION(3,0,0)
+     if (gtk_notebook_get_current_page(GTK_NOTEBOOK(gui.tabline)) != nr - 1)
+ 	gtk_notebook_set_current_page(GTK_NOTEBOOK(gui.tabline), nr - 1);
+-# else
+-    if (gtk_notebook_current_page(GTK_NOTEBOOK(gui.tabline)) != nr - 1)
+-	gtk_notebook_set_page(GTK_NOTEBOOK(gui.tabline), nr - 1);
+-# endif
+     ignore_tabline_evt = FALSE;
+ }
+ 
+@@ -3911,11 +3800,7 @@ gui_mch_init(void)
+     gui.text_context = gtk_widget_create_pango_context(gui.mainwin);
+     pango_context_set_base_dir(gui.text_context, PANGO_DIRECTION_LTR);
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_container_set_border_width(GTK_CONTAINER(gui.mainwin), 0);
+-#else
+-    gtk_container_border_width(GTK_CONTAINER(gui.mainwin), 0);
+-#endif
+     gtk_widget_add_events(gui.mainwin, GDK_VISIBILITY_NOTIFY_MASK);
+ 
+ #if GTK_CHECK_VERSION(3,0,0)
+@@ -4121,11 +4006,7 @@ gui_mch_init(void)
+ #endif /* FEAT_GUI_TABLINE */
+ 
+     gui.formwin = gtk_form_new();
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_container_set_border_width(GTK_CONTAINER(gui.formwin), 0);
+-#else
+-    gtk_container_border_width(GTK_CONTAINER(gui.formwin), 0);
+-#endif
+ #if !GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_events(gui.formwin, GDK_EXPOSURE_MASK);
+ #endif
+@@ -5036,11 +4917,7 @@ gui_mch_enable_menu(int showit)
  	widget = gui.menubar;
  
      /* Do not disable the menu while starting up, otherwise F10 doesn't work. */
@@ -547,7 +772,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -5071,11 +4973,7 @@ gui_mch_show_toolbar(int showit)
+@@ -5071,11 +4948,7 @@ gui_mch_show_toolbar(int showit)
      if (showit)
  	set_toolbar_style(GTK_TOOLBAR(gui.toolbar));
  
@@ -559,7 +784,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -6336,11 +6234,7 @@ gui_mch_beep(void)
+@@ -6336,11 +6209,7 @@ gui_mch_beep(void)
  {
      GdkDisplay *display;
  
@@ -571,7 +796,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	display = gtk_widget_get_display(gui.mainwin);
      else
  	display = gdk_display_get_default();
-@@ -6700,11 +6594,7 @@ theend:
+@@ -6700,11 +6569,7 @@ theend:
      void
  gui_mch_flush(void)
  {
@@ -583,7 +808,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	gdk_display_flush(gtk_widget_get_display(gui.mainwin));
  }
  
-@@ -7060,11 +6950,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
+@@ -7060,11 +6925,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
  
      gui_mch_menu_hidden(menu, FALSE);
      /* Be clever about bitfields versus true booleans here! */
@@ -595,7 +820,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	gtk_widget_set_sensitive(menu->id, !grey);
  	gui_mch_update();
-@@ -7082,11 +6968,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7082,11 +6943,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
  
      if (hidden)
      {
@@ -607,7 +832,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_hide(menu->id);
  	    gui_mch_update();
-@@ -7094,11 +6976,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7094,11 +6951,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
      }
      else
      {
@@ -619,7 +844,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_show(menu->id);
  	    gui_mch_update();
-@@ -7166,11 +7044,7 @@ gui_mch_get_rgb(guicolor_T pixel)
+@@ -7166,11 +7019,7 @@ gui_mch_get_rgb(guicolor_T pixel)
      void
  gui_mch_getmouse(int *x, int *y)
  {
