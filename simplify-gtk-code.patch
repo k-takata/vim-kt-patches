@@ -846,14 +846,8 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2338,8 +2338,34 @@ typedef enum {
- #endif
- 
+@@ -2340,6 +2340,28 @@ typedef enum {
  #ifdef FEAT_GUI_GTK
-+# if !GTK_CHECK_VERSION(2,2,0)
-+# define gtk_widget_set_size_request(wid, w, h) \
-+    do { (wid)->requisition.width = w; (wid)->requisition.height = h; } while (0)
-+# endif
  # if !GTK_CHECK_VERSION(2,14,0)
  #  define gtk_widget_get_window(wid)	((wid)->window)
 +#  define gtk_selection_data_get_data(sel)	((sel)->data)
