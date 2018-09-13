@@ -373,19 +373,6 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  		gtk_widget_unmap(child->widget);
  	}
      }
-@@ -966,12 +888,7 @@ gtk_form_position_children(GtkForm *form
- gtk_form_move_resize(GtkForm *form, GtkWidget *widget,
- 		     gint x, gint y, gint w, gint h)
- {
--#if GTK_CHECK_VERSION(3,0,0)
-     gtk_widget_set_size_request(widget, w, h);
--#else
--    widget->requisition.width  = w;
--    widget->requisition.height = h;
--#endif
- 
-     gtk_form_move(form, widget, x, y);
- }
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
