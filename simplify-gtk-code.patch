@@ -898,7 +898,31 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
  	gdk_window_get_user_data(tabwin, (gpointer)&tabwidget);
  # if GTK_CHECK_VERSION(3,0,0)
-@@ -3586,11 +3485,7 @@ gui_mch_show_tabline(int showit)
+@@ -3536,11 +3435,7 @@ on_tabline_menu(GtkWidget *widget, GdkEv
+     static void
+ on_select_tab(
+ 	GtkNotebook	*notebook UNUSED,
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	gpointer	*page UNUSED,
+-# else
+-	GtkNotebookPage *page UNUSED,
+-# endif
+ 	gint		idx,
+ 	gpointer	data UNUSED)
+ {
+@@ -3554,11 +3449,7 @@ on_select_tab(
+     static void
+ on_tab_reordered(
+ 	GtkNotebook	*notebook UNUSED,
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	gpointer	*page UNUSED,
+-# else
+-	GtkNotebookPage *page UNUSED,
+-# endif
+ 	gint		idx,
+ 	gpointer	data UNUSED)
+ {
+@@ -3586,11 +3477,7 @@ gui_mch_show_tabline(int showit)
  	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(gui.tabline), showit);
  	update_window_manager_hints(0, 0);
  	if (showit)
@@ -910,7 +934,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      }
  
      gui_mch_update();
-@@ -3670,11 +3565,7 @@ gui_mch_update_tabline(void)
+@@ -3670,11 +3557,7 @@ gui_mch_update_tabline(void)
  	gtk_object_set_user_data(GTK_OBJECT(event_box),
  						     (gpointer)(long)tab_num);
  # endif
@@ -922,7 +946,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	get_tabline_label(tp, FALSE);
  	labeltext = CONVERT_TO_UTF8(NameBuff);
  	gtk_label_set_text(GTK_LABEL(label), (const char *)labeltext);
-@@ -3695,13 +3586,8 @@ gui_mch_update_tabline(void)
+@@ -3695,13 +3578,8 @@ gui_mch_update_tabline(void)
      while (gtk_notebook_get_nth_page(GTK_NOTEBOOK(gui.tabline), nr) != NULL)
  	gtk_notebook_remove_page(GTK_NOTEBOOK(gui.tabline), nr);
  
@@ -936,7 +960,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      /* Make sure everything is in place before drawing text. */
      gui_mch_update();
-@@ -3719,13 +3605,8 @@ gui_mch_set_curtab(int nr)
+@@ -3719,13 +3597,8 @@ gui_mch_set_curtab(int nr)
  	return;
  
      ignore_tabline_evt = TRUE;
@@ -950,7 +974,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      ignore_tabline_evt = FALSE;
  }
  
-@@ -3872,11 +3753,7 @@ gui_mch_init(void)
+@@ -3872,11 +3745,7 @@ gui_mch_init(void)
  	/* Use GtkSocket from another app. */
  	plug = gtk_plug_new_for_display(gdk_display_get_default(),
  					gtk_socket_id);
@@ -962,7 +986,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gui.mainwin = plug;
  	}
-@@ -3911,11 +3788,7 @@ gui_mch_init(void)
+@@ -3911,11 +3780,7 @@ gui_mch_init(void)
      gui.text_context = gtk_widget_create_pango_context(gui.mainwin);
      pango_context_set_base_dir(gui.text_context, PANGO_DIRECTION_LTR);
  
@@ -974,7 +998,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      gtk_widget_add_events(gui.mainwin, GDK_VISIBILITY_NOTIFY_MASK);
  
  #if GTK_CHECK_VERSION(3,0,0)
-@@ -4121,11 +3994,7 @@ gui_mch_init(void)
+@@ -4121,11 +3986,7 @@ gui_mch_init(void)
  #endif /* FEAT_GUI_TABLINE */
  
      gui.formwin = gtk_form_new();
@@ -986,7 +1010,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  #if !GTK_CHECK_VERSION(3,0,0)
      gtk_widget_set_events(gui.formwin, GDK_EXPOSURE_MASK);
  #endif
-@@ -4213,11 +4082,7 @@ gui_mch_init(void)
+@@ -4213,11 +4074,7 @@ gui_mch_init(void)
  
      if (gtk_socket_id != 0)
  	/* make sure keyboard input can go to the drawarea */
@@ -998,7 +1022,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      /*
       * Set clipboard specific atoms
-@@ -4415,16 +4280,12 @@ set_cairo_source_rgba_from_color(cairo_t
+@@ -4415,16 +4272,12 @@ set_cairo_source_rgba_from_color(cairo_t
      void
  gui_mch_new_colors(void)
  {
@@ -1020,7 +1044,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  #if GTK_CHECK_VERSION(3,22,2)
  	GtkStyleContext * const context
  	    = gtk_widget_get_style_context(gui.drawarea);
-@@ -4462,11 +4323,7 @@ gui_mch_new_colors(void)
+@@ -4462,11 +4315,7 @@ gui_mch_new_colors(void)
  	GdkColor color = { 0, 0, 0, 0 };
  
  	color.pixel = gui.back_pixel;
@@ -1032,7 +1056,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  #endif /* !GTK_CHECK_VERSION(3,22,2) */
      }
  }
-@@ -5036,11 +4893,7 @@ gui_mch_enable_menu(int showit)
+@@ -5036,11 +4885,7 @@ gui_mch_enable_menu(int showit)
  	widget = gui.menubar;
  
      /* Do not disable the menu while starting up, otherwise F10 doesn't work. */
@@ -1044,7 +1068,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -5071,11 +4924,7 @@ gui_mch_show_toolbar(int showit)
+@@ -5071,11 +4916,7 @@ gui_mch_show_toolbar(int showit)
      if (showit)
  	set_toolbar_style(GTK_TOOLBAR(gui.toolbar));
  
@@ -1056,7 +1080,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -6336,11 +6185,7 @@ gui_mch_beep(void)
+@@ -6336,11 +6177,7 @@ gui_mch_beep(void)
  {
      GdkDisplay *display;
  
@@ -1068,7 +1092,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	display = gtk_widget_get_display(gui.mainwin);
      else
  	display = gdk_display_get_default();
-@@ -6700,11 +6545,7 @@ theend:
+@@ -6700,11 +6537,7 @@ theend:
      void
  gui_mch_flush(void)
  {
@@ -1080,7 +1104,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	gdk_display_flush(gtk_widget_get_display(gui.mainwin));
  }
  
-@@ -7060,11 +6901,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
+@@ -7060,11 +6893,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
  
      gui_mch_menu_hidden(menu, FALSE);
      /* Be clever about bitfields versus true booleans here! */
@@ -1092,7 +1116,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	gtk_widget_set_sensitive(menu->id, !grey);
  	gui_mch_update();
-@@ -7082,11 +6919,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7082,11 +6911,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
  
      if (hidden)
      {
@@ -1104,7 +1128,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_hide(menu->id);
  	    gui_mch_update();
-@@ -7094,11 +6927,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7094,11 +6919,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
      }
      else
      {
@@ -1116,7 +1140,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_show(menu->id);
  	    gui_mch_update();
-@@ -7126,15 +6955,7 @@ gui_mch_enable_scrollbar(scrollbar_T *sb
+@@ -7126,15 +6947,7 @@ gui_mch_enable_scrollbar(scrollbar_T *sb
      if (sb->id == NULL)
  	return;
  
@@ -1132,7 +1156,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      update_window_manager_hints(0, 0);
  }
  
-@@ -7166,11 +6987,7 @@ gui_mch_get_rgb(guicolor_T pixel)
+@@ -7166,11 +6979,7 @@ gui_mch_get_rgb(guicolor_T pixel)
      void
  gui_mch_getmouse(int *x, int *y)
  {
