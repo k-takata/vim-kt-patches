@@ -19,7 +19,33 @@ diff --git a/src/gui_beval.c b/src/gui_beval.c
 diff --git a/src/gui_gtk.c b/src/gui_gtk.c
 --- a/src/gui_gtk.c
 +++ b/src/gui_gtk.c
-@@ -1136,11 +1136,7 @@ gui_mch_create_scrollbar(scrollbar_T *sb
+@@ -792,12 +792,8 @@ gui_mch_add_menu_item(vimmenu_T *menu, i
+ 	    gtk_widget_set_sensitive(menu->id, FALSE);
+ # endif
+ 	    gtk_widget_show(menu->id);
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	    gtk_menu_shell_insert(GTK_MENU_SHELL(parent->submenu_id),
+ 		    menu->id, idx);
+-# else
+-	    gtk_menu_insert(GTK_MENU(parent->submenu_id), menu->id, idx);
+-# endif
+ 
+ 	    return;
+ 	}
+@@ -805,12 +801,8 @@ gui_mch_add_menu_item(vimmenu_T *menu, i
+ 	/* Add textual menu item. */
+ 	menu_item_new(menu, parent->submenu_id);
+ 	gtk_widget_show(menu->id);
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	gtk_menu_shell_insert(GTK_MENU_SHELL(parent->submenu_id),
+ 		menu->id, idx);
+-# else
+-	gtk_menu_insert(GTK_MENU(parent->submenu_id), menu->id, idx);
+-# endif
+ 
+ 	if (menu->id != NULL)
+ # if GTK_CHECK_VERSION(3,0,0)
+@@ -1136,11 +1128,7 @@ gui_mch_create_scrollbar(scrollbar_T *sb
      {
  	GtkAdjustment *adjustment;
  
@@ -31,7 +57,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
  	gtk_form_put(GTK_FORM(gui.formwin), sb->id, 0, 0);
  
  	adjustment = gtk_range_get_adjustment(GTK_RANGE(sb->id));
-@@ -2203,17 +2199,10 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2203,17 +2191,10 @@ find_replace_dialog_create(char_u *arg, 
  	if (entry_text != NULL)
  	{
  	    gtk_entry_set_text(GTK_ENTRY(frdp->what), (char *)entry_text);
@@ -49,7 +75,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
  	}
  	gtk_window_present(GTK_WINDOW(frdp->dialog));
  
-@@ -2278,11 +2267,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2278,11 +2259,7 @@ find_replace_dialog_create(char_u *arg, 
  	table = gtk_table_new(1024, 3, FALSE);
  #endif
      gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
@@ -61,7 +87,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
  
      tmp = gtk_label_new(CONV(_("Find what:")));
  #if GTK_CHECK_VERSION(3,16,0)
-@@ -2417,13 +2402,8 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2417,13 +2394,8 @@ find_replace_dialog_create(char_u *arg, 
  
      /* whole word only button */
      frdp->wword = gtk_check_button_new_with_label(CONV(_("Match whole word only")));
@@ -75,7 +101,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      if (do_replace)
  #if GTK_CHECK_VERSION(3,4,0)
  	gtk_grid_attach(GTK_GRID(table), frdp->wword, 0, 2, 5, 1);
-@@ -2441,13 +2421,8 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2441,13 +2413,8 @@ find_replace_dialog_create(char_u *arg, 
  
      /* match case button */
      frdp->mcase = gtk_check_button_new_with_label(CONV(_("Match case")));
@@ -89,7 +115,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      if (do_replace)
  #if GTK_CHECK_VERSION(3,4,0)
  	gtk_grid_attach(GTK_GRID(table), frdp->mcase, 0, 3, 5, 1);
-@@ -2484,30 +2459,16 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2484,30 +2451,16 @@ find_replace_dialog_create(char_u *arg, 
  #else
      vbox = gtk_vbox_new(FALSE, 0);
  #endif
@@ -120,7 +146,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      gtk_container_set_border_width(GTK_CONTAINER(vbox), 2);
      gtk_box_pack_start(GTK_BOX(vbox), frdp->down, TRUE, TRUE, 0);
  
-@@ -2517,11 +2478,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2517,11 +2470,7 @@ find_replace_dialog_create(char_u *arg, 
  #else
      actionarea = gtk_vbutton_box_new();
  #endif
@@ -132,7 +158,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      gtk_box_pack_end(GTK_BOX(hbox), actionarea, FALSE, FALSE, 0);
  
      /* 'Find Next' button */
-@@ -2544,11 +2501,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2544,11 +2493,7 @@ find_replace_dialog_create(char_u *arg, 
  				    : GINT_TO_POINTER(FRD_FINDNEXT));
  #endif
  
@@ -144,7 +170,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      gtk_box_pack_start(GTK_BOX(actionarea), frdp->find, FALSE, FALSE, 0);
      gtk_widget_grab_default(frdp->find);
  
-@@ -2561,11 +2514,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2561,11 +2506,7 @@ find_replace_dialog_create(char_u *arg, 
  	frdp->replace = create_image_button(GTK_STOCK_CONVERT, _("Replace"));
  #endif
  	gtk_widget_set_sensitive(frdp->replace, sensitive);
@@ -156,7 +182,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
  	gtk_box_pack_start(GTK_BOX(actionarea), frdp->replace, FALSE, FALSE, 0);
  #if GTK_CHECK_VERSION(3,0,0)
  	g_signal_connect(G_OBJECT(frdp->replace), "clicked",
-@@ -2584,11 +2533,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2584,11 +2525,7 @@ find_replace_dialog_create(char_u *arg, 
  	frdp->all = create_image_button(GTK_STOCK_CONVERT, _("Replace All"));
  #endif
  	gtk_widget_set_sensitive(frdp->all, sensitive);
@@ -168,7 +194,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
  	gtk_box_pack_start(GTK_BOX(actionarea), frdp->all, FALSE, FALSE, 0);
  #if GTK_CHECK_VERSION(3,0,0)
  	g_signal_connect(G_OBJECT(frdp->all), "clicked",
-@@ -2607,11 +2552,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2607,11 +2544,7 @@ find_replace_dialog_create(char_u *arg, 
  #else
      tmp = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
  #endif
@@ -180,7 +206,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      gtk_box_pack_end(GTK_BOX(actionarea), tmp, FALSE, FALSE, 0);
  #if GTK_CHECK_VERSION(3,0,0)
      g_signal_connect_swapped(G_OBJECT(tmp),
-@@ -2693,23 +2634,11 @@ find_replace_cb(GtkWidget *widget UNUSED
+@@ -2693,23 +2626,11 @@ find_replace_cb(GtkWidget *widget UNUSED
      }
  
      find_text = (char_u *)gtk_entry_get_text(GTK_ENTRY(sfr->what));
@@ -884,7 +910,19 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      }
  
      gui_mch_update();
-@@ -3695,13 +3590,8 @@ gui_mch_update_tabline(void)
+@@ -3670,11 +3565,7 @@ gui_mch_update_tabline(void)
+ 	gtk_object_set_user_data(GTK_OBJECT(event_box),
+ 						     (gpointer)(long)tab_num);
+ # endif
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	label = gtk_bin_get_child(GTK_BIN(event_box));
+-# else
+-	label = GTK_BIN(event_box)->child;
+-# endif
+ 	get_tabline_label(tp, FALSE);
+ 	labeltext = CONVERT_TO_UTF8(NameBuff);
+ 	gtk_label_set_text(GTK_LABEL(label), (const char *)labeltext);
+@@ -3695,13 +3586,8 @@ gui_mch_update_tabline(void)
      while (gtk_notebook_get_nth_page(GTK_NOTEBOOK(gui.tabline), nr) != NULL)
  	gtk_notebook_remove_page(GTK_NOTEBOOK(gui.tabline), nr);
  
@@ -898,7 +936,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      /* Make sure everything is in place before drawing text. */
      gui_mch_update();
-@@ -3719,13 +3609,8 @@ gui_mch_set_curtab(int nr)
+@@ -3719,13 +3605,8 @@ gui_mch_set_curtab(int nr)
  	return;
  
      ignore_tabline_evt = TRUE;
@@ -912,7 +950,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      ignore_tabline_evt = FALSE;
  }
  
-@@ -3872,11 +3757,7 @@ gui_mch_init(void)
+@@ -3872,11 +3753,7 @@ gui_mch_init(void)
  	/* Use GtkSocket from another app. */
  	plug = gtk_plug_new_for_display(gdk_display_get_default(),
  					gtk_socket_id);
@@ -924,7 +962,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gui.mainwin = plug;
  	}
-@@ -3911,11 +3792,7 @@ gui_mch_init(void)
+@@ -3911,11 +3788,7 @@ gui_mch_init(void)
      gui.text_context = gtk_widget_create_pango_context(gui.mainwin);
      pango_context_set_base_dir(gui.text_context, PANGO_DIRECTION_LTR);
  
@@ -936,7 +974,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      gtk_widget_add_events(gui.mainwin, GDK_VISIBILITY_NOTIFY_MASK);
  
  #if GTK_CHECK_VERSION(3,0,0)
-@@ -4121,11 +3998,7 @@ gui_mch_init(void)
+@@ -4121,11 +3994,7 @@ gui_mch_init(void)
  #endif /* FEAT_GUI_TABLINE */
  
      gui.formwin = gtk_form_new();
@@ -948,7 +986,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  #if !GTK_CHECK_VERSION(3,0,0)
      gtk_widget_set_events(gui.formwin, GDK_EXPOSURE_MASK);
  #endif
-@@ -4213,11 +4086,7 @@ gui_mch_init(void)
+@@ -4213,11 +4082,7 @@ gui_mch_init(void)
  
      if (gtk_socket_id != 0)
  	/* make sure keyboard input can go to the drawarea */
@@ -960,7 +998,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      /*
       * Set clipboard specific atoms
-@@ -5036,11 +4905,7 @@ gui_mch_enable_menu(int showit)
+@@ -5036,11 +4901,7 @@ gui_mch_enable_menu(int showit)
  	widget = gui.menubar;
  
      /* Do not disable the menu while starting up, otherwise F10 doesn't work. */
@@ -972,7 +1010,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -5071,11 +4936,7 @@ gui_mch_show_toolbar(int showit)
+@@ -5071,11 +4932,7 @@ gui_mch_show_toolbar(int showit)
      if (showit)
  	set_toolbar_style(GTK_TOOLBAR(gui.toolbar));
  
@@ -984,7 +1022,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -6336,11 +6197,7 @@ gui_mch_beep(void)
+@@ -6336,11 +6193,7 @@ gui_mch_beep(void)
  {
      GdkDisplay *display;
  
@@ -996,7 +1034,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	display = gtk_widget_get_display(gui.mainwin);
      else
  	display = gdk_display_get_default();
-@@ -6700,11 +6557,7 @@ theend:
+@@ -6700,11 +6553,7 @@ theend:
      void
  gui_mch_flush(void)
  {
@@ -1008,7 +1046,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	gdk_display_flush(gtk_widget_get_display(gui.mainwin));
  }
  
-@@ -7060,11 +6913,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
+@@ -7060,11 +6909,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
  
      gui_mch_menu_hidden(menu, FALSE);
      /* Be clever about bitfields versus true booleans here! */
@@ -1020,7 +1058,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	gtk_widget_set_sensitive(menu->id, !grey);
  	gui_mch_update();
-@@ -7082,11 +6931,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7082,11 +6927,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
  
      if (hidden)
      {
@@ -1032,7 +1070,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_hide(menu->id);
  	    gui_mch_update();
-@@ -7094,11 +6939,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7094,11 +6935,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
      }
      else
      {
@@ -1044,7 +1082,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_show(menu->id);
  	    gui_mch_update();
-@@ -7166,11 +7007,7 @@ gui_mch_get_rgb(guicolor_T pixel)
+@@ -7166,11 +7003,7 @@ gui_mch_get_rgb(guicolor_T pixel)
      void
  gui_mch_getmouse(int *x, int *y)
  {
