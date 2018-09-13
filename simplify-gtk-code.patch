@@ -998,7 +998,41 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      /*
       * Set clipboard specific atoms
-@@ -5036,11 +4901,7 @@ gui_mch_enable_menu(int showit)
+@@ -4415,16 +4280,12 @@ set_cairo_source_rgba_from_color(cairo_t
+     void
+ gui_mch_new_colors(void)
+ {
+-#if GTK_CHECK_VERSION(3,0,0)
+-# if !GTK_CHECK_VERSION(3,22,2)
+-    GdkWindow * const da_win = gtk_widget_get_window(gui.drawarea);
+-# endif
+-
+     if (gui.drawarea != NULL && gtk_widget_get_window(gui.drawarea) != NULL)
+-#else
+-    if (gui.drawarea != NULL && gui.drawarea->window != NULL)
+-#endif
+-    {
++    {
++#if !GTK_CHECK_VERSION(3,22,2)
++	GdkWindow * const da_win = gtk_widget_get_window(gui.drawarea);
++#endif
++
+ #if GTK_CHECK_VERSION(3,22,2)
+ 	GtkStyleContext * const context
+ 	    = gtk_widget_get_style_context(gui.drawarea);
+@@ -4462,11 +4323,7 @@ gui_mch_new_colors(void)
+ 	GdkColor color = { 0, 0, 0, 0 };
+ 
+ 	color.pixel = gui.back_pixel;
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	gdk_window_set_background(da_win, &color);
+-# else
+-	gdk_window_set_background(gui.drawarea->window, &color);
+-# endif
+ #endif /* !GTK_CHECK_VERSION(3,22,2) */
+     }
+ }
+@@ -5036,11 +4893,7 @@ gui_mch_enable_menu(int showit)
  	widget = gui.menubar;
  
      /* Do not disable the menu while starting up, otherwise F10 doesn't work. */
@@ -1010,7 +1044,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -5071,11 +4932,7 @@ gui_mch_show_toolbar(int showit)
+@@ -5071,11 +4924,7 @@ gui_mch_show_toolbar(int showit)
      if (showit)
  	set_toolbar_style(GTK_TOOLBAR(gui.toolbar));
  
@@ -1022,7 +1056,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -6336,11 +6193,7 @@ gui_mch_beep(void)
+@@ -6336,11 +6185,7 @@ gui_mch_beep(void)
  {
      GdkDisplay *display;
  
@@ -1034,7 +1068,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	display = gtk_widget_get_display(gui.mainwin);
      else
  	display = gdk_display_get_default();
-@@ -6700,11 +6553,7 @@ theend:
+@@ -6700,11 +6545,7 @@ theend:
      void
  gui_mch_flush(void)
  {
@@ -1046,7 +1080,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	gdk_display_flush(gtk_widget_get_display(gui.mainwin));
  }
  
-@@ -7060,11 +6909,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
+@@ -7060,11 +6901,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
  
      gui_mch_menu_hidden(menu, FALSE);
      /* Be clever about bitfields versus true booleans here! */
@@ -1058,7 +1092,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	gtk_widget_set_sensitive(menu->id, !grey);
  	gui_mch_update();
-@@ -7082,11 +6927,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7082,11 +6919,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
  
      if (hidden)
      {
@@ -1070,7 +1104,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_hide(menu->id);
  	    gui_mch_update();
-@@ -7094,11 +6935,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7094,11 +6927,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
      }
      else
      {
@@ -1082,7 +1116,23 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_show(menu->id);
  	    gui_mch_update();
-@@ -7166,11 +7003,7 @@ gui_mch_get_rgb(guicolor_T pixel)
+@@ -7126,15 +6955,7 @@ gui_mch_enable_scrollbar(scrollbar_T *sb
+     if (sb->id == NULL)
+ 	return;
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_visible(sb->id, flag);
+-#else
+-    if (flag)
+-	gtk_widget_show(sb->id);
+-    else
+-	gtk_widget_hide(sb->id);
+-#endif
+-
+     update_window_manager_hints(0, 0);
+ }
+ 
+@@ -7166,11 +6987,7 @@ gui_mch_get_rgb(guicolor_T pixel)
      void
  gui_mch_getmouse(int *x, int *y)
  {
@@ -1097,7 +1147,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2340,6 +2340,41 @@ typedef enum {
+@@ -2340,6 +2340,44 @@ typedef enum {
  #ifdef FEAT_GUI_GTK
  # if !GTK_CHECK_VERSION(2,14,0)
  #  define gtk_widget_get_window(wid)	((wid)->window)
@@ -1126,6 +1176,9 @@ diff --git a/src/vim.h b/src/vim.h
 +#  define gtk_widget_set_can_focus(wid, can) \
 +    do { if (can) { GTK_WIDGET_SET_FLAGS(wid, GTK_CAN_FOCUS); } \
 +	else { GTK_WIDGET_UNSET_FLAGS(wid, GTK_CAN_FOCUS); } } while (0)
++#  define gtk_widget_set_visible(wid, vis) \
++    do { if (vis) { gtk_widget_show(wid); } \
++	else { gtk_widget_hide(wid); } } while (0)
 +# endif
 +# if !GTK_CHECK_VERSION(2,20,0)
 +#  define gtk_widget_get_mapped(wid)	GTK_WIDGET_MAPPED(wid)
