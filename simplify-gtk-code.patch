@@ -19,7 +19,19 @@ diff --git a/src/gui_beval.c b/src/gui_beval.c
 diff --git a/src/gui_gtk.c b/src/gui_gtk.c
 --- a/src/gui_gtk.c
 +++ b/src/gui_gtk.c
-@@ -2203,17 +2203,10 @@ find_replace_dialog_create(char_u *arg, 
+@@ -1136,11 +1136,7 @@ gui_mch_create_scrollbar(scrollbar_T *sb
+     {
+ 	GtkAdjustment *adjustment;
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	gtk_widget_set_can_focus(sb->id, FALSE);
+-#else
+-	GTK_WIDGET_UNSET_FLAGS(sb->id, GTK_CAN_FOCUS);
+-#endif
+ 	gtk_form_put(GTK_FORM(gui.formwin), sb->id, 0, 0);
+ 
+ 	adjustment = gtk_range_get_adjustment(GTK_RANGE(sb->id));
+@@ -2203,17 +2199,10 @@ find_replace_dialog_create(char_u *arg, 
  	if (entry_text != NULL)
  	{
  	    gtk_entry_set_text(GTK_ENTRY(frdp->what), (char *)entry_text);
@@ -37,7 +49,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
  	}
  	gtk_window_present(GTK_WINDOW(frdp->dialog));
  
-@@ -2278,11 +2271,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2278,11 +2267,7 @@ find_replace_dialog_create(char_u *arg, 
  	table = gtk_table_new(1024, 3, FALSE);
  #endif
      gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
@@ -49,7 +61,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
  
      tmp = gtk_label_new(CONV(_("Find what:")));
  #if GTK_CHECK_VERSION(3,16,0)
-@@ -2417,13 +2406,8 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2417,13 +2402,8 @@ find_replace_dialog_create(char_u *arg, 
  
      /* whole word only button */
      frdp->wword = gtk_check_button_new_with_label(CONV(_("Match whole word only")));
@@ -63,7 +75,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      if (do_replace)
  #if GTK_CHECK_VERSION(3,4,0)
  	gtk_grid_attach(GTK_GRID(table), frdp->wword, 0, 2, 5, 1);
-@@ -2441,13 +2425,8 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2441,13 +2421,8 @@ find_replace_dialog_create(char_u *arg, 
  
      /* match case button */
      frdp->mcase = gtk_check_button_new_with_label(CONV(_("Match case")));
@@ -77,7 +89,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      if (do_replace)
  #if GTK_CHECK_VERSION(3,4,0)
  	gtk_grid_attach(GTK_GRID(table), frdp->mcase, 0, 3, 5, 1);
-@@ -2484,30 +2463,16 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2484,30 +2459,16 @@ find_replace_dialog_create(char_u *arg, 
  #else
      vbox = gtk_vbox_new(FALSE, 0);
  #endif
@@ -108,7 +120,7 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      gtk_container_set_border_width(GTK_CONTAINER(vbox), 2);
      gtk_box_pack_start(GTK_BOX(vbox), frdp->down, TRUE, TRUE, 0);
  
-@@ -2517,11 +2482,7 @@ find_replace_dialog_create(char_u *arg, 
+@@ -2517,11 +2478,7 @@ find_replace_dialog_create(char_u *arg, 
  #else
      actionarea = gtk_vbutton_box_new();
  #endif
@@ -120,7 +132,55 @@ diff --git a/src/gui_gtk.c b/src/gui_gtk.c
      gtk_box_pack_end(GTK_BOX(hbox), actionarea, FALSE, FALSE, 0);
  
      /* 'Find Next' button */
-@@ -2693,23 +2654,11 @@ find_replace_cb(GtkWidget *widget UNUSED
+@@ -2544,11 +2501,7 @@ find_replace_dialog_create(char_u *arg, 
+ 				    : GINT_TO_POINTER(FRD_FINDNEXT));
+ #endif
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_can_default(frdp->find, TRUE);
+-#else
+-    GTK_WIDGET_SET_FLAGS(frdp->find, GTK_CAN_DEFAULT);
+-#endif
+     gtk_box_pack_start(GTK_BOX(actionarea), frdp->find, FALSE, FALSE, 0);
+     gtk_widget_grab_default(frdp->find);
+ 
+@@ -2561,11 +2514,7 @@ find_replace_dialog_create(char_u *arg, 
+ 	frdp->replace = create_image_button(GTK_STOCK_CONVERT, _("Replace"));
+ #endif
+ 	gtk_widget_set_sensitive(frdp->replace, sensitive);
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	gtk_widget_set_can_default(frdp->find, TRUE);
+-#else
+-	GTK_WIDGET_SET_FLAGS(frdp->replace, GTK_CAN_DEFAULT);
+-#endif
+ 	gtk_box_pack_start(GTK_BOX(actionarea), frdp->replace, FALSE, FALSE, 0);
+ #if GTK_CHECK_VERSION(3,0,0)
+ 	g_signal_connect(G_OBJECT(frdp->replace), "clicked",
+@@ -2584,11 +2533,7 @@ find_replace_dialog_create(char_u *arg, 
+ 	frdp->all = create_image_button(GTK_STOCK_CONVERT, _("Replace All"));
+ #endif
+ 	gtk_widget_set_sensitive(frdp->all, sensitive);
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	gtk_widget_set_can_default(frdp->all, TRUE);
+-#else
+-	GTK_WIDGET_SET_FLAGS(frdp->all, GTK_CAN_DEFAULT);
+-#endif
+ 	gtk_box_pack_start(GTK_BOX(actionarea), frdp->all, FALSE, FALSE, 0);
+ #if GTK_CHECK_VERSION(3,0,0)
+ 	g_signal_connect(G_OBJECT(frdp->all), "clicked",
+@@ -2607,11 +2552,7 @@ find_replace_dialog_create(char_u *arg, 
+ #else
+     tmp = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+ #endif
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_can_default(tmp, TRUE);
+-#else
+-    GTK_WIDGET_SET_FLAGS(tmp, GTK_CAN_DEFAULT);
+-#endif
+     gtk_box_pack_end(GTK_BOX(actionarea), tmp, FALSE, FALSE, 0);
+ #if GTK_CHECK_VERSION(3,0,0)
+     g_signal_connect_swapped(G_OBJECT(tmp),
+@@ -2693,23 +2634,11 @@ find_replace_cb(GtkWidget *widget UNUSED
      }
  
      find_text = (char_u *)gtk_entry_get_text(GTK_ENTRY(sfr->what));
@@ -169,7 +229,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	gtk_form_realize_child(form, child);
  
      gtk_form_position_child(form, child, TRUE);
-@@ -300,6 +292,7 @@ gtk_form_realize(GtkWidget *widget)
+@@ -300,32 +292,19 @@ gtk_form_realize(GtkWidget *widget)
      GtkForm *form;
      GdkWindowAttr attributes;
      gint attributes_mask;
@@ -177,9 +237,12 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  
      g_return_if_fail(GTK_IS_FORM(widget));
  
-@@ -310,22 +303,12 @@ gtk_form_realize(GtkWidget *widget)
-     GTK_WIDGET_SET_FLAGS(form, GTK_REALIZED);
- #endif
+     form = GTK_FORM(widget);
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_realized(widget, TRUE);
+-#else
+-    GTK_WIDGET_SET_FLAGS(form, GTK_REALIZED);
+-#endif
  
 +    gtk_widget_get_allocation(widget, &allocation);
      attributes.window_type = GDK_WINDOW_CHILD;
@@ -205,7 +268,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      attributes.wclass = GDK_INPUT_OUTPUT;
      attributes.visual = gtk_widget_get_visual(widget);
  #if GTK_CHECK_VERSION(3,0,0)
-@@ -341,14 +324,9 @@ gtk_form_realize(GtkWidget *widget)
+@@ -341,14 +320,9 @@ gtk_form_realize(GtkWidget *widget)
      attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
  #endif
  
@@ -220,7 +283,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
  
      attributes.x = 0;
-@@ -382,11 +360,7 @@ gtk_form_realize(GtkWidget *widget)
+@@ -382,11 +356,7 @@ gtk_form_realize(GtkWidget *widget)
  
  	gtk_form_attach_child_window(form, child);
  
@@ -232,7 +295,19 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	    gtk_form_realize_child(form, child);
      }
  }
-@@ -423,13 +397,8 @@ gtk_form_map(GtkWidget *widget)
+@@ -410,11 +380,7 @@ gtk_form_map(GtkWidget *widget)
+ 
+     form = GTK_FORM(widget);
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_mapped(widget, TRUE);
+-#else
+-    GTK_WIDGET_SET_FLAGS(widget, GTK_MAPPED);
+-#endif
+ 
+     gdk_window_show(gtk_widget_get_window(widget));
+     gdk_window_show(form->bin_window);
+@@ -423,13 +389,8 @@ gtk_form_map(GtkWidget *widget)
      {
  	GtkFormChild *child = tmp_list->data;
  
@@ -246,7 +321,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	    gtk_widget_map(child->widget);
      }
  }
-@@ -534,34 +503,20 @@ gtk_form_size_allocate(GtkWidget *widget
+@@ -534,34 +495,20 @@ gtk_form_size_allocate(GtkWidget *widget
      GList *tmp_list;
      GtkForm *form;
      gboolean need_reposition;
@@ -281,7 +356,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      form = GTK_FORM(widget);
  
      if (need_reposition)
-@@ -577,11 +532,7 @@ gtk_form_size_allocate(GtkWidget *widget
+@@ -577,11 +524,7 @@ gtk_form_size_allocate(GtkWidget *widget
  	}
      }
  
@@ -293,7 +368,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      {
  	gdk_window_move_resize(gtk_widget_get_window(widget),
  			       allocation->x, allocation->y,
-@@ -590,11 +541,7 @@ gtk_form_size_allocate(GtkWidget *widget
+@@ -590,11 +533,7 @@ gtk_form_size_allocate(GtkWidget *widget
  			       0, 0,
  			       allocation->width, allocation->height);
      }
@@ -305,7 +380,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      if (need_reposition)
  	gtk_form_send_configure(form);
  }
-@@ -760,34 +707,25 @@ gtk_form_attach_child_window(GtkForm *fo
+@@ -760,34 +699,25 @@ gtk_form_attach_child_window(GtkForm *fo
      if (child->window != NULL)
  	return; /* been there, done that */
  
@@ -348,7 +423,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	attributes.wclass = GDK_INPUT_OUTPUT;
  	attributes.visual = gtk_widget_get_visual(widget);
  #if !GTK_CHECK_VERSION(3,0,0)
-@@ -836,11 +774,7 @@ gtk_form_attach_child_window(GtkForm *fo
+@@ -836,11 +766,7 @@ gtk_form_attach_child_window(GtkForm *fo
  			   GTK_SIGNAL_FUNC(&gtk_form_child_unmap), child);
  #endif
      }
@@ -360,7 +435,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      {
  	gtk_widget_set_parent_window(child->widget, form->bin_window);
      }
-@@ -868,18 +802,10 @@ gtk_form_position_child(GtkForm *form, G
+@@ -868,18 +794,10 @@ gtk_form_position_child(GtkForm *form, G
      {
  	if (!child->mapped)
  	{
@@ -379,7 +454,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  		    gtk_widget_map(child->widget);
  
  		child->mapped = TRUE;
-@@ -890,31 +816,22 @@ gtk_form_position_child(GtkForm *form, G
+@@ -890,31 +808,22 @@ gtk_form_position_child(GtkForm *form, G
  	if (force_allocate)
  	{
  	    GtkAllocation allocation;
@@ -414,7 +489,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  		}
  
  		allocation.x = 0;
-@@ -926,13 +843,8 @@ gtk_form_position_child(GtkForm *form, G
+@@ -926,13 +835,8 @@ gtk_form_position_child(GtkForm *form, G
  		allocation.y = y;
  	    }
  
@@ -428,7 +503,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  
  	    gtk_widget_size_allocate(child->widget, &allocation);
  	}
-@@ -943,11 +855,7 @@ gtk_form_position_child(GtkForm *form, G
+@@ -943,11 +847,7 @@ gtk_form_position_child(GtkForm *form, G
  	{
  	    child->mapped = FALSE;
  
@@ -440,7 +515,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  		gtk_widget_unmap(child->widget);
  	}
      }
-@@ -981,28 +889,17 @@ gtk_form_send_configure(GtkForm *form)
+@@ -981,28 +881,17 @@ gtk_form_send_configure(GtkForm *form)
  {
      GtkWidget *widget;
      GdkEventConfigure event;
@@ -797,7 +872,19 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
  	gdk_window_get_user_data(tabwin, (gpointer)&tabwidget);
  # if GTK_CHECK_VERSION(3,0,0)
-@@ -3695,13 +3594,8 @@ gui_mch_update_tabline(void)
+@@ -3586,11 +3485,7 @@ gui_mch_show_tabline(int showit)
+ 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(gui.tabline), showit);
+ 	update_window_manager_hints(0, 0);
+ 	if (showit)
+-# if GTK_CHECK_VERSION(3,0,0)
+ 	    gtk_widget_set_can_focus(GTK_WIDGET(gui.tabline), FALSE);
+-# else
+-	    GTK_WIDGET_UNSET_FLAGS(GTK_WIDGET(gui.tabline), GTK_CAN_FOCUS);
+-# endif
+     }
+ 
+     gui_mch_update();
+@@ -3695,13 +3590,8 @@ gui_mch_update_tabline(void)
      while (gtk_notebook_get_nth_page(GTK_NOTEBOOK(gui.tabline), nr) != NULL)
  	gtk_notebook_remove_page(GTK_NOTEBOOK(gui.tabline), nr);
  
@@ -811,7 +898,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  
      /* Make sure everything is in place before drawing text. */
      gui_mch_update();
-@@ -3719,13 +3613,8 @@ gui_mch_set_curtab(int nr)
+@@ -3719,13 +3609,8 @@ gui_mch_set_curtab(int nr)
  	return;
  
      ignore_tabline_evt = TRUE;
@@ -825,7 +912,19 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      ignore_tabline_evt = FALSE;
  }
  
-@@ -3911,11 +3800,7 @@ gui_mch_init(void)
+@@ -3872,11 +3757,7 @@ gui_mch_init(void)
+ 	/* Use GtkSocket from another app. */
+ 	plug = gtk_plug_new_for_display(gdk_display_get_default(),
+ 					gtk_socket_id);
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	if (plug != NULL && gtk_plug_get_socket_window(GTK_PLUG(plug)) != NULL)
+-#else
+-	if (plug != NULL && GTK_PLUG(plug)->socket_window != NULL)
+-#endif
+ 	{
+ 	    gui.mainwin = plug;
+ 	}
+@@ -3911,11 +3792,7 @@ gui_mch_init(void)
      gui.text_context = gtk_widget_create_pango_context(gui.mainwin);
      pango_context_set_base_dir(gui.text_context, PANGO_DIRECTION_LTR);
  
@@ -837,7 +936,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      gtk_widget_add_events(gui.mainwin, GDK_VISIBILITY_NOTIFY_MASK);
  
  #if GTK_CHECK_VERSION(3,0,0)
-@@ -4121,11 +4006,7 @@ gui_mch_init(void)
+@@ -4121,11 +3998,7 @@ gui_mch_init(void)
  #endif /* FEAT_GUI_TABLINE */
  
      gui.formwin = gtk_form_new();
@@ -849,7 +948,19 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  #if !GTK_CHECK_VERSION(3,0,0)
      gtk_widget_set_events(gui.formwin, GDK_EXPOSURE_MASK);
  #endif
-@@ -5036,11 +4917,7 @@ gui_mch_enable_menu(int showit)
+@@ -4213,11 +4086,7 @@ gui_mch_init(void)
+ 
+     if (gtk_socket_id != 0)
+ 	/* make sure keyboard input can go to the drawarea */
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	gtk_widget_set_can_focus(gui.drawarea, TRUE);
+-#else
+-	GTK_WIDGET_SET_FLAGS(gui.drawarea, GTK_CAN_FOCUS);
+-#endif
+ 
+     /*
+      * Set clipboard specific atoms
+@@ -5036,11 +4905,7 @@ gui_mch_enable_menu(int showit)
  	widget = gui.menubar;
  
      /* Do not disable the menu while starting up, otherwise F10 doesn't work. */
@@ -861,7 +972,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -5071,11 +4948,7 @@ gui_mch_show_toolbar(int showit)
+@@ -5071,11 +4936,7 @@ gui_mch_show_toolbar(int showit)
      if (showit)
  	set_toolbar_style(GTK_TOOLBAR(gui.toolbar));
  
@@ -873,7 +984,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	if (showit)
  	    gtk_widget_show(widget);
-@@ -6336,11 +6209,7 @@ gui_mch_beep(void)
+@@ -6336,11 +6197,7 @@ gui_mch_beep(void)
  {
      GdkDisplay *display;
  
@@ -885,7 +996,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	display = gtk_widget_get_display(gui.mainwin);
      else
  	display = gdk_display_get_default();
-@@ -6700,11 +6569,7 @@ theend:
+@@ -6700,11 +6557,7 @@ theend:
      void
  gui_mch_flush(void)
  {
@@ -897,7 +1008,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	gdk_display_flush(gtk_widget_get_display(gui.mainwin));
  }
  
-@@ -7060,11 +6925,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
+@@ -7060,11 +6913,7 @@ gui_mch_menu_grey(vimmenu_T *menu, int g
  
      gui_mch_menu_hidden(menu, FALSE);
      /* Be clever about bitfields versus true booleans here! */
@@ -909,7 +1020,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
      {
  	gtk_widget_set_sensitive(menu->id, !grey);
  	gui_mch_update();
-@@ -7082,11 +6943,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7082,11 +6931,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
  
      if (hidden)
      {
@@ -921,7 +1032,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_hide(menu->id);
  	    gui_mch_update();
-@@ -7094,11 +6951,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
+@@ -7094,11 +6939,7 @@ gui_mch_menu_hidden(vimmenu_T *menu, int
      }
      else
      {
@@ -933,7 +1044,7 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
  	{
  	    gtk_widget_show(menu->id);
  	    gui_mch_update();
-@@ -7166,11 +7019,7 @@ gui_mch_get_rgb(guicolor_T pixel)
+@@ -7166,11 +7007,7 @@ gui_mch_get_rgb(guicolor_T pixel)
      void
  gui_mch_getmouse(int *x, int *y)
  {
@@ -948,10 +1059,11 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2340,6 +2340,28 @@ typedef enum {
+@@ -2340,6 +2340,41 @@ typedef enum {
  #ifdef FEAT_GUI_GTK
  # if !GTK_CHECK_VERSION(2,14,0)
  #  define gtk_widget_get_window(wid)	((wid)->window)
++#  define gtk_plug_get_socket_window(wid)	((wid)->socket_window)
 +#  define gtk_selection_data_get_data(sel)	((sel)->data)
 +#  define gtk_selection_data_get_length(sel)	((sel)->length)
 +#  define gtk_selection_data_get_type(sel)	((sel)->type)
@@ -970,10 +1082,22 @@ diff --git a/src/vim.h b/src/vim.h
 +#  define gtk_widget_has_focus(wid)	GTK_WIDGET_HAS_FOCUS(wid)
 +#  define gtk_widget_set_window(wid, win) \
 +    do { (wid)->window = (win); } while (0)
++#  define gtk_widget_set_can_default(wid, can) \
++    do { if (can) { GTK_WIDGET_SET_FLAGS(wid, GTK_CAN_DEFAULT); } \
++	else { GTK_WIDGET_UNSET_FLAGS(wid, GTK_CAN_DEFAULT); } } while (0)
++#  define gtk_widget_set_can_focus(wid, can) \
++    do { if (can) { GTK_WIDGET_SET_FLAGS(wid, GTK_CAN_FOCUS); } \
++	else { GTK_WIDGET_UNSET_FLAGS(wid, GTK_CAN_FOCUS); } } while (0)
 +# endif
 +# if !GTK_CHECK_VERSION(2,20,0)
 +#  define gtk_widget_get_mapped(wid)	GTK_WIDGET_MAPPED(wid)
 +#  define gtk_widget_get_realized(wid)	GTK_WIDGET_REALIZED(wid)
++#  define gtk_widget_set_mapped(wid, map) \
++    do { if (map) { GTK_WIDGET_SET_FLAGS(wid, GTK_MAPPED); } \
++	else { GTK_WIDGET_UNSET_FLAGS(wid, GTK_MAPPED); } } while (0)
++#  define gtk_widget_set_realized(wid, rea) \
++    do { if (rea) { GTK_WIDGET_SET_FLAGS(wid, GTK_REALIZED); } \
++	else { GTK_WIDGET_UNSET_FLAGS(wid, GTK_REALIZED); } } while (0)
  # endif
  #endif
  
