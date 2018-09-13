@@ -26,7 +26,22 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	gtk_form_realize_child(form, child);
  
      gtk_form_position_child(form, child, TRUE);
-@@ -382,11 +374,7 @@ gtk_form_realize(GtkWidget *widget)
+@@ -341,14 +333,9 @@ gtk_form_realize(GtkWidget *widget)
+     attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
+ #endif
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_window(widget,
+ 			  gdk_window_new(gtk_widget_get_parent_window(widget),
+ 					 &attributes, attributes_mask));
+-#else
+-    widget->window = gdk_window_new(gtk_widget_get_parent_window(widget),
+-				    &attributes, attributes_mask);
+-#endif
+     gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
+ 
+     attributes.x = 0;
+@@ -382,11 +369,7 @@ gtk_form_realize(GtkWidget *widget)
  
  	gtk_form_attach_child_window(form, child);
  
@@ -38,7 +53,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	    gtk_form_realize_child(form, child);
      }
  }
-@@ -423,13 +411,8 @@ gtk_form_map(GtkWidget *widget)
+@@ -423,13 +406,8 @@ gtk_form_map(GtkWidget *widget)
      {
  	GtkFormChild *child = tmp_list->data;
  
@@ -52,7 +67,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	    gtk_widget_map(child->widget);
      }
  }
-@@ -534,34 +517,20 @@ gtk_form_size_allocate(GtkWidget *widget
+@@ -534,34 +512,20 @@ gtk_form_size_allocate(GtkWidget *widget
      GList *tmp_list;
      GtkForm *form;
      gboolean need_reposition;
@@ -87,7 +102,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      form = GTK_FORM(widget);
  
      if (need_reposition)
-@@ -577,11 +546,7 @@ gtk_form_size_allocate(GtkWidget *widget
+@@ -577,11 +541,7 @@ gtk_form_size_allocate(GtkWidget *widget
  	}
      }
  
@@ -99,7 +114,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      {
  	gdk_window_move_resize(gtk_widget_get_window(widget),
  			       allocation->x, allocation->y,
-@@ -590,11 +555,7 @@ gtk_form_size_allocate(GtkWidget *widget
+@@ -590,11 +550,7 @@ gtk_form_size_allocate(GtkWidget *widget
  			       0, 0,
  			       allocation->width, allocation->height);
      }
@@ -111,7 +126,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      if (need_reposition)
  	gtk_form_send_configure(form);
  }
-@@ -760,11 +721,7 @@ gtk_form_attach_child_window(GtkForm *fo
+@@ -760,11 +716,7 @@ gtk_form_attach_child_window(GtkForm *fo
      if (child->window != NULL)
  	return; /* been there, done that */
  
@@ -123,7 +138,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      {
  	GtkWidget	*widget;
  	GdkWindowAttr	attributes;
-@@ -836,11 +793,7 @@ gtk_form_attach_child_window(GtkForm *fo
+@@ -836,11 +788,7 @@ gtk_form_attach_child_window(GtkForm *fo
  			   GTK_SIGNAL_FUNC(&gtk_form_child_unmap), child);
  #endif
      }
@@ -135,7 +150,7 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
      {
  	gtk_widget_set_parent_window(child->widget, form->bin_window);
      }
-@@ -868,18 +821,10 @@ gtk_form_position_child(GtkForm *form, G
+@@ -868,18 +816,10 @@ gtk_form_position_child(GtkForm *form, G
      {
  	if (!child->mapped)
  	{
@@ -154,8 +169,17 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  		    gtk_widget_map(child->widget);
  
  		child->mapped = TRUE;
-@@ -896,11 +841,7 @@ gtk_form_position_child(GtkForm *form, G
+@@ -890,31 +830,22 @@ gtk_form_position_child(GtkForm *form, G
+ 	if (force_allocate)
+ 	{
+ 	    GtkAllocation allocation;
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	    GtkRequisition requisition;
+ 
++#if GTK_CHECK_VERSION(3,0,0)
  	    gtk_widget_get_preferred_size(child->widget, &requisition, NULL);
++#else
++	    requisition = child->widget->requisition;
  #endif
  
 -#if GTK_CHECK_VERSION(3,0,0)
@@ -166,7 +190,35 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  	    {
  		if (child->window)
  		{
-@@ -943,11 +884,7 @@ gtk_form_position_child(GtkForm *form, G
+-#if GTK_CHECK_VERSION(3,0,0)
+ 		    gdk_window_move_resize(child->window,
+ 			    x, y,
+ 			    requisition.width,
+ 			    requisition.height);
+-#else
+-		    gdk_window_move_resize(child->window,
+-			    x, y,
+-			    child->widget->requisition.width,
+-			    child->widget->requisition.height);
+-#endif
+ 		}
+ 
+ 		allocation.x = 0;
+@@ -926,13 +857,8 @@ gtk_form_position_child(GtkForm *form, G
+ 		allocation.y = y;
+ 	    }
+ 
+-#if GTK_CHECK_VERSION(3,0,0)
+ 	    allocation.width = requisition.width;
+ 	    allocation.height = requisition.height;
+-#else
+-	    allocation.width = child->widget->requisition.width;
+-	    allocation.height = child->widget->requisition.height;
+-#endif
+ 
+ 	    gtk_widget_size_allocate(child->widget, &allocation);
+ 	}
+@@ -943,11 +869,7 @@ gtk_form_position_child(GtkForm *form, G
  	{
  	    child->mapped = FALSE;
  
@@ -178,6 +230,19 @@ diff --git a/src/gui_gtk_f.c b/src/gui_gtk_f.c
  		gtk_widget_unmap(child->widget);
  	}
      }
+@@ -966,12 +888,7 @@ gtk_form_position_children(GtkForm *form
+ gtk_form_move_resize(GtkForm *form, GtkWidget *widget,
+ 		     gint x, gint y, gint w, gint h)
+ {
+-#if GTK_CHECK_VERSION(3,0,0)
+     gtk_widget_set_size_request(widget, w, h);
+-#else
+-    widget->requisition.width  = w;
+-    widget->requisition.height = h;
+-#endif
+ 
+     gtk_form_move(form, widget, x, y);
+ }
 diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 --- a/src/gui_gtk_x11.c
 +++ b/src/gui_gtk_x11.c
@@ -569,8 +634,14 @@ diff --git a/src/gui_gtk_x11.c b/src/gui_gtk_x11.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -2340,6 +2340,26 @@ typedef enum {
+@@ -2338,8 +2338,34 @@ typedef enum {
+ #endif
+ 
  #ifdef FEAT_GUI_GTK
++# if !GTK_CHECK_VERSION(2,2,0)
++# define gtk_widget_set_size_request(wid, w, h) \
++    do { (wid)->requisition.width = w; (wid)->requisition.height = h; } while (0)
++# endif
  # if !GTK_CHECK_VERSION(2,14,0)
  #  define gtk_widget_get_window(wid)	((wid)->window)
 +#  define gtk_selection_data_get_data(sel)	((sel)->data)
@@ -589,6 +660,8 @@ diff --git a/src/vim.h b/src/vim.h
 +#  define gtk_widget_get_sensitive(wid)	GTK_WIDGET_SENSITIVE(wid)
 +#  define gtk_widget_get_visible(wid)	GTK_WIDGET_VISIBLE(wid)
 +#  define gtk_widget_has_focus(wid)	GTK_WIDGET_HAS_FOCUS(wid)
++#  define gtk_widget_set_window(wid, win) \
++    do { (wid)->window = (win); } while (0)
 +# endif
 +# if !GTK_CHECK_VERSION(2,20,0)
 +#  define gtk_widget_get_mapped(wid)	GTK_WIDGET_MAPPED(wid)
