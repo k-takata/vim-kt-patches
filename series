@@ -43,4 +43,5 @@ mingw-gc-sections.patch
 update-installpc.patch
 simplify-gtk-code.patch
 remove-code-for-gtk1.patch
+simplify-gtk-code2.patch
 fix-config_cache-removal.patch #+rejected
