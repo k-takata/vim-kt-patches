@@ -10,15 +10,13 @@ environment:
   - ARCH: x86
   - ARCH: x86_64
 
-exclude:
-  - image: Visual Studio 2015
-    environment:
+matrix:
+  exclude:
+    - image: Visual Studio 2015
       ARCH: x86_64
-  - image: Ubuntu
-    environment:
+    - image: Ubuntu
       ARCH: x64
-  - image: Ubuntu
-    environment:
+    - image: Ubuntu
       ARCH: x86
 
 for:
