@@ -1,18 +1,56 @@
 version: 1.0.{build}
 
+image:
+  - Visual Studio 2015
+  - Ubuntu
+
 environment:
   matrix:
   - ARCH: x64
-    PYTHON2_DIR: C:\Python27-x64
-    PYTHON3_DIR: C:\Python34-x64
   - ARCH: x86
-    PYTHON2_DIR: C:\Python27
-    PYTHON3_DIR: C:\Python34
+  - ARCH: x86_64
+
+matrix:
+  exclude:
+    - image: Visual Studio 2015
+      ARCH: x86_64
+    - image: Ubuntu
+      ARCH: x64
+    - image: Ubuntu
+      ARCH: x86
+
+for:
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2015
+          ARCH: x64
+    environment:
+      PYTHON2_DIR: C:\Python27-x64
+      PYTHON3_DIR: C:\Python34-x64
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2015
+          ARCH: x86
+    environment:
+      PYTHON2_DIR: C:\Python27
+      PYTHON3_DIR: C:\Python34
+  -
+    matrix:
+      only:
+        - image: Ubuntu
+          ARCH: x86_64
+
 
 install:
 - cmd: |-
     "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /%ARCH% /release
     set "INCLUDE=%INCLUDE%C:\Program Files (x86)\Windows Kits\8.1\Include\um"
+- sh: |-
+    sudo apt update -q
+    sudo apt-get install -y -qq libperl-dev python2.7-dev python3-dev liblua5.2-dev lua5.2 ruby-dev ruby tcl-dev man
+    rvm use system
 
 build_script:
 - cmd: |-
@@ -45,6 +83,21 @@ build_script:
     rem Print interface versions
     .\vim --not-a-term -u NONE -S ..\.hg\patches\scripts\if_ver.vim -c quit
     type if_ver.txt
+- sh: |-
+    cd ..
+    hg clone https://bitbucket.org/vim-mirror/vim
+    cd vim
+    hg log -v -r -1:-4 --color=always | cat
+    cp -r $APPVEYOR_BUILD_FOLDER .hg/patches
+    cp .hg/patches/scripts/*.vim src
+    cd src
+    hg --config extensions.mq= qselect linux pipelines
+    hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
+    make
+    ./vim --version
+    ./vim --not-a-term -u NONE -S if_ver-1.vim -c quit > /dev/null
+    ./vim --not-a-term -u NONE -S if_ver-2.vim -c quit > /dev/null
+    cat if_ver.txt
 
 test_script:
 - cmd: |-
@@ -54,5 +107,10 @@ test_script:
     nmake -f Make_dos.mak clean
     rem Testing with MSVC vim
     nmake -f Make_dos.mak VIMPROG=..\vim
+- sh: |-
+    export -n DISPLAY
+    make test
+    if test -f testdir/messages; then cat testdir/messages; fi
+    if test -f testdir/test.log; then cat testdir/test.log; fi
 
 # vim: ts=2 sw=2 sts=2 et
