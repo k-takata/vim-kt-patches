@@ -1,15 +1,42 @@
 version: 1.0.{build}
 
+image:
+  - Visual Studio 2015
+  - Ubuntu
+
 environment:
   matrix:
   - ARCH: x64
-    PYTHON2_DIR: C:\Python27-x64
-    PYTHON3_DIR: C:\Python34-x64
   - ARCH: x86
-    PYTHON2_DIR: C:\Python27
-    PYTHON3_DIR: C:\Python34
+  - ARCH: x86_64
+
+for:
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2015
+          ARCH: x64
+    environment:
+      PYTHON2_DIR: C:\Python27-x64
+      PYTHON3_DIR: C:\Python34-x64
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2015
+          ARCH: x86
+    environment:
+      PYTHON2_DIR: C:\Python27
+      PYTHON3_DIR: C:\Python34
+  -
+    matrix:
+      only:
+        - image: Ubuntu
+          ARCH: x86_64
+
 
 install:
+- cmd: echo %PYTHON3_DIR%
+- sh: echo $PYTHON3_DIR
 - cmd: |-
     "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /%ARCH% /release
     set "INCLUDE=%INCLUDE%C:\Program Files (x86)\Windows Kits\8.1\Include\um"
