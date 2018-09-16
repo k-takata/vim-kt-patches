@@ -89,7 +89,7 @@ build_script:
     ls
     hg clone https://bitbucket.org/vim-mirror/vim
     cd vim
-    hg log -v -r -1:-4
+    hg log -v -r -1:-4 | cat
     pwd
     echo $APPVEYOR_BUILD_FOLDER
     cp -r $APPVEYOR_BUILD_FOLDER .hg/patches
