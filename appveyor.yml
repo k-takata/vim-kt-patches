@@ -83,8 +83,10 @@ build_script:
     .\vim --not-a-term -u NONE -S ..\.hg\patches\scripts\if_ver.vim -c quit
     type if_ver.txt
 - sh: |-
+    echo $APPVEYOR_BUILD_FOLDER
     pwd
     cd ..
+    ls
     hg clone https://bitbucket.org/vim-mirror/vim
     cd vim
     hg log -v -r -1:-4
