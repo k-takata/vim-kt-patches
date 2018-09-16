@@ -1,7 +1,7 @@
 version: 1.0.{build}
 
 image:
-  - Visual Studio 2015
+  #- Visual Studio 2015
   - Ubuntu
 
 environment:
@@ -83,6 +83,7 @@ build_script:
     .\vim --not-a-term -u NONE -S ..\.hg\patches\scripts\if_ver.vim -c quit
     type if_ver.txt
 - sh: |-
+    type -a ruby
     cd ..
     hg clone https://bitbucket.org/vim-mirror/vim
     cd vim
