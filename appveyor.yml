@@ -12,11 +12,14 @@ environment:
 
 exclude:
   - image: Visual Studio 2015
-    ARCH: x86_64
+    environment:
+      ARCH: x86_64
   - image: Ubuntu
-    ARCH: x64
+    environment:
+      ARCH: x64
   - image: Ubuntu
-    ARCH: x86
+    environment:
+      ARCH: x86
 
 for:
   -
