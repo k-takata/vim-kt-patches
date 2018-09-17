@@ -43,4 +43,5 @@ mingw-gc-sections.patch
 update-installpc.patch
 simplify-gtk-code.patch
 drop-support-for-glib-2.2.patch
+msvc2015-x64.patch
 fix-config_cache-removal.patch #+rejected
