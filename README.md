@@ -37,7 +37,3 @@ $ mqpull.sh
 ## License ##
 
 The Vim License (if it is written by me.)
-
-----
-
-Old build log: https://archive.drone.io/bitbucket.org/k_takata/vim-ktakata-mq
