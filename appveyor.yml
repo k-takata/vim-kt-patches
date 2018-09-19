@@ -48,7 +48,7 @@ install:
     "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /%ARCH% /release
     set "INCLUDE=%INCLUDE%C:\Program Files (x86)\Windows Kits\8.1\Include\um"
 - sh: |-
-    sudo apt update -q
+    sudo apt update -qq
     sudo apt-get install -y -qq libperl-dev python2.7-dev python3-dev liblua5.2-dev lua5.2 ruby-dev ruby tcl-dev libgtk-3-dev
     Xvfb :99 &
     export DISPLAY=:99.0
