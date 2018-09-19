@@ -111,7 +111,5 @@ test_script:
     nmake -f Make_dos.mak VIMPROG=..\vim
 - sh: |-
     make test
-    #if test -f testdir/messages; then cat testdir/messages; fi
-    #if test -f testdir/test.log; then cat testdir/test.log; fi
 
 # vim: ts=2 sw=2 sts=2 et
