@@ -109,9 +109,9 @@ test_script:
     rem Testing with MSVC vim
     nmake -f Make_dos.mak VIMPROG=..\vim
 - sh: |-
-    export -n DISPLAY
+    #export -n DISPLAY
     make test
     if test -f testdir/messages; then cat testdir/messages; fi
-    if test -f testdir/test.log; then cat testdir/test.log; fi
+    #if test -f testdir/test.log; then cat testdir/test.log; fi
 
 # vim: ts=2 sw=2 sts=2 et
