@@ -93,7 +93,7 @@ build_script:
     cp -r $APPVEYOR_BUILD_FOLDER .hg/patches
     cp .hg/patches/scripts/*.vim src
     cd src
-    hg --config extensions.mq= qselect linux pipelines
+    hg --config extensions.mq= qselect linux # pipelines
     hg --config extensions.mq= --config "ui.username=$USER <$USER@$HOSTNAME>" qpush -a
     make
     ./vim --version
