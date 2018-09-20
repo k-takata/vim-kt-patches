@@ -41,5 +41,4 @@ mingw-lua-dir.patch
 installer-use-logiclib.patch
 mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch
-test-messages.patch
 fix-config_cache-removal.patch #+rejected
