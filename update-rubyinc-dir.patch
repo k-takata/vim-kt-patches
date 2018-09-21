@@ -1,17 +1,15 @@
 # HG changeset patch
-# Parent  7207a8e1950456ff5b99b933db198be7eb14fa77
+# Parent  7db83b965a6788d11a9fc4e38e33c957df452737
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -409,9 +409,12 @@ ifeq (19, $(word 1,$(sort 19 $(RUBY_VER)
+@@ -472,9 +472,10 @@ ifeq (19, $(word 1,$(sort 19 $(RUBY_VER)
  RUBY_19_OR_LATER = 1
  endif
  
 +ifdef RUBY_19_OR_LATER
 +RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
-+# For using header files from Ruby's source code directory (w/o installing)
-+RUBYINC += -I $(RUBY)/include -I $(RUBY)/.ext/include/$(RUBY_PLATFORM)
 +else
  RUBYINC = -I $(RUBY)/lib/ruby/$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
 -ifdef RUBY_19_OR_LATER
@@ -22,14 +20,12 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -969,7 +969,9 @@ RUBY_INSTALL_NAME = mswin32-ruby$(RUBY_A
+@@ -1136,7 +1136,7 @@ RUBY_INSTALL_NAME = mswin32-ruby$(RUBY_A
  CFLAGS = $(CFLAGS) -DFEAT_RUBY
  RUBY_OBJ = $(OUTDIR)\if_ruby.obj
  !if $(RUBY_VER) >= 19
 -RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
 +RUBY_INC = /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
-+# For using header files from Ruby's source code directory (w/o installing)
-+RUBY_INC = $(RUBY_INC) /I "$(RUBY)\include" /I "$(RUBY)\.ext\include\$(RUBY_PLATFORM)"
  !else
  RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
  !endif

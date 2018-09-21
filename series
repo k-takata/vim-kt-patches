@@ -26,6 +26,7 @@ bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
 update-rubyinc-dir.patch
+update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
 remove-sync_dup_close.patch
 embarcadero.patch
