@@ -1,19 +1,19 @@
 # HG changeset patch
-# Parent  b38e62290217339e8252250d76acef4d67f07a49
+# Parent  08275a20e45e673a720e7bbf8c08ab32af7792d9
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2139,6 +2139,8 @@ getline({lnum})			String	line {lnum} of 
+@@ -2192,6 +2192,8 @@ getline({lnum})			String	line {lnum} of 
  getline({lnum}, {end})		List	lines {lnum} to {end} of current buffer
- getloclist({nr}[, {what}])	List	list of location list items
+ getloclist({nr} [, {what}])	List	list of location list items
  getmatches()			List	list of current matches
 +getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
 +				List	list of pakage/plugin directories
  getpid()			Number	process ID of Vim
  getpos({expr})			List	position of cursor, mark, etc.
  getqflist([{what}])		List	list of quickfix items
-@@ -4533,6 +4535,23 @@ getmatches()						*getmatches()*
+@@ -4762,6 +4764,23 @@ getmatches()						*getmatches()*
  			'pattern': 'FIXME', 'priority': 10, 'id': 2}] >
  			:unlet m
  <
@@ -40,7 +40,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -180,6 +180,7 @@ static void f_getftype(typval_T *argvars
+@@ -192,6 +192,7 @@ static void f_getjumplist(typval_T *argv
  static void f_getline(typval_T *argvars, typval_T *rettv);
  static void f_getloclist(typval_T *argvars UNUSED, typval_T *rettv UNUSED);
  static void f_getmatches(typval_T *argvars, typval_T *rettv);
@@ -48,7 +48,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  static void f_getpid(typval_T *argvars, typval_T *rettv);
  static void f_getcurpos(typval_T *argvars, typval_T *rettv);
  static void f_getpos(typval_T *argvars, typval_T *rettv);
-@@ -615,6 +616,7 @@ static struct fst
+@@ -658,6 +659,7 @@ static struct fst
      {"getline",		1, 2, f_getline},
      {"getloclist",	1, 2, f_getloclist},
      {"getmatches",	0, 0, f_getmatches},
@@ -56,7 +56,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
      {"getpid",		0, 0, f_getpid},
      {"getpos",		1, 1, f_getpos},
      {"getqflist",	0, 1, f_getqflist},
-@@ -4858,6 +4860,80 @@ f_getmatches(typval_T *argvars UNUSED, t
+@@ -5315,6 +5317,80 @@ f_getmatches(typval_T *argvars UNUSED, t
  #endif
  }
  
@@ -140,7 +140,7 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 diff --git a/src/testdir/test_packadd.vim b/src/testdir/test_packadd.vim
 --- a/src/testdir/test_packadd.vim
 +++ b/src/testdir/test_packadd.vim
-@@ -273,3 +273,82 @@ func Test_runtime()
+@@ -355,3 +355,82 @@ func Test_runtime()
    runtime! ALL extra/bar.vim
    call assert_equal('runstartopt', g:sequence)
  endfunc
