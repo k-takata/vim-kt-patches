@@ -25,20 +25,15 @@ remove-useless-STRCPY.patch
 bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
-update-rubyinc-dir.patch
 update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
 remove-sync_dup_close.patch
 embarcadero.patch
 fix-highdpi.patch
-fix-cproto-O2.patch
 fix-quotation-without-vimrun.patch
-stop-generating-vim-lib.patch
 add-getpackages.patch
-mingw-create-mapfile.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
-mingw-lua-dir.patch
 installer-use-logiclib.patch
 mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch
