@@ -1,4 +1,3 @@
-test_reduce_test_log.patch
 ignore-return-value-on-pipelines.patch #+pipelines
 disable-regexp-debug-log.patch #+noregexplog
 debug-enable-Trace-also-on-release-build.patch
