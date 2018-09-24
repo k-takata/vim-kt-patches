@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  804077ce6f266a617c4baef8e8e5a5b3015b58ae
+# Parent  0123e583471ea23aadf555cd4e3df61310bd9a8c
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -459,8 +459,8 @@ endif
+@@ -506,8 +506,8 @@ endif
  #>>>>> end of choices
  ###########################################################################
  
@@ -15,12 +15,12 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
  EXTRA_LIBS =
  
-@@ -862,6 +862,8 @@ endif
- DEFINES+=-DDYNAMIC_ICONV
+@@ -948,6 +948,8 @@ endif
+ LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
  endif
  
 +LFLAGS += -Wl,--gc-sections
 +
- ifeq (yes, $(USE_STDCPLUS))
- ifeq (yes, $(STATIC_STDCPLUS))
- LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
+ ifeq (yes, $(MAP))
+ LFLAGS += -Wl,-Map=$(TARGET).map
+ endif

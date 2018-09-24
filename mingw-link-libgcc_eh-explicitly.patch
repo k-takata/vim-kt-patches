@@ -1,15 +1,47 @@
 # HG changeset patch
-# Parent  09f9c24a20ea9e169a22e0481d4e2f9041d48289
+# Parent  03a4736605f7d70401d854306bfac6c5b8b8b0e0
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -938,7 +938,7 @@ endif
+@@ -121,6 +121,9 @@ endif
+ ifndef STATIC_WINPTHREAD
+ STATIC_WINPTHREAD=$(STATIC_STDCPLUS)
+ endif
++# If you use TDM-GCC(-64), change HAS_GCC_EH to "no".
++# This is used when STATIC_STDCPLUS=yes.
++HAS_GCC_EH=yes
+ 
+ # If the user doesn't want gettext, undefine it.
+ ifeq (no, $(GETTEXT))
+@@ -930,14 +933,18 @@ DEFINES+=-DDYNAMIC_ICONV
+ endif
+ 
+ ifeq (yes, $(USE_STDCPLUS))
++LINK = $(CXX)
+ ifeq (yes, $(STATIC_STDCPLUS))
+-LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
++LIB += -static-libstdc++ -static-libgcc
++endif
+ else
+-LIB += -lstdc++
+-endif
++LINK = $(CC)
  endif
  
  ifeq (yes, $(STATIC_WINPTHREAD))
--LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
-+LIB += -lgcc_eh -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
++ifeq (yes, $(HAS_GCC_EH))
++LIB += -lgcc_eh
++endif
+ LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
  endif
  
- ifeq (yes, $(MAP))
+@@ -957,7 +964,7 @@ uninstal.exe: uninstal.c
+ 	$(CC) $(CFLAGS) -o uninstal.exe uninstal.c $(LIB)
+ 
+ $(TARGET): $(OUTDIR) $(OBJ)
+-	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
++	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
+ 
+ upx: exes
+ 	upx gvim.exe
