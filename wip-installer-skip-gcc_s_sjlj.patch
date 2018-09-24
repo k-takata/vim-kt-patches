@@ -1,0 +1,28 @@
+# HG changeset patch
+# Parent  d167155004e69db31269ac99c5c6b44f1ac13df0
+
+diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
+--- a/nsis/gvim.nsi
++++ b/nsis/gvim.nsi
+@@ -379,7 +379,7 @@ Section "Add an Edit-with-Vim context me
+ !ifdef HAVE_NLS
+ 	File ${GETTEXT}\gettext32\libintl-8.dll
+ 	File ${GETTEXT}\gettext32\libiconv-2.dll
+-	File ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
++	File /nonfatal ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
+ !endif
+ 
+ 	${If} ${Errors}
+@@ -396,8 +396,10 @@ Section "Add an Edit-with-Vim context me
+ 	  File /oname=$3 ${GETTEXT}\gettext32\libiconv-2.dll
+ 	  Rename /REBOOTOK $3 $0\GvimExt32\libiconv-2.dll
+ 	  GetTempFileName $3 $0\GvimExt32
+-	  File /oname=$3 ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
+-	  Rename /REBOOTOK $3 $0\GvimExt32\libgcc_s_sjlj-1.dll
++	  File /nonfatal /oname=$3 ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
++	  ${If} ${FileExists} "$3"
++	    Rename /REBOOTOK $3 $0\GvimExt32\libgcc_s_sjlj-1.dll
++	  ${EndIf}
+ !endif
+ 	${EndIf}
+ 	SetOverwrite lastused
