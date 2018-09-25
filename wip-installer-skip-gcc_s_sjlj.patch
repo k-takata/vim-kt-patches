@@ -8,10 +8,10 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  !ifdef HAVE_NLS
  	File ${GETTEXT}\gettext32\libintl-8.dll
  	File ${GETTEXT}\gettext32\libiconv-2.dll
-+ !if /FileExists "${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll"
++  !if /FileExists "${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll"
 +	# Install libgcc_s_sjlj-1.dll only if it is needed.
  	File ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
-+ !endif
++  !endif
  !endif
  
  	${If} ${Errors}
@@ -19,12 +19,12 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	  GetTempFileName $3 $0\GvimExt32
  	  File /oname=$3 ${GETTEXT}\gettext32\libiconv-2.dll
  	  Rename /REBOOTOK $3 $0\GvimExt32\libiconv-2.dll
-+ !if /FileExists "${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll"
++  !if /FileExists "${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll"
 +	  # Install libgcc_s_sjlj-1.dll only if it is needed.
  	  GetTempFileName $3 $0\GvimExt32
  	  File /oname=$3 ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
  	  Rename /REBOOTOK $3 $0\GvimExt32\libgcc_s_sjlj-1.dll
-+ !endif
++  !endif
  !endif
  	${EndIf}
  	SetOverwrite lastused
