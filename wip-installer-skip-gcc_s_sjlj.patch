@@ -28,3 +28,15 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  !endif
  	${EndIf}
  	SetOverwrite lastused
+@@ -451,7 +457,10 @@ Section "Native Language Support"
+ 	File ${GETTEXT}\gettext32\libintl-8.dll
+ 	File ${GETTEXT}\gettext32\libiconv-2.dll
+ 	#File /nonfatal ${VIMRT}\libwinpthread-1.dll
+-	File /nonfatal ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
++  !if /FileExists "${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll"
++	# Install libgcc_s_sjlj-1.dll only if it is needed.
++	File ${GETTEXT}\gettext32\libgcc_s_sjlj-1.dll
++  !endif
+ SectionEnd
+ !endif
+ 
