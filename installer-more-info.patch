@@ -4,14 +4,13 @@
 diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
 --- a/nsis/gvim.nsi
 +++ b/nsis/gvim.nsi
-@@ -42,10 +42,16 @@
+@@ -42,10 +42,15 @@
  !include LogicLib.nsh
  !include x64.nsh
  
 -Name "Vim ${VER_MAJOR}.${VER_MINOR}"
 +!define PRODUCT		"Vim ${VER_MAJOR}.${VER_MINOR}"
 +!define UNINST_REG_KEY	"Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}"
-+!define PUBLISHER	"Bram Moolenaar et al."
 +
 +Name "${PRODUCT}"
  OutFile gvim${VER_MAJOR}${VER_MINOR}.exe
@@ -22,7 +21,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  SetDatablockOptimize on
  RequestExecutionLevel highest
  XPStyle on
-@@ -195,7 +201,7 @@ Function un.GetParent
+@@ -195,7 +200,7 @@ Function un.GetParent
  FunctionEnd
  
  ##########################################################
@@ -31,7 +30,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	SectionIn 1 2 3 RO
  
  	# we need also this here if the user changes the instdir
-@@ -299,7 +305,7 @@ Section "Vim executables and runtime fil
+@@ -299,7 +304,7 @@ Section "Vim executables and runtime fil
  SectionEnd
  
  ##########################################################
@@ -40,7 +39,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	SectionIn 1 3
  
  	SetOutPath $0
-@@ -400,7 +406,7 @@ Section "Create plugin directories in VI
+@@ -400,7 +405,7 @@ Section "Create plugin directories in VI
  SectionEnd
  
  ##########################################################
@@ -49,7 +48,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	SectionIn 3
  
  	SetOutPath $0
-@@ -410,7 +416,7 @@ SectionEnd
+@@ -410,7 +415,7 @@ SectionEnd
  
  ##########################################################
  !ifdef HAVE_NLS
@@ -58,7 +57,7 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  	SectionIn 1 3
  
  	SetOutPath $0\lang
-@@ -489,6 +495,39 @@ SectionEnd
+@@ -489,6 +494,36 @@ SectionEnd
  
  ##########################################################
  Section -post
@@ -82,14 +81,11 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
 +	  IntOp $3 $3 + $4
 +	${EndIf}
 +
-+	# Register some information.
++	# Register EstimatedSize.
 +	# Other information will be set by the install.exe.
 +	${If} ${RunningX64}
 +	  SetRegView 64
 +	${EndIf}
-+	WriteRegStr HKLM "${UNINST_REG_KEY}" "DisplayIcon" '"$0\gvim.exe",0'
-+	WriteRegStr HKLM "${UNINST_REG_KEY}" "DisplayVersion" "${VER_MAJOR}.${VER_MINOR}"
-+	WriteRegStr HKLM "${UNINST_REG_KEY}" "Publisher" "${PUBLISHER}"
 +	WriteRegDWORD HKLM "${UNINST_REG_KEY}" "EstimatedSize" $3
 +	${If} ${RunningX64}
 +	  SetRegView lastused
