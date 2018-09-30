@@ -39,4 +39,7 @@ wip-installer-respect-nls.patch
 installer-more-info.patch
 register-more-info-in-installer.patch
 installer-adjust-diffexpr.patch
+wip-installer-use-nsexec.patch
+wip-installer-mui2.patch
+wip-installer-use-installlib.patch
 fix-config_cache-removal.patch #+rejected
