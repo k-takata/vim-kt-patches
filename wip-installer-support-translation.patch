@@ -574,15 +574,6 @@ diff --git a/nsis/lang/english.nsi b/nsis/lang/english.nsi
  ##############################################################################
  # MUI Configuration Strings                                               {{{1
  ##############################################################################
-@@ -29,7 +36,7 @@ LangString str_dest_folder          ${LA
-     "Destination Folder (Must end with $\"vim$\")"
- 
- LangString str_show_readme          ${LANG_ENGLISH} \
--    "Show README after installation finish"
-+    "&Show README after installation finish"
- 
- # Install types:
- LangString str_type_typical         ${LANG_ENGLISH} \
 @@ -46,13 +53,13 @@ LangString str_type_full            ${LA
  # Section Titles & Description                                            {{{1
  ##############################################################################
@@ -1178,7 +1169,7 @@ new file mode 100644
 +#    "Destination Folder (Must end with $\"vim$\")"
 +
 +LangString str_show_readme          ${LANG_JAPANESE} \
-+    "インストール完了後に README を表示する(&S)"
++    "インストール完了後に README を表示する"
 +
 +# Install types:
 +LangString str_type_typical         ${LANG_JAPANESE} \
