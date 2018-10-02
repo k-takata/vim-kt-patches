@@ -47,6 +47,5 @@ wip-installer-ja-workaround.patch
 wip-installer-fix-some-condition.patch
 wip-installer-disable-visvim.patch
 wip-installer-remove-old-codes.patch
-wip-installer-use-logiclib.patch
 wip-installer-fix-comments.patch
 fix-config_cache-removal.patch #+rejected
