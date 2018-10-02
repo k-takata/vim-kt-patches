@@ -1,0 +1,20 @@
+# HG changeset patch
+# Parent  af23533a3c435046b4df418325e540c0f9957ef7
+
+diff --git a/nsis/lang/japanese.nsi b/nsis/lang/japanese.nsi
+--- a/nsis/lang/japanese.nsi
++++ b/nsis/lang/japanese.nsi
+@@ -18,6 +18,13 @@ LangString ^SetupCaption     ${LANG_JAPA
+ LangString ^UninstallCaption ${LANG_JAPANESE} \
+         "$(^Name) Uninstall"
+ 
++# Workarounds for NSIS Japanese translation. The messages are too long.
++# These should be better to be fixed by the NSIS upstream.
++LangString ^SpaceAvailable   ${LANG_JAPANESE} \
++        "利用可能なディスク容量："
++LangString ^SpaceRequired ${LANG_JAPANESE} \
++        "必要なディスク容量："
++
+ ##############################################################################
+ # MUI Configuration Strings                                               {{{1
+ ##############################################################################
