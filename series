@@ -30,14 +30,15 @@ fix-quotation-without-vimrun.patch
 add-getpackages.patch
 mingw-link-libgcc_eh-explicitly.patch
 wip-fix-7.4.852.patch
-installer-use-logiclib.patch
 mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
+installer-use-logiclib.patch
+installer-copy-to-orig.patch
 wip-installer-skip-gcc_s_sjlj.patch
 wip-installer-respect-nls.patch
-installer-more-info.patch
-register-more-info-in-installer.patch
-installer-adjust-diffexpr.patch
+wip-installer-more-info.patch
+dosinst-register-more-info.patch
+dosinst-adjust-diffexpr.patch
 wip-installer-use-nsexec.patch
 wip-installer-mui2.patch
 wip-installer-use-installlib.patch

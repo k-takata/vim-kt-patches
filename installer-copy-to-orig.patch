@@ -1,0 +1,6 @@
+# HG changeset patch
+# Parent  f1d403f83d9bf41c48af8ae35adcd96cef5afca8
+
+diff --git a/nsis/gvim.nsi b/nsis/gvim-orig.nsi
+copy from nsis/gvim.nsi
+copy to nsis/gvim-orig.nsi
