@@ -101,19 +101,18 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  ##########################################################
 -Section "Create icons on the Desktop"
 -	SectionIn 1 3
--
--	StrCpy $1 "$1 -install-icons"
--SectionEnd
 +SectionGroup $(str_group_icons) id_group_icons
 +	Section "$(str_section_desktop)" id_section_desktop
 +		SectionIn 1 3
-+	
++
 +		StrCpy $1 "$1 -install-icons"
 +	SectionEnd
-+	
+ 
+-	StrCpy $1 "$1 -install-icons"
+-SectionEnd
 +	Section "$(str_section_start_menu)" id_section_startmenu
 +		SectionIn 1 3
-+	
++
 +		StrCpy $1 "$1 -add-start-menu"
 +	SectionEnd
 +SectionGroupEnd
@@ -146,19 +145,18 @@ diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
  ##########################################################
 -Section "Create plugin directories in HOME or VIM"
 -	SectionIn 1 3
--
--	StrCpy $1 "$1 -create-directories home"
--SectionEnd
 +SectionGroup $(str_group_plugin) id_group_plugin
 +	Section "$(str_section_plugin_home)" id_section_pluginhome
 +		SectionIn 1 3
-+	
++
 +		StrCpy $1 "$1 -create-directories home"
 +	SectionEnd
-+	
+ 
+-	StrCpy $1 "$1 -create-directories home"
+-SectionEnd
 +	Section "$(str_section_plugin_vim)" id_section_pluginvim
 +		SectionIn 3
-+	
++
 +		StrCpy $1 "$1 -create-directories vim"
 +	SectionEnd
 +SectionGroupEnd
