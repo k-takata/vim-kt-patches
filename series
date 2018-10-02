@@ -20,7 +20,6 @@ tab-xyz-pragmb.diff #-tab-xyz
 tab-xyz.diff #+tab-xyz
 subpixel-artifacts.patch
 fix-italic-overhang-before-space.patch
-bmp-rle.patch
 fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
 update-rubyinc-dir-ext.patch
@@ -47,4 +46,6 @@ wip-installer-ja-workaround.patch
 wip-installer-fix-some-condition.patch
 wip-installer-disable-visvim.patch
 wip-installer-remove-old-codes.patch
+wip-installer-use-logiclib.patch
+wip-installer-fix-comments.patch
 fix-config_cache-removal.patch #+rejected
