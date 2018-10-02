@@ -42,4 +42,5 @@ installer-adjust-diffexpr.patch
 wip-installer-use-nsexec.patch
 wip-installer-mui2.patch
 wip-installer-use-installlib.patch
+wip-installer-support-translation.patch
 fix-config_cache-removal.patch #+rejected
