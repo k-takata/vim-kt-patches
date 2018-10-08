@@ -38,13 +38,4 @@ wip-installer-respect-nls.patch
 wip-installer-more-info.patch
 dosinst-register-more-info.patch
 dosinst-adjust-diffexpr.patch
-wip-installer-use-nsexec.patch
-wip-installer-mui2.patch
-wip-installer-use-installlib.patch
-wip-installer-support-translation.patch
-wip-installer-ja-workaround.patch
-wip-installer-fix-some-condition.patch
-wip-installer-disable-visvim.patch
-wip-installer-remove-old-codes.patch
-wip-installer-fix-comments.patch
 fix-config_cache-removal.patch #+rejected
