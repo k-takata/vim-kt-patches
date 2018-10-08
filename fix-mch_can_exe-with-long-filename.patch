@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent 6ee3a815113c128147fa9831c2004916a7daba86
-# Parent  039ae57e25a2a8271194314330101fced8caf0fc
+# Parent  707014f5a78471ca3aa6fc1bb893119da5489633
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3390,11 +3390,18 @@ mch_writable(char_u *name)
+@@ -3547,14 +3547,21 @@ mch_writable(char_u *name)
      int
  mch_can_exe(char_u *name, char_u **path, int use_path)
  {
@@ -18,23 +18,27 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      char_u	buf[_MAX_PATH];
 +#endif
      int		len = (int)STRLEN(name);
-     char_u	*p;
+     char_u	*p, *saved;
  
 -    if (len >= _MAX_PATH)	/* safety check */
 +    if (len >= sizeof(buf))	/* safety check */
  	return FALSE;
  
-     /* If there already is an extension try using the name directly.  Also do
-@@ -3407,7 +3414,7 @@ mch_can_exe(char_u *name, char_u **path,
-     /*
-      * Loop over all extensions in $PATHEXT.
-      */
+-    /* Ty using the name directly when a Unix-shell like 'shell'. */
++    /* Try using the name directly when a Unix-shell like 'shell'. */
+     if (strstr((char *)gettail(p_sh), "sh") != NULL)
+ 	if (executable_exists((char *)name, path, use_path))
+ 	    return TRUE;
+@@ -3587,7 +3594,7 @@ mch_can_exe(char_u *name, char_u **path,
+     }
+     vim_free(saved);
+ 
 -    vim_strncpy(buf, name, _MAX_PATH - 1);
 +    vim_strncpy(buf, name, sizeof(buf) - 1);
      p = mch_getenv("PATHEXT");
      if (p == NULL)
  	p = (char_u *)".com;.exe;.bat;.cmd";
-@@ -3422,7 +3429,7 @@ mch_can_exe(char_u *name, char_u **path,
+@@ -3602,7 +3609,7 @@ mch_can_exe(char_u *name, char_u **path,
  		++p;
  	}
  	else
