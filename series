@@ -38,4 +38,6 @@ wip-installer-respect-nls.patch
 wip-installer-more-info.patch
 dosinst-register-more-info.patch
 dosinst-adjust-diffexpr.patch
+fix-ctags-option.patch
+fix-some-tests-on-windows.patch
 fix-config_cache-removal.patch #+rejected
