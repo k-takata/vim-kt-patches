@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  4429a721e71aceb2d0356202ea65c10f2fad9d5e
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -7691,9 +7691,9 @@ mch_setenv(char *var, char *value, int x
+ #endif
+     {
+ 	_putenv((char *)envbuf);
+-# ifdef libintl_putenv
++#ifdef libintl_putenv
+ 	libintl_putenv((char *)envbuf);
+-# endif
++#endif
+ 	/* Unlike Un*x systems, we can free the string for _putenv(). */
+ 	vim_free(envbuf);
+     }
