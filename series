@@ -9,10 +9,10 @@ backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+linux
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
+if_perl-out-to-autodir.patch
 cpo-N.diff #+rejected
 cpo-N-mark.diff #+rejected
 cpo-N-update-tags.patch #+rejected
-if_perl-use-output.patch
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 tab-xyz-pragmb.diff #-tab-xyz
