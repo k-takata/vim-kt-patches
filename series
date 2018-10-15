@@ -38,4 +38,5 @@ wip-installer-more-info.patch
 fix-ctags-option.patch
 fix-mingw-ifperl.patch
 fix-indent.patch
+adjust-mvc-cflags.patch
 fix-config_cache-removal.patch #+rejected
