@@ -37,5 +37,6 @@ wip-installer-respect-nls.patch
 wip-installer-more-info.patch
 fix-ctags-option.patch
 fix-indent.patch
+win32-enable-optimization.patch
 adjust-mvc-cflags.patch
 fix-config_cache-removal.patch #+rejected
