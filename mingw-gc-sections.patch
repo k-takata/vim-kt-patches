@@ -4,17 +4,18 @@
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -506,7 +506,8 @@ endif
+@@ -506,8 +506,8 @@ endif
  #>>>>> end of choices
  ###########################################################################
  
 -CFLAGS = -I. -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall
+-CXXFLAGS = -std=gnu++11
 +CFLAGS = -I. -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall -ffunction-sections -fno-asynchronous-unwind-tables
 +CXXFLAGS = -fasynchronous-unwind-tables -std=gnu++11
- CXXFLAGS = -std=gnu++11
  WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
  EXTRA_LIBS =
-@@ -948,6 +949,8 @@ endif
+ 
+@@ -948,6 +948,8 @@ endif
  LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
  endif
  
