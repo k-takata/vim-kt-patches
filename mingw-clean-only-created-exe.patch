@@ -9,7 +9,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
  	-rmdir $(OUTDIR)
 -	-$(DEL) *.exe
-+	-$(DEL) $(TARGET).exe vimrun.exe install.exe uninstal.exe
++	-$(DEL) $(TARGET) vimrun.exe install.exe uninstal.exe
  	-$(DEL) pathdef.c
  ifdef PERL
  	-$(DEL) if_perl.c
