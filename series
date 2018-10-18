@@ -37,5 +37,4 @@ wip-installer-respect-nls.patch
 wip-installer-more-info.patch
 fix-indent.patch
 win32-enable-optimization.patch
-mingw-clean-only-created-exe.patch
 fix-config_cache-removal.patch #+rejected
