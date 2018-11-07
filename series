@@ -5,8 +5,9 @@ myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
 myconfiguration-private-install.patch #+private-install
 myconfiguration-clang.patch #+clang
+myconfiguration-for-gtk2.patch #+gtk2
 backout-7.3.638.patch #+disabled
-gtk2_force_redraw.diff #+linux
+gtk2_force_redraw.diff #+gtk2
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
 cpo-N.diff #+rejected
