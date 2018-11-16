@@ -35,7 +35,6 @@ installer-copy-to-orig.patch
 wip-installer-skip-gcc_s_sjlj.patch
 wip-installer-respect-nls.patch
 wip-installer-more-info.patch
-fix-indent.patch
 win32-enable-optimization.patch
 big5corr.patch
 fix-config_cache-removal.patch #+rejected
