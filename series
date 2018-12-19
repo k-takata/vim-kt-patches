@@ -38,4 +38,5 @@ wip-installer-more-info.patch
 win32-enable-optimization.patch
 big5corr.patch
 if_ruby-fix-unused-variable.patch
+update-win32-ctags.patch
 fix-config_cache-removal.patch #+rejected
