@@ -1,34 +1,34 @@
 # HG changeset patch
-# Parent  6fcb283d30347d46be40cc30ccdda27bda8d3ae0
+# Parent  b17efc1cfebb3528e694ec6cdaeb4b1f5505288c
 
 diff --git a/src/if_ruby.c b/src/if_ruby.c
 --- a/src/if_ruby.c
 +++ b/src/if_ruby.c
-@@ -192,6 +192,7 @@ static void ruby_vim_init(void);
+@@ -220,6 +220,7 @@ static void ruby_vim_init(void);
   */
  # define rb_assoc_new			dll_rb_assoc_new
  # define rb_cObject			(*dll_rb_cObject)
 +# define rb_cData			(*dll_rb_cData)
+ # define rb_class_new_instance		dll_rb_class_new_instance
  # define rb_check_type			dll_rb_check_type
  # ifdef USE_TYPEDDATA
- #  define rb_check_typeddata		dll_rb_check_typeddata
-@@ -307,6 +308,7 @@ VALUE *dll_rb_cFloat;
+@@ -367,6 +368,7 @@ VALUE *dll_rb_cFloat;
  # endif
  VALUE *dll_rb_cNilClass;
  static VALUE *dll_rb_cObject;
 +static VALUE *dll_rb_cData;
+ VALUE *dll_rb_cString;
  VALUE *dll_rb_cSymbol;
  VALUE *dll_rb_cTrueClass;
- static void (*dll_rb_check_type) (VALUE,int);
-@@ -490,6 +492,7 @@ static struct
+@@ -583,6 +585,7 @@ static struct
  # endif
      {"rb_cNilClass", (RUBY_PROC*)&dll_rb_cNilClass},
      {"rb_cObject", (RUBY_PROC*)&dll_rb_cObject},
 +    {"rb_cData", (RUBY_PROC*)&dll_rb_cData},
+     {"rb_cString", (RUBY_PROC*)&dll_rb_cString},
      {"rb_cSymbol", (RUBY_PROC*)&dll_rb_cSymbol},
      {"rb_cTrueClass", (RUBY_PROC*)&dll_rb_cTrueClass},
-     {"rb_check_type", (RUBY_PROC*)&dll_rb_check_type},
-@@ -1513,7 +1516,7 @@ static void ruby_vim_init(void)
+@@ -1694,7 +1697,7 @@ static void ruby_vim_init(void)
      eDeletedWindowError = rb_define_class_under(mVIM, "DeletedWindowError",
  						rb_eStandardError);
  
@@ -37,7 +37,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      rb_define_singleton_method(cBuffer, "current", buffer_s_current, 0);
      rb_define_singleton_method(cBuffer, "count", buffer_s_count, 0);
      rb_define_singleton_method(cBuffer, "[]", buffer_s_aref, 1);
-@@ -1533,7 +1536,7 @@ static void ruby_vim_init(void)
+@@ -1714,7 +1717,7 @@ static void ruby_vim_init(void)
      rb_define_method(cBuffer, "line=", set_current_line, 1);
  
  
