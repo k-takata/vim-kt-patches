@@ -1,15 +1,15 @@
 # HG changeset patch
 # Parent e89f9176882f2e24edbe9d98fe007174d612b7a9
-# Parent  6030cacf045f8b8099144a67e37c35ec9e023ac5
+# Parent  d6142aea7b1e198aca16afba5bd68f8a040935e8
 
 diff --git a/src/undo.c b/src/undo.c
 --- a/src/undo.c
 +++ b/src/undo.c
-@@ -2965,6 +2965,7 @@ u_undo_end(
+@@ -2987,6 +2987,7 @@ u_undo_end(
  	}
      }
  #endif
 +    redraw_later(NOT_VALID);
  
-     smsg_attr_keep(0, (char_u *)_("%ld %s; %s #%ld  %s"),
+     smsg_attr_keep(0, _("%ld %s; %s #%ld  %s"),
  	    u_oldcount < 0 ? -u_oldcount : u_oldcount,
