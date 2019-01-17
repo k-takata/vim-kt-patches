@@ -15,7 +15,6 @@ cpo-N-mark.diff #+rejected
 cpo-N-update-tags.patch #+rejected
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
-tab-xyz.diff #+tab-xyz
 subpixel-artifacts.patch
 fix-italic-overhang-before-space.patch
 fix-mch_can_exe-with-long-filename.patch
