@@ -1,0 +1,31 @@
+# HG changeset patch
+# Parent  7257d238cf8b24faefc9dd7416b6cdede527755a
+
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -8855,7 +8855,7 @@ ins_esc(
+      */
+     if (reg_recording != 0 || restart_edit != NUL)
+ 	showmode();
+-    else if (p_smd)
++    else if (p_smd && !global_busy)
+ 	msg("");
+ 
+     return TRUE;	    /* exit Insert mode */
+diff --git a/src/getchar.c b/src/getchar.c
+--- a/src/getchar.c
++++ b/src/getchar.c
+@@ -3084,9 +3084,10 @@ inchar(
+ 
+ 	/*
+ 	 * Always flush the output characters when getting input characters
+-	 * from the user.
++	 * from the user (except in the :global command).
+ 	 */
+-	out_flush();
++	if (!global_busy)
++	    out_flush();
+ 
+ 	/*
+ 	 * Fill up to a third of the buffer, because each character may be
