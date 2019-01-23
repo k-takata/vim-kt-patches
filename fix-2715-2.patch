@@ -1,0 +1,32 @@
+# HG changeset patch
+# Parent  8e4c9d479a3119a1ffc7be9ff70c14327a0fdedd
+
+diff --git a/src/ex_docmd.c b/src/ex_docmd.c
+--- a/src/ex_docmd.c
++++ b/src/ex_docmd.c
+@@ -10441,7 +10441,8 @@ ex_normal(exarg_T *eap)
+     restore_current_state(&save_state);
+     --ex_normal_busy;
+ #ifdef FEAT_MOUSE
+-    setmouse();
++    if (!global_busy)
++	setmouse();
+ #endif
+ #ifdef CURSOR_SHAPE
+     ui_cursor_shape();		/* may show different cursor shape */
+diff --git a/src/getchar.c b/src/getchar.c
+--- a/src/getchar.c
++++ b/src/getchar.c
+@@ -3084,10 +3084,9 @@ inchar(
+ 
+ 	/*
+ 	 * Always flush the output characters when getting input characters
+-	 * from the user (except in the :global command).
++	 * from the user.
+ 	 */
+-	if (!global_busy)
+-	    out_flush();
++	out_flush();
+ 
+ 	/*
+ 	 * Fill up to a third of the buffer, because each character may be
