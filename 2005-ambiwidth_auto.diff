@@ -143,14 +143,13 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -538,6 +538,14 @@ typedef unsigned long u8char_T;	    /* l
+@@ -538,6 +538,13 @@ typedef unsigned long u8char_T;	    /* l
  #endif
  
  /*
 + * Whether 'ambiwidth' supports "auto".  Currently, only for Win32.
 + */
-+#if defined(FEAT_MBYTE) && defined(FEAT_GUI) && \
-+    (defined(FEAT_GUI_W32))
++#if defined(FEAT_GUI_W32)
 +# define USE_AMBIWIDTH_AUTO
 +#endif
 +
