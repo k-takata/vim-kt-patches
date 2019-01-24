@@ -4,17 +4,17 @@
 diff --git a/src/screen.c b/src/screen.c
 --- a/src/screen.c
 +++ b/src/screen.c
-@@ -5589,6 +5589,10 @@ win_line(
- 		}
- 	    }
- #endif
+@@ -6132,6 +6132,10 @@ screen_line(
+     int		    char_cells;		/* 1: normal char */
+ 					/* 2: occupies two display cells */
+ # define CHAR_CELLS char_cells
 +#ifdef FEAT_GUI
 +    int		    changed_this;   /* bool: is character changed? */
 +    int		    changed_next;   /* bool: changed_this for next character */
 +#endif
  
- 	    screen_line(screen_row, wp->w_wincol, col,
- 				  (int)wp->w_width, HAS_RIGHTLEFT(wp->w_p_rl));
+     /* Check for illegal row and col, just in case. */
+     if (row >= Rows)
 @@ -6173,6 +6177,9 @@ screen_line(
  #endif /* FEAT_RIGHTLEFT */
  
