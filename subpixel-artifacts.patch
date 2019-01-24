@@ -1,18 +1,21 @@
-diff -r 7adbbf32444e -r 55ccd8a77b7b src/screen.c
---- a/src/screen.c	Thu Nov 21 18:13:38 2013 +0100
-+++ b/src/screen.c	Sat Nov 23 12:52:58 2013 -0600
-@@ -5591,6 +5591,10 @@
- #else
- # define CHAR_CELLS 1
+# HG changeset patch
+# Parent  1d22bae48b3c60e06989b772c7b53cfa253ac0ec
+
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -5589,6 +5589,10 @@ win_line(
+ 		}
+ 	    }
  #endif
 +#ifdef FEAT_GUI
 +    int		    changed_this;   /* bool: is character changed? */
 +    int		    changed_next;   /* bool: changed_this for next character */
 +#endif
  
-     /* Check for illegal row and col, just in case. */
-     if (row >= Rows)
-@@ -5637,6 +5641,9 @@
+ 	    screen_line(screen_row, wp->w_wincol, col,
+ 				  (int)wp->w_width, HAS_RIGHTLEFT(wp->w_p_rl));
+@@ -6173,6 +6177,9 @@ screen_line(
  #endif /* FEAT_RIGHTLEFT */
  
      redraw_next = char_needs_redraw(off_from, off_to, endcol - col);
@@ -22,7 +25,7 @@ diff -r 7adbbf32444e -r 55ccd8a77b7b src/screen.c
  
      while (col < endcol)
      {
-@@ -5649,21 +5656,18 @@
+@@ -6183,21 +6190,18 @@ screen_line(
  
  	redraw_this = redraw_next;
  	redraw_next = force || char_needs_redraw(off_from + CHAR_CELLS,
@@ -53,7 +56,7 @@ diff -r 7adbbf32444e -r 55ccd8a77b7b src/screen.c
  #endif
  
  	if (redraw_this)
-@@ -5796,6 +5800,11 @@
+@@ -6326,6 +6330,11 @@ screen_line(
  		    redraw_next = TRUE;
  	    }
  #endif
@@ -63,5 +66,5 @@ diff -r 7adbbf32444e -r 55ccd8a77b7b src/screen.c
 +		redraw_next = TRUE;
 +#endif
  	    ScreenAttrs[off_to] = ScreenAttrs[off_from];
- #ifdef FEAT_MBYTE
+ 
  	    /* For simplicity set the attributes of second half of a

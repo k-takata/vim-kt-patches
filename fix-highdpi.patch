@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  853757477aca39d65ee863cb6f5d992154de717d
+# Parent  cbab432c7810daaf2d587298904c7010d4be89fe
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -2703,7 +2703,7 @@ static const LOGFONT s_lfDefault =
+@@ -2761,7 +2761,7 @@ static const LOGFONT s_lfDefault =
   * with an explicit size has been set. This defaults the size to this value
   * (-12 equates to roughly 9pt).
   */
@@ -13,7 +13,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  
  /* Convert a string representing a point size into pixels. The string should
   * be a positive decimal number, with an optional decimal point (eg, "12", or
-@@ -2856,7 +2856,29 @@ get_logfont(
+@@ -2911,7 +2911,29 @@ get_logfont(
  
      *lf = s_lfDefault;
      if (name == NULL)
@@ -41,9 +41,9 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	return OK;
 +    }
  
- #ifdef FEAT_MBYTE
      /* Convert 'name' from 'encoding' to the current codepage, because
-@@ -2883,7 +2905,10 @@ get_logfont(
+      * lf->lfFaceName uses the current codepage.
+@@ -2936,7 +2958,10 @@ get_logfont(
  	cf.lpLogFont = lf;
  	cf.nFontType = 0 ; //REGULAR_FONTTYPE;
  	if (ChooseFont(&cf))

@@ -1,13 +1,13 @@
 # HG changeset patch
-# Parent  1f825f6d2246c08a60133020d7f117fbf378bedf
+# Parent  c3e6408e87542599634b11cbcd461e07d117c68d
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -5771,21 +5771,22 @@ write_chars(
+@@ -6270,21 +6270,22 @@ write_chars(
+     COORD coord = g_coord;
      DWORD written;
  
- #ifdef FEAT_MBYTE
 -    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 +    if (enc_codepage >= 0 && (int)GetConsoleCP() != enc_codepage)
      {
