@@ -30,5 +30,4 @@ mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
 win32-enable-optimization.patch
 big5corr.patch
-fix-if_python.patch
 fix-config_cache-removal.patch #+rejected
