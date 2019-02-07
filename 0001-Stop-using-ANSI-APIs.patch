@@ -1,4 +1,4 @@
-From a2e42e9b9811e767b6d4cdf0f4aac2abca517a97 Mon Sep 17 00:00:00 2001
+From 7d8e3e1c1ddaaf2b174db7e038cf6c1584d484f2 Mon Sep 17 00:00:00 2001
 From: "K.Takata" <kentkt@csc.jp>
 Date: Thu, 7 Feb 2019 19:25:21 +0900
 Subject: [PATCH 1/2] Stop using ANSI APIs
@@ -9,8 +9,8 @@ We can simplify the source code by removing usage of ANSI APIs.
  src/gui_w32.c  |  325 +++---------
  src/misc1.c    |   51 +-
  src/os_mswin.c |  348 ++++---------
- src/os_win32.c | 1314 ++++++++++++++++--------------------------------
- 4 files changed, 615 insertions(+), 1423 deletions(-)
+ src/os_win32.c | 1312 ++++++++++++++++--------------------------------
+ 4 files changed, 614 insertions(+), 1422 deletions(-)
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 index ead617a79..dc856b0d6 100644
@@ -1031,7 +1031,7 @@ index 363dc4666..70ae30b00 100644
      if (ppf != NULL)
  	ppf->lpVtbl->Release(ppf);
 diff --git a/src/os_win32.c b/src/os_win32.c
-index 10ca41881..5f624182d 100644
+index 10ca41881..1a24b8645 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
 @@ -2013,9 +2013,10 @@ theend:
@@ -1435,13 +1435,12 @@ index 10ca41881..5f624182d 100644
  mch_setperm(char_u *name, long perm)
  {
 -    long	n = -1;
--
++    long	n;
++    WCHAR	*p;
+ 
 -    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 -    {
 -	WCHAR *p = enc_to_utf16(name, NULL);
-+    long	n;
-+    WCHAR	*p;
-+    
 +    p = enc_to_utf16(name, NULL);
 +    if (p == NULL)
 +	return FAIL;

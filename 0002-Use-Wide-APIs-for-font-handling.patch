@@ -1,4 +1,4 @@
-From e99150d08e5e2309b2a37692c4eab195df5d0ff5 Mon Sep 17 00:00:00 2001
+From b225ce0cf7d90752c6313a874233cbc421ce6c6c Mon Sep 17 00:00:00 2001
 From: "K.Takata" <kentkt@csc.jp>
 Date: Thu, 7 Feb 2019 20:07:28 +0900
 Subject: [PATCH 2/2] Use Wide APIs for font handling
@@ -7,11 +7,11 @@ Use LOGFONTW instead of LOGFONT, etc.
 Now we can use a font even which name cannot be represented in the
 current code page.
 ---
- src/gui_w32.c          | 106 ++++++++++++++++----------------
- src/os_mswin.c         | 136 +++++++++++++++++++++++------------------
+ src/gui_w32.c          | 106 +++++++++++++++----------------
+ src/os_mswin.c         | 140 ++++++++++++++++++++++-------------------
  src/proto/gui_w32.pro  |   2 +-
  src/proto/os_mswin.pro |   2 +-
- 4 files changed, 128 insertions(+), 118 deletions(-)
+ 4 files changed, 130 insertions(+), 120 deletions(-)
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 index dc856b0d6..bc805466a 100644
@@ -342,9 +342,18 @@ index dc856b0d6..bc805466a 100644
  	    || pImmGetConversionStatus == NULL
  	    || pImmSetConversionStatus == NULL)
 diff --git a/src/os_mswin.c b/src/os_mswin.c
-index 70ae30b00..92ba4ba4e 100644
+index 70ae30b00..00847387d 100644
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
+@@ -85,7 +85,7 @@ typedef int COLORREF;
+ typedef int CONSOLE_CURSOR_INFO;
+ typedef int COORD;
+ typedef int DWORD;
+-typedef int ENUMLOGFONT;
++typedef int ENUMLOGFONTW;
+ typedef int HANDLE;
+ typedef int HDC;
+ typedef int HFONT;
 @@ -93,7 +93,7 @@ typedef int HICON;
  typedef int HWND;
  typedef int INPUT_RECORD;
@@ -354,6 +363,15 @@ index 70ae30b00..92ba4ba4e 100644
  typedef int LPARAM;
  typedef int LPBOOL;
  typedef int LPCSTR;
+@@ -103,7 +103,7 @@ typedef int LPTSTR;
+ typedef int LPWSTR;
+ typedef int LRESULT;
+ typedef int MOUSE_EVENT_RECORD;
+-typedef int NEWTEXTMETRIC;
++typedef int NEWTEXTMETRICW;
+ typedef int PACL;
+ typedef int PRINTDLG;
+ typedef int PSECURITY_DESCRIPTOR;
 @@ -1346,7 +1346,7 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
      static int		stored_nCopies = 1;
      static int		stored_nFlags = 0;
