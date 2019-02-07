@@ -25,7 +25,7 @@ embarcadero.patch
 fix-highdpi.patch
 fix-quotation-without-vimrun.patch
 add-getpackages.patch
-wip-fix-7.4.852.patch
+wip-fix-7.4.852.patch #+disabled
 mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
 win32-enable-optimization.patch
