@@ -1,4 +1,4 @@
-From 7d8e3e1c1ddaaf2b174db7e038cf6c1584d484f2 Mon Sep 17 00:00:00 2001
+From 8bd144686f4d5ad645c6e0ceb6097310db953110 Mon Sep 17 00:00:00 2001
 From: "K.Takata" <kentkt@csc.jp>
 Date: Thu, 7 Feb 2019 19:25:21 +0900
 Subject: [PATCH 1/2] Stop using ANSI APIs
@@ -9,8 +9,8 @@ We can simplify the source code by removing usage of ANSI APIs.
  src/gui_w32.c  |  325 +++---------
  src/misc1.c    |   51 +-
  src/os_mswin.c |  348 ++++---------
- src/os_win32.c | 1312 ++++++++++++++++--------------------------------
- 4 files changed, 614 insertions(+), 1422 deletions(-)
+ src/os_win32.c | 1313 ++++++++++++++++--------------------------------
+ 4 files changed, 615 insertions(+), 1422 deletions(-)
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 index ead617a79..dc856b0d6 100644
@@ -1031,7 +1031,7 @@ index 363dc4666..70ae30b00 100644
      if (ppf != NULL)
  	ppf->lpVtbl->Release(ppf);
 diff --git a/src/os_win32.c b/src/os_win32.c
-index 10ca41881..1a24b8645 100644
+index 10ca41881..9518c14da 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
 @@ -2013,9 +2013,10 @@ theend:
@@ -2164,7 +2164,7 @@ index 10ca41881..1a24b8645 100644
      return h;
  }
  
-@@ -6265,81 +5940,55 @@ write_chars(
+@@ -6265,81 +5940,56 @@ write_chars(
      char_u *pchBuf,
      DWORD  cbToWrite)
  {
@@ -2176,9 +2176,10 @@ index 10ca41881..1a24b8645 100644
 +    static WCHAR    *unicodebuf = NULL;
 +    static int	    unibuflen = 0;
 +    int		    length;
++    int		    cp = enc_utf8 ? CP_UTF8 : enc_codepage;
  
 -    if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
-+    length = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite, 0, 0);
++    length = MultiByteToWideChar(cp, 0, (LPCSTR)pchBuf, cbToWrite, 0, 0);
 +    if (unicodebuf == NULL || length > unibuflen)
      {
 -	static WCHAR	*unicodebuf = NULL;
@@ -2199,7 +2200,7 @@ index 10ca41881..1a24b8645 100644
 +	unicodebuf = (WCHAR *)lalloc(length * sizeof(WCHAR), FALSE);
 +	unibuflen = length;
 +    }
-+    MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)pchBuf, cbToWrite,
++    MultiByteToWideChar(cp, 0, (LPCSTR)pchBuf, cbToWrite,
 +	    unicodebuf, unibuflen);
  
 -	cells = mb_string2cells(pchBuf, cbToWrite);
@@ -2286,7 +2287,7 @@ index 10ca41881..1a24b8645 100644
      }
  
      while (g_coord.X > g_srScrollRegion.Right)
-@@ -6690,7 +6339,7 @@ mch_delay(
+@@ -6690,7 +6340,7 @@ mch_delay(
      int
  mch_remove(char_u *name)
  {
@@ -2295,7 +2296,7 @@ index 10ca41881..1a24b8645 100644
      int		n;
  
      /*
-@@ -6702,17 +6351,13 @@ mch_remove(char_u *name)
+@@ -6702,17 +6352,13 @@ mch_remove(char_u *name)
  
      win32_setattrs(name, FILE_ATTRIBUTE_NORMAL);
  
@@ -2320,7 +2321,7 @@ index 10ca41881..1a24b8645 100644
  }
  
  
-@@ -6763,8 +6408,23 @@ mch_total_mem(int special UNUSED)
+@@ -6763,8 +6409,23 @@ mch_total_mem(int special UNUSED)
  }
  
  /*
@@ -2346,7 +2347,7 @@ index 10ca41881..1a24b8645 100644
   */
      int
  mch_wrename(WCHAR *wold, WCHAR *wnew)
-@@ -6775,6 +6435,8 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6775,6 +6436,8 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
      WCHAR	szNewPath[_MAX_PATH + 1];
      HANDLE	hf;
  
@@ -2355,7 +2356,7 @@ index 10ca41881..1a24b8645 100644
      p = wold;
      for (i = 0; wold[i] != NUL; ++i)
  	if ((wold[i] == '/' || wold[i] == '\\' || wold[i] == ':')
-@@ -6783,33 +6445,52 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6783,33 +6446,52 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
      if ((int)(wold + i - p) < 8 || p[6] != '~')
  	return (MoveFileW(wold, wnew) == 0);
  
@@ -2408,7 +2409,7 @@ index 10ca41881..1a24b8645 100644
      if (!DeleteFileW(wold))
  	return -8;
  
-@@ -6818,109 +6499,25 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6818,109 +6500,25 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
  
  
  /*
@@ -2526,7 +2527,7 @@ index 10ca41881..1a24b8645 100644
  }
  
  /*
-@@ -6943,55 +6540,35 @@ mch_access(char *n, int p)
+@@ -6943,55 +6541,35 @@ mch_access(char *n, int p)
  {
      HANDLE	hFile;
      int		retval = -1;	    /* default: fail */
@@ -2599,7 +2600,7 @@ index 10ca41881..1a24b8645 100644
  	}
  
  	if (p & W_OK)
-@@ -7000,19 +6577,10 @@ mch_access(char *n, int p)
+@@ -7000,19 +6578,10 @@ mch_access(char *n, int p)
  	     * directories on read-only network shares.  However, in
  	     * directories whose ACL allows writes but denies deletes will end
  	     * up keeping the temporary file :-(. */
@@ -2622,7 +2623,7 @@ index 10ca41881..1a24b8645 100644
  	}
      }
      else
-@@ -7025,12 +6593,8 @@ mch_access(char *n, int p)
+@@ -7025,12 +6594,8 @@ mch_access(char *n, int p)
  	DWORD access_mode = ((p & W_OK) ? GENERIC_WRITE : 0)
  					     | ((p & R_OK) ? GENERIC_READ : 0);
  
@@ -2637,7 +2638,7 @@ index 10ca41881..1a24b8645 100644
  	if (hFile == INVALID_HANDLE_VALUE)
  	    goto getout;
  	CloseHandle(hFile);
-@@ -7053,18 +6617,14 @@ mch_open(const char *name, int flags, int mode)
+@@ -7053,18 +6618,14 @@ mch_open(const char *name, int flags, int mode)
      WCHAR	*wn;
      int		f;
  
@@ -2663,7 +2664,7 @@ index 10ca41881..1a24b8645 100644
      /* open() can open a file which name is longer than _MAX_PATH bytes
       * and shorter than _MAX_PATH characters successfully, but sometimes it
       * causes unexpected error in another part. We make it an error explicitly
-@@ -7073,10 +6633,11 @@ mch_open(const char *name, int flags, int mode)
+@@ -7073,10 +6634,11 @@ mch_open(const char *name, int flags, int mode)
  	return -1;
  
      return open(name, flags, mode);
@@ -2676,7 +2677,7 @@ index 10ca41881..1a24b8645 100644
   */
      FILE *
  mch_fopen(const char *name, const char *mode)
-@@ -7084,41 +6645,29 @@ mch_fopen(const char *name, const char *mode)
+@@ -7084,41 +6646,29 @@ mch_fopen(const char *name, const char *mode)
      WCHAR	*wn, *wm;
      FILE	*f = NULL;
  
@@ -2737,7 +2738,7 @@ index 10ca41881..1a24b8645 100644
  }
  
  /*
-@@ -7596,6 +7145,7 @@ fix_arg_enc(void)
+@@ -7596,6 +7146,7 @@ fix_arg_enc(void)
  mch_setenv(char *var, char *value, int x)
  {
      char_u	*envbuf;
@@ -2745,7 +2746,7 @@ index 10ca41881..1a24b8645 100644
  
      envbuf = alloc((unsigned)(STRLEN(var) + STRLEN(value) + 2));
      if (envbuf == NULL)
-@@ -7603,29 +7153,17 @@ mch_setenv(char *var, char *value, int x)
+@@ -7603,29 +7154,17 @@ mch_setenv(char *var, char *value, int x)
  
      sprintf((char *)envbuf, "%s=%s", var, value);
  
