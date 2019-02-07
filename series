@@ -31,4 +31,6 @@ drop-support-for-glib-2.2.patch #+rejected
 win32-enable-optimization.patch
 big5corr.patch
 fix-1698-3520.patch
+0001-Stop-using-ANSI-APIs.patch
+0002-Use-Wide-APIs-for-font-handling.patch
 fix-config_cache-removal.patch #+rejected
