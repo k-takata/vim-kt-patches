@@ -33,4 +33,6 @@ big5corr.patch
 fix-1698-3520.patch
 0001-Stop-using-ANSI-APIs.patch
 0002-Use-Wide-APIs-for-font-handling.patch
+0003-Stop-using-ANSI-findrep.patch
+use-getconsolewindow.patch
 fix-config_cache-removal.patch #+rejected
