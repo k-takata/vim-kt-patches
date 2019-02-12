@@ -35,4 +35,5 @@ big5corr.patch
 0003-Stop-using-ANSI-findrep.patch
 use-getconsolewindow.patch
 0001-Remove-USE_LONG_FNAME.patch
+fix-crash-conpty.patch
 fix-config_cache-removal.patch #+rejected
