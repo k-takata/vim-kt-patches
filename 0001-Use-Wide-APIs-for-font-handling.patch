@@ -1,7 +1,7 @@
-From b225ce0cf7d90752c6313a874233cbc421ce6c6c Mon Sep 17 00:00:00 2001
+From 60d30ef4e47697e5f4bd8a10641ebefa376eb302 Mon Sep 17 00:00:00 2001
 From: "K.Takata" <kentkt@csc.jp>
 Date: Thu, 7 Feb 2019 20:07:28 +0900
-Subject: [PATCH 2/2] Use Wide APIs for font handling
+Subject: [PATCH 1/3] Use Wide APIs for font handling
 
 Use LOGFONTW instead of LOGFONT, etc.
 Now we can use a font even which name cannot be represented in the
@@ -14,7 +14,7 @@ current code page.
  4 files changed, 130 insertions(+), 120 deletions(-)
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
-index dc856b0d6..bc805466a 100644
+index ead617a79..02108f591 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
 @@ -253,7 +253,7 @@ typedef int HBITMAP;
@@ -47,7 +47,7 @@ index dc856b0d6..bc805466a 100644
  #endif
  
  #ifdef FEAT_MBYTE_IME
-@@ -1515,12 +1515,12 @@ gui_mch_adjust_charheight(void)
+@@ -1520,12 +1520,12 @@ gui_mch_adjust_charheight(void)
  }
  
      static GuiFont
@@ -62,7 +62,7 @@ index dc856b0d6..bc805466a 100644
  
      if (font == NULL)
  	return NOFONT;
-@@ -1551,7 +1551,7 @@ gui_mch_get_font(
+@@ -1556,7 +1556,7 @@ gui_mch_get_font(
      char_u	*name,
      int		giveErrorIfMissing)
  {
@@ -71,7 +71,7 @@ index dc856b0d6..bc805466a 100644
      GuiFont	font = NOFONT;
  
      if (get_logfont(&lf, name, NULL, giveErrorIfMissing) == OK)
-@@ -3145,23 +3145,18 @@ gui_mch_exit(int rc UNUSED)
+@@ -3204,23 +3204,18 @@ gui_mch_exit(int rc UNUSED)
  }
  
      static char_u *
@@ -100,7 +100,7 @@ index dc856b0d6..bc805466a 100644
      quality_name = quality_id2name((int)lf.lfQuality);
  
      res = (char *)alloc((unsigned)(strlen(font_name) + 20
-@@ -3198,25 +3193,24 @@ logfont2name(LOGFONT lf)
+@@ -3257,25 +3252,24 @@ logfont2name(LOGFONT lf)
  	}
      }
  
@@ -130,7 +130,7 @@ index dc856b0d6..bc805466a 100644
  	norm_logfont = lf_wide;
      else
  	norm_logfont = sub_logfont;
-@@ -3230,7 +3224,7 @@ update_im_font(void)
+@@ -3289,7 +3283,7 @@ update_im_font(void)
      void
  gui_mch_wide_font_changed(void)
  {
@@ -139,7 +139,7 @@ index dc856b0d6..bc805466a 100644
  
  #ifdef FEAT_MBYTE_IME
      update_im_font();
-@@ -3244,7 +3238,7 @@ gui_mch_wide_font_changed(void)
+@@ -3303,7 +3297,7 @@ gui_mch_wide_font_changed(void)
      gui.wide_boldital_font = NOFONT;
  
      if (gui.wide_font
@@ -148,7 +148,7 @@ index dc856b0d6..bc805466a 100644
      {
  	if (!lf.lfItalic)
  	{
-@@ -3272,7 +3266,7 @@ gui_mch_wide_font_changed(void)
+@@ -3331,7 +3325,7 @@ gui_mch_wide_font_changed(void)
      int
  gui_mch_init_font(char_u *font_name, int fontset UNUSED)
  {
@@ -157,7 +157,7 @@ index dc856b0d6..bc805466a 100644
      GuiFont	font = NOFONT;
      char_u	*p;
  
-@@ -4314,8 +4308,8 @@ static HIMC (WINAPI *pImmAssociateContext)(HWND, HIMC);
+@@ -4373,8 +4367,8 @@ static HIMC (WINAPI *pImmAssociateContext)(HWND, HIMC);
  static BOOL (WINAPI *pImmReleaseContext)(HWND, HIMC);
  static BOOL (WINAPI *pImmGetOpenStatus)(HIMC);
  static BOOL (WINAPI *pImmSetOpenStatus)(HIMC, BOOL);
@@ -168,7 +168,7 @@ index dc856b0d6..bc805466a 100644
  static BOOL (WINAPI *pImmSetCompositionWindow)(HIMC, LPCOMPOSITIONFORM);
  static BOOL (WINAPI *pImmGetConversionStatus)(HIMC, LPDWORD, LPDWORD);
  static BOOL (WINAPI *pImmSetConversionStatus)(HIMC, DWORD, DWORD);
-@@ -4328,8 +4322,8 @@ static void dyn_imm_load(void);
+@@ -4387,8 +4381,8 @@ static void dyn_imm_load(void);
  # define pImmReleaseContext	  ImmReleaseContext
  # define pImmGetOpenStatus	  ImmGetOpenStatus
  # define pImmSetOpenStatus	  ImmSetOpenStatus
@@ -179,7 +179,7 @@ index dc856b0d6..bc805466a 100644
  # define pImmSetCompositionWindow ImmSetCompositionWindow
  # define pImmGetConversionStatus  ImmGetConversionStatus
  # define pImmSetConversionStatus  ImmSetConversionStatus
-@@ -4468,14 +4462,14 @@ _OnMouseWheel(
+@@ -4527,14 +4521,14 @@ _OnMouseWheel(
   * Return OK or FAIL.
   */
      static int
@@ -199,7 +199,7 @@ index dc856b0d6..bc805466a 100644
  	    &nm,
  	    0))
  	return FAIL;
-@@ -4492,7 +4486,7 @@ gui_w32_get_menu_font(LOGFONT *lf)
+@@ -4551,7 +4545,7 @@ gui_w32_get_menu_font(LOGFONT *lf)
      static void
  set_tabline_font(void)
  {
@@ -208,7 +208,7 @@ index dc856b0d6..bc805466a 100644
      HFONT	font;
      HWND	hwnd;
      HDC		hdc;
-@@ -4502,7 +4496,7 @@ set_tabline_font(void)
+@@ -4561,7 +4555,7 @@ set_tabline_font(void)
      if (gui_w32_get_menu_font(&lfSysmenu) != OK)
  	return;
  
@@ -217,7 +217,7 @@ index dc856b0d6..bc805466a 100644
  
      SendMessage(s_tabhwnd, WM_SETFONT, (WPARAM)font, TRUE);
  
-@@ -5651,7 +5645,7 @@ _OnImeNotify(HWND hWnd, DWORD dwCommand, DWORD dwData UNUSED)
+@@ -5710,7 +5704,7 @@ _OnImeNotify(HWND hWnd, DWORD dwCommand, DWORD dwData UNUSED)
  	case IMN_SETOPENSTATUS:
  	    if (pImmGetOpenStatus(hImc))
  	    {
@@ -226,7 +226,7 @@ index dc856b0d6..bc805466a 100644
  		im_set_position(gui.row, gui.col);
  
  		/* Disable langmap */
-@@ -5792,13 +5786,13 @@ GetResultStr(HWND hwnd, int GCS, int *lenp)
+@@ -5851,13 +5845,13 @@ GetResultStr(HWND hwnd, int GCS, int *lenp)
   * set font to IM.
   */
      void
@@ -242,7 +242,7 @@ index dc856b0d6..bc805466a 100644
  	pImmReleaseContext(s_hwnd, hImc);
      }
  }
-@@ -6876,7 +6870,7 @@ gui_mch_dialog(
+@@ -6976,7 +6970,7 @@ gui_mch_dialog(
      int		dlgPaddingX;
      int		dlgPaddingY;
  #ifdef USE_SYSMENU_FONT
@@ -251,7 +251,7 @@ index dc856b0d6..bc805466a 100644
      int		use_lfSysmenu = FALSE;
  #endif
      garray_T	ga;
-@@ -6941,7 +6935,7 @@ gui_mch_dialog(
+@@ -7041,7 +7035,7 @@ gui_mch_dialog(
  #ifdef USE_SYSMENU_FONT
      if (gui_w32_get_menu_font(&lfSysmenu) == OK)
      {
@@ -260,7 +260,7 @@ index dc856b0d6..bc805466a 100644
  	use_lfSysmenu = TRUE;
      }
      else
-@@ -7170,7 +7164,8 @@ gui_mch_dialog(
+@@ -7270,7 +7264,8 @@ gui_mch_dialog(
  	    /* point size */
  	    *p++ = -MulDiv(lfSysmenu.lfHeight, 72,
  		    GetDeviceCaps(hdc, LOGPIXELSY));
@@ -270,7 +270,7 @@ index dc856b0d6..bc805466a 100644
  	}
  	else
  #endif
-@@ -7535,14 +7530,14 @@ get_dialog_font_metrics(void)
+@@ -7635,14 +7630,14 @@ get_dialog_font_metrics(void)
      DWORD	    dlgFontSize;
      SIZE	    size;
  #ifdef USE_SYSMENU_FONT
@@ -287,7 +287,7 @@ index dc856b0d6..bc805466a 100644
      else
  #endif
  	hfontTools = CreateFont(-DLG_FONT_POINT_SIZE, 0, 0, 0, 0, 0, 0, 0,
-@@ -7610,7 +7605,7 @@ gui_mch_tearoff(
+@@ -7710,7 +7705,7 @@ gui_mch_tearoff(
      int		x;
      int		y;
  #ifdef USE_SYSMENU_FONT
@@ -296,7 +296,7 @@ index dc856b0d6..bc805466a 100644
      int		use_lfSysmenu = FALSE;
  #endif
  
-@@ -7646,7 +7641,7 @@ gui_mch_tearoff(
+@@ -7746,7 +7741,7 @@ gui_mch_tearoff(
  #ifdef USE_SYSMENU_FONT
      if (gui_w32_get_menu_font(&lfSysmenu) == OK)
      {
@@ -305,7 +305,7 @@ index dc856b0d6..bc805466a 100644
  	use_lfSysmenu = TRUE;
      }
      else
-@@ -7755,7 +7750,8 @@ gui_mch_tearoff(
+@@ -7855,7 +7850,8 @@ gui_mch_tearoff(
  	    /* point size */
  	    *p++ = -MulDiv(lfSysmenu.lfHeight, 72,
  		    GetDeviceCaps(hdc, LOGPIXELSY));
@@ -315,7 +315,7 @@ index dc856b0d6..bc805466a 100644
  	}
  	else
  #endif
-@@ -8183,10 +8179,10 @@ dyn_imm_load(void)
+@@ -8283,10 +8279,10 @@ dyn_imm_load(void)
  	    = (void *)GetProcAddress(hLibImm, "ImmGetOpenStatus");
      pImmSetOpenStatus
  	    = (void *)GetProcAddress(hLibImm, "ImmSetOpenStatus");
@@ -330,7 +330,7 @@ index dc856b0d6..bc805466a 100644
      pImmSetCompositionWindow
  	    = (void *)GetProcAddress(hLibImm, "ImmSetCompositionWindow");
      pImmGetConversionStatus
-@@ -8201,8 +8197,8 @@ dyn_imm_load(void)
+@@ -8301,8 +8297,8 @@ dyn_imm_load(void)
  	    || pImmReleaseContext == NULL
  	    || pImmGetOpenStatus == NULL
  	    || pImmSetOpenStatus == NULL
@@ -342,7 +342,7 @@ index dc856b0d6..bc805466a 100644
  	    || pImmGetConversionStatus == NULL
  	    || pImmSetConversionStatus == NULL)
 diff --git a/src/os_mswin.c b/src/os_mswin.c
-index 70ae30b00..00847387d 100644
+index 8d46e53cf..735641f74 100644
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
 @@ -85,7 +85,7 @@ typedef int COLORREF;
@@ -372,7 +372,7 @@ index 70ae30b00..00847387d 100644
  typedef int PACL;
  typedef int PRINTDLG;
  typedef int PSECURITY_DESCRIPTOR;
-@@ -1346,7 +1346,7 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
+@@ -1431,7 +1431,7 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
      static int		stored_nCopies = 1;
      static int		stored_nFlags = 0;
  
@@ -381,7 +381,7 @@ index 70ae30b00..00847387d 100644
      int			pifItalic;
      int			pifBold;
      int			pifUnderline;
-@@ -1503,7 +1503,7 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
+@@ -1588,7 +1588,7 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
  		fLogFont.lfItalic = pifItalic;
  		fLogFont.lfUnderline = pifUnderline;
  		prt_font_handles[pifBold][pifItalic][pifUnderline]
@@ -390,7 +390,7 @@ index 70ae30b00..00847387d 100644
  	    }
  
      SetBkMode(prt_dlg.hDC, OPAQUE);
-@@ -2594,12 +2594,12 @@ quality_id2name(DWORD id)
+@@ -2926,12 +2926,12 @@ quality_id2name(DWORD id)
      return qp->name;
  }
  
@@ -405,7 +405,7 @@ index 70ae30b00..00847387d 100644
  };
  
  /* Initialise the "current height" to -12 (same as s_lfDefault) just
-@@ -2616,7 +2616,7 @@ int current_font_height = -12;		/* also used in gui_w48.c */
+@@ -2948,7 +2948,7 @@ int current_font_height = -12;		/* also used in gui_w48.c */
   * calculation is for a vertical (height) size or a horizontal (width) one.
   */
      static int
@@ -414,7 +414,7 @@ index 70ae30b00..00847387d 100644
  {
      int		pixels;
      int		points = 0;
-@@ -2627,7 +2627,7 @@ points_to_pixels(char_u *str, char_u **end, int vertical, long_i pprinter_dc)
+@@ -2959,7 +2959,7 @@ points_to_pixels(char_u *str, char_u **end, int vertical, long_i pprinter_dc)
  
      while (*str != NUL)
      {
@@ -423,7 +423,7 @@ index 70ae30b00..00847387d 100644
  	{
  	    /* Start keeping a divisor, for later */
  	    divisor = 1;
-@@ -2638,7 +2638,7 @@ points_to_pixels(char_u *str, char_u **end, int vertical, long_i pprinter_dc)
+@@ -2970,7 +2970,7 @@ points_to_pixels(char_u *str, char_u **end, int vertical, long_i pprinter_dc)
  		break;
  
  	    points *= 10;
@@ -432,7 +432,7 @@ index 70ae30b00..00847387d 100644
  	    divisor *= 10;
  	}
  	++str;
-@@ -2668,15 +2668,15 @@ points_to_pixels(char_u *str, char_u **end, int vertical, long_i pprinter_dc)
+@@ -3000,15 +3000,15 @@ points_to_pixels(char_u *str, char_u **end, int vertical, long_i pprinter_dc)
  
      static int CALLBACK
  font_enumproc(
@@ -452,7 +452,7 @@ index 70ae30b00..00847387d 100644
       *	      (monospace, not ANSI)
       * We use these values, as EnumFontFamilies returns 1 if the
       * callback function is never called. So, we check the return as
-@@ -2684,7 +2684,7 @@ font_enumproc(
+@@ -3016,7 +3016,7 @@ font_enumproc(
       * It's not pretty, but it works!
       */
  
@@ -461,7 +461,7 @@ index 70ae30b00..00847387d 100644
  
  #ifndef FEAT_PROPORTIONAL_FONTS
      /* Ignore non-monospace fonts without further ado */
-@@ -2692,7 +2692,7 @@ font_enumproc(
+@@ -3024,7 +3024,7 @@ font_enumproc(
  	return 1;
  #endif
  
@@ -470,7 +470,7 @@ index 70ae30b00..00847387d 100644
      *lf = elf->elfLogFont;
  
      /* Terminate the scan as soon as we find an ANSI font */
-@@ -2706,15 +2706,15 @@ font_enumproc(
+@@ -3038,15 +3038,15 @@ font_enumproc(
  }
  
      static int
@@ -490,7 +490,7 @@ index 70ae30b00..00847387d 100644
  			 (LPARAM)lf);
  
      ReleaseDC(hwnd, hdc);
-@@ -2723,7 +2723,7 @@ init_logfont(LOGFONT *lf)
+@@ -3055,7 +3055,7 @@ init_logfont(LOGFONT *lf)
      if (n == 1)
  	return FAIL;
  
@@ -499,7 +499,7 @@ index 70ae30b00..00847387d 100644
       * font - get_logfont() sets bold, italic, etc based on the user's
       * input.
       */
-@@ -2738,40 +2738,52 @@ init_logfont(LOGFONT *lf)
+@@ -3070,40 +3070,52 @@ init_logfont(LOGFONT *lf)
      return OK;
  }
  
@@ -567,7 +567,7 @@ index 70ae30b00..00847387d 100644
  	/* if name is "*", bring up std font dialog: */
  	vim_memset(&cf, 0, sizeof(cf));
  	cf.lStructSize = sizeof(cf);
-@@ -2781,7 +2793,7 @@ get_logfont(
+@@ -3113,7 +3125,7 @@ get_logfont(
  	    *lf = *lastlf;
  	cf.lpLogFont = lf;
  	cf.nFontType = 0 ; //REGULAR_FONTTYPE;
@@ -576,7 +576,7 @@ index 70ae30b00..00847387d 100644
  	    ret = OK;
  #endif
  	goto theend;
-@@ -2790,14 +2802,14 @@ get_logfont(
+@@ -3122,14 +3134,14 @@ get_logfont(
      /*
       * Split name up, it could be <name>:h<height>:w<width> etc.
       */
@@ -596,7 +596,7 @@ index 70ae30b00..00847387d 100644
  
      /* First set defaults */
      lf->lfHeight = -12;
-@@ -2815,18 +2827,16 @@ get_logfont(
+@@ -3147,18 +3159,16 @@ get_logfont(
  	int	did_replace = FALSE;
  
  	for (i = 0; lf->lfFaceName[i]; ++i)
@@ -618,7 +618,7 @@ index 70ae30b00..00847387d 100644
  	p++;
  
      /* Set the values found after ':' */
-@@ -2834,30 +2844,30 @@ get_logfont(
+@@ -3166,30 +3176,30 @@ get_logfont(
      {
  	switch (*p++)
  	{
@@ -657,7 +657,7 @@ index 70ae30b00..00847387d 100644
  			{
  			    lf->lfCharSet = cp->charset;
  			    p += strlen(cp->name);
-@@ -2865,17 +2875,19 @@ get_logfont(
+@@ -3197,17 +3207,19 @@ get_logfont(
  			}
  		    if (cp->name == NULL && verbose)
  		    {
@@ -680,7 +680,7 @@ index 70ae30b00..00847387d 100644
  			{
  			    lf->lfQuality = qp->quality;
  			    p += strlen(qp->name);
-@@ -2883,7 +2895,9 @@ get_logfont(
+@@ -3215,7 +3227,9 @@ get_logfont(
  			}
  		    if (qp->name == NULL && verbose)
  		    {
@@ -691,7 +691,7 @@ index 70ae30b00..00847387d 100644
  			break;
  		    }
  		    break;
-@@ -2893,7 +2907,7 @@ get_logfont(
+@@ -3225,7 +3239,7 @@ get_logfont(
  		    semsg(_("E245: Illegal char '%c' in font name \"%s\""), p[-1], name);
  		goto theend;
  	}
@@ -700,7 +700,7 @@ index 70ae30b00..00847387d 100644
  	    p++;
      }
      ret = OK;
-@@ -2903,11 +2917,11 @@ theend:
+@@ -3235,11 +3249,11 @@ theend:
      if (ret == OK && printer_dc == NULL)
      {
  	vim_free(lastlf);
@@ -729,7 +729,7 @@ index 75edd4be2..9f2e5fbce 100644
  void im_set_active(int active);
  int im_get_status(void);
 diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
-index cc660a6d9..efad1e938 100644
+index 3e8d48707..2548d0079 100644
 --- a/src/proto/os_mswin.pro
 +++ b/src/proto/os_mswin.pro
 @@ -49,6 +49,6 @@ char_u *serverGetReply(HWND server, int *expr_res, int remove, int wait, int tim

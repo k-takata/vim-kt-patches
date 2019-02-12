@@ -1,7 +1,7 @@
-From 8bd144686f4d5ad645c6e0ceb6097310db953110 Mon Sep 17 00:00:00 2001
+From 80f3537b5726f8a5ccd88daf5f36fb7f78ec3613 Mon Sep 17 00:00:00 2001
 From: "K.Takata" <kentkt@csc.jp>
 Date: Thu, 7 Feb 2019 19:25:21 +0900
-Subject: [PATCH 1/2] Stop using ANSI APIs
+Subject: [PATCH 2/3] Stop using ANSI APIs
 
 utf16_to_enc() and other conversion functions are now always available.
 We can simplify the source code by removing usage of ANSI APIs.
@@ -9,11 +9,11 @@ We can simplify the source code by removing usage of ANSI APIs.
  src/gui_w32.c  |  325 +++---------
  src/misc1.c    |   51 +-
  src/os_mswin.c |  348 ++++---------
- src/os_win32.c | 1313 ++++++++++++++++--------------------------------
- 4 files changed, 615 insertions(+), 1422 deletions(-)
+ src/os_win32.c | 1341 ++++++++++++++++--------------------------------
+ 4 files changed, 627 insertions(+), 1438 deletions(-)
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
-index ead617a79..dc856b0d6 100644
+index 02108f591..bc805466a 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
 @@ -1152,12 +1152,7 @@ _OnFindRepl(void)
@@ -244,7 +244,7 @@ index ead617a79..dc856b0d6 100644
  	}
  
  	set_window_title(s_findrep_hwnd, _("Find & Replace"));
-@@ -6505,49 +6446,26 @@ gui_mch_add_menu(
+@@ -6499,49 +6440,26 @@ gui_mch_add_menu(
  
      if (menu_is_menubar(menu->name))
      {
@@ -312,7 +312,7 @@ index ead617a79..dc856b0d6 100644
      }
  
      /* Fix window size if menu may have wrapped */
-@@ -6660,27 +6578,17 @@ gui_mch_add_menu_item(
+@@ -6654,27 +6572,17 @@ gui_mch_add_menu_item(
      else
  #endif
      {
@@ -348,7 +348,7 @@ index ead617a79..dc856b0d6 100644
  #ifdef FEAT_TEAROFF
  	if (IsWindow(parent->tearoff_handle))
  	    rebuild_tearoff(parent);
-@@ -6870,22 +6778,14 @@ dialog_callback(
+@@ -6864,22 +6772,14 @@ dialog_callback(
  	/* If the edit box exists, copy the string. */
  	if (s_textfield != NULL)
  	{
@@ -379,7 +379,7 @@ index ead617a79..dc856b0d6 100644
  	}
  
  	/*
-@@ -8570,7 +8470,7 @@ multiline_balloon_available(void)
+@@ -8566,7 +8466,7 @@ multiline_balloon_available(void)
  }
  
      static void
@@ -388,7 +388,7 @@ index ead617a79..dc856b0d6 100644
  {
      TOOLINFOW	*pti;
      int		ToolInfoSize;
-@@ -8639,77 +8539,6 @@ make_tooltipw(BalloonEval *beval, char *text, POINT pt)
+@@ -8635,77 +8535,6 @@ make_tooltipw(BalloonEval *beval, char *text, POINT pt)
      vim_free(pti);
  }
  
@@ -557,7 +557,7 @@ index 26b570bcb..dc688cef1 100644
  	    VIM_CLEAR(matchname);
  	}
 diff --git a/src/os_mswin.c b/src/os_mswin.c
-index 363dc4666..70ae30b00 100644
+index 735641f74..d0c874e82 100644
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
 @@ -282,19 +282,14 @@ mch_settitle(
@@ -911,7 +911,7 @@ index 363dc4666..70ae30b00 100644
  }
  
      void
-@@ -1835,8 +1720,6 @@ mch_resolve_shortcut(char_u *fname)
+@@ -2003,8 +1888,6 @@ resolve_shortcut(char_u *fname)
      IShellLink		*psl = NULL;
      IPersistFile	*ppf = NULL;
      OLECHAR		wsz[MAX_PATH];
@@ -920,7 +920,7 @@ index 363dc4666..70ae30b00 100644
      char_u		*rfname = NULL;
      int			len;
      IShellLinkW		*pslw = NULL;
-@@ -1852,80 +1735,43 @@ mch_resolve_shortcut(char_u *fname)
+@@ -2020,80 +1903,43 @@ resolve_shortcut(char_u *fname)
  
      CoInitialize(NULL);
  
@@ -1031,7 +1031,7 @@ index 363dc4666..70ae30b00 100644
      if (ppf != NULL)
  	ppf->lpVtbl->Release(ppf);
 diff --git a/src/os_win32.c b/src/os_win32.c
-index 10ca41881..9518c14da 100644
+index 10ca41881..d5d89a15a 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
 @@ -2013,9 +2013,10 @@ theend:
@@ -1112,12 +1112,34 @@ index 10ca41881..9518c14da 100644
      return TRUE;
  }
  
-@@ -2872,22 +2850,17 @@ fname_casew(
+@@ -2760,11 +2738,10 @@ mch_check_win(
+ 
+ 
+ /*
+- * fname_casew(): Wide version of fname_case().  Set the case of the file name,
++ * fname_casew(): Wide part of fname_case().  Set the case of the file name,
+  * if it already exists.  When "len" is > 0, also expand short to long
+  * filenames.
+  * Return FAIL if wide functions are not available, OK otherwise.
+- * NOTE: much of this is identical to fname_case(), keep in sync!
+  */
+     static int
+ fname_casew(
+@@ -2791,7 +2768,7 @@ fname_casew(
+     porig = name;
+     ptrue = szTrueName;
+ 
+-    if (iswalpha(porig[0]) && porig[1] == L':')
++    if (iswascii(porig[0]) && iswalpha(porig[0]) && porig[1] == L':')
+     {
+ 	/* copy leading drive letter */
+ 	*ptrue++ = *porig++;
+@@ -2872,22 +2849,17 @@ fname_casew(
  /*
   * fname_case(): Set the case of the file name, if it already exists.
   * When "len" is > 0, also expand short to long filenames.
 - * NOTE: much of this is identical to fname_casew(), keep in sync!
-+ * NOTE: just convert to UTF-16, then call fname_casew().
++ * This adjusts slashes, converts to UTF-16, then calls fname_casew().
   */
      void
  fname_case(
@@ -1140,7 +1162,7 @@ index 10ca41881..9518c14da 100644
  
      flen = (int)STRLEN(name);
      if (flen == 0)
-@@ -2895,126 +2868,24 @@ fname_case(
+@@ -2895,126 +2867,24 @@ fname_case(
  
      slash_adjust(name);
  
@@ -1278,7 +1300,7 @@ index 10ca41881..9518c14da 100644
  }
  
  
-@@ -3026,31 +2897,20 @@ mch_get_user_name(
+@@ -3026,31 +2896,20 @@ mch_get_user_name(
      char_u  *s,
      int	    len)
  {
@@ -1318,7 +1340,7 @@ index 10ca41881..9518c14da 100644
      s[0] = NUL;
      return FAIL;
  }
-@@ -3064,27 +2924,20 @@ mch_get_host_name(
+@@ -3064,27 +2923,20 @@ mch_get_host_name(
      char_u	*s,
      int		len)
  {
@@ -1354,7 +1376,7 @@ index 10ca41881..9518c14da 100644
  }
  
  
-@@ -3107,8 +2960,7 @@ mch_dirname(
+@@ -3107,8 +2959,7 @@ mch_dirname(
      char_u	*buf,
      int		len)
  {
@@ -1364,7 +1386,7 @@ index 10ca41881..9518c14da 100644
  
      /*
       * Originally this was:
-@@ -3116,47 +2968,32 @@ mch_dirname(
+@@ -3116,47 +2967,32 @@ mch_dirname(
       * But the Win32s known bug list says that getcwd() doesn't work
       * so use the Win32 system call instead. <Negri>
       */
@@ -1382,7 +1404,9 @@ index 10ca41881..9518c14da 100644
 -	    char_u  *p = NULL;
 -
 -	    if (GetLongPathNameW(wbuf, wcbuf, _MAX_PATH) != 0)
--	    {
++	    p = utf16_to_enc(wcbuf, NULL);
++	    if (STRLEN(p) >= (size_t)len)
+ 	    {
 -		p = utf16_to_enc(wcbuf, NULL);
 -		if (STRLEN(p) >= (size_t)len)
 -		{
@@ -1395,9 +1419,7 @@ index 10ca41881..9518c14da 100644
 -		p = utf16_to_enc(wbuf, NULL);
 -
 -	    if (p != NULL)
-+	    p = utf16_to_enc(wcbuf, NULL);
-+	    if (STRLEN(p) >= (size_t)len)
- 	    {
+-	    {
 -		vim_strncpy(buf, p, len - 1);
 +		// long path name is too long, fall back to short one
  		vim_free(p);
@@ -1430,7 +1452,7 @@ index 10ca41881..9518c14da 100644
  }
  
  /*
-@@ -3182,22 +3019,15 @@ mch_getperm(char_u *name)
+@@ -3182,22 +3018,15 @@ mch_getperm(char_u *name)
      int
  mch_setperm(char_u *name, long perm)
  {
@@ -1460,7 +1482,7 @@ index 10ca41881..9518c14da 100644
      if (n == -1)
  	return FAIL;
  
-@@ -3267,19 +3097,15 @@ mch_isrealdir(char_u *name)
+@@ -3267,19 +3096,15 @@ mch_isrealdir(char_u *name)
      int
  mch_mkdir(char_u *name)
  {
@@ -1488,7 +1510,7 @@ index 10ca41881..9518c14da 100644
  }
  
  /*
-@@ -3289,19 +3115,15 @@ mch_mkdir(char_u *name)
+@@ -3289,19 +3114,15 @@ mch_mkdir(char_u *name)
      int
  mch_rmdir(char_u *name)
  {
@@ -1516,7 +1538,7 @@ index 10ca41881..9518c14da 100644
  }
  
  /*
-@@ -3324,35 +3146,22 @@ mch_is_symbolic_link(char_u *name)
+@@ -3324,35 +3145,22 @@ mch_is_symbolic_link(char_u *name)
  {
      HANDLE		hFind;
      int			res = FALSE;
@@ -1562,7 +1584,7 @@ index 10ca41881..9518c14da 100644
  
      if ((fileFlags & FILE_ATTRIBUTE_REPARSE_POINT)
  	    && (reparseTag == IO_REPARSE_TAG_SYMLINK
-@@ -3386,33 +3195,20 @@ win32_fileinfo(char_u *fname, BY_HANDLE_FILE_INFORMATION *info)
+@@ -3386,33 +3194,20 @@ win32_fileinfo(char_u *fname, BY_HANDLE_FILE_INFORMATION *info)
  {
      HANDLE	hFile;
      int		res = FILEINFO_READ_FAIL;
@@ -1598,18 +1620,18 @@ index 10ca41881..9518c14da 100644
 +    if (wn == NULL)
 +	return FILEINFO_ENC_FAIL;
 +
-+    hFile = CreateFileW(wn,	/* file name */
-+	    GENERIC_READ,	/* access mode */
-+	    FILE_SHARE_READ | FILE_SHARE_WRITE,	/* share mode */
-+	    NULL,		/* security descriptor */
-+	    OPEN_EXISTING,	/* creation disposition */
-+	    FILE_FLAG_BACKUP_SEMANTICS,	/* file attributes */
-+	    NULL);		/* handle to template file */
++    hFile = CreateFileW(wn,	// file name
++	    GENERIC_READ,	// access mode
++	    FILE_SHARE_READ | FILE_SHARE_WRITE,	// share mode
++	    NULL,		// security descriptor
++	    OPEN_EXISTING,	// creation disposition
++	    FILE_FLAG_BACKUP_SEMANTICS,	// file attributes
++	    NULL);		// handle to template file
 +    vim_free(wn);
  
      if (hFile != INVALID_HANDLE_VALUE)
      {
-@@ -3435,18 +3231,14 @@ win32_fileinfo(char_u *fname, BY_HANDLE_FILE_INFORMATION *info)
+@@ -3435,18 +3230,14 @@ win32_fileinfo(char_u *fname, BY_HANDLE_FILE_INFORMATION *info)
  win32_getattrs(char_u *name)
  {
      int		attr;
@@ -1634,7 +1656,7 @@ index 10ca41881..9518c14da 100644
  
      return attr;
  }
-@@ -3459,19 +3251,15 @@ win32_getattrs(char_u *name)
+@@ -3459,19 +3250,15 @@ win32_getattrs(char_u *name)
      static int
  win32_setattrs(char_u *name, int attrs)
  {
@@ -1661,7 +1683,7 @@ index 10ca41881..9518c14da 100644
  
      return res ? 0 : -1;
  }
-@@ -3586,7 +3374,7 @@ mch_nodetype(char_u *name)
+@@ -3586,7 +3373,7 @@ mch_nodetype(char_u *name)
  {
      HANDLE	hFile;
      int		type;
@@ -1670,7 +1692,7 @@ index 10ca41881..9518c14da 100644
  
      /* We can't open a file with a name "\\.\con" or "\\.\prn" and trying to
       * read from it later will cause Vim to hang.  Thus return NODE_WRITABLE
-@@ -3594,29 +3382,18 @@ mch_nodetype(char_u *name)
+@@ -3594,29 +3381,18 @@ mch_nodetype(char_u *name)
      if (STRNCMP(name, "\\\\.\\", 4) == 0)
  	return NODE_WRITABLE;
  
@@ -1700,18 +1722,18 @@ index 10ca41881..9518c14da 100644
 +    if (wn == NULL)
 +	return NODE_NORMAL;
  
-+    hFile = CreateFileW(wn,	    /* file name */
-+	    GENERIC_WRITE,	    /* access mode */
-+	    0,			    /* share mode */
-+	    NULL,		    /* security descriptor */
-+	    OPEN_EXISTING,	    /* creation disposition */
-+	    0,			    /* file attributes */
-+	    NULL);		    /* handle to template file */
++    hFile = CreateFileW(wn,	    // file name
++	    GENERIC_WRITE,	    // access mode
++	    0,			    // share mode
++	    NULL,		    // security descriptor
++	    OPEN_EXISTING,	    // creation disposition
++	    0,			    // file attributes
++	    NULL);		    // handle to template file
 +    vim_free(wn);
      if (hFile == INVALID_HANDLE_VALUE)
  	return NODE_NORMAL;
  
-@@ -3656,81 +3433,45 @@ mch_get_acl(char_u *fname)
+@@ -3656,81 +3432,45 @@ mch_get_acl(char_u *fname)
      p = (struct my_acl *)alloc_clear((unsigned)sizeof(struct my_acl));
      if (p != NULL)
      {
@@ -1725,7 +1747,7 @@ index 10ca41881..9518c14da 100644
 +	if (wn == NULL)
 +	    return NULL;
 +
-+	/* Try to retrieve the entire security descriptor. */
++	// Try to retrieve the entire security descriptor.
 +	err = GetNamedSecurityInfoW(
 +		wn,			// Abstract filename
 +		SE_FILE_OBJECT,		// File Object
@@ -1753,7 +1775,7 @@ index 10ca41881..9518c14da 100644
 -		    &p->pSidGroup,	// Group membership.
 -		    &p->pDacl,		// Discretionary information.
 -		    &p->pSacl,		// For auditing purposes.
-+	    /* Retrieve only DACL. */
++	    // Retrieve only DACL.
 +	    (void)GetNamedSecurityInfoW(
 +		    wn,
 +		    SE_FILE_OBJECT,
@@ -1826,7 +1848,7 @@ index 10ca41881..9518c14da 100644
      }
  
      return (vim_acl_T)p;
-@@ -3771,56 +3512,42 @@ mch_set_acl(char_u *fname, vim_acl_T acl)
+@@ -3771,56 +3511,41 @@ mch_set_acl(char_u *fname, vim_acl_T acl)
  #ifdef HAVE_ACL
      struct my_acl   *p = (struct my_acl *)acl;
      SECURITY_INFORMATION    sec_info = 0;
@@ -1886,7 +1908,7 @@ index 10ca41881..9518c14da 100644
 -			);
 -	}
 -    }
-+    /* Set security flags */
++    // Set security flags
 +    if (p->pSidOwner)
 +	sec_info |= OWNER_SECURITY_INFORMATION;
 +    if (p->pSidGroup)
@@ -1894,9 +1916,8 @@ index 10ca41881..9518c14da 100644
 +    if (p->pDacl)
 +    {
 +	sec_info |= DACL_SECURITY_INFORMATION;
-+	/* Do not inherit its parent's DACL.
-+	 * If the DACL is inherited, Cygwin permissions would be changed.
-+	 */
++	// Do not inherit its parent's DACL.
++	// If the DACL is inherited, Cygwin permissions would be changed.
 +	if (!is_acl_inherited(p->pDacl))
 +	    sec_info |= PROTECTED_DACL_SECURITY_INFORMATION;
 +    }
@@ -1905,10 +1926,10 @@ index 10ca41881..9518c14da 100644
 +
 +    (void)SetNamedSecurityInfoW(
 +	    wn,			// Abstract filename
-+	    SE_FILE_OBJECT,		// File Object
++	    SE_FILE_OBJECT,	// File Object
 +	    sec_info,
-+	    p->pSidOwner,		// Ownership information.
-+	    p->pSidGroup,		// Group membership.
++	    p->pSidOwner,	// Ownership information.
++	    p->pSidGroup,	// Group membership.
 +	    p->pDacl,		// Discretionary information.
 +	    p->pSacl		// For auditing purposes.
 +	    );
@@ -1916,7 +1937,7 @@ index 10ca41881..9518c14da 100644
  #endif
  }
  
-@@ -4166,25 +3893,23 @@ vim_create_process(
+@@ -4166,52 +3891,35 @@ vim_create_process(
      LPVOID		*env,
      char		*cwd)
  {
@@ -1924,41 +1945,33 @@ index 10ca41881..9518c14da 100644
 -    {
 -	BOOL	ret;
 -	WCHAR	*wcmd, *wcwd = NULL;
-+    BOOL	ret;
-+    WCHAR	*wcmd, *wcwd = NULL;
- 
+-
 -	wcmd = enc_to_utf16((char_u *)cmd, NULL);
 -	if (wcmd == NULL)
 -	    goto fallback;
 -	if (cwd != NULL)
-+    wcmd = enc_to_utf16((char_u *)cmd, NULL);
-+    if (wcmd == NULL)
-+	return FALSE;
-+    if (cwd != NULL)
-+    {
-+	wcwd = enc_to_utf16((char_u *)cwd, NULL);
-+	if (wcwd == NULL)
- 	{
+-	{
 -	    wcwd = enc_to_utf16((char_u *)cwd, NULL);
 -	    if (wcwd == NULL)
 -	    {
 -		vim_free(wcmd);
 -		goto fallback;
 -	    }
-+	    vim_free(wcmd);
-+	    return FALSE;
- 	}
-+    }
+-	}
++    BOOL	ret = FALSE;
++    WCHAR	*wcmd, *wcwd = NULL;
  
 -	ret = CreateProcessW(
-+    ret = CreateProcessW(
- 	    NULL,			/* Executable name */
- 	    wcmd,			/* Command to execute */
- 	    NULL,			/* Process security attributes */
-@@ -4195,23 +3920,10 @@ vim_create_process(
- 	    wcwd,			/* Current directory */
- 	    (LPSTARTUPINFOW)si,	/* Startup information */
- 	    pi);			/* Process information */
+-	    NULL,			/* Executable name */
+-	    wcmd,			/* Command to execute */
+-	    NULL,			/* Process security attributes */
+-	    NULL,			/* Thread security attributes */
+-	    inherit_handles,	/* Inherit handles */
+-	    flags,			/* Creation flags */
+-	    env,			/* Environment */
+-	    wcwd,			/* Current directory */
+-	    (LPSTARTUPINFOW)si,	/* Startup information */
+-	    pi);			/* Process information */
 -	vim_free(wcmd);
 -	if (wcwd != NULL)
 -	    vim_free(wcwd);
@@ -1976,6 +1989,28 @@ index 10ca41881..9518c14da 100644
 -	cwd,			/* Current directory */
 -	si,			/* Startup information */
 -	pi);			/* Process information */
++    wcmd = enc_to_utf16((char_u *)cmd, NULL);
++    if (wcmd == NULL)
++	return FALSE;
++    if (cwd != NULL)
++    {
++	wcwd = enc_to_utf16((char_u *)cwd, NULL);
++	if (wcwd == NULL)
++	    goto theend;
++    }
++
++    ret = CreateProcessW(
++	    NULL,		// Executable name
++	    wcmd,		// Command to execute
++	    NULL,		// Process security attributes
++	    NULL,		// Thread security attributes
++	    inherit_handles,	// Inherit handles
++	    flags,		// Creation flags
++	    env,		// Environment
++	    wcwd,		// Current directory
++	    (LPSTARTUPINFOW)si,	// Startup information
++	    pi);		// Process information
++theend:
 +    vim_free(wcmd);
 +    if (wcwd != NULL)
 +	vim_free(wcwd);
@@ -1983,7 +2018,7 @@ index 10ca41881..9518c14da 100644
  }
  
  
-@@ -4220,18 +3932,16 @@ vim_shell_execute(
+@@ -4220,18 +3928,16 @@ vim_shell_execute(
      char *cmd,
      INT	 n_show_cmd)
  {
@@ -2012,7 +2047,7 @@ index 10ca41881..9518c14da 100644
  }
  
  
-@@ -4794,17 +4504,16 @@ mch_system(char *cmd, int options)
+@@ -4794,17 +4500,16 @@ mch_system(char *cmd, int options)
      static int
  mch_system(char *cmd, int options)
  {
@@ -2040,7 +2075,7 @@ index 10ca41881..9518c14da 100644
  }
  
  #endif
-@@ -4901,51 +4610,29 @@ mch_call_shell(
+@@ -4901,51 +4606,29 @@ mch_call_shell(
      int		x = 0;
      int		tmode = cur_tmode;
  #ifdef FEAT_TITLE
@@ -2107,7 +2142,7 @@ index 10ca41881..9518c14da 100644
  #endif
  
      out_flush();
-@@ -5145,18 +4832,13 @@ mch_call_shell(
+@@ -5145,18 +4828,13 @@ mch_call_shell(
  			"External commands will not pause after completion.\n"
  			"See  :help win32-vimrun  for more information.");
  		    char *title = _("Vim Warning");
@@ -2132,7 +2167,7 @@ index 10ca41881..9518c14da 100644
  		    need_vimrun_warning = FALSE;
  		}
  		if (!s_dont_use_vimrun && p_stmp)
-@@ -5220,23 +4902,16 @@ job_io_file_open(
+@@ -5220,23 +4898,16 @@ job_io_file_open(
  	DWORD dwFlagsAndAttributes)
  {
      HANDLE h;
@@ -2164,7 +2199,7 @@ index 10ca41881..9518c14da 100644
      return h;
  }
  
-@@ -6265,81 +5940,56 @@ write_chars(
+@@ -6265,81 +5936,56 @@ write_chars(
      char_u *pchBuf,
      DWORD  cbToWrite)
  {
@@ -2201,7 +2236,7 @@ index 10ca41881..9518c14da 100644
 +	unibuflen = length;
 +    }
 +    MultiByteToWideChar(cp, 0, (LPCSTR)pchBuf, cbToWrite,
-+	    unicodebuf, unibuflen);
++			unicodebuf, unibuflen);
  
 -	cells = mb_string2cells(pchBuf, cbToWrite);
 +    cells = mb_string2cells(pchBuf, cbToWrite);
@@ -2223,9 +2258,9 @@ index 10ca41881..9518c14da 100644
 +    if (!USE_VTP)
 +    {
 +	FillConsoleOutputAttribute(g_hConOut, g_attrCurrent, cells,
-+		coord, &written);
-+	/* When writing fails or didn't write a single character, pretend one
-+	 * character was written, otherwise we get stuck. */
++				    coord, &written);
++	// When writing fails or didn't write a single character, pretend one
++	// character was written, otherwise we get stuck.
 +	if (WriteConsoleOutputCharacterW(g_hConOut, unicodebuf, length,
 +		    coord, &cchwritten) == 0
 +		|| cchwritten == 0)
@@ -2287,7 +2322,7 @@ index 10ca41881..9518c14da 100644
      }
  
      while (g_coord.X > g_srScrollRegion.Right)
-@@ -6690,7 +6340,7 @@ mch_delay(
+@@ -6690,7 +6336,7 @@ mch_delay(
      int
  mch_remove(char_u *name)
  {
@@ -2296,7 +2331,7 @@ index 10ca41881..9518c14da 100644
      int		n;
  
      /*
-@@ -6702,17 +6352,13 @@ mch_remove(char_u *name)
+@@ -6702,17 +6348,13 @@ mch_remove(char_u *name)
  
      win32_setattrs(name, FILE_ATTRIBUTE_NORMAL);
  
@@ -2321,7 +2356,7 @@ index 10ca41881..9518c14da 100644
  }
  
  
-@@ -6763,8 +6409,23 @@ mch_total_mem(int special UNUSED)
+@@ -6763,8 +6405,23 @@ mch_total_mem(int special UNUSED)
  }
  
  /*
@@ -2347,7 +2382,7 @@ index 10ca41881..9518c14da 100644
   */
      int
  mch_wrename(WCHAR *wold, WCHAR *wnew)
-@@ -6775,6 +6436,8 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6775,6 +6432,8 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
      WCHAR	szNewPath[_MAX_PATH + 1];
      HANDLE	hf;
  
@@ -2356,7 +2391,7 @@ index 10ca41881..9518c14da 100644
      p = wold;
      for (i = 0; wold[i] != NUL; ++i)
  	if ((wold[i] == '/' || wold[i] == '\\' || wold[i] == ':')
-@@ -6783,33 +6446,52 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6783,33 +6442,52 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
      if ((int)(wold + i - p) < 8 || p[6] != '~')
  	return (MoveFileW(wold, wnew) == 0);
  
@@ -2409,7 +2444,7 @@ index 10ca41881..9518c14da 100644
      if (!DeleteFileW(wold))
  	return -8;
  
-@@ -6818,109 +6500,25 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
+@@ -6818,109 +6496,25 @@ mch_wrename(WCHAR *wold, WCHAR *wnew)
  
  
  /*
@@ -2527,7 +2562,7 @@ index 10ca41881..9518c14da 100644
  }
  
  /*
-@@ -6943,55 +6541,35 @@ mch_access(char *n, int p)
+@@ -6943,55 +6537,35 @@ mch_access(char *n, int p)
  {
      HANDLE	hFile;
      int		retval = -1;	    /* default: fail */
@@ -2600,7 +2635,7 @@ index 10ca41881..9518c14da 100644
  	}
  
  	if (p & W_OK)
-@@ -7000,19 +6578,10 @@ mch_access(char *n, int p)
+@@ -7000,19 +6574,10 @@ mch_access(char *n, int p)
  	     * directories on read-only network shares.  However, in
  	     * directories whose ACL allows writes but denies deletes will end
  	     * up keeping the temporary file :-(. */
@@ -2623,7 +2658,7 @@ index 10ca41881..9518c14da 100644
  	}
      }
      else
-@@ -7025,12 +6594,8 @@ mch_access(char *n, int p)
+@@ -7025,12 +6590,8 @@ mch_access(char *n, int p)
  	DWORD access_mode = ((p & W_OK) ? GENERIC_WRITE : 0)
  					     | ((p & R_OK) ? GENERIC_READ : 0);
  
@@ -2638,7 +2673,7 @@ index 10ca41881..9518c14da 100644
  	if (hFile == INVALID_HANDLE_VALUE)
  	    goto getout;
  	CloseHandle(hFile);
-@@ -7053,18 +6618,14 @@ mch_open(const char *name, int flags, int mode)
+@@ -7053,18 +6614,14 @@ mch_open(const char *name, int flags, int mode)
      WCHAR	*wn;
      int		f;
  
@@ -2664,7 +2699,7 @@ index 10ca41881..9518c14da 100644
      /* open() can open a file which name is longer than _MAX_PATH bytes
       * and shorter than _MAX_PATH characters successfully, but sometimes it
       * causes unexpected error in another part. We make it an error explicitly
-@@ -7073,10 +6634,11 @@ mch_open(const char *name, int flags, int mode)
+@@ -7073,10 +6630,11 @@ mch_open(const char *name, int flags, int mode)
  	return -1;
  
      return open(name, flags, mode);
@@ -2677,7 +2712,7 @@ index 10ca41881..9518c14da 100644
   */
      FILE *
  mch_fopen(const char *name, const char *mode)
-@@ -7084,41 +6646,29 @@ mch_fopen(const char *name, const char *mode)
+@@ -7084,41 +6642,29 @@ mch_fopen(const char *name, const char *mode)
      WCHAR	*wn, *wm;
      FILE	*f = NULL;
  
@@ -2738,7 +2773,7 @@ index 10ca41881..9518c14da 100644
  }
  
  /*
-@@ -7596,6 +7146,7 @@ fix_arg_enc(void)
+@@ -7596,6 +7142,7 @@ fix_arg_enc(void)
  mch_setenv(char *var, char *value, int x)
  {
      char_u	*envbuf;
@@ -2746,7 +2781,7 @@ index 10ca41881..9518c14da 100644
  
      envbuf = alloc((unsigned)(STRLEN(var) + STRLEN(value) + 2));
      if (envbuf == NULL)
-@@ -7603,29 +7154,17 @@ mch_setenv(char *var, char *value, int x)
+@@ -7603,29 +7150,17 @@ mch_setenv(char *var, char *value, int x)
  
      sprintf((char *)envbuf, "%s=%s", var, value);
  
