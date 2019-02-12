@@ -508,9 +508,9 @@ index 8d46e53cf..735641f74 100644
 + * Only works all the code points are inside ASCII range.
 + */
 +    static int
-+utf16ascncmp(const WCHAR *w, const char *p, int n)
++utf16ascncmp(const WCHAR *w, const char *p, size_t n)
 +{
-+    int i;
++    size_t i;
 +
 +    for (i = 0; i < n; i++)
 +    {
