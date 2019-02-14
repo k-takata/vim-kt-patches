@@ -1,32 +1,32 @@
 # HG changeset patch
 # Parent 6ee3a815113c128147fa9831c2004916a7daba86
-# Parent  f7ae8176ec5063d3f23f8c9f5b9d38ef5951fa89
+# Parent  54b1387be17d939d03f3c1abc54ad15387e64c31
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -3508,14 +3508,17 @@ mch_writable(char_u *name)
+@@ -3515,14 +3515,17 @@ mch_writable(char_u *name)
      int
  mch_can_exe(char_u *name, char_u **path, int use_path)
  {
 -    char_u	buf[_MAX_PATH];
-+    /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
-+     * means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
-+     * UTF-8. */
++    // WinNT and later can use _MAX_PATH wide characters for a pathname, which
++    // means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
++    // UTF-8.
 +    char_u	buf[_MAX_PATH * 3];
      int		len = (int)STRLEN(name);
      char_u	*p, *saved;
  
 -    if (len >= _MAX_PATH)	/* safety check */
-+    if (len >= sizeof(buf))	/* safety check */
++    if (len >= sizeof(buf))	// safety check
  	return FALSE;
  
 -    /* Ty using the name directly when a Unix-shell like 'shell'. */
-+    /* Try using the name directly when a Unix-shell like 'shell'. */
++    // Try using the name directly when a Unix-shell like 'shell'.
      if (strstr((char *)gettail(p_sh), "sh") != NULL)
  	if (executable_exists((char *)name, path, use_path))
  	    return TRUE;
-@@ -3548,7 +3551,7 @@ mch_can_exe(char_u *name, char_u **path,
+@@ -3555,7 +3558,7 @@ mch_can_exe(char_u *name, char_u **path,
      }
      vim_free(saved);
  
@@ -35,7 +35,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      p = mch_getenv("PATHEXT");
      if (p == NULL)
  	p = (char_u *)".com;.exe;.bat;.cmd";
-@@ -3563,7 +3566,7 @@ mch_can_exe(char_u *name, char_u **path,
+@@ -3570,7 +3573,7 @@ mch_can_exe(char_u *name, char_u **path,
  		++p;
  	}
  	else
