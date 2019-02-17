@@ -48,6 +48,6 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -# pragma optimize("", on)
 -#endif
 -
- #endif /* FEAT_GUI_W32 */
+ #endif /* FEAT_GUI_MSWIN */
  
  

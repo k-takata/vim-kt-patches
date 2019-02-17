@@ -7,7 +7,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 @@ -4885,7 +4885,8 @@ mch_call_shell(
  	{
  	    cmdlen = (
- #ifdef FEAT_GUI_W32
+ #ifdef FEAT_GUI_MSWIN
 -		(!p_stmp ? 0 : STRLEN(vimrun_path)) +
 +		(!s_dont_use_vimrun && p_stmp ?
 +		    STRLEN(vimrun_path) : STRLEN(p_sh) + STRLEN(p_shcf)) +
