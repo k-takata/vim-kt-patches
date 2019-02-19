@@ -85,7 +85,7 @@ index ead617a79..02108f591 100644
 -    char	*font_name = lf.lfFaceName;
 +    char	*font_name;
  
-+    font_name = utf16_to_enc(lf.lfFaceName, NULL);
++    font_name = (char *)utf16_to_enc(lf.lfFaceName, NULL);
 +    if (font_name == NULL)
 +	return NULL;
      charset_name = charset_id2name((int)lf.lfCharSet);
