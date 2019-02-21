@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  a7fe8a7065f3ebf6b9d67c8a8a157c9ff77a5e92
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -934,7 +934,7 @@ ifeq (yes, $(USE_STDCPLUS))
+ LINK = $(CXX)
+ ifeq (yes, $(STATIC_STDCPLUS))
+ #LIB += -static-libstdc++ -static-libgcc
+-LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
++LIB += -Wl,-Bstatic -lstdc++ -lgcc -Wl,-Bdynamic
+ endif
+ else
+ LINK = $(CC)

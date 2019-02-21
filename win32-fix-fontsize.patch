@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent  90ec36c89f87bd35447987dcf10fcbafa9d3da1a
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -1458,10 +1458,16 @@ GetFontSize(GuiFont font)
+     HWND    hwnd = GetDesktopWindow();
+     HDC	    hdc = GetWindowDC(hwnd);
+     HFONT   hfntOld = SelectFont(hdc, (HFONT)font);
++    SIZE    size;
+     TEXTMETRIC tm;
+ 
+     GetTextMetrics(hdc, &tm);
+-    gui.char_width = tm.tmAveCharWidth + tm.tmOverhang;
++    // GetTextMetrics() may not return the right value in tmAveCharWidth
++    // for some fonts.
++    GetTextExtentPoint(hdc,
++	    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
++	    52, &size);
++    gui.char_width = (size.cx / 26 + 1) / 2 + tm.tmOverhang;
+ 
+     gui.char_height = tm.tmHeight + p_linespace;
+ 
