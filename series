@@ -36,7 +36,6 @@ big5corr.patch
 0003-Stop-using-ANSI-findrep.patch
 use-wide-api-in-modify_fname.patch
 use-wide-api-in-vim_getenv.patch
-fix-mingw-static.patch
 win32-fix-fontsize.patch
 win32-remove-get_cmd_args.patch
 fix-config_cache-removal.patch #+rejected
