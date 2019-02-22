@@ -34,8 +34,11 @@ big5corr.patch
 0001-Simplify-fname_case.patch
 0002-Stop-using-ANSI-APIs.patch
 0003-Stop-using-ANSI-findrep.patch
+0004-Stop-using-ANSI-APIs-in-reparse.patch
 use-wide-api-in-modify_fname.patch
 use-wide-api-in-vim_getenv.patch
 win32-fix-fontsize.patch
 win32-remove-get_cmd_args.patch
+dwrite-redraw-after-recreate-target.patch
+remove-mswin-winclip.patch
 fix-config_cache-removal.patch #+rejected
