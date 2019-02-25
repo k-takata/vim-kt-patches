@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f309f2107e3531205cf4869d9f3448b26a7d0029
+# Parent  55ca2cb30bd8fedea28d37f72c116950ebc2626f
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -306,6 +306,15 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		if (decode_key_event(&ir.Event.KeyEvent, &ch, &ch2,
  								 NULL, FALSE))
  		    return TRUE;
+@@ -1636,7 +1636,7 @@ WaitForChar(long msec, int ignore_input)
+ 		COORD dwSize = ir.Event.WindowBufferSizeEvent.dwSize;
+ 
+ 		// Only call shell_resized() when the size actually change to
+-		// avoid the screen is cleard.
++		// avoid the screen is cleared.
+ 		if (dwSize.X != Columns || dwSize.Y != Rows)
+ 		{
+ 		    CONSOLE_SCREEN_BUFFER_INFO csbi;
 @@ -1646,26 +1646,25 @@ WaitForChar(long msec, int ignore_input)
  		    shell_resized();
  		}
