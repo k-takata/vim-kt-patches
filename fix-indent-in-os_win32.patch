@@ -591,7 +591,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Silently handle invalid parameters to CRT functions */
      SET_INVALID_PARAM_HANDLER;
-@@ -2584,15 +2582,15 @@ mch_init(void)
+@@ -2584,21 +2582,21 @@ mch_init(void)
  	create_conin();
      g_hConOut = GetStdHandle(STD_OUTPUT_HANDLE);
  
@@ -610,6 +610,13 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (cterm_normal_fg_color == 0)
  	cterm_normal_fg_color = (g_attrCurrent & 0xf) + 1;
      if (cterm_normal_bg_color == 0)
+ 	cterm_normal_bg_color = ((g_attrCurrent >> 4) & 0xf) + 1;
+ 
+-    // Fg and Bg color index nunmber at startup
++    // Fg and Bg color index number at startup
+     g_color_index_fg = g_attrDefault & 0xf;
+     g_color_index_bg = (g_attrDefault >> 4) & 0xf;
+ 
 @@ -2609,7 +2607,7 @@ mch_init(void)
      GetConsoleMode(g_hConIn,  &g_cmodein);
      GetConsoleMode(g_hConOut, &g_cmodeout);
@@ -699,6 +706,15 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      exit(r);
  }
+@@ -3059,7 +3057,7 @@ mch_is_linked(char_u *fname)
+ /*
+  * Get the by-handle-file-information for "fname".
+  * Returns FILEINFO_OK when OK.
+- * returns FILEINFO_ENC_FAIL when enc_to_utf16() failed.
++ * Returns FILEINFO_ENC_FAIL when enc_to_utf16() failed.
+  * Returns FILEINFO_READ_FAIL when CreateFile() failed.
+  * Returns FILEINFO_INFO_FAIL when GetFileInformationByHandle() failed.
+  */
 @@ -3486,9 +3484,9 @@ handler_routine(
  		     : dwCtrlType == CTRL_LOGOFF_EVENT
  			 ? _("logoff")
@@ -723,8 +739,9 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +# endif
  	cmodeout &= ~(
 -#ifdef FEAT_TERMGUICOLORS
+-	    /* Do not turn off the ENABLE_PROCESSRD_OUTPUT flag when using
 +# ifdef FEAT_TERMGUICOLORS
- 	    /* Do not turn off the ENABLE_PROCESSRD_OUTPUT flag when using
++	    /* Do not turn off the ENABLE_PROCESSED_OUTPUT flag when using
  	     * VTP. */
  	    ((vtp_working) ? 0 : ENABLE_PROCESSED_OUTPUT) |
 -#else
