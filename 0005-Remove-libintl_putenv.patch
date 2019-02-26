@@ -1,10 +1,18 @@
-# HG changeset patch
-# Parent  b6706ea6dd33b6ef00ead86b8fa687872846c763
+From ec6b34aeeb90affae7a174fd23f4a618749f61b1 Mon Sep 17 00:00:00 2001
+From: "K.Takata" <kentkt@csc.jp>
+Date: Wed, 27 Feb 2019 02:14:01 +0900
+Subject: [PATCH] Remove libintl_putenv()
+
+---
+ src/os_win32.c | 16 +---------------
+ src/vim.h      |  1 -
+ 2 files changed, 1 insertion(+), 16 deletions(-)
 
 diff --git a/src/os_win32.c b/src/os_win32.c
+index 5b42a6849..9aef76179 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -586,7 +586,6 @@ static char *null_libintl_ngettext(const
+@@ -586,7 +586,6 @@ static char *null_libintl_ngettext(const char *, const char *, unsigned long n);
  static char *null_libintl_textdomain(const char *);
  static char *null_libintl_bindtextdomain(const char *, const char *);
  static char *null_libintl_bind_textdomain_codeset(const char *, const char *);
@@ -12,7 +20,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  static int null_libintl_wputenv(const wchar_t *);
  
  static HINSTANCE hLibintlDLL = NULL;
-@@ -598,7 +597,6 @@ char *(*dyn_libintl_bindtextdomain)(cons
+@@ -598,7 +597,6 @@ char *(*dyn_libintl_bindtextdomain)(const char *, const char *)
  						= null_libintl_bindtextdomain;
  char *(*dyn_libintl_bind_textdomain_codeset)(const char *, const char *)
  				       = null_libintl_bind_textdomain_codeset;
@@ -45,23 +53,24 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      dyn_libintl_wputenv		= null_libintl_wputenv;
  }
  
-@@ -734,12 +726,6 @@ null_libintl_textdomain(const char *doma
+@@ -733,12 +725,6 @@ null_libintl_textdomain(const char *domainname UNUSED)
+     return NULL;
  }
  
-     static int
+-    static int
 -null_libintl_putenv(const char *envstring UNUSED)
 -{
 -    return 0;
 -}
 -
--    static int
+     static int
  null_libintl_wputenv(const wchar_t *envstring UNUSED)
  {
-     return 0;
 diff --git a/src/vim.h b/src/vim.h
+index fbae72d8d..62f631a66 100644
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -566,7 +566,6 @@ extern int (*dyn_libintl_putenv)(const c
+@@ -559,7 +559,6 @@ extern int (*dyn_libintl_putenv)(const char *envstring);
  #   define HAVE_BIND_TEXTDOMAIN_CODESET 1
  #  endif
  #  define textdomain(domain) (*dyn_libintl_textdomain)(domain)
@@ -69,3 +78,6 @@ diff --git a/src/vim.h b/src/vim.h
  #  define libintl_wputenv(envstring) (*dyn_libintl_wputenv)(envstring)
  # else
  #  include <libintl.h>
+-- 
+2.17.0
+

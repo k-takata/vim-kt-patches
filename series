@@ -35,6 +35,7 @@ big5corr.patch
 0002-Stop-using-ANSI-APIs.patch
 0003-Stop-using-ANSI-findrep.patch
 0004-Stop-using-ANSI-APIs-in-reparse.patch
+0005-Remove-libintl_putenv.patch
 use-wide-api-in-modify_fname.patch
 use-wide-api-in-vim_getenv.patch
 win32-fix-fontsize.patch
@@ -44,5 +45,4 @@ remove-mswin-winclip.patch
 use-wide-api-in-printdlg.patch
 remove-__cygwin32__.patch
 fix-indent-in-os_win32.patch
-remove-libintl_putenv.patch
 fix-config_cache-removal.patch #+rejected
