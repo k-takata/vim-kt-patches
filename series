@@ -44,4 +44,5 @@ remove-mswin-winclip.patch
 use-wide-api-in-printdlg.patch
 remove-__cygwin32__.patch
 fix-indent-in-os_win32.patch
+remove-libintl_putenv.patch
 fix-config_cache-removal.patch #+rejected
