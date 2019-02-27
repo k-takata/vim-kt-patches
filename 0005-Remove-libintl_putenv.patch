@@ -1,12 +1,12 @@
-From ec6b34aeeb90affae7a174fd23f4a618749f61b1 Mon Sep 17 00:00:00 2001
+From 7fff641665113c45220bfd0c1464f9266e7427dd Mon Sep 17 00:00:00 2001
 From: "K.Takata" <kentkt@csc.jp>
 Date: Wed, 27 Feb 2019 02:14:01 +0900
 Subject: [PATCH] Remove libintl_putenv()
 
 ---
  src/os_win32.c | 16 +---------------
- src/vim.h      |  1 -
- 2 files changed, 1 insertion(+), 16 deletions(-)
+ src/vim.h      |  3 +--
+ 2 files changed, 2 insertions(+), 17 deletions(-)
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 index 5b42a6849..9aef76179 100644
@@ -67,9 +67,18 @@ index 5b42a6849..9aef76179 100644
  null_libintl_wputenv(const wchar_t *envstring UNUSED)
  {
 diff --git a/src/vim.h b/src/vim.h
-index fbae72d8d..62f631a66 100644
+index fbae72d8d..d47999ec2 100644
 --- a/src/vim.h
 +++ b/src/vim.h
+@@ -536,7 +536,7 @@ extern char *(*dyn_libintl_ngettext)(const char *msgid, const char *msgid_plural
+ extern char *(*dyn_libintl_bindtextdomain)(const char *domainname, const char *dirname);
+ extern char *(*dyn_libintl_bind_textdomain_codeset)(const char *domainname, const char *codeset);
+ extern char *(*dyn_libintl_textdomain)(const char *domainname);
+-extern int (*dyn_libintl_putenv)(const char *envstring);
++extern int (*dyn_libintl_wputenv)(const char *envstring);
+ #endif
+ 
+ 
 @@ -559,7 +559,6 @@ extern int (*dyn_libintl_putenv)(const char *envstring);
  #   define HAVE_BIND_TEXTDOMAIN_CODESET 1
  #  endif

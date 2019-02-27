@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  baa3f14472b80f271f32cfba54d17513fed2df11
+# Parent  8e9498afde404ea7e9c16b022082dc676fd82156
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
@@ -159,22 +159,28 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 --- a/src/os_w32exe.c
 +++ b/src/os_w32exe.c
-@@ -46,26 +46,12 @@ WinMain(
+@@ -42,29 +42,20 @@ static void (_cdecl *pSaveInst)(HINSTANC
+ WinMain(
+     HINSTANCE	hInstance UNUSED,
+     HINSTANCE	hPrevInst UNUSED,
+-    LPSTR	lpszCmdLine,
++    LPSTR	lpszCmdLine UNUSED,
      int		nCmdShow UNUSED)
  {
      int		argc = 0;
 -    char	**argv;
 -    char	*tofree;
--    char	prog[256];
 +    char	**argv = NULL;
- #ifdef VIMDLL
++#ifdef VIMDLL
+     char	prog[256];
+-#ifdef VIMDLL
      char	*p;
      HANDLE	hLib;
- #endif
+-#endif
  
--    /* Ron: added full path name so that the $VIM variable will get set to our
--     * startup path (so the .vimrc file can be found w/o a VIM env. var.) */
--    GetModuleFileName(NULL, prog, 255);
+     /* Ron: added full path name so that the $VIM variable will get set to our
+      * startup path (so the .vimrc file can be found w/o a VIM env. var.) */
+     GetModuleFileName(NULL, prog, 255);
 -
 -    argc = get_cmd_args(prog, (char *)lpszCmdLine, &argv, &tofree);
 -    if (argc == 0)
@@ -183,11 +189,11 @@ diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 -							      "VIM Error", 0);
 -	return 0;
 -    }
--
++#endif
+ 
  #ifdef DYNAMIC_GETTEXT
      /* Initialize gettext library */
-     dyn_libintl_init();
-@@ -127,9 +113,6 @@ WinMain(
+@@ -127,9 +118,6 @@ WinMain(
      FreeLibrary(hLib);
  errout:
  #endif
