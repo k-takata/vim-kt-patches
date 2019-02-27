@@ -38,10 +38,10 @@ big5corr.patch
 0005-Remove-libintl_putenv.patch
 use-wide-api-in-modify_fname.patch
 use-wide-api-in-vim_getenv.patch
+use-wide-api-in-printdlg.patch
 win32-fix-fontsize.patch
 win32-remove-get_cmd_args.patch
-dwrite-redraw-after-recreate-target.patch
-use-wide-api-in-printdlg.patch
-fix-indent-in-os_win32.patch
 win32-dont-call-dyn_libintl_init.patch
+dwrite-redraw-after-recreate-target.patch
+fix-indent-in-os_win32.patch
 fix-config_cache-removal.patch #+rejected
