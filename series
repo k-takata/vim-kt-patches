@@ -41,7 +41,6 @@ use-wide-api-in-vim_getenv.patch
 win32-fix-fontsize.patch
 win32-remove-get_cmd_args.patch
 dwrite-redraw-after-recreate-target.patch
-remove-mswin-winclip.patch
 use-wide-api-in-printdlg.patch
 fix-indent-in-os_win32.patch
 dont-call-dyn_libintl_init.patch
