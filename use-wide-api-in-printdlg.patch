@@ -1,12 +1,10 @@
 # HG changeset patch
-# Parent  39c5681cb7a66df96f74b8136a1a743bf8d4a4b6
+# Parent  b7f5b41a092ab7f9052837b65f4b2caf373356af
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -105,7 +105,7 @@ typedef int LRESULT;
- typedef int MOUSE_EVENT_RECORD;
- typedef int NEWTEXTMETRICW;
+@@ -107,5 +107,5 @@ typedef int LRESULT;
  typedef int PACL;
 -typedef int PRINTDLG;
 +typedef int PRINTDLGW;
@@ -80,7 +78,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      if (mem != NULL)
      {
  	if (mem->dmCopies != 1)
-@@ -1442,34 +1442,19 @@ mch_print_init(prt_settings_T *psettings
+@@ -1442,34 +1442,20 @@ mch_print_init(prt_settings_T *psettings
      devname = (DEVNAMES *)GlobalLock(prt_dlg.hDevNames);
      if (devname != 0)
      {
@@ -105,11 +103,14 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 -	    if (to_free != NULL)
 -		port_name = to_free;
 -	}
+-	prt_name = alloc((unsigned)(STRLEN(printer_name) + STRLEN(port_name)
+-							     + STRLEN(text)));
 +	char_u  *printer_name = utf16_to_enc(wprinter_name, NULL);
 +	char_u	*port_name = utf16_to_enc(wport_name, NULL);
 +
- 	prt_name = alloc((unsigned)(STRLEN(printer_name) + STRLEN(port_name)
- 							     + STRLEN(text)));
++	if (printer_name != NULL && port_name != NULL)
++	    prt_name = alloc((unsigned)(STRLEN(printer_name)
++					+ STRLEN(port_name) + STRLEN(text)));
  	if (prt_name != NULL)
  	    wsprintf((char *)prt_name, (const char *)text,
  		    printer_name, port_name);
