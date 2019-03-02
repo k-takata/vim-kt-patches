@@ -1749,7 +1749,7 @@ index 10ca41881..d5d89a15a 100644
  #endif
  }
  
-@@ -4166,52 +3891,35 @@ vim_create_process(
+@@ -4166,51 +3891,34 @@ vim_create_process(
      LPVOID		*env,
      char		*cwd)
  {
@@ -1785,8 +1785,7 @@ index 10ca41881..d5d89a15a 100644
 -	    (LPSTARTUPINFOW)si,	/* Startup information */
 -	    pi);			/* Process information */
 -	vim_free(wcmd);
--	if (wcwd != NULL)
--	    vim_free(wcwd);
+-	vim_free(wcwd);
 -	return ret;
 -    }
 -fallback:
@@ -1824,8 +1823,7 @@ index 10ca41881..d5d89a15a 100644
 +	    pi);		// Process information
 +theend:
 +    vim_free(wcmd);
-+    if (wcwd != NULL)
-+	vim_free(wcwd);
++    vim_free(wcwd);
 +    return ret;
  }
  
