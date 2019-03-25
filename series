@@ -42,7 +42,6 @@ use-wide-api-in-printdlg.patch
 win32-fix-fontsize.patch
 win32-remove-get_cmd_args.patch
 win32-dont-call-dyn_libintl_init.patch
-dwrite-redraw-after-recreate-target.patch
 fix-indent-in-os_win32.patch
 simplify-swap_tcap.patch
 remove-needless-platformid.patch
