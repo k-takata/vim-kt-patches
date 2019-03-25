@@ -45,4 +45,6 @@ win32-dont-call-dyn_libintl_init.patch
 dwrite-redraw-after-recreate-target.patch
 fix-indent-in-os_win32.patch
 simplify-swap_tcap.patch
+remove-needless-platformid.patch
+nsis-use-r-option.patch
 fix-config_cache-removal.patch #+rejected
