@@ -42,4 +42,5 @@ use-wide-api-in-printdlg.patch
 win32-fix-fontsize.patch
 fix-indent-in-os_win32.patch
 simplify-swap_tcap.patch
+simplify-os_w32exe.c.patch
 fix-config_cache-removal.patch #+rejected
