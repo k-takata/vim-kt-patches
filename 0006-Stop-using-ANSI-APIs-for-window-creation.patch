@@ -1,0 +1,188 @@
+From 1799011e085e076907c3988f0a146946751daac2 Mon Sep 17 00:00:00 2001
+From: "K.Takata" <kentkt@csc.jp>
+Date: Sun, 31 Mar 2019 16:08:23 +0900
+Subject: [PATCH] Stop using ANSI APIs for window creation
+
+---
+ src/glbl_ime.cpp |   9 +----
+ src/globals.h    |   4 --
+ src/gui_w32.c    | 100 +++++++++++------------------------------------
+ 3 files changed, 24 insertions(+), 89 deletions(-)
+
+diff --git a/src/glbl_ime.cpp b/src/glbl_ime.cpp
+index 166199074..6fd84ecc4 100644
+--- a/src/glbl_ime.cpp
++++ b/src/glbl_ime.cpp
+@@ -133,14 +133,7 @@ global_ime_DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+ 
+     if (pIApp == NULL || pIApp->OnDefWindowProc(hWnd, Msg,
+ 					    wParam, lParam, &lResult) != S_OK)
+-    {
+-#if defined(MSWIN)
+-	if (wide_WindowProc)
+-	    lResult = DefWindowProcW(hWnd, Msg, wParam, lParam);
+-	else
+-#endif
+-	    lResult = DefWindowProc(hWnd, Msg, wParam, lParam);
+-    }
++	lResult = DefWindowProcW(hWnd, Msg, wParam, lParam);
+     return lResult;
+ }
+ 
+diff --git a/src/globals.h b/src/globals.h
+index b225e59a7..e7ea84e70 100644
+--- a/src/globals.h
++++ b/src/globals.h
+@@ -822,10 +822,6 @@ EXTERN int	enc_latin9 INIT(= FALSE);	/* 'encoding' is latin9 */
+ #endif
+ EXTERN int	has_mbyte INIT(= 0);		/* any multi-byte encoding */
+ 
+-#if defined(MSWIN)
+-EXTERN int	wide_WindowProc INIT(= FALSE);	/* use wide WindowProc() */
+-#endif
+-
+ /*
+  * To speed up BYTELEN() we fill a table with the byte lengths whenever
+  * enc_utf8 or enc_dbcs changes.
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+index 0ca282a62..0e324d24d 100644
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -390,7 +390,7 @@ directx_binddc(void)
+ }
+ #endif
+ 
+-/* use of WindowProc depends on wide_WindowProc */
++/* use of WindowProc depends on Global IME */
+ #define MyWindowProc vim_WindowProc
+ 
+ extern int current_font_height;	    /* this is in os_mswin.c */
+@@ -1273,9 +1273,7 @@ vim_WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+ #ifdef GLOBAL_IME
+     return global_ime_DefWindowProc(hwnd, message, wParam, lParam);
+ #else
+-    if (wide_WindowProc)
+-	return DefWindowProcW(hwnd, message, wParam, lParam);
+-    return DefWindowProc(hwnd, message, wParam, lParam);
++    return DefWindowProcW(hwnd, message, wParam, lParam);
+ #endif
+ }
+ 
+@@ -4989,32 +4987,8 @@ gui_mch_init(void)
+ #endif
+ 		    RegisterClassW(&wndclassw)) == 0)
+ 	    return FAIL;
+-	else
+-	    wide_WindowProc = TRUE;
+     }
+ 
+-    if (!wide_WindowProc)
+-	if (GetClassInfo(s_hinst, szVimWndClass, &wndclass) == 0)
+-	{
+-	    wndclass.style = CS_DBLCLKS;
+-	    wndclass.lpfnWndProc = _WndProc;
+-	    wndclass.cbClsExtra = 0;
+-	    wndclass.cbWndExtra = 0;
+-	    wndclass.hInstance = s_hinst;
+-	    wndclass.hIcon = LoadIcon(wndclass.hInstance, "IDR_VIM");
+-	    wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+-	    wndclass.hbrBackground = s_brush;
+-	    wndclass.lpszMenuName = NULL;
+-	    wndclass.lpszClassName = szVimWndClass;
+-
+-	    if ((
+-#ifdef GLOBAL_IME
+-			atom =
+-#endif
+-			RegisterClass(&wndclass)) == 0)
+-		return FAIL;
+-	}
+-
+     if (vim_parent_hwnd != NULL)
+     {
+ #ifdef HAVE_TRY_EXCEPT
+@@ -5085,60 +5059,32 @@ gui_mch_init(void)
+ #endif
+ 
+     /* Create the text area window */
+-    if (wide_WindowProc)
++    if (GetClassInfoW(s_hinst, szTextAreaClassW, &wndclassw) == 0)
+     {
+-	if (GetClassInfoW(s_hinst, szTextAreaClassW, &wndclassw) == 0)
+-	{
+-	    wndclassw.style = CS_OWNDC;
+-	    wndclassw.lpfnWndProc = _TextAreaWndProc;
+-	    wndclassw.cbClsExtra = 0;
+-	    wndclassw.cbWndExtra = 0;
+-	    wndclassw.hInstance = s_hinst;
+-	    wndclassw.hIcon = NULL;
+-	    wndclassw.hCursor = LoadCursor(NULL, IDC_ARROW);
+-	    wndclassw.hbrBackground = NULL;
+-	    wndclassw.lpszMenuName = NULL;
+-	    wndclassw.lpszClassName = szTextAreaClassW;
+-
+-	    if (RegisterClassW(&wndclassw) == 0)
+-		return FAIL;
+-	}
++	wndclassw.style = CS_OWNDC;
++	wndclassw.lpfnWndProc = _TextAreaWndProc;
++	wndclassw.cbClsExtra = 0;
++	wndclassw.cbWndExtra = 0;
++	wndclassw.hInstance = s_hinst;
++	wndclassw.hIcon = NULL;
++	wndclassw.hCursor = LoadCursor(NULL, IDC_ARROW);
++	wndclassw.hbrBackground = NULL;
++	wndclassw.lpszMenuName = NULL;
++	wndclassw.lpszClassName = szTextAreaClassW;
+ 
+-	s_textArea = CreateWindowExW(
+-	    0,
+-	    szTextAreaClassW, L"Vim text area",
+-	    WS_CHILD | WS_VISIBLE, 0, 0,
+-	    100,				// Any value will do for now
+-	    100,				// Any value will do for now
+-	    s_hwnd, NULL,
+-	    s_hinst, NULL);
+-    }
+-    else if (GetClassInfo(s_hinst, szTextAreaClass, &wndclass) == 0)
+-    {
+-	wndclass.style = CS_OWNDC;
+-	wndclass.lpfnWndProc = _TextAreaWndProc;
+-	wndclass.cbClsExtra = 0;
+-	wndclass.cbWndExtra = 0;
+-	wndclass.hInstance = s_hinst;
+-	wndclass.hIcon = NULL;
+-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+-	wndclass.hbrBackground = NULL;
+-	wndclass.lpszMenuName = NULL;
+-	wndclass.lpszClassName = szTextAreaClass;
+-
+-	if (RegisterClass(&wndclass) == 0)
++	if (RegisterClassW(&wndclassw) == 0)
+ 	    return FAIL;
+-
+-	s_textArea = CreateWindowEx(
+-	    0,
+-	    szTextAreaClass, "Vim text area",
+-	    WS_CHILD | WS_VISIBLE, 0, 0,
+-	    100,				// Any value will do for now
+-	    100,				// Any value will do for now
+-	    s_hwnd, NULL,
+-	    s_hinst, NULL);
+     }
+ 
++    s_textArea = CreateWindowExW(
++	0,
++	szTextAreaClassW, L"Vim text area",
++	WS_CHILD | WS_VISIBLE, 0, 0,
++	100,				// Any value will do for now
++	100,				// Any value will do for now
++	s_hwnd, NULL,
++	s_hinst, NULL);
++
+     if (s_textArea == NULL)
+ 	return FAIL;
+ 
+-- 
+2.17.0
+
