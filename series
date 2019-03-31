@@ -17,7 +17,6 @@ redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 subpixel-artifacts.patch
 fix-italic-overhang-before-space.patch
-fix-mch_can_exe-with-long-filename.patch
 if_ruby-remove-allocate-method.patch
 update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
@@ -34,8 +33,6 @@ big5corr.patch
 0003-Stop-using-ANSI-findrep.patch
 0004-Stop-using-ANSI-APIs-in-reparse.patch
 0005-Remove-libintl_putenv.patch
-use-wide-api-in-modify_fname.patch
-use-wide-api-in-vim_getenv.patch
 use-wide-api-in-printdlg.patch
 win32-fix-fontsize.patch
 fix-indent-in-os_win32.patch
