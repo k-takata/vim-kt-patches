@@ -74,9 +74,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      { VK_ADD,	TRUE,   'N',    'N',    'N',	'N',	}, // keyp '+'
      { VK_SUBTRACT, TRUE,'J',	'J',    'J',	'J',	}, // keyp '-'
   // { VK_DIVIDE,   TRUE,'N',	'N',    'N',	'N',	}, // keyp '/'
-@@ -916,17 +916,17 @@ static const struct
- };
- 
+@@ -918,15 +918,15 @@ static const struct
  
 -#if defined(__GNUC__) && !defined(__MINGW32__)  && !defined(__CYGWIN__)
 -# define UChar UnicodeChar

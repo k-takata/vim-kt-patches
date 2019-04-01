@@ -33,10 +33,12 @@ big5corr.patch
 0002-Stop-using-ANSI-findrep.patch
 0003-Stop-using-ANSI-APIs-in-reparse.patch
 0004-Remove-libintl_putenv.patch
-0005-use-wide-api-in-printdlg.patch
+0005-Use-Wide-API-in-PrintDlg.patch
 0006-Stop-using-ANSI-APIs-for-window-creation.patch
 win32-fix-fontsize.patch
 fix-indent-in-os_win32.patch
+fix-indent-in-os_mswin.patch
+fix-indent-in-gui_w32.patch
 simplify-swap_tcap.patch
 simplify-os_w32exe.c.patch
 fix-config_cache-removal.patch #+rejected

@@ -1,10 +1,19 @@
-# HG changeset patch
-# Parent  b7f5b41a092ab7f9052837b65f4b2caf373356af
+From 13625487fc3066ec553fc4b725a9b4491c6f9fde Mon Sep 17 00:00:00 2001
+From: "K.Takata" <kentkt@csc.jp>
+Date: Sun, 31 Mar 2019 11:35:26 +0900
+Subject: [PATCH] Use Wide API in PrintDlg
+
+---
+ src/os_mswin.c | 52 ++++++++++++++++++--------------------------------
+ 1 file changed, 19 insertions(+), 33 deletions(-)
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
+index 662ca131c..c638aa678 100644
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -107,5 +107,5 @@ typedef int LRESULT;
+@@ -105,7 +105,7 @@ typedef int LRESULT;
+ typedef int MOUSE_EVENT_RECORD;
+ typedef int NEWTEXTMETRICW;
  typedef int PACL;
 -typedef int PRINTDLG;
 +typedef int PRINTDLGW;
@@ -38,7 +47,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	pPD->nCopies = (WORD)pPD->lCustData;
  	SetDlgItemInt( hDlg, edt3, pPD->nCopies, FALSE );
  	/*  Bring the window to top */
-@@ -1340,13 +1340,13 @@ mch_print_init(prt_settings_T *psettings
+@@ -1340,13 +1340,13 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
      int			pifBold;
      int			pifUnderline;
  
@@ -55,7 +64,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  #ifndef FEAT_GUI
      GetConsoleHwnd();	    /* get value of s_hwnd */
  #endif
-@@ -1387,11 +1387,11 @@ mch_print_init(prt_settings_T *psettings
+@@ -1387,11 +1387,11 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
  	else
  	{
  	    prt_dlg.Flags |= PD_RETURNDEFAULT;
@@ -69,7 +78,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	goto init_fail_dlg;
      else
      {
-@@ -1427,7 +1427,7 @@ mch_print_init(prt_settings_T *psettings
+@@ -1427,7 +1427,7 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
       * passed back correctly. It must be retrieved from the
       * hDevMode struct.
       */
@@ -78,7 +87,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      if (mem != NULL)
      {
  	if (mem->dmCopies != 1)
-@@ -1442,34 +1442,20 @@ mch_print_init(prt_settings_T *psettings
+@@ -1442,34 +1442,20 @@ mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
      devname = (DEVNAMES *)GlobalLock(prt_dlg.hDevNames);
      if (devname != 0)
      {
@@ -89,7 +98,9 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	char_u	*text = (char_u *)_("to %s on %s");
 -	char_u  *printer_name_orig = printer_name;
 -	char_u	*port_name_orig = port_name;
--
++	char_u  *printer_name = utf16_to_enc(wprinter_name, NULL);
++	char_u	*port_name = utf16_to_enc(wport_name, NULL);
+ 
 -	if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
 -	{
 -	    char_u  *to_free = NULL;
@@ -105,9 +116,6 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 -	}
 -	prt_name = alloc((unsigned)(STRLEN(printer_name) + STRLEN(port_name)
 -							     + STRLEN(text)));
-+	char_u  *printer_name = utf16_to_enc(wprinter_name, NULL);
-+	char_u	*port_name = utf16_to_enc(wport_name, NULL);
-+
 +	if (printer_name != NULL && port_name != NULL)
 +	    prt_name = alloc((unsigned)(STRLEN(printer_name)
 +					+ STRLEN(port_name) + STRLEN(text)));
@@ -123,3 +131,6 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      }
      GlobalUnlock(prt_dlg.hDevNames);
  
+-- 
+2.17.0
+
