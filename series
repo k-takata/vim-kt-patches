@@ -35,10 +35,14 @@ big5corr.patch
 0004-Remove-libintl_putenv.patch
 0005-Use-Wide-API-in-PrintDlg.patch
 0006-Stop-using-ANSI-APIs-for-window-creation.patch
+0007-Remove-unnecessary-check-for-ANSI-API.patch
 win32-fix-fontsize.patch
 fix-indent-in-os_win32.patch
 fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
 simplify-swap_tcap.patch
 simplify-os_w32exe.c.patch
+use-wide-entrypoint.patch
+update-make-ftplugin.patch
+update-make-syntax.patch
 fix-config_cache-removal.patch #+rejected
