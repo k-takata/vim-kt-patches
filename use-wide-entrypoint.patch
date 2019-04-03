@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  b62788e5908af9f91bd3675a6c861dc5de6ac23d
+# Parent  0d3cb357be981981548152fbefa31d7e88a1229a
 
 diff --git a/src/Make_cyg.mak b/src/Make_cyg.mak
 --- a/src/Make_cyg.mak
@@ -108,7 +108,7 @@ diff --git a/src/main.c b/src/main.c
 diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 --- a/src/os_w32exe.c
 +++ b/src/os_w32exe.c
-@@ -26,20 +26,21 @@ void _cdecl SaveInst(HINSTANCE hInst);
+@@ -28,20 +28,22 @@ void _cdecl SaveInst(HINSTANCE hInst);
  #endif
  
  #ifndef PROTO
@@ -122,7 +122,8 @@ diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 +    LPWSTR	lpszCmdLine UNUSED,
      int		nCmdShow UNUSED)
 +# else
-+wmain(int argc, WCHAR **argv)
++    int
++wmain(int argc UNUSED, wchar_t **argv UNUSED)
 +# endif
  {
 -    int		argc = 0;
