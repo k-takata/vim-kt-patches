@@ -34,7 +34,6 @@ fix-indent-in-os_win32.patch
 fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
 simplify-swap_tcap.patch
-use-wide-entrypoint.patch
 update-make-ftplugin.patch
 update-make-syntax.patch
 fix-config_cache-removal.patch #+rejected
