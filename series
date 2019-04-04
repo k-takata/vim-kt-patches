@@ -33,6 +33,4 @@ win32-fix-fontsize.patch
 fix-indent-in-os_win32.patch
 fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
-update-make-ftplugin.patch
-update-make-syntax.patch
 fix-config_cache-removal.patch #+rejected
