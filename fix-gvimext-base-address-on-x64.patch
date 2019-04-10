@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  e183f191d8c381b6fe183317549344310b7e22a5
+
+diff --git a/src/GvimExt/Makefile b/src/GvimExt/Makefile
+--- a/src/GvimExt/Makefile
++++ b/src/GvimExt/Makefile
+@@ -58,7 +58,7 @@ SUBSYSTEM = console
+ SUBSYSTEM = $(SUBSYSTEM),$(SUBSYSTEM_VER)
+ !endif
+ 
+-!if "$(CPU)" == "ARM64"
++!if "$(CPU)" == "AMD64" || "$(CPU)" == "ARM64"
+ OFFSET = 0x11C000000
+ !else
+ OFFSET = 0x1C000000
