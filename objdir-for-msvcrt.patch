@@ -14,6 +14,15 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  # If you change something else, do "make clean" first!
  !if "$(VIMDLL)" == "yes"
  OBJDIR = .\ObjD
+@@ -202,7 +201,7 @@ OBJDIR = .\ObjG
+ !else
+ OBJDIR = .\ObjC
+ !endif
+-!if "$(DIRECTX)" == "yes"
++!if "$(DIRECTX)" == "yes" && "$(GUI)" == "yes"
+ OBJDIR = $(OBJDIR)X
+ !endif
+ !if "$(OLE)" == "yes"
 @@ -229,6 +228,9 @@ OBJDIR = $(OBJDIR)R
  !ifdef MZSCHEME
  OBJDIR = $(OBJDIR)Z
