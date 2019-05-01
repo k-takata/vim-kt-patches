@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent  3295d7b46d1649aa68fe376d7479a5b8e96a1906
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -192,8 +192,7 @@ GUI = yes
+ DIRECTX = $(GUI)
+ !endif
+ 
+-# Select one of eight object code directories, depends on GUI, OLE, DEBUG and
+-# interfaces.
++# Select a code directory, depends on GUI, OLE, DEBUG, interfaces and etc.
+ # If you change something else, do "make clean" first!
+ !if "$(VIMDLL)" == "yes"
+ OBJDIR = .\ObjD
+@@ -229,6 +228,9 @@ OBJDIR = $(OBJDIR)R
+ !ifdef MZSCHEME
+ OBJDIR = $(OBJDIR)Z
+ !endif
++!ifdef USE_MSVCRT
++OBJDIR = $(OBJDIR)V
++!endif
+ !if "$(DEBUG)" == "yes"
+ OBJDIR = $(OBJDIR)d
+ !endif
