@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  b82bd3dbc798fac5f8ac73e4c362978a3874c9ef
+# Parent  f9faca38c81dfa3b6f5e157b2c097827c6abc007
 
 diff --git a/src/getchar.c b/src/getchar.c
 --- a/src/getchar.c
@@ -12,7 +12,7 @@ diff --git a/src/getchar.c b/src/getchar.c
 +		    && (
  # ifdef VIMDLL
 -		    && !gui.in_use
-+			gui.in_use ? 1 :
++			gui.in_use ||
  # endif
 -		    /* Win32 console passes modifiers */
 -		    && (i < 2 || p[1] != KS_MODIFIER)
