@@ -33,4 +33,5 @@ fix-indent-in-os_win32.patch
 fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
 objdir-for-msvcrt.patch
+fix-vimdll-mbyte-input.patch
 fix-config_cache-removal.patch #+rejected
