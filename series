@@ -8,7 +8,6 @@ myconfiguration-for-gtk2.patch #+gtk2
 backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+gtk2
 2005-ambiwidth_auto.diff
-fix-ambw.patch
 ambiwidth_auto-mark.diff
 cpo-N.diff #+rejected
 cpo-N-mark.diff #+rejected
