@@ -22,7 +22,6 @@ update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
 embarcadero.patch
 fix-highdpi.patch #+disabled
-fix-quotation-without-vimrun.patch
 add-getpackages.patch
 mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
