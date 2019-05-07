@@ -28,7 +28,6 @@ mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
 win32-enable-optimization.patch
 big5corr.patch
-win32-fix-fontsize.patch
 fix-indent-in-os_win32.patch
 fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
