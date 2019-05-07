@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  2f8b03351617f576886bb6d1213e80504ae95a12
+
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -1583,7 +1583,7 @@ utf_char2cells(int c)
+ 	/* This is required by screen.c implicitly. */
+ 	if (c == 0)
+ 	    return 1;
+-	if ((cell = gui_mch_get_charwidth(c)) > 0)
++	if (utf_printable(c) && (cell = gui_mch_get_charwidth(c)) > 0)
+ 	    return cell;
+     }
+ #endif
