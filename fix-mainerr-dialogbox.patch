@@ -4,13 +4,14 @@
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -3242,6 +3242,11 @@ mainerr(
+@@ -3242,6 +3242,12 @@ mainerr(
      reset_signals();		/* kill us with CTRL-C here, if you like */
  #endif
  
 +#ifdef VIMDLL
 +    // If GUI executable, show an error dialog box.
 +    gui.in_use = mch_is_gui_executable();
++    gui.starting = FALSE;
 +#endif
 +
      init_longVersion();
