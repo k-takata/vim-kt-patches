@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  6ca1b5c806e4ad7c0c9dcdb733bb05ead93fee50
+
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -3242,6 +3242,11 @@ mainerr(
+     reset_signals();		/* kill us with CTRL-C here, if you like */
+ #endif
+ 
++#ifdef VIMDLL
++    // If GUI executable, show an error dialog box.
++    gui.in_use = mch_is_gui_executable();
++#endif
++
+     init_longVersion();
+     mch_errmsg(longVersion);
+     mch_errmsg("\n");
