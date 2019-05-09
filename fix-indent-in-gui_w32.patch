@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  897ecfaa5fa5129a0adc51e26dec8211d73e7be2
+# Parent  4e9c7cb1ffae96f003cfd3d41cb2f1a1c7bd5fc6
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
@@ -33,7 +33,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  #endif /* PROTO */
  
-@@ -2387,7 +2387,7 @@ gui_mch_show_toolbar(int showit)
+@@ -2384,7 +2384,7 @@ gui_mch_show_toolbar(int showit)
  }
  
  /* The number of bitmaps is fixed.  Exit is missing! */
@@ -42,7 +42,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  #endif
  
-@@ -2510,10 +2510,10 @@ gui_mch_update_tabline(void)
+@@ -2507,10 +2507,10 @@ gui_mch_update_tabline(void)
      if (s_tabhwnd == NULL)
  	return;
  
@@ -56,7 +56,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      // Enable unicode support
      SendMessage(s_tabhwnd, CCM_SETUNICODEFORMAT, (WPARAM)TRUE, (LPARAM)0);
  
-@@ -3410,11 +3410,11 @@ mch_set_mouse_shape(int shape)
+@@ -3407,11 +3407,11 @@ mch_set_mouse_shape(int shape)
  	    idc = IDC_ARROW;
  	else
  	    idc = mshape_idcs[shape];
@@ -71,7 +71,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (!p_mh)
  	{
  	    POINT mp;
-@@ -3499,12 +3499,12 @@ gui_mch_browse(
+@@ -3496,12 +3496,12 @@ gui_mch_browse(
      filterp = convert_filterW(filter);
  
      vim_memset(&fileStruct, 0, sizeof(OPENFILENAMEW));
@@ -87,7 +87,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (title != NULL)
  	titlep = enc_to_utf16(title, NULL);
-@@ -3541,10 +3541,10 @@ gui_mch_browse(
+@@ -3538,10 +3538,10 @@ gui_mch_browse(
       * Don't use OFN_OVERWRITEPROMPT, Vim has its own ":confirm" dialog.
       */
      fileStruct.Flags = (OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY);
@@ -100,7 +100,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (saving)
      {
  	if (!GetSaveFileNameW(&fileStruct))
-@@ -3915,7 +3915,7 @@ gui_mch_browsedir(char_u *title, char_u 
+@@ -3909,7 +3909,7 @@ gui_mch_browsedir(char_u *title, char_u 
  
  /* For the Intellimouse: */
  #ifndef WM_MOUSEWHEEL
@@ -109,7 +109,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  
  
-@@ -3923,12 +3923,12 @@ gui_mch_browsedir(char_u *title, char_u 
+@@ -3917,12 +3917,12 @@ gui_mch_browsedir(char_u *title, char_u 
  # define ID_BEVAL_TOOLTIP   200
  # define BEVAL_TEXT_LEN	    MAXPATHL
  
@@ -126,7 +126,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  static BalloonEval  *cur_beval = NULL;
  static UINT_PTR	    BevalTimerId = 0;
-@@ -3936,15 +3936,15 @@ static DWORD	    LastActivity = 0;
+@@ -3930,15 +3930,15 @@ static DWORD	    LastActivity = 0;
  
  
  /* cproto fails on missing include files */
@@ -146,7 +146,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  typedef struct _DllVersionInfo
  {
-@@ -3955,9 +3955,9 @@ typedef struct _DllVersionInfo
+@@ -3949,9 +3949,9 @@ typedef struct _DllVersionInfo
      DWORD dwPlatformID;
  } DLLVERSIONINFO;
  
@@ -159,7 +159,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  typedef struct tagTOOLINFOA_NEW
  {
-@@ -4006,17 +4006,17 @@ typedef struct tagNMTTDISPINFOW_NEW
+@@ -4000,17 +4000,17 @@ typedef struct tagNMTTDISPINFOW_NEW
  
  
  typedef HRESULT (WINAPI* DLLGETVERSIONPROC)(DLLVERSIONINFO *);
@@ -188,7 +188,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  #endif /* defined(FEAT_BEVAL_GUI) */
  
-@@ -5597,7 +5597,7 @@ gui_mch_set_sp_color(guicolor_T color)
+@@ -5595,7 +5595,7 @@ gui_mch_set_sp_color(guicolor_T color)
  		State &= ~LANGMAP;
  		if (State & INSERT)
  		{
@@ -197,7 +197,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  		    /* Unshown 'keymap' in status lines */
  		    if (curbuf->b_p_iminsert == B_IMODE_LMAP)
  		    {
-@@ -5615,7 +5615,7 @@ gui_mch_set_sp_color(guicolor_T color)
+@@ -5613,7 +5613,7 @@ gui_mch_set_sp_color(guicolor_T color)
  			gui.row = old_row;
  			gui.col = old_col;
  		    }
@@ -206,24 +206,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  		}
  	    }
  	    gui_update_cursor(TRUE, FALSE);
-@@ -6321,14 +6321,14 @@ gui_mch_draw_string(
-     void
- gui_mch_flush(void)
- {
--#   if defined(__BORLANDC__)
-+#if defined(__BORLANDC__)
-     /*
-      * The GdiFlush declaration (in Borland C 5.01 <wingdi.h>) is not a
-      * prototype declaration.
-      * The compiler complains if __stdcall is not used in both declarations.
-      */
-     BOOL  __stdcall GdiFlush(void);
--#   endif
-+#endif
- 
- #if defined(FEAT_DIRECTX)
-     if (IS_ENABLE_DIRECTX())
-@@ -6411,10 +6411,10 @@ gui_mch_add_menu(
+@@ -6400,10 +6400,10 @@ gui_mch_add_menu(
      /* Fix window size if menu may have wrapped */
      if (parent == NULL)
  	gui_mswin_get_menu_height(!gui.starting);
@@ -236,7 +219,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
      void
-@@ -6455,7 +6455,7 @@ gui_make_popup(char_u *path_name, int mo
+@@ -6444,7 +6444,7 @@ gui_make_popup(char_u *path_name, int mo
      }
  }
  
@@ -245,7 +228,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Given a menu descriptor, e.g. "File.New", find it in the menu hierarchy and
   * create it as a pseudo-"tearoff menu".
-@@ -6469,7 +6469,7 @@ gui_make_tearoff(char_u *path_name)
+@@ -6458,7 +6458,7 @@ gui_make_tearoff(char_u *path_name)
      if (menu != NULL)
  	gui_mch_tearoff(menu->dname, menu, 0xffffL, 0xffffL);
  }
@@ -254,7 +237,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  /*
   * Add a menu item to a menu
-@@ -6484,15 +6484,15 @@ gui_mch_add_menu_item(
+@@ -6473,15 +6473,15 @@ gui_mch_add_menu_item(
      menu->id = s_menu_id++;
      menu->submenu_id = NULL;
  
@@ -273,7 +256,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (menu_is_toolbar(parent->name))
      {
  	TBBUTTON newtb;
-@@ -6516,7 +6516,7 @@ gui_mch_add_menu_item(
+@@ -6505,7 +6505,7 @@ gui_mch_add_menu_item(
  	menu->submenu_id = (HMENU)-1;
      }
      else
@@ -282,7 +265,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      {
  	WCHAR	*wn;
  
-@@ -6529,10 +6529,10 @@ gui_mch_add_menu_item(
+@@ -6518,10 +6518,10 @@ gui_mch_add_menu_item(
  		    (UINT)menu->id, wn);
  	    vim_free(wn);
  	}
@@ -295,7 +278,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  }
  
-@@ -6542,7 +6542,7 @@ gui_mch_add_menu_item(
+@@ -6531,7 +6531,7 @@ gui_mch_add_menu_item(
      void
  gui_mch_destroy_menu(vimmenu_T *menu)
  {
@@ -304,7 +287,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /*
       * is this a toolbar button?
       */
-@@ -6555,7 +6555,7 @@ gui_mch_destroy_menu(vimmenu_T *menu)
+@@ -6544,7 +6544,7 @@ gui_mch_destroy_menu(vimmenu_T *menu)
  	SendMessage(s_toolbarhwnd, TB_DELETEBUTTON, (WPARAM)iButton, 0);
      }
      else
@@ -313,7 +296,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      {
  	if (menu->parent != NULL
  		&& menu_is_popup(menu->parent->dname)
-@@ -6565,7 +6565,7 @@ gui_mch_destroy_menu(vimmenu_T *menu)
+@@ -6554,7 +6554,7 @@ gui_mch_destroy_menu(vimmenu_T *menu)
  	    RemoveMenu(s_menuBar, menu->id, MF_BYCOMMAND);
  	if (menu->submenu_id != NULL)
  	    DestroyMenu(menu->submenu_id);
@@ -322,7 +305,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (IsWindow(menu->tearoff_handle))
  	    DestroyWindow(menu->tearoff_handle);
  	if (menu->parent != NULL
-@@ -6576,11 +6576,11 @@ gui_mch_destroy_menu(vimmenu_T *menu)
+@@ -6565,11 +6565,11 @@ gui_mch_destroy_menu(vimmenu_T *menu)
  	    menu->modes = 0;
  	    rebuild_tearoff(menu->parent);
  	}
@@ -339,7 +322,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      static void
  rebuild_tearoff(vimmenu_T *menu)
  {
-@@ -6618,7 +6618,7 @@ rebuild_tearoff(vimmenu_T *menu)
+@@ -6607,7 +6607,7 @@ rebuild_tearoff(vimmenu_T *menu)
  				SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
      }
  }
@@ -348,7 +331,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  /*
   * Make a menu either grey or not grey.
-@@ -6628,7 +6628,7 @@ gui_mch_menu_grey(
+@@ -6617,7 +6617,7 @@ gui_mch_menu_grey(
      vimmenu_T	*menu,
      int	    grey)
  {
@@ -357,7 +340,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      /*
       * is this a toolbar button?
       */
-@@ -6638,11 +6638,11 @@ gui_mch_menu_grey(
+@@ -6627,11 +6627,11 @@ gui_mch_menu_grey(
  	    (WPARAM)menu->id, (LPARAM) MAKELONG((grey ? FALSE : TRUE), 0) );
      }
      else
@@ -371,7 +354,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if ((menu->parent != NULL) && (IsWindow(menu->parent->tearoff_handle)))
      {
  	WORD menuID;
-@@ -6660,7 +6660,7 @@ gui_mch_menu_grey(
+@@ -6649,7 +6649,7 @@ gui_mch_menu_grey(
  	    EnableWindow(menuHandle, !grey);
  
      }
@@ -380,7 +363,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
  #endif /* FEAT_MENU */
-@@ -6815,21 +6815,21 @@ gui_mch_dialog(
+@@ -6804,21 +6804,21 @@ gui_mch_dialog(
      int		vertical;
      int		dlgPaddingX;
      int		dlgPaddingY;
@@ -408,7 +391,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (s_hwnd == NULL)
  	get_dialog_font_metrics();
-@@ -6881,14 +6881,14 @@ gui_mch_dialog(
+@@ -6870,14 +6870,14 @@ gui_mch_dialog(
       */
      hwnd = GetDesktopWindow();
      hdc = GetWindowDC(hwnd);
@@ -425,7 +408,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      font = CreateFont(-DLG_FONT_POINT_SIZE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  		      VARIABLE_PITCH , DLG_FONT_NAME);
      if (s_usenewlook)
-@@ -7107,7 +7107,7 @@ gui_mch_dialog(
+@@ -7096,7 +7096,7 @@ gui_mch_dialog(
      if (s_usenewlook)
      {
  	/* do the font, since DS_3DLOOK doesn't work properly */
@@ -434,7 +417,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (use_lfSysmenu)
  	{
  	    /* point size */
-@@ -7117,7 +7117,7 @@ gui_mch_dialog(
+@@ -7106,7 +7106,7 @@ gui_mch_dialog(
  	    nchar = (int)wcslen(lfSysmenu.lfFaceName) + 1;
  	}
  	else
@@ -443,7 +426,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{
  	    *p++ = DLG_FONT_POINT_SIZE;		// point size
  	    nchar = nCopyAnsiToWideChar(p, DLG_FONT_NAME, FALSE);
-@@ -7553,10 +7553,10 @@ gui_mch_tearoff(
+@@ -7542,10 +7542,10 @@ gui_mch_tearoff(
      int		sepPadding=0;
      int		x;
      int		y;
@@ -456,7 +439,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      /*
       * If this menu is already torn off, move it to the mouse position.
-@@ -7587,14 +7587,14 @@ gui_mch_tearoff(
+@@ -7576,14 +7576,14 @@ gui_mch_tearoff(
  
      hwnd = GetDesktopWindow();
      hdc = GetWindowDC(hwnd);
@@ -473,7 +456,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      font = CreateFont(-DLG_FONT_POINT_SIZE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  		      VARIABLE_PITCH , DLG_FONT_NAME);
      if (s_usenewlook)
-@@ -7693,7 +7693,7 @@ gui_mch_tearoff(
+@@ -7682,7 +7682,7 @@ gui_mch_tearoff(
      if (s_usenewlook)
      {
  	/* do the font, since DS_3DLOOK doesn't work properly */
@@ -482,7 +465,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (use_lfSysmenu)
  	{
  	    /* point size */
-@@ -7703,7 +7703,7 @@ gui_mch_tearoff(
+@@ -7692,7 +7692,7 @@ gui_mch_tearoff(
  	    nchar = (int)wcslen(lfSysmenu.lfFaceName) + 1;
  	}
  	else
@@ -491,7 +474,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	{
  	    *p++ = DLG_FONT_POINT_SIZE;		// point size
  	    nchar = nCopyAnsiToWideChar(p, DLG_FONT_NAME, FALSE);
-@@ -7855,7 +7855,7 @@ gui_mch_tearoff(
+@@ -7844,7 +7844,7 @@ gui_mch_tearoff(
  #endif
  
  #if defined(FEAT_TOOLBAR) || defined(PROTO)
@@ -500,7 +483,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  /* This not defined in older SDKs */
  # ifndef TBSTYLE_FLAT
-@@ -7935,9 +7935,9 @@ get_toolbar_bitmap(vimmenu_T *menu)
+@@ -7924,9 +7924,9 @@ get_toolbar_bitmap(vimmenu_T *menu)
  	 */
  	if (hbitmap == NULL
  		&& (gui_find_bitmap(
@@ -512,7 +495,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  					menu->dname, fname, "bmp") == OK))
  	    hbitmap = LoadImage(
  		    NULL,
-@@ -8173,9 +8173,9 @@ typedef struct _signicon_t
+@@ -8162,9 +8162,9 @@ typedef struct _signicon_t
  {
      HANDLE	hImage;
      UINT	uType;
@@ -524,7 +507,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  } signicon_t;
  
      void
-@@ -8187,10 +8187,10 @@ gui_mch_drawsign(int row, int col, int t
+@@ -8176,10 +8176,10 @@ gui_mch_drawsign(int row, int col, int t
      if (!gui.in_use || (sign = (signicon_t *)sign_get_image(typenr)) == NULL)
  	return;
  
@@ -537,7 +520,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      x = TEXT_X(col);
      y = TEXT_Y(row);
-@@ -8214,7 +8214,7 @@ gui_mch_drawsign(int row, int col, int t
+@@ -8203,7 +8203,7 @@ gui_mch_drawsign(int row, int col, int t
  	case IMAGE_CURSOR:
  	    DrawIconEx(s_hdc, x, y, (HICON)sign->hImage, w, h, 0, NULL, DI_NORMAL);
  	    break;
@@ -546,7 +529,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	case IMAGE_XPM:
  	    {
  		HDC hdcMem;
-@@ -8232,7 +8232,7 @@ gui_mch_drawsign(int row, int col, int t
+@@ -8221,7 +8221,7 @@ gui_mch_drawsign(int row, int col, int t
  		DeleteDC(hdcMem);
  	    }
  	    break;
@@ -555,7 +538,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  }
  
-@@ -8251,12 +8251,12 @@ close_signicon_image(signicon_t *sign)
+@@ -8240,12 +8240,12 @@ close_signicon_image(signicon_t *sign)
  	    case IMAGE_ICON:
  		DestroyIcon((HICON)sign->hImage);
  		break;
@@ -570,7 +553,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	}
  }
  
-@@ -8285,14 +8285,14 @@ gui_mch_register_sign(char_u *signfile)
+@@ -8274,14 +8274,14 @@ gui_mch_register_sign(char_u *signfile)
  	    sign.hImage = (HANDLE)LoadImage(NULL, (LPCSTR)signfile, sign.uType,
  		    gui.char_width * 2, gui.char_height,
  		    LR_LOADFROMFILE | LR_CREATEDIBSECTION);
@@ -587,7 +570,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      psign = NULL;
-@@ -8659,9 +8659,9 @@ TrackUserActivity(UINT uMsg)
+@@ -8657,9 +8657,9 @@ TrackUserActivity(UINT uMsg)
      void
  gui_mch_destroy_beval_area(BalloonEval *beval)
  {
@@ -599,7 +582,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      vim_free(beval->tofree);
      vim_free(beval);
  }
-@@ -8685,10 +8685,10 @@ netbeans_draw_multisign_indicator(int ro
+@@ -8683,10 +8683,10 @@ netbeans_draw_multisign_indicator(int ro
      x = 0;
      y = TEXT_Y(row);
  

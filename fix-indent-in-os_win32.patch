@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  3db8262cd319d1ba7d1e4d404538055211a64812
+# Parent  85097b6493c28ab15905df868cdb7eebfa7094f4
 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
@@ -13,7 +13,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  typedef char * LPCSTR;
  typedef char * LPWSTR;
  typedef int ACCESS_MASK;
-@@ -261,7 +261,7 @@ static BOOL has_csbiex = FALSE;
+@@ -256,7 +256,7 @@ static BOOL has_csbiex = FALSE;
   * Get version number including build number
   */
  typedef BOOL (WINAPI *PfnRtlGetVersion)(LPOSVERSIONINFOW);
@@ -22,7 +22,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      (((major) << 24) | ((minor) << 16) | (build))
  
      static DWORD
-@@ -645,14 +645,14 @@ dyn_libintl_init(void)
+@@ -640,14 +640,14 @@ dyn_libintl_init(void)
  	return 1;
      // Load gettext library (libintl.dll and other names).
      hLibintlDLL = vimLoadLib(GETTEXT_DLL);
@@ -41,7 +41,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (!hLibintlDLL)
      {
  	if (p_verbose > 0)
-@@ -841,10 +841,10 @@ PlatformId(void)
+@@ -836,10 +836,10 @@ PlatformId(void)
  
  #if !defined(FEAT_GUI_MSWIN) || defined(VIMDLL)
  
@@ -56,7 +56,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  
  /* When uChar.AsciiChar is 0, then we need to look at wVirtualKeyCode.
-@@ -895,7 +895,7 @@ static const struct
+@@ -890,7 +890,7 @@ static const struct
  
      { VK_SNAPSHOT,TRUE,	0,	0,	0,	    'r', }, // PrtScrn
  
@@ -65,7 +65,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      // Most people don't have F13-F20, but what the hell...
      { VK_F13,	TRUE,	'\332',	'\333',	'\334',	    '\335', },
      { VK_F14,	TRUE,	'\336',	'\337',	'\340',	    '\341', },
-@@ -905,7 +905,7 @@ static const struct
+@@ -900,7 +900,7 @@ static const struct
      { VK_F18,	TRUE,	'\356',	'\357',	'\360',	    '\361', },
      { VK_F19,	TRUE,	'\362',	'\363',	'\364',	    '\365', },
      { VK_F20,	TRUE,	'\366',	'\367',	'\370',	    '\371', },
@@ -74,7 +74,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      { VK_ADD,	TRUE,   'N',    'N',    'N',	'N',	}, // keyp '+'
      { VK_SUBTRACT, TRUE,'J',	'J',    'J',	'J',	}, // keyp '-'
   // { VK_DIVIDE,   TRUE,'N',	'N',    'N',	'N',	}, // keyp '/'
-@@ -925,17 +925,17 @@ static const struct
+@@ -920,11 +920,11 @@ static const struct
  };
  
  
@@ -91,15 +91,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /* The return code indicates key code size. */
      static int
--#ifdef __BORLANDC__
-+# ifdef __BORLANDC__
-     __stdcall
--#endif
-+# endif
- win32_kbd_patch_key(
-     KEY_EVENT_RECORD *pker)
- {
-@@ -1152,7 +1152,7 @@ mch_setmouse(int on)
+@@ -1144,7 +1144,7 @@ mch_setmouse(int on)
  }
  
  
@@ -108,7 +100,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /*
   * Called when 'balloonevalterm' changed.
   */
-@@ -1161,7 +1161,7 @@ mch_bevalterm_changed(void)
+@@ -1153,7 +1153,7 @@ mch_bevalterm_changed(void)
  {
      mch_setmouse(g_fMouseActive);
  }
@@ -117,7 +109,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /*
   * Decode a MOUSE_EVENT.  If it's a valid event, return MOUSE_LEFT,
-@@ -1199,9 +1199,9 @@ decode_mouse_event(
+@@ -1191,9 +1191,9 @@ decode_mouse_event(
      static int s_xOldMouse = -1;
      static int s_yOldMouse = -1;
      static linenr_T s_old_topline = 0;
@@ -129,7 +121,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      static int s_cClicks = 1;
      static BOOL s_fReleased = TRUE;
      static DWORD s_dwLastClickTime = 0;
-@@ -1256,12 +1256,12 @@ decode_mouse_event(
+@@ -1248,12 +1248,12 @@ decode_mouse_event(
  	/* If the last thing returned was MOUSE_RELEASE, ignore this */
  	if (s_fReleased)
  	{
@@ -144,7 +136,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		return FALSE;
  	}
  
-@@ -1367,9 +1367,9 @@ decode_mouse_event(
+@@ -1359,9 +1359,9 @@ decode_mouse_event(
  		    || s_yOldMouse != g_yMouse
  		    || s_nOldButton != nButton
  		    || s_old_topline != curwin->w_topline
@@ -156,7 +148,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		    || (int)(dwCurrentTime - s_dwLastClickTime) > p_mouset)
  	    {
  		s_cClicks = 1;
-@@ -1420,9 +1420,9 @@ decode_mouse_event(
+@@ -1412,9 +1412,9 @@ decode_mouse_event(
      s_xOldMouse = g_xMouse;
      s_yOldMouse = g_yMouse;
      s_old_topline = curwin->w_topline;
@@ -168,7 +160,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      s_nOldMouseClick = g_nMouseClick;
  
      return TRUE;
-@@ -1499,9 +1499,9 @@ WaitForChar(long msec, int ignore_input)
+@@ -1491,9 +1491,9 @@ WaitForChar(long msec, int ignore_input)
      INPUT_RECORD    ir;
      DWORD	    cRecords;
      WCHAR	    ch, ch2;
@@ -180,7 +172,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      if (msec > 0)
  	/* Wait until the specified time has elapsed. */
-@@ -1517,24 +1517,24 @@ WaitForChar(long msec, int ignore_input)
+@@ -1509,24 +1509,24 @@ WaitForChar(long msec, int ignore_input)
  	// Only process messages when waiting.
  	if (msec != 0)
  	{
@@ -215,7 +207,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	   )
  	    return TRUE;
  
-@@ -1550,7 +1550,7 @@ WaitForChar(long msec, int ignore_input)
+@@ -1542,7 +1542,7 @@ WaitForChar(long msec, int ignore_input)
  	{
  	    DWORD dwWaitTime = dwEndTime - dwNow;
  
@@ -224,7 +216,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    /* Check channel while waiting for input. */
  	    if (dwWaitTime > 100)
  	    {
-@@ -1560,19 +1560,19 @@ WaitForChar(long msec, int ignore_input)
+@@ -1552,19 +1552,19 @@ WaitForChar(long msec, int ignore_input)
  		if (channel_any_readahead())
  		    dwWaitTime = 10;
  	    }
@@ -250,7 +242,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    // When waiting very briefly don't trigger timers.
  	    if (dwWaitTime > 10)
  	    {
-@@ -1589,17 +1589,17 @@ WaitForChar(long msec, int ignore_input)
+@@ -1581,17 +1581,17 @@ WaitForChar(long msec, int ignore_input)
  		if (due_time > 0 && dwWaitTime > (DWORD)due_time)
  		    dwWaitTime = due_time;
  	    }
@@ -272,7 +264,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		    )
  		continue;
  	}
-@@ -1607,7 +1607,7 @@ WaitForChar(long msec, int ignore_input)
+@@ -1599,7 +1599,7 @@ WaitForChar(long msec, int ignore_input)
  	cRecords = 0;
  	peek_console_input(g_hConIn, &ir, 1, &cRecords);
  
@@ -281,7 +273,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (State & CMDLINE && msg_row == Rows - 1)
  	{
  	    CONSOLE_SCREEN_BUFFER_INFO csbi;
-@@ -1624,13 +1624,13 @@ WaitForChar(long msec, int ignore_input)
+@@ -1616,13 +1616,13 @@ WaitForChar(long msec, int ignore_input)
  		}
  	    }
  	}
@@ -297,7 +289,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		/* Windows IME sends two '\n's with only one 'ENTER'.  First:
  		 * wVirtualKeyCode == 13. second: wVirtualKeyCode == 0 */
  		if (ir.Event.KeyEvent.UChar == 0
-@@ -1639,7 +1639,7 @@ WaitForChar(long msec, int ignore_input)
+@@ -1631,7 +1631,7 @@ WaitForChar(long msec, int ignore_input)
  		    read_console_input(g_hConIn, &ir, 1, &cRecords);
  		    continue;
  		}
@@ -306,7 +298,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		if (decode_key_event(&ir.Event.KeyEvent, &ch, &ch2,
  								 NULL, FALSE))
  		    return TRUE;
-@@ -1654,7 +1654,7 @@ WaitForChar(long msec, int ignore_input)
+@@ -1646,7 +1646,7 @@ WaitForChar(long msec, int ignore_input)
  		COORD dwSize = ir.Event.WindowBufferSizeEvent.dwSize;
  
  		// Only call shell_resized() when the size actually change to
@@ -315,7 +307,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		if (dwSize.X != Columns || dwSize.Y != Rows)
  		{
  		    CONSOLE_SCREEN_BUFFER_INFO csbi;
-@@ -1664,21 +1664,21 @@ WaitForChar(long msec, int ignore_input)
+@@ -1656,21 +1656,21 @@ WaitForChar(long msec, int ignore_input)
  		    shell_resized();
  		}
  	    }
@@ -341,7 +333,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      return FALSE;
  }
-@@ -1737,15 +1737,15 @@ tgetch(int *pmodifiers, WCHAR *pch2)
+@@ -1729,15 +1729,15 @@ tgetch(int *pmodifiers, WCHAR *pch2)
  	INPUT_RECORD ir;
  	DWORD cRecords = 0;
  
@@ -360,7 +352,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (read_console_input(g_hConIn, &ir, 1, &cRecords) == 0)
  	{
  	    if (did_create_conin)
-@@ -1764,13 +1764,13 @@ tgetch(int *pmodifiers, WCHAR *pch2)
+@@ -1756,13 +1756,13 @@ tgetch(int *pmodifiers, WCHAR *pch2)
  	    handle_focus_event(ir);
  	else if (ir.EventType == WINDOW_BUFFER_SIZE_EVENT)
  	    shell_resized();
@@ -376,7 +368,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  }
  #endif /* !FEAT_GUI_MSWIN */
-@@ -1795,7 +1795,7 @@ mch_inchar(
+@@ -1787,7 +1787,7 @@ mch_inchar(
  
      int		len;
      int		c;
@@ -385,7 +377,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      static char_u   typeahead[TYPEAHEADLEN];	/* previously typed bytes. */
      static int	    typeaheadlen = 0;
  
-@@ -1842,10 +1842,10 @@ mch_inchar(
+@@ -1834,10 +1834,10 @@ mch_inchar(
      /* we will get at least one key. Get more if they are available. */
      g_fCBrkPressed = FALSE;
  
@@ -398,7 +390,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Keep looping until there is something in the typeahead buffer and more
       * to get and still room in the buffer (up to two bytes for a char and
-@@ -1860,14 +1860,14 @@ mch_inchar(
+@@ -1852,14 +1852,14 @@ mch_inchar(
  	    typeaheadlen = 0;
  	    break;
  	}
@@ -416,7 +408,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    typeahead[typeaheadlen++] = ESC + 128;
  	    typeahead[typeaheadlen++] = 'M';
  	    typeahead[typeaheadlen++] = g_nMouseClick;
-@@ -1876,7 +1876,7 @@ mch_inchar(
+@@ -1868,7 +1868,7 @@ mch_inchar(
  	    g_nMouseClick = -1;
  	}
  	else
@@ -425,7 +417,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	{
  	    WCHAR	ch2 = NUL;
  	    int		modifiers = 0;
-@@ -1893,15 +1893,15 @@ mch_inchar(
+@@ -1885,15 +1885,15 @@ mch_inchar(
  
  	    if (c == Ctrl_C && ctrl_c_interrupts)
  	    {
@@ -445,7 +437,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    {
  		int	n = 1;
  
-@@ -1983,21 +1983,21 @@ mch_inchar(
+@@ -1975,21 +1975,21 @@ mch_inchar(
  
  		typeaheadlen += n;
  
@@ -471,7 +463,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  theend:
      /* Move typeahead to "buf", as much as fits. */
-@@ -2112,9 +2112,9 @@ bad_param_handler(const wchar_t *express
+@@ -2104,9 +2104,9 @@ bad_param_handler(const wchar_t *express
      static void
  mch_init_g(void)
  {
@@ -483,7 +475,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Silently handle invalid parameters to CRT functions */
      SET_INVALID_PARAM_HANDLER;
-@@ -2169,9 +2169,9 @@ mch_init_g(void)
+@@ -2161,9 +2161,9 @@ mch_init_g(void)
      if (!executable_exists("findstr.exe", NULL, TRUE))
  	set_option_value((char_u *)"grepprg", 0, (char_u *)"grep -n", 0);
  
@@ -495,7 +487,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      vtp_flag_init();
  }
-@@ -2181,8 +2181,8 @@ mch_init_g(void)
+@@ -2173,8 +2173,8 @@ mch_init_g(void)
  
  #if !defined(FEAT_GUI_MSWIN) || defined(VIMDLL)
  
@@ -506,7 +498,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /*
   * ClearConsoleBuffer()
-@@ -2453,14 +2453,14 @@ RestoreConsoleBuffer(
+@@ -2445,14 +2445,14 @@ RestoreConsoleBuffer(
      return TRUE;
  }
  
@@ -525,7 +517,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  char g_szOrigTitle[256] = { 0 };
  HWND g_hWnd = NULL;	/* also used in os_mswin.c */
  static HICON g_hOrigIconSmall = NULL;
-@@ -2469,12 +2469,12 @@ static HICON g_hVimIcon = NULL;
+@@ -2461,12 +2461,12 @@ static HICON g_hVimIcon = NULL;
  static BOOL g_fCanChangeIcon = FALSE;
  
  /* ICON* are not defined in VC++ 4.0 */
@@ -544,7 +536,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /*
   * GetConsoleIcon()
   * Description:
-@@ -2566,7 +2566,7 @@ SaveConsoleTitleAndIcon(void)
+@@ -2558,7 +2558,7 @@ SaveConsoleTitleAndIcon(void)
      if (g_hVimIcon != NULL)
  	g_fCanChangeIcon = TRUE;
  }
@@ -553,7 +545,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  static int g_fWindInitCalled = FALSE;
  static int g_fTermcapMode = FALSE;
-@@ -2580,12 +2580,12 @@ static DWORD g_cmodeout = 0;
+@@ -2572,12 +2572,12 @@ static DWORD g_cmodeout = 0;
      static void
  mch_init_c(void)
  {
@@ -570,7 +562,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* Silently handle invalid parameters to CRT functions */
      SET_INVALID_PARAM_HANDLER;
-@@ -2604,15 +2604,15 @@ mch_init_c(void)
+@@ -2596,15 +2596,15 @@ mch_init_c(void)
  	create_conin();
      g_hConOut = GetStdHandle(STD_OUTPUT_HANDLE);
  
@@ -589,7 +581,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (cterm_normal_fg_color == 0)
  	cterm_normal_fg_color = (g_attrCurrent & 0xf) + 1;
      if (cterm_normal_bg_color == 0)
-@@ -2629,7 +2629,7 @@ mch_init_c(void)
+@@ -2621,7 +2621,7 @@ mch_init_c(void)
      GetConsoleMode(g_hConIn,  &g_cmodein);
      GetConsoleMode(g_hConOut, &g_cmodeout);
  
@@ -598,7 +590,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      SaveConsoleTitleAndIcon();
      /*
       * Set both the small and big icons of the console window to Vim's icon.
-@@ -2638,11 +2638,11 @@ mch_init_c(void)
+@@ -2630,11 +2630,11 @@ mch_init_c(void)
       */
      if (g_fCanChangeIcon)
  	SetConsoleIcon(g_hWnd, g_hVimIcon, g_hVimIcon);
@@ -612,7 +604,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      fdDump = fopen("dump", "wt");
  
      if (fdDump)
-@@ -2653,17 +2653,17 @@ mch_init_c(void)
+@@ -2645,17 +2645,17 @@ mch_init_c(void)
  	fputs(ctime(&t), fdDump);
  	fflush(fdDump);
      }
@@ -636,7 +628,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      vtp_flag_init();
      vtp_init();
-@@ -2689,7 +2689,7 @@ mch_exit_c(int r)
+@@ -2681,7 +2681,7 @@ mch_exit_c(int r)
  
      if (g_fWindInitCalled)
      {
@@ -645,7 +637,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	mch_restore_title(SAVE_RESTORE_BOTH);
  	/*
  	 * Restore both the small and big icons of the console window to
-@@ -2698,9 +2698,9 @@ mch_exit_c(int r)
+@@ -2690,9 +2690,9 @@ mch_exit_c(int r)
  	 */
  	if (g_fCanChangeIcon && !g_fForceExit)
  	    SetConsoleIcon(g_hWnd, g_hOrigIconSmall, g_hOrigIcon);
@@ -658,7 +650,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (fdDump)
  	{
  	    time_t t;
-@@ -2710,16 +2710,16 @@ mch_exit_c(int r)
+@@ -2702,16 +2702,16 @@ mch_exit_c(int r)
  	    fclose(fdDump);
  	}
  	fdDump = NULL;
@@ -678,7 +670,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      exit(r);
  }
-@@ -3130,7 +3130,7 @@ mch_is_linked(char_u *fname)
+@@ -3122,7 +3122,7 @@ mch_is_linked(char_u *fname)
  /*
   * Get the by-handle-file-information for "fname".
   * Returns FILEINFO_OK when OK.
@@ -687,7 +679,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
   * Returns FILEINFO_READ_FAIL when CreateFile() failed.
   * Returns FILEINFO_INFO_FAIL when GetFileInformationByHandle() failed.
   */
-@@ -3557,9 +3557,9 @@ handler_routine(
+@@ -3549,9 +3549,9 @@ handler_routine(
  		     : dwCtrlType == CTRL_LOGOFF_EVENT
  			 ? _("logoff")
  			 : _("shutdown")));
@@ -699,7 +691,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  	preserve_exit();	/* output IObuff, preserve files and exit */
  
-@@ -3591,18 +3591,18 @@ mch_settmode(int tmode)
+@@ -3583,18 +3583,18 @@ mch_settmode(int tmode)
      {
  	cmodein &= ~(ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT |
  		     ENABLE_ECHO_INPUT);
@@ -723,7 +715,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    ENABLE_WRAP_AT_EOL_OUTPUT);
  	bEnableHandler = TRUE;
      }
-@@ -3617,7 +3617,7 @@ mch_settmode(int tmode)
+@@ -3609,7 +3609,7 @@ mch_settmode(int tmode)
      SetConsoleMode(g_hConOut, cmodeout);
      SetConsoleCtrlHandler(handler_routine, bEnableHandler);
  
@@ -732,7 +724,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (fdDump)
      {
  	fprintf(fdDump, "mch_settmode(%s, in = %x, out = %x)\n",
-@@ -3626,7 +3626,7 @@ mch_settmode(int tmode)
+@@ -3618,7 +3618,7 @@ mch_settmode(int tmode)
  		cmodein, cmodeout);
  	fflush(fdDump);
      }
@@ -741,7 +733,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  
-@@ -3677,14 +3677,14 @@ ResizeConBuf(
+@@ -3669,14 +3669,14 @@ ResizeConBuf(
  {
      if (!SetConsoleScreenBufferSize(hConsole, coordScreen))
      {
@@ -758,7 +750,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  }
  
-@@ -3698,14 +3698,14 @@ ResizeWindow(
+@@ -3690,14 +3690,14 @@ ResizeWindow(
  {
      if (!SetConsoleWindowInfo(hConsole, TRUE, &srWindowRect))
      {
@@ -775,7 +767,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  }
  
-@@ -3723,13 +3723,13 @@ ResizeConBufAndWindow(
+@@ -3715,13 +3715,13 @@ ResizeConBufAndWindow(
      COORD	    coordScreen;
      static int	    resized = FALSE;
  
@@ -791,7 +783,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      /* get the largest size we can size the console window to */
      coordScreen = GetLargestConsoleWindowSize(hConsole);
-@@ -3945,7 +3945,7 @@ mch_system_classic(char *cmd, int option
+@@ -3937,7 +3937,7 @@ mch_system_classic(char *cmd, int option
  
      /* Wait for the command to terminate before continuing */
      {
@@ -800,7 +792,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	int	    delay = 1;
  
  	/* Keep updating the window while waiting for the shell to finish. */
-@@ -3969,9 +3969,9 @@ mch_system_classic(char *cmd, int option
+@@ -3961,9 +3961,9 @@ mch_system_classic(char *cmd, int option
  	    if (delay < 50)
  		delay += 10;
  	}
@@ -812,7 +804,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  	/* Get the command exit code */
  	GetExitCodeProcess(pi.hProcess, &ret);
-@@ -5445,17 +5445,17 @@ termcap_mode_start(void)
+@@ -5437,17 +5437,17 @@ termcap_mode_start(void)
  	ResizeConBufAndWindow(g_hConOut, Columns, Rows);
      }
  
@@ -834,7 +826,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      cmodein |= ENABLE_WINDOW_INPUT;
      SetConsoleMode(g_hConIn, cmodein);
  
-@@ -5484,11 +5484,11 @@ termcap_mode_end(void)
+@@ -5476,11 +5476,11 @@ termcap_mode_end(void)
      cmodein &= ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
      SetConsoleMode(g_hConIn, cmodein);
  
@@ -849,7 +841,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      RestoreConsoleBuffer(cb, p_rs);
      reset_console_color_rgb();
      SetConsoleCursorInfo(g_hConOut, &g_cci);
-@@ -5907,9 +5907,9 @@ mch_set_normal_colors(void)
+@@ -5899,9 +5899,9 @@ mch_set_normal_colors(void)
      cterm_normal_fg_color = (g_attrDefault & 0xf) + 1;
      cterm_normal_bg_color = ((g_attrDefault >> 4) & 0xf) + 1;
      if (
@@ -861,7 +853,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	T_ME[0] == ESC && T_ME[1] == '|')
      {
  	p = T_ME + 2;
-@@ -5920,10 +5920,10 @@ mch_set_normal_colors(void)
+@@ -5912,10 +5912,10 @@ mch_set_normal_colors(void)
  	    cterm_normal_bg_color = ((n >> 4) & 0xf) + 1;
  	}
      }
@@ -874,7 +866,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  
-@@ -5961,9 +5961,9 @@ visual_bell(void)
+@@ -5953,9 +5953,9 @@ visual_bell(void)
  cursor_visible(BOOL fVisible)
  {
      s_cursor_visible = fVisible;
@@ -886,7 +878,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  
-@@ -6082,14 +6082,14 @@ mch_write(
+@@ -6074,14 +6074,14 @@ mch_write(
  	    DWORD nWritten;
  
  	    nWritten = write_chars(s, prefix);
@@ -903,7 +895,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    len -= (nWritten - 1);
  	    s += nWritten;
  	}
-@@ -6105,20 +6105,20 @@ mch_write(
+@@ -6097,20 +6097,20 @@ mch_write(
  	    {
  		gotoxy(g_srScrollRegion.Left + 1, g_coord.Y + 2);
  	    }
@@ -928,7 +920,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    s++;
  	}
  	else if (s[0] == '\b')
-@@ -6132,27 +6132,27 @@ mch_write(
+@@ -6124,27 +6124,27 @@ mch_write(
  		g_coord.Y--;
  	    }
  	    gotoxy(g_coord.X + 1, g_coord.Y + 1);
@@ -962,7 +954,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    char_u  *p;
  	    int	    arg1 = 0, arg2 = 0, argc = 0, args[16];
  
-@@ -6307,14 +6307,14 @@ mch_write(
+@@ -6299,14 +6299,14 @@ mch_write(
  		len -= 2;
  	    }
  
@@ -979,7 +971,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
  	else
  	{
-@@ -6322,24 +6322,24 @@ mch_write(
+@@ -6314,24 +6314,24 @@ mch_write(
  	    DWORD nWritten;
  
  	    nWritten = write_chars(s, 1);
@@ -1008,7 +1000,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  #endif /* FEAT_GUI_MSWIN */
-@@ -7133,7 +7133,7 @@ fix_arg_enc(void)
+@@ -7113,7 +7113,7 @@ fix_arg_enc(void)
  	{
  	    int literal = used_file_literal;
  
@@ -1017,7 +1009,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    /* When using diff mode may need to concatenate file name to
  	     * directory name.  Just like it's done in main(). */
  	    if (used_file_diff_mode && mch_isdir(str) && GARGCOUNT > 0
-@@ -7148,7 +7148,7 @@ fix_arg_enc(void)
+@@ -7128,7 +7128,7 @@ fix_arg_enc(void)
  		    str = r;
  		}
  	    }
