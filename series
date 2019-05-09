@@ -19,7 +19,6 @@ fix-italic-overhang-before-space.patch
 if_ruby-remove-allocate-method.patch
 update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
-embarcadero.patch
 fix-highdpi.patch #+disabled
 add-getpackages.patch
 mingw-gc-sections.patch
