@@ -29,4 +29,5 @@ big5corr.patch
 fix-indent-in-os_win32.patch
 fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
+fix-msvc-version.patch
 fix-config_cache-removal.patch #+rejected
