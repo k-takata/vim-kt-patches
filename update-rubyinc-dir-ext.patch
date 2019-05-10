@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  6efc6310851473227c20942bef80fded523ce06d
+# Parent  85d870a5a6df0ac0ecfae1793cb0dc84be266956
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -474,6 +474,8 @@ endif
+@@ -485,6 +485,8 @@ endif
  
  ifdef RUBY_19_OR_LATER
  RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
@@ -16,12 +16,12 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1137,6 +1137,8 @@ CFLAGS = $(CFLAGS) -DFEAT_RUBY
+@@ -1152,6 +1152,8 @@ CFLAGS = $(CFLAGS) -DFEAT_RUBY
  RUBY_OBJ = $(OUTDIR)\if_ruby.obj
- !if $(RUBY_VER) >= 19
+ ! if $(RUBY_VER) >= 19
  RUBY_INC = /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
 +# For using header files from Ruby's source code directory (w/o installing)
 +RUBY_INC = $(RUBY_INC) /I "$(RUBY)\include" /I "$(RUBY)\.ext\include\$(RUBY_PLATFORM)"
- !else
+ ! else
  RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
- !endif
+ ! endif
