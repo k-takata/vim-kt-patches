@@ -1,18 +1,18 @@
 # HG changeset patch
-# Parent  85d870a5a6df0ac0ecfae1793cb0dc84be266956
+# Parent  0669c0c5d58f2a99c4565a6511442358e7275ae4
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -485,6 +485,8 @@ endif
+@@ -481,6 +481,8 @@ RUBY_19_OR_LATER = 1
  
- ifdef RUBY_19_OR_LATER
+  ifdef RUBY_19_OR_LATER
  RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
 +# For using header files from Ruby's source code directory (w/o installing)
 +RUBYINC += -I $(RUBY)/include -I $(RUBY)/.ext/include/$(RUBY_PLATFORM)
- else
+  else
  RUBYINC = -I $(RUBY)/lib/ruby/$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
- endif
+  endif
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
