@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  4eb7d6a6eada8714d023e4c82696c3a63608c29c
+
+diff --git a/src/terminal.c b/src/terminal.c
+--- a/src/terminal.c
++++ b/src/terminal.c
+@@ -2432,6 +2432,8 @@ color2index(VTermColor *color, int fg, i
+ 
+     if (color->ansi_index != VTERM_ANSI_INDEX_NONE)
+     {
++	if (t_colors == 256)
++	   return color->ansi_index;
+ 	// The first 16 colors and default: use the ANSI index.
+ 	switch (color->ansi_index)
+ 	{
