@@ -1,0 +1,38 @@
+# HG changeset patch
+# Parent  97bf2754937f8809dfbb3ceb2ec0db36a7bacbd6
+
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -1887,7 +1887,7 @@ recover_names(
+ 	if (num_names == 0)
+ 	    num_files = 0;
+ 	else if (expand_wildcards(num_names, names, &num_files, &files,
+-					EW_KEEPALL|EW_FILE|EW_SILENT) == FAIL)
++			    EW_NOTENV|EW_KEEPALL|EW_FILE|EW_SILENT) == FAIL)
+ 	    num_files = 0;
+ 
+ 	/*
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -4020,7 +4020,7 @@ gen_expand_wildcards(
+ 	    /*
+ 	     * First expand environment variables, "~/" and "~user/".
+ 	     */
+-	    if (has_env_var(p) || *p == '~')
++	    if ((has_env_var(p) && !(flags & EW_NOTENV)) || *p == '~')
+ 	    {
+ 		p = expand_env_save_opt(p, TRUE);
+ 		if (p == NULL)
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -808,6 +808,7 @@ extern int (*dyn_libintl_wputenv)(const 
+ 				 * if executable is in $PATH */
+ #define EW_DODOT	0x4000	/* also files starting with a dot */
+ #define EW_EMPTYOK	0x8000	/* no matches is not an error */
++#define EW_NOTENV	0x10000	// do not expand environment variables
+ 
+ /* Flags for find_file_*() functions. */
+ #define FINDFILE_FILE	0	/* only files */
