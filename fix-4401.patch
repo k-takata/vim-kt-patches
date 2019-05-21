@@ -1,0 +1,52 @@
+# HG changeset patch
+# Parent  5849b20c52b8780fec1e82589e8a38f18d32ecce
+
+diff --git a/src/ex_cmds2.c b/src/ex_cmds2.c
+--- a/src/ex_cmds2.c
++++ b/src/ex_cmds2.c
+@@ -3016,7 +3016,9 @@ ex_packadd(exarg_T *eap)
+ ex_options(
+     exarg_T	*eap UNUSED)
+ {
+-    vim_setenv((char_u *)"OPTWIN_CMD", (char_u *)(cmdmod.tab ? "tab" : ""));
++    vim_setenv((char_u *)"OPTWIN_CMD",
++	    (char_u *)(cmdmod.tab ? "tab" :
++		(cmdmod.split & WSP_VERT) ? "vert" : ""));
+     cmd_source((char_u *)SYS_OPTWIN_FILE, NULL);
+ }
+ #endif
+diff --git a/src/testdir/test_options.vim b/src/testdir/test_options.vim
+--- a/src/testdir/test_options.vim
++++ b/src/testdir/test_options.vim
+@@ -51,6 +51,31 @@ func Test_options()
+   endtry
+   call assert_equal('ok', caught)
+ 
++  " Check if the option-window is opened horizontally.
++  wincmd j
++  call assert_notequal('option-window', bufname(''))
++  wincmd k
++  call assert_equal('option-window', bufname(''))
++  " close option-window
++  close
++
++  " Open the option-window vertically.
++  vert options
++  " Check if the option-window is opened vertically.
++  wincmd l
++  call assert_notequal('option-window', bufname(''))
++  wincmd h
++  call assert_equal('option-window', bufname(''))
++  " close option-window
++  close
++
++  " Open the option-window in a new tab.
++  tab options
++  " Check if the option-window is opened in a tab.
++  normal gT
++  call assert_notequal('option-window', bufname(''))
++  normal gt
++  call assert_equal('option-window', bufname(''))
+   " close option-window
+   close
+ endfunc

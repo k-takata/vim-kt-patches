@@ -31,5 +31,6 @@ fix-indent-in-gui_w32.patch
 fix-msvc-version.patch
 fix-8.1.1146.patch
 test-for-4369.patch
+fix-4401.patch
 fix-4369.patch
 fix-config_cache-removal.patch #+rejected
