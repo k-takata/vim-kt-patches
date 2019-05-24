@@ -1,0 +1,26 @@
+From 8212e21e5f12bb5eefea818f0641a02e4dcf6129 Mon Sep 17 00:00:00 2001
+From: "K.Takata" <kentkt@csc.jp>
+Date: Fri, 24 May 2019 13:39:41 +0900
+Subject: [PATCH] vimdll: SUBSYSTEM version was not set on vim.exe
+
+SUBSYSTEM version was not set only on vim.exe when `VIMDLL=yes`.
+---
+ src/Make_mvc.mak | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+index 89f4e13fb..4981539b9 100644
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -847,7 +847,7 @@ XDIFF_DEPS = \
+ !if "$(SUBSYSTEM_VER)" != ""
+ SUBSYSTEM = $(SUBSYSTEM),$(SUBSYSTEM_VER)
+ SUBSYSTEM_TOOLS = $(SUBSYSTEM_TOOLS),$(SUBSYSTEM_VER)
+-! if "$(VIMDLL)" != "yes"
++! if "$(VIMDLL)" == "yes"
+ SUBSYSTEM_CON = $(SUBSYSTEM_CON),$(SUBSYSTEM_VER)
+ ! endif
+ # Pass SUBSYSTEM_VER to GvimExt and other tools
+-- 
+2.17.0
+
