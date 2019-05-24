@@ -30,7 +30,6 @@ fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
 fix-msvc-version.patch
 fix-8.1.1146.patch
-fix-4418.patch
 fix-696.patch
 0001-vimdll-SUBSYSTEM-version-was-not-set-on-vim.exe.patch
 0001-win32-Update-dependency-of-gui_dwrite.cpp.patch
