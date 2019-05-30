@@ -30,4 +30,5 @@ fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
 fix-msvc-version.patch
 fix-8.1.1146.patch
+adjust-ga_grow-size.patch
 fix-config_cache-removal.patch #+rejected

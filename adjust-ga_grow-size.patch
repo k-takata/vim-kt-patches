@@ -1,0 +1,27 @@
+# HG changeset patch
+# Parent  ef2acbe2ec4a511d9e473aaf3e457772fcee6c45
+
+diff --git a/src/misc2.c b/src/misc2.c
+--- a/src/misc2.c
++++ b/src/misc2.c
+@@ -2055,8 +2055,18 @@ ga_grow(garray_T *gap, int n)
+ 
+     if (gap->ga_maxlen - gap->ga_len < n)
+     {
+-	if (n < gap->ga_growsize)
+-	    n = gap->ga_growsize;
++	if (gap->ga_growsize > 0)
++	{
++	    if (n < gap->ga_growsize)
++		n = gap->ga_growsize;
++	}
++	else
++	{
++	    if (n < -gap->ga_growsize)
++		n = -gap->ga_growsize;
++	    if (n < gap->ga_len / 2)
++		n = gap->ga_len / 2;
++	}
+ 	new_len = gap->ga_itemsize * (gap->ga_len + n);
+ 	pp = vim_realloc(gap->ga_data, new_len);
+ 	if (pp == NULL)
