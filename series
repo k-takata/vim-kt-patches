@@ -30,5 +30,4 @@ fix-indent-in-os_mswin.patch
 fix-indent-in-gui_w32.patch
 fix-msvc-version.patch
 fix-8.1.1146.patch
-fix-pathdef.patch
 fix-config_cache-removal.patch #+rejected
