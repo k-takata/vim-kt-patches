@@ -31,4 +31,6 @@ fix-indent-in-gui_w32.patch
 fix-msvc-version.patch
 fix-8.1.1146.patch
 fix-indent-in-proto.patch
+fix-4681.patch
+localize-time-of-swapfile.patch
 fix-config_cache-removal.patch #+rejected
