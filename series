@@ -32,4 +32,5 @@ fix-msvc-version.patch
 fix-8.1.1146.patch
 fix-indent-in-proto.patch
 fix-literal-dict-comments.patch
+fix-resolve-4661.patch
 fix-config_cache-removal.patch #+rejected
