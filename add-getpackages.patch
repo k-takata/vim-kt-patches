@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  b5ee0937e2ac72585abf999671e6360c37527463
+# Parent  8667bb5d96c3a0e07d3637da91604fac4ecbbb92
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2426,6 +2426,8 @@ getline({lnum})			String	line {lnum} of 
+@@ -2442,6 +2442,8 @@ getline({lnum})			String	line {lnum} of 
  getline({lnum}, {end})		List	lines {lnum} to {end} of current buffer
  getloclist({nr} [, {what}])	List	list of location list items
  getmatches([{win}])		List	list of current matches
@@ -13,7 +13,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  getpid()			Number	process ID of Vim
  getpos({expr})			List	position of cursor, mark, etc.
  getqflist([{what}])		List	list of quickfix items
-@@ -4957,6 +4959,23 @@ getmatches([{win}])					*getmatches()*
+@@ -5009,6 +5011,23 @@ getmatches([{win}])					*getmatches()*
  			'pattern': 'FIXME', 'priority': 10, 'id': 2}] >
  			:unlet m
  <
@@ -40,7 +40,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -162,6 +162,7 @@ static void f_getftype(typval_T *argvars
+@@ -161,6 +161,7 @@ static void f_getftype(typval_T *argvars
  static void f_getjumplist(typval_T *argvars, typval_T *rettv);
  static void f_getline(typval_T *argvars, typval_T *rettv);
  static void f_getloclist(typval_T *argvars UNUSED, typval_T *rettv UNUSED);
@@ -48,15 +48,15 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  static void f_getpid(typval_T *argvars, typval_T *rettv);
  static void f_getcurpos(typval_T *argvars, typval_T *rettv);
  static void f_getpos(typval_T *argvars, typval_T *rettv);
-@@ -607,6 +608,7 @@ static struct fst
-     {"getline",		1, 2, f_getline},
-     {"getloclist",	1, 2, f_getloclist},
-     {"getmatches",	0, 1, f_getmatches},
-+    {"getpackages",	0, 4, f_getpackages},
-     {"getpid",		0, 0, f_getpid},
-     {"getpos",		1, 1, f_getpos},
-     {"getqflist",	0, 1, f_getqflist},
-@@ -5273,6 +5275,80 @@ f_getloclist(typval_T *argvars UNUSED, t
+@@ -603,6 +604,7 @@ static funcentry_T global_functions[] =
+     {"getline",		1, 2, 0,	  f_getline},
+     {"getloclist",	1, 2, 0,	  f_getloclist},
+     {"getmatches",	0, 1, 0,	  f_getmatches},
++    {"getpackages",	0, 4, 0,	  f_getpackages},
+     {"getpid",		0, 0, 0,	  f_getpid},
+     {"getpos",		1, 1, 0,	  f_getpos},
+     {"getqflist",	0, 1, 0,	  f_getqflist},
+@@ -5313,6 +5315,80 @@ f_getloclist(typval_T *argvars UNUSED, t
  #endif
  }
  
