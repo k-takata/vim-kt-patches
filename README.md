@@ -9,7 +9,8 @@ Some of the patches are already sent to [vim_dev](https://groups.google.com/foru
 
 ## How to use ##
 ### First time ###
-```sh
+
+```
 $ hg qclone https://bitbucket.org/vim-mirror/vim -p https://bitbucket.org/k_takata/vim-ktakata-mq vim
 $ cd vim
 $ hg qselect linux    # if needed
@@ -17,11 +18,17 @@ $ hg qpush -a
 $ make
 ```
 
+You can also do qclone from OSDN:
+
+```
+$ hg qclone https://hg.osdn.net/view/vim/vim -p http://hg.pf.osdn.net/view/k/k_/k_takata/vim-ktakata-mq vim
+```
+
 ### Update ###
 
 If you want to get the latest source code after qclone, you can use the following commands:
 
-```sh
+```
 $ hg qpop -a
 $ hg pull -u
 $ hg pull -u --mq
@@ -30,7 +37,7 @@ $ hg qpush -a
 
 Or you can use [this script](https://gist.github.com/k-takata/3a152aa2307cc3969cfd):
 
-```sh
+```
 $ mqpull.sh
 ```
 
