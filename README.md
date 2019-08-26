@@ -11,10 +11,10 @@ Some of the patches are already sent to [vim_dev](https://groups.google.com/foru
 ### First time ###
 
 ```
-$ hg qclone https://bitbucket.org/vim-mirror/vim -p https://bitbucket.org/k_takata/vim-ktakata-mq vim
-$ cd vim
-$ hg qselect linux    # if needed
-$ hg qpush -a
+$ hg qclone https://bitbucket.org/vim-mirror/vim -p https://bitbucket.org/k_takata/vim-ktakata-mq vim  
+$ cd vim  
+$ hg qselect linux    # if needed  
+$ hg qpush -a  
 $ make
 ```
 
@@ -29,9 +29,9 @@ $ hg qclone https://hg.osdn.net/view/vim/vim -p http://hg.pf.osdn.net/view/k/k_/
 If you want to get the latest source code after qclone, you can use the following commands:
 
 ```
-$ hg qpop -a
-$ hg pull -u
-$ hg pull -u --mq
+$ hg qpop -a  
+$ hg pull -u  
+$ hg pull -u --mq  
 $ hg qpush -a
 ```
 
