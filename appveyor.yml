@@ -63,7 +63,7 @@ build_script:
     hg log -v -r -1:-4
     cd .hg
     mkdir patches
-    xcopy /s ..\..\vim-ktakata-mq patches > nul
+    xcopy /s %APPVEYOR_BUILD_FOLDER% patches > nul
     cd ..\src
     rem Apply all patches
     hg --config extensions.mq= --config "ui.username=%USERNAME% <%USERNAME%@%USERDOMAIN%>" qpush -a
