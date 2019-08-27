@@ -5,6 +5,10 @@ image:
   - Ubuntu
 
 environment:
+  global:
+  - VIMREPO: https://bitbucket.org/vim-mirror/vim
+  #- VIMREPO: https://hg.osdn.net/view/vim/vim
+
   matrix:
   - ARCH: x64
   - ARCH: x86
@@ -57,7 +61,7 @@ install:
 build_script:
 - cmd: |-
     cd ..
-    hg clone https://bitbucket.org/vim-mirror/vim
+    hg clone %VIMREPO%
     cd vim
     rem Show the recent commits in the Vim repository
     hg log -v -r -1:-4
@@ -87,7 +91,7 @@ build_script:
     type if_ver.txt
 - sh: |-
     cd ..
-    hg clone https://bitbucket.org/vim-mirror/vim
+    hg clone $VIMREPO
     cd vim
     hg log -v -r -1:-4 --color=always | cat
     cp -r $APPVEYOR_BUILD_FOLDER .hg/patches
