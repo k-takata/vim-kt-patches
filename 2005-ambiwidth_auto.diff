@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent b310fc3abf0bd107728295980e4090a7573dea3d
-# Parent  4fd44e762873d376cd7cd89930a932aa75938aad
+# Parent  af9920001c97a367d5b909ef1de1aad5ed0cd1a0
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
@@ -113,12 +113,12 @@ diff --git a/src/mbyte.c b/src/mbyte.c
      if (c >= 0x100)
      {
  #ifdef USE_WCHAR_FUNCTIONS
-diff --git a/src/optiondefs.h b/src/optiondefs.h
---- a/src/optiondefs.h
-+++ b/src/optiondefs.h
-@@ -3158,7 +3158,11 @@ static struct vimoption options[] =
+diff --git a/src/optionstr.c b/src/optionstr.c
+--- a/src/optionstr.c
++++ b/src/optionstr.c
+@@ -13,7 +13,11 @@
  
- #define PARAM_COUNT (sizeof(options) / sizeof(struct vimoption))
+ #include "vim.h"
  
 -static char *(p_ambw_values[]) = {"single", "double", NULL};
 +static char *(p_ambw_values[]) = {"single", "double",
@@ -127,8 +127,8 @@ diff --git a/src/optiondefs.h b/src/optiondefs.h
 +#endif
 +    NULL};
  static char *(p_bg_values[]) = {"light", "dark", NULL};
- static char *(p_nf_values[]) = {"bin", "octal", "hex", "alpha", NULL};
- static char *(p_ff_values[]) = {FF_UNIX, FF_DOS, FF_MAC, NULL};
+ static char *(p_bkc_values[]) = {"yes", "auto", "no", "breaksymlink", "breakhardlink", NULL};
+ static char *(p_bo_values[]) = {"all", "backspace", "cursor", "complete",
 diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 --- a/src/proto/gui_w32.pro
 +++ b/src/proto/gui_w32.pro
@@ -143,7 +143,7 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -504,6 +504,13 @@ typedef unsigned int u8char_T;	// int is
+@@ -508,6 +508,13 @@ typedef unsigned int u8char_T;	// int is
  #endif
  
  /*
