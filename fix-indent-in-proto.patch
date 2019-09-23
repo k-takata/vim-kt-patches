@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  d574da465e8c6e67059f60eaf53aa07b86ecc70f
+# Parent  6556432dd3fa2a5909937b5fdab4228b53360da6
 
 diff --git a/src/proto.h b/src/proto.h
 --- a/src/proto.h
 +++ b/src/proto.h
-@@ -115,47 +115,47 @@ extern int _stricoll(char *a, char *b);
+@@ -119,47 +119,47 @@ extern int _stricoll(char *a, char *b);
  
  /* These prototypes cannot be produced automatically. */
  int smsg(const char *, ...)
@@ -66,7 +66,7 @@ diff --git a/src/proto.h b/src/proto.h
      ;
  
  int vim_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap);
-@@ -164,13 +164,13 @@ int vim_vsnprintf_typval(char *str, size
+@@ -168,13 +168,13 @@ int vim_vsnprintf_typval(char *str, size
  # include "message.pro"
  # include "misc1.pro"
  # include "misc2.pro"
@@ -81,10 +81,10 @@ diff --git a/src/proto.h b/src/proto.h
  void qsort(void *base, size_t elm_count, size_t elm_size, int (*cmp)(const void *, const void *));
 -#endif
 +# endif
+ # include "mouse.pro"
  # include "move.pro"
  # include "mbyte.pro"
- # include "normal.pro"
-@@ -258,9 +258,9 @@ void qsort(void *base, size_t elm_count,
+@@ -263,9 +263,9 @@ void qsort(void *base, size_t elm_count,
  
  /* Not generated automatically, to add extra attribute. */
  void ch_log(channel_T *ch, const char *fmt, ...)
@@ -96,7 +96,7 @@ diff --git a/src/proto.h b/src/proto.h
      ;
  
  # endif
-@@ -321,20 +321,20 @@ extern char *vim_SelFile(Widget toplevel
+@@ -326,20 +326,20 @@ extern char *vim_SelFile(Widget toplevel
   * not included here for the perl files.  Use a dummy define for CV for the
   * other files.
   */
