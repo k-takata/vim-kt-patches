@@ -1,22 +1,22 @@
 # HG changeset patch
-# Parent  69fa8cbc8cec038cf875afdaf70499381d7b1f41
+# Parent  99236522f2de7652ce4fe9797443e6d275ea5f64
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2475,6 +2475,8 @@ getline({lnum})			String	line {lnum} of 
- getline({lnum}, {end})		List	lines {lnum} to {end} of current buffer
+@@ -2481,6 +2481,8 @@ getline({lnum}, {end})		List	lines {lnum
  getloclist({nr} [, {what}])	List	list of location list items
  getmatches([{win}])		List	list of current matches
+ getmousepos()			Dict	last known mouse position
 +getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
 +				List	list of pakage/plugin directories
  getpid()			Number	process ID of Vim
  getpos({expr})			List	position of cursor, mark, etc.
  getqflist([{what}])		List	list of quickfix items
-@@ -5303,6 +5305,23 @@ getmatches([{win}])					*getmatches()*
- 			'pattern': 'FIXME', 'priority': 10, 'id': 2}] >
- 			:unlet m
- <
+@@ -5360,6 +5362,23 @@ getmousepos()						*getmousepos()*
+ 		When using |getchar()| the Vim variables |v:mouse_lnum|,
+ 		|v:mouse_col| and |v:mouse_winid| also provide these values.
+ 
 +							*getpackages()*
 +getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
 +		Return a List of package/plugin directories.
@@ -40,7 +40,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -97,6 +97,7 @@ static void f_getcmdwintype(typval_T *ar
+@@ -94,6 +94,7 @@ static void f_getcmdwintype(typval_T *ar
  static void f_getenv(typval_T *argvars, typval_T *rettv);
  static void f_getfontname(typval_T *argvars, typval_T *rettv);
  static void f_getjumplist(typval_T *argvars, typval_T *rettv);
@@ -48,15 +48,15 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  static void f_getpid(typval_T *argvars, typval_T *rettv);
  static void f_getcurpos(typval_T *argvars, typval_T *rettv);
  static void f_getpos(typval_T *argvars, typval_T *rettv);
-@@ -471,6 +472,7 @@ static funcentry_T global_functions[] =
-     {"getline",		1, 2, FEARG_1,	  f_getline},
+@@ -466,6 +467,7 @@ static funcentry_T global_functions[] =
      {"getloclist",	1, 2, 0,	  f_getloclist},
      {"getmatches",	0, 1, 0,	  f_getmatches},
+     {"getmousepos",	0, 0, 0,	  f_getmousepos},
 +    {"getpackages",	0, 4, 0,	  f_getpackages},
      {"getpid",		0, 0, 0,	  f_getpid},
      {"getpos",		1, 1, FEARG_1,	  f_getpos},
      {"getqflist",	0, 1, 0,	  f_getqflist},
-@@ -3117,6 +3119,80 @@ f_getjumplist(typval_T *argvars, typval_
+@@ -2978,6 +2980,80 @@ f_getjumplist(typval_T *argvars, typval_
  #endif
  }
  
