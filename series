@@ -20,7 +20,7 @@ if_ruby-remove-allocate-method.patch
 update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
 fix-highdpi.patch #+disabled
-add-getpackages.patch
+add-getpackages.patch #+disabled
 mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
 win32-enable-optimization.patch
