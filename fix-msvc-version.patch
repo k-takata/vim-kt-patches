@@ -1,20 +1,21 @@
 # HG changeset patch
-# Parent  185798f5066b322d11be32f46ab8ec9d06533ade
+# Parent  13876f897e06befd3f0a13492e94a5e7ddf172c7
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1,7 +1,8 @@
+@@ -1,7 +1,7 @@
  # Makefile for Vim on Win32 (Windows XP/2003/Vista/7/8/10) and Win64,
- # using the Microsoft Visual C++ compilers. Known to work with VC5, VC6 (VS98),
- # VC7.0 (VS2002), VC7.1 (VS2003), VC8 (VS2005), VC9 (VS2008), VC10 (VS2010),
+-# using the Microsoft Visual C++ compilers. Known to work with VC5, VC6 (VS98),
+-# VC7.0 (VS2002), VC7.1 (VS2003), VC8 (VS2005), VC9 (VS2008), VC10 (VS2010),
 -# VC11 (VS2012), VC12 (VS2013), VC14 (VS2015) and VC15 (VS2017)
++# using the Microsoft Visual C++ compilers. Known to work with VC10 (VS2010),
 +# VC11 (VS2012), VC12 (VS2013), VC14 (VS2015), VC14.1 (VS2017) and
-+# VC14.2 (VS2019)
++# VC14.2 (VS2019).
  #
  # To build using other Windows compilers, see INSTALLpc.txt
  #
-@@ -274,15 +275,9 @@ link = link
+@@ -276,15 +276,9 @@ link = link
  !if $(MSVCVER) < 1900
  MSVC_MAJOR = ($(MSVCVER) / 100 - 6)
  MSVCRT_VER = ($(MSVCVER) / 10 - 60)
