@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  17c75bc7a8cc9ae9ba0047b430516309f11c98ed
+# Parent  27de3e20414cd48d1d5d38edd62dc5b8fe2260bf
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
@@ -9,7 +9,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      static HIMC	hImcOld = (HIMC)0;
  
 +# ifdef VIMDLL
-+    if (!gui.in_use)
++    if (!gui.in_use && !gui.starting)
 +    {
 +	mbyte_im_set_active(active);
 +	return;
@@ -24,7 +24,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      HIMC	hImc;
  
 +# ifdef VIMDLL
-+    if (!gui.in_use)
++    if (!gui.in_use && !gui.starting)
 +	return mbyte_im_get_status();
 +# endif
 +
