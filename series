@@ -31,4 +31,5 @@ fix-8.1.1146.patch
 fix-indent-in-proto.patch
 fix-indent-in-drawline.patch
 fix-tgc-test-with-vimdll.patch
+fix-vimdll-filterpipe.patch
 fix-config_cache-removal.patch #+rejected
