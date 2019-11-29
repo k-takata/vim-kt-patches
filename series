@@ -33,4 +33,5 @@ fix-indent-in-drawline.patch
 fix-tgc-test-with-vimdll.patch
 fix-vimdll-filterpipe.patch
 fix-vimdll-tlmenu.patch
+fix-vimdll-iminsert.patch
 fix-config_cache-removal.patch #+rejected
