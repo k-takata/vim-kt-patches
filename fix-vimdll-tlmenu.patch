@@ -1,0 +1,19 @@
+# HG changeset patch
+# Parent  e778841d6a41e614bb192636c8adfcfcfe1e2eb8
+
+diff --git a/src/menu.c b/src/menu.c
+--- a/src/menu.c
++++ b/src/menu.c
+@@ -685,7 +685,11 @@ add_menu_path(
+ 	    if (	addtearoff
+ 		    && *next_name
+ 		    && vim_strchr(p_go, GO_TEAROFF) != NULL
+-		    && menu_is_menubar(name))
++		    && menu_is_menubar(name)
++#  ifdef VIMDLL
++		    && (gui.in_use || gui.starting)
++#  endif
++		    )
+ 	    {
+ 		char_u		*tearpath;
+ 
