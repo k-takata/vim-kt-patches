@@ -1,0 +1,164 @@
+# HG changeset patch
+# Parent  d5833ab1e353ada4b1a0d68934d8986942c2acb6
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -91,15 +91,17 @@ the Number.  Examples:
+ 	Number -1	-->	String "-1" ~
+ 							*octal*
+ Conversion from a String to a Number is done by converting the first digits to
+-a number.  Hexadecimal "0xf9", Octal "017", and Binary "0b10" numbers are
+-recognized (NOTE: when using |scriptversion-4| octal is not recognized).  If
+-the String doesn't start with digits, the result is zero.
++a number.  Hexadecimal "0xf9", Octal "017" or "0o17", and Binary "0b10"
++numbers are recognized (NOTE: when using |scriptversion-4| octal with a
++leading "0" is not recognized).  If the String doesn't start with digits, the
++result is zero.
+ Examples:
+ 	String "456"	-->	Number 456 ~
+ 	String "6bar"	-->	Number 6 ~
+ 	String "foo"	-->	Number 0 ~
+ 	String "0xf1"	-->	Number 241 ~
+ 	String "0100"	-->	Number 64 ~
++	String "0o100"	-->	Number 64 ~
+ 	String "0b101"	-->	Number 5 ~
+ 	String "-8"	-->	Number -8 ~
+ 	String "+8"	-->	Number 0 ~
+@@ -1258,7 +1260,7 @@ number			number constant			*expr-number*
+ 				*hex-number* *octal-number* *binary-number*
+ 
+ Decimal, Hexadecimal (starting with 0x or 0X), Binary (starting with 0b or 0B)
+-and Octal (starting with 0).
++and Octal (starting with 0, 0o or 0O).
+ 
+ 						*floating-point-format*
+ Floating point numbers can be written in two forms:
+@@ -9246,8 +9248,8 @@ str2nr({expr} [, {base} [, {quoted}]])		
+ <
+ 		When {base} is 16 a leading "0x" or "0X" is ignored.  With a
+ 		different base the result will be zero.  Similarly, when
+-		{base} is 8 a leading "0" is ignored, and when {base} is 2 a
+-		leading "0b" or "0B" is ignored.
++		{base} is 8 a leading "0", "0o" or "0O" is ignored, and when
++		{base} is 2 a leading "0b" or "0B" is ignored.
+ 		Text after the number is silently ignored.
+ 
+ 		Can also be used as a |method|: >
+@@ -13143,13 +13145,16 @@ instead of failing in mysterious ways.
+ <
+ 							*scriptversion-4*  >
+  :scriptversion 4
+-<	Numbers with a leading zero are not recognized as octal.  With the
++<	Numbers with a leading zero are not recognized as octal.  "0o" or "0O"
++	is still recognized as octal.  With the
+ 	previous version you get: >
+-		echo 017   " displays 15
+-		echo 018   " displays 18
++		echo 017   " displays 15 (octal)
++		echo 0o17  " displays 15 (octal)
++		echo 018   " displays 18 (decimal)
+ <	with script version 4: >
+-		echo 017   " displays 17
+-		echo 018   " displays 18
++		echo 017   " displays 17 (decimal)
++		echo 0o17  " displays 15 (octal)
++		echo 018   " displays 18 (decimal)
+ <	Also, it is possible to use single quotes inside numbers to make them
+ 	easier to read: >
+ 		echo 1'000'000
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -1764,6 +1764,8 @@ vim_isblankline(char_u *lbuf)
+  * If "prep" is not NULL, returns a flag to indicate the type of the number:
+  *  0	    decimal
+  *  '0'	    octal
++ *  'O'	    octal
++ *  'o'	    octal
+  *  'B'	    bin
+  *  'b'	    bin
+  *  'X'	    hex
+@@ -1783,8 +1785,8 @@ vim_isblankline(char_u *lbuf)
+ vim_str2nr(
+     char_u		*start,
+     int			*prep,	    // return: type of number 0 = decimal, 'x'
+-				    // or 'X' is hex, '0' = octal, 'b' or 'B'
+-				    // is bin
++				    // or 'X' is hex, '0', 'o' or 'O' is octal,
++				    // 'b' or 'B' is bin
+     int			*len,	    // return: detected length of number
+     int			what,	    // what numbers to recognize
+     varnumber_T		*nptr,	    // return: signed result
+@@ -1822,6 +1824,11 @@ vim_str2nr(
+ 		&& (maxlen == 0 || maxlen > 2))
+ 	    // binary
+ 	    ptr += 2;
++	else if ((what & STR2NR_OOCT)
++		&& (pre == 'O' || pre == 'o') && vim_isbdigit(ptr[2])
++		&& (maxlen == 0 || maxlen > 2))
++	    // octal with prefix "0o"
++	    ptr += 2;
+ 	else
+ 	{
+ 	    // decimal or octal, default is decimal
+@@ -1869,9 +1876,12 @@ vim_str2nr(
+ 	    }
+ 	}
+     }
+-    else if (pre == '0' || ((what & STR2NR_OCT) && (what & STR2NR_FORCE)))
++    else if (pre == 'O' || pre == 'o' ||
++		pre == '0' || ((what & STR2NR_OCT) && (what & STR2NR_FORCE)))
+     {
+ 	// octal
++	if (pre != 0 && pre != '0')
++	    n += 2;	    // skip over "0o"
+ 	while ('0' <= *ptr && *ptr <= '7')
+ 	{
+ 	    // avoid ubsan error for overflow
+diff --git a/src/testdir/test_eval_stuff.vim b/src/testdir/test_eval_stuff.vim
+--- a/src/testdir/test_eval_stuff.vim
++++ b/src/testdir/test_eval_stuff.vim
+@@ -196,9 +196,12 @@ scriptversion 4
+ func Test_vvar_scriptversion4()
+   call assert_true(has('vimscript-4'))
+   call assert_equal(17, 017)
++  call assert_equal(15, 0o17)
++  call assert_equal(15, 0O17)
+   call assert_equal(18, 018)
+   call assert_equal(64, 0b1'00'00'00)
+   call assert_equal(1048576, 0x10'00'00)
++  call assert_equal(32768, 0o10'00'00)
+   call assert_equal(1000000, 1'000'000)
+   call assert_equal("1234", execute("echo 1'234")->trim())
+   call assert_equal('1  234', execute("echo 1''234")->trim())
+@@ -208,6 +211,8 @@ endfunc
+ scriptversion 1
+ func Test_vvar_scriptversion1()
+   call assert_equal(15, 017)
++  call assert_equal(15, 0o17)
++  call assert_equal(15, 0O17)
+   call assert_equal(18, 018)
+ endfunc
+ 
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -319,11 +319,12 @@
+ #define NUMBUFLEN 65
+ 
+ // flags for vim_str2nr()
+-#define STR2NR_BIN 0x01
+-#define STR2NR_OCT 0x02
+-#define STR2NR_HEX 0x04
+-#define STR2NR_ALL (STR2NR_BIN + STR2NR_OCT + STR2NR_HEX)
+-#define STR2NR_NO_OCT (STR2NR_BIN + STR2NR_HEX)
++#define STR2NR_BIN  0x01
++#define STR2NR_OCT  0x02
++#define STR2NR_HEX  0x04
++#define STR2NR_OOCT 0x08    // Octal with prefix "0o": 0o777
++#define STR2NR_ALL (STR2NR_BIN + STR2NR_OCT + STR2NR_HEX + STR2NR_OOCT)
++#define STR2NR_NO_OCT (STR2NR_BIN + STR2NR_HEX + STR2NR_OOCT)
+ 
+ #define STR2NR_FORCE 0x80   // only when ONE of the above is used
+ 

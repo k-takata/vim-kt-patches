@@ -26,4 +26,5 @@ drop-support-for-glib-2.2.patch #+rejected
 big5corr.patch
 fix-8.1.1146.patch
 fix-typo-in-version8.patch
+o-octal.patch
 fix-config_cache-removal.patch #+rejected
