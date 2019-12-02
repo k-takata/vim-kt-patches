@@ -1,10 +1,12 @@
 # HG changeset patch
 # Parent 0d562ac6a11939a577c936226c816a3387acbd03
+# Parent  b9914cb1a5ac71fc1bd958f948b766867cb0d35c
+
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -2706,7 +2706,11 @@
- 	 * is.  Needed for when the bold trick is used */
+@@ -2742,7 +2742,11 @@ gui_redraw_block(
+ 	// is.  Needed for when the bold trick is used
  	for (back = 0; back < col1; ++back)
  	    if (ScreenAttrs[off - 1 - back] != ScreenAttrs[off]
 -		    || ScreenLines[off - 1 - back] == ' ')

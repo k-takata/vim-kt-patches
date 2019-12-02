@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  fc237c293646f97bc151228da42b5bf103881b03
+# Parent  4f8ee84ee4ec439498fc89ea9700999ea0ca5240
 
 diff --git a/src/screen.c b/src/screen.c
 --- a/src/screen.c
 +++ b/src/screen.c
-@@ -6324,6 +6324,10 @@ screen_line(
+@@ -420,6 +420,10 @@ screen_line(
      int		    char_cells;		/* 1: normal char */
  					/* 2: occupies two display cells */
  # define CHAR_CELLS char_cells
@@ -15,8 +15,8 @@ diff --git a/src/screen.c b/src/screen.c
  
      /* Check for illegal row and col, just in case. */
      if (row >= Rows)
-@@ -6365,6 +6369,9 @@ screen_line(
- #endif /* FEAT_RIGHTLEFT */
+@@ -473,6 +477,9 @@ screen_line(
+ #endif
  
      redraw_next = char_needs_redraw(off_from, off_to, endcol - col);
 +#ifdef FEAT_GUI
@@ -25,7 +25,7 @@ diff --git a/src/screen.c b/src/screen.c
  
      while (col < endcol)
      {
-@@ -6375,21 +6382,18 @@ screen_line(
+@@ -483,21 +490,18 @@ screen_line(
  
  	redraw_this = redraw_next;
  	redraw_next = force || char_needs_redraw(off_from + CHAR_CELLS,
@@ -54,9 +54,9 @@ diff --git a/src/screen.c b/src/screen.c
 -	}
 +	    redraw_this = TRUE;
  #endif
- #ifdef FEAT_TEXT_PROP
+ #ifdef FEAT_PROP_POPUP
  	if (blocked_by_popup(row, col + coloff))
-@@ -6521,6 +6525,11 @@ screen_line(
+@@ -629,6 +633,11 @@ screen_line(
  		    redraw_next = TRUE;
  	    }
  #endif

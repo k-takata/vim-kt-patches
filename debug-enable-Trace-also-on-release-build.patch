@@ -1,11 +1,11 @@
 # HG changeset patch
-# Parent  3cc0ddf2abd0c4d56eba36b8e70f10b5bdcde45e
+# Parent  9dd7e4c50a52e0be614e5eea0abad8a466599f5d
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
 @@ -936,7 +936,7 @@ DumpPutS(const char *psz UNUSED)
- # endif
+ #endif
  }
  
 -#ifdef _DEBUG
