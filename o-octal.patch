@@ -1,5 +1,11 @@
 # HG changeset patch
-# Parent  d5833ab1e353ada4b1a0d68934d8986942c2acb6
+# Parent  f4c528ef6e32ec7e9e473cfcfa9dbce5cd8fc1ac
+[PATCH] Fix that str2nr() didn't support "0o" notation
+From 447cdf690b8151f37981d464b9399c690feee38c Mon Sep 17 00:00:00 2001
+---
+ src/evalfunc.c                 | 2 +-
+ src/testdir/test_functions.vim | 5 +++++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -45,7 +51,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Text after the number is silently ignored.
  
  		Can also be used as a |method|: >
-@@ -13143,13 +13145,16 @@ instead of failing in mysterious ways.
+@@ -13144,13 +13146,16 @@ instead of failing in mysterious ways.
  <
  							*scriptversion-4*  >
   :scriptversion 4
@@ -116,6 +122,18 @@ diff --git a/src/charset.c b/src/charset.c
  	while ('0' <= *ptr && *ptr <= '7')
  	{
  	    // avoid ubsan error for overflow
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -7259,7 +7259,7 @@ f_str2nr(typval_T *argvars, typval_T *re
+     switch (base)
+     {
+ 	case 2: what |= STR2NR_BIN + STR2NR_FORCE; break;
+-	case 8: what |= STR2NR_OCT + STR2NR_FORCE; break;
++	case 8: what |= STR2NR_OCT + STR2NR_OOCT + STR2NR_FORCE; break;
+ 	case 16: what |= STR2NR_HEX + STR2NR_FORCE; break;
+     }
+     vim_str2nr(p, NULL, NULL, what, &n, NULL, 0, FALSE);
 diff --git a/src/testdir/test_eval_stuff.vim b/src/testdir/test_eval_stuff.vim
 --- a/src/testdir/test_eval_stuff.vim
 +++ b/src/testdir/test_eval_stuff.vim
@@ -141,6 +159,28 @@ diff --git a/src/testdir/test_eval_stuff.vim b/src/testdir/test_eval_stuff.vim
    call assert_equal(18, 018)
  endfunc
  
+diff --git a/src/testdir/test_functions.vim b/src/testdir/test_functions.vim
+--- a/src/testdir/test_functions.vim
++++ b/src/testdir/test_functions.vim
+@@ -149,6 +149,10 @@ func Test_str2nr()
+   call assert_equal(65, str2nr('0101', 8))
+   call assert_equal(-65, str2nr('-101', 8))
+   call assert_equal(-65, str2nr('-0101', 8))
++  call assert_equal(65, str2nr('0o101', 8))
++  call assert_equal(65, str2nr('0O0101', 8))
++  call assert_equal(-65, str2nr('-0O101', 8))
++  call assert_equal(-65, str2nr('-0o0101', 8))
+ 
+   call assert_equal(11259375, str2nr('abcdef', 16))
+   call assert_equal(11259375, str2nr('ABCDEF', 16))
+@@ -167,6 +171,7 @@ func Test_str2nr()
+ 
+   call assert_equal(0, str2nr('0x10'))
+   call assert_equal(0, str2nr('0b10'))
++  call assert_equal(0, str2nr('0o10'))
+   call assert_equal(1, str2nr('12', 2))
+   call assert_equal(1, str2nr('18', 8))
+   call assert_equal(1, str2nr('1g', 16))
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
