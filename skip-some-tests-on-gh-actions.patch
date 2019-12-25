@@ -91,7 +91,7 @@ diff --git a/src/testdir/test_vimscript.vim b/src/testdir/test_vimscript.vim
  " Most of this was formerly in test49.
  
 +if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
-+  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  "throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +  finish
 +endif
 +
