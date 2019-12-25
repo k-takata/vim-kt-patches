@@ -42,6 +42,20 @@ diff --git a/src/testdir/test_restricted.vim b/src/testdir/test_restricted.vim
  func Test_restricted()
    call Run_restricted_test('!ls', 'E145:')
  endfunc
+diff --git a/src/testdir/test_startup.vim b/src/testdir/test_startup.vim
+--- a/src/testdir/test_startup.vim
++++ b/src/testdir/test_startup.vim
+@@ -4,6 +4,10 @@ source shared.vim
+ source screendump.vim
+ source check.vim
+ 
++if has('win32') && $GITHUB_ACTIONS == 'true'
++  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++endif
++
+ " Check that loading startup.vim works.
+ func Test_startup_script()
+   set compatible
 diff --git a/src/testdir/test_undo.vim b/src/testdir/test_undo.vim
 --- a/src/testdir/test_undo.vim
 +++ b/src/testdir/test_undo.vim
