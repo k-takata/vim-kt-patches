@@ -8,7 +8,7 @@ diff --git a/src/testdir/test_exit.vim b/src/testdir/test_exit.vim
  source shared.vim
  
  func Test_exiting()
-+  if has('win32') && $GITHUB_ACTIONS == 'true'
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
 +    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +  endif
    let after =<< trim [CODE]
@@ -21,7 +21,7 @@ diff --git a/src/testdir/test_profile.vim b/src/testdir/test_profile.vim
  source shared.vim
  source screendump.vim
  
-+if has('win32') && $GITHUB_ACTIONS == 'true'
++if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
 +  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +endif
 +
@@ -35,7 +35,7 @@ diff --git a/src/testdir/test_restricted.vim b/src/testdir/test_restricted.vim
  "  finish
  "endif
  
-+if has('win32') && $GITHUB_ACTIONS == 'true'
++if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
 +  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +endif
 +
@@ -49,7 +49,7 @@ diff --git a/src/testdir/test_startup.vim b/src/testdir/test_startup.vim
  source screendump.vim
  source check.vim
  
-+if has('win32') && $GITHUB_ACTIONS == 'true'
++if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
 +  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +endif
 +
@@ -63,7 +63,7 @@ diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
  source shared.vim
  source screendump.vim
  
-+if has('win32') && $GITHUB_ACTIONS == 'true'
++if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
 +  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +endif
 +
@@ -90,7 +90,7 @@ diff --git a/src/testdir/test_vimscript.vim b/src/testdir/test_vimscript.vim
  source check.vim
  source shared.vim
  
-+if has('win32') && $GITHUB_ACTIONS == 'true'
++if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
 +  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +endif
 +
