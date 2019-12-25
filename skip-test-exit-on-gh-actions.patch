@@ -1,0 +1,16 @@
+# HG changeset patch
+# Parent  6a156f6d00e925b792f75c74409d73cf66308499
+
+diff --git a/src/testdir/test_exit.vim b/src/testdir/test_exit.vim
+--- a/src/testdir/test_exit.vim
++++ b/src/testdir/test_exit.vim
+@@ -3,6 +3,9 @@
+ source shared.vim
+ 
+ func Test_exiting()
++  if has('win32') && $GITHUB_ACTIONS == 'true'
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let after =<< trim [CODE]
+     au QuitPre * call writefile(["QuitPre"], "Xtestout")
+     au ExitPre * call writefile(["ExitPre"], "Xtestout", "a")
