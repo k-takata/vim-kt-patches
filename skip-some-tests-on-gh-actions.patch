@@ -56,6 +56,29 @@ diff --git a/src/testdir/test_startup.vim b/src/testdir/test_startup.vim
  " Check that loading startup.vim works.
  func Test_startup_script()
    set compatible
+diff --git a/src/testdir/test_startup_utf8.vim b/src/testdir/test_startup_utf8.vim
+--- a/src/testdir/test_startup_utf8.vim
++++ b/src/testdir/test_startup_utf8.vim
+@@ -4,6 +4,9 @@ source shared.vim
+ source screendump.vim
+ 
+ func Test_read_stdin_utf8()
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let linesin = ['テスト', '€ÀÈÌÒÙ']
+   call writefile(linesin, 'Xtestin')
+   let before = [
+@@ -65,6 +68,9 @@ func Test_detect_ambiwidth()
+   if !CanRunVimInTerminal()
+     throw 'Skipped: cannot run Vim in a terminal window'
+   endif
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   " Use the title termcap entries to output the escape sequence.
+   call writefile([
 diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
 --- a/src/testdir/test_terminal.vim
 +++ b/src/testdir/test_terminal.vim
