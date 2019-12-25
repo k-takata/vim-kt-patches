@@ -28,6 +28,20 @@ diff --git a/src/testdir/test_profile.vim b/src/testdir/test_profile.vim
  func Test_profile_func()
    let lines =<< trim [CODE]
      profile start Xprofile_func.log
+diff --git a/src/testdir/test_restricted.vim b/src/testdir/test_restricted.vim
+--- a/src/testdir/test_restricted.vim
++++ b/src/testdir/test_restricted.vim
+@@ -7,6 +7,10 @@ source shared.vim
+ "  finish
+ "endif
+ 
++if has('win32') && $GITHUB_ACTIONS == 'true'
++  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++endif
++
+ func Test_restricted()
+   call Run_restricted_test('!ls', 'E145:')
+ endfunc
 diff --git a/src/testdir/test_undo.vim b/src/testdir/test_undo.vim
 --- a/src/testdir/test_undo.vim
 +++ b/src/testdir/test_undo.vim
