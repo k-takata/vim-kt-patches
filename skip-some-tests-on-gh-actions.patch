@@ -86,14 +86,14 @@ diff --git a/src/testdir/test_undo.vim b/src/testdir/test_undo.vim
 diff --git a/src/testdir/test_vimscript.vim b/src/testdir/test_vimscript.vim
 --- a/src/testdir/test_vimscript.vim
 +++ b/src/testdir/test_vimscript.vim
-@@ -4,6 +4,10 @@
- source check.vim
- source shared.vim
+@@ -1,6 +1,10 @@
+ " Test various aspects of the Vim script language.
+ " Most of this was formerly in test49.
  
 +if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
 +  throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
 +endif
 +
- "-------------------------------------------------------------------------------
- " Test environment							    {{{1
- "-------------------------------------------------------------------------------
+ source check.vim
+ source shared.vim
+ 
