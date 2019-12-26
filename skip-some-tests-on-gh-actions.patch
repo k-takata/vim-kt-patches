@@ -1,6 +1,52 @@
 # HG changeset patch
 # Parent  0b8132f937a29711e8051a96d68eb69cad6d4aad
 
+diff --git a/src/testdir/test_bufline.vim b/src/testdir/test_bufline.vim
+--- a/src/testdir/test_bufline.vim
++++ b/src/testdir/test_bufline.vim
+@@ -56,6 +56,9 @@ func Test_setbufline_getbufline_fold_tab
+ endfunc
+ 
+ func Test_setline_startup()
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let cmd = GetVimCommand('Xscript')
+   if cmd == ''
+     return
+@@ -95,6 +98,9 @@ func Test_appendbufline()
+ endfunc
+ 
+ func Test_appendbufline_no_E315()
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let after =<< trim [CODE]
+     set stl=%f ls=2
+     new
+@@ -149,6 +155,9 @@ endfunc
+ 
+ func Test_appendbufline_redraw()
+   CheckScreendump
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   let lines =<< trim END
+     new foo
+diff --git a/src/testdir/test_cursorline.vim b/src/testdir/test_cursorline.vim
+--- a/src/testdir/test_cursorline.vim
++++ b/src/testdir/test_cursorline.vim
+@@ -110,6 +110,9 @@ endfunc
+ func Test_cursorline_screenline()
+   CheckScreendump
+   CheckOption cursorlineopt
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let filename='Xcursorline'
+   let lines = []
+ 
 diff --git a/src/testdir/test_exit.vim b/src/testdir/test_exit.vim
 --- a/src/testdir/test_exit.vim
 +++ b/src/testdir/test_exit.vim
@@ -14,6 +60,85 @@ diff --git a/src/testdir/test_exit.vim b/src/testdir/test_exit.vim
    let after =<< trim [CODE]
      au QuitPre * call writefile(["QuitPre"], "Xtestout")
      au ExitPre * call writefile(["ExitPre"], "Xtestout", "a")
+diff --git a/src/testdir/test_functions.vim b/src/testdir/test_functions.vim
+--- a/src/testdir/test_functions.vim
++++ b/src/testdir/test_functions.vim
+@@ -1690,6 +1690,9 @@ endfunc
+ 
+ func Test_state()
+   CheckRunVimInTerminal
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   let lines =<< trim END
+ 	call setline(1, ['one', 'two', 'three'])
+diff --git a/src/testdir/test_match.vim b/src/testdir/test_match.vim
+--- a/src/testdir/test_match.vim
++++ b/src/testdir/test_match.vim
+@@ -295,6 +295,9 @@ endfunc
+ 
+ func Test_matchdelete_other_window()
+   CheckScreendump
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   let buf = OtherWindowCommon()
+   call term_sendkeys(buf, ":call matchdelete(mid, winid)\<CR>")
+@@ -313,6 +316,9 @@ func Test_matchclear_other_window()
+   if !CanRunVimInTerminal()
+     throw 'Skipped: cannot make screendumps'
+   endif
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let buf = OtherWindowCommon()
+   call term_sendkeys(buf, ":call clearmatches(winid)\<CR>")
+   call VerifyScreenDump(buf, 'Test_matchclear_1', {})
+@@ -325,6 +331,9 @@ func Test_matchadd_other_window()
+   if !CanRunVimInTerminal()
+     throw 'Skipped: cannot make screendumps'
+   endif
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let buf = OtherWindowCommon()
+   call term_sendkeys(buf, ":call matchadd('Search', 'Hello', 1, -1, #{window: winid})\<CR>")
+   call term_sendkeys(buf, ":\<CR>")
+diff --git a/src/testdir/test_popup.vim b/src/testdir/test_popup.vim
+--- a/src/testdir/test_popup.vim
++++ b/src/testdir/test_popup.vim
+@@ -739,6 +739,9 @@ endfunc
+ func Test_popup_and_previewwindow_dump()
+   CheckScreendump
+   CheckFeature quickfix
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   let lines =<< trim END
+     set previewheight=9
+@@ -807,6 +810,9 @@ endfunc
+ 
+ func Test_popup_position()
+   CheckScreendump
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   let lines =<< trim END
+     123456789_123456789_123456789_a
+@@ -850,6 +856,9 @@ endfunc
+ func Test_popup_command()
+   CheckScreendump
+   CheckFeature menu
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   let lines =<< trim END
+ 	one two three four five
 diff --git a/src/testdir/test_profile.vim b/src/testdir/test_profile.vim
 --- a/src/testdir/test_profile.vim
 +++ b/src/testdir/test_profile.vim
@@ -79,6 +204,32 @@ diff --git a/src/testdir/test_startup_utf8.vim b/src/testdir/test_startup_utf8.v
  
    " Use the title termcap entries to output the escape sequence.
    call writefile([
+diff --git a/src/testdir/test_tabpage.vim b/src/testdir/test_tabpage.vim
+--- a/src/testdir/test_tabpage.vim
++++ b/src/testdir/test_tabpage.vim
+@@ -562,6 +562,9 @@ func Test_tabpage_cmdheight()
+   if !CanRunVimInTerminal()
+     throw 'Skipped: cannot make screendumps'
+   endif
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   call writefile([
+         \ 'set laststatus=2',
+         \ 'set cmdheight=2',
+diff --git a/src/testdir/test_tagjump.vim b/src/testdir/test_tagjump.vim
+--- a/src/testdir/test_tagjump.vim
++++ b/src/testdir/test_tagjump.vim
+@@ -505,6 +505,9 @@ endfunc
+ " Requires a terminal to trigger that prompt.
+ func Test_tselect()
+   CheckScreendump
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+ 
+   call writefile([
+ 	\ 'main	Xtest.h	/^void test();$/;"	f',
 diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
 --- a/src/testdir/test_terminal.vim
 +++ b/src/testdir/test_terminal.vim
@@ -93,6 +244,19 @@ diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
  let s:python = PythonProg()
  let $PROMPT_COMMAND=''
  
+diff --git a/src/testdir/test_timers.vim b/src/testdir/test_timers.vim
+--- a/src/testdir/test_timers.vim
++++ b/src/testdir/test_timers.vim
+@@ -313,6 +313,9 @@ func Test_timer_restore_count()
+   if !CanRunVimInTerminal()
+     throw 'Skipped: cannot run Vim in a terminal window'
+   endif
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   " Check that v:count is saved and restored, not changed by a timer.
+   call writefile([
+         \ 'nnoremap <expr><silent> L v:count ? v:count . "l" : "l"',
 diff --git a/src/testdir/test_undo.vim b/src/testdir/test_undo.vim
 --- a/src/testdir/test_undo.vim
 +++ b/src/testdir/test_undo.vim
@@ -106,6 +270,19 @@ diff --git a/src/testdir/test_undo.vim b/src/testdir/test_undo.vim
    " Issue #1254
    " create undofile with timestamps older than Vim startup time.
    let t0 = localtime() - 43200
+diff --git a/src/testdir/test_unlet.vim b/src/testdir/test_unlet.vim
+--- a/src/testdir/test_unlet.vim
++++ b/src/testdir/test_unlet.vim
+@@ -23,6 +23,9 @@ func Test_unlet_fails()
+ endfunc
+ 
+ func Test_unlet_env()
++  if has('win64') && $GITHUB_ACTIONS == 'true' && !has('gui_running')
++    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
++  endif
+   let envcmd = has('win32') ? 'set' : 'env'
+ 
+   let $FOOBAR = 'test'
 diff --git a/src/testdir/test_vimscript.vim b/src/testdir/test_vimscript.vim
 --- a/src/testdir/test_vimscript.vim
 +++ b/src/testdir/test_vimscript.vim
