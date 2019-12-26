@@ -257,19 +257,6 @@ diff --git a/src/testdir/test_timers.vim b/src/testdir/test_timers.vim
    " Check that v:count is saved and restored, not changed by a timer.
    call writefile([
          \ 'nnoremap <expr><silent> L v:count ? v:count . "l" : "l"',
-diff --git a/src/testdir/test_undo.vim b/src/testdir/test_undo.vim
---- a/src/testdir/test_undo.vim
-+++ b/src/testdir/test_undo.vim
-@@ -328,6 +328,9 @@ func Test_insert_expr()
- endfunc
- 
- func Test_undofile_earlier()
-+  if has('win32') && $GITHUB_ACTIONS == 'true'
-+    throw 'Skipped: does not work on Windows on GitHub Actions by unknown reasons'
-+  endif
-   " Issue #1254
-   " create undofile with timestamps older than Vim startup time.
-   let t0 = localtime() - 43200
 diff --git a/src/testdir/test_unlet.vim b/src/testdir/test_unlet.vim
 --- a/src/testdir/test_unlet.vim
 +++ b/src/testdir/test_unlet.vim
