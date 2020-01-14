@@ -1,0 +1,72 @@
+# HG changeset patch
+# Parent  95539a110c9016b41462dd36c5d7cfbd1930dfc5
+
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -6527,6 +6527,10 @@ A jump table for the options with a shor
+ 	of this option).
+ 	For the Amiga the default is ">".  The output is directly saved in a
+ 	file and not echoed to the screen.
++	For MS-Windows the default is ">%s 2>&1".  The output including stderr
++	is directly saved in a file and not echoed to the screen.  If "tee"
++	command is found in the PATH the default becomes "2>&1| tee".  The
++	output is also echoed to the screen.
+ 	For Unix the default it "| tee".  The stdout of the compiler is saved
+ 	in a file and echoed to the screen.  If the 'shell' option is "csh" or
+ 	"tcsh" after initializations, the default becomes "|& tee".  If the
+diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
+--- a/runtime/doc/quickfix.txt
++++ b/runtime/doc/quickfix.txt
+@@ -944,11 +944,13 @@ or simpler >
+ "$*" can be given multiple times, for example: >
+    :set makeprg=gcc\ -o\ $*\ $*
+ 
+-The 'shellpipe' option defaults to ">" for the Amiga and Win32.  This means
+-that the output of the compiler is saved in a file and not shown on the screen
+-directly.  For Unix "| tee" is used.  The compiler output is shown on the
+-screen and saved in a file the same time.  Depending on the shell used "|&
+-tee" or "2>&1| tee" is the default, so stderr output will be included.
++The 'shellpipe' option defaults to ">" for the Amiga and ">%s 2>&1" Win32 if
++"tee" command is not found in the PATH.  This means that the output of the
++compiler is saved in a file and not shown on the screen directly.  If "tee"
++command is found on Win32 the default becomes "2>&1| tee" and the output is
++also echoed to the screen.  For Unix "| tee" is used.  The compiler output is
++shown on the screen and saved in a file the same time.  Depending on the shell
++used "|& tee" or "2>&1| tee" is the default, so stderr output will be included.
+ 
+ If 'shellpipe' is empty, the {errorfile} part will be omitted.  This is useful
+ for compilers that write to an errorfile themselves (e.g., Manx's Amiga C).
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -847,10 +847,11 @@ set_init_3(void)
+ 	    if (do_sp)
+ 	    {
+ #  ifdef MSWIN
+-		p_sp = (char_u *)">&";
+-#  else
+-		p_sp = (char_u *)"|& tee";
++		if (!mch_can_exe((char_u *)"tee", NULL, TRUE))
++		    p_sp = (char_u *)">&";
++		else
+ #  endif
++		    p_sp = (char_u *)"|& tee";
+ 		options[idx_sp].def_val[VI_DEFAULT] = p_sp;
+ 	    }
+ # endif
+@@ -887,10 +888,11 @@ set_init_3(void)
+ 		if (do_sp)
+ 		{
+ #  ifdef MSWIN
+-		    p_sp = (char_u *)">%s 2>&1";
+-#  else
+-		    p_sp = (char_u *)"2>&1| tee";
++		    if (!mch_can_exe((char_u *)"tee", NULL, TRUE))
++			p_sp = (char_u *)">%s 2>&1";
++		    else
+ #  endif
++			p_sp = (char_u *)"2>&1| tee";
+ 		    options[idx_sp].def_val[VI_DEFAULT] = p_sp;
+ 		}
+ # endif
