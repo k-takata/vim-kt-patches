@@ -28,6 +28,4 @@ fix-8.1.1146.patch
 o-octal.patch
 skip-undofile-earlier-on-gh-actions.patch
 support-tee-with-sp-on-windows.patch
-fix-bri-sbr.patch
-fix-vimjp-1273.patch
 fix-config_cache-removal.patch #+rejected
