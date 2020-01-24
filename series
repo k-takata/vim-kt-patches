@@ -29,4 +29,5 @@ o-octal.patch
 skip-undofile-earlier-on-gh-actions.patch
 support-tee-with-sp-on-windows.patch
 revise-crt_secure_no_deprecate.patch
+dont-create-auto-dir-if-not-needed.patch
 fix-config_cache-removal.patch #+rejected
