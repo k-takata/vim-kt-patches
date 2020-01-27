@@ -1,21 +1,22 @@
 # HG changeset patch
-# Parent  eb14d2ebd1692c011d86c46e7654e769ec211084
+# Parent  1ab7023bc2f1c9a094de55ad48a3c467d146d8c5
 
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -657,6 +657,8 @@ OPTFLAG = /Ox
+ !  if "$(OPTIMIZE)" != "SPACE"
+ OPTFLAG = $(OPTFLAG) /GL
+ !  endif
++# Visual Studio 2005 has 'deprecated' many of the standard CRT functions
++CFLAGS = $(CFLAGS) /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE
+ ! endif
+ 
+ # (/Wp64 is deprecated in VC9 and generates an obnoxious warning.)
 diff --git a/src/if_ruby.c b/src/if_ruby.c
 --- a/src/if_ruby.c
 +++ b/src/if_ruby.c
-@@ -16,12 +16,18 @@
- # include "auto/config.h"
- #endif
- 
-+#if _MSC_VER >= 1400
-+// Visual Studio 2005 has 'deprecated' many of the standard CRT functions
-+# define _CRT_SECURE_NO_DEPRECATE
-+# define _CRT_NONSTDC_NO_DEPRECATE
-+#endif
-+
- #include <stdio.h>
- #include <string.h>
+@@ -21,7 +21,7 @@
  
  #ifdef _WIN32
  # if !defined(DYNAMIC_RUBY) || (RUBY_VERSION < 18)
@@ -24,7 +25,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  # endif
  # ifndef DYNAMIC_RUBY
  #  define IMPORT // For static dll usage __declspec(dllimport)
-@@ -301,8 +307,8 @@ static int ruby_convert_to_vim_value(VAL
+@@ -301,8 +301,8 @@ static int ruby_convert_to_vim_value(VAL
  #  define rb_float_new			dll_rb_float_new
  #  define rb_ary_new			dll_rb_ary_new
  #  ifdef rb_ary_new4
@@ -35,7 +36,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  #  endif
  #  define rb_ary_new4			dll_rb_ary_new4
  #  define rb_ary_push			dll_rb_ary_push
-@@ -1074,15 +1080,15 @@ error_print(int state)
+@@ -1074,15 +1074,15 @@ error_print(int state)
  	    }
  
  	    attr = syn_name2attr((char_u *)"Error");
@@ -86,3 +87,19 @@ diff --git a/src/vim.h b/src/vim.h
  /*
   * VIM_SIZEOF_INT is used in feature.h, and the system-specific included files
   * need items from feature.h.  Therefore define VIM_SIZEOF_INT here.
+diff --git a/src/vimio.h b/src/vimio.h
+--- a/src/vimio.h
++++ b/src/vimio.h
+@@ -7,12 +7,6 @@
+  * See README.txt for an overview of the Vim source code.
+  */
+ 
+-// Visual Studio 2005 has 'deprecated' many of the standard CRT functions
+-#if _MSC_VER >= 1400
+-# define _CRT_SECURE_NO_DEPRECATE
+-# define _CRT_NONSTDC_NO_DEPRECATE
+-#endif
+-
+ // cproto fails on missing include files
+ #ifndef PROTO
+ # include <io.h>
