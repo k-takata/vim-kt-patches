@@ -1,4 +1,4 @@
-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/j9v6gmrxqlk7i8wr/branch/default?svg=true)](https://ci.appveyor.com/project/k-takata/vim-ktakata-mq/branch/default)
+[![Build status](https://ci.appveyor.com/api/projects/status/08qq79ukn7y64i3o/branch/default?svg=true)](https://ci.appveyor.com/project/k-takata/vim-ktakata-mq-osdn/branch/default)
 
 # K.Takata's patch queue for Vim #
 
@@ -10,17 +10,11 @@ Some of the patches are already sent to [vim_dev](https://groups.google.com/foru
 ## How to use ##
 ### First time ###
 
-From BitBucket:
-
-    $ hg qclone https://bitbucket.org/vim-mirror/vim -p https://bitbucket.org/k_takata/vim-ktakata-mq vim
+    $ hg qclone https://hg.osdn.net/view/vim/vim -p http://hg.pf.osdn.net/view/k/k_/k_takata/vim-ktakata-mq vim
     $ cd vim
     $ hg qselect linux    # if needed
     $ hg qpush -a
     $ make
-
-You can also do qclone from OSDN:
-
-    $ hg qclone https://hg.osdn.net/view/vim/vim -p http://hg.pf.osdn.net/view/k/k_/k_takata/vim-ktakata-mq vim
 
 ### Update ###
 
