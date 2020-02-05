@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  854e04e1f7b57278f31d5f23f21f9b5500bb0622
+# Parent  720d74884a1dbf1e307ce310904e2a046c4c4093
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -287,7 +287,7 @@ diff --git a/src/fileio.c b/src/fileio.c
 +    if (ret >= 0 && S_ISLNK(st.st_mode))
 +    {
 +	link = TRUE;
-+	ret = mch_stat(p, &st)
++	ret = mch_stat(p, &st);
 +    }
 +    vim_free(p);
 +
@@ -297,7 +297,7 @@ diff --git a/src/fileio.c b/src/fileio.c
 +    if (ret >= 0)
 +    {
 +	size = (varnumber_T)st.st_size;
-+	if (S_ISDIR(st->st_mode))
++	if (S_ISDIR(st.st_mode))
 +	    size = 0;
 +	// non-perfect check for overflow
 +	if ((off_T)size != (off_T)st.st_size)
@@ -309,10 +309,10 @@ diff --git a/src/fileio.c b/src/fileio.c
 +
 +	if (link)
 +	{
-+	    if (S_ISDIR(st->st_mode))
-+		type = "linkd";
++	    if (S_ISDIR(st.st_mode))
++		type = (char_u*)"linkd";
 +	    else
-+		type = "link";
++		type = (char_u*)"link";
 +	}
 +	else
 +	    type = getftypest(&st);
