@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  720d74884a1dbf1e307ce310904e2a046c4c4093
+# Parent  5551100de3129157c0f682b84a7d419f40e2b56b
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -12,7 +12,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  readfile({fname} [, {type} [, {max}]])
  				List	get list of lines from file {fname}
  reg_executing()			String	get the executing register name
-@@ -7667,11 +7668,11 @@ rand([{expr}])						*rand()*
+@@ -7668,11 +7669,11 @@ rand([{expr}])						*rand()*
  			:echo rand(seed)
  			:echo rand(seed) % 16  " random number 0 - 15
  <
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  		When {expr} is omitted all entries are included.
  		When {expr} is given, it is evaluated to check what to do:
-@@ -7681,6 +7682,7 @@ readdir({directory} [, {expr}])
+@@ -7682,6 +7683,7 @@ readdir({directory} [, {expr}])
  			added to the list.
  			If {expr} results in 1 then this entry will be added
  			to the list.
@@ -34,7 +34,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Each time {expr} is evaluated |v:val| is set to the entry name.
  		When {expr} is a function the name is passed as the argument.
  		For example, to get a list of files ending in ".txt": >
-@@ -7699,6 +7701,58 @@ readdir({directory} [, {expr}])
+@@ -7700,6 +7702,55 @@ readdir({directory} [, {expr}])
  		Can also be used as a |method|: >
  			GetDirName()->readdir()
  <
@@ -47,7 +47,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +		This is much faster than calling |readdir()| then calling
 +		|getfperm()|, |getfsize()|, |getftime()| and |getftype()| for
 +		each file and directory especially on MS-Windows.
-+		NOTE: unlike |readdir()|, the list may be unsorted.
++		The list will be sorted by name (case sensitive).
 +
 +		The Dictionary for file and directory information has the
 +		following items:
@@ -83,9 +83,6 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 +		When {expr} is a function the entry is passed as the argument.
 +		For example, to get a list of files ending in ".txt": >
 +		  readdirex(dirname, {e -> e.name =~ '.txt$'})
-+<		To sort the result by name (case sensitive): >
-+		  readdirex(dirname)->sort({e1, e2 -> e1.name ==# e2.name ?
-+			\ 0 : e1.name ># e2.name ? 1 : -1})
 +<
 +		Can also be used as a |method|: >
 +			GetDirName()->readdirex()
@@ -143,7 +140,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  	}
  	FindClose(hFind);
      }
-@@ -4554,7 +4554,345 @@ readdir_core(
+@@ -4554,7 +4554,379 @@ readdir_core(
  
      return failed ? FAIL : OK;
  }
@@ -340,6 +337,16 @@ diff --git a/src/fileio.c b/src/fileio.c
 +}
 +# endif
 +
++    static int
++compare_readdirex_item(const void *p1, const void *p2)
++{
++    char_u  *name1, *name2;
++
++    name1 = dict_get_string(*(dict_T**)p1, "name", FALSE);
++    name2 = dict_get_string(*(dict_T**)p2, "name", FALSE);
++    return STRCMP(name1, name2);
++}
++
 +/*
 + * Core part of "readdirex()" function.
 + * Retrieve the list of files/directories of "path" into "list".
@@ -353,13 +360,19 @@ diff --git a/src/fileio.c b/src/fileio.c
 +    int		(*checkitem)(void *context, dict_T *item))
 +{
 +    int			failed = FALSE;
++    int			i;
++    garray_T		ga;
 +# ifdef MSWIN
 +    char_u		*buf, *p;
 +    int			ok;
 +    HANDLE		hFind = INVALID_HANDLE_VALUE;
 +    WIN32_FIND_DATAW    wfd;
 +    WCHAR		*wn = NULL;	// UTF-16 name, NULL when not used.
++# endif
 +
++    ga_init2(&ga, (int)sizeof(dict_T *), 20);
++
++# ifdef MSWIN
 +    buf = alloc(MAXPATHL);
 +    if (buf == NULL)
 +	return FAIL;
@@ -408,14 +421,17 @@ diff --git a/src/fileio.c b/src/fileio.c
 +
 +	    if (!ignore)
 +	    {
-+		if (list_append_dict(list, item) == FAIL)
++		if (ga_grow(&ga, 1) == OK)
++		    ((dict_T**)ga.ga_data)[ga.ga_len++] = item;
++		else
 +		{
 +		    failed = TRUE;
 +		    dict_unref(item);
 +		    break;
 +		}
 +	    }
-+	    dict_unref(item);
++	    else
++		dict_unref(item);
 +
 +	    ok = FindNextFileW(hFind, &wfd);
 +	}
@@ -468,19 +484,34 @@ diff --git a/src/fileio.c b/src/fileio.c
 +
 +	    if (!ignore)
 +	    {
-+		if (list_append_dict(list, item) == FAIL)
++		if (ga_grow(&ga, 1) == OK)
++		    ((dict_T**)ga.ga_data)[ga.ga_len++] = item;
++		else
 +		{
 +		    failed = TRUE;
 +		    dict_unref(item);
 +		    break;
 +		}
 +	    }
-+	    dict_unref(item);
++	    else
++		dict_unref(item);
 +	}
 +
 +	closedir(dirp);
 +    }
 +# endif
++
++    if (!failed && ga.ga_len > 0)
++    {
++	qsort((void*)ga.ga_data, (size_t)ga.ga_len, sizeof(dict_T*),
++		compare_readdirex_item);
++	for (i = 0; i < ga.ga_len; i++)
++	{
++	    list_append_dict(list, ((dict_T**)ga.ga_data)[i]);
++	    dict_unref(((dict_T**)ga.ga_data)[i]);
++	}
++    }
++    ga_clear(&ga);
 +
 +    return failed ? FAIL : OK;
 +}
@@ -493,7 +524,7 @@ diff --git a/src/fileio.c b/src/fileio.c
 diff --git a/src/filepath.c b/src/filepath.c
 --- a/src/filepath.c
 +++ b/src/filepath.c
-@@ -1024,6 +1024,25 @@ f_getcwd(typval_T *argvars, typval_T *re
+@@ -1028,6 +1028,25 @@ f_getcwd(typval_T *argvars, typval_T *re
  }
  
  /*
@@ -519,7 +550,7 @@ diff --git a/src/filepath.c b/src/filepath.c
   * "getfperm({fname})" function
   */
      void
-@@ -1032,24 +1051,13 @@ f_getfperm(typval_T *argvars, typval_T *
+@@ -1036,24 +1055,13 @@ f_getfperm(typval_T *argvars, typval_T *
      char_u	*fname;
      stat_T	st;
      char_u	*perm = NULL;
@@ -546,7 +577,7 @@ diff --git a/src/filepath.c b/src/filepath.c
      rettv->vval.v_string = perm;
  }
  
-@@ -1101,6 +1109,33 @@ f_getftime(typval_T *argvars, typval_T *
+@@ -1105,6 +1113,33 @@ f_getftime(typval_T *argvars, typval_T *
  }
  
  /*
@@ -580,7 +611,7 @@ diff --git a/src/filepath.c b/src/filepath.c
   * "getftype({fname})" function
   */
      void
-@@ -1109,31 +1144,12 @@ f_getftype(typval_T *argvars, typval_T *
+@@ -1113,31 +1148,12 @@ f_getftype(typval_T *argvars, typval_T *
      char_u	*fname;
      stat_T	st;
      char_u	*type = NULL;
@@ -613,7 +644,7 @@ diff --git a/src/filepath.c b/src/filepath.c
      rettv->vval.v_string = type;
  }
  
-@@ -1416,6 +1432,63 @@ f_readdir(typval_T *argvars, typval_T *r
+@@ -1420,6 +1436,63 @@ f_readdir(typval_T *argvars, typval_T *r
  }
  
  /*

@@ -32,5 +32,4 @@ revise-crt_secure_no_deprecate.patch
 dont-create-auto-dir-if-not-needed.patch
 if_lua-fix-warning.patch
 add-readdirex.patch
-sort-readdirex.patch
 fix-config_cache-removal.patch #+rejected
