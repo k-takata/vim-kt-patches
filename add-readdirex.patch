@@ -154,7 +154,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  	}
  	FindClose(hFind);
      }
-@@ -4554,7 +4555,379 @@ readdir_core(
+@@ -4554,7 +4555,371 @@ readdir_core(
  
      return failed ? FAIL : OK;
  }
@@ -368,7 +368,7 @@ diff --git a/src/fileio.c b/src/fileio.c
 + */
 +    int
 +readdirex_core(
-+    list_T	*list,
++    garray_T	*gap,
 +    char_u	*path,
 +    void	*context,
 +    int		(*checkitem)(void *context, dict_T *item))
@@ -384,7 +384,7 @@ diff --git a/src/fileio.c b/src/fileio.c
 +    WCHAR		*wn = NULL;	// UTF-16 name, NULL when not used.
 +# endif
 +
-+    ga_init2(&ga, (int)sizeof(dict_T *), 20);
++    ga_init2(gap, (int)sizeof(dict_T *), 20);
 +
 +# ifdef MSWIN
 +    buf = alloc(MAXPATHL);
@@ -435,8 +435,8 @@ diff --git a/src/fileio.c b/src/fileio.c
 +
 +	    if (!ignore)
 +	    {
-+		if (ga_grow(&ga, 1) == OK)
-+		    ((dict_T**)ga.ga_data)[ga.ga_len++] = item;
++		if (ga_grow(gap, 1) == OK)
++		    ((dict_T**)gap->ga_data)[gap->ga_len++] = item;
 +		else
 +		{
 +		    failed = TRUE;
@@ -498,8 +498,8 @@ diff --git a/src/fileio.c b/src/fileio.c
 +
 +	    if (!ignore)
 +	    {
-+		if (ga_grow(&ga, 1) == OK)
-+		    ((dict_T**)ga.ga_data)[ga.ga_len++] = item;
++		if (ga_grow(gap, 1) == OK)
++		    ((dict_T**)gap->ga_data)[gap->ga_len++] = item;
 +		else
 +		{
 +		    failed = TRUE;
@@ -515,17 +515,9 @@ diff --git a/src/fileio.c b/src/fileio.c
 +    }
 +# endif
 +
-+    if (!failed && ga.ga_len > 0)
-+    {
-+	qsort((void*)ga.ga_data, (size_t)ga.ga_len, sizeof(dict_T*),
++    if (!failed && gap->ga_len > 0)
++	qsort((void*)gap->ga_data, (size_t)gap->ga_len, sizeof(dict_T*),
 +		compare_readdirex_item);
-+	for (i = 0; i < ga.ga_len; i++)
-+	{
-+	    list_append_dict(list, ((dict_T**)ga.ga_data)[i]);
-+	    dict_unref(((dict_T**)ga.ga_data)[i]);
-+	}
-+    }
-+    ga_clear(&ga);
 +
 +    return failed ? FAIL : OK;
 +}
@@ -658,7 +650,16 @@ diff --git a/src/filepath.c b/src/filepath.c
      rettv->vval.v_string = type;
  }
  
-@@ -1420,6 +1436,63 @@ f_readdir(typval_T *argvars, typval_T *r
+@@ -1408,7 +1424,7 @@ f_readdir(typval_T *argvars, typval_T *r
+     expr = &argvars[1];
+ 
+     ret = readdir_core(&ga, path, (void *)expr, readdir_checkitem);
+-    if (ret == OK && rettv->vval.v_list != NULL && ga.ga_len > 0)
++    if (ret == OK)
+     {
+ 	for (i = 0; i < ga.ga_len; i++)
+ 	{
+@@ -1420,6 +1436,71 @@ f_readdir(typval_T *argvars, typval_T *r
  }
  
  /*
@@ -703,19 +704,27 @@ diff --git a/src/filepath.c b/src/filepath.c
 +f_readdirex(typval_T *argvars, typval_T *rettv)
 +{
 +    typval_T	*expr;
++    int		ret;
 +    char_u	*path;
++    garray_T	ga;
++    int		i;
 +
 +    if (rettv_list_alloc(rettv) == FAIL)
 +	return;
 +    path = tv_get_string(&argvars[0]);
 +    expr = &argvars[1];
 +
-+    if (readdirex_core(rettv->vval.v_list, path, (void *)expr,
-+						readdirex_checkitem) == FAIL)
++    ret = readdirex_core(&ga, path, (void *)expr, readdirex_checkitem);
++    if (ret == OK)
 +    {
-+	list_free(rettv->vval.v_list);
-+	rettv->vval.v_list = NULL;
++	for (i = 0; i < ga.ga_len; i++)
++	{
++	    dict_T  *dict = ((dict_T**)ga.ga_data)[i];
++	    list_append_dict(rettv->vval.v_list, dict);
++	    dict_unref(dict);
++	}
 +    }
++    ga_clear(&ga);
 +}
 +
 +/*
@@ -729,7 +738,7 @@ diff --git a/src/proto/fileio.pro b/src/proto/fileio.pro
  void buf_store_time(buf_T *buf, stat_T *st, char_u *fname);
  void write_lnum_adjust(linenr_T offset);
  int readdir_core(garray_T *gap, char_u *path, void *context, int (*checkitem)(void *context, char_u *name));
-+int readdirex_core(list_T *list, char_u *path, void *context, int (*checkitem)(void *context, dict_T *item));
++int readdirex_core(garray_T *gap, char_u *path, void *context, int (*checkitem)(void *context, dict_T *item));
  int delete_recursive(char_u *name);
  void vim_deltempdir(void);
  char_u *vim_tempname(int extra_char, int keep);
