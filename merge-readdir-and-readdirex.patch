@@ -1,0 +1,462 @@
+# HG changeset patch
+# Parent  4ef0587df0e8809218a06abe4f30d81e472873cc
+
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -4409,155 +4409,8 @@ write_lnum_adjust(linenr_T offset)
+ 	curbuf->b_no_eol_lnum += offset;
+ }
+ 
+-#if defined(TEMPDIRNAMES) || defined(FEAT_EVAL) || defined(PROTO)
+-/*
+- * Core part of "readdir()" function.
+- * Retrieve the list of files/directories of "path" into "gap".
+- * Return OK for success, FAIL for failure.
+- */
+-    int
+-readdir_core(
+-    garray_T	*gap,
+-    char_u	*path,
+-    void	*context,
+-    int		(*checkitem)(void *context, char_u *name))
+-{
+-    int			failed = FALSE;
+-    char_u		*p;
+-# ifdef MSWIN
+-    char_u		*buf;
+-    int			ok;
+-    HANDLE		hFind = INVALID_HANDLE_VALUE;
+-    WIN32_FIND_DATAW    wfd;
+-    WCHAR		*wn = NULL;	// UTF-16 name, NULL when not used.
+-# else
+-    DIR			*dirp;
+-    struct dirent	*dp;
+-# endif
+-
+-    ga_init2(gap, (int)sizeof(char *), 20);
+-
+-# ifdef MSWIN
+-    buf = alloc(MAXPATHL);
+-    if (buf == NULL)
+-	return FAIL;
+-    STRNCPY(buf, path, MAXPATHL-5);
+-    p = buf + STRLEN(buf);
+-    MB_PTR_BACK(buf, p);
+-    if (*p == '\\' || *p == '/')
+-	*p = NUL;
+-    STRCAT(buf, "\\*");
+-
+-    wn = enc_to_utf16(buf, NULL);
+-    if (wn != NULL)
+-	hFind = FindFirstFileW(wn, &wfd);
+-    ok = (hFind != INVALID_HANDLE_VALUE);
+-    if (!ok)
+-    {
+-	failed = TRUE;
+-	smsg(_(e_notopen), path);
+-    }
+-    else
+-    {
+-	while (ok)
+-	{
+-	    int	ignore;
+-
+-	    p = utf16_to_enc(wfd.cFileName, NULL);   // p is allocated here
+-	    if (p == NULL)
+-		break;  // out of memory
+-
+-	    ignore = p[0] == '.' && (p[1] == NUL
+-					      || (p[1] == '.' && p[2] == NUL));
+-	    if (!ignore && checkitem != NULL)
+-	    {
+-		int r = checkitem(context, p);
+-
+-		if (r < 0)
+-		{
+-		    vim_free(p);
+-		    break;
+-		}
+-		if (r == 0)
+-		    ignore = TRUE;
+-	    }
+-
+-	    if (!ignore)
+-	    {
+-		if (ga_grow(gap, 1) == OK)
+-		    ((char_u**)gap->ga_data)[gap->ga_len++] = p;
+-		else
+-		{
+-		    failed = TRUE;
+-		    vim_free(p);
+-		    break;
+-		}
+-	    }
+-	    else
+-		vim_free(p);
+-
+-	    ok = FindNextFileW(hFind, &wfd);
+-	}
+-	FindClose(hFind);
+-    }
+-
+-    vim_free(buf);
+-    vim_free(wn);
+-# else
+-    dirp = opendir((char *)path);
+-    if (dirp == NULL)
+-    {
+-	failed = TRUE;
+-	smsg(_(e_notopen), path);
+-    }
+-    else
+-    {
+-	for (;;)
+-	{
+-	    int	ignore;
+-
+-	    dp = readdir(dirp);
+-	    if (dp == NULL)
+-		break;
+-	    p = (char_u *)dp->d_name;
+-
+-	    ignore = p[0] == '.' &&
+-		    (p[1] == NUL ||
+-		     (p[1] == '.' && p[2] == NUL));
+-	    if (!ignore && checkitem != NULL)
+-	    {
+-		int r = checkitem(context, p);
+-
+-		if (r < 0)
+-		    break;
+-		if (r == 0)
+-		    ignore = TRUE;
+-	    }
+-
+-	    if (!ignore)
+-	    {
+-		if (ga_grow(gap, 1) == OK)
+-		    ((char_u**)gap->ga_data)[gap->ga_len++] = vim_strsave(p);
+-		else
+-		{
+-		    failed = TRUE;
+-		    break;
+-		}
+-	    }
+-	}
+-
+-	closedir(dirp);
+-    }
+-# endif
+-
+-    if (!failed && gap->ga_len > 0)
+-	sort_strings((char_u **)gap->ga_data, gap->ga_len);
+-
+-    return failed ? FAIL : OK;
+-}
+-#endif
+-
+-#if defined(FEAT_EVAL) || defined(PROTO)
++// Subfuncions for readdirex()
++#ifdef FEAT_EVAL
+ # ifdef MSWIN
+     static char_u *
+ getfpermwfd(WIN32_FIND_DATAW *wfd, char_u *perm)
+@@ -4756,18 +4609,23 @@ compare_readdirex_item(const void *p1, c
+     name2 = dict_get_string(*(dict_T**)p2, (char_u*)"name", FALSE);
+     return STRCMP(name1, name2);
+ }
+-
++#endif
++
++#if defined(TEMPDIRNAMES) || defined(FEAT_EVAL) || defined(PROTO)
+ /*
+- * Core part of "readdirex()" function.
+- * Retrieve the list of files/directories of "path" into "list".
++ * Core part of "readdir()" and "readdirex()" function.
++ * Retrieve the list of files/directories of "path" into "gap".
++ * If "withattr" is TRUE, retrieve the names and their attributes.
++ * If "withattr" is FALSE, retrieve the names only.
+  * Return OK for success, FAIL for failure.
+  */
+     int
+-readdirex_core(
++readdir_core(
+     garray_T	*gap,
+     char_u	*path,
++    int		withattr UNUSED,
+     void	*context,
+-    int		(*checkitem)(void *context, dict_T *item))
++    int		(*checkitem)(void *context, void *item))
+ {
+     int			failed = FALSE;
+     char_u		*p;
+@@ -4782,7 +4640,18 @@ readdirex_core(
+     struct dirent	*dp;
+ # endif
+ 
+-    ga_init2(gap, (int)sizeof(dict_T *), 20);
++    ga_init2(gap, (int)sizeof(char *), 20);
++
++# ifdef FEAT_EVAL
++#  define FREE_ITEM(item)   do { \
++	if (withattr) \
++	    dict_unref((dict_T*)item); \
++	else \
++	    vim_free(item); \
++    } while (0)
++# else
++#  define FREE_ITEM(item)   vim_free(item)
++# endif
+ 
+ # ifdef MSWIN
+     buf = alloc(MAXPATHL);
+@@ -4809,22 +4678,35 @@ readdirex_core(
+ 	while (ok)
+ 	{
+ 	    int	    ignore;
+-	    dict_T  *item;
++	    void    *item;
+ 	    WCHAR   *wp;
+ 
+ 	    wp = wfd.cFileName;
+-	    ignore = wp[0] == L'.' && (wp[1] == NUL
+-					|| (wp[1] == L'.' && wp[2] == NUL));
+-	    item = create_readdirex_item(&wfd);
+-	    if (item == NULL)
+-		break;
++	    ignore = wp[0] == L'.' &&
++		    (wp[1] == NUL ||
++		     (wp[1] == L'.' && wp[2] == NUL));
++#  ifdef FEAT_EVAL
++	    if (withattr)
++	    {
++		item = (void*)create_readdirex_item(&wfd);
++		if (item == NULL)
++		    break;
++	    }
++	    else
++#  endif
++	    {
++		item = (void*)utf16_to_enc(wfd.cFileName, NULL);
++		if (item == NULL)
++		    break;  // out of memory
++	    }
++
+ 	    if (!ignore && checkitem != NULL)
+ 	    {
+ 		int r = checkitem(context, item);
+ 
+ 		if (r < 0)
+ 		{
+-		    dict_unref(item);
++		    FREE_ITEM(item);
+ 		    break;
+ 		}
+ 		if (r == 0)
+@@ -4834,16 +4716,16 @@ readdirex_core(
+ 	    if (!ignore)
+ 	    {
+ 		if (ga_grow(gap, 1) == OK)
+-		    ((dict_T**)gap->ga_data)[gap->ga_len++] = item;
++		    ((void**)gap->ga_data)[gap->ga_len++] = item;
+ 		else
+ 		{
+ 		    failed = TRUE;
+-		    dict_unref(item);
++		    FREE_ITEM(item);
+ 		    break;
+ 		}
+ 	    }
+ 	    else
+-		dict_unref(item);
++		FREE_ITEM(item);
+ 
+ 	    ok = FindNextFileW(hFind, &wfd);
+ 	}
+@@ -4852,7 +4734,7 @@ readdirex_core(
+ 
+     vim_free(buf);
+     vim_free(wn);
+-# else
++# else	// MSWIN
+     dirp = opendir((char *)path);
+     if (dirp == NULL)
+     {
+@@ -4864,7 +4746,7 @@ readdirex_core(
+ 	for (;;)
+ 	{
+ 	    int	    ignore;
+-	    dict_T  *item;
++	    void    *item;
+ 
+ 	    dp = readdir(dirp);
+ 	    if (dp == NULL)
+@@ -4874,16 +4756,28 @@ readdirex_core(
+ 	    ignore = p[0] == '.' &&
+ 		    (p[1] == NUL ||
+ 		     (p[1] == '.' && p[2] == NUL));
+-	    item = create_readdirex_item(path, p);
+-	    if (item == NULL)
+-		break;
++#  ifdef FEAT_EVAL
++	    if (withattr)
++	    {
++		item = (void*)create_readdirex_item(path, p);
++		if (item == NULL)
++		    break;
++	    }
++	    else
++#  endif
++	    {
++		item = (void*)vim_strsave(p);
++		if (item == NULL)
++		    break;
++	    }
++
+ 	    if (!ignore && checkitem != NULL)
+ 	    {
+ 		int r = checkitem(context, item);
+ 
+ 		if (r < 0)
+ 		{
+-		    dict_unref(item);
++		    FREE_ITEM(item);
+ 		    break;
+ 		}
+ 		if (r == 0)
+@@ -4893,31 +4787,38 @@ readdirex_core(
+ 	    if (!ignore)
+ 	    {
+ 		if (ga_grow(gap, 1) == OK)
+-		    ((dict_T**)gap->ga_data)[gap->ga_len++] = item;
++		    ((void**)gap->ga_data)[gap->ga_len++] = item;
+ 		else
+ 		{
+ 		    failed = TRUE;
+-		    dict_unref(item);
++		    FREE_ITEM(item);
+ 		    break;
+ 		}
+ 	    }
+ 	    else
+-		dict_unref(item);
++		FREE_ITEM(item);
+ 	}
+ 
+ 	closedir(dirp);
+     }
+-# endif
++# endif	// MSWIN
++
++# undef FREE_ITEM
+ 
+     if (!failed && gap->ga_len > 0)
+-	qsort((void*)gap->ga_data, (size_t)gap->ga_len, sizeof(dict_T*),
+-		compare_readdirex_item);
++    {
++# ifdef FEAT_EVAL
++	if (withattr)
++	    qsort((void*)gap->ga_data, (size_t)gap->ga_len, sizeof(dict_T*),
++		    compare_readdirex_item);
++	else
++# endif
++	    sort_strings((char_u **)gap->ga_data, gap->ga_len);
++    }
+ 
+     return failed ? FAIL : OK;
+ }
+-#endif
+-
+-#if defined(TEMPDIRNAMES) || defined(FEAT_EVAL) || defined(PROTO)
++
+ /*
+  * Delete "name" and everything in it, recursively.
+  * return 0 for success, -1 if some file was not deleted.
+@@ -4943,7 +4844,7 @@ delete_recursive(char_u *name)
+ 	exp = vim_strsave(name);
+ 	if (exp == NULL)
+ 	    return -1;
+-	if (readdir_core(&ga, exp, NULL, NULL) == OK)
++	if (readdir_core(&ga, exp, FALSE, NULL, NULL) == OK)
+ 	{
+ 	    for (i = 0; i < ga.ga_len; ++i)
+ 	    {
+diff --git a/src/filepath.c b/src/filepath.c
+--- a/src/filepath.c
++++ b/src/filepath.c
+@@ -1374,7 +1374,7 @@ f_pathshorten(typval_T *argvars, typval_
+  * Evaluate "expr" (= "context") for readdir().
+  */
+     static int
+-readdir_checkitem(void *context, char_u *name)
++readdir_checkitem(void *context, void *item)
+ {
+     typval_T	*expr = (typval_T *)context;
+     typval_T	save_val;
+@@ -1382,6 +1382,7 @@ readdir_checkitem(void *context, char_u 
+     typval_T	argv[2];
+     int		retval = 0;
+     int		error = FALSE;
++    char_u	*name = (char_u*)item;
+ 
+     if (expr->v_type == VAR_UNKNOWN)
+ 	return 1;
+@@ -1423,7 +1424,7 @@ f_readdir(typval_T *argvars, typval_T *r
+     path = tv_get_string(&argvars[0]);
+     expr = &argvars[1];
+ 
+-    ret = readdir_core(&ga, path, (void *)expr, readdir_checkitem);
++    ret = readdir_core(&ga, path, FALSE, (void *)expr, readdir_checkitem);
+     if (ret == OK)
+     {
+ 	for (i = 0; i < ga.ga_len; i++)
+@@ -1439,7 +1440,7 @@ f_readdir(typval_T *argvars, typval_T *r
+  * Evaluate "expr" (= "context") for readdirex().
+  */
+     static int
+-readdirex_checkitem(void *context, dict_T *item)
++readdirex_checkitem(void *context, void *item)
+ {
+     typval_T	*expr = (typval_T *)context;
+     typval_T	save_val;
+@@ -1447,14 +1448,15 @@ readdirex_checkitem(void *context, dict_
+     typval_T	argv[2];
+     int		retval = 0;
+     int		error = FALSE;
++    dict_T	*dict = (dict_T*)item;
+ 
+     if (expr->v_type == VAR_UNKNOWN)
+ 	return 1;
+ 
+     prepare_vimvar(VV_VAL, &save_val);
+-    set_vim_var_dict(VV_VAL, item);
++    set_vim_var_dict(VV_VAL, dict);
+     argv[0].v_type = VAR_DICT;
+-    argv[0].vval.v_dict = item;
++    argv[0].vval.v_dict = dict;
+ 
+     if (eval_expr_typval(expr, argv, 1, &rettv) == FAIL)
+ 	goto theend;
+@@ -1487,7 +1489,7 @@ f_readdirex(typval_T *argvars, typval_T 
+     path = tv_get_string(&argvars[0]);
+     expr = &argvars[1];
+ 
+-    ret = readdirex_core(&ga, path, (void *)expr, readdirex_checkitem);
++    ret = readdir_core(&ga, path, TRUE, (void *)expr, readdirex_checkitem);
+     if (ret == OK)
+     {
+ 	for (i = 0; i < ga.ga_len; i++)
+diff --git a/src/proto/fileio.pro b/src/proto/fileio.pro
+--- a/src/proto/fileio.pro
++++ b/src/proto/fileio.pro
+@@ -31,8 +31,7 @@ int buf_check_timestamp(buf_T *buf, int 
+ void buf_reload(buf_T *buf, int orig_mode);
+ void buf_store_time(buf_T *buf, stat_T *st, char_u *fname);
+ void write_lnum_adjust(linenr_T offset);
+-int readdir_core(garray_T *gap, char_u *path, void *context, int (*checkitem)(void *context, char_u *name));
+-int readdirex_core(garray_T *gap, char_u *path, void *context, int (*checkitem)(void *context, dict_T *item));
++int readdir_core(garray_T *gap, char_u *path, int withattr, void *context, int (*checkitem)(void *context, void *item));
+ int delete_recursive(char_u *name);
+ void vim_deltempdir(void);
+ char_u *vim_tempname(int extra_char, int keep);
