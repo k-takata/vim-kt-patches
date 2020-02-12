@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  4ef0587df0e8809218a06abe4f30d81e472873cc
+# Parent  252233fb343c438f62dc488790061fa5ba3d9331
 
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
@@ -196,7 +196,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  # endif
  
 -    ga_init2(gap, (int)sizeof(dict_T *), 20);
-+    ga_init2(gap, (int)sizeof(char *), 20);
++    ga_init2(gap, (int)sizeof(void *), 20);
 +
 +# ifdef FEAT_EVAL
 +#  define FREE_ITEM(item)   do { \
@@ -211,6 +211,15 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  # ifdef MSWIN
      buf = alloc(MAXPATHL);
+@@ -4793,7 +4662,7 @@ readdirex_core(
+     MB_PTR_BACK(buf, p);
+     if (*p == '\\' || *p == '/')
+ 	*p = NUL;
+-    STRCAT(buf, "\\*");
++    STRCAT(p, "\\*");
+ 
+     wn = enc_to_utf16(buf, NULL);
+     if (wn != NULL)
 @@ -4809,22 +4678,35 @@ readdirex_core(
  	while (ok)
  	{

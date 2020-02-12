@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  5551100de3129157c0f682b84a7d419f40e2b56b
+# Parent  d05a1ef3cabb3c29c73adfc40cda13043c31f467
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
@@ -12,7 +12,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  readfile({fname} [, {type} [, {max}]])
  				List	get list of lines from file {fname}
  reg_executing()			String	get the executing register name
-@@ -7668,11 +7669,11 @@ rand([{expr}])						*rand()*
+@@ -7669,11 +7670,11 @@ rand([{expr}])						*rand()*
  			:echo rand(seed)
  			:echo rand(seed) % 16  " random number 0 - 15
  <
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  		When {expr} is omitted all entries are included.
  		When {expr} is given, it is evaluated to check what to do:
-@@ -7682,6 +7683,7 @@ readdir({directory} [, {expr}])
+@@ -7683,6 +7684,7 @@ readdir({directory} [, {expr}])
  			added to the list.
  			If {expr} results in 1 then this entry will be added
  			to the list.
@@ -34,7 +34,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Each time {expr} is evaluated |v:val| is set to the entry name.
  		When {expr} is a function the name is passed as the argument.
  		For example, to get a list of files ending in ".txt": >
-@@ -7700,6 +7702,55 @@ readdir({directory} [, {expr}])
+@@ -7701,6 +7703,55 @@ readdir({directory} [, {expr}])
  		Can also be used as a |method|: >
  			GetDirName()->readdir()
  <
@@ -90,10 +90,21 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  							*readfile()*
  readfile({fname} [, {type} [, {max}]])
  		Read file {fname} and return a |List|, each line of the file
+diff --git a/runtime/doc/usr_41.txt b/runtime/doc/usr_41.txt
+--- a/runtime/doc/usr_41.txt
++++ b/runtime/doc/usr_41.txt
+@@ -790,6 +790,7 @@ System functions and manipulation of fil
+ 	hostname()		name of the system
+ 	readfile()		read a file into a List of lines
+ 	readdir()		get a List of file names in a directory
++	readdirex()		get a List of file information in a directory
+ 	writefile()		write a List of lines or Blob into a file
+ 
+ Date and Time:				*date-functions* *time-functions*
 diff --git a/src/evalfunc.c b/src/evalfunc.c
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -643,6 +643,7 @@ static funcentry_T global_functions[] =
+@@ -644,6 +644,7 @@ static funcentry_T global_functions[] =
      {"rand",		0, 1, FEARG_1,	  &t_number,	f_rand},
      {"range",		1, 3, FEARG_1,	  &t_list_number, f_range},
      {"readdir",		1, 2, FEARG_1,	  &t_list_string, f_readdir},
