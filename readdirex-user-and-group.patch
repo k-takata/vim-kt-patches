@@ -1,0 +1,112 @@
+# HG changeset patch
+# Parent  82dfdf631033fd7bb16ad9ce7211be99552dc143
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -7715,6 +7715,7 @@ readdirex({directory} [, {expr}])			*rea
+ 
+ 		The Dictionary for file and directory information has the
+ 		following items:
++			group	Group name of the entry. (Only on Unix)
+ 			name	Name of the entry.
+ 			perm	Permissions of the entry. See |getfperm()|.
+ 			size	Size of the entry. See |getfsize()|.
+@@ -7730,8 +7731,11 @@ readdirex({directory} [, {expr}])			*rea
+ 				    Symlink to a dir	"linkd"
+ 				    Other symlink	"link"
+ 				    Other reparse point	"reparse"
+-		If the entry is a symlink, the Dictionary includes the
+-		information of the symlink itself, not the target.
++			user	User name of the entry's owner. (Only on Unix)
++		On Unix, if the entry is a symlink, the Dictionary includes
++		the information of the target (except the "type" item).
++		On MS-Windows, it includes the information of the symlink
++		itself because of performance reasons.
+ 
+ 		When {expr} is omitted all entries are included.
+ 		When {expr} is given, it is evaluated to check what to do:
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -16,6 +16,10 @@
+ #if defined(__TANDEM) || defined(__MINT__)
+ # include <limits.h>		// for SSIZE_MAX
+ #endif
++#if defined(UNIX) && defined(FEAT_EVAL)
++# include <pwd.h>
++# include <grp.h>
++#endif
+ 
+ // Is there any system that doesn't have access()?
+ #define USE_MCH_ACCESS
+@@ -4514,6 +4518,11 @@ create_readdirex_item(WIN32_FIND_DATAW *
+     if (dict_add_string(item, "perm", getfpermwfd(wfd, permbuf)) == FAIL)
+ 	goto theend;
+ 
++    if (dict_add_string(item, "user", (char_u*)"") == FAIL)
++	goto theend;
++    if (dict_add_string(item, "group", (char_u*)"") == FAIL)
++	goto theend;
++
+     return item;
+ 
+ theend:
+@@ -4531,7 +4540,9 @@ create_readdirex_item(char_u *path, char
+     int		ret, link = FALSE;
+     varnumber_T	size;
+     char_u	permbuf[] = "---------";
+-    char_u	*type;
++    char_u	*q;
++    struct passwd *pw;
++    struct group  *gr;
+ 
+     item = dict_alloc();
+     if (item == NULL)
+@@ -4570,16 +4581,31 @@ create_readdirex_item(char_u *path, char
+ 	if (link)
+ 	{
+ 	    if (S_ISDIR(st.st_mode))
+-		type = (char_u*)"linkd";
++		q = (char_u*)"linkd";
+ 	    else
+-		type = (char_u*)"link";
++		q = (char_u*)"link";
+ 	}
+ 	else
+-	    type = getftypest(&st);
+-	if (dict_add_string(item, "type", type) == FAIL)
++	    q = getftypest(&st);
++	if (dict_add_string(item, "type", q) == FAIL)
+ 	    goto theend;
+ 	if (dict_add_string(item, "perm", getfpermst(&st, permbuf)) == FAIL)
+ 	    goto theend;
++
++	pw = getpwuid(st.st_uid);
++	if (pw == NULL)
++	    q = (char_u*)"";
++	else
++	    q = (char_u*)pw->pw_name;
++	if (dict_add_string(item, "user", q) == FAIL)
++	    goto theend;
++	gr = getgrgid(st.st_gid);
++	if (gr == NULL)
++	    q = (char_u*)"";
++	else
++	    q = (char_u*)gr->gr_name;
++	if (dict_add_string(item, "group", q) == FAIL)
++	    goto theend;
+     }
+     else
+     {
+@@ -4591,6 +4617,10 @@ create_readdirex_item(char_u *path, char
+ 	    goto theend;
+ 	if (dict_add_string(item, "perm", (char_u*)"") == FAIL)
+ 	    goto theend;
++	if (dict_add_string(item, "user", (char_u*)"") == FAIL)
++	    goto theend;
++	if (dict_add_string(item, "group", (char_u*)"") == FAIL)
++	    goto theend;
+     }
+     return item;
+ 
