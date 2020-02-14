@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  252233fb343c438f62dc488790061fa5ba3d9331
+# Parent  c39a4bf928b5f6ff3945bb4f9ca2aeaaa4d34613
 
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
@@ -220,7 +220,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
      wn = enc_to_utf16(buf, NULL);
      if (wn != NULL)
-@@ -4809,22 +4678,35 @@ readdirex_core(
+@@ -4809,22 +4678,32 @@ readdirex_core(
  	while (ok)
  	{
  	    int	    ignore;
@@ -232,24 +232,19 @@ diff --git a/src/fileio.c b/src/fileio.c
 -	    ignore = wp[0] == L'.' && (wp[1] == NUL
 -					|| (wp[1] == L'.' && wp[2] == NUL));
 -	    item = create_readdirex_item(&wfd);
--	    if (item == NULL)
--		break;
 +	    ignore = wp[0] == L'.' &&
 +		    (wp[1] == NUL ||
 +		     (wp[1] == L'.' && wp[2] == NUL));
 +#  ifdef FEAT_EVAL
 +	    if (withattr)
-+	    {
 +		item = (void*)create_readdirex_item(&wfd);
-+		if (item == NULL)
-+		    break;
-+	    }
 +	    else
 +#  endif
-+	    {
 +		item = (void*)utf16_to_enc(wfd.cFileName, NULL);
-+		if (item == NULL)
-+		    break;  // out of memory
+ 	    if (item == NULL)
++	    {
++		failed = TRUE;
+ 		break;
 +	    }
 +
  	    if (!ignore && checkitem != NULL)
@@ -263,7 +258,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  		    break;
  		}
  		if (r == 0)
-@@ -4834,16 +4716,16 @@ readdirex_core(
+@@ -4834,16 +4713,16 @@ readdirex_core(
  	    if (!ignore)
  	    {
  		if (ga_grow(gap, 1) == OK)
@@ -283,7 +278,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	    ok = FindNextFileW(hFind, &wfd);
  	}
-@@ -4852,7 +4734,7 @@ readdirex_core(
+@@ -4852,7 +4731,7 @@ readdirex_core(
  
      vim_free(buf);
      vim_free(wn);
@@ -292,7 +287,7 @@ diff --git a/src/fileio.c b/src/fileio.c
      dirp = opendir((char *)path);
      if (dirp == NULL)
      {
-@@ -4864,7 +4746,7 @@ readdirex_core(
+@@ -4864,7 +4743,7 @@ readdirex_core(
  	for (;;)
  	{
  	    int	    ignore;
@@ -301,26 +296,21 @@ diff --git a/src/fileio.c b/src/fileio.c
  
  	    dp = readdir(dirp);
  	    if (dp == NULL)
-@@ -4874,16 +4756,28 @@ readdirex_core(
+@@ -4874,16 +4753,25 @@ readdirex_core(
  	    ignore = p[0] == '.' &&
  		    (p[1] == NUL ||
  		     (p[1] == '.' && p[2] == NUL));
 -	    item = create_readdirex_item(path, p);
--	    if (item == NULL)
--		break;
 +#  ifdef FEAT_EVAL
 +	    if (withattr)
-+	    {
 +		item = (void*)create_readdirex_item(path, p);
-+		if (item == NULL)
-+		    break;
-+	    }
 +	    else
 +#  endif
-+	    {
 +		item = (void*)vim_strsave(p);
-+		if (item == NULL)
-+		    break;
+ 	    if (item == NULL)
++	    {
++		failed = TRUE;
+ 		break;
 +	    }
 +
  	    if (!ignore && checkitem != NULL)
@@ -334,7 +324,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  		    break;
  		}
  		if (r == 0)
-@@ -4893,31 +4787,38 @@ readdirex_core(
+@@ -4893,31 +4781,38 @@ readdirex_core(
  	    if (!ignore)
  	    {
  		if (ga_grow(gap, 1) == OK)
@@ -382,7 +372,7 @@ diff --git a/src/fileio.c b/src/fileio.c
  /*
   * Delete "name" and everything in it, recursively.
   * return 0 for success, -1 if some file was not deleted.
-@@ -4943,7 +4844,7 @@ delete_recursive(char_u *name)
+@@ -4943,7 +4838,7 @@ delete_recursive(char_u *name)
  	exp = vim_strsave(name);
  	if (exp == NULL)
  	    return -1;
@@ -403,24 +393,28 @@ diff --git a/src/filepath.c b/src/filepath.c
  {
      typval_T	*expr = (typval_T *)context;
      typval_T	save_val;
-@@ -1382,6 +1382,7 @@ readdir_checkitem(void *context, char_u 
+@@ -1382,9 +1382,7 @@ readdir_checkitem(void *context, char_u 
      typval_T	argv[2];
      int		retval = 0;
      int		error = FALSE;
+-
+-    if (expr->v_type == VAR_UNKNOWN)
+-	return 1;
 +    char_u	*name = (char_u*)item;
  
-     if (expr->v_type == VAR_UNKNOWN)
- 	return 1;
-@@ -1423,7 +1424,7 @@ f_readdir(typval_T *argvars, typval_T *r
+     prepare_vimvar(VV_VAL, &save_val);
+     set_vim_var_string(VV_VAL, name, -1);
+@@ -1423,7 +1421,8 @@ f_readdir(typval_T *argvars, typval_T *r
      path = tv_get_string(&argvars[0]);
      expr = &argvars[1];
  
 -    ret = readdir_core(&ga, path, (void *)expr, readdir_checkitem);
-+    ret = readdir_core(&ga, path, FALSE, (void *)expr, readdir_checkitem);
++    ret = readdir_core(&ga, path, FALSE, (void *)expr,
++	    (expr->v_type == VAR_UNKNOWN) ? NULL : readdir_checkitem);
      if (ret == OK)
      {
  	for (i = 0; i < ga.ga_len; i++)
-@@ -1439,7 +1440,7 @@ f_readdir(typval_T *argvars, typval_T *r
+@@ -1439,7 +1438,7 @@ f_readdir(typval_T *argvars, typval_T *r
   * Evaluate "expr" (= "context") for readdirex().
   */
      static int
@@ -429,14 +423,14 @@ diff --git a/src/filepath.c b/src/filepath.c
  {
      typval_T	*expr = (typval_T *)context;
      typval_T	save_val;
-@@ -1447,14 +1448,15 @@ readdirex_checkitem(void *context, dict_
+@@ -1447,14 +1446,12 @@ readdirex_checkitem(void *context, dict_
      typval_T	argv[2];
      int		retval = 0;
      int		error = FALSE;
+-
+-    if (expr->v_type == VAR_UNKNOWN)
+-	return 1;
 +    dict_T	*dict = (dict_T*)item;
- 
-     if (expr->v_type == VAR_UNKNOWN)
- 	return 1;
  
      prepare_vimvar(VV_VAL, &save_val);
 -    set_vim_var_dict(VV_VAL, item);
@@ -447,12 +441,13 @@ diff --git a/src/filepath.c b/src/filepath.c
  
      if (eval_expr_typval(expr, argv, 1, &rettv) == FAIL)
  	goto theend;
-@@ -1487,7 +1489,7 @@ f_readdirex(typval_T *argvars, typval_T 
+@@ -1487,7 +1484,8 @@ f_readdirex(typval_T *argvars, typval_T 
      path = tv_get_string(&argvars[0]);
      expr = &argvars[1];
  
 -    ret = readdirex_core(&ga, path, (void *)expr, readdirex_checkitem);
-+    ret = readdir_core(&ga, path, TRUE, (void *)expr, readdirex_checkitem);
++    ret = readdir_core(&ga, path, TRUE, (void *)expr,
++	    (expr->v_type == VAR_UNKNOWN) ? NULL : readdirex_checkitem);
      if (ret == OK)
      {
  	for (i = 0; i < ga.ga_len; i++)

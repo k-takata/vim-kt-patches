@@ -31,5 +31,4 @@ support-tee-with-sp-on-windows.patch
 add-readdirex.patch
 merge-readdir-and-readdirex.patch
 readdirex-user-and-group.patch
-update-readdirex.patch
 fix-config_cache-removal.patch #+rejected
