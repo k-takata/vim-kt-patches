@@ -1,0 +1,93 @@
+# HG changeset patch
+# Parent  ee63900d73f721663e814a18338e27d09ddb28e0
+
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -4717,17 +4717,14 @@ readdir_core(
+ 		     (wp[1] == L'.' && wp[2] == NUL));
+ #  ifdef FEAT_EVAL
+ 	    if (withattr)
+-	    {
+ 		item = (void*)create_readdirex_item(&wfd);
+-		if (item == NULL)
+-		    break;
+-	    }
+ 	    else
+ #  endif
++		item = (void*)utf16_to_enc(wfd.cFileName, NULL);
++	    if (item == NULL)
+ 	    {
+-		item = (void*)utf16_to_enc(wfd.cFileName, NULL);
+-		if (item == NULL)
+-		    break;  // out of memory
++		failed = TRUE;
++		break;
+ 	    }
+ 
+ 	    if (!ignore && checkitem != NULL)
+@@ -4788,17 +4785,14 @@ readdir_core(
+ 		     (p[1] == '.' && p[2] == NUL));
+ #  ifdef FEAT_EVAL
+ 	    if (withattr)
+-	    {
+ 		item = (void*)create_readdirex_item(path, p);
+-		if (item == NULL)
+-		    break;
+-	    }
+ 	    else
+ #  endif
++		item = (void*)vim_strsave(p);
++	    if (item == NULL)
+ 	    {
+-		item = (void*)vim_strsave(p);
+-		if (item == NULL)
+-		    break;
++		failed = TRUE;
++		break;
+ 	    }
+ 
+ 	    if (!ignore && checkitem != NULL)
+diff --git a/src/filepath.c b/src/filepath.c
+--- a/src/filepath.c
++++ b/src/filepath.c
+@@ -1384,9 +1384,6 @@ readdir_checkitem(void *context, void *i
+     int		error = FALSE;
+     char_u	*name = (char_u*)item;
+ 
+-    if (expr->v_type == VAR_UNKNOWN)
+-	return 1;
+-
+     prepare_vimvar(VV_VAL, &save_val);
+     set_vim_var_string(VV_VAL, name, -1);
+     argv[0].v_type = VAR_STRING;
+@@ -1424,7 +1421,8 @@ f_readdir(typval_T *argvars, typval_T *r
+     path = tv_get_string(&argvars[0]);
+     expr = &argvars[1];
+ 
+-    ret = readdir_core(&ga, path, FALSE, (void *)expr, readdir_checkitem);
++    ret = readdir_core(&ga, path, FALSE, (void *)expr,
++	    (expr->v_type == VAR_UNKNOWN) ? NULL : readdir_checkitem);
+     if (ret == OK)
+     {
+ 	for (i = 0; i < ga.ga_len; i++)
+@@ -1450,9 +1448,6 @@ readdirex_checkitem(void *context, void 
+     int		error = FALSE;
+     dict_T	*dict = (dict_T*)item;
+ 
+-    if (expr->v_type == VAR_UNKNOWN)
+-	return 1;
+-
+     prepare_vimvar(VV_VAL, &save_val);
+     set_vim_var_dict(VV_VAL, dict);
+     argv[0].v_type = VAR_DICT;
+@@ -1489,7 +1484,8 @@ f_readdirex(typval_T *argvars, typval_T 
+     path = tv_get_string(&argvars[0]);
+     expr = &argvars[1];
+ 
+-    ret = readdir_core(&ga, path, TRUE, (void *)expr, readdirex_checkitem);
++    ret = readdir_core(&ga, path, TRUE, (void *)expr,
++	    (expr->v_type == VAR_UNKNOWN) ? NULL : readdirex_checkitem);
+     if (ret == OK)
+     {
+ 	for (i = 0; i < ga.ga_len; i++)
