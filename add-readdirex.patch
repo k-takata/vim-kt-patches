@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  17777bb8cc653d45d7411841c88a2ff6d5dac167
+# Parent  692c30a3703584973cd6e6e39920d084647dbcd9
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -2662,6 +2662,7 @@ rand([{expr}])			Number	get pseudo-rando
+@@ -2665,6 +2665,7 @@ rand([{expr}])			Number	get pseudo-rando
  range({expr} [, {max} [, {stride}]])
  				List	items from {expr} to {max}
  readdir({dir} [, {expr}])	List	file names in {dir} selected by {expr}
@@ -12,7 +12,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  readfile({fname} [, {type} [, {max}]])
  				List	get list of lines from file {fname}
  reg_executing()			String	get the executing register name
-@@ -7681,11 +7682,11 @@ rand([{expr}])						*rand()*
+@@ -7690,11 +7691,11 @@ rand([{expr}])						*rand()*
  			:echo rand(seed)
  			:echo rand(seed) % 16  " random number 0 - 15
  <
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  
  		When {expr} is omitted all entries are included.
  		When {expr} is given, it is evaluated to check what to do:
-@@ -7695,6 +7696,7 @@ readdir({directory} [, {expr}])
+@@ -7704,6 +7705,7 @@ readdir({directory} [, {expr}])
  			added to the list.
  			If {expr} results in 1 then this entry will be added
  			to the list.
@@ -34,7 +34,7 @@ diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
  		Each time {expr} is evaluated |v:val| is set to the entry name.
  		When {expr} is a function the name is passed as the argument.
  		For example, to get a list of files ending in ".txt": >
-@@ -7713,6 +7715,55 @@ readdir({directory} [, {expr}])
+@@ -7722,6 +7724,55 @@ readdir({directory} [, {expr}])
  		Can also be used as a |method|: >
  			GetDirName()->readdir()
  <
@@ -115,78 +115,251 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 diff --git a/src/fileio.c b/src/fileio.c
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -4423,12 +4423,16 @@ readdir_core(
+@@ -4423,133 +4423,131 @@ readdir_core(
+     void	*context,
      int		(*checkitem)(void *context, char_u *name))
  {
-     int			failed = FALSE;
+-    int		failed = FALSE;
+-    char_u	*p;
++    int			failed = FALSE;
 +    char_u		*p;
- # ifdef MSWIN
--    char_u		*buf, *p;
++# ifdef MSWIN
 +    char_u		*buf;
-     int			ok;
-     HANDLE		hFind = INVALID_HANDLE_VALUE;
--    WIN32_FIND_DATAW    wfb;
++    int			ok;
++    HANDLE		hFind = INVALID_HANDLE_VALUE;
 +    WIN32_FIND_DATAW    wfd;
-     WCHAR		*wn = NULL;	// UTF-16 name, NULL when not used.
++    WCHAR		*wn = NULL;	// UTF-16 name, NULL when not used.
 +# else
 +    DIR			*dirp;
 +    struct dirent	*dp;
- # endif
++# endif
  
      ga_init2(gap, (int)sizeof(char *), 20);
-@@ -4446,7 +4450,7 @@ readdir_core(
  
-     wn = enc_to_utf16(buf, NULL);
-     if (wn != NULL)
--	hFind = FindFirstFileW(wn, &wfb);
+ # ifdef MSWIN
++    buf = alloc(MAXPATHL);
++    if (buf == NULL)
++	return FAIL;
++    STRNCPY(buf, path, MAXPATHL-5);
++    p = buf + STRLEN(buf);
++    MB_PTR_BACK(buf, p);
++    if (*p == '\\' || *p == '/')
++	*p = NUL;
++    STRCAT(buf, "\\*");
++
++    wn = enc_to_utf16(buf, NULL);
++    if (wn != NULL)
 +	hFind = FindFirstFileW(wn, &wfd);
-     ok = (hFind != INVALID_HANDLE_VALUE);
-     if (!ok)
++    ok = (hFind != INVALID_HANDLE_VALUE);
++    if (!ok)
      {
-@@ -4459,7 +4463,7 @@ readdir_core(
+-	char_u		*buf;
+-	int		ok;
+-	HANDLE		hFind = INVALID_HANDLE_VALUE;
+-	WIN32_FIND_DATAW    wfb;
+-	WCHAR		*wn = NULL;	// UTF-16 name, NULL when not used.
+-
+-	buf = alloc(MAXPATHL);
+-	if (buf == NULL)
+-	    return FAIL;
+-	STRNCPY(buf, path, MAXPATHL-5);
+-	p = buf + STRLEN(buf);
+-	MB_PTR_BACK(buf, p);
+-	if (*p == '\\' || *p == '/')
+-	    *p = NUL;
+-	STRCAT(buf, "\\*");
+-
+-	wn = enc_to_utf16(buf, NULL);
+-	if (wn != NULL)
+-	    hFind = FindFirstFileW(wn, &wfb);
+-	ok = (hFind != INVALID_HANDLE_VALUE);
+-	if (!ok)
++	failed = TRUE;
++	smsg(_(e_notopen), path);
++    }
++    else
++    {
++	while (ok)
  	{
- 	    int	ignore;
- 
--	    p = utf16_to_enc(wfb.cFileName, NULL);   // p is allocated here
+-	    failed = TRUE;
+-	    smsg(_(e_notopen), path);
+-	}
+-	else
+-	{
+-	    while (ok)
++	    int	ignore;
++
 +	    p = utf16_to_enc(wfd.cFileName, NULL);   // p is allocated here
- 	    if (p == NULL)
- 		break;  // out of memory
- 
-@@ -4481,7 +4485,7 @@ readdir_core(
- 	    if (!ignore)
++	    if (p == NULL)
++		break;  // out of memory
++
++	    ignore = p[0] == '.' && (p[1] == NUL
++					      || (p[1] == '.' && p[2] == NUL));
++	    if (!ignore && checkitem != NULL)
  	    {
- 		if (ga_grow(gap, 1) == OK)
--		    ((char_u**)gap->ga_data)[gap->ga_len++] = vim_strsave(p);
-+		    ((char_u**)gap->ga_data)[gap->ga_len++] = p;
- 		else
+-		int	ignore;
+-
+-		p = utf16_to_enc(wfb.cFileName, NULL);   // p is allocated here
+-		if (p == NULL)
+-		    break;  // out of memory
+-
+-		ignore = p[0] == '.' && (p[1] == NUL
+-						  || (p[1] == '.' && p[2] == NUL));
+-		if (!ignore && checkitem != NULL)
+-		{
+-		    int r = checkitem(context, p);
+-
+-		    if (r < 0)
+-		    {
+-			vim_free(p);
+-			break;
+-		    }
+-		    if (r == 0)
+-			ignore = TRUE;
+-		}
+-
+-		if (!ignore)
++		int r = checkitem(context, p);
++
++		if (r < 0)
  		{
- 		    failed = TRUE;
-@@ -4489,9 +4493,10 @@ readdir_core(
- 		    break;
+-		    if (ga_grow(gap, 1) == OK)
+-			((char_u**)gap->ga_data)[gap->ga_len++] = vim_strsave(p);
+-		    else
+-		    {
+-			failed = TRUE;
+-			vim_free(p);
+-			break;
+-		    }
++		    vim_free(p);
++		    break;
+ 		}
+-
+-		vim_free(p);
+-		ok = FindNextFileW(hFind, &wfb);
++		if (r == 0)
++		    ignore = TRUE;
+ 	    }
+-	    FindClose(hFind);
+-	}
+-
+-	vim_free(buf);
+-	vim_free(wn);
+-    }
+-# else
+-    {
+-	DIR			*dirp;
+-	struct dirent	*dp;
+-
+-	dirp = opendir((char *)path);
+-	if (dirp == NULL)
+-	{
+-	    failed = TRUE;
+-	    smsg(_(e_notopen), path);
+-	}
+-	else
+-	{
+-	    for (;;)
++
++	    if (!ignore)
+ 	    {
+-		int	ignore;
+-
+-		dp = readdir(dirp);
+-		if (dp == NULL)
+-		    break;
+-		p = (char_u *)dp->d_name;
+-
+-		ignore = p[0] == '.' &&
+-			(p[1] == NUL ||
+-			 (p[1] == '.' && p[2] == NUL));
+-		if (!ignore && checkitem != NULL)
++		if (ga_grow(gap, 1) == OK)
++		    ((char_u**)gap->ga_data)[gap->ga_len++] = p;
++		else
+ 		{
+-		    int r = checkitem(context, p);
+-
+-		    if (r < 0)
+-			break;
+-		    if (r == 0)
+-			ignore = TRUE;
+-		}
+-
+-		if (!ignore)
+-		{
+-		    if (ga_grow(gap, 1) == OK)
+-			((char_u**)gap->ga_data)[gap->ga_len++] = vim_strsave(p);
+-		    else
+-		    {
+-			failed = TRUE;
+-			break;
+-		    }
++		    failed = TRUE;
++		    vim_free(p);
++		    break;
  		}
  	    }
 -
--	    vim_free(p);
--	    ok = FindNextFileW(hFind, &wfb);
+-	    closedir(dirp);
 +	    else
 +		vim_free(p);
 +
 +	    ok = FindNextFileW(hFind, &wfd);
  	}
- 	FindClose(hFind);
++	FindClose(hFind);
++    }
++
++    vim_free(buf);
++    vim_free(wn);
++# else
++    dirp = opendir((char *)path);
++    if (dirp == NULL)
++    {
++	failed = TRUE;
++	smsg(_(e_notopen), path);
++    }
++    else
++    {
++	for (;;)
++	{
++	    int	ignore;
++
++	    dp = readdir(dirp);
++	    if (dp == NULL)
++		break;
++	    p = (char_u *)dp->d_name;
++
++	    ignore = p[0] == '.' &&
++		    (p[1] == NUL ||
++		     (p[1] == '.' && p[2] == NUL));
++	    if (!ignore && checkitem != NULL)
++	    {
++		int r = checkitem(context, p);
++
++		if (r < 0)
++		    break;
++		if (r == 0)
++		    ignore = TRUE;
++	    }
++
++	    if (!ignore)
++	    {
++		if (ga_grow(gap, 1) == OK)
++		    ((char_u**)gap->ga_data)[gap->ga_len++] = vim_strsave(p);
++		else
++		{
++		    failed = TRUE;
++		    break;
++		}
++	    }
++	}
++
++	closedir(dirp);
      }
-@@ -4499,10 +4504,6 @@ readdir_core(
-     vim_free(buf);
-     vim_free(wn);
- # else
--    DIR		*dirp;
--    struct dirent *dp;
--    char_u	*p;
--
-     dirp = opendir((char *)path);
-     if (dirp == NULL)
-     {
-@@ -4554,7 +4555,362 @@ readdir_core(
+ # endif
+ 
+@@ -4558,7 +4556,362 @@ readdir_core(
  
      return failed ? FAIL : OK;
  }
@@ -791,7 +964,7 @@ diff --git a/src/proto/filepath.pro b/src/proto/filepath.pro
 diff --git a/src/testdir/test_functions.vim b/src/testdir/test_functions.vim
 --- a/src/testdir/test_functions.vim
 +++ b/src/testdir/test_functions.vim
-@@ -1596,7 +1596,7 @@ func Test_readdir()
+@@ -1620,7 +1620,7 @@ func Test_readdir()
    call assert_equal(['bar.txt', 'dir', 'foo.txt'], sort(files))
  
    " Only results containing "f"
@@ -800,7 +973,7 @@ diff --git a/src/testdir/test_functions.vim b/src/testdir/test_functions.vim
    call assert_equal(['foo.txt'], sort(files))
  
    " Only .txt files
-@@ -1619,6 +1619,45 @@ func Test_readdir()
+@@ -1643,6 +1643,45 @@ func Test_readdir()
    eval 'Xdir'->delete('rf')
  endfunc
  
