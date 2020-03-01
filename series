@@ -31,4 +31,5 @@ support-tee-with-sp-on-windows.patch
 add-readdirex.patch
 merge-readdir-and-readdirex.patch
 readdirex-user-and-group.patch
+fix-8.2.0329-vimdll.patch
 fix-config_cache-removal.patch #+rejected

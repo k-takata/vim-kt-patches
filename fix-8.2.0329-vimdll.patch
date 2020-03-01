@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  73f561b19cc25ce4e1fccb5ee4f3bf901c7410d6
+
+diff --git a/src/testdir/test_popupwin.vim b/src/testdir/test_popupwin.vim
+--- a/src/testdir/test_popupwin.vim
++++ b/src/testdir/test_popupwin.vim
+@@ -3284,7 +3284,7 @@ func Test_popupwin_filter_input_multibyt
+   call feedkeys("\u3000", 'xt')
+   call assert_equal([0xe3, 0x80, 0x80], g:bytes)
+ 
+-  if has('gui')
++  if has('gui_running')
+     " UTF-8: E3 80 9B, including CSI(0x9B)
+     call feedkeys("\u301b", 'xt')
+     call assert_equal([0xe3, 0x80, 0x9b], g:bytes)
