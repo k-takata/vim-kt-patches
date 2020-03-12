@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  3fea181d421c194588bff5345e05194a1b6f1460
+
+diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
+--- a/src/testdir/test_terminal.vim
++++ b/src/testdir/test_terminal.vim
+@@ -2460,7 +2460,7 @@ func Test_term_nasty_callback()
+   call OpenTerms()
+ 
+   call term_sendkeys(g:buf0, "exit\<CR>")
+-  sleep 50m
++  sleep 200m
+   exe g:buf0 .. 'bwipe'
+   set hidden&
+ endfunc
