@@ -32,5 +32,5 @@ add-readdirex.patch
 merge-readdir-and-readdirex.patch
 readdirex-user-and-group.patch
 optimize-lambda.patch
-workaround-8.2.0371.patch
+fix-terminal-tests.patch
 fix-config_cache-removal.patch #+rejected
