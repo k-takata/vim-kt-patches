@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  5f67cd572e9dac7b25b8d536b22dee86f4216f15
+# Parent  3f49ea77ae2b691ba47262515bcc67540f58fc19
 
 diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
 --- a/src/testdir/test_terminal.vim
@@ -62,7 +62,7 @@ diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
    call OpenTerms()
  
    call term_sendkeys(g:buf0, "exit\<CR>")
--  sleep 50m
+-  sleep 100m
 +  sleep 200m
    exe g:buf0 .. 'bwipe'
    set hidden&
