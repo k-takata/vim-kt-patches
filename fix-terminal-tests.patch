@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  3f49ea77ae2b691ba47262515bcc67540f58fc19
+# Parent  99890cd9cd10b58e3cb57654b6d6937a234f768b
 
 diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
 --- a/src/testdir/test_terminal.vim
 +++ b/src/testdir/test_terminal.vim
-@@ -713,10 +713,12 @@ func Test_terminal_write_stdin()
+@@ -715,10 +715,12 @@ func Test_terminal_write_stdin()
  endfunc
  
  func Test_terminal_eof_arg()
@@ -19,7 +19,7 @@ diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
    " MS-Windows echoes the input, Unix doesn't.
    if has('win32')
      call WaitFor({-> getline('$') =~ 'exit(123)'})
-@@ -731,22 +733,26 @@ endfunc
+@@ -733,22 +735,26 @@ endfunc
  
  func Test_terminal_eof_arg_win32_ctrl_z()
    CheckMSWindows
@@ -50,7 +50,7 @@ diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
    " MS-Windows echoes the input, Unix doesn't.
    if has('win32')
      call WaitFor({-> getline('$') =~ 'exit(123)'})
-@@ -2436,6 +2442,7 @@ func Test_hidden_terminal()
+@@ -2477,6 +2483,7 @@ func Test_hidden_terminal()
  endfunc
  
  func Test_term_nasty_callback()
@@ -58,12 +58,3 @@ diff --git a/src/testdir/test_terminal.vim b/src/testdir/test_terminal.vim
    func OpenTerms()
      set hidden
      let g:buf0 = term_start('sh', #{hidden: 1})
-@@ -2453,7 +2460,7 @@ func Test_term_nasty_callback()
-   call OpenTerms()
- 
-   call term_sendkeys(g:buf0, "exit\<CR>")
--  sleep 100m
-+  sleep 200m
-   exe g:buf0 .. 'bwipe'
-   set hidden&
- endfunc
