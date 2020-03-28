@@ -15,7 +15,7 @@ cpo-N-update-tags.patch #+rejected
 redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 subpixel-artifacts.patch #+disabled
-fix-italic-overhang-before-space.patch
+fix-italic-overhang-before-space.patch #+disabled
 if_ruby-remove-allocate-method.patch
 update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
