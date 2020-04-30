@@ -31,6 +31,4 @@ support-tee-with-sp-on-windows.patch
 add-readdirex.patch
 merge-readdir-and-readdirex.patch
 readdirex-user-and-group.patch
-fix-terminal-tests.patch
-fix-test_ruby_p.patch
 fix-config_cache-removal.patch #+rejected
