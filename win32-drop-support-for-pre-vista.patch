@@ -1,0 +1,266 @@
+# HG changeset patch
+# Parent  de5f74ede2b7ac0482307c9597a32635681201f5
+
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -26,10 +26,10 @@ All commands are given with normal keybo
+ with ten fingers can work very fast.  Additionally, function keys can be
+ mapped to commands by the user, and the mouse can be used.
+ 
+-Vim runs under MS-Windows (XP, Vista, 7, 8, 10), macOS, Haiku, VMS and almost
+-all flavours of UNIX.  Porting to other systems should not be very difficult.
+-Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000, Amiga DOS,
+-Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
++Vim runs under MS-Windows (7, 8, 10), macOS, Haiku, VMS and almost all flavours
++of UNIX.  Porting to other systems should not be very difficult.
++Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000/XP/Vista,
++Amiga DOS, Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
+ 
+ For Vim9 script see [README_VIM9](README_VIM9.md).
+ 
+diff --git a/README.txt b/README.txt
+--- a/README.txt
++++ b/README.txt
+@@ -16,10 +16,10 @@ All commands are given with normal keybo
+ with ten fingers can work very fast.  Additionally, function keys can be
+ mapped to commands by the user, and the mouse can be used.
+ 
+-Vim runs under MS-Windows (XP, Vista, 7, 8, 10), macOS, VMS and almost all
+-flavours of UNIX.  Porting to other systems should not be very difficult.
+-Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000, Amiga DOS,
+-Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
++Vim runs under MS-Windows (7, 8, 10), macOS, VMS and almost all flavours of
++UNIX.  Porting to other systems should not be very difficult.
++Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000/XP/Vista,
++Amiga DOS, Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
+ 
+ 
+ DISTRIBUTION
+diff --git a/runtime/doc/gui_w32.txt b/runtime/doc/gui_w32.txt
+--- a/runtime/doc/gui_w32.txt
++++ b/runtime/doc/gui_w32.txt
+@@ -106,8 +106,7 @@ 7. <OK>
+ You can also install Vim in the "Send To" menu:
+ 1. Start a Windows Explorer
+ 2. Navigate to your sendto directory:
+-   Windows XP: C:\Documents and Settings\%user%\SendTo
+-   Windows Vista: C:\Users\%user%\AppData\Roaming\Microsoft\Windows\SendTo .
++   C:\Users\%user%\AppData\Roaming\Microsoft\Windows\SendTo .
+ 3. Right-click in the file pane and select New->Shortcut
+ 4. Follow the shortcut wizard, using the full path to VIM/GVIM.
+ 
+diff --git a/runtime/doc/os_win32.txt b/runtime/doc/os_win32.txt
+--- a/runtime/doc/os_win32.txt
++++ b/runtime/doc/os_win32.txt
+@@ -7,8 +7,8 @@
+ 						*win32* *Win32* *MS-Windows*
+ This file documents the idiosyncrasies of the Win32 version of Vim.
+ 
+-The Win32 version of Vim works on Windows XP, Vista, 7, 8 and 10.  There are
+-both console and GUI versions.
++The Win32 version of Vim works on Windows 7, 8 and 10.  There are both console
++and GUI versions.
+ 
+ The 32 bit version also runs on 64 bit MS-Windows systems.
+ 
+diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
+--- a/src/INSTALLpc.txt
++++ b/src/INSTALLpc.txt
+@@ -12,7 +12,7 @@ this, then you will get the default beha
+ be fine for most people.
+ 
+ This document assumes that you are building Vim for Win32 or later (Windows
+-XP/2003/Vista/7/8/10).  There are also instructions for pre-XP systems, but
++7/8/10).  There are also instructions for pre-Vista and pre-XP systems, but
+ they might no longer work.
+ 
+ The recommended way is to build a 32 bit Vim, also on 64 bit systems.  You can
+@@ -41,9 +41,9 @@ 16. Installing after building from sourc
+ 
+ 
+ The currently recommended way (that means it has been verified to work) is
+-using the "Visual Studio Community 2015" installation.  This includes the SDK
+-needed to target Windows XP.  But not older Windows versions (95, 98), see
+-"OLDER VERSIONS" below for that.
++using the "Visual Studio Community 2015" installation.  This doesn't include
++the SDK for older Windows versions (95, 98), see "OLDER VERSIONS" below for
++that.
+ 
+ 
+ 1. Microsoft Visual C++
+@@ -54,8 +54,10 @@ can search for "Visual Studio Community 
+ create a Microsoft account (it's free).
+ 
+ When installing "Visual Studio Community 2015 with Update 3" make sure to
+-select "custom" and check "Windows XP Support for C++" and all checkboxes
+-under "Universal Windows App Development Tools"
++select "custom" and check all checkboxes under "Universal Windows App
++Development Tools".
++(If you still want to target Windows XP, check also "Windows XP Support for
++C++".  Note that this is no longer supported.)
+ 
+ 
+ Visual Studio
+@@ -100,6 +102,9 @@ Vim with Make_mvc.mak.
+ Targeting Windows XP with MSVC 2012 and later      *new-msvc-windows-xp*
+ ---------------------------------------------
+ 
++(The support for pre-Vista was removed in patch 8.2.0xxx.  If you want to
++target Windows XP, use the source code before that.)
++
+ Beginning with Visual C++ 2012, Microsoft changed the behavior of LINK.EXE
+ so that it targets Windows 6.0 (Vista) by default.  In order to override
+ this, the target Windows version number needs to be passed to LINK like
+@@ -137,9 +142,6 @@ compiler by using the "x64" option:
+ The following Visual C++ team blog can serve as a reference page:
+     http://blogs.msdn.com/b/vcblog/archive/2012/10/08/windows-xp-targeting-with-c-in-visual-studio-2012.aspx
+ 
+-VC 2019 dropped support for targeting Windows XP.  If you want a binary that
+-targeting Windows XP, use VC 2017 or earlier.
+-
+ 
+ Cross compile support for Windows on ARM64
+ ------------------------------------------
+@@ -152,7 +154,7 @@ The ARM64 support was provided by Leende
+ 
+ OLDER VERSIONS
+ 
+-The minimal supported version is Windows XP. Building with older compilers
++The minimal supported version is Windows 7. Building with older compilers
+ might still work, but these instructions might be outdated.
+ 
+ If you need the executable to run on Windows 98 or ME, use the 2003 one
+@@ -825,12 +827,12 @@ config.h and Ruby's DLL name. Here are t
+       nmake -f Make_mvc.mak
+           RUBY=C:\Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
+           RUBY_MSVCRT_NAME=msvcrt
+-          WINVER=0x501
++          WINVER=0x601
+ 
+     For 64-bit version, replace RUBY=C:\Ruby24 with RUBY=C:\Ruby24-x64.
+ 
+     If you set WINVER explicitly, it must be set to >=0x500, when building
+-    with Ruby 2.1 or later.  (Default is 0x501.)
++    with Ruby 2.1 or later.  (Default is 0x601.)
+     When using this trick, you also need to set RUBY_MSVCRT_NAME to msvcrt
+     which is used for the Ruby's DLL name.
+ 
+@@ -841,11 +843,11 @@ After you install RubyInstaller, just ty
+ 
+     mingw32-make -f Make_ming.mak
+         RUBY=C:/Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
+-        WINVER=0x600
++        WINVER=0x601
+ 
+ For 64-bit version, replace RUBY=C:/Ruby24 with RUBY=C:/Ruby24-x64.
+ If you set WINVER explicitly, it must be set to >=0x500, when building with
+-Ruby 2.1 or later.  (Default is 0x600.)
++Ruby 2.1 or later.  (Default is 0x601.)
+ 
+ 
+ 
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -80,10 +80,9 @@ POSTSCRIPT=no
+ # Set to yes to enable OLE support.
+ OLE=no
+ 
+-# Set the default $(WINVER).  Use 0x0501 to make it work with WinXP.
++# Set the default $(WINVER).  Use 0x0601 to make it work with Windows 7.
+ ifndef WINVER
+-# WINVER = 0x0501
+-WINVER = 0x0600
++WINVER = 0x0601
+ endif
+ 
+ # Set to yes to enable Cscope support.
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1,7 +1,6 @@
+-# Makefile for Vim on Win32 (Windows XP/2003/Vista/7/8/10) and Win64,
+-# using the Microsoft Visual C++ compilers. Known to work with VC10 (VS2010),
+-# VC11 (VS2012), VC12 (VS2013), VC14 (VS2015), VC14.1 (VS2017) and
+-# VC14.2 (VS2019).
++# Makefile for Vim on Win32 (Windows 7/8/10) and Win64, using the Microsoft
++# Visual C++ compilers. Known to work with VC10 (VS2010), VC11 (VS2012), VC12
++# (VS2013), VC14 (VS2015), VC14.1 (VS2017) and VC14.2 (VS2019).
+ #
+ # To build using other Windows compilers, see INSTALLpc.txt
+ #
+@@ -124,13 +123,13 @@
+ #
+ #	Optimization: OPTIMIZE=[SPACE, SPEED, MAXSPEED] (default is MAXSPEED)
+ #
+-#	Processor Version: CPUNR=[any, i586, i686, sse, sse2, avx, avx2] (default is
++#	Processor Version: CPUNR=[any, i686, sse, sse2, avx, avx2] (default is
+ #	any)
+ #	  avx is available on Visual C++ 2010 and after.
+ #	  avx2 is available on Visual C++ 2013 Update 2 and after.
+ #
+-#	Version Support: WINVER=[0x0501, 0x0502, 0x0600, 0x0601, 0x0602,
+-#	0x0603, 0x0A00] (default is 0x0501)
++#	Version Support: WINVER=[0x0601, 0x0602, 0x0603, 0x0A00] (default is
++#	0x0601)
+ #	Supported versions depends on your target SDK, check SDKDDKVer.h
+ #	See https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt
+ #
+@@ -317,9 +316,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
+ CPU = ix86
+ !endif
+ 
+-### Set the default $(WINVER) to make it work with VC++7.0 (VS.NET)
++### Set the default $(WINVER) to make it work with Windows 7
+ !ifndef WINVER
+-WINVER = 0x0501
++WINVER = 0x0601
+ !endif
+ 
+ # Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
+@@ -522,27 +521,25 @@ OUTDIR=$(OBJDIR)
+ !ifndef CPUNR
+ # default to untargeted code
+ CPUNR = any
+-!elseif "$(CPUNR)" == "i386" || "$(CPUNR)" == "i486"
+-# alias i386 and i486 to i586
++!elseif "$(CPUNR)" == "i386" || "$(CPUNR)" == "i486" || "$(CPUNR)" == "i586"
++# alias i386, i486 and i586 to i686
+ ! message *** WARNING CPUNR=$(CPUNR) is not a valid target architecture.
+-! message Windows XP is the minimum target OS, with a minimum target
+-! message architecture of i586.
+-! message Retargeting to i586
+-CPUNR = i586
++! message Windows 7 is the minimum target OS, with a minimum target
++! message architecture of i686.
++! message Retargeting to i686
++CPUNR = i686
+ !elseif "$(CPUNR)" == "pentium4"
+ # alias pentium4 to sse2
+ ! message *** WARNING CPUNR=pentium4 is deprecated in favour of sse2.
+ ! message Retargeting to sse2.
+ CPUNR = sse2
+-!elseif "$(CPUNR)" != "any" && "$(CPUNR)" != "i586" && "$(CPUNR)" != "i686" && "$(CPUNR)" != "sse" && "$(CPUNR)" != "sse2" && "$(CPUNR)" != "avx" && "$(CPUNR)" != "avx2"
++!elseif "$(CPUNR)" != "any" && "$(CPUNR)" != "i686" && "$(CPUNR)" != "sse" && "$(CPUNR)" != "sse2" && "$(CPUNR)" != "avx" && "$(CPUNR)" != "avx2"
+ ! error *** ERROR Unknown target architecture "$(CPUNR)". Make aborted.
+ !endif
+ 
+ # Convert processor ID to MVC-compatible number
+ !if $(MSVC_MAJOR) < 8
+-! if "$(CPUNR)" == "i586"
+-CPUARG = /G5
+-! elseif "$(CPUNR)" == "i686"
++! if "$(CPUNR)" == "i686"
+ CPUARG = /G6
+ ! elseif "$(CPUNR)" == "sse"
+ CPUARG = /G6 /arch:SSE
+@@ -557,7 +554,7 @@ CPUARG =
+ ! endif
+ !else
+ # IA32/SSE/SSE2 are only supported on x86
+-! if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i586" || "$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
++! if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
+ # VC<11 generates fp87 code by default
+ !  if $(MSVC_MAJOR) < 11
+ CPUARG =
