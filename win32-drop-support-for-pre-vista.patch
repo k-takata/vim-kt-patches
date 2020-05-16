@@ -228,7 +228,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 -CPUNR = any
 -!elseif "$(CPUNR)" == "i386" || "$(CPUNR)" == "i486"
 -# alias i386 and i486 to i586
-+# default to sse2
++# default to SSE2
 +CPUNR = sse2
 +!elseif "$(CPUNR)" == "i386" || "$(CPUNR)" == "i486" || "$(CPUNR)" == "i586"
 +# alias i386, i486 and i586 to i686
