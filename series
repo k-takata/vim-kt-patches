@@ -32,5 +32,4 @@ add-readdirex.patch
 merge-readdir-and-readdirex.patch
 readdirex-user-and-group.patch
 win32-drop-support-for-pre-vista.patch
-fix-5986.patch
 fix-config_cache-removal.patch #+rejected
