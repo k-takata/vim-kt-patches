@@ -195,8 +195,9 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Optimization: OPTIMIZE=[SPACE, SPEED, MAXSPEED] (default is MAXSPEED)
  #
 -#	Processor Version: CPUNR=[any, i586, i686, sse, sse2, avx, avx2] (default is
+-#	any)
 +#	Processor Version: CPUNR=[any, i686, sse, sse2, avx, avx2] (default is
- #	any)
++#	sse2)
  #	  avx is available on Visual C++ 2010 and after.
  #	  avx2 is available on Visual C++ 2013 Update 2 and after.
  #
@@ -219,12 +220,16 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
-@@ -522,27 +521,25 @@ OUTDIR=$(OBJDIR)
+@@ -520,29 +519,27 @@ OUTDIR=$(OBJDIR)
+ 
+ ### Validate CPUNR
  !ifndef CPUNR
- # default to untargeted code
- CPUNR = any
+-# default to untargeted code
+-CPUNR = any
 -!elseif "$(CPUNR)" == "i386" || "$(CPUNR)" == "i486"
 -# alias i386 and i486 to i586
++# default to sse2
++CPUNR = sse2
 +!elseif "$(CPUNR)" == "i386" || "$(CPUNR)" == "i486" || "$(CPUNR)" == "i586"
 +# alias i386, i486 and i586 to i686
  ! message *** WARNING CPUNR=$(CPUNR) is not a valid target architecture.
