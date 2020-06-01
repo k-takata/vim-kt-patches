@@ -27,8 +27,5 @@ big5corr.patch
 o-octal.patch
 skip-undofile-earlier-on-gh-actions.patch
 support-tee-with-sp-on-windows.patch
-add-readdirex.patch
-merge-readdir-and-readdirex.patch
-readdirex-user-and-group.patch
 win32-drop-support-for-pre-vista.patch
 fix-config_cache-removal.patch #+rejected
