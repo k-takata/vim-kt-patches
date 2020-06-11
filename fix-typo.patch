@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  8cb9d95ef45105214637c93e4799455ff00be4d2
+
+diff --git a/src/testdir/test_functions.vim b/src/testdir/test_functions.vim
+--- a/src/testdir/test_functions.vim
++++ b/src/testdir/test_functions.vim
+@@ -1916,7 +1916,7 @@ func Test_readdirex()
+ 			  \ ->map({-> v:val.name})
+   call sort(files)->assert_equal(['bar.txt', 'dir', 'foo.txt'])
+ 
+-  " report brocken link correctly
++  " report broken link correctly
+   if has("unix")
+     call writefile([], 'Xdir/abc.txt')
+     call system("ln -s Xdir/abc.txt Xdir/link")
