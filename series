@@ -27,5 +27,4 @@ big5corr.patch
 skip-undofile-earlier-on-gh-actions.patch
 support-tee-with-sp-on-windows.patch
 win32-drop-support-for-pre-vista.patch
-fix-8.2.1107-with-vimdll.patch
 fix-config_cache-removal.patch #+rejected
