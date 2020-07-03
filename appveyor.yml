@@ -6,7 +6,8 @@ image:
 
 environment:
   global:
-    VIMREPO: https://hg.osdn.net/view/vim/vim
+    #VIMREPO: https://hg.osdn.net/view/vim/vim
+    VIMREPO: http://hg.osdn.net/view/vim/vim
 
   matrix:
   - ARCH: x64
