@@ -27,6 +27,5 @@ big5corr.patch
 skip-undofile-earlier-on-gh-actions.patch
 support-tee-with-sp-on-windows.patch
 win32-drop-support-for-pre-vista.patch
-installer-default-settings.patch
 X011-GH592-fix-height-adjustment.diff
 fix-config_cache-removal.patch #+rejected
