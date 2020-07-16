@@ -28,4 +28,6 @@ skip-undofile-earlier-on-gh-actions.patch
 support-tee-with-sp-on-windows.patch
 win32-drop-support-for-pre-vista.patch
 X011-GH592-fix-height-adjustment.diff
+revise-gui_w32.patch
+fix-5602-adjust-scrollbar-position.patch
 fix-config_cache-removal.patch #+rejected

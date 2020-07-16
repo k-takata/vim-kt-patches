@@ -1,0 +1,74 @@
+# HG changeset patch
+# Parent  32dd428689a11ddc374ac8e8c6c7f821d29cd899
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -320,9 +320,6 @@ static int		s_findrep_is_find;	// TRUE f
+ 						// for find/replace dialog
+ #endif
+ 
+-#if !defined(FEAT_GUI)
+-static
+-#endif
+ HWND			s_hwnd = NULL;
+ static HDC		s_hdc = NULL;
+ static HBRUSH		s_brush = NULL;
+@@ -1210,6 +1207,16 @@ HandleMouseHide(UINT uMsg, LPARAM lParam
+     }
+ }
+ 
++    static LRESULT WINAPI
++vim_WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
++{
++#ifdef GLOBAL_IME
++    return global_ime_DefWindowProc(hwnd, message, wParam, lParam);
++#else
++    return DefWindowProcW(hwnd, message, wParam, lParam);
++#endif
++}
++
+     static LRESULT CALLBACK
+ _TextAreaWndProc(
+     HWND hwnd,
+@@ -1259,20 +1266,6 @@ HandleMouseHide(UINT uMsg, LPARAM lParam
+     }
+ }
+ 
+-#ifdef PROTO
+-typedef int WINAPI;
+-#endif
+-
+-    LRESULT WINAPI
+-vim_WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+-{
+-#ifdef GLOBAL_IME
+-    return global_ime_DefWindowProc(hwnd, message, wParam, lParam);
+-#else
+-    return DefWindowProcW(hwnd, message, wParam, lParam);
+-#endif
+-}
+-
+ /*
+  * Called when the foreground or background color has been changed.
+  */
+@@ -1429,7 +1422,7 @@ gui_mch_create_scrollbar(
+ /*
+  * Find the scrollbar with the given hwnd.
+  */
+-	 static scrollbar_T *
++    static scrollbar_T *
+ gui_mswin_find_scrollbar(HWND hwnd)
+ {
+     win_T	*wp;
+diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
+--- a/src/proto/gui_w32.pro
++++ b/src/proto/gui_w32.pro
+@@ -5,7 +5,6 @@ int gui_mch_is_blink_off(void);
+ void gui_mch_set_blinking(long wait, long on, long off);
+ void gui_mch_stop_blink(int may_call_gui_update_cursor);
+ void gui_mch_start_blink(void);
+-LRESULT WINAPI vim_WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+ void gui_mch_new_colors(void);
+ void gui_mch_def_colors(void);
+ int gui_mch_open(void);
