@@ -52,15 +52,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Called when the foreground or background color has been changed.
   */
-@@ -1429,7 +1422,7 @@ gui_mch_create_scrollbar(
- /*
-  * Find the scrollbar with the given hwnd.
-  */
--	 static scrollbar_T *
-+    static scrollbar_T *
- gui_mswin_find_scrollbar(HWND hwnd)
- {
-     win_T	*wp;
 diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 --- a/src/proto/gui_w32.pro
 +++ b/src/proto/gui_w32.pro
