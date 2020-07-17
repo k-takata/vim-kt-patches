@@ -27,7 +27,4 @@ big5corr.patch
 skip-undofile-earlier-on-gh-actions.patch
 support-tee-with-sp-on-windows.patch
 win32-drop-support-for-pre-vista.patch
-revise-gui_w32.patch
-fix-5602-adjust-scrollbar-position.patch
-win32-support-snap.patch
 fix-config_cache-removal.patch #+rejected
