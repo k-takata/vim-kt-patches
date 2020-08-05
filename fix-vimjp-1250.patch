@@ -27,7 +27,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/if_python3.c b/src/if_python3.c
 --- a/src/if_python3.c
 +++ b/src/if_python3.c
-@@ -907,6 +907,44 @@ python3_loaded(void)
+@@ -907,6 +907,47 @@ python3_loaded(void)
  
  static wchar_t *py_home_buf = NULL;
  
@@ -51,6 +51,8 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +    if (hinst == NULL)
 +	return;
 +
++    // Get "freopen" and "stdin" which are used in the python DLL.
++    // "stdin" is defined as "__acrt_iob_func(0)" in VC++ 2015 or later.
 +    py__acrt_iob_func = get_dll_import_func(hinst, "__acrt_iob_func");
 +    if (py__acrt_iob_func)
 +    {
@@ -60,6 +62,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +	    pyfreopen = (void*)GetProcAddress(hpystdiodll, "freopen");
 +    }
 +
++    // Reconnect stdin to CONIN$.
 +    if (pyfreopen)
 +	pyfreopen("CONIN$", "r", py__acrt_iob_func(0));
 +    else
@@ -72,7 +75,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
      static int
  Python3_Init(void)
  {
-@@ -939,6 +977,7 @@ Python3_Init(void)
+@@ -939,6 +980,7 @@ Python3_Init(void)
  
  	PyImport_AppendInittab("vim", Py3Init_vim);
  
