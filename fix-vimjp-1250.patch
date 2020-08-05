@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f3e5af7fdf5b54ea2a31654fcfc7bb773d4d64ba
+# Parent  c5521d61683b8c4bcbc3f9cb2fc368efbbe3ffb0
 
 diff --git a/src/if_python3.c b/src/if_python3.c
 --- a/src/if_python3.c
@@ -8,7 +8,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  
  static wchar_t *py_home_buf = NULL;
  
-+#if definde(MSWIN) && (PY_VERSION_HEX >= 0x030500f0)
++#if defined(MSWIN) && (PY_VERSION_HEX >= 0x030500f0)
 +// Python 3.5 or later will abort inside Py_Initialize() when stdin is
 +// redirected.  Reconnect stdin to CONIN$.
 +// Note that the python DLL is linked to its own stdio DLL which can be
