@@ -1,12 +1,12 @@
 # HG changeset patch
 # Parent b310fc3abf0bd107728295980e4090a7573dea3d
-# Parent  af9920001c97a367d5b909ef1de1aad5ed0cd1a0
+# Parent  51d2e34334f1be6b51d89fc5ec3bf2d62656c84b
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -693,6 +693,9 @@ A jump table for the options with a shor
+@@ -699,6 +699,9 @@ A jump table for the options with a shor
  	"single":	Use the same width as characters in US-ASCII.  This is
  			expected by most users.
  	"double":	Use twice the width of ASCII characters.
@@ -15,8 +15,8 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +
  							*E834* *E835*
  	The value "double" cannot be used if 'listchars' or 'fillchars'
- 	contains a character that would be double width.
-@@ -717,6 +720,10 @@ A jump table for the options with a shor
+ 
+@@ -725,6 +728,10 @@ A jump table for the options with a shor
  	escape sequence to request cursor position report.  The response can
  	be found in |v:termu7resp|.
  
@@ -30,7 +30,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4970,6 +4970,59 @@ error:
+@@ -5033,6 +5033,59 @@ error:
  }
  #endif
  
@@ -93,7 +93,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -1575,6 +1575,19 @@ utf_char2cells(int c)
+@@ -1547,6 +1547,19 @@ utf_char2cells(int c)
  	{0x1f6f3, 0x1f6f3}
      };
  
@@ -112,7 +112,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 +
      if (c >= 0x100)
      {
- #ifdef USE_WCHAR_FUNCTIONS
+ #if defined(FEAT_EVAL) || defined(USE_WCHAR_FUNCTIONS)
 diff --git a/src/optionstr.c b/src/optionstr.c
 --- a/src/optionstr.c
 +++ b/src/optionstr.c
@@ -132,7 +132,7 @@ diff --git a/src/optionstr.c b/src/optionstr.c
 diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 --- a/src/proto/gui_w32.pro
 +++ b/src/proto/gui_w32.pro
-@@ -76,6 +76,7 @@ void im_set_active(int active);
+@@ -77,6 +77,7 @@ void im_set_active(int active);
  int im_get_status(void);
  void gui_mch_draw_string(int row, int col, char_u *text, int len, int flags);
  void gui_mch_flush(void);
@@ -143,7 +143,7 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -508,6 +508,13 @@ typedef unsigned int u8char_T;	// int is
+@@ -498,6 +498,13 @@ typedef unsigned int u8char_T;	// int is
  #endif
  
  /*
