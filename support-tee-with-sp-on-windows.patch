@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  72ca4dbae6fd3ce543051565de0c1e816f587cef
+# Parent  5dee98a1aa1554d3a9ffa1e390e37a5e8d770ad2
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6526,9 +6526,12 @@ A jump table for the options with a shor
+@@ -6568,9 +6568,12 @@ A jump table for the options with a shor
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
@@ -17,7 +17,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +	is directly saved in a file and not echoed to the screen.  If "tee"
 +	command is found in the PATH the default becomes "2>&1| tee".  The
 +	output is also echoed to the screen.
- 	For Unix the default it "| tee".  The stdout of the compiler is saved
+ 	For Unix the default is "| tee".  The stdout of the compiler is saved
  	in a file and echoed to the screen.  If the 'shell' option is "csh" or
  	"tcsh" after initializations, the default becomes "|& tee".  If the
 diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
