@@ -1,0 +1,71 @@
+# HG changeset patch
+# Parent  601bd8efd70a0bd8cd37c47ec6464cbb5d837d03
+
+diff --git a/src/fileio.c b/src/fileio.c
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -2292,6 +2292,7 @@ failed:
+ 	// Use stderr for stdin, makes shell commands work.
+ 	close(0);
+ 	vim_ignored = dup(2);
++	stdin_closed = TRUE;
+     }
+ #endif
+ 
+diff --git a/src/globals.h b/src/globals.h
+--- a/src/globals.h
++++ b/src/globals.h
+@@ -797,6 +797,7 @@ EXTERN int	really_exiting INIT(= FALSE);
+ 				// a deadly signal
+ EXTERN int	v_dying INIT(= 0); // internal value of v:dying
+ EXTERN int	stdout_isatty INIT(= TRUE);	// is stdout a terminal?
++EXTERN int	stdin_closed INIT(= FALSE);	// is stdin closed?
+ 
+ #if defined(FEAT_AUTOCHDIR)
+ EXTERN int	test_autochdir INIT(= FALSE);
+diff --git a/src/if_python3.c b/src/if_python3.c
+--- a/src/if_python3.c
++++ b/src/if_python3.c
+@@ -908,8 +908,8 @@ python3_loaded(void)
+ static wchar_t *py_home_buf = NULL;
+ 
+ #if defined(MSWIN) && (PY_VERSION_HEX >= 0x030500f0)
+-// Python 3.5 or later will abort inside Py_Initialize() when stdin is
+-// redirected.  Reconnect stdin to NUL.
++// Python 3.5 or later will abort inside Py_Initialize() when stdin has
++// been closed (i.e. executed by "vim -").  Reconnect stdin to NUL.
+ // Note that the python DLL is linked to its own stdio DLL which can be
+ // differ from Vim's stdio.
+     static void
+@@ -925,7 +925,7 @@ reset_stdin(void)
+ # else
+     hinst = GetModuleHandle(PYTHON3_DLL);
+ # endif
+-    if (hinst == NULL)
++    if (hinst == NULL || !stdin_closed)
+ 	return;
+ 
+     // Get "freopen" and "stdin" which are used in the python DLL.
+@@ -938,10 +938,8 @@ reset_stdin(void)
+ 	if (hpystdiodll)
+ 	    pyfreopen = (void *)GetProcAddress(hpystdiodll, "freopen");
+     }
+-    if (isatty(fileno(stdin)))
+-	stdin_name = "CONIN$";
+ 
+-    // Reconnect stdin to NUL or CONIN$.
++    // Reconnect stdin to NUL.
+     if (pyfreopen != NULL)
+ 	pyfreopen(stdin_name, "r", py__acrt_iob_func(0));
+     else
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -2718,6 +2718,7 @@ read_stdin(void)
+      */
+     close(0);
+     vim_ignored = dup(2);
++    stdin_closed = TRUE;
+ #endif
+ }
+ 
