@@ -4,12 +4,13 @@
 diff --git a/src/if_python3.c b/src/if_python3.c
 --- a/src/if_python3.c
 +++ b/src/if_python3.c
-@@ -908,8 +908,24 @@ python3_loaded(void)
+@@ -908,8 +908,25 @@ python3_loaded(void)
  static wchar_t *py_home_buf = NULL;
  
  #if defined(MSWIN) && (PY_VERSION_HEX >= 0x030500f0)
 -// Python 3.5 or later will abort inside Py_Initialize() when stdin is
 -// redirected.  Reconnect stdin to NUL.
++// Check if stdin is readable from Python 3.
 +    static BOOL
 +is_stdin_readable(void)
 +{
@@ -18,12 +19,12 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +    int		    fd = fileno(stdin);
 +    HANDLE	    hstdin = (HANDLE)_get_osfhandle(fd);
 +
++    // Check if stdin is connected to the console.
 +    if (GetConsoleMode(hstdin, &mode))
++	// Check if it is opened as input.
 +	return GetNumberOfConsoleInputEvents(hstdin, &eventnum);
 +
-+    if (_fstat(fd, &st) == 0)
-+	return TRUE;
-+    return FALSE;
++    return _fstat(fd, &st) == 0;
 +}
 +
 +// Python 3.5 or later will abort inside Py_Initialize() when stdin has
@@ -31,7 +32,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  // Note that the python DLL is linked to its own stdio DLL which can be
  // differ from Vim's stdio.
      static void
-@@ -925,7 +941,7 @@ reset_stdin(void)
+@@ -925,7 +942,7 @@ reset_stdin(void)
  # else
      hinst = GetModuleHandle(PYTHON3_DLL);
  # endif
@@ -40,7 +41,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  	return;
  
      // Get "freopen" and "stdin" which are used in the python DLL.
-@@ -938,10 +954,8 @@ reset_stdin(void)
+@@ -938,10 +955,8 @@ reset_stdin(void)
  	if (hpystdiodll)
  	    pyfreopen = (void *)GetProcAddress(hpystdiodll, "freopen");
      }
