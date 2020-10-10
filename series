@@ -26,5 +26,4 @@ drop-support-for-glib-2.2.patch #+rejected
 big5corr.patch
 support-tee-with-sp-on-windows.patch
 win32-drop-support-for-pre-vista.patch
-fix-python3-stdin.patch
 fix-config_cache-removal.patch #+rejected
