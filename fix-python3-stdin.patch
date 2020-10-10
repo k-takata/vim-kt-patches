@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  601bd8efd70a0bd8cd37c47ec6464cbb5d837d03
+# Parent  37016e8bc6d74ff611ed41d8022a053ace5c575b
 
 diff --git a/src/if_python3.c b/src/if_python3.c
 --- a/src/if_python3.c
@@ -28,10 +28,19 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +}
 +
 +// Python 3.5 or later will abort inside Py_Initialize() when stdin has
-+// been closed (i.e. executed by "vim -").  Reconnect stdin to NUL.
++// been closed (i.e. executed by "vim -").  Reconnect stdin to CONIN$.
  // Note that the python DLL is linked to its own stdio DLL which can be
  // differ from Vim's stdio.
      static void
+@@ -917,7 +934,7 @@ reset_stdin(void)
+ {
+     FILE *(*py__acrt_iob_func)(unsigned) = NULL;
+     FILE *(*pyfreopen)(const char *, const char *, FILE *) = NULL;
+-    char *stdin_name = "NUL";
++    char *stdin_name = "CONIN$";
+     HINSTANCE hinst;
+ 
+ # ifdef DYNAMIC_PYTHON3
 @@ -925,7 +942,7 @@ reset_stdin(void)
  # else
      hinst = GetModuleHandle(PYTHON3_DLL);
@@ -49,7 +58,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 -	stdin_name = "CONIN$";
  
 -    // Reconnect stdin to NUL or CONIN$.
-+    // Reconnect stdin to NUL.
++    // Reconnect stdin to CONIN$.
      if (pyfreopen != NULL)
  	pyfreopen(stdin_name, "r", py__acrt_iob_func(0));
      else
