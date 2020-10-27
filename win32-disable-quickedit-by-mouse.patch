@@ -39,3 +39,46 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  /*
   * non-GUI version of mch_init().
+@@ -3719,7 +3726,10 @@ mch_settmode(tmode_T tmode)
+ 	cmodein &= ~(ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT |
+ 		     ENABLE_ECHO_INPUT);
+ 	if (g_fMouseActive)
++	{
+ 	    cmodein |= ENABLE_MOUSE_INPUT;
++	    cmodein &= ~ENABLE_QUICK_EDIT_MODE;
++	}
+ 	cmodeout &= ~(
+ # ifdef FEAT_TERMGUICOLORS
+ 	    // Do not turn off the ENABLE_PROCESSED_OUTPUT flag when using
+@@ -3735,6 +3745,7 @@ mch_settmode(tmode_T tmode)
+     {
+ 	cmodein |= (ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT |
+ 		    ENABLE_ECHO_INPUT);
++	cmodein |= g_cmodein & ENABLE_QUICK_EDIT_MODE;
+ 	cmodeout |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
+ 	bEnableHandler = FALSE;
+     }
+@@ -5593,9 +5604,15 @@ termcap_mode_start(void)
+ 
+     GetConsoleMode(g_hConIn, &cmodein);
+     if (g_fMouseActive)
++    {
+ 	cmodein |= ENABLE_MOUSE_INPUT;
++	cmodein &= ~ENABLE_QUICK_EDIT_MODE;
++    }
+     else
++    {
+ 	cmodein &= ~ENABLE_MOUSE_INPUT;
++	cmodein |= g_cmodein & ENABLE_QUICK_EDIT_MODE;
++    }
+     cmodein |= ENABLE_WINDOW_INPUT;
+     SetConsoleMode(g_hConIn, cmodein);
+ 
+@@ -5622,6 +5639,7 @@ termcap_mode_end(void)
+ 
+     GetConsoleMode(g_hConIn, &cmodein);
+     cmodein &= ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
++    cmodein |= g_cmodein & ENABLE_QUICK_EDIT_MODE;
+     SetConsoleMode(g_hConIn, cmodein);
+ 
+ # ifdef FEAT_RESTORE_ORIG_SCREEN
