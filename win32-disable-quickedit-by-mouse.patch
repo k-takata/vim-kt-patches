@@ -1,0 +1,41 @@
+# HG changeset patch
+# Parent  a7d28a37573dd645ef899b5e2458bc7d16b635ba
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -1146,6 +1146,9 @@ static int g_nMouseClick = -1;	    // mo
+ static int g_xMouse;		    // mouse x coordinate
+ static int g_yMouse;		    // mouse y coordinate
+ 
++static DWORD g_cmodein = 0;
++static DWORD g_cmodeout = 0;
++
+ /*
+  * Enable or disable mouse input
+  */
+@@ -1165,9 +1168,15 @@ mch_setmouse(int on)
+     GetConsoleMode(g_hConIn, &cmodein);
+ 
+     if (g_fMouseActive)
++    {
+ 	cmodein |= ENABLE_MOUSE_INPUT;
++	cmodein &= ~ENABLE_QUICK_EDIT_MODE;
++    }
+     else
++    {
+ 	cmodein &= ~ENABLE_MOUSE_INPUT;
++	cmodein |= g_cmodein & ENABLE_QUICK_EDIT_MODE;
++    }
+ 
+     SetConsoleMode(g_hConIn, cmodein);
+ }
+@@ -2757,8 +2766,6 @@ SaveConsoleTitleAndIcon(void)
+ static int g_fWindInitCalled = FALSE;
+ static int g_fTermcapMode = FALSE;
+ static CONSOLE_CURSOR_INFO g_cci;
+-static DWORD g_cmodein = 0;
+-static DWORD g_cmodeout = 0;
+ 
+ /*
+  * non-GUI version of mch_init().
