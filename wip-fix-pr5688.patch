@@ -4,7 +4,37 @@
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -3015,6 +3015,45 @@ get_scroll_flags(void)
+@@ -2986,6 +2986,17 @@ gui_mch_flash(int msec)
+ }
+ 
+ /*
++ * Check if the specified point is on-screen.
++ */
++    static BOOL
++is_point_onscreen(int x, int y)
++{
++    POINT   pt = {x, y};
++
++    return MonitorFromPoint(pt, MONITOR_DEFAULTTONULL) != NULL;
++}
++
++/*
+  * Return flags used for scrolling.
+  * The SW_INVALIDATE is required when part of the window is covered or
+  * off-screen. Refer to MS KB Q75236.
+@@ -3001,7 +3012,10 @@ get_scroll_flags(void)
+     // Check if the window is partly above or below the screen.  We don't care
+     // about partly left or right of the screen, it is not relevant when
+     // scrolling up or down.
+-    if (rcVim.top < 0 || rcVim.bottom > GetSystemMetrics(SM_CYFULLSCREEN))
++    if ((!is_point_onscreen(rcVim.left, rcVim.top)
++		&& !is_point_onscreen(rcVim.right, rcVim.top))
++	    || (!is_point_onscreen(rcVim.left, rcVim.bottom)
++		&& !is_point_onscreen(rcVim.right, rcVim.bottom)))
+ 	return SW_INVALIDATE;
+ 
+     // Check if there is an window (partly) on top of us.
+@@ -3015,6 +3029,32 @@ get_scroll_flags(void)
      return 0;
  }
  
@@ -19,30 +49,17 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +is_window_onscreen(HWND hwnd)
 +{
 +    RECT    rc;
-+    POINT   pt;
 +
 +    GetWindowRect(hwnd, &rc);
 +
-+    pt.x = rc.left;
-+    pt.y = rc.top;
-+    if (MonitorFromPoint(pt, MONITOR_DEFAULTTONULL) == NULL)
++    if (!is_point_onscreen(rc.left, rc.top))
 +	return FALSE;
-+
-+    pt.x = rc.left;
-+    pt.y = rc.bottom;
-+    if (MonitorFromPoint(pt, MONITOR_DEFAULTTONULL) == NULL)
++    if (!is_point_onscreen(rc.left, rc.bottom))
 +	return FALSE;
-+
-+    pt.x = rc.right;
-+    pt.y = rc.top;
-+    if (MonitorFromPoint(pt, MONITOR_DEFAULTTONULL) == NULL)
++    if (!is_point_onscreen(rc.right, rc.top))
 +	return FALSE;
-+
-+    pt.x = rc.right;
-+    pt.y = rc.bottom;
-+    if (MonitorFromPoint(pt, MONITOR_DEFAULTTONULL) == NULL)
++    if (!is_point_onscreen(rc.right, rc.bottom))
 +	return FALSE;
-+
 +    return TRUE;
 +}
 +#endif
@@ -50,7 +67,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * On some Intel GPUs, the regions drawn just prior to ScrollWindowEx()
   * may not be scrolled out properly.
-@@ -3046,14 +3085,17 @@ gui_mch_delete_lines(
+@@ -3046,14 +3086,17 @@ gui_mch_delete_lines(
      rc.bottom = FILL_Y(gui.scroll_region_bot + 1);
  
  #if defined(FEAT_DIRECTX)
@@ -70,7 +87,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	intel_gpu_workaround();
  	ScrollWindowEx(s_textArea, 0, -num_lines * gui.char_height,
  				    &rc, &rc, NULL, NULL, get_scroll_flags());
-@@ -3088,14 +3130,17 @@ gui_mch_insert_lines(
+@@ -3088,14 +3131,17 @@ gui_mch_insert_lines(
      rc.bottom = FILL_Y(gui.scroll_region_bot + 1);
  
  #if defined(FEAT_DIRECTX)
