@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent b310fc3abf0bd107728295980e4090a7573dea3d
-# Parent  51d2e34334f1be6b51d89fc5ec3bf2d62656c84b
+# Parent  10e8731bc2ec6e1016afc0d59b50aee60f0eba98
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
@@ -15,8 +15,8 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +
  							*E834* *E835*
  	The value "double" cannot be used if 'listchars' or 'fillchars'
- 
-@@ -725,6 +728,10 @@ A jump table for the options with a shor
+ 	contains a character that would be double width.
+@@ -726,6 +729,10 @@ A jump table for the options with a shor
  	escape sequence to request cursor position report.  The response can
  	be found in |v:termu7resp|.
  
@@ -30,7 +30,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5033,6 +5033,59 @@ error:
+@@ -5071,6 +5071,59 @@ error:
  }
  #endif
  
@@ -93,7 +93,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -1547,6 +1547,19 @@ utf_char2cells(int c)
+@@ -1547,6 +1547,27 @@ utf_char2cells(int c)
  	{0x1f6f3, 0x1f6f3}
      };
  
@@ -102,6 +102,14 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 +    {
 +	int cell;
 +
++#ifdef FEAT_EVAL
++	if (c >= 0x100)
++	{
++	    int n = cw_value(c);
++	    if (n != 0)
++		return n;
++	}
++#endif
 +	/* This is required by screen.c implicitly. */
 +	if (c == 0)
 +	    return 1;
