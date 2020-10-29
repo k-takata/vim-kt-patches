@@ -4,13 +4,16 @@
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -3015,6 +3015,42 @@ get_scroll_flags(void)
+@@ -3015,6 +3015,45 @@ get_scroll_flags(void)
      return 0;
  }
  
 +#if defined(FEAT_DIRECTX)
 +/*
-+ * Check if the all area of the specfied window is on screen.
++ * Check if the whole area of the specified window is on-screen.
++ * Windows 10 1809 or above no longer maintains image of the window portion
++ * that is off-screen.  Scrolling by DWriteContext_Scroll() only works when
++ * the whole window is on-screen.
 + */
 +    static BOOL
 +is_window_onscreen(HWND hwnd)
@@ -47,7 +50,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * On some Intel GPUs, the regions drawn just prior to ScrollWindowEx()
   * may not be scrolled out properly.
-@@ -3046,7 +3082,7 @@ gui_mch_delete_lines(
+@@ -3046,14 +3085,17 @@ gui_mch_delete_lines(
      rc.bottom = FILL_Y(gui.scroll_region_bot + 1);
  
  #if defined(FEAT_DIRECTX)
@@ -55,8 +58,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    if (IS_ENABLE_DIRECTX() && is_window_onscreen(s_hwnd))
      {
  	DWriteContext_Scroll(s_dwc, 0, -num_lines * gui.char_height, &rc);
- 	DWriteContext_Flush(s_dwc);
-@@ -3054,6 +3090,10 @@ gui_mch_delete_lines(
+-	DWriteContext_Flush(s_dwc);
+     }
      else
  #endif
      {
@@ -67,7 +70,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	intel_gpu_workaround();
  	ScrollWindowEx(s_textArea, 0, -num_lines * gui.char_height,
  				    &rc, &rc, NULL, NULL, get_scroll_flags());
-@@ -3088,7 +3128,7 @@ gui_mch_insert_lines(
+@@ -3088,14 +3130,17 @@ gui_mch_insert_lines(
      rc.bottom = FILL_Y(gui.scroll_region_bot + 1);
  
  #if defined(FEAT_DIRECTX)
@@ -75,8 +78,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    if (IS_ENABLE_DIRECTX() && is_window_onscreen(s_hwnd))
      {
  	DWriteContext_Scroll(s_dwc, 0, num_lines * gui.char_height, &rc);
- 	DWriteContext_Flush(s_dwc);
-@@ -3096,6 +3136,10 @@ gui_mch_insert_lines(
+-	DWriteContext_Flush(s_dwc);
+     }
      else
  #endif
      {
