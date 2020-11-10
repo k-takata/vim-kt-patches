@@ -29,4 +29,5 @@ win32-drop-support-for-pre-vista.patch
 msvc-use-gf-flag.patch
 win32-disable-quickedit-by-mouse.patch
 vim9-fix-has-gui_running-with-vimdll.patch
+win32-fix-memleak.patch
 fix-config_cache-removal.patch #+rejected
