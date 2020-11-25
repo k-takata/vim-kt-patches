@@ -10,7 +10,7 @@ diff --git a/src/testdir/test_swap.vim b/src/testdir/test_swap.vim
  
 +func s:get_unused_pid(base)
 +  if has('job')
-+    " Execute 'echo' as a temporally job, and return its pid as an unused pid.
++    " Execute 'echo' as a temporary job, and return its pid as an unused pid.
 +    if has('win32')
 +      let cmd = 'cmd /c echo'
 +    else
