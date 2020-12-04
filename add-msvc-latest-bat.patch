@@ -1,0 +1,19 @@
+# HG changeset patch
+# Parent  81dd6941221d784b490bb90004908b6a64ee7f0a
+
+diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
+new file mode 100644
+--- /dev/null
++++ b/src/msvc-latest.bat
+@@ -0,0 +1,11 @@
++@echo off
++
++for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
++	set InstallDir=%%i
++)
++
++if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
++	"%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
++) else (
++	echo Error: vcvarsall.bat not found.
++)
