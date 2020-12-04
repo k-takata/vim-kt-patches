@@ -13,7 +13,7 @@ new file mode 100644
 +)
 +
 +if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
-+	"%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
++	call "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
 +) else (
 +	echo Error: vcvarsall.bat not found.
 +)
