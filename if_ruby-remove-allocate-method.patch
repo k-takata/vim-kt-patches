@@ -1,18 +1,18 @@
 # HG changeset patch
-# Parent  e1fb27da29695ccb7ff80b090a71b0a6ced1df3f
+# Parent  9942471f6a513b10165d012ab6542194e26e5807
 
 diff --git a/src/if_ruby.c b/src/if_ruby.c
 --- a/src/if_ruby.c
 +++ b/src/if_ruby.c
-@@ -219,6 +219,7 @@ static int ruby_convert_to_vim_value(VAL
+@@ -238,6 +238,7 @@ static int ruby_convert_to_vim_value(VAL
  
  # define rb_assoc_new			dll_rb_assoc_new
  # define rb_cObject			(*dll_rb_cObject)
 +# define rb_cData			(*dll_rb_cData)
  # define rb_class_new_instance		dll_rb_class_new_instance
- # define rb_check_type			dll_rb_check_type
- # ifdef USE_TYPEDDATA
-@@ -368,6 +369,7 @@ VALUE *dll_rb_cFloat;
+ # if RUBY_VERSION < 30
+ #  define rb_check_type			dll_rb_check_type
+@@ -391,6 +392,7 @@ VALUE *dll_rb_cFloat;
  # endif
  VALUE *dll_rb_cNilClass;
  static VALUE *dll_rb_cObject;
@@ -20,7 +20,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  VALUE *dll_rb_cString;
  VALUE *dll_rb_cSymbol;
  VALUE *dll_rb_cTrueClass;
-@@ -600,6 +602,7 @@ static struct
+@@ -648,6 +650,7 @@ static struct
  # endif
      {"rb_cNilClass", (RUBY_PROC*)&dll_rb_cNilClass},
      {"rb_cObject", (RUBY_PROC*)&dll_rb_cObject},
@@ -28,7 +28,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      {"rb_cString", (RUBY_PROC*)&dll_rb_cString},
      {"rb_cSymbol", (RUBY_PROC*)&dll_rb_cSymbol},
      {"rb_cTrueClass", (RUBY_PROC*)&dll_rb_cTrueClass},
-@@ -1766,7 +1769,7 @@ ruby_vim_init(void)
+@@ -1809,7 +1812,7 @@ ruby_vim_init(void)
      eDeletedWindowError = rb_define_class_under(mVIM, "DeletedWindowError",
  						rb_eStandardError);
  
@@ -37,7 +37,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      rb_define_singleton_method(cBuffer, "current", buffer_s_current, 0);
      rb_define_singleton_method(cBuffer, "count", buffer_s_count, 0);
      rb_define_singleton_method(cBuffer, "[]", buffer_s_aref, 1);
-@@ -1786,7 +1789,7 @@ ruby_vim_init(void)
+@@ -1829,7 +1832,7 @@ ruby_vim_init(void)
      rb_define_method(cBuffer, "line=", set_current_line, 1);
  
  
