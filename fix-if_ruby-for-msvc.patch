@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  d30a4795d560e73ceaab0fd44318034a0e919c04
+
+diff --git a/src/if_ruby.c b/src/if_ruby.c
+--- a/src/if_ruby.c
++++ b/src/if_ruby.c
+@@ -526,7 +526,7 @@ static void (*dll_rb_gc_writebarrier_unp
+ # endif
+ 
+ # if RUBY_VERSION >= 30
+-NORETURN(static void (*dll_ruby_malloc_size_overflow)(size_t, size_t));
++static void (*dll_ruby_malloc_size_overflow)(size_t, size_t);
+ # endif
+ 
+ # if RUBY_VERSION >= 26

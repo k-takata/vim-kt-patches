@@ -30,5 +30,6 @@ msvc-use-gf-flag.patch
 win32-disable-quickedit-by-mouse.patch
 add-msvc-latest-bat.patch
 remove-redundant-lines.patch
+fix-if_ruby-for-msvc.patch
 wip-win32-vimdir-encoding.patch #+wip
 fix-config_cache-removal.patch #+rejected
