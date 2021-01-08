@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  f39c2cefd39cf916184324a5f0a46010b8d5b772
+
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -245,8 +245,6 @@ main
+ 
+ #ifdef MSWIN
+     {
+-	extern void set_alist_count(void);
+-
+ 	// Remember the number of entries in the argument list.  If it changes
+ 	// we don't react on setting 'encoding'.
+ 	set_alist_count();
