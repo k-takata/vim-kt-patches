@@ -31,16 +31,21 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      long
  rb_fix2int_stub(VALUE x)
  {
-@@ -612,7 +612,7 @@ rb_check_type_stub(VALUE obj, int t)
+@@ -612,13 +612,11 @@ rb_check_type_stub(VALUE obj, int t)
  {
      dll_rb_check_type(obj, t);
  }
 -#   if VIM_SIZEOF_INT < VIM_SIZEOF_LONG // 64 bits only
-+#   if VIM_SIZEOF_INT < VIM_SIZEOF_LONG || defined(MSWIN)
      unsigned long
  rb_num2uint_stub(VALUE x)
  {
-@@ -695,7 +695,7 @@ static struct
+     return dll_rb_num2uint(x);
+ }
+-#   endif
+     void
+ ruby_malloc_size_overflow_stub(size_t x, size_t y)
+ {
+@@ -695,7 +693,7 @@ static struct
      {"rb_inspect", (RUBY_PROC*)&dll_rb_inspect},
      {"rb_int2inum", (RUBY_PROC*)&dll_rb_int2inum},
      {"rb_intern", (RUBY_PROC*)&dll_rb_intern},
