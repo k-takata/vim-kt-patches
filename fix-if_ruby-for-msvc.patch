@@ -4,18 +4,7 @@
 diff --git a/src/if_ruby.c b/src/if_ruby.c
 --- a/src/if_ruby.c
 +++ b/src/if_ruby.c
-@@ -100,7 +100,9 @@
- 
- # if RUBY_VERSION >= 30
- #  define rb_check_type rb_check_type_stub
--#  define rb_num2uint rb_num2uint_stub
-+#  if VIM_SIZEOF_INT < VIM_SIZEOF_LONG || defined(_WIN32)
-+#   define rb_num2uint rb_num2uint_stub
-+#  endif
- #  define ruby_malloc_size_overflow ruby_malloc_size_overflow_stub
- # endif
- 
-@@ -436,7 +438,7 @@ static VALUE (*dll_rb_hash_new) (void);
+@@ -436,7 +436,7 @@ static VALUE (*dll_rb_hash_new) (void);
  static VALUE (*dll_rb_inspect) (VALUE);
  static VALUE (*dll_rb_int2inum) (long);
  static ID (*dll_rb_intern) (const char*);
@@ -24,7 +13,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  static long (*dll_rb_fix2int) (VALUE);
  static long (*dll_rb_num2int) (VALUE);
  static unsigned long (*dll_rb_num2uint) (VALUE);
-@@ -524,7 +526,7 @@ static void (*dll_rb_gc_writebarrier_unp
+@@ -524,7 +524,7 @@ static void (*dll_rb_gc_writebarrier_unp
  # endif
  
  # if RUBY_VERSION >= 30
@@ -33,7 +22,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  # endif
  
  # if RUBY_VERSION >= 26
-@@ -554,7 +556,7 @@ rb_int2big_stub(SIGNED_VALUE x)
+@@ -554,7 +554,7 @@ rb_int2big_stub(SIGNED_VALUE x)
  {
      return dll_rb_int2big(x);
  }
@@ -42,7 +31,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      long
  rb_fix2int_stub(VALUE x)
  {
-@@ -612,7 +614,7 @@ rb_check_type_stub(VALUE obj, int t)
+@@ -612,7 +612,7 @@ rb_check_type_stub(VALUE obj, int t)
  {
      dll_rb_check_type(obj, t);
  }
@@ -51,7 +40,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      unsigned long
  rb_num2uint_stub(VALUE x)
  {
-@@ -695,7 +697,7 @@ static struct
+@@ -695,7 +695,7 @@ static struct
      {"rb_inspect", (RUBY_PROC*)&dll_rb_inspect},
      {"rb_int2inum", (RUBY_PROC*)&dll_rb_int2inum},
      {"rb_intern", (RUBY_PROC*)&dll_rb_intern},
