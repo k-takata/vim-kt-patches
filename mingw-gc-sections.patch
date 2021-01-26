@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  a084ed46276c00476d7ec4e0e78b112c8dd80d7f
+# Parent  87cada7913f7bbe806b648b66c4fa61be396aa61
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -506,8 +506,8 @@ endif
+@@ -513,8 +513,8 @@ endif
  #>>>>> end of choices
  ###########################################################################
  
@@ -12,10 +12,10 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 -CXXFLAGS = -std=gnu++11
 +CFLAGS = -I. -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall -ffunction-sections -fno-asynchronous-unwind-tables
 +CXXFLAGS = -fasynchronous-unwind-tables -std=gnu++11
- WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
+ # This used to have --preprocessor, but it's no longer supported
+ WINDRES_FLAGS =
  EXTRA_LIBS =
- 
-@@ -948,6 +948,8 @@ endif
+@@ -1042,6 +1042,8 @@ LIB += -lgcc_eh
  LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
  endif
  
