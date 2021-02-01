@@ -133,7 +133,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +    HANDLE		h;
 +    OBJECT_ATTRIBUTES	oa;
 +    IO_STATUS_BLOCK	iosb;
-+    FILE_EA_INFORMATION eainfo = {0};
++    FILE_EA_INFORMATION	eainfo = {0};
 +    void		*ea = NULL;
 +
 +    if (!load_ntdll())
