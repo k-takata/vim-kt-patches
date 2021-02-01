@@ -29,7 +29,6 @@ msvc-use-gf-flag.patch
 win32-disable-quickedit-by-mouse.patch
 add-msvc-latest-bat.patch
 remove-redundant-lines.patch
-win32-fix-backupcopy.patch
 win32-backup-ea.patch
 wip-win32-vimdir-encoding.patch #+wip
 fix-config_cache-removal.patch #+rejected
