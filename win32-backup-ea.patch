@@ -1,5 +1,7 @@
+# HG changeset patch
+# Parent  d93cca225f884c3a480186f00a00a109f44286ea
+
 diff --git a/src/os_win32.c b/src/os_win32.c
-index 972f10da5..2f4c87177 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
 @@ -33,6 +33,7 @@
@@ -10,11 +12,10 @@ index 972f10da5..2f4c87177 100644
  #endif
  
  #undef chdir
-@@ -7253,6 +7254,188 @@ copy_infostreams(char_u *from, char_u *to)
-     vim_free(tow);
+@@ -7251,6 +7252,190 @@ copy_infostreams(char_u *from, char_u *t
  }
  
-+/*
+ /*
 + * ntdll.dll definitions
 + */
 +#define FileEaInformation   7
@@ -124,16 +125,16 @@ index 972f10da5..2f4c87177 100644
 +    static void
 +copy_extattr(char_u *from, char_u *to)
 +{
-+    char_u  *fromf = NULL;
-+    char_u  *tof = NULL;
-+    WCHAR   *fromw = NULL;
-+    WCHAR   *tow = NULL;
-+    UNICODE_STRING  u;
-+    HANDLE  h;
++    char_u		*fromf = NULL;
++    char_u		*tof = NULL;
++    WCHAR		*fromw = NULL;
++    WCHAR		*tow = NULL;
++    UNICODE_STRING	u;
++    HANDLE		h;
 +    OBJECT_ATTRIBUTES	oa;
-+    IO_STATUS_BLOCK iosb;
++    IO_STATUS_BLOCK	iosb;
 +    FILE_EA_INFORMATION eainfo = {0};
-+    void *ea = NULL;
++    void		*ea = NULL;
 +
 +    if (!load_ntdll())
 +	return;
@@ -154,10 +155,11 @@ index 972f10da5..2f4c87177 100644
 +    if (fromw == NULL || tow == NULL)
 +	goto theend;
 +
++    // Get the EA.
 +    pRtlInitUnicodeString(&u, fromw);
 +    InitializeObjectAttributes(&oa, &u, 0, NULL, NULL);
-+    if (pNtOpenFile(&h, FILE_READ_EA, &oa, &iosb, 0, FILE_OPEN)
-+	    != STATUS_SUCCESS)
++    if (pNtOpenFile(&h, FILE_READ_EA, &oa, &iosb, 0,
++		FILE_NON_DIRECTORY_FILE) != STATUS_SUCCESS)
 +	goto theend;
 +    pNtQueryInformationFile(h, &iosb, &eainfo, sizeof(eainfo),
 +	    FileEaInformation);
@@ -176,12 +178,13 @@ index 972f10da5..2f4c87177 100644
 +    }
 +    pNtClose(h);
 +
++    // Set the EA.
 +    if (ea != NULL)
 +    {
 +	pRtlInitUnicodeString(&u, tow);
 +	InitializeObjectAttributes(&oa, &u, 0, NULL, NULL);
-+	if (pNtOpenFile(&h, FILE_WRITE_EA, &oa, &iosb, 0, FILE_OPEN)
-+		!= STATUS_SUCCESS)
++	if (pNtOpenFile(&h, FILE_WRITE_EA, &oa, &iosb, 0,
++		    FILE_NON_DIRECTORY_FILE) != STATUS_SUCCESS)
 +	    goto theend;
 +
 +	pNtSetEaFile(h, &iosb, ea, eainfo.EaSize);
@@ -196,10 +199,11 @@ index 972f10da5..2f4c87177 100644
 +    vim_free(ea);
 +}
 +
- /*
++/*
   * Copy file attributes from file "from" to file "to".
   * For Windows NT and later we copy info streams.
-@@ -7263,6 +7446,7 @@ mch_copy_file_attribute(char_u *from, char_u *to)
+  * Always returns zero, errors are ignored.
+@@ -7260,6 +7445,7 @@ mch_copy_file_attribute(char_u *from, ch
  {
      // File streams only work on Windows NT and later.
      copy_infostreams(from, to);
