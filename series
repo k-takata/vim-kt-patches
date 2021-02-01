@@ -31,5 +31,6 @@ add-msvc-latest-bat.patch
 remove-redundant-lines.patch
 fix-if_ruby-for-msvc.patch
 win32-fix-backupcopy.patch
+win32-backup-ea.patch
 wip-win32-vimdir-encoding.patch #+wip
 fix-config_cache-removal.patch #+rejected
