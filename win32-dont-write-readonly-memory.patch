@@ -1,0 +1,37 @@
+# HG changeset patch
+# Parent  04d3b0fb3dccc534bba59c35e009eb44db2e198a
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -6403,13 +6403,13 @@ mch_write(
+     char_u  *s,
+     int	    len)
+ {
++    char_u  *end = s + len;
++
+ # ifdef VIMDLL
+     if (gui.in_use)
+ 	return;
+ # endif
+ 
+-    s[len] = NUL;
+-
+     if (!term_console)
+     {
+ 	write(1, s, (unsigned)len);
+@@ -6430,10 +6430,13 @@ mch_write(
+ 	    return;
+ 	}
+ 
+-	while((ch = s[++prefix]))
++	while (s + ++prefix < end)
++	{
++	    ch = s[prefix];
+ 	    if (ch <= 0x1e && !(ch != '\n' && ch != '\r' && ch != '\b'
+ 						&& ch != '\a' && ch != '\033'))
+ 		break;
++	}
+ 
+ 	if (p_wd)
+ 	{
