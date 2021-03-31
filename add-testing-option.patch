@@ -1,0 +1,45 @@
+# HG changeset patch
+# Parent  2cacf1e8e2d8a224b5e4cb675a8a032c17e441c6
+
+diff --git a/src/gui.h b/src/gui.h
+--- a/src/gui.h
++++ b/src/gui.h
+@@ -441,6 +441,7 @@ typedef struct Gui
+     guicolor_T	currFgColor;	    // Current foreground text color
+     guicolor_T	currBgColor;	    // Current background text color
+     guicolor_T	currSpColor;	    // Current special text color
++    int		testing;	    // Running on testing mode
+ #endif
+ 
+ #ifdef FEAT_GUI_HAIKU
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -2057,6 +2057,12 @@ command_line_scan(mparm_T *parmp)
+ 		    // already processed, skip
+ 		}
+ #endif
++		else if (STRNICMP(argv[0] + argv_idx, "testing", 7) == 0)
++		{
++#ifdef FEAT_GUI_MSWIN
++		    gui.testing = TRUE;
++#endif
++		}
+ 		else
+ 		{
+ 		    if (argv[0][argv_idx])
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -608,7 +608,10 @@ display_errors(void)
+ 	    for (p = (char *)error_ga.ga_data; *p; ++p)
+ 		if (!isspace(*p))
+ 		{
+-		    (void)gui_mch_dialog(
++		    if (gui.testing)
++			printf("%s", p);
++		    else
++			(void)gui_mch_dialog(
+ 				     gui.starting ? VIM_INFO :
+ 					     VIM_ERROR,
+ 				     gui.starting ? (char_u *)_("Message") :
