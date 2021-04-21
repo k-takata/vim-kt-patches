@@ -26,7 +26,6 @@ big5corr.patch
 support-tee-with-sp-on-windows.patch
 win32-drop-support-for-pre-vista.patch
 msvc-use-gf-flag.patch
-win32-dont-write-readonly-memory.patch
 win32-disable-quickedit-by-mouse.patch
 add-msvc-latest-bat.patch
 remove-redundant-lines.patch
