@@ -29,6 +29,5 @@ win32-disable-quickedit-by-mouse.patch
 add-msvc-latest-bat.patch
 remove-redundant-lines.patch
 add-testing-option.patch
-testing-hide-comment.patch
 wip-win32-vimdir-encoding.patch #+wip
 fix-config_cache-removal.patch #+rejected
