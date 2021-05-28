@@ -31,5 +31,6 @@ remove-redundant-lines.patch
 add-testing-option.patch
 win32-strftime-use-utf16.patch
 simplify-strftime.patch
+use-array_length-macro.patch
 wip-win32-vimdir-encoding.patch #+wip
 fix-config_cache-removal.patch #+rejected
