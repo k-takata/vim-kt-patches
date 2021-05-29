@@ -1,14 +1,33 @@
 # HG changeset patch
-# Parent  81dd6941221d784b490bb90004908b6a64ee7f0a
+# Parent  0e04fb8d83efdd733ff8e44a88177f3565b7e490
 
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 new file mode 100644
 --- /dev/null
 +++ b/src/msvc-latest.bat
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,32 @@
 +@echo off
++rem To be used on MS-Windows for Visual C++ 2017 or later
++rem See INSTALLpc.txt for information.
++rem
++rem Usage:
++rem   For x86 builds run this with "x86" option:
++rem     msvc-latest x86
++rem   For x64 builds run this with "amd64" option:
++rem     msvc-latest amd64
 +
-+for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
++set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
++if not exist "%VSWHERE%" (
++	where vswhere > nul 2>&1
++	if errorlevel 1 (
++		echo Error: vswhere not found.
++		set VSWHERE=
++		exit /b 1
++	)
++	set VSWHERE=vswhere
++)
++
++for /f "usebackq tokens=*" %%i in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
 +	set InstallDir=%%i
 +)
 +
@@ -17,3 +36,5 @@ new file mode 100644
 +) else (
 +	echo Error: vcvarsall.bat not found.
 +)
++set VSWHERE=
++set InstallDir=
