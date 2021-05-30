@@ -25,7 +25,6 @@ drop-support-for-glib-2.2.patch #+rejected
 big5corr.patch
 support-tee-with-sp-on-windows.patch
 win32-drop-support-for-pre-vista.patch
-win32-disable-quickedit-by-mouse.patch
 add-msvc-latest-bat.patch
 remove-redundant-lines.patch
 add-testing-option.patch
