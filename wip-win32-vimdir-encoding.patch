@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f39c2cefd39cf916184324a5f0a46010b8d5b772
+# Parent  4166b3b9d61e2397195c1b14bae89b519ef3f839
 
 diff --git a/src/locale.c b/src/locale.c
 --- a/src/locale.c
@@ -15,7 +15,7 @@ diff --git a/src/locale.c b/src/locale.c
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -1255,6 +1255,32 @@ free_users(void)
+@@ -1261,6 +1261,32 @@ free_users(void)
  }
  #endif
  
@@ -48,85 +48,78 @@ diff --git a/src/misc1.c b/src/misc1.c
  /*
   * Call expand_env() and store the result in an allocated string.
   * This is not very memory efficient, this expects the result to be freed
-@@ -1400,7 +1426,11 @@ expand_env_esc(
+@@ -1406,7 +1432,9 @@ expand_env_esc(
  			++tail;
  #endif
  		    *var = NUL;
-+		    OutputDebugString("expanding");
-+		    OutputDebugString(dst);
++		    Trace("expanding: %s", dst);
  		    var = vim_getenv(dst, &mustfree);
-+		    OutputDebugString(var);
-+		    OutputDebugString("expanded");
++		    Trace("expanded: %s", var);
  #if defined(MSWIN) || defined(UNIX)
  		}
  #endif
-@@ -1687,6 +1717,7 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1693,6 +1721,7 @@ vim_getenv(char_u *name, int *mustfree)
      if (!vimruntime && STRCMP(name, "VIM") != 0)
  	return NULL;
  
-+OutputDebugString("vim_getenv: $VIM or $VIMRUNTIME");
++Trace("vim_getenv: $VIM or $VIMRUNTIME");
      /*
       * When expanding $VIMRUNTIME fails, try using $VIM/vim<version> or $VIM.
       * Don't do this when default_vimruntime_dir is non-empty.
-@@ -1744,10 +1775,14 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1750,10 +1779,12 @@ vim_getenv(char_u *name, int *mustfree)
  	else
  	    p = exe_name;
  #endif
-+OutputDebugString("vim_getenv: p");
-+OutputDebugString(p);
++Trace("vim_getenv: p=%s", p);
  	if (p != NULL)
  	{
  	    // remove the file name
  	    pend = gettail(p);
-+OutputDebugString("vim_getenv: pend");
-+OutputDebugString(pend);
++Trace("vim_getenv: pend=%s", pend);
  
  	    // remove "doc/" from 'helpfile', if present
  	    if (p == p_hf)
-@@ -1786,6 +1821,8 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1792,6 +1823,7 @@ vim_getenv(char_u *name, int *mustfree)
  		pend = remove_tail(p, pend, (char_u *)RUNTIME_DIRNAME);
  		pend = remove_tail(p, pend, (char_u *)VIM_VERSION_NODOT);
  	    }
-+OutputDebugString("vim_getenv: pend2");
-+OutputDebugString(pend);
++Trace("vim_getenv: pend2=%s", pend);
  
  	    // remove trailing path separator
  	    if (pend > p && after_pathsep(p, pend))
-@@ -1847,14 +1884,19 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1853,14 +1885,17 @@ vim_getenv(char_u *name, int *mustfree)
  	if (vimruntime)
  	{
  	    vim_setenv((char_u *)"VIMRUNTIME", p);
-+OutputDebugString("vim_getenv: VIMRUNTIME");
-+OutputDebugString(p);
++Trace("vim_getenv: VIMRUNTIME=%s", p);
  	    didset_vimruntime = TRUE;
  	}
  	else
  	{
  	    vim_setenv((char_u *)"VIM", p);
-+OutputDebugString("vim_getenv: VIM");
-+OutputDebugString(p);
++Trace("vim_getenv: VIM=%s", p);
  	    didset_vim = TRUE;
  	}
      }
-+OutputDebugString("vim_getenv: end");
++Trace("vim_getenv: end");
      return p;
  }
  
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2292,6 +2292,7 @@ option_expand(int opt_idx, char_u *val)
+@@ -2302,6 +2302,7 @@ option_expand(int opt_idx, char_u *val)
  	    (char_u **)options[opt_idx].var == &p_sps ? (char_u *)"file:" :
  #endif
  				  NULL);
-+if ((char_u **)options[opt_idx].var == &p_hf) OutputDebugString(NameBuff);
++if ((char_u **)options[opt_idx].var == &p_hf) Trace("option_expand: %s", NameBuff);
      if (STRCMP(NameBuff, val) == 0)   // they are the same
  	return NULL;
  
 diff --git a/src/optionstr.c b/src/optionstr.c
 --- a/src/optionstr.c
 +++ b/src/optionstr.c
-@@ -1017,9 +1017,13 @@ did_set_string_option(
+@@ -1037,9 +1037,13 @@ ambw_end:
  	    }
  
  #if defined(MSWIN)
@@ -144,7 +137,16 @@ diff --git a/src/optionstr.c b/src/optionstr.c
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -437,25 +437,37 @@ wait_for_single_object(
+@@ -237,7 +237,7 @@ static void restore_console_color_rgb(vo
+ static int suppress_winsize = 1;	// don't fiddle with console
+ #endif
+ 
+-static char_u *exe_path = NULL;
++static WCHAR *exe_pathw = NULL;
+ 
+ static BOOL win8_or_later = FALSE;
+ 
+@@ -438,26 +438,45 @@ wait_for_single_object(
  # endif
  #endif
  
@@ -164,7 +166,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +    int		updated = FALSE;
 +    static int	enc_prev = -1;
 +
-+    if (exe_name == NULL || enc_prev != enc_codepage)
++    if (exe_name == NULL || exe_pathw == NULL || enc_prev != enc_codepage)
      {
  	// store the name of the executable, may be used for $VIM
 -	GetModuleFileName(NULL, temp, MAX_ENV_PATH_LEN - 1);
@@ -174,46 +176,65 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -
 -    if (exe_path == NULL && exe_name != NULL)
 -    {
+-	exe_path = vim_strnsave(exe_name, gettail_sep(exe_name) - exe_name);
 +	GetModuleFileNameW(NULL, buf, MAX_PATH);
 +	if (*buf != NUL)
 +	{
++	    WCHAR	*wp;
 +	    if (enc_codepage == -1)
 +		enc_codepage = GetACP();
 +	    exe_name = utf16_to_enc(buf, NULL);
 +	    enc_prev = enc_codepage;
++
++	    wp = wcsrchr(buf, '\\');
++	    if (wp != NULL)
++		*wp = NUL;
++	    if (exe_pathw != NULL)
++		vim_free(exe_pathw);
++	    exe_pathw = _wcsdup(buf);
 +	    updated = TRUE;
 +OutputDebugString(exe_name);
 +	}
 +    }
 +
-+    if ((exe_path == NULL || updated) && exe_name != NULL)
++    if (exe_pathw != NULL && updated)
 +    {
-+	if (exe_path != NULL)
-+	    vim_free(exe_path);
- 	exe_path = vim_strnsave(exe_name, gettail_sep(exe_name) - exe_name);
++	char_u	*exe_path = utf16_to_enc(exe_pathw, NULL);
++
  	if (exe_path != NULL)
  	{
-@@ -510,7 +522,7 @@ vimLoadLib(char *name)
+ 	    // Append our starting directory to $PATH, so that when doing
+@@ -477,6 +496,7 @@ get_exe_name(void)
+ 		STRCAT(temp, exe_path);
+ 		vim_setenv((char_u *)"PATH", (char_u *)temp);
+ 	    }
++	    vim_free(exe_path);
+ 	}
+     }
+ }
+@@ -514,9 +534,9 @@ vimLoadLib(char *name)
+ 
      // NOTE: Do not use mch_dirname() and mch_chdir() here, they may call
      // vimLoadLib() recursively, which causes a stack overflow.
-     if (exe_path == NULL)
+-    if (exe_path == NULL)
 -	get_exe_name();
+-    if (exe_path != NULL)
++    if (exe_pathw == NULL)
 +	mch_get_exe_name();
-     if (exe_path != NULL)
++    if (exe_pathw != NULL)
      {
  	WCHAR old_dirw[MAXPATHL];
-@@ -520,7 +532,9 @@ vimLoadLib(char *name)
+ 
+@@ -525,7 +545,7 @@ vimLoadLib(char *name)
  	    // Change directory to where the executable is, both to make
  	    // sure we find a .dll there and to avoid looking for a .dll
  	    // in the current directory.
 -	    SetCurrentDirectory((LPCSTR)exe_path);
-+	    WCHAR *wpath = enc_to_utf16(exe_path, NULL);
-+	    SetCurrentDirectoryW(wpath);
-+	    vim_free(wpath);
++	    SetCurrentDirectoryW(exe_pathw);
  	    dll = LoadLibrary(name);
  	    SetCurrentDirectoryW(old_dirw);
  	    return dll;
-@@ -2956,7 +2970,7 @@ mch_check_win(
+@@ -2962,7 +2982,7 @@ mch_check_win(
      int argc UNUSED,
      char **argv UNUSED)
  {
