@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  4166b3b9d61e2397195c1b14bae89b519ef3f839
+# Parent  966a55f59e8255979ed20950b33a89fe3ac9fa22
 
 diff --git a/src/locale.c b/src/locale.c
 --- a/src/locale.c
@@ -146,7 +146,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  static BOOL win8_or_later = FALSE;
  
-@@ -438,26 +438,45 @@ wait_for_single_object(
+@@ -438,26 +438,47 @@ wait_for_single_object(
  # endif
  #endif
  
@@ -183,6 +183,8 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +	    WCHAR	*wp;
 +	    if (enc_codepage == -1)
 +		enc_codepage = GetACP();
++	    if (exe_name != NULL)
++		vim_free(exe_name);
 +	    exe_name = utf16_to_enc(buf, NULL);
 +	    enc_prev = enc_codepage;
 +
@@ -204,7 +206,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (exe_path != NULL)
  	{
  	    // Append our starting directory to $PATH, so that when doing
-@@ -477,6 +496,7 @@ get_exe_name(void)
+@@ -477,6 +498,7 @@ get_exe_name(void)
  		STRCAT(temp, exe_path);
  		vim_setenv((char_u *)"PATH", (char_u *)temp);
  	    }
@@ -212,7 +214,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  }
-@@ -514,9 +534,9 @@ vimLoadLib(char *name)
+@@ -514,9 +536,9 @@ vimLoadLib(char *name)
  
      // NOTE: Do not use mch_dirname() and mch_chdir() here, they may call
      // vimLoadLib() recursively, which causes a stack overflow.
@@ -225,7 +227,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	WCHAR old_dirw[MAXPATHL];
  
-@@ -525,7 +545,7 @@ vimLoadLib(char *name)
+@@ -525,7 +547,7 @@ vimLoadLib(char *name)
  	    // Change directory to where the executable is, both to make
  	    // sure we find a .dll there and to avoid looking for a .dll
  	    // in the current directory.
@@ -234,7 +236,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    dll = LoadLibrary(name);
  	    SetCurrentDirectoryW(old_dirw);
  	    return dll;
-@@ -2962,7 +2982,7 @@ mch_check_win(
+@@ -2962,7 +2984,7 @@ mch_check_win(
      int argc UNUSED,
      char **argv UNUSED)
  {
