@@ -1,0 +1,31 @@
+# HG changeset patch
+# Parent  7bc065c6fdbbb5b222907f8db8ed0ec05ee7eeb5
+
+diff --git a/src/vim.manifest b/src/vim.manifest
+--- a/src/vim.manifest
++++ b/src/vim.manifest
+@@ -5,7 +5,7 @@
+   Do ":help uganda"  in Vim to read copying and usage conditions.
+   Do ":help credits" in Vim to see a list of people who contributed.
+ -->
+-<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" >
++<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+   <assemblyIdentity
+     processorArchitecture="*"
+     version="8.2.0.0"
+@@ -36,11 +36,11 @@
+     </security>
+   </trustInfo>
+   <!-- Vista High DPI aware -->
+-  <asmv3:application>
+-    <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
++  <application xmlns="urn:schemas-microsoft-com:asm.v3">
++    <windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
+       <dpiAware>true</dpiAware>
+-    </asmv3:windowsSettings>
+-  </asmv3:application>
++    </windowsSettings>
++  </application>
+   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+     <application>
+       <!--The ID below indicates application support for Windows Vista -->
