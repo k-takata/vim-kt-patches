@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  5dee98a1aa1554d3a9ffa1e390e37a5e8d770ad2
+# Parent  45863c540bb68da9d0349e30178b6dd42ab5fe3c
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6568,9 +6568,12 @@ A jump table for the options with a shor
+@@ -6627,9 +6627,12 @@ A jump table for the options with a shor
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
@@ -45,7 +45,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -847,10 +847,11 @@ set_init_3(void)
+@@ -919,10 +919,11 @@ set_init_3(void)
  	    if (do_sp)
  	    {
  #  ifdef MSWIN
@@ -60,7 +60,7 @@ diff --git a/src/option.c b/src/option.c
  		options[idx_sp].def_val[VI_DEFAULT] = p_sp;
  	    }
  # endif
-@@ -887,10 +888,11 @@ set_init_3(void)
+@@ -962,10 +963,11 @@ set_init_3(void)
  		if (do_sp)
  		{
  #  ifdef MSWIN
@@ -75,3 +75,39 @@ diff --git a/src/option.c b/src/option.c
  		    options[idx_sp].def_val[VI_DEFAULT] = p_sp;
  		}
  # endif
+diff --git a/src/testdir/test_shell.vim b/src/testdir/test_shell.vim
+--- a/src/testdir/test_shell.vim
++++ b/src/testdir/test_shell.vim
+@@ -22,20 +22,20 @@ func Test_shell_options()
+           \ ['tcsh', '-c', '|& tee', '', '>&', '', '']]
+   endif
+   if has('win32')
+-    let shells += [['cmd', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', ''],
+-          \ ['cmd.exe', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '('],
++    let shells += [['cmd', '/c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', ''],
++          \ ['cmd.exe', '/c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '('],
+           \ ['powershell.exe', '-c', '>', '', '>', '"&|<>()@^', '"'],
+           \ ['powershell', '-c', '>', '', '>', '"&|<>()@^', '"'],
+-          \ ['sh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['ksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['mksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['pdksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['zsh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['zsh-beta.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['bash.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['dash.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['csh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"'],
+-          \ ['tcsh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"']]
++          \ ['sh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['ksh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['mksh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['pdksh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['zsh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['zsh-beta.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['bash.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['dash.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++          \ ['csh.exe', '-c', '|& tee', '', '>&', '"&|<>()@^', '"'],
++          \ ['tcsh.exe', '-c', '|& tee', '', '>&', '"&|<>()@^', '"']]
+   endif
+ 
+   " start a new Vim instance with 'shell' set to each of the supported shells
