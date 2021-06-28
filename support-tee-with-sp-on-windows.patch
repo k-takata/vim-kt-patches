@@ -1,22 +1,25 @@
 # HG changeset patch
-# Parent  45863c540bb68da9d0349e30178b6dd42ab5fe3c
+# Parent  1bc7646598ff382e222dbc0dac7d396797e0f7ff
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6627,9 +6627,12 @@ A jump table for the options with a shor
+@@ -6629,10 +6629,14 @@ A jump table for the options with a shor
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
--	For the Amiga the default is ">".  For MS-Windows the default is
--	">%s 2>&1".  The output is directly saved in a file and not echoed to
--	the screen.
+-	For the Amiga the default is ">".  For MS-Windows using powershell the
+-	default is "2>&1 | Out-File -Encoding default", otherwise the default
+-	is ">%s 2>&1".  The output is directly saved in a file and not echoed
+-	to the screen.
 +	For the Amiga the default is ">".  The output is directly saved in a
 +	file and not echoed to the screen.
-+	For MS-Windows the default is ">%s 2>&1".  The output including stderr
-+	is directly saved in a file and not echoed to the screen.  If "tee"
-+	command is found in the PATH the default becomes "2>&1| tee".  The
-+	output is also echoed to the screen.
++	For MS-Windows using powershell the default is "2>&1 | Out-File
++	-Encoding default", otherwise if "tee" command is not found in the
++	PATH the default is ">%s 2>&1".  The output is directly saved in a
++	file and not echoed to the screen.  If "tee" command is found in the
++	PATH the default becomes "2>&1| tee" or "|& tee" depends on the
++	'shell' option.  The output is also echoed to the screen.
  	For Unix the default is "| tee".  The stdout of the compiler is saved
  	in a file and echoed to the screen.  If the 'shell' option is "csh" or
  	"tcsh" after initializations, the default becomes "|& tee".  If the
@@ -60,7 +63,7 @@ diff --git a/src/option.c b/src/option.c
  		options[idx_sp].def_val[VI_DEFAULT] = p_sp;
  	    }
  # endif
-@@ -962,10 +963,11 @@ set_init_3(void)
+@@ -983,10 +984,11 @@ set_init_3(void)
  		if (do_sp)
  		{
  #  ifdef MSWIN
@@ -78,7 +81,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/testdir/test_shell.vim b/src/testdir/test_shell.vim
 --- a/src/testdir/test_shell.vim
 +++ b/src/testdir/test_shell.vim
-@@ -22,20 +22,20 @@ func Test_shell_options()
+@@ -22,22 +22,22 @@ func Test_shell_options()
            \ ['tcsh', '-c', '|& tee', '', '>&', '', '']]
    endif
    if has('win32')
@@ -86,8 +89,10 @@ diff --git a/src/testdir/test_shell.vim b/src/testdir/test_shell.vim
 -          \ ['cmd.exe', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '('],
 +    let shells += [['cmd', '/c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', ''],
 +          \ ['cmd.exe', '/c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '('],
-           \ ['powershell.exe', '-c', '>', '', '>', '"&|<>()@^', '"'],
-           \ ['powershell', '-c', '>', '', '>', '"&|<>()@^', '"'],
+           \ ['powershell.exe', '-Command', '2>&1 | Out-File -Encoding default',
+           \           '', '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
+           \ ['powershell', '-Command', '2>&1 | Out-File -Encoding default', '',
+           \               '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
 -          \ ['sh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
 -          \ ['ksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
 -          \ ['mksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
