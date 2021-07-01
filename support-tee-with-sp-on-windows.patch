@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  4095d88798a8d0fc6678e193a5568a3444bd3d3a
+# Parent  863765fb753c8161fd1554aa760a7de19e4dd50e
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
@@ -167,8 +167,8 @@ diff --git a/src/testdir/test_shell.vim b/src/testdir/test_shell.vim
 +            \ ['zsh-beta.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
 +            \ ['bash.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
 +            \ ['dash.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
-+            \ ['csh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"'],
-+            \ ['tcsh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"']]
++            \ ['csh.exe', '-c', '|& tee', '', '>&', '"&|<>()@^', '"'],
++            \ ['tcsh.exe', '-c', '|& tee', '', '>&', '"&|<>()@^', '"']]
 +    else
 +      let shells += [['cmd', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', ''],
 +            \ ['cmd.exe', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '('],
