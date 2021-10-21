@@ -1,11 +1,11 @@
 # HG changeset patch
-# Parent  0e04fb8d83efdd733ff8e44a88177f3565b7e490
+# Parent  a8376b89aaf6d0f698f092d89816363900f6b356
 
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 new file mode 100644
 --- /dev/null
 +++ b/src/msvc-latest.bat
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,46 @@
 +@echo off
 +rem To be used on MS-Windows for Visual C++ 2017 or later
 +rem See INSTALLpc.txt for information.
@@ -27,14 +27,28 @@ new file mode 100644
 +	set VSWHERE=vswhere
 +)
 +
++rem Search Visual Studio Community, Professional or above.
 +for /f "usebackq tokens=*" %%i in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
 +	set InstallDir=%%i
 +)
++if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
++	call "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
++	goto done
++)
 +
++rem Search Visual Studio 2017 Express.
++rem (Visual Studio 2017 Express uses different component IDs.)
++for /f "usebackq tokens=*" %%i in (`"%VSWHERE%" -latest -products Microsoft.VisualStudio.Product.WDExpress -property installationPath`) do (
++	set InstallDir=%%i
++)
 +if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
 +	call "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
 +) else (
 +	echo Error: vcvarsall.bat not found.
++	rem Set ERRORLEVEL to 1.
++	call
 +)
++
++:done
 +set VSWHERE=
 +set InstallDir=
