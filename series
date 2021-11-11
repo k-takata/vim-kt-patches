@@ -29,4 +29,5 @@ add-msvc-latest-bat.patch
 add-testing-option.patch
 wip-win32-vimdir-encoding.patch #+wip
 wip-win32-permonitorv2.patch #+wip
+fix-python310-errmsg.patch
 fix-config_cache-removal.patch #+rejected
