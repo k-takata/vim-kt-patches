@@ -1,6 +1,67 @@
 # HG changeset patch
 # Parent  3bdf5c0479f698ad7cd4c972f0204a92f7ab2a2f
 
+diff --git a/src/gui.c b/src/gui.c
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -1433,10 +1433,6 @@ gui_position_components(int total_width 
+     if (gui.menu_is_active)
+ 	text_area_y += gui.menu_height;
+ #endif
+-#if defined(FEAT_TOOLBAR) && defined(FEAT_GUI_MSWIN)
+-    if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
+-	text_area_y = TOOLBAR_BUTTON_HEIGHT + TOOLBAR_BORDER_HEIGHT;
+-#endif
+ 
+ # if defined(FEAT_GUI_TABLINE) && (defined(FEAT_GUI_MSWIN) \
+ 	|| defined(FEAT_GUI_MOTIF))
+@@ -1445,7 +1441,7 @@ gui_position_components(int total_width 
+ #endif
+ 
+ #if defined(FEAT_TOOLBAR) && (defined(FEAT_GUI_MOTIF) || defined(FEAT_GUI_ATHENA) \
+-	|| defined(FEAT_GUI_HAIKU))
++	|| defined(FEAT_GUI_HAIKU) || defined(FEAT_GUI_MSWIN))
+     if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
+     {
+ # if defined(FEAT_GUI_ATHENA) || defined(FEAT_GUI_HAIKU)
+@@ -1529,11 +1525,7 @@ gui_get_base_height(void)
+ # endif
+ # ifdef FEAT_TOOLBAR
+     if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
+-#  if defined(FEAT_GUI_MSWIN) && defined(FEAT_TOOLBAR)
+-	base_height += (TOOLBAR_BUTTON_HEIGHT + TOOLBAR_BORDER_HEIGHT);
+-#  else
+ 	base_height += gui.toolbar_height;
+-#  endif
+ # endif
+ # if defined(FEAT_GUI_TABLINE) && (defined(FEAT_GUI_MSWIN) \
+ 	|| defined(FEAT_GUI_MOTIF) || defined(FEAT_GUI_HAIKU))
+@@ -4342,13 +4334,7 @@ gui_update_scrollbars(
+ #if defined(FEAT_TOOLBAR) && (defined(FEAT_GUI_MSWIN) || defined(FEAT_GUI_ATHENA) \
+ 	|| defined(FEAT_GUI_HAIKU))
+ 	    if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
+-# if defined(FEAT_GUI_ATHENA) || defined(FEAT_GUI_HAIKU)
+ 		y += gui.toolbar_height;
+-# else
+-#  ifdef FEAT_GUI_MSWIN
+-		y += TOOLBAR_BUTTON_HEIGHT + TOOLBAR_BORDER_HEIGHT;
+-#  endif
+-# endif
+ #endif
+ 
+ #if defined(FEAT_GUI_TABLINE) && defined(FEAT_GUI_MSWIN) || defined(FEAT_GUI_HAIKU)
+diff --git a/src/gui.h b/src/gui.h
+--- a/src/gui.h
++++ b/src/gui.h
+@@ -424,7 +424,7 @@ typedef struct Gui
+ #endif
+ 
+ #if defined(FEAT_TOOLBAR) \
+-	&& (defined(FEAT_GUI_ATHENA) || defined(FEAT_GUI_MOTIF) || defined(FEAT_GUI_HAIKU))
++	&& (defined(FEAT_GUI_ATHENA) || defined(FEAT_GUI_MOTIF) || defined(FEAT_GUI_HAIKU) || defined(FEAT_GUI_MSWIN))
+     int		toolbar_height;	    // height of the toolbar
+ #endif
+ 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
@@ -65,6 +126,24 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #if defined(FEAT_DIRECTX)
      static int
  directx_enabled(void)
+@@ -1348,7 +1395,7 @@ gui_mch_set_text_area_pos(int x, int y, 
+ #ifdef FEAT_TOOLBAR
+     if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
+ 	SendMessage(s_toolbarhwnd, WM_SIZE,
+-	      (WPARAM)0, (LPARAM)(w + ((long)(TOOLBAR_BUTTON_HEIGHT+8)<<16)));
++	      (WPARAM)0, MAKELPARAM(w, gui.toolbar_height));
+ #endif
+ #if defined(FEAT_GUI_TABLINE)
+     if (showing_tabline)
+@@ -1358,7 +1405,7 @@ gui_mch_set_text_area_pos(int x, int y, 
+ 
+ # ifdef FEAT_TOOLBAR
+ 	if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
+-	    top = TOOLBAR_BUTTON_HEIGHT + TOOLBAR_BORDER_HEIGHT;
++	    top = gui.toolbar_height;
+ # endif
+ 	GetClientRect(s_hwnd, &rect);
+ 	MoveWindow(s_tabhwnd, 0, top, rect.right, gui.tabline_height, TRUE);
 @@ -1414,8 +1461,8 @@ gui_mch_get_scrollbar_xpadding(void)
      GetWindowRect(s_textArea, &rcTxt);
      GetWindowRect(s_hwnd, &rcWnd);
@@ -162,7 +241,15 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  	    - gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -4419,6 +4471,7 @@ set_tabline_font(void)
+@@ -4178,6 +4230,7 @@ static int mouse_scroll_lines = 0;
+ static int	s_usenewlook;	    // emulate W95/NT4 non-bold dialogs
+ #ifdef FEAT_TOOLBAR
+ static void initialise_toolbar(void);
++static void update_toolbar_size(void);
+ static LRESULT CALLBACK toolbar_wndproc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+ static int get_toolbar_bitmap(vimmenu_T *menu);
+ #endif
+@@ -4419,6 +4472,7 @@ set_tabline_font(void)
      if (gui_w32_get_menu_font(&lfSysmenu) != OK)
  	return;
  
@@ -170,7 +257,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      font = CreateFontIndirectW(&lfSysmenu);
  
      SendMessage(s_tabhwnd, WM_SETFONT, (WPARAM)font, TRUE);
-@@ -4556,6 +4609,25 @@ destroy_sizing_tip(void)
+@@ -4556,6 +4610,28 @@ destroy_sizing_tip(void)
      return TRUE;
  }
  
@@ -184,6 +271,9 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    gui.scrollbar_width = pGetSystemMetricsForDpi(SM_CXVSCROLL, s_dpi);
 +    gui.scrollbar_height = pGetSystemMetricsForDpi(SM_CYHSCROLL, s_dpi);
 +
++#ifdef FEAT_TOOLBAR
++    update_toolbar_size();
++#endif
 +#if defined(FEAT_GUI_TABLINE) && defined(USE_SYSMENU_FONT)
 +    set_tabline_font();
 +#endif
@@ -196,7 +286,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  
      static LRESULT CALLBACK
-@@ -4916,6 +4988,9 @@ destroy_sizing_tip(void)
+@@ -4916,6 +4992,9 @@ destroy_sizing_tip(void)
  	    return MyWindowProc(hwnd, uMsg, wParam, lParam);
  	return 1L;
  #endif
@@ -206,7 +296,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      default:
  #ifdef MSWIN_FIND_REPLACE
-@@ -5269,6 +5344,37 @@ gui_mch_prepare(int *argc, char **argv)
+@@ -5269,6 +5348,37 @@ gui_mch_prepare(int *argc, char **argv)
  #endif
  }
  
@@ -244,7 +334,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Initialise the GUI.	Create all the windows, set up all the call-backs
   * etc.
-@@ -5295,8 +5401,10 @@ gui_mch_init(void)
+@@ -5295,12 +5405,17 @@ gui_mch_init(void)
      s_htearbitmap = LoadBitmap(g_hinst, "IDB_TEAROFF");
  #endif
  
@@ -257,7 +347,14 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
      gui.menu_height = 0;	// Windows takes care of this
  #endif
-@@ -5389,6 +5497,14 @@ gui_mch_init(void)
+     gui.border_width = 0;
++#ifdef FEAT_TOOLBAR
++    gui.toolbar_height = TOOLBAR_BUTTON_HEIGHT + TOOLBAR_BORDER_HEIGHT;
++#endif
+ 
+     s_brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+ 
+@@ -5389,6 +5504,14 @@ gui_mch_init(void)
      if (s_hwnd == NULL)
  	return FAIL;
  
@@ -272,7 +369,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef GLOBAL_IME
      global_ime_init(atom, s_hwnd);
  #endif
-@@ -5444,7 +5560,7 @@ gui_mch_init(void)
+@@ -5444,7 +5567,7 @@ gui_mch_init(void)
      DragAcceptFiles(s_hwnd, TRUE);
  
      // Do we need to bother with this?
@@ -281,7 +378,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      // Get background/foreground colors from the system
      gui_mch_def_colors();
-@@ -5586,11 +5702,11 @@ gui_mch_set_shellsize(
+@@ -5586,11 +5709,11 @@ gui_mch_set_shellsize(
      GetWindowRect(s_hwnd, &window_rect);
  
      // compute the size of the outside of the window
@@ -298,7 +395,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  			+ gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -6491,16 +6607,16 @@ gui_mch_get_screen_dimensions(int *scree
+@@ -6491,16 +6614,16 @@ gui_mch_get_screen_dimensions(int *scree
      get_work_area(&workarea_rect);
  
      *screen_w = workarea_rect.right - workarea_rect.left
@@ -320,7 +417,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  		- gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -7064,15 +7180,15 @@ gui_mch_dialog(
+@@ -7064,15 +7187,15 @@ gui_mch_dialog(
  	// Use our own window for the size, unless it's very small.
  	GetWindowRect(s_hwnd, &rect);
  	maxDialogWidth = rect.right - rect.left
@@ -341,7 +438,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (maxDialogHeight < DLG_MIN_MAX_HEIGHT)
  	    maxDialogHeight = DLG_MIN_MAX_HEIGHT;
      }
-@@ -7137,7 +7253,7 @@ gui_mch_dialog(
+@@ -7137,7 +7260,7 @@ gui_mch_dialog(
  
      // Add width of icon to dlgwidth, and some space
      dlgwidth = messageWidth + DLG_ICON_WIDTH + 3 * dlgPaddingX
@@ -350,7 +447,33 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (msgheight < DLG_ICON_HEIGHT)
  	msgheight = DLG_ICON_HEIGHT;
-@@ -8189,7 +8305,8 @@ tabline_wndproc(
+@@ -8031,6 +8154,25 @@ initialise_toolbar(void)
+     s_toolbar_wndproc = SubclassWindow(s_toolbarhwnd, toolbar_wndproc);
+ 
+     gui_mch_show_toolbar(vim_strchr(p_go, GO_TOOLBAR) != NULL);
++
++    update_toolbar_size();
++}
++
++    static void
++update_toolbar_size(void)
++{
++    int h, w;
++    TBMETRICS tbm = {sizeof(TBMETRICS)};
++    tbm.dwMask = TBMF_PAD | TBMF_BUTTONSPACING;
++    SendMessage(s_toolbarhwnd, TB_GETMETRICS, 0, (LPARAM)&tbm);
++    //TRACE("Pad: %d, %d", tbm.cxPad, tbm.cyPad);
++    //TRACE("ButtonSpacing: %d, %d", tbm.cxButtonSpacing, tbm.cyButtonSpacing);
++
++    h = (TOOLBAR_BUTTON_HEIGHT + tbm.cyPad * 2) * s_dpi / (int)pGetDpiForSystem();
++    w = (TOOLBAR_BUTTON_WIDTH + tbm.cxPad * 2) * s_dpi / (int)pGetDpiForSystem();
++    SendMessage(s_toolbarhwnd, TB_SETBUTTONSIZE, 0,
++	    MAKELPARAM(w, h));
++    gui.toolbar_height = h + 6;
+ }
+ 
+     static LRESULT CALLBACK
+@@ -8189,7 +8331,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
