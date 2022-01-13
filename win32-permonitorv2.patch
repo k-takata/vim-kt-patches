@@ -244,7 +244,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      default:
  #ifdef MSWIN_FIND_REPLACE
-@@ -5269,6 +5368,38 @@ gui_mch_prepare(int *argc, char **argv)
+@@ -5269,6 +5368,39 @@ gui_mch_prepare(int *argc, char **argv)
  #endif
  }
  
@@ -264,7 +264,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    pSetThreadDpiAwarenessContext = (void*)GetProcAddress(hUser32, "SetThreadDpiAwarenessContext");
 +    pSystemParametersInfoForDpiW = (void*)GetProcAddress(hUser32, "SystemParametersInfoForDpiW");
 +
-+    if (pSetThreadDpiAwarenessContext(
++    if (pSetThreadDpiAwarenessContext != NULL &&
++	    pSetThreadDpiAwarenessContext(
 +		DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
 +    {
 +	//TRACE("DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 enabled");
@@ -283,7 +284,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Initialise the GUI.	Create all the windows, set up all the call-backs
   * etc.
-@@ -5295,8 +5426,8 @@ gui_mch_init(void)
+@@ -5295,8 +5427,8 @@ gui_mch_init(void)
      s_htearbitmap = LoadBitmap(g_hinst, "IDB_TEAROFF");
  #endif
  
@@ -294,7 +295,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
      gui.menu_height = 0;	// Windows takes care of this
  #endif
-@@ -5304,6 +5435,8 @@ gui_mch_init(void)
+@@ -5304,6 +5436,8 @@ gui_mch_init(void)
  
      s_brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
  
@@ -303,7 +304,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      // First try using the wide version, so that we can use any title.
      // Otherwise only characters in the active codepage will work.
      if (GetClassInfoW(g_hinst, szVimWndClassW, &wndclassw) == 0)
-@@ -5389,6 +5522,14 @@ gui_mch_init(void)
+@@ -5389,6 +5523,14 @@ gui_mch_init(void)
      if (s_hwnd == NULL)
  	return FAIL;
  
@@ -318,7 +319,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef GLOBAL_IME
      global_ime_init(atom, s_hwnd);
  #endif
-@@ -5444,7 +5585,7 @@ gui_mch_init(void)
+@@ -5444,7 +5586,7 @@ gui_mch_init(void)
      DragAcceptFiles(s_hwnd, TRUE);
  
      // Do we need to bother with this?
@@ -327,7 +328,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      // Get background/foreground colors from the system
      gui_mch_def_colors();
-@@ -5586,11 +5727,11 @@ gui_mch_set_shellsize(
+@@ -5586,11 +5728,11 @@ gui_mch_set_shellsize(
      GetWindowRect(s_hwnd, &window_rect);
  
      // compute the size of the outside of the window
@@ -344,7 +345,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  			+ gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -6491,16 +6632,16 @@ gui_mch_get_screen_dimensions(int *scree
+@@ -6491,16 +6633,16 @@ gui_mch_get_screen_dimensions(int *scree
      get_work_area(&workarea_rect);
  
      *screen_w = workarea_rect.right - workarea_rect.left
@@ -366,7 +367,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  		- gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -7064,15 +7205,15 @@ gui_mch_dialog(
+@@ -7064,15 +7206,15 @@ gui_mch_dialog(
  	// Use our own window for the size, unless it's very small.
  	GetWindowRect(s_hwnd, &rect);
  	maxDialogWidth = rect.right - rect.left
@@ -387,7 +388,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (maxDialogHeight < DLG_MIN_MAX_HEIGHT)
  	    maxDialogHeight = DLG_MIN_MAX_HEIGHT;
      }
-@@ -7137,7 +7278,7 @@ gui_mch_dialog(
+@@ -7137,7 +7279,7 @@ gui_mch_dialog(
  
      // Add width of icon to dlgwidth, and some space
      dlgwidth = messageWidth + DLG_ICON_WIDTH + 3 * dlgPaddingX
@@ -396,7 +397,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (msgheight < DLG_ICON_HEIGHT)
  	msgheight = DLG_ICON_HEIGHT;
-@@ -8189,7 +8330,8 @@ tabline_wndproc(
+@@ -8189,7 +8331,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
