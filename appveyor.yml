@@ -46,8 +46,6 @@ for:
         - image: Ubuntu
           ARCH: x86_64
 
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
 #- cmd: |-
@@ -84,7 +82,6 @@ build_script:
     rem Show gvim version
     start /wait .\gvim -silent -register
     start /wait .\gvim -u NONE -c "redir @a | ver | 0put a | wq!" ver.txt
-    pause
     type ver.txt
     rem Print interface versions
     start /wait .\gvim -u NONE -S ..\.hg\patches\scripts\if_ver.vim -c quit
