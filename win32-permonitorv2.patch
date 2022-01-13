@@ -162,15 +162,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  	    - gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -4390,7 +4442,7 @@ gui_w32_get_menu_font(LOGFONTW *lf)
-     NONCLIENTMETRICSW nm;
- 
-     nm.cbSize = sizeof(NONCLIENTMETRICSW);
--    if (!SystemParametersInfoW(
-+    if (!SystemParametersInfo(
- 	    SPI_GETNONCLIENTMETRICS,
- 	    sizeof(NONCLIENTMETRICSW),
- 	    &nm,
 @@ -4419,6 +4471,7 @@ set_tabline_font(void)
      if (gui_w32_get_menu_font(&lfSysmenu) != OK)
  	return;
