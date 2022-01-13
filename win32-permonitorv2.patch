@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  3bdf5c0479f698ad7cd4c972f0204a92f7ab2a2f
+# Parent  7c3d23e139580b54ca2a6c22bd3875bbfad2a846
 
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
@@ -123,7 +123,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +}
 +
 +    static int
-+adjust_size_by_dpi(int size)
++adjust_fontsize_by_dpi(int size)
 +{
 +    return size * s_dpi / (int)pGetDpiForSystem();
 +}
@@ -176,7 +176,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (get_logfont(&lf, name, NULL, giveErrorIfMissing) == OK)
 +    {
-+	lf.lfHeight = adjust_size_by_dpi(lf.lfHeight);
++	lf.lfHeight = adjust_fontsize_by_dpi(lf.lfHeight);
  	font = get_font_handle(&lf);
 +    }
      if (font == NOFONT && giveErrorIfMissing)
@@ -214,7 +214,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      // Load the font
      if (get_logfont(&lf, font_name, NULL, TRUE) == OK)
 +    {
-+	lf.lfHeight = adjust_size_by_dpi(lf.lfHeight);
++	lf.lfHeight = adjust_fontsize_by_dpi(lf.lfHeight);
  	font = get_font_handle(&lf);
 +    }
      if (font == NOFONT)
@@ -258,7 +258,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (gui_w32_get_menu_font(&lfSysmenu) != OK)
  	return;
  
-+    lfSysmenu.lfHeight = adjust_size_by_dpi(lfSysmenu.lfHeight);
++    lfSysmenu.lfHeight = adjust_fontsize_by_dpi(lfSysmenu.lfHeight);
      font = CreateFontIndirectW(&lfSysmenu);
  
      SendMessage(s_tabhwnd, WM_SETFONT, (WPARAM)font, TRUE);
@@ -452,7 +452,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (msgheight < DLG_ICON_HEIGHT)
  	msgheight = DLG_ICON_HEIGHT;
-@@ -8031,6 +8159,25 @@ initialise_toolbar(void)
+@@ -8031,6 +8159,28 @@ initialise_toolbar(void)
      s_toolbar_wndproc = SubclassWindow(s_toolbarhwnd, toolbar_wndproc);
  
      gui_mch_show_toolbar(vim_strchr(p_go, GO_TOOLBAR) != NULL);
@@ -470,15 +470,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    //TRACE("Pad: %d, %d", tbm.cxPad, tbm.cyPad);
 +    //TRACE("ButtonSpacing: %d, %d", tbm.cxButtonSpacing, tbm.cyButtonSpacing);
 +
-+    h = adjust_size_by_dpi(TOOLBAR_BUTTON_HEIGHT + tbm.cyPad * 2);
-+    w = adjust_size_by_dpi(TOOLBAR_BUTTON_WIDTH + tbm.cxPad * 2);
-+    SendMessage(s_toolbarhwnd, TB_SETBUTTONSIZE, 0,
-+	    MAKELPARAM(w, h));
++    h = (TOOLBAR_BUTTON_HEIGHT + tbm.cyPad) * s_dpi / DEFAULT_DPI;
++    w = (TOOLBAR_BUTTON_WIDTH + tbm.cxPad) * s_dpi / DEFAULT_DPI;
++    //TRACE("button size: %d, %d", w, h);
++    SendMessage(s_toolbarhwnd, TB_SETBUTTONSIZE, 0, MAKELPARAM(w, h));
 +    gui.toolbar_height = h + 6;
++
++    //DWORD s = SendMessage(s_toolbarhwnd, TB_GETBUTTONSIZE, 0, 0);
++    //TRACE("actual button size: %d, %d", LOWORD(s), HIWORD(s));
  }
  
      static LRESULT CALLBACK
-@@ -8189,7 +8336,8 @@ tabline_wndproc(
+@@ -8189,7 +8339,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
