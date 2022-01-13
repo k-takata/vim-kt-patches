@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  7c3d23e139580b54ca2a6c22bd3875bbfad2a846
+# Parent  3e0050eb6a6399ed1aa15a9cc3effd267b6d3b1b
 
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
@@ -313,7 +313,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +
 +    hUser32 = GetModuleHandle("user32.dll");
 +    if (hUser32 == NULL)
-+	goto theend;
++	goto fail;
 +
 +    pGetDpiForSystem = (void*)GetProcAddress(hUser32, "GetDpiForSystem");
 +    pGetDpiForWindow = (void*)GetProcAddress(hUser32, "GetDpiForWindow");
@@ -329,7 +329,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	return;
 +    }
 +
-+theend:
++fail:
 +    // Disable PerMonitorV2 APIs.
 +    pGetDpiForSystem = stubGetDpiForSystem;
 +    pGetDpiForWindow = NULL;
