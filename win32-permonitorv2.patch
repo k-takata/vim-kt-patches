@@ -452,7 +452,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (msgheight < DLG_ICON_HEIGHT)
  	msgheight = DLG_ICON_HEIGHT;
-@@ -8031,6 +8159,28 @@ initialise_toolbar(void)
+@@ -8031,6 +8159,33 @@ initialise_toolbar(void)
      s_toolbar_wndproc = SubclassWindow(s_toolbarhwnd, toolbar_wndproc);
  
      gui_mch_show_toolbar(vim_strchr(p_go, GO_TOOLBAR) != NULL);
@@ -463,8 +463,9 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    static void
 +update_toolbar_size(void)
 +{
-+    int h, w;
-+    TBMETRICS tbm = {sizeof(TBMETRICS)};
++    int		h, w;
++    TBMETRICS	tbm = {sizeof(TBMETRICS)};
++
 +    tbm.dwMask = TBMF_PAD | TBMF_BUTTONSPACING;
 +    SendMessage(s_toolbarhwnd, TB_GETMETRICS, 0, (LPARAM)&tbm);
 +    //TRACE("Pad: %d, %d", tbm.cxPad, tbm.cyPad);
@@ -478,10 +479,14 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +
 +    //DWORD s = SendMessage(s_toolbarhwnd, TB_GETBUTTONSIZE, 0, 0);
 +    //TRACE("actual button size: %d, %d", LOWORD(s), HIWORD(s));
++
++    // TODO:
++    // Currently, this funcion only updates the size of toolbar buttons.
++    // It would be nice if the toolbar images are resized based on DPI.
  }
  
      static LRESULT CALLBACK
-@@ -8189,7 +8339,8 @@ tabline_wndproc(
+@@ -8189,7 +8344,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
