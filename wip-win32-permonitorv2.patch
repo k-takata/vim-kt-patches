@@ -371,15 +371,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (msgheight < DLG_ICON_HEIGHT)
  	msgheight = DLG_ICON_HEIGHT;
-@@ -7677,7 +7791,7 @@ gui_mch_tearoff(
-     vimmenu_T	*pmenu;
-     vimmenu_T	*top_menu;
-     vimmenu_T	*the_menu = menu;
--    HWND	hwnd;
-+    HWND	hwnd = s_hwnd;
-     HDC		hdc;
-     HFONT	font, oldFont;
-     int		col, spaceWidth, len;
 @@ -8189,7 +8303,7 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
