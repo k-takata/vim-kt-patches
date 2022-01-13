@@ -57,7 +57,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    else
 +    {
 +	HWND hwnd = GetDesktopWindow();
-+	HDC hdc = GetWindowDC();
++	HDC hdc = GetWindowDC(hwnd);
 +	int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
 +	ReleaseDC(hwnd, hdc);
 +	return dpi;
