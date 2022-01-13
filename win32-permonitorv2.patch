@@ -210,7 +210,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +{
 +    s_dpi = ydpi;
 +    s_in_dpichanged = TRUE;
-+    Trace("DPI: %d", ydpi);
++    //TRACE("DPI: %d", ydpi);
 +
 +    gui.scrollbar_width = vimGetSystemMetricsForDpi(SM_CXVSCROLL, s_dpi);
 +    gui.scrollbar_height = vimGetSystemMetricsForDpi(SM_CYHSCROLL, s_dpi);
@@ -280,7 +280,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    if (pSetThreadDpiAwarenessContext(
 +		DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
 +    {
-+	Trace("DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 enabled");
++	//TRACE("DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 enabled");
 +    }
 +
      // First try using the wide version, so that we can use any title.
@@ -295,7 +295,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	s_dpi = pGetDpiForWindow(s_hwnd);
 +	gui.scrollbar_width = vimGetSystemMetricsForDpi(SM_CXVSCROLL, s_dpi);
 +	gui.scrollbar_height = vimGetSystemMetricsForDpi(SM_CYHSCROLL, s_dpi);
-+	Trace("System DPI: %d, DPI: %d", vimGetDpiForSystem(), s_dpi);
++	//TRACE("System DPI: %d, DPI: %d", vimGetDpiForSystem(), s_dpi);
 +    }
 +
  #ifdef GLOBAL_IME
