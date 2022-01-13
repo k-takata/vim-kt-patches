@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  24a2445b995288b6d54c7764d94bbaaadab78a9a
+# Parent  92ff6885b6d0c1fa2d04b7eada4b5d152edc57a3
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
@@ -349,15 +349,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  		- gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -6940,7 +7064,7 @@ gui_mch_dialog(
-     char_u	*last_white;
-     char_u	*tbuffer;
-     RECT	rect;
--    HWND	hwnd;
-+    HWND	hwnd = s_hwnd;
-     HDC		hdc;
-     HFONT	font, oldFont;
-     TEXTMETRIC	fontInfo;
 @@ -7064,15 +7188,15 @@ gui_mch_dialog(
  	// Use our own window for the size, unless it's very small.
  	GetWindowRect(s_hwnd, &rect);
