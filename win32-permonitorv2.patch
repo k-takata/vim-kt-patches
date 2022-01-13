@@ -423,7 +423,16 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef FEAT_MENU
  		- gui_mswin_get_menu_height(FALSE)
  #endif
-@@ -7064,15 +7193,15 @@ gui_mch_dialog(
+@@ -6958,6 +7087,8 @@ gui_mch_dialog(
+ # endif
+     garray_T	ga;
+     int		l;
++    int		dlg_icon_width;
++    int		dlg_icon_height;
+ 
+ # ifndef NO_CONSOLE
+     // Don't output anything in silent mode ("ex -s")
+@@ -7064,15 +7195,15 @@ gui_mch_dialog(
  	// Use our own window for the size, unless it's very small.
  	GetWindowRect(s_hwnd, &rect);
  	maxDialogWidth = rect.right - rect.left
@@ -444,16 +453,55 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (maxDialogHeight < DLG_MIN_MAX_HEIGHT)
  	    maxDialogHeight = DLG_MIN_MAX_HEIGHT;
      }
-@@ -7137,7 +7266,7 @@ gui_mch_dialog(
+@@ -7135,12 +7266,15 @@ gui_mch_dialog(
  
+     messageWidth += 10;		// roundoff space
+ 
++    dlg_icon_width = DLG_ICON_WIDTH * pGetDpiForSystem() / DEFAULT_DPI;
++    dlg_icon_height = DLG_ICON_HEIGHT * pGetDpiForSystem() / DEFAULT_DPI;
++
      // Add width of icon to dlgwidth, and some space
-     dlgwidth = messageWidth + DLG_ICON_WIDTH + 3 * dlgPaddingX
+-    dlgwidth = messageWidth + DLG_ICON_WIDTH + 3 * dlgPaddingX
 -					     + GetSystemMetrics(SM_CXVSCROLL);
+-
+-    if (msgheight < DLG_ICON_HEIGHT)
+-	msgheight = DLG_ICON_HEIGHT;
++    dlgwidth = messageWidth + dlg_icon_width + 3 * dlgPaddingX
 +			     + pGetSystemMetricsForDpi(SM_CXVSCROLL, s_dpi);
++
++    if (msgheight < dlg_icon_height)
++	msgheight = dlg_icon_height;
  
-     if (msgheight < DLG_ICON_HEIGHT)
- 	msgheight = DLG_ICON_HEIGHT;
-@@ -8031,6 +8160,33 @@ initialise_toolbar(void)
+     /*
+      * Check button names.  A long one will make the dialog wider.
+@@ -7228,7 +7362,7 @@ gui_mch_dialog(
+ 	dlgheight = maxDialogHeight;
+ 	scroll_flag = WS_VSCROLL;
+ 	// Make sure scrollbar doesn't appear in the middle of the dialog
+-	messageWidth = dlgwidth - DLG_ICON_WIDTH - 3 * dlgPaddingX;
++	messageWidth = dlgwidth - dlg_icon_width - 3 * dlgPaddingX;
+     }
+ 
+     add_word(PixelToDialogY(dlgheight));
+@@ -7325,14 +7459,14 @@ gui_mch_dialog(
+     p = add_dialog_element(p, SS_ICON,
+ 	    PixelToDialogX(dlgPaddingX),
+ 	    PixelToDialogY(dlgPaddingY),
+-	    PixelToDialogX(DLG_ICON_WIDTH),
+-	    PixelToDialogY(DLG_ICON_HEIGHT),
++	    PixelToDialogX(dlg_icon_width),
++	    PixelToDialogY(dlg_icon_height),
+ 	    DLG_NONBUTTON_CONTROL + 0, (WORD)0x0082,
+ 	    dlg_icons[type]);
+ 
+     // Dialog message
+     p = add_dialog_element(p, ES_LEFT|scroll_flag|ES_MULTILINE|ES_READONLY,
+-	    PixelToDialogX(2 * dlgPaddingX + DLG_ICON_WIDTH),
++	    PixelToDialogX(2 * dlgPaddingX + dlg_icon_width),
+ 	    PixelToDialogY(dlgPaddingY),
+ 	    (WORD)(PixelToDialogX(messageWidth) + 1),
+ 	    PixelToDialogY(msgheight),
+@@ -8031,6 +8165,33 @@ initialise_toolbar(void)
      s_toolbar_wndproc = SubclassWindow(s_toolbarhwnd, toolbar_wndproc);
  
      gui_mch_show_toolbar(vim_strchr(p_go, GO_TOOLBAR) != NULL);
@@ -487,7 +535,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
      static LRESULT CALLBACK
-@@ -8189,7 +8345,8 @@ tabline_wndproc(
+@@ -8189,7 +8350,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
