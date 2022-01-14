@@ -464,7 +464,17 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (maxDialogHeight < DLG_MIN_MAX_HEIGHT)
  	    maxDialogHeight = DLG_MIN_MAX_HEIGHT;
      }
-@@ -7135,12 +7269,15 @@ gui_mch_dialog(
+@@ -7110,7 +7244,8 @@ gui_mch_dialog(
+ 		if (last_white != NULL)
+ 		{
+ 		    // break the line just after a space
+-		    ga.ga_len -= (int)(pend - (last_white + 1));
++		    if (pend > last_white)
++			ga.ga_len -= (int)(pend - (last_white + 1));
+ 		    pend = last_white + 1;
+ 		    last_white = NULL;
+ 		}
+@@ -7135,12 +7270,15 @@ gui_mch_dialog(
  
      messageWidth += 10;		// roundoff space
  
@@ -485,7 +495,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      /*
       * Check button names.  A long one will make the dialog wider.
-@@ -7228,7 +7365,7 @@ gui_mch_dialog(
+@@ -7228,7 +7366,7 @@ gui_mch_dialog(
  	dlgheight = maxDialogHeight;
  	scroll_flag = WS_VSCROLL;
  	// Make sure scrollbar doesn't appear in the middle of the dialog
@@ -494,7 +504,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      add_word(PixelToDialogY(dlgheight));
-@@ -7325,14 +7462,14 @@ gui_mch_dialog(
+@@ -7325,14 +7463,14 @@ gui_mch_dialog(
      p = add_dialog_element(p, SS_ICON,
  	    PixelToDialogX(dlgPaddingX),
  	    PixelToDialogY(dlgPaddingY),
@@ -512,7 +522,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    PixelToDialogY(dlgPaddingY),
  	    (WORD)(PixelToDialogX(messageWidth) + 1),
  	    PixelToDialogY(msgheight),
-@@ -8031,6 +8168,33 @@ initialise_toolbar(void)
+@@ -8031,6 +8169,33 @@ initialise_toolbar(void)
      s_toolbar_wndproc = SubclassWindow(s_toolbarhwnd, toolbar_wndproc);
  
      gui_mch_show_toolbar(vim_strchr(p_go, GO_TOOLBAR) != NULL);
@@ -546,7 +556,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
      static LRESULT CALLBACK
-@@ -8189,7 +8353,8 @@ tabline_wndproc(
+@@ -8189,7 +8354,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
