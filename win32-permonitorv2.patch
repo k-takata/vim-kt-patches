@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  3e0050eb6a6399ed1aa15a9cc3effd267b6d3b1b
+# Parent  887d7f41d88e2a065e0cdcc9523d08422d6368bd
 
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
@@ -101,6 +101,12 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +static int		s_dpi = DEFAULT_DPI;
 +static BOOL		s_in_dpichanged = FALSE;
 +
++static UINT (WINAPI *pGetDpiForSystem)(void) = NULL;
++static UINT (WINAPI *pGetDpiForWindow)(HWND hwnd) = NULL;
++static int (WINAPI *pGetSystemMetricsForDpi)(int, UINT) = NULL;
++//static INT (WINAPI *pGetWindowDpiAwarenessContext)(HWND hwnd) = NULL;
++static DPI_AWARENESS_CONTEXT (WINAPI *pSetThreadDpiAwarenessContext)(DPI_AWARENESS_CONTEXT dpiContext) = NULL;
++
 +    static UINT WINAPI
 +stubGetDpiForSystem(void)
 +{
@@ -116,12 +122,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +{
 +    return GetSystemMetrics(nIndex);
 +}
-+
-+static UINT (WINAPI *pGetDpiForSystem)(void) = stubGetDpiForSystem;
-+static UINT (WINAPI *pGetDpiForWindow)(HWND hwnd) = NULL;
-+static int (WINAPI *pGetSystemMetricsForDpi)(int, UINT) = stubGetSystemMetricsForDpi;
-+//static INT (WINAPI *pGetWindowDpiAwarenessContext)(HWND hwnd) = NULL;
-+static DPI_AWARENESS_CONTEXT (WINAPI *pSetThreadDpiAwarenessContext)(DPI_AWARENESS_CONTEXT dpiContext) = NULL;
 +
 +    static int
 +adjust_fontsize_by_dpi(int size)
@@ -432,7 +432,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  # ifndef NO_CONSOLE
      // Don't output anything in silent mode ("ex -s")
-@@ -7064,15 +7195,15 @@ gui_mch_dialog(
+@@ -6969,7 +7100,10 @@ gui_mch_dialog(
+ # endif
+ 
+     if (s_hwnd == NULL)
++    {
++	load_dpi_func();
+ 	get_dialog_font_metrics();
++    }
+ 
+     if ((type < 0) || (type > VIM_LAST_TYPE))
+ 	type = 0;
+@@ -7064,15 +7198,15 @@ gui_mch_dialog(
  	// Use our own window for the size, unless it's very small.
  	GetWindowRect(s_hwnd, &rect);
  	maxDialogWidth = rect.right - rect.left
@@ -453,7 +464,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (maxDialogHeight < DLG_MIN_MAX_HEIGHT)
  	    maxDialogHeight = DLG_MIN_MAX_HEIGHT;
      }
-@@ -7135,12 +7266,15 @@ gui_mch_dialog(
+@@ -7135,12 +7269,15 @@ gui_mch_dialog(
  
      messageWidth += 10;		// roundoff space
  
@@ -474,7 +485,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      /*
       * Check button names.  A long one will make the dialog wider.
-@@ -7228,7 +7362,7 @@ gui_mch_dialog(
+@@ -7228,7 +7365,7 @@ gui_mch_dialog(
  	dlgheight = maxDialogHeight;
  	scroll_flag = WS_VSCROLL;
  	// Make sure scrollbar doesn't appear in the middle of the dialog
@@ -483,7 +494,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      add_word(PixelToDialogY(dlgheight));
-@@ -7325,14 +7459,14 @@ gui_mch_dialog(
+@@ -7325,14 +7462,14 @@ gui_mch_dialog(
      p = add_dialog_element(p, SS_ICON,
  	    PixelToDialogX(dlgPaddingX),
  	    PixelToDialogY(dlgPaddingY),
@@ -501,7 +512,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    PixelToDialogY(dlgPaddingY),
  	    (WORD)(PixelToDialogX(messageWidth) + 1),
  	    PixelToDialogY(msgheight),
-@@ -8031,6 +8165,33 @@ initialise_toolbar(void)
+@@ -8031,6 +8168,33 @@ initialise_toolbar(void)
      s_toolbar_wndproc = SubclassWindow(s_toolbarhwnd, toolbar_wndproc);
  
      gui_mch_show_toolbar(vim_strchr(p_go, GO_TOOLBAR) != NULL);
@@ -535,7 +546,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
      static LRESULT CALLBACK
-@@ -8189,7 +8350,8 @@ tabline_wndproc(
+@@ -8189,7 +8353,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
