@@ -65,7 +65,16 @@ diff --git a/src/gui.h b/src/gui.h
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -230,6 +230,10 @@ gui_mch_set_rendering_options(char_u *s)
+@@ -40,6 +40,8 @@ static void directx_binddc(void);
+ 
+ #ifdef FEAT_MENU
+ static int gui_mswin_get_menu_height(int fix_window);
++#else
++# define gui_mswin_get_menu_height(fix_window)	0
+ #endif
+ 
+ #if defined(FEAT_RENDER_OPTIONS) || defined(PROTO)
+@@ -230,6 +232,10 @@ gui_mch_set_rendering_options(char_u *s)
  # define MK_XBUTTON2		0x0040
  #endif
  
@@ -76,7 +85,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef PROTO
  /*
   * Define a few things for generating prototypes.  This is just to avoid
-@@ -314,7 +318,7 @@ static int		s_busy_processing = FALSE;
+@@ -314,7 +320,7 @@ static int		s_busy_processing = FALSE;
  static int		destroying = FALSE;	// call DestroyWindow() ourselves
  
  #ifdef MSWIN_FIND_REPLACE
@@ -85,7 +94,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  static FINDREPLACEW	s_findrep_struct;
  static HWND		s_findrep_hwnd = NULL;
  static int		s_findrep_is_find;	// TRUE for find dialog, FALSE
-@@ -358,6 +362,61 @@ static int allow_scrollbar = FALSE;
+@@ -358,6 +364,61 @@ static int allow_scrollbar = FALSE;
  # define MyTranslateMessage(x) TranslateMessage(x)
  #endif
  
@@ -147,7 +156,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #if defined(FEAT_DIRECTX)
      static int
  directx_enabled(void)
-@@ -1348,7 +1407,7 @@ gui_mch_set_text_area_pos(int x, int y, 
+@@ -1348,7 +1409,7 @@ gui_mch_set_text_area_pos(int x, int y, 
  #ifdef FEAT_TOOLBAR
      if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
  	SendMessage(s_toolbarhwnd, WM_SIZE,
@@ -156,7 +165,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  #if defined(FEAT_GUI_TABLINE)
      if (showing_tabline)
-@@ -1358,7 +1417,7 @@ gui_mch_set_text_area_pos(int x, int y, 
+@@ -1358,7 +1419,7 @@ gui_mch_set_text_area_pos(int x, int y, 
  
  # ifdef FEAT_TOOLBAR
  	if (vim_strchr(p_go, GO_TOOLBAR) != NULL)
@@ -165,7 +174,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  # endif
  	GetClientRect(s_hwnd, &rect);
  	MoveWindow(s_tabhwnd, 0, top, rect.right, gui.tabline_height, TRUE);
-@@ -1414,8 +1473,8 @@ gui_mch_get_scrollbar_xpadding(void)
+@@ -1414,8 +1475,8 @@ gui_mch_get_scrollbar_xpadding(void)
      GetWindowRect(s_textArea, &rcTxt);
      GetWindowRect(s_hwnd, &rcWnd);
      xpad = rcWnd.right - rcTxt.right - gui.scrollbar_width
@@ -176,7 +185,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      return (xpad < 0) ? 0 : xpad;
  }
  
-@@ -1428,8 +1487,8 @@ gui_mch_get_scrollbar_ypadding(void)
+@@ -1428,8 +1489,8 @@ gui_mch_get_scrollbar_ypadding(void)
      GetWindowRect(s_textArea, &rcTxt);
      GetWindowRect(s_hwnd, &rcWnd);
      ypad = rcWnd.bottom - rcTxt.bottom - gui.scrollbar_height
@@ -187,7 +196,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      return (ypad < 0) ? 0 : ypad;
  }
  
-@@ -1467,6 +1526,13 @@ gui_mswin_find_scrollbar(HWND hwnd)
+@@ -1467,6 +1528,13 @@ gui_mswin_find_scrollbar(HWND hwnd)
      return NULL;
  }
  
@@ -201,7 +210,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Get the character size of a font.
   */
-@@ -1545,7 +1611,10 @@ gui_mch_get_font(
+@@ -1545,7 +1613,10 @@ gui_mch_get_font(
      GuiFont	font = NOFONT;
  
      if (get_logfont(&lf, name, NULL, giveErrorIfMissing) == OK)
@@ -212,7 +221,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (font == NOFONT && giveErrorIfMissing)
  	semsg(_(e_unknown_font_str), name);
      return font;
-@@ -2858,7 +2927,7 @@ gui_mch_show_popupmenu_at(vimmenu_T *men
+@@ -2858,14 +2929,12 @@ gui_mch_show_popupmenu_at(vimmenu_T *men
      int cx,
      int cy)
  {
@@ -221,7 +230,14 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      {
  	gui_resize_shell(cx, cy);
  
-@@ -2949,12 +3018,12 @@ gui_mswin_get_valid_dimensions(
+-#ifdef FEAT_MENU
+ 	// Menu bar may wrap differently now
+ 	gui_mswin_get_menu_height(TRUE);
+-#endif
+     }
+ }
+ 
+@@ -2949,16 +3018,13 @@ gui_mswin_get_valid_dimensions(
      int	    base_width, base_height;
  
      base_width = gui_get_base_width()
@@ -233,13 +249,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -	+ (GetSystemMetrics(SM_CYFRAME) +
 -	   GetSystemMetrics(SM_CXPADDEDBORDER)) * 2
 -	+ GetSystemMetrics(SM_CYCAPTION)
+-#ifdef FEAT_MENU
+-	+ gui_mswin_get_menu_height(FALSE)
+-#endif
+-	;
 +	+ (pGetSystemMetricsForDpi(SM_CYFRAME, s_dpi) +
 +	   pGetSystemMetricsForDpi(SM_CXPADDEDBORDER, s_dpi)) * 2
 +	+ pGetSystemMetricsForDpi(SM_CYCAPTION, s_dpi)
- #ifdef FEAT_MENU
- 	+ gui_mswin_get_menu_height(FALSE)
- #endif
-@@ -3316,7 +3385,10 @@ gui_mch_init_font(char_u *font_name, int
++	+ gui_mswin_get_menu_height(FALSE);
+     *cols = (w - base_width) / gui.char_width;
+     *rows = (h - base_height) / gui.char_height;
+     *valid_w = base_width + *cols * gui.char_width;
+@@ -3316,7 +3382,10 @@ gui_mch_init_font(char_u *font_name, int
  
      // Load the font
      if (get_logfont(&lf, font_name, NULL, TRUE) == OK)
@@ -250,7 +271,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (font == NOFONT)
  	return FAIL;
  
-@@ -3342,7 +3414,6 @@ gui_mch_init_font(char_u *font_name, int
+@@ -3342,7 +3411,6 @@ gui_mch_init_font(char_u *font_name, int
  	hl_set_font_name(p);
  
  	// When setting 'guifont' to "*" replace it with the actual font name.
@@ -258,7 +279,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (STRCMP(font_name, "*") == 0 && STRCMP(p_guifont, "*") == 0)
  	{
  	    vim_free(p_guifont);
-@@ -3428,12 +3499,12 @@ gui_mch_newfont(void)
+@@ -3428,26 +3496,19 @@ gui_mch_newfont(void)
      if (win_socket_id == 0)
      {
  	gui_resize_shell(rect.right - rect.left
@@ -270,13 +291,29 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -	    - (GetSystemMetrics(SM_CYFRAME) +
 -	       GetSystemMetrics(SM_CXPADDEDBORDER)) * 2
 -	    - GetSystemMetrics(SM_CYCAPTION)
+-#ifdef FEAT_MENU
+-	    - gui_mswin_get_menu_height(FALSE)
+-#endif
+-	);
 +	    - (pGetSystemMetricsForDpi(SM_CYFRAME, s_dpi) +
 +	       pGetSystemMetricsForDpi(SM_CXPADDEDBORDER, s_dpi)) * 2
 +	    - pGetSystemMetricsForDpi(SM_CYCAPTION, s_dpi)
- #ifdef FEAT_MENU
- 	    - gui_mswin_get_menu_height(FALSE)
- #endif
-@@ -4101,7 +4172,7 @@ typedef HRESULT (WINAPI* DLLGETVERSIONPR
++	    - gui_mswin_get_menu_height(FALSE));
+     }
+     else
+     {
+ 	// Inside another window, don't use the frame and border.
+ 	gui_resize_shell(rect.right - rect.left,
+-	    rect.bottom - rect.top
+-#ifdef FEAT_MENU
+-			- gui_mswin_get_menu_height(FALSE)
+-#endif
+-	);
++	    rect.bottom - rect.top - gui_mswin_get_menu_height(FALSE));
+     }
+ }
+ 
+@@ -4101,7 +4162,7 @@ typedef HRESULT (WINAPI* DLLGETVERSIONPR
  #if defined(FEAT_TOOLBAR) || defined(FEAT_GUI_TABLINE)
  // Older MSVC compilers don't have LPNMTTDISPINFO[AW] thus we need to define
  // it here if LPNMTTDISPINFO isn't defined.
@@ -285,7 +322,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  // _MSC_VER.
  # if !defined(LPNMTTDISPINFO) && defined(_MSC_VER)
  typedef struct tagNMTTDISPINFOA {
-@@ -4178,8 +4249,11 @@ static int mouse_scroll_lines = 0;
+@@ -4178,8 +4239,11 @@ static int mouse_scroll_lines = 0;
  static int	s_usenewlook;	    // emulate W95/NT4 non-bold dialogs
  #ifdef FEAT_TOOLBAR
  static void initialise_toolbar(void);
@@ -297,7 +334,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  
  #ifdef FEAT_GUI_TABLINE
-@@ -4419,6 +4493,7 @@ set_tabline_font(void)
+@@ -4419,6 +4483,7 @@ set_tabline_font(void)
      if (gui_w32_get_menu_font(&lfSysmenu) != OK)
  	return;
  
@@ -305,7 +342,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      font = CreateFontIndirectW(&lfSysmenu);
  
      SendMessage(s_tabhwnd, WM_SETFONT, (WPARAM)font, TRUE);
-@@ -4441,6 +4516,8 @@ set_tabline_font(void)
+@@ -4441,6 +4506,8 @@ set_tabline_font(void)
       */
      gui.tabline_height = tm.tmHeight + tm.tmInternalLeading + 7;
  }
@@ -314,7 +351,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  
  /*
-@@ -4452,10 +4529,8 @@ set_tabline_font(void)
+@@ -4452,10 +4519,8 @@ set_tabline_font(void)
      if (n == SPI_SETWHEELSCROLLLINES)
  	SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0,
  		&mouse_scroll_lines, 0);
@@ -325,7 +362,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      return 0;
  }
  
-@@ -4556,6 +4631,22 @@ destroy_sizing_tip(void)
+@@ -4556,6 +4621,24 @@ destroy_sizing_tip(void)
      return TRUE;
  }
  
@@ -339,16 +376,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    update_scrollbar_size();
 +    update_toolbar_size();
 +    set_tabline_font();
++
 +    gui_init_font(*p_guifont == NUL ? hl_get_font_name() : p_guifont, FALSE);
 +    gui_mswin_get_menu_height(FALSE);
 +    InvalidateRect(hwnd, NULL, TRUE);
++
 +    s_in_dpichanged = FALSE;
 +    return 0L;
 +}
  
  
      static LRESULT CALLBACK
-@@ -4916,6 +5007,9 @@ destroy_sizing_tip(void)
+@@ -4916,6 +4999,9 @@ destroy_sizing_tip(void)
  	    return MyWindowProc(hwnd, uMsg, wParam, lParam);
  	return 1L;
  #endif
@@ -358,7 +397,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      default:
  #ifdef MSWIN_FIND_REPLACE
-@@ -5269,6 +5363,37 @@ gui_mch_prepare(int *argc, char **argv)
+@@ -5269,6 +5355,37 @@ gui_mch_prepare(int *argc, char **argv)
  #endif
  }
  
@@ -396,7 +435,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Initialise the GUI.	Create all the windows, set up all the call-backs
   * etc.
-@@ -5295,12 +5420,18 @@ gui_mch_init(void)
+@@ -5295,12 +5412,18 @@ gui_mch_init(void)
      s_htearbitmap = LoadBitmap(g_hinst, "IDB_TEAROFF");
  #endif
  
@@ -404,7 +443,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -    gui.scrollbar_height = GetSystemMetrics(SM_CYHSCROLL);
 +    load_dpi_func();
 +
-+    s_dpi = pGetDpiForSystem(s_hwnd);
++    s_dpi = pGetDpiForSystem();
 +    update_scrollbar_size();
 +
  #ifdef FEAT_MENU
@@ -417,7 +456,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      s_brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
  
-@@ -5389,6 +5520,13 @@ gui_mch_init(void)
+@@ -5389,6 +5512,13 @@ gui_mch_init(void)
      if (s_hwnd == NULL)
  	return FAIL;
  
@@ -431,7 +470,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #ifdef GLOBAL_IME
      global_ime_init(atom, s_hwnd);
  #endif
-@@ -5444,7 +5582,7 @@ gui_mch_init(void)
+@@ -5444,7 +5574,7 @@ gui_mch_init(void)
      DragAcceptFiles(s_hwnd, TRUE);
  
      // Do we need to bother with this?
@@ -440,7 +479,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      // Get background/foreground colors from the system
      gui_mch_def_colors();
-@@ -5586,11 +5724,11 @@ gui_mch_set_shellsize(
+@@ -5586,15 +5716,12 @@ gui_mch_set_shellsize(
      GetWindowRect(s_hwnd, &window_rect);
  
      // compute the size of the outside of the window
@@ -449,15 +488,31 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -    win_height = height + (GetSystemMetrics(SM_CYFRAME) +
 -			   GetSystemMetrics(SM_CXPADDEDBORDER)) * 2
 -			+ GetSystemMetrics(SM_CYCAPTION)
+-#ifdef FEAT_MENU
+-			+ gui_mswin_get_menu_height(FALSE)
+-#endif
+-			;
 +    win_width = width + (pGetSystemMetricsForDpi(SM_CXFRAME, s_dpi) +
 +		     pGetSystemMetricsForDpi(SM_CXPADDEDBORDER, s_dpi)) * 2;
 +    win_height = height + (pGetSystemMetricsForDpi(SM_CYFRAME, s_dpi) +
 +		       pGetSystemMetricsForDpi(SM_CXPADDEDBORDER, s_dpi)) * 2
 +			+ pGetSystemMetricsForDpi(SM_CYCAPTION, s_dpi)
- #ifdef FEAT_MENU
- 			+ gui_mswin_get_menu_height(FALSE)
- #endif
-@@ -6491,16 +6629,16 @@ gui_mch_get_screen_dimensions(int *scree
++			+ gui_mswin_get_menu_height(FALSE);
+ 
+     // The following should take care of keeping Vim on the same monitor, no
+     // matter if the secondary monitor is left or right of the primary
+@@ -5621,10 +5748,8 @@ gui_mch_set_shellsize(
+     SetActiveWindow(s_hwnd);
+     SetFocus(s_hwnd);
+ 
+-#ifdef FEAT_MENU
+     // Menu may wrap differently now
+     gui_mswin_get_menu_height(!gui.starting);
+-#endif
+ }
+ 
+ 
+@@ -6491,20 +6616,17 @@ gui_mch_get_screen_dimensions(int *scree
      get_work_area(&workarea_rect);
  
      *screen_w = workarea_rect.right - workarea_rect.left
@@ -473,13 +528,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 -		- (GetSystemMetrics(SM_CYFRAME) +
 -		   GetSystemMetrics(SM_CXPADDEDBORDER)) * 2
 -		- GetSystemMetrics(SM_CYCAPTION)
+-#ifdef FEAT_MENU
+-		- gui_mswin_get_menu_height(FALSE)
+-#endif
+-		;
 +		- (pGetSystemMetricsForDpi(SM_CYFRAME, s_dpi) +
 +		   pGetSystemMetricsForDpi(SM_CXPADDEDBORDER, s_dpi)) * 2
 +		- pGetSystemMetricsForDpi(SM_CYCAPTION, s_dpi)
- #ifdef FEAT_MENU
- 		- gui_mswin_get_menu_height(FALSE)
- #endif
-@@ -6958,6 +7096,9 @@ gui_mch_dialog(
++		- gui_mswin_get_menu_height(FALSE);
+ }
+ 
+ 
+@@ -6958,6 +7080,9 @@ gui_mch_dialog(
  # endif
      garray_T	ga;
      int		l;
@@ -489,7 +549,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  # ifndef NO_CONSOLE
      // Don't output anything in silent mode ("ex -s")
-@@ -6969,7 +7110,13 @@ gui_mch_dialog(
+@@ -6969,7 +7094,13 @@ gui_mch_dialog(
  # endif
  
      if (s_hwnd == NULL)
@@ -503,7 +563,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if ((type < 0) || (type > VIM_LAST_TYPE))
  	type = 0;
-@@ -7027,7 +7174,7 @@ gui_mch_dialog(
+@@ -7027,7 +7158,7 @@ gui_mch_dialog(
      else
  # endif
      font = CreateFont(-DLG_FONT_POINT_SIZE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -512,7 +572,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (s_usenewlook)
      {
  	oldFont = SelectFont(hdc, font);
-@@ -7054,8 +7201,8 @@ gui_mch_dialog(
+@@ -7054,8 +7185,8 @@ gui_mch_dialog(
  	// We don't have a window, use the desktop area.
  	get_work_area(&workarea_rect);
  	maxDialogWidth = workarea_rect.right - workarea_rect.left - 100;
@@ -523,7 +583,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	// Leave some room for the taskbar.
  	maxDialogHeight = workarea_rect.bottom - workarea_rect.top - 150;
      }
-@@ -7064,17 +7211,17 @@ gui_mch_dialog(
+@@ -7064,17 +7195,17 @@ gui_mch_dialog(
  	// Use our own window for the size, unless it's very small.
  	GetWindowRect(s_hwnd, &rect);
  	maxDialogWidth = rect.right - rect.left
@@ -550,7 +610,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      // Set dlgwidth to width of message.
-@@ -7110,7 +7257,8 @@ gui_mch_dialog(
+@@ -7110,7 +7241,8 @@ gui_mch_dialog(
  		if (last_white != NULL)
  		{
  		    // break the line just after a space
@@ -560,7 +620,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  		    pend = last_white + 1;
  		    last_white = NULL;
  		}
-@@ -7135,12 +7283,15 @@ gui_mch_dialog(
+@@ -7135,12 +7267,15 @@ gui_mch_dialog(
  
      messageWidth += 10;		// roundoff space
  
@@ -581,7 +641,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      /*
       * Check button names.  A long one will make the dialog wider.
-@@ -7228,7 +7379,7 @@ gui_mch_dialog(
+@@ -7228,7 +7363,7 @@ gui_mch_dialog(
  	dlgheight = maxDialogHeight;
  	scroll_flag = WS_VSCROLL;
  	// Make sure scrollbar doesn't appear in the middle of the dialog
@@ -590,7 +650,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
  
      add_word(PixelToDialogY(dlgheight));
-@@ -7325,14 +7476,14 @@ gui_mch_dialog(
+@@ -7325,14 +7460,14 @@ gui_mch_dialog(
      p = add_dialog_element(p, SS_ICON,
  	    PixelToDialogX(dlgPaddingX),
  	    PixelToDialogY(dlgPaddingY),
@@ -608,7 +668,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    PixelToDialogY(dlgPaddingY),
  	    (WORD)(PixelToDialogX(messageWidth) + 1),
  	    PixelToDialogY(msgheight),
-@@ -7626,7 +7777,7 @@ get_dialog_font_metrics(void)
+@@ -7626,7 +7761,7 @@ get_dialog_font_metrics(void)
      else
  #endif
  	hfontTools = CreateFont(-DLG_FONT_POINT_SIZE, 0, 0, 0, 0, 0, 0, 0,
@@ -617,7 +677,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      if (hfontTools)
      {
-@@ -7732,7 +7883,7 @@ gui_mch_tearoff(
+@@ -7732,7 +7867,7 @@ gui_mch_tearoff(
      else
  # endif
      font = CreateFont(-DLG_FONT_POINT_SIZE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -626,7 +686,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (s_usenewlook)
  	oldFont = SelectFont(hdc, font);
      else
-@@ -8031,6 +8182,33 @@ initialise_toolbar(void)
+@@ -8031,6 +8166,33 @@ initialise_toolbar(void)
      s_toolbar_wndproc = SubclassWindow(s_toolbarhwnd, toolbar_wndproc);
  
      gui_mch_show_toolbar(vim_strchr(p_go, GO_TOOLBAR) != NULL);
@@ -660,7 +720,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
      static LRESULT CALLBACK
-@@ -8124,9 +8302,7 @@ initialise_tabline(void)
+@@ -8124,9 +8286,7 @@ initialise_tabline(void)
  
      gui.tabline_height = TABLINE_HEIGHT;
  
@@ -670,7 +730,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  }
  
  /*
-@@ -8143,7 +8319,7 @@ GetTabFromPoint(
+@@ -8143,7 +8303,7 @@ GetTabFromPoint(
      {
  	TCHITTESTINFO htinfo;
  	htinfo.pt = pt;
@@ -679,7 +739,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	if (s_tabhwnd == hWnd)
  	{
  	    int idx = TabCtrl_HitTest(s_tabhwnd, &htinfo);
-@@ -8189,7 +8365,8 @@ tabline_wndproc(
+@@ -8189,7 +8349,8 @@ tabline_wndproc(
  	    {
  		pt.x = GET_X_LPARAM(lParam);
  		pt.y = s_pt.y;
