@@ -1,12 +1,11 @@
 # HG changeset patch
-# Parent b310fc3abf0bd107728295980e4090a7573dea3d
-# Parent  10e8731bc2ec6e1016afc0d59b50aee60f0eba98
+# Parent  301bae6110f0aede397626d601991620dbf56932
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -699,6 +699,9 @@ A jump table for the options with a shor
+@@ -741,6 +741,9 @@ A jump table for the options with a shor
  	"single":	Use the same width as characters in US-ASCII.  This is
  			expected by most users.
  	"double":	Use twice the width of ASCII characters.
@@ -15,8 +14,8 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 +
  							*E834* *E835*
  	The value "double" cannot be used if 'listchars' or 'fillchars'
- 	contains a character that would be double width.
-@@ -726,6 +729,10 @@ A jump table for the options with a shor
+ 	contains a character that would be double width.  These errors may
+@@ -769,6 +772,10 @@ A jump table for the options with a shor
  	escape sequence to request cursor position report.  The response can
  	be found in |v:termu7resp|.
  
@@ -30,7 +29,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5071,6 +5071,59 @@ error:
+@@ -5221,6 +5221,59 @@ error:
  }
  #endif
  
@@ -93,8 +92,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -1547,6 +1547,27 @@ utf_char2cells(int c)
- 	{0x1f6f3, 0x1f6f3}
+@@ -1559,6 +1559,27 @@ utf_char2cells(int c)
+ #endif
      };
  
 +#ifdef USE_AMBIWIDTH_AUTO
@@ -151,7 +150,7 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -498,6 +498,13 @@ typedef unsigned int u8char_T;	// int is
+@@ -519,6 +519,13 @@ typedef unsigned int u8char_T;	// int is
  #endif
  
  /*
