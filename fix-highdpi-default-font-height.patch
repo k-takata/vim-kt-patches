@@ -4,15 +4,6 @@
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -2761,7 +2761,7 @@ static const LOGFONT s_lfDefault =
-  * with an explicit size has been set. This defaults the size to this value
-  * (-12 equates to roughly 9pt).
-  */
--int current_font_height = -12;		/* also used in gui_w48.c */
-+int current_font_height = -12;		/* also used in gui_w32.c */
- 
- /* Convert a string representing a point size into pixels. The string should
-  * be a positive decimal number, with an optional decimal point (eg, "12", or
 @@ -2911,7 +2911,29 @@ get_logfont(
  
      *lf = s_lfDefault;
