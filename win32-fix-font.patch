@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  b622b213936cd8ad15ea731fbc6d78f66b50c418
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -3398,7 +3398,7 @@ gui_mch_init_font(char_u *font_name, int
+ 	return FAIL;
+ 
+     if (font_name == NULL)
+-	font_name = (char_u *)lf.lfFaceName;
++	font_name = (char_u *)"";
+ #if defined(FEAT_MBYTE_IME) || defined(GLOBAL_IME)
+     norm_logfont = lf;
+ #endif

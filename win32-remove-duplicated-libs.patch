@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  c5d40aaa3c06de7858157b6496341c3da497d3c3
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -911,9 +911,8 @@ GUI_OBJ = \
+ 	$(OUTDIR)\gui_beval.obj \
+ 	$(OUTDIR)\gui_w32.obj
+ GUI_LIB = \
+-	gdi32.lib version.lib $(IME_LIB) \
+-	winspool.lib comctl32.lib advapi32.lib shell32.lib netapi32.lib \
+-	/machine:$(CPU)
++	version.lib $(IME_LIB) \
++	winspool.lib comctl32.lib
+ !else
+ SUBSYSTEM = console
+ CUI_INCL = iscygpty.h
