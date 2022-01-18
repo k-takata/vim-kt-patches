@@ -1,0 +1,228 @@
+# HG changeset patch
+# Parent  7d05a8436356b0d4b6df275fa9159875cd8c452f
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -669,7 +669,14 @@ DEFINES += -DFEAT_DIRECTX_COLOR_EMOJI
+ endif
+ 
+ ifeq ($(SODIUM),yes)
++ ifndef DYNAMIC_SODIUM
++DYNAMIC_SODIUM=yes
++ endif
++ ifeq ($(DYNAMIC_SODIUM),yes)
++DEFINES += -DDYNAMIC_SODIUM
++ else
+ SODIUMLIB = -lsodium
++ endif
+ endif
+ 
+ # Only allow XPM for a GUI build.
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -41,6 +41,7 @@
+ #	Sound support: SOUND=yes (default is yes)
+ #
+ #	Sodium support: SODIUM=[Path to Sodium directory]
++#	  DYNAMIC_SODIUM=yes (to load the Sodium DLL dynamically)
+ #	 Dynamic built with libsodium
+ #	 You need to install the msvc package from
+ #	 https://download.libsodium.org/libsodium/releases/
+@@ -383,6 +384,9 @@ SOUND = no
+ !ifndef SODIUM
+ SODIUM = no
+ !endif
++!ifndef DYNAMIC_SODIUM
++DYNAMIC_SODIUM = yes
++!endif
+ 
+ !if "$(SODIUM)" != "no"
+ ! if "$(CPU)" == "AMD64"
+@@ -396,8 +400,13 @@ SODIUM = no
+ 
+ !if "$(SODIUM)" != "no"
+ SOD_INC		= /I "$(SODIUM)\include"
++! if "$(DYNAMIC_SODIUM)" == "yes"
++SOD_DEFS	= -DHAVE_SODIUM -DDYNAMIC_SODIUM
++SOD_LIB		=
++! else
+ SOD_DEFS	= -DHAVE_SODIUM
+ SOD_LIB		= $(SOD_LIB)\libsodium.lib
++! endif
+ !endif
+ 
+ !ifndef NETBEANS
+diff --git a/src/buffer.c b/src/buffer.c
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -2270,7 +2270,7 @@ free_buf_options(
+ #ifdef FEAT_CRYPT
+ # ifdef FEAT_SODIUM
+     if (buf->b_p_key != NULL && (crypt_get_method_nr(buf) == CRYPT_M_SOD))
+-	sodium_munlock(buf->b_p_key, STRLEN(buf->b_p_key));
++	crypt_sodium_munlock(buf->b_p_key, STRLEN(buf->b_p_key));
+ # endif
+     clear_string_option(&buf->b_p_key);
+ #endif
+diff --git a/src/crypt.c b/src/crypt.c
+--- a/src/crypt.c
++++ b/src/crypt.c
+@@ -159,6 +159,108 @@ typedef struct {
+     crypto_secretstream_xchacha20poly1305_state
+ 		    state;
+ } sodium_state_T;
++
++
++# ifdef DYNAMIC_SODIUM
++#  define sodium_init	    load_sodium
++#  define sodium_free	    dll_sodium_free
++#  define sodium_malloc	    dll_sodium_malloc
++#  define sodium_memzero    dll_sodium_memzero
++#  define sodium_mlock	    dll_sodium_mlock
++#  define sodium_munlock    dll_sodium_munlock
++#  define crypto_secretstream_xchacha20poly1305_init_push \
++    dll_crypto_secretstream_xchacha20poly1305_init_push
++#  define crypto_secretstream_xchacha20poly1305_push \
++    dll_crypto_secretstream_xchacha20poly1305_push
++#  define crypto_secretstream_xchacha20poly1305_init_pull \
++    dll_crypto_secretstream_xchacha20poly1305_init_pull
++#  define crypto_secretstream_xchacha20poly1305_pull \
++    dll_crypto_secretstream_xchacha20poly1305_pull
++#  define crypto_pwhash	    dll_crypto_pwhash
++#  define randombytes_buf   dll_randombytes_buf
++
++static int (*dll_sodium_init)(void) = NULL;
++static void (*dll_sodium_free)(void *) = NULL;
++static void *(*dll_sodium_malloc)(const size_t) = NULL;
++static void (*dll_sodium_memzero)(void * const, const size_t) = NULL;
++static int (*dll_sodium_mlock)(void * const, const size_t) = NULL;
++static int (*dll_sodium_munlock)(void * const, const size_t) = NULL;
++static int (*dll_crypto_secretstream_xchacha20poly1305_init_push)
++   (crypto_secretstream_xchacha20poly1305_state *state,
++    unsigned char [],
++    const unsigned char []) = NULL;
++static int (*dll_crypto_secretstream_xchacha20poly1305_push)
++   (crypto_secretstream_xchacha20poly1305_state *state,
++    unsigned char *c, unsigned long long *clen_p,
++    const unsigned char *m, unsigned long long mlen,
++    const unsigned char *ad, unsigned long long adlen, unsigned char tag)
++    = NULL;
++static int (*dll_crypto_secretstream_xchacha20poly1305_init_pull)
++   (crypto_secretstream_xchacha20poly1305_state *state,
++    const unsigned char [],
++    const unsigned char []) = NULL;
++static int (*dll_crypto_secretstream_xchacha20poly1305_pull)
++   (crypto_secretstream_xchacha20poly1305_state *state,
++    unsigned char *m, unsigned long long *mlen_p, unsigned char *tag_p,
++    const unsigned char *c, unsigned long long clen,
++    const unsigned char *ad, unsigned long long adlen) = NULL;
++static int (*dll_crypto_pwhash)(unsigned char * const out,
++    unsigned long long outlen,
++    const char * const passwd, unsigned long long passwdlen,
++    const unsigned char * const salt,
++    unsigned long long opslimit, size_t memlimit, int alg)
++    = NULL;
++static void (*dll_randombytes_buf)(void * const buf, const size_t size);
++
++static struct {
++    const char *name;
++    FARPROC *ptr;
++} sodium_funcname_table[] = {
++    {"sodium_init", (FARPROC*)&dll_sodium_init},
++    {"sodium_free", (FARPROC*)&dll_sodium_free},
++    {"sodium_malloc", (FARPROC*)&dll_sodium_malloc},
++    {"sodium_memzero", (FARPROC*)&dll_sodium_memzero},
++    {"sodium_mlock", (FARPROC*)&dll_sodium_mlock},
++    {"sodium_munlock", (FARPROC*)&dll_sodium_munlock},
++    {"crypto_secretstream_xchacha20poly1305_init_push", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_init_push},
++    {"crypto_secretstream_xchacha20poly1305_push", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_push},
++    {"crypto_secretstream_xchacha20poly1305_init_pull", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_init_pull},
++    {"crypto_secretstream_xchacha20poly1305_pull", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_pull},
++    {"crypto_pwhash", (FARPROC*)&dll_crypto_pwhash},
++    {"randombytes_buf", (FARPROC*)&dll_randombytes_buf},
++    {NULL, NULL}
++};
++
++    static int
++load_sodium(void)
++{
++    static HANDLE hsodium = NULL;
++    int i;
++
++    if (hsodium != NULL)
++	return 0;
++
++    hsodium = vimLoadLib("libsodium.dll");
++    if (hsodium == NULL)
++    {
++	// TODO: Show error message.
++	return -1;
++    }
++
++    for (i = 0; sodium_funcname_table[i].ptr; ++i)
++    {
++	if ((*sodium_funcname_table[i].ptr = GetProcAddress(hsodium,
++			sodium_funcname_table[i].name)) == NULL)
++	{
++	    FreeLibrary(hsodium);
++	    hsodium = NULL;
++	    // TODO: Show error message.
++	    return -1;
++	}
++    }
++    return dll_sodium_init();
++}
++# endif
+ #endif
+ 
+ #define CRYPT_MAGIC_LEN	12	// cannot change
+@@ -990,4 +1092,24 @@ crypt_sodium_buffer_decode(
+ # endif
+ }
+ 
++# if defined(FEAT_SODIUM) || defined(PROTO)
++    int
++crypt_sodium_munlock(void *const addr, const size_t len)
++{
++# if DYNAMIC_SODIUM
++    // FIXME:
++    // The free_buf_options() function in buffer.c may call this without
++    // calling crypt_sodium_init().
++    load_sodium();
++# endif
++    return sodium_munlock(addr, len);
++}
++
++    void
++crypt_sodium_randombytes_buf(void *const buf, const size_t size)
++{
++    randombytes_buf(buf, size);
++}
++# endif
++
+ #endif // FEAT_CRYPT
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -436,7 +436,8 @@ ml_set_mfp_crypt(buf_T *buf)
+ 	}
+ #ifdef FEAT_SODIUM
+ 	else if (method_nr == CRYPT_M_SOD)
+-	    randombytes_buf(buf->b_ml.ml_mfp->mf_seed, MF_SEED_LEN);
++	    crypt_sodium_randombytes_buf(buf->b_ml.ml_mfp->mf_seed,
++							    MF_SEED_LEN);
+  #endif
+     }
+ }
+diff --git a/src/proto/crypt.pro b/src/proto/crypt.pro
+--- a/src/proto/crypt.pro
++++ b/src/proto/crypt.pro
+@@ -26,4 +26,6 @@ void crypt_append_msg(buf_T *buf);
+ int crypt_sodium_init(cryptstate_T *state, char_u *key, char_u *salt, int salt_len, char_u *seed, int seed_len);
+ long crypt_sodium_buffer_encode(cryptstate_T *state, char_u *from, size_t len, char_u **buf_out, int last);
+ long crypt_sodium_buffer_decode(cryptstate_T *state, char_u *from, size_t len, char_u **buf_out, int last);
++int crypt_sodium_munlock(void *const addr, const size_t len);
++void crypt_sodium_randombytes_buf(void *const buf, const size_t size);
+ /* vim: set ft=c : */
