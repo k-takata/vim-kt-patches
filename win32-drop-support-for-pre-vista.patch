@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  f3e9a761f3288750b83f4a1d208a88fe15821613
+# Parent  1443ecc46769cec87b8af635b6a5d536b5af6205
 
 diff --git a/README.md b/README.md
 --- a/README.md
 +++ b/README.md
-@@ -26,10 +26,10 @@ All commands are given with normal keybo
+@@ -28,10 +28,10 @@ All commands are given with normal keybo
  with ten fingers can work very fast.  Additionally, function keys can be
  mapped to commands by the user, and the mouse can be used.
  
@@ -131,7 +131,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  might still work, but these instructions might be outdated.
  
  If you need the executable to run on Windows 98 or ME, use the 2003 one
-@@ -825,12 +827,12 @@ config.h and Ruby's DLL name. Here are t
+@@ -824,12 +826,12 @@ config.h and Ruby's DLL name. Here are t
        nmake -f Make_mvc.mak
            RUBY=C:\Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
            RUBY_MSVCRT_NAME=msvcrt
@@ -146,7 +146,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
      When using this trick, you also need to set RUBY_MSVCRT_NAME to msvcrt
      which is used for the Ruby's DLL name.
  
-@@ -841,11 +843,11 @@ After you install RubyInstaller, just ty
+@@ -840,11 +842,11 @@ After you install RubyInstaller, just ty
  
      mingw32-make -f Make_ming.mak
          RUBY=C:/Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
@@ -163,7 +163,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -80,10 +80,9 @@ POSTSCRIPT=no
+@@ -86,10 +86,9 @@ POSTSCRIPT=no
  # Set to yes to enable OLE support.
  OLE=no
  
@@ -190,7 +190,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #
  # To build using other Windows compilers, see INSTALLpc.txt
  #
-@@ -124,13 +123,13 @@
+@@ -129,13 +128,13 @@
  #
  #	Optimization: OPTIMIZE=[SPACE, SPEED, MAXSPEED] (default is MAXSPEED)
  #
@@ -208,7 +208,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Supported versions depends on your target SDK, check SDKDDKVer.h
  #	See https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt
  #
-@@ -317,9 +316,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
+@@ -310,9 +309,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
  CPU = ix86
  !endif
  
@@ -220,7 +220,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
-@@ -520,29 +519,27 @@ OUTDIR=$(OBJDIR)
+@@ -534,29 +533,27 @@ OUTDIR=$(OBJDIR)
  
  ### Validate CPUNR
  !ifndef CPUNR
@@ -260,7 +260,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  CPUARG = /G6
  ! elseif "$(CPUNR)" == "sse"
  CPUARG = /G6 /arch:SSE
-@@ -557,7 +554,7 @@ CPUARG =
+@@ -571,7 +568,7 @@ CPUARG =
  ! endif
  !else
  # IA32/SSE/SSE2 are only supported on x86
@@ -269,36 +269,10 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  # VC<11 generates fp87 code by default
  !  if $(MSVC_MAJOR) < 11
  CPUARG =
-@@ -652,6 +649,7 @@ CFLAGS = $(CFLAGS) /analyze
- !endif
- 
- !ifdef NODEBUG
-+
- VIM = vim
- ! if "$(OPTIMIZE)" == "SPACE"
- OPTFLAG = /O1
-@@ -682,7 +680,9 @@ LIBC = msvcrt.lib
- LIBC = libcmt.lib
- CFLAGS = $(CFLAGS) /Zl /MT
- ! endif
-+
- !else  # DEBUG
-+
- VIM = vimd
- ! if ("$(CPU)" == "i386") || ("$(CPU)" == "ix86")
- DEBUGINFO = /ZI
-@@ -702,6 +702,7 @@ LIBC = $(LIBC) msvcrtd.lib
- LIBC = $(LIBC) libcmtd.lib
- CFLAGS = $(CFLAGS) /Zl /MTd
- ! endif
-+
- !endif # DEBUG
- 
- !if "$(CL)" == "/D_USING_V110_SDK71_"
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -246,27 +246,6 @@ static BOOL win8_or_later = FALSE;
+@@ -247,27 +247,6 @@ static BOOL win8_or_later = FALSE;
  #  define UChar uChar.UnicodeChar
  # endif
  
@@ -326,7 +300,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /*
   * Get version number including build number
   */
-@@ -7682,30 +7661,13 @@ vtp_flag_init(void)
+@@ -7889,30 +7868,13 @@ vtp_flag_init(void)
      static void
  vtp_init(void)
  {
@@ -359,7 +333,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      save_console_bg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_bg];
      save_console_fg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_fg];
      store_console_bg_rgb = save_console_bg_rgb;
-@@ -7930,7 +7892,7 @@ ctermtoxterm(
+@@ -8137,7 +8099,7 @@ ctermtoxterm(
  set_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -368,7 +342,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      guicolor_T	fg, bg;
      int		ctermfg, ctermbg;
  
-@@ -7950,8 +7912,7 @@ set_console_color_rgb(void)
+@@ -8157,8 +8119,7 @@ set_console_color_rgb(void)
      bg = (GetRValue(bg) << 16) | (GetGValue(bg) << 8) | GetBValue(bg);
  
      csbi.cbSize = sizeof(csbi);
@@ -378,7 +352,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      csbi.cbSize = sizeof(csbi);
      csbi.srWindow.Right += 1;
-@@ -7960,8 +7921,7 @@ set_console_color_rgb(void)
+@@ -8167,8 +8128,7 @@ set_console_color_rgb(void)
      store_console_fg_rgb = csbi.ColorTable[g_color_index_fg];
      csbi.ColorTable[g_color_index_bg] = (COLORREF)bg;
      csbi.ColorTable[g_color_index_fg] = (COLORREF)fg;
@@ -388,7 +362,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8017,22 +7977,20 @@ get_default_console_color(
+@@ -8224,22 +8184,20 @@ get_default_console_color(
  reset_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -414,7 +388,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8043,19 +8001,17 @@ reset_console_color_rgb(void)
+@@ -8250,19 +8208,17 @@ reset_console_color_rgb(void)
  restore_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
