@@ -34,7 +34,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  #endif
  
 +#ifdef USE_AMBIWIDTH_AUTO
-+#define CHARWIDE_CACHESIZE 0x20000
++# define CHARWIDE_CACHESIZE 0x20000
 +static GuiFont last_font = 0;
 +
 +    int
@@ -101,14 +101,14 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 +    {
 +	int cell;
 +
-+#ifdef FEAT_EVAL
++# ifdef FEAT_EVAL
 +	if (c >= 0x100)
 +	{
 +	    int n = cw_value(c);
 +	    if (n != 0)
 +		return n;
 +	}
-+#endif
++# endif
 +	/* This is required by screen.c implicitly. */
 +	if (c == 0)
 +	    return 1;
