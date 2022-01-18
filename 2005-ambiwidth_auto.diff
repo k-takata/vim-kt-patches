@@ -10,7 +10,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  			expected by most users.
  	"double":	Use twice the width of ASCII characters.
 +	"auto":		Use obtained width from system.
-+			{only for Win NT/2K systems, currently}
++			{only for MS-Windows, currently}
 +
  							*E834* *E835*
  	The value "double" cannot be used if 'listchars' or 'fillchars'
