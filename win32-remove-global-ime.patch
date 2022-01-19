@@ -1086,7 +1086,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 @@ -3399,13 +3357,9 @@ gui_mch_init_font(char_u *font_name, int
  
      if (font_name == NULL)
- 	font_name = (char_u *)"";
+ 	font_name = (char_u *)lf.lfFaceName;
 -#if defined(FEAT_MBYTE_IME) || defined(GLOBAL_IME)
 +#ifdef FEAT_MBYTE_IME
      norm_logfont = lf;

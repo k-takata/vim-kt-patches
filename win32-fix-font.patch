@@ -10,6 +10,6 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (font_name == NULL)
 -	font_name = (char_u *)lf.lfFaceName;
 +	font_name = (char_u *)"";
- #if defined(FEAT_MBYTE_IME) || defined(GLOBAL_IME)
+ #ifdef FEAT_MBYTE_IME
      norm_logfont = lf;
- #endif
+     sub_logfont = lf;
