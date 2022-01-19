@@ -31,4 +31,5 @@ wip-win32-vimdir-encoding.patch #+wip
 win32-fix-font.patch
 win32-sodium-dynamic.patch
 wip-win32-directwrite-charwidth-auto.patch #+wip
+win32-remove-global-ime.patch
 fix-config_cache-removal.patch #+rejected
