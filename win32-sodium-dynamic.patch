@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  7d05a8436356b0d4b6df275fa9159875cd8c452f
+# Parent  3a279bf889f7fbf5fd5ed3771d01d79528dd93fd
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -57,11 +57,14 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/buffer.c b/src/buffer.c
 --- a/src/buffer.c
 +++ b/src/buffer.c
-@@ -2270,7 +2270,7 @@ free_buf_options(
+@@ -2269,8 +2269,9 @@ free_buf_options(
+ #endif
  #ifdef FEAT_CRYPT
  # ifdef FEAT_SODIUM
-     if (buf->b_p_key != NULL && (crypt_get_method_nr(buf) == CRYPT_M_SOD))
+-    if (buf->b_p_key != NULL && (crypt_get_method_nr(buf) == CRYPT_M_SOD))
 -	sodium_munlock(buf->b_p_key, STRLEN(buf->b_p_key));
++    if ((buf->b_p_key != NULL) && (*buf->b_p_key != NUL) &&
++				(crypt_get_method_nr(buf) == CRYPT_M_SOD))
 +	crypt_sodium_munlock(buf->b_p_key, STRLEN(buf->b_p_key));
  # endif
      clear_string_option(&buf->b_p_key);
@@ -178,7 +181,7 @@ diff --git a/src/crypt.c b/src/crypt.c
  #endif
  
  #define CRYPT_MAGIC_LEN	12	// cannot change
-@@ -990,4 +1092,24 @@ crypt_sodium_buffer_decode(
+@@ -990,4 +1092,18 @@ crypt_sodium_buffer_decode(
  # endif
  }
  
@@ -186,12 +189,6 @@ diff --git a/src/crypt.c b/src/crypt.c
 +    int
 +crypt_sodium_munlock(void *const addr, const size_t len)
 +{
-+# if DYNAMIC_SODIUM
-+    // FIXME:
-+    // The free_buf_options() function in buffer.c may call this without
-+    // calling crypt_sodium_init().
-+    load_sodium();
-+# endif
 +    return sodium_munlock(addr, len);
 +}
 +
