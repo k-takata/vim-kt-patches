@@ -4,7 +4,7 @@
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4582,6 +4582,239 @@ destroy_sizing_tip(void)
+@@ -4582,6 +4582,237 @@ destroy_sizing_tip(void)
      return TRUE;
  }
  
@@ -58,29 +58,27 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    int		x, y;
 +
 +    result = FORWARD_WM_NCHITTEST(hwnd, xPos, yPos, DefWindowProcW);
-+    if (result == HTCLIENT)
-+    {
-+#ifdef FEAT_GUI_TABLINE
-+	if (gui_mch_showing_tabline())
-+	{
-+	    RECT rct;
-+
-+	    // If the cursor is on the GUI tabline, don't process this event
-+	    GetWindowRect(s_textArea, &rct);
-+	    if (yPos < rct.top)
-+		return result;
-+	}
-+#endif
-+	(void)gui_mch_get_winpos(&x, &y);
-+	xPos -= x;
-+
-+	if (xPos < 48) // <VN> TODO should use system metric?
-+	    return HTBOTTOMLEFT;
-+	else
-+	    return HTBOTTOMRIGHT;
-+    }
-+    else
++    if (result != HTCLIENT)
 +	return result;
++
++#ifdef FEAT_GUI_TABLINE
++    if (gui_mch_showing_tabline())
++    {
++	RECT rct;
++
++	// If the cursor is on the GUI tabline, don't process this event
++	GetWindowRect(s_textArea, &rct);
++	if (yPos < rct.top)
++	    return result;
++    }
++#endif
++    (void)gui_mch_get_winpos(&x, &y);
++    xPos -= x;
++
++    if (xPos < 48) // <VN> TODO should use system metric?
++	return HTBOTTOMLEFT;
++    else
++	return HTBOTTOMRIGHT;
 +}
 +
 +#if defined(FEAT_TOOLBAR) || defined(FEAT_GUI_TABLINE)
@@ -148,38 +146,38 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +			str = pMenu->strings[MENU_INDEX_TIP];
 +		}
 +# endif
-+		if (str != NULL)
++		if (str == NULL)
++		    break;
++
++		// Set the maximum width, this also enables using \n for
++		// line break.
++		SendMessage(hdr->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 500);
++
++		if (hdr->code == TTN_GETDISPINFOW)
 +		{
-+		    // Set the maximum width, this also enables using \n for
-+		    // line break.
-+		    SendMessage(hdr->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 500);
++		    LPNMTTDISPINFOW	lpdi = (LPNMTTDISPINFOW)hdr;
 +
-+		    if (hdr->code == TTN_GETDISPINFOW)
-+		    {
-+			LPNMTTDISPINFOW	lpdi = (LPNMTTDISPINFOW)hdr;
++		    tt_text = enc_to_utf16(str, NULL);
++		    lpdi->lpszText = tt_text;
++		    // can't show tooltip if failed
++		}
++		else
++		{
++		    LPNMTTDISPINFO	lpdi = (LPNMTTDISPINFO)hdr;
 +
-+			tt_text = enc_to_utf16(str, NULL);
-+			lpdi->lpszText = tt_text;
-+			// can't show tooltip if failed
-+		    }
++		    if (STRLEN(str) < sizeof(lpdi->szText)
++			    || ((tt_text = vim_strsave(str)) == NULL))
++			vim_strncpy((char_u *)lpdi->szText, str,
++				sizeof(lpdi->szText) - 1);
 +		    else
-+		    {
-+			LPNMTTDISPINFO	lpdi = (LPNMTTDISPINFO)hdr;
-+
-+			if (STRLEN(str) < sizeof(lpdi->szText)
-+				|| ((tt_text = vim_strsave(str)) == NULL))
-+			    vim_strncpy((char_u *)lpdi->szText, str,
-+				    sizeof(lpdi->szText) - 1);
-+			else
-+			    lpdi->lpszText = tt_text;
-+		    }
++			lpdi->lpszText = tt_text;
 +		}
 +	    }
 +	    break;
 +
 +# ifdef FEAT_GUI_TABLINE
 +	case TCN_SELCHANGE:
-+	    if (gui_mch_showing_tabline() && hdr->hwndFrom == s_tabhwnd)
++	    if (gui_mch_showing_tabline() && (hdr->hwndFrom == s_tabhwnd))
 +	    {
 +		send_tabline_event(TabCtrl_GetCurSel(s_tabhwnd) + 1);
 +		return 0L;
@@ -187,7 +185,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	    break;
 +
 +	case NM_RCLICK:
-+	    if (gui_mch_showing_tabline() && hdr->hwndFrom == s_tabhwnd)
++	    if (gui_mch_showing_tabline() && (hdr->hwndFrom == s_tabhwnd))
 +	    {
 +		show_tabline_popup_menu();
 +		return 0L;
@@ -244,7 +242,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      static LRESULT
  _OnDpiChanged(HWND hwnd, UINT xdpi, UINT ydpi, RECT *rc)
  {
-@@ -4650,46 +4883,11 @@ destroy_sizing_tip(void)
+@@ -4650,46 +4881,11 @@ destroy_sizing_tip(void)
  #ifdef FEAT_NETBEANS_INTG
  	HANDLE_MSG(hwnd, WM_WINDOWPOSCHANGED, _OnWindowPosChanged);
  #endif
@@ -295,7 +293,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      case WM_QUERYENDSESSION:	// System wants to go down.
  	gui_shell_closed();	// Will exit when no changed buffers.
-@@ -4758,200 +4956,13 @@ destroy_sizing_tip(void)
+@@ -4758,200 +4954,13 @@ destroy_sizing_tip(void)
  
  #if defined(FEAT_TOOLBAR) || defined(FEAT_GUI_TABLINE)
      case WM_NOTIFY:
@@ -501,7 +499,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  #ifdef FEAT_MBYTE_IME
      case WM_IME_NOTIFY:
-@@ -4973,7 +4984,7 @@ destroy_sizing_tip(void)
+@@ -4973,7 +4982,7 @@ destroy_sizing_tip(void)
  	if (uMsg == s_findrep_msg && s_findrep_msg != 0)
  	    _OnFindRepl();
  #endif
