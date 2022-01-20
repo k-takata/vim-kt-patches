@@ -20,7 +20,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	/*
 +	 * If the cursor is on the tabline, display the tab menu
 +	 */
-+	GetCursorPos((LPPOINT)&pt);
++	GetCursorPos(&pt);
 +	GetWindowRect(s_textArea, &rect);
 +	if (pt.y < rect.top)
 +	{
@@ -42,7 +42,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	POINT pt;
 +	RECT rect;
 +
-+	GetCursorPos((LPPOINT)&pt);
++	GetCursorPos(&pt);
 +	GetWindowRect(s_textArea, &rect);
 +	if (pt.y < rect.top)
 +	    send_tabline_menu_event(0, TABLINE_MENU_NEW);
