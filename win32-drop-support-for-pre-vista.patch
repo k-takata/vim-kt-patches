@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  1443ecc46769cec87b8af635b6a5d536b5af6205
+# Parent  4a886ba939577efad8681e7b079d70f6b57d7d68
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -12,8 +12,8 @@ diff --git a/README.md b/README.md
 -all flavours of UNIX.  Porting to other systems should not be very difficult.
 -Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000, Amiga DOS,
 -Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
-+Vim runs under MS-Windows (7, 8, 10), macOS, Haiku, VMS and almost all flavours
-+of UNIX.  Porting to other systems should not be very difficult.
++Vim runs under MS-Windows (7, 8, 10, 11), macOS, Haiku, VMS and almost all
++flavours of UNIX.  Porting to other systems should not be very difficult.
 +Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000/XP/Vista,
 +Amiga DOS, Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
  
@@ -27,11 +27,10 @@ diff --git a/README.txt b/README.txt
  mapped to commands by the user, and the mouse can be used.
  
 -Vim runs under MS-Windows (XP, Vista, 7, 8, 10), macOS, VMS and almost all
--flavours of UNIX.  Porting to other systems should not be very difficult.
++Vim runs under MS-Windows (7, 8, 10, 11), macOS, Haiku, VMS and almost all
+ flavours of UNIX.  Porting to other systems should not be very difficult.
 -Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000, Amiga DOS,
 -Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
-+Vim runs under MS-Windows (7, 8, 10), macOS, VMS and almost all flavours of
-+UNIX.  Porting to other systems should not be very difficult.
 +Older versions of Vim run on MS-DOS, MS-Windows 95/98/Me/NT/2000/XP/Vista,
 +Amiga DOS, Atari MiNT, BeOS, RISC OS and OS/2.  These are no longer maintained.
  
@@ -59,8 +58,8 @@ diff --git a/runtime/doc/os_win32.txt b/runtime/doc/os_win32.txt
  
 -The Win32 version of Vim works on Windows XP, Vista, 7, 8 and 10.  There are
 -both console and GUI versions.
-+The Win32 version of Vim works on Windows 7, 8 and 10.  There are both console
-+and GUI versions.
++The Win32 version of Vim works on Windows 7, 8, 10 and 11.  There are both
++console and GUI versions.
  
  The 32 bit version also runs on 64 bit MS-Windows systems.
  
@@ -72,7 +71,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  This document assumes that you are building Vim for Win32 or later (Windows
 -XP/2003/Vista/7/8/10).  There are also instructions for pre-XP systems, but
-+7/8/10).  There are also instructions for pre-Vista and pre-XP systems, but
++7/8/10/11).  There are also instructions for pre-Vista and pre-XP systems, but
  they might no longer work.
  
  The recommended way is to build a 32 bit Vim, also on 64 bit systems.  You can
@@ -179,18 +178,19 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1,7 +1,6 @@
+@@ -1,7 +1,7 @@
 -# Makefile for Vim on Win32 (Windows XP/2003/Vista/7/8/10) and Win64,
 -# using the Microsoft Visual C++ compilers. Known to work with VC10 (VS2010),
 -# VC11 (VS2012), VC12 (VS2013), VC14 (VS2015), VC14.1 (VS2017) and
 -# VC14.2 (VS2019).
-+# Makefile for Vim on Win32 (Windows 7/8/10) and Win64, using the Microsoft
++# Makefile for Vim on Win32 (Windows 7/8/10/11) and Win64, using the Microsoft
 +# Visual C++ compilers. Known to work with VC10 (VS2010), VC11 (VS2012), VC12
-+# (VS2013), VC14 (VS2015), VC14.1 (VS2017) and VC14.2 (VS2019).
++# (VS2013), VC14 (VS2015), VC14.1 (VS2017), VC14.2 (VS2019) and VC14.3
++# (VS2022).
  #
  # To build using other Windows compilers, see INSTALLpc.txt
  #
-@@ -129,13 +128,13 @@
+@@ -129,13 +129,13 @@
  #
  #	Optimization: OPTIMIZE=[SPACE, SPEED, MAXSPEED] (default is MAXSPEED)
  #
@@ -208,7 +208,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Supported versions depends on your target SDK, check SDKDDKVer.h
  #	See https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt
  #
-@@ -310,9 +309,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
+@@ -310,9 +310,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
  CPU = ix86
  !endif
  
@@ -220,7 +220,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
-@@ -534,29 +533,27 @@ OUTDIR=$(OBJDIR)
+@@ -542,29 +542,27 @@ OUTDIR=$(OBJDIR)
  
  ### Validate CPUNR
  !ifndef CPUNR
@@ -260,7 +260,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  CPUARG = /G6
  ! elseif "$(CPUNR)" == "sse"
  CPUARG = /G6 /arch:SSE
-@@ -571,7 +568,7 @@ CPUARG =
+@@ -579,7 +577,7 @@ CPUARG =
  ! endif
  !else
  # IA32/SSE/SSE2 are only supported on x86
