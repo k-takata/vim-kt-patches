@@ -4,7 +4,7 @@
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4582,6 +4582,242 @@ destroy_sizing_tip(void)
+@@ -4582,6 +4582,240 @@ destroy_sizing_tip(void)
      return TRUE;
  }
  
@@ -180,8 +180,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +
 +# ifdef FEAT_GUI_TABLINE
 +	case TCN_SELCHANGE:
-+	    if (gui_mch_showing_tabline()
-+		    && hdr->hwndFrom == s_tabhwnd)
++	    if (gui_mch_showing_tabline() && hdr->hwndFrom == s_tabhwnd)
 +	    {
 +		send_tabline_event(TabCtrl_GetCurSel(s_tabhwnd) + 1);
 +		return 0L;
@@ -189,8 +188,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	    break;
 +
 +	case NM_RCLICK:
-+	    if (gui_mch_showing_tabline()
-+		    && hdr->hwndFrom == s_tabhwnd)
++	    if (gui_mch_showing_tabline() && hdr->hwndFrom == s_tabhwnd)
 +	    {
 +		show_tabline_popup_menu();
 +		return 0L;
@@ -247,7 +245,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      static LRESULT
  _OnDpiChanged(HWND hwnd, UINT xdpi, UINT ydpi, RECT *rc)
  {
-@@ -4650,46 +4886,11 @@ destroy_sizing_tip(void)
+@@ -4650,46 +4884,11 @@ destroy_sizing_tip(void)
  #ifdef FEAT_NETBEANS_INTG
  	HANDLE_MSG(hwnd, WM_WINDOWPOSCHANGED, _OnWindowPosChanged);
  #endif
@@ -298,7 +296,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      case WM_QUERYENDSESSION:	// System wants to go down.
  	gui_shell_closed();	// Will exit when no changed buffers.
-@@ -4758,200 +4959,13 @@ destroy_sizing_tip(void)
+@@ -4758,200 +4957,13 @@ destroy_sizing_tip(void)
  
  #if defined(FEAT_TOOLBAR) || defined(FEAT_GUI_TABLINE)
      case WM_NOTIFY:
@@ -504,7 +502,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  #ifdef FEAT_MBYTE_IME
      case WM_IME_NOTIFY:
-@@ -4973,7 +4987,7 @@ destroy_sizing_tip(void)
+@@ -4973,7 +4985,7 @@ destroy_sizing_tip(void)
  	if (uMsg == s_findrep_msg && s_findrep_msg != 0)
  	    _OnFindRepl();
  #endif
