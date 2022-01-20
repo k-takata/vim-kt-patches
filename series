@@ -31,4 +31,5 @@ wip-win32-vimdir-encoding.patch #+wip
 win32-fix-font.patch
 wip-win32-directwrite-charwidth-auto.patch #+wip
 win32-refactor-wndproc.patch
+win32-fix-memleak-in-browse.patch
 fix-config_cache-removal.patch #+rejected
