@@ -29,7 +29,7 @@ add-msvc-latest-bat.patch
 add-testing-option-7970.patch
 wip-win32-vimdir-encoding.patch #+wip
 win32-fix-font.patch
-wip-win32-directwrite-charwidth-auto.patch #+wip
 win32-remove-casts.patch
 win32-use-unicode-message-api.patch
+wip-win32-directwrite-ambiwidth-auto.patch #+wip
 fix-config_cache-removal.patch #+rejected

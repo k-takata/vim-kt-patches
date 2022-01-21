@@ -1,0 +1,146 @@
+# HG changeset patch
+# Parent  653be08b1f6a0e52b52b70ae5a0239d5a7d3f796
+
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+--- a/src/gui_dwrite.cpp
++++ b/src/gui_dwrite.cpp
+@@ -343,6 +343,8 @@ struct DWriteContext {
+ 
+     void Flush();
+ 
++    int GetCharWidth(int c);
++
+     void SetRenderingParams(
+ 	    const DWriteRenderingParams *params);
+ 
+@@ -1155,6 +1157,60 @@ DWriteContext::Flush()
+     SetDrawingMode(DM_GDI);
+ }
+ 
++    int
++DWriteContext::GetCharWidth(int c)
++{
++    HRESULT hr;
++    IDWriteTextLayout *textLayout = NULL;
++    WCHAR text[3];
++    int len, w = 0;
++
++    //SetDrawingMode(DM_DIRECTX);
++
++    if (c < 0x10000)
++    {
++	text[0] = (WCHAR)c;
++	len = 1;
++    }
++    else
++    {
++	text[0] = ((c - 0x10000) >> 10) + 0xD800;
++	text[1] = ((c - 0x10000) & 0x3ff) + 0xDC00;
++	len = 2;
++    }
++    text[len] = L'\0';
++
++    hr = mDWriteFactory->CreateTextLayout(text, len, mTextFormat,
++	    10.0f, 10.0f, &textLayout);
++
++    if (SUCCEEDED(hr))
++    {
++	DWRITE_TEXT_RANGE textRange = { 0, UINT32(len) };
++	textLayout->SetFontWeight(mFontWeight, textRange);
++	textLayout->SetFontStyle(mFontStyle, textRange);
++
++	UINT32 count;
++	if (textLayout->GetClusterMetrics(NULL, 0, &count) == E_NOT_SUFFICIENT_BUFFER)
++	{
++	    DWRITE_CLUSTER_METRICS *metrics = new DWRITE_CLUSTER_METRICS[count];
++	    textLayout->GetClusterMetrics(metrics, count, &count);
++#ifdef DEBUG
++	    //_RPT2(_CRT_WARN, "len %d, count %d", len, count);
++	    for (UINT32 i = 0; i < count; i++)
++	    {
++		_RPT2(_CRT_WARN, "%x (%C), [%d]: width %f", c, c, i, metrics[i].width);
++	    }
++#endif
++	    if (count >= 1)
++		w = (int)metrics[0].width;
++	    delete [] metrics;
++	}
++    }
++
++    SafeRelease(&textLayout);
++    return w;
++}
++
+     void
+ DWriteContext::SetRenderingParams(
+ 	const DWriteRenderingParams *params)
+@@ -1322,6 +1378,14 @@ DWriteContext_Flush(DWriteContext *ctx)
+ 	ctx->Flush();
+ }
+ 
++    int
++DWriteContext_GetCharWidth(DWriteContext *ctx, int c)
++{
++    if (ctx != NULL)
++	return ctx->GetCharWidth(c);
++    return 0;
++}
++
+     void
+ DWriteContext_Close(DWriteContext *ctx)
+ {
+diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
+--- a/src/gui_dwrite.h
++++ b/src/gui_dwrite.h
+@@ -76,6 +76,7 @@ void DWriteContext_DrawLine(DWriteContex
+ void DWriteContext_SetPixel(DWriteContext *ctx, int x, int y, COLORREF color);
+ void DWriteContext_Scroll(DWriteContext *ctx, int x, int y, const RECT *rc);
+ void DWriteContext_Flush(DWriteContext *ctx);
++int DWriteContext_GetCharWidth(DWriteContext *ctx, int c);
+ void DWriteContext_Close(DWriteContext *ctx);
+ 
+ void DWriteContext_SetRenderingParams(
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -5182,12 +5182,12 @@ error:
+ 
+ #ifdef USE_AMBIWIDTH_AUTO
+ # define CHARWIDE_CACHESIZE 0x20000
+-static GuiFont last_font = NOFONT;
+ 
+     int
+ gui_mch_get_charwidth(int c)
+ {
+     static int cache[CHARWIDE_CACHESIZE];
++    static GuiFont last_font = NOFONT;
+     GuiFont usingfont = gui.wide_font ? gui.wide_font : gui.norm_font;
+ 
+     /* Check validity of charwide cache */
+@@ -5205,6 +5205,17 @@ gui_mch_get_charwidth(int c)
+     {
+ 	if (cache[c] >= 0)
+ 	    return cache[c]; /* Use cached value */
++# if defined(FEAT_DIRECTX)
++	else if (IS_ENABLE_DIRECTX())
++	{
++	    int len;
++
++	    DWriteContext_SetFont(s_dwc, (HFONT)usingfont);
++	    len = DWriteContext_GetCharWidth(s_dwc, c);
++	    cache[c] = (len + (gui.char_width >> 1)) / gui.char_width;
++	    return cache[c];
++	}
++# endif
+ 	else
+ 	{
+ 	    /*
+@@ -5222,7 +5233,7 @@ gui_mch_get_charwidth(int c)
+ 		cache[c] = 0;
+ 	    }
+ 	    else
+-		cache[c] = ((len + (gui.char_width >> 1)) / gui.char_width);
++		cache[c] = (len + (gui.char_width >> 1)) / gui.char_width;
+ 	    SelectFont(s_hdc, hfntOld);
+ 
+ 	    return cache[c];
