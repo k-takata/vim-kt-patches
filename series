@@ -31,5 +31,5 @@ wip-win32-vimdir-encoding.patch #+wip
 win32-fix-font.patch
 win32-remove-casts.patch
 win32-use-unicode-message-api.patch
-wip-win32-directwrite-ambiwidth-auto.patch #+wip
+win32-directwrite-ambiwidth-auto.patch
 fix-config_cache-removal.patch #+rejected
