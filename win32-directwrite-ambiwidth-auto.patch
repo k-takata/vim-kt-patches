@@ -58,7 +58,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 +	    //_RPT2(_CRT_WARN, "len %d, count %d", len, count);
 +	    for (UINT32 i = 0; i < count; i++)
 +	    {
-+		_RPT2(_CRT_WARN, "%x (%C), [%d]: width %f", c, c, i, metrics[i].width);
++		//_RPT2(_CRT_WARN, "%x (%C), [%d]: width %f", c, c, i, metrics[i].width);
 +	    }
 +#endif
 +	    if (count >= 1)
@@ -103,16 +103,19 @@ diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5182,21 +5182,21 @@ error:
+@@ -5181,30 +5181,41 @@ error:
+ #endif
  
  #ifdef USE_AMBIWIDTH_AUTO
- # define CHARWIDE_CACHESIZE 0x20000
+-# define CHARWIDE_CACHESIZE 0x20000
 -static GuiFont last_font = NOFONT;
++# define CHARWIDE_CACHESIZE 0x40000
  
      int
  gui_mch_get_charwidth(int c)
  {
-     static int cache[CHARWIDE_CACHESIZE];
+-    static int cache[CHARWIDE_CACHESIZE];
++    static char cache[CHARWIDE_CACHESIZE];
 +    static GuiFont last_font = NOFONT;
      GuiFont usingfont = gui.wide_font ? gui.wide_font : gui.norm_font;
  
@@ -127,8 +130,10 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +	TRACE("Charwidth cache will be updated (base=%d)\n", gui.char_width);
  	last_font = usingfont;
  	for (i = 0; i < CHARWIDE_CACHESIZE; ++i)
- 	    cache[i] = -1;
-@@ -5205,6 +5205,17 @@ gui_mch_get_charwidth(int c)
+-	    cache[i] = -1;
++	    cache[i] = (char)-1;
+     }
+     if (usingfont && 0 <= c && c < CHARWIDE_CACHESIZE)
      {
  	if (cache[c] >= 0)
  	    return cache[c]; /* Use cached value */
@@ -139,7 +144,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +
 +	    DWriteContext_SetFont(s_dwc, (HFONT)usingfont);
 +	    len = DWriteContext_GetCharWidth(s_dwc, c);
-+	    cache[c] = (len + (gui.char_width >> 1)) / gui.char_width;
++	    cache[c] = (char)((len + (gui.char_width >> 1)) / gui.char_width);
 +	    return cache[c];
 +	}
 +# endif
@@ -151,7 +156,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    }
  	    else
 -		cache[c] = ((len + (gui.char_width >> 1)) / gui.char_width);
-+		cache[c] = (len + (gui.char_width >> 1)) / gui.char_width;
++		cache[c] = (char)((len + (gui.char_width >> 1)) / gui.char_width);
  	    SelectFont(s_hdc, hfntOld);
  
  	    return cache[c];
