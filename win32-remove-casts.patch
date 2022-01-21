@@ -4,6 +4,24 @@
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
+@@ -2754,7 +2754,7 @@ gui_mch_find_dialog(exarg_T *eap)
+ 	if (!IsWindow(s_findrep_hwnd))
+ 	{
+ 	    initialise_findrep(eap->arg);
+-	    s_findrep_hwnd = FindTextW((LPFINDREPLACEW) &s_findrep_struct);
++	    s_findrep_hwnd = FindTextW(&s_findrep_struct);
+ 	}
+ 
+ 	set_window_title(s_findrep_hwnd, _("Find string"));
+@@ -2778,7 +2778,7 @@ gui_mch_replace_dialog(exarg_T *eap)
+ 	if (!IsWindow(s_findrep_hwnd))
+ 	{
+ 	    initialise_findrep(eap->arg);
+-	    s_findrep_hwnd = ReplaceTextW((LPFINDREPLACEW) &s_findrep_struct);
++	    s_findrep_hwnd = ReplaceTextW(&s_findrep_struct);
+ 	}
+ 
+ 	set_window_title(s_findrep_hwnd, _("Find & Replace"));
 @@ -2952,7 +2952,7 @@ gui_mch_getmouse(int *x, int *y)
      POINT mp;
  
