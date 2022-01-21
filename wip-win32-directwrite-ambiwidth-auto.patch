@@ -103,7 +103,7 @@ diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5182,12 +5182,12 @@ error:
+@@ -5182,21 +5182,21 @@ error:
  
  #ifdef USE_AMBIWIDTH_AUTO
  # define CHARWIDE_CACHESIZE 0x20000
@@ -116,7 +116,18 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    static GuiFont last_font = NOFONT;
      GuiFont usingfont = gui.wide_font ? gui.wide_font : gui.norm_font;
  
-     /* Check validity of charwide cache */
+-    /* Check validity of charwide cache */
++    /* Check validity of charwidth cache */
+     if (last_font != usingfont)
+     {
+ 	/* Update cache. -1 is mark for uninitialized cell */
+ 	int i;
+ 
+-	TRACE("Charwide cache will be updated (base=%d)\n", gui.char_width);
++	TRACE("Charwidth cache will be updated (base=%d)\n", gui.char_width);
+ 	last_font = usingfont;
+ 	for (i = 0; i < CHARWIDE_CACHESIZE; ++i)
+ 	    cache[i] = -1;
 @@ -5205,6 +5205,17 @@ gui_mch_get_charwidth(int c)
      {
  	if (cache[c] >= 0)
