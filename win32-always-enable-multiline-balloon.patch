@@ -38,7 +38,58 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -8561,89 +8561,13 @@ gui_mch_destroy_sign(void *sign)
+@@ -4035,42 +4035,6 @@ static UINT_PTR	    BevalTimerId = 0;
+ static DWORD	    LastActivity = 0;
+ 
+ 
+-// cproto fails on missing include files
+-# ifndef PROTO
+-
+-/*
+- * excerpts from headers since this may not be presented
+- * in the extremely old compilers
+- */
+-#  include <pshpack1.h>
+-
+-# endif
+-
+-typedef struct _DllVersionInfo
+-{
+-    DWORD cbSize;
+-    DWORD dwMajorVersion;
+-    DWORD dwMinorVersion;
+-    DWORD dwBuildNumber;
+-    DWORD dwPlatformID;
+-} DLLVERSIONINFO;
+-
+-# ifndef PROTO
+-#  include <poppack.h>
+-# endif
+-
+-typedef struct tagTOOLINFOA_NEW
+-{
+-    UINT       cbSize;
+-    UINT       uFlags;
+-    HWND       hwnd;
+-    UINT_PTR   uId;
+-    RECT       rect;
+-    HINSTANCE  hinst;
+-    LPSTR      lpszText;
+-    LPARAM     lParam;
+-} TOOLINFO_NEW;
+-
+ typedef struct tagNMTTDISPINFO_NEW
+ {
+     NMHDR      hdr;
+@@ -4105,7 +4069,6 @@ typedef struct tagNMTTDISPINFOW_NEW
+ } NMTTDISPINFOW_NEW;
+ 
+ 
+-typedef HRESULT (WINAPI* DLLGETVERSIONPROC)(DLLVERSIONINFO *);
+ # ifndef TTM_SETMAXTIPWIDTH
+ #  define TTM_SETMAXTIPWIDTH	(WM_USER+24)
+ # endif
+@@ -8561,89 +8524,13 @@ gui_mch_destroy_sign(void *sign)
   * 5) WM_NOTIFY:TTN_POP destroys created tooltip
   */
  
@@ -132,7 +183,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (pti == NULL)
  	return;
  
-@@ -8655,30 +8579,19 @@ make_tooltip(BalloonEval *beval, char *t
+@@ -8655,30 +8542,19 @@ make_tooltip(BalloonEval *beval, char *t
      SetWindowPos(beval->balloon, HWND_TOPMOST, 0, 0, 0, 0,
  	    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
  
