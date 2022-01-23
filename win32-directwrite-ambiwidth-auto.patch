@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  d2680464267b32f454dee5198be8d9dabd04b598
+# Parent  d71a232aef1b6fcd8ef35f54a857e21f8147f0bf
 
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 --- a/src/gui_dwrite.cpp
@@ -13,7 +13,20 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      void SetRenderingParams(
  	    const DWriteRenderingParams *params);
  
-@@ -1155,6 +1157,60 @@ DWriteContext::Flush()
+@@ -386,9 +388,11 @@ public:
+ 
+     static FLOAT adjustToCell(FLOAT value, FLOAT cellWidth)
+     {
+-	int cellCount = int(floor(value / cellWidth + 0.5f));
++	int cellCount = int(floor(value / cellWidth + 0.6f));
+ 	if (cellCount < 1)
+ 	    cellCount = 1;
++	if (cellCount > 2)
++	    cellCount = 2;
+ 	return cellCount * cellWidth;
+     }
+ };
+@@ -1155,6 +1159,60 @@ DWriteContext::Flush()
      SetDrawingMode(DM_GDI);
  }
  
@@ -74,7 +87,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      void
  DWriteContext::SetRenderingParams(
  	const DWriteRenderingParams *params)
-@@ -1322,6 +1378,14 @@ DWriteContext_Flush(DWriteContext *ctx)
+@@ -1322,6 +1380,14 @@ DWriteContext_Flush(DWriteContext *ctx)
  	ctx->Flush();
  }
  
@@ -103,7 +116,7 @@ diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5144,30 +5144,43 @@ error:
+@@ -5141,52 +5141,71 @@ error:
  #endif
  
  #ifdef USE_AMBIWIDTH_AUTO
@@ -138,28 +151,54 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      }
      if (usingfont && 0 <= c && c < CHARWIDE_CACHESIZE)
      {
++	int len;
++
  	if (cache[c] >= 0)
  	    return cache[c]; /* Use cached value */
 +# if defined(FEAT_DIRECTX)
 +	else if (IS_ENABLE_DIRECTX())
 +	{
-+	    int len;
-+
 +	    DWriteContext_SetFont(s_dwc, (HFONT)usingfont);
 +	    len = DWriteContext_GetCharWidth(s_dwc, c);
-+	    cache[c] = (char)((len + (gui.char_width >> 1)) / gui.char_width);
-+	    return cache[c];
 +	}
 +# endif
  	else
  	{
  	    /*
-@@ -5185,7 +5198,7 @@ gui_mch_get_charwidth(int c)
- 		cache[c] = 0;
+ 	     * Get true character width in dot, convert to cells and save
+ 	     * it.
+ 	     */
+-	    int	    len;
+ 	    ABC	    fontABC;
+ 	    HFONT   hfntOld = SelectFont(s_hdc, usingfont);
+ 
+-	    if (!GetCharABCWidthsW(s_hdc, c, c, &fontABC) ||
+-		    (len = fontABC.abcA + fontABC.abcB + fontABC.abcC) <= 0)
++	    if (!GetCharABCWidthsW(s_hdc, c, c, &fontABC))
+ 	    {
+ 		TRACE("GetCharABCWidthsW() failed for %08X\n", c);
+-		cache[c] = 0;
++		len = -1;
  	    }
  	    else
 -		cache[c] = ((len + (gui.char_width >> 1)) / gui.char_width);
-+		cache[c] = (char)((len + (gui.char_width >> 1)) / gui.char_width);
++		len = fontABC.abcA + fontABC.abcB + fontABC.abcC;
++
  	    SelectFont(s_hdc, hfntOld);
- 
- 	    return cache[c];
+-
+-	    return cache[c];
+ 	}
++	if (len < 0)
++	    cache[c] = 0;
++	else
++	{
++	    cache[c] = (char)((len + (gui.char_width * 3 / 5)) / gui.char_width);
++	    if (cache[c] < 1)
++		cache[c] = (char)1;
++	    if (cache[c] > 2)
++		cache[c] = (char)2;
++	}
++	return cache[c];
+     }
+     else
+ 	return 0;
