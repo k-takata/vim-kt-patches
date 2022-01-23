@@ -29,6 +29,5 @@ add-msvc-latest-bat.patch
 add-testing-option-7970.patch
 wip-win32-vimdir-encoding.patch #+wip
 win32-directwrite-ambiwidth-auto.patch
-win32-remove-oldlook.patch
 win32-average-fontsize.patch
 fix-config_cache-removal.patch #+rejected
