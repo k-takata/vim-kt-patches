@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  4a886ba939577efad8681e7b079d70f6b57d7d68
+# Parent  4023447e2ab008194f6d59fe3910317d03112196
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -88,7 +88,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  
  1. Microsoft Visual C++
-@@ -54,8 +54,10 @@ can search for "Visual Studio Community 
+@@ -54,15 +54,17 @@ can search for "Visual Studio Community 
  create a Microsoft account (it's free).
  
  When installing "Visual Studio Community 2015 with Update 3" make sure to
@@ -101,11 +101,20 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  
  Visual Studio
+ -------------
+ 
+-Building with Visual Studio (VS2010, VS2012, VS2013, VS2015, VS2017 and VS2019)
+-is straightforward.
++Building with Visual Studio (VS2010, VS2012, VS2013, VS2015, VS2017, VS2019
++and VS2022) is straightforward.
+ 
+ To build Vim from the command line with MSVC, use Make_mvc.mak.
+ Visual Studio installed a batch file called vcvars32.bat, which you must
 @@ -100,6 +102,9 @@ Vim with Make_mvc.mak.
  Targeting Windows XP with MSVC 2012 and later      *new-msvc-windows-xp*
  ---------------------------------------------
  
-+(The support for pre-Vista was removed in patch 8.2.0xxx.  If you want to
++(The support for pre-Vista was removed in patch 9.0.0xxx.  If you want to
 +target Windows XP, use the source code before that.)
 +
  Beginning with Visual C++ 2012, Microsoft changed the behavior of LINK.EXE
@@ -190,7 +199,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #
  # To build using other Windows compilers, see INSTALLpc.txt
  #
-@@ -129,13 +129,13 @@
+@@ -128,13 +128,13 @@
  #
  #	Optimization: OPTIMIZE=[SPACE, SPEED, MAXSPEED] (default is MAXSPEED)
  #
@@ -208,7 +217,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Supported versions depends on your target SDK, check SDKDDKVer.h
  #	See https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt
  #
-@@ -310,9 +310,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
+@@ -309,9 +309,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
  CPU = ix86
  !endif
  
@@ -220,7 +229,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
-@@ -542,29 +542,27 @@ OUTDIR=$(OBJDIR)
+@@ -541,29 +541,27 @@ OUTDIR=$(OBJDIR)
  
  ### Validate CPUNR
  !ifndef CPUNR
@@ -260,7 +269,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  CPUARG = /G6
  ! elseif "$(CPUNR)" == "sse"
  CPUARG = /G6 /arch:SSE
-@@ -579,7 +577,7 @@ CPUARG =
+@@ -578,7 +576,7 @@ CPUARG =
  ! endif
  !else
  # IA32/SSE/SSE2 are only supported on x86
