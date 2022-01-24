@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  2982c692d9c7940af8b6680d07084190e84bb8d9
+# Parent  05280ad0eef54b97a4a3f0338ccdf11a069dd2ec
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
@@ -15,8 +15,8 @@ diff --git a/Filelist b/Filelist
 diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
 --- a/src/INSTALLpc.txt
 +++ b/src/INSTALLpc.txt
-@@ -157,84 +157,8 @@ OLDER VERSIONS
- The minimal supported version is Windows 7. Building with older compilers
+@@ -155,84 +155,8 @@ OLDER VERSIONS
+ The minimal supported version is Windows XP. Building with older compilers
  might still work, but these instructions might be outdated.
  
 -If you need the executable to run on Windows 98 or ME, use the 2003 one
@@ -408,7 +408,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      mouse_scroll_lines = 3;	// reasonable default
  
      // if NT 4.0+ (or Win98) get scroll lines directly from system
-@@ -5594,12 +5363,6 @@ gui_mch_init(void)
+@@ -5575,12 +5344,6 @@ gui_mch_init(void)
  #endif
  
  #ifdef FEAT_EVAL
@@ -421,7 +421,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      // set the v:windowid variable
      set_vim_var_nr(VV_WINDOWID, HandleToLong(s_hwnd));
  #endif
-@@ -7975,11 +7738,6 @@ gui_mch_tearoff(
+@@ -7956,11 +7719,6 @@ gui_mch_tearoff(
  #if defined(FEAT_TOOLBAR) || defined(PROTO)
  # include "gui_w32_rc.h"
  
@@ -433,7 +433,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  /*
   * Create the toolbar, initially unpopulated.
   *  (just like the menu, there are no defaults, it's all
-@@ -8493,10 +8251,10 @@ gui_mch_destroy_sign(void *sign)
+@@ -8474,10 +8232,10 @@ gui_mch_destroy_sign(void *sign)
      static void
  make_tooltip(BalloonEval *beval, char *text, POINT pt)
  {
@@ -448,7 +448,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      if (pti == NULL)
  	return;
  
-@@ -8508,7 +8266,7 @@ make_tooltip(BalloonEval *beval, char *t
+@@ -8489,7 +8247,7 @@ make_tooltip(BalloonEval *beval, char *t
      SetWindowPos(beval->balloon, HWND_TOPMOST, 0, 0, 0, 0,
  	    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
  
@@ -457,7 +457,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      pti->uFlags = TTF_SUBCLASS;
      pti->hwnd = beval->target;
      pti->hinst = 0; // Don't use string resources
-@@ -8700,7 +8458,7 @@ Handle_WM_Notify(HWND hwnd UNUSED, LPNMH
+@@ -8681,7 +8439,7 @@ Handle_WM_Notify(HWND hwnd UNUSED, LPNMH
  	case TTN_GETDISPINFO:
  	    {
  		// if you get there then we have new common controls
@@ -466,7 +466,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  		info->lpszText = (LPSTR)info->lParam;
  		info->uFlags |= TTF_DI_SETITEM;
  	    }
-@@ -8708,7 +8466,7 @@ Handle_WM_Notify(HWND hwnd UNUSED, LPNMH
+@@ -8689,7 +8447,7 @@ Handle_WM_Notify(HWND hwnd UNUSED, LPNMH
  	case TTN_GETDISPINFOW:
  	    {
  		// if we get here then we have new common controls
@@ -495,7 +495,7 @@ deleted file mode 100644
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -2691,13 +2691,6 @@ static HICON g_hOrigIcon = NULL;
+@@ -2690,13 +2690,6 @@ static HICON g_hOrigIcon = NULL;
  static HICON g_hVimIcon = NULL;
  static BOOL g_fCanChangeIcon = FALSE;
  

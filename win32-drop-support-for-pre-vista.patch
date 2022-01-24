@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  4023447e2ab008194f6d59fe3910317d03112196
+# Parent  93521f2bf696ddf06a9f23f5ed00102a69a7fd84
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -138,8 +138,8 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
 +The minimal supported version is Windows 7. Building with older compilers
  might still work, but these instructions might be outdated.
  
- If you need the executable to run on Windows 98 or ME, use the 2003 one
-@@ -824,12 +826,12 @@ config.h and Ruby's DLL name. Here are t
+ If you need the executable to run on Windows 98 or ME, use the 2005 one
+@@ -748,12 +750,12 @@ config.h and Ruby's DLL name. Here are t
        nmake -f Make_mvc.mak
            RUBY=C:\Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
            RUBY_MSVCRT_NAME=msvcrt
@@ -154,7 +154,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
      When using this trick, you also need to set RUBY_MSVCRT_NAME to msvcrt
      which is used for the Ruby's DLL name.
  
-@@ -840,11 +842,11 @@ After you install RubyInstaller, just ty
+@@ -764,11 +766,11 @@ After you install RubyInstaller, just ty
  
      mingw32-make -f Make_ming.mak
          RUBY=C:/Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
@@ -309,7 +309,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /*
   * Get version number including build number
   */
-@@ -7889,30 +7868,13 @@ vtp_flag_init(void)
+@@ -7800,30 +7779,13 @@ vtp_flag_init(void)
      static void
  vtp_init(void)
  {
@@ -342,7 +342,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      save_console_bg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_bg];
      save_console_fg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_fg];
      store_console_bg_rgb = save_console_bg_rgb;
-@@ -8137,7 +8099,7 @@ ctermtoxterm(
+@@ -8048,7 +8010,7 @@ ctermtoxterm(
  set_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -351,7 +351,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      guicolor_T	fg, bg;
      int		ctermfg, ctermbg;
  
-@@ -8157,8 +8119,7 @@ set_console_color_rgb(void)
+@@ -8068,8 +8030,7 @@ set_console_color_rgb(void)
      bg = (GetRValue(bg) << 16) | (GetGValue(bg) << 8) | GetBValue(bg);
  
      csbi.cbSize = sizeof(csbi);
@@ -361,7 +361,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      csbi.cbSize = sizeof(csbi);
      csbi.srWindow.Right += 1;
-@@ -8167,8 +8128,7 @@ set_console_color_rgb(void)
+@@ -8078,8 +8039,7 @@ set_console_color_rgb(void)
      store_console_fg_rgb = csbi.ColorTable[g_color_index_fg];
      csbi.ColorTable[g_color_index_bg] = (COLORREF)bg;
      csbi.ColorTable[g_color_index_fg] = (COLORREF)fg;
@@ -371,7 +371,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8224,22 +8184,20 @@ get_default_console_color(
+@@ -8135,22 +8095,20 @@ get_default_console_color(
  reset_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -397,7 +397,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8250,19 +8208,17 @@ reset_console_color_rgb(void)
+@@ -8161,19 +8119,17 @@ reset_console_color_rgb(void)
  restore_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
