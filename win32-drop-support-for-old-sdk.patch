@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  05280ad0eef54b97a4a3f0338ccdf11a069dd2ec
+# Parent  4a8d82c3431886126252ace83d5ff4679b809173
 
 diff --git a/Filelist b/Filelist
 --- a/Filelist
@@ -102,6 +102,34 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  Visual C++ 2005 Express Edition       *msvc-2005-express*
  -------------------------------
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -305,10 +305,6 @@ MSVCRT_NAME = msvcr$(MSVCRT_VER)
+ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
+ !endif
+ 
+-!if $(MSVC_MAJOR) == 6
+-CPU = ix86
+-!endif
+-
+ ### Set the default $(WINVER) to make it work with VC++7.0 (VS.NET)
+ !ifndef WINVER
+ WINVER = 0x0501
+@@ -719,12 +715,8 @@ DEBUGINFO = /ZI
+ ! endif
+ CFLAGS = $(CFLAGS) -D_DEBUG -DDEBUG /Od
+ RCFLAGS = $(rcflags) $(rcvars) -D_DEBUG -DDEBUG
+-# The /fixed:no is needed for Quantify. Assume not 4.? as unsupported in VC4.0.
+-! if $(MSVC_MAJOR) == 4
+-LIBC =
+-! else
++# The /fixed:no is needed for Quantify.
+ LIBC = /fixed:no
+-! endif
+ ! ifdef USE_MSVCRT
+ CFLAGS = $(CFLAGS) /MDd
+ LIBC = $(LIBC) msvcrtd.lib
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c

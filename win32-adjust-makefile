@@ -1,0 +1,35 @@
+# HG changeset patch
+# Parent  a5e6cfc03b61260dfc8fd4c698722bf0a666343b
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -705,8 +705,8 @@ RCFLAGS = $(rcflags) $(rcvars) -DNDEBUG
+ CFLAGS = $(CFLAGS) /MD
+ LIBC = msvcrt.lib
+ ! else
++CFLAGS = $(CFLAGS) /Zl /MT
+ LIBC = libcmt.lib
+-CFLAGS = $(CFLAGS) /Zl /MT
+ ! endif
+ 
+ !else  # DEBUG
+@@ -727,8 +727,8 @@ LIBC = /fixed:no
+ CFLAGS = $(CFLAGS) /MDd
+ LIBC = $(LIBC) msvcrtd.lib
+ ! else
++CFLAGS = $(CFLAGS) /Zl /MTd
+ LIBC = $(LIBC) libcmtd.lib
+-CFLAGS = $(CFLAGS) /Zl /MTd
+ ! endif
+ 
+ !endif # DEBUG
+@@ -797,7 +797,7 @@ OBJ = \
+ 	$(OUTDIR)\hashtab.obj \
+ 	$(OUTDIR)\help.obj \
+ 	$(OUTDIR)\highlight.obj \
+-	$(OBJDIR)\if_cscope.obj \
++	$(OUTDIR)\if_cscope.obj \
+ 	$(OUTDIR)\indent.obj \
+ 	$(OUTDIR)\insexpand.obj \
+ 	$(OUTDIR)\json.obj \
