@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  93521f2bf696ddf06a9f23f5ed00102a69a7fd84
+# Parent  f4f829d8cc8cccfee3d35243392eeec8d349eac7
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -139,7 +139,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  might still work, but these instructions might be outdated.
  
  If you need the executable to run on Windows 98 or ME, use the 2005 one
-@@ -748,12 +750,12 @@ config.h and Ruby's DLL name. Here are t
+@@ -749,12 +751,12 @@ config.h and Ruby's DLL name. Here are t
        nmake -f Make_mvc.mak
            RUBY=C:\Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
            RUBY_MSVCRT_NAME=msvcrt
@@ -154,7 +154,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
      When using this trick, you also need to set RUBY_MSVCRT_NAME to msvcrt
      which is used for the Ruby's DLL name.
  
-@@ -764,11 +766,11 @@ After you install RubyInstaller, just ty
+@@ -765,11 +767,11 @@ After you install RubyInstaller, just ty
  
      mingw32-make -f Make_ming.mak
          RUBY=C:/Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
@@ -217,8 +217,8 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Supported versions depends on your target SDK, check SDKDDKVer.h
  #	See https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt
  #
-@@ -309,9 +309,9 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
- CPU = ix86
+@@ -305,9 +305,9 @@ MSVCRT_NAME = msvcr$(MSVCRT_VER)
+ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
  !endif
  
 -### Set the default $(WINVER) to make it work with VC++7.0 (VS.NET)
@@ -229,7 +229,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
-@@ -541,29 +541,27 @@ OUTDIR=$(OBJDIR)
+@@ -537,29 +537,27 @@ OUTDIR=$(OBJDIR)
  
  ### Validate CPUNR
  !ifndef CPUNR
@@ -269,7 +269,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  CPUARG = /G6
  ! elseif "$(CPUNR)" == "sse"
  CPUARG = /G6 /arch:SSE
-@@ -578,7 +576,7 @@ CPUARG =
+@@ -574,7 +572,7 @@ CPUARG =
  ! endif
  !else
  # IA32/SSE/SSE2 are only supported on x86
