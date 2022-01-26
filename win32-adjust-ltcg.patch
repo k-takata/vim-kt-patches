@@ -1,0 +1,74 @@
+# HG changeset patch
+# Parent  3d5b92324e6823deb2d1d752370b1c8c7f5516d2
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -472,17 +472,15 @@ jobs:
+         run: |
+           call "%VCVARSALL%" ${{ matrix.vcarch }}
+           cd src
+-          :: Filter out the progress bar from the build log
+-          sed -e "s/@<<$/@<< | sed -e 's#.*\\\\r.*##'/" Make_mvc.mak > Make_mvc2.mak
+           if "${{ matrix.features }}"=="HUGE" (
+-            nmake -nologo -f Make_mvc2.mak ^
++            nmake -nologo -f Make_mvc.mak ^
+               FEATURES=${{ matrix.features }} ^
+               GUI=yes IME=yes ICONV=yes VIMDLL=yes ^
+               DYNAMIC_LUA=yes LUA=%LUA_DIR% ^
+               DYNAMIC_PYTHON=yes PYTHON=%PYTHON_DIR% ^
+               DYNAMIC_PYTHON3=yes PYTHON3=%PYTHON3_DIR%
+           ) else (
+-            nmake -nologo -f Make_mvc2.mak ^
++            nmake -nologo -f Make_mvc.mak ^
+               FEATURES=${{ matrix.features }} ^
+               GUI=yes IME=yes ICONV=yes VIMDLL=yes
+           )
+diff --git a/ci/appveyor.bat b/ci/appveyor.bat
+--- a/ci/appveyor.bat
++++ b/ci/appveyor.bat
+@@ -5,8 +5,6 @@ setlocal ENABLEDELAYEDEXPANSION
+ cd %APPVEYOR_BUILD_FOLDER%
+ 
+ cd src
+-:: Filter out the progress bar from the build log
+-sed -e "s/@<<$/@<< | sed -e 's#.*\\\\r.*##'/" Make_mvc.mak > Make_mvc2.mak
+ 
+ echo "Building MSVC 64bit console Version"
+ nmake -f Make_mvc2.mak CPU=AMD64 ^
+@@ -21,13 +19,13 @@ if not exist vim.exe (
+ :: GUI needs to be last, so that testing works
+ echo "Building MSVC 64bit GUI Version"
+ if "%FEATURE%" == "HUGE" (
+-    nmake -f Make_mvc2.mak CPU=AMD64 ^
++    nmake -f Make_mvc.mak CPU=AMD64 ^
+         OLE=no GUI=yes IME=yes ICONV=yes DEBUG=no POSTSCRIPT=yes ^
+         PYTHON_VER=27 DYNAMIC_PYTHON=yes PYTHON=C:\Python27-x64 ^
+         PYTHON3_VER=35 DYNAMIC_PYTHON3=yes PYTHON3=C:\Python35-x64 ^
+         FEATURES=%FEATURE%
+ ) ELSE (
+-    nmake -f Make_mvc2.mak CPU=AMD64 ^
++    nmake -f Make_mvc.mak CPU=AMD64 ^
+         OLE=no GUI=yes IME=yes ICONV=yes DEBUG=no ^
+         FEATURES=%FEATURE%
+ )
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1281,10 +1281,15 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODE
+ 		$(LUA_LIB) $(MZSCHEME_LIB) $(PERL_LIB) $(PYTHON_LIB) $(PYTHON3_LIB) $(RUBY_LIB) \
+ 		$(TCL_LIB) $(SOUND_LIB) $(NETBEANS_LIB) $(XPM_LIB) $(SOD_LIB) $(LINK_PDB)
+ 
+-# Report link time code generation progress if used.
++# Enable link time code generation if needed.
+ !ifdef NODEBUG
+ ! if "$(OPTIMIZE)" != "SPACE"
++!  if "$(CI)" == "true" || "$(CI)" == "True"
++LINKARGS1 = $(LINKARGS1) /LTCG
++!  else
++# Report link time code generation progress.
+ LINKARGS1 = $(LINKARGS1) /LTCG:STATUS
++!  endif
+ ! endif
+ !endif
+ 
