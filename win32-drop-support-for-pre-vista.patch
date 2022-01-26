@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f4f829d8cc8cccfee3d35243392eeec8d349eac7
+# Parent  a17d2a73c8915d9c7fe6808b1304dc8e0ca44aea
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -217,7 +217,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #	Supported versions depends on your target SDK, check SDKDDKVer.h
  #	See https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt
  #
-@@ -305,9 +305,9 @@ MSVCRT_NAME = msvcr$(MSVCRT_VER)
+@@ -303,9 +303,9 @@ MSVCRT_NAME = msvcr$(MSVCRT_VER)
  MSVCRT_NAME = vcruntime$(MSVCRT_VER)
  !endif
  
@@ -228,8 +228,8 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 +WINVER = 0x0601
  !endif
  
- # Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
-@@ -537,29 +537,27 @@ OUTDIR=$(OBJDIR)
+ # Use multiprocess build
+@@ -522,27 +522,27 @@ OUTDIR=$(OBJDIR)
  
  ### Validate CPUNR
  !ifndef CPUNR
@@ -261,22 +261,11 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Convert processor ID to MVC-compatible number
- !if $(MSVC_MAJOR) < 8
--! if "$(CPUNR)" == "i586"
--CPUARG = /G5
--! elseif "$(CPUNR)" == "i686"
-+! if "$(CPUNR)" == "i686"
- CPUARG = /G6
- ! elseif "$(CPUNR)" == "sse"
- CPUARG = /G6 /arch:SSE
-@@ -574,7 +572,7 @@ CPUARG =
- ! endif
- !else
  # IA32/SSE/SSE2 are only supported on x86
--! if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i586" || "$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
-+! if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
+-!if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i586" || "$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
++!if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
  # VC<11 generates fp87 code by default
- !  if $(MSVC_MAJOR) < 11
+ ! if $(MSVC_MAJOR) < 11
  CPUARG =
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c

@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  2b06a3d54d591aecfc9060380a5cf2ea73f8294e
+# Parent  ccdafe30b6575cb9faa117806a7a3e78064499c9
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
@@ -32,7 +32,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
 @@ -310,9 +308,6 @@ MSVCRT_NAME = vcruntime$(MSVCRT_VER)
- WINVER = 0x0601
+ WINVER = 0x0501
  !endif
  
 -# Flag to turn on Win64 compatibility warnings for VC7.x and VC8.
@@ -67,12 +67,14 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  		$(CSCOPE_DEFS) $(TERM_DEFS) $(SOUND_DEFS) $(NETBEANS_DEFS) $(CHANNEL_DEFS) \
  		$(NBDEBUG_DEFS) $(XPM_DEFS) $(SOD_DEFS) $(SOD_INC) \
  		$(DEFINES) -DWINVER=$(WINVER) -D_WIN32_WINNT=$(WINVER)
-@@ -556,66 +541,50 @@ CPUNR = sse2
+@@ -556,68 +541,50 @@ CPUNR = sse2
  !endif
  
  # Convert processor ID to MVC-compatible number
 -!if $(MSVC_MAJOR) < 8
--! if "$(CPUNR)" == "i686"
+-! if "$(CPUNR)" == "i586"
+-CPUARG = /G5
+-! elseif "$(CPUNR)" == "i686"
 -CPUARG = /G6
 -! elseif "$(CPUNR)" == "sse"
 -CPUARG = /G6 /arch:SSE
@@ -87,8 +89,8 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 -! endif
 -!else
  # IA32/SSE/SSE2 are only supported on x86
--! if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
-+!if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
+-! if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i586" || "$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
++!if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && ("$(CPUNR)" == "i586" || "$(CPUNR)" == "i686" || "$(CPUNR)" == "any")
  # VC<11 generates fp87 code by default
 -!  if $(MSVC_MAJOR) < 11
 +! if $(MSVC_MAJOR) < 11
@@ -160,7 +162,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  ! endif
  !endif
  
-@@ -683,16 +652,9 @@ OPTFLAG = /O2
+@@ -685,16 +652,9 @@ OPTFLAG = /O2
  OPTFLAG = /Ox
  ! endif
  
@@ -178,7 +180,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  ! endif
  
  CFLAGS = $(CFLAGS) $(OPTFLAG) -DNDEBUG $(CPUARG)
-@@ -729,11 +691,9 @@ LIBC = $(LIBC) libcmtd.lib
+@@ -731,11 +691,9 @@ LIBC = $(LIBC) libcmtd.lib
  RCFLAGS = $(RCFLAGS) /D_USING_V110_SDK71_
  !endif
  
@@ -190,7 +192,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  
  !include Make_all.mak
  !include testdir\Make_all.mak
-@@ -1323,10 +1283,8 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODE
+@@ -1325,10 +1283,8 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODE
  
  # Report link time code generation progress if used.
  !ifdef NODEBUG
