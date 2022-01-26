@@ -1,0 +1,32 @@
+# HG changeset patch
+# Parent  2b06a3d54d591aecfc9060380a5cf2ea73f8294e
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -495,16 +495,6 @@ CHANNEL_DEFS	= $(CHANNEL_DEFS) -DHAVE_IN
+ NETBEANS_LIB	= WSock32.lib Ws2_32.lib
+ !endif
+ 
+-# Set which version of the CRT to use
+-!if defined(USE_MSVCRT)
+-# CVARS = $(cvarsdll)
+-# !elseif defined(MULTITHREADED)
+-# CVARS = $(cvarsmt)
+-!else
+-# CVARS = $(cvars)
+-# CVARS = $(cvarsmt)
+-!endif
+-
+ # need advapi32.lib for GetUserName()
+ # need shell32.lib for ExtractIcon()
+ # need netapi32.lib for NetUserEnum()
+@@ -522,7 +512,7 @@ CON_LIB = $(CON_LIB) /DELAYLOAD:comdlg32
+ #VIMRCLOC = somewhere
+ #VIMRUNTIMEDIR = somewhere
+ 
+-CFLAGS = -c /W3 /GF /nologo $(CVARS) -I. -Iproto -DHAVE_PATHDEF -DWIN32 \
++CFLAGS = -c /W3 /GF /nologo -I. -Iproto -DHAVE_PATHDEF -DWIN32 \
+ 		$(CSCOPE_DEFS) $(TERM_DEFS) $(SOUND_DEFS) $(NETBEANS_DEFS) $(CHANNEL_DEFS) \
+ 		$(NBDEBUG_DEFS) $(XPM_DEFS) $(SOD_DEFS) $(SOD_INC) \
+ 		$(DEFINES) -DWINVER=$(WINVER) -D_WIN32_WINNT=$(WINVER)
