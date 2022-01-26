@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  3d5b92324e6823deb2d1d752370b1c8c7f5516d2
+# Parent  eb03b00c2be30ba1c64416c9e948130a33e253c4
 
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
 --- a/.github/workflows/ci.yml
@@ -27,7 +27,7 @@ diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
 diff --git a/ci/appveyor.bat b/ci/appveyor.bat
 --- a/ci/appveyor.bat
 +++ b/ci/appveyor.bat
-@@ -5,8 +5,6 @@ setlocal ENABLEDELAYEDEXPANSION
+@@ -5,11 +5,9 @@ setlocal ENABLEDELAYEDEXPANSION
  cd %APPVEYOR_BUILD_FOLDER%
  
  cd src
@@ -35,7 +35,11 @@ diff --git a/ci/appveyor.bat b/ci/appveyor.bat
 -sed -e "s/@<<$/@<< | sed -e 's#.*\\\\r.*##'/" Make_mvc.mak > Make_mvc2.mak
  
  echo "Building MSVC 64bit console Version"
- nmake -f Make_mvc2.mak CPU=AMD64 ^
+-nmake -f Make_mvc2.mak CPU=AMD64 ^
++nmake -f Make_mvc.mak CPU=AMD64 ^
+     OLE=no GUI=no IME=yes ICONV=yes DEBUG=no ^
+     FEATURES=%FEATURE%
+ if not exist vim.exe (
 @@ -21,13 +19,13 @@ if not exist vim.exe (
  :: GUI needs to be last, so that testing works
  echo "Building MSVC 64bit GUI Version"
@@ -55,7 +59,7 @@ diff --git a/ci/appveyor.bat b/ci/appveyor.bat
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1281,10 +1281,15 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODE
+@@ -1281,10 +1281,16 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODE
  		$(LUA_LIB) $(MZSCHEME_LIB) $(PERL_LIB) $(PYTHON_LIB) $(PYTHON3_LIB) $(RUBY_LIB) \
  		$(TCL_LIB) $(SOUND_LIB) $(NETBEANS_LIB) $(XPM_LIB) $(SOD_LIB) $(LINK_PDB)
  
@@ -64,6 +68,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !ifdef NODEBUG
  ! if "$(OPTIMIZE)" != "SPACE"
 +!  if "$(CI)" == "true" || "$(CI)" == "True"
++# Enable link time code generation, but do not show the progress.
 +LINKARGS1 = $(LINKARGS1) /LTCG
 +!  else
 +# Report link time code generation progress.
