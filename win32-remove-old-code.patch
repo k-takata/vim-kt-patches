@@ -162,7 +162,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  ! endif
  !endif
  
-@@ -685,16 +652,9 @@ OPTFLAG = /O2
+@@ -685,20 +652,13 @@ OPTFLAG = /O2
  OPTFLAG = /Ox
  ! endif
  
@@ -180,6 +180,20 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  ! endif
  
  CFLAGS = $(CFLAGS) $(OPTFLAG) -DNDEBUG $(CPUARG)
+-RCFLAGS = $(rcflags) $(rcvars) -DNDEBUG
++RCFLAGS = -DNDEBUG
+ ! ifdef USE_MSVCRT
+ CFLAGS = $(CFLAGS) /MD
+ LIBC = msvcrt.lib
+@@ -714,7 +674,7 @@ VIM = vimd
+ DEBUGINFO = /ZI
+ ! endif
+ CFLAGS = $(CFLAGS) -D_DEBUG -DDEBUG /Od
+-RCFLAGS = $(rcflags) $(rcvars) -D_DEBUG -DDEBUG
++RCFLAGS = -D_DEBUG -DDEBUG
+ # The /fixed:no is needed for Quantify.
+ LIBC = /fixed:no
+ ! ifdef USE_MSVCRT
 @@ -731,11 +691,9 @@ LIBC = $(LIBC) libcmtd.lib
  RCFLAGS = $(RCFLAGS) /D_USING_V110_SDK71_
  !endif
