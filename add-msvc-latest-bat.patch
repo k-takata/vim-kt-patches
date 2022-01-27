@@ -1,11 +1,11 @@
 # HG changeset patch
-# Parent  e9523f06f4e039b9d4aff7400b1f8cfb516f7dfe
+# Parent  d87bf3cfffca61cf3dbc367523ac74a5ad612a1d
 
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 new file mode 100644
 --- /dev/null
 +++ b/src/msvc-latest.bat
-@@ -0,0 +1,71 @@
+@@ -0,0 +1,72 @@
 +@echo off
 +rem To be used on MS-Windows for Visual C++ 2017 or later.
 +rem See INSTALLpc.txt for information.
@@ -37,6 +37,7 @@ new file mode 100644
 +if not exist "%VSWHERE%" (
 +	echo Error: vswhere not found.
 +	set VSWHERE=
++	set VSWHERE_SET=
 +	exit /b 1
 +)
 +
