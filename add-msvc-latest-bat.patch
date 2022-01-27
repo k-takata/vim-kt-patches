@@ -108,8 +108,8 @@ new file mode 100644
 +rem Usage:
 +rem   For x86 builds run this with "x86" option:
 +rem     msvc2019 x86
-+rem   For x64 builds run this with "x86_amd64" option:
-+rem     msvc2019 x86_amd64
++rem   For x64 builds run this with "x64" option:
++rem     msvc2019 x64
 +
 +set "VSVEROPT=-version [16.0^,17.0^)"
 +call "%~dp0msvc-latest.bat" %*
@@ -126,8 +126,8 @@ new file mode 100644
 +rem Usage:
 +rem   For x86 builds run this with "x86" option:
 +rem     msvc2022 x86
-+rem   For x64 builds run this with "x86_amd64" option:
-+rem     msvc2022 x86_amd64
++rem   For x64 builds run this with "x64" option:
++rem     msvc2022 x64
 +
 +set "VSVEROPT=-version [17.0^,18.0^)"
 +call "%~dp0msvc-latest.bat" %*
