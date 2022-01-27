@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  fc10a8cb666b22b1f8febfefe0ac8fcc2f36b2a3
+# Parent  5c20d05d99169e742447cf8a681dfdf1afc471d7
 
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
@@ -40,17 +40,3 @@ diff --git a/src/gui.c b/src/gui.c
  
  /*
   * Get the font for 'guifontwide'.
-diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
---- a/src/gui_dwrite.cpp
-+++ b/src/gui_dwrite.cpp
-@@ -1176,8 +1176,8 @@ DWriteContext::GetCharWidth(int c)
-     }
-     else
-     {
--	text[0] = ((c - 0x10000) >> 10) + 0xD800;
--	text[1] = ((c - 0x10000) & 0x3ff) + 0xDC00;
-+	text[0] = (WCHAR)(((c - 0x10000) >> 10) + 0xD800);
-+	text[1] = (WCHAR)(((c - 0x10000) & 0x3ff) + 0xDC00);
- 	len = 2;
-     }
-     text[len] = L'\0';
