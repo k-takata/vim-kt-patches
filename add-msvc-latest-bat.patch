@@ -24,11 +24,11 @@ new file mode 100644
 +rem     Option to search specific version of Visual Studio.
 +rem     Default: -latest
 +rem     To search VS2017:
-+rem       set VSVEROPT=-version [15.0^^,16.0^^)
++rem       set "VSVEROPT=-version [15.0^,16.0^)"
 +rem     To search VS2019:
-+rem       set VSVEROPT=-version [16.0^^,17.0^^)
++rem       set "VSVEROPT=-version [16.0^,17.0^)"
 +rem     To search VS2022:
-+rem       set VSVEROPT=-version [17.0^^,18.0^^)
++rem       set "VSVEROPT=-version [17.0^,18.0^)"
 +
 +if "%VSWHERE%"=="" (
 +	set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -93,7 +93,7 @@ new file mode 100644
 +rem   For x64 builds run this with "x86_amd64" option:
 +rem     msvc2017 x86_amd64
 +
-+set VSVEROPT=-version [15.0^^,16.0^^)
++set "VSVEROPT=-version [15.0^,16.0^)"
 +call %~dp0msvc-latest.bat %*
 +set VSVEROPT=
 diff --git a/src/msvc2019.bat b/src/msvc2019.bat
@@ -111,7 +111,7 @@ new file mode 100644
 +rem   For x64 builds run this with "x86_amd64" option:
 +rem     msvc2019 x86_amd64
 +
-+set VSVEROPT=-version [16.0^^,17.0^^)
++set "VSVEROPT=-version [16.0^,17.0^)"
 +call %~dp0msvc-latest.bat %*
 +set VSVEROPT=
 diff --git a/src/msvc2022.bat b/src/msvc2022.bat
@@ -129,6 +129,6 @@ new file mode 100644
 +rem   For x64 builds run this with "x86_amd64" option:
 +rem     msvc2022 x86_amd64
 +
-+set VSVEROPT=-version [17.0^^,18.0^^)
++set "VSVEROPT=-version [17.0^,18.0^)"
 +call %~dp0msvc-latest.bat %*
 +set VSVEROPT=
