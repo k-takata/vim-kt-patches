@@ -40,3 +40,17 @@ diff --git a/src/gui.c b/src/gui.c
  
  /*
   * Get the font for 'guifontwide'.
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+--- a/src/gui_dwrite.cpp
++++ b/src/gui_dwrite.cpp
+@@ -1176,8 +1176,8 @@ DWriteContext::GetCharWidth(int c)
+     }
+     else
+     {
+-	text[0] = ((c - 0x10000) >> 10) + 0xD800;
+-	text[1] = ((c - 0x10000) & 0x3ff) + 0xDC00;
++	text[0] = (WCHAR)(((c - 0x10000) >> 10) + 0xD800);
++	text[1] = (WCHAR)(((c - 0x10000) & 0x3ff) + 0xDC00);
+ 	len = 2;
+     }
+     text[len] = L'\0';
