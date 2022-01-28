@@ -1,0 +1,46 @@
+# HG changeset patch
+# Parent  e012dc226b5de0a984ad0b2e9ee8e4108ff41820
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1262,25 +1262,29 @@ LINK_PDB = /PDB:$(VIM).pdb -debug
+ # CFLAGS with /Fo$(OUTDIR)/
+ CFLAGS_OUTDIR=$(CFLAGS) /Fo$(OUTDIR)/
+ 
++PATHDEF_SRC = $(OUTDIR)\pathdef.c
++
++LINKARGS1 = /nologo
++LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODEFAULTLIB) $(LIBC) $(OLE_LIB) \
++		$(LUA_LIB) $(MZSCHEME_LIB) $(PERL_LIB) $(PYTHON_LIB) $(PYTHON3_LIB) $(RUBY_LIB) \
++		$(TCL_LIB) $(SOUND_LIB) $(NETBEANS_LIB) $(XPM_LIB) $(SOD_LIB) $(LINK_PDB)
++
++!ifdef NODEBUG
+ # Add /opt:ref to remove unreferenced functions and data even when /DEBUG is
+ # added.
+-conflags = /nologo /opt:ref
+-
+-PATHDEF_SRC = $(OUTDIR)\pathdef.c
++LINKARGS1 = $(LINKARGS1) /opt:ref
++!else
++LINKARGS1 = $(LINKARGS1) /opt:noref /opt:noicf
++!endif
+ 
+ !IF "$(MAP)" == "yes"
+ # "/map" is for debugging
+-conflags = $(conflags) /map
++LINKARGS1 = $(LINKARGS1) /map
+ !ELSEIF "$(MAP)" == "lines"
+ # "/mapinfo:lines" is for debugging, only works for VC6 and later
+-conflags = $(conflags) /map /mapinfo:lines
++LINKARGS1 = $(LINKARGS1) /map /mapinfo:lines
+ !ENDIF
+ 
+-LINKARGS1 = $(linkdebug) $(conflags)
+-LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODEFAULTLIB) $(LIBC) $(OLE_LIB) \
+-		$(LUA_LIB) $(MZSCHEME_LIB) $(PERL_LIB) $(PYTHON_LIB) $(PYTHON3_LIB) $(RUBY_LIB) \
+-		$(TCL_LIB) $(SOUND_LIB) $(NETBEANS_LIB) $(XPM_LIB) $(SOD_LIB) $(LINK_PDB)
+-
+ # Enable link time code generation if needed.
+ !ifdef NODEBUG
+ ! if "$(OPTIMIZE)" != "SPACE"
