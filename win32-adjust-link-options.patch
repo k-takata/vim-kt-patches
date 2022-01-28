@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  e012dc226b5de0a984ad0b2e9ee8e4108ff41820
+# Parent  cde1224792091dcaa1fc709cf3c417f91f1d936d
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
@@ -97,7 +97,15 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  $(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(VIM).exe $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) $(OLE_OBJ)
  $(LUA_OBJ) $(MZSCHEME_OBJ) $(PERL_OBJ) $(PYTHON_OBJ) $(PYTHON3_OBJ) $(RUBY_OBJ)
  $(TCL_OBJ) $(TERM_OBJ) $(SOUND_OBJ) $(NETBEANS_OBJ) $(CHANNEL_OBJ)
-@@ -1897,7 +1901,7 @@ E_LINKARGS2 = $(E000_LINKARGS2:>=^^>)
+@@ -1415,6 +1419,7 @@ clean: testclean
+ 	- if exist $(GVIM).exe del $(GVIM).exe
+ 	- if exist $(GVIM).map del $(GVIM).map
+ 	- if exist $(VIMDLLBASE).dll del $(VIMDLLBASE).dll
++	- if exist $(VIMDLLBASE).ilk del $(VIMDLLBASE).ilk
+ 	- if exist $(VIMDLLBASE).lib del $(VIMDLLBASE).lib
+ 	- if exist $(VIMDLLBASE).exp del $(VIMDLLBASE).exp
+ 	- if exist $(VIMDLLBASE).pdb del $(VIMDLLBASE).pdb
+@@ -1897,7 +1902,7 @@ E_LINKARGS2 = $(E000_LINKARGS2:>=^^>)
  	@echo char_u *default_vim_dir = (char_u *)"$(VIMRCLOC:\=\\)"; >> $(PATHDEF_SRC)
  	@echo char_u *default_vimruntime_dir = (char_u *)"$(VIMRUNTIMEDIR:\=\\)"; >> $(PATHDEF_SRC)
  	@echo char_u *all_cflags = (char_u *)"$(CC:\=\\) $(E_CFLAGS)"; >> $(PATHDEF_SRC)
