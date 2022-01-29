@@ -1,80 +1,180 @@
 # HG changeset patch
-# Parent  5bf0dff700532f48b95a277278f707b7038523c5
+# Parent  0bea874bd35389e108185bf6a149d39c39775f8a
 
-diff --git a/src/gui_w32.c b/src/gui_w32.c
---- a/src/gui_w32.c
-+++ b/src/gui_w32.c
-@@ -5852,7 +5852,7 @@ latin9_to_ucs(char_u *text, int len, WCH
-  * noticeably so.
-  */
-     static void
--RevOut( HDC s_hdc,
-+RevOut( HDC hdc,
- 	int col,
- 	int row,
- 	UINT foptions,
-@@ -5864,7 +5864,7 @@ RevOut( HDC s_hdc,
-     int		ix;
+diff --git a/src/cmdexpand.c b/src/cmdexpand.c
+--- a/src/cmdexpand.c
++++ b/src/cmdexpand.c
+@@ -1993,11 +1993,11 @@ ExpandFromContext(
+ #ifdef BACKSLASH_IN_FILENAME
+ 	if (p_csl[0] != NUL && (options & WILD_IGNORE_COMPLETESLASH) == 0)
+ 	{
+-	    int	    i;
++	    int	    j;
  
-     for (ix = 0; ix < (int)len; ++ix)
--	ExtTextOut(s_hdc, col + TEXT_X(ix), row, foptions,
-+	ExtTextOut(hdc, col + TEXT_X(ix), row, foptions,
- 					pcliprect, text + ix, 1, padding);
- }
- #endif
-@@ -5940,7 +5940,6 @@ gui_mch_draw_string(
- {
-     static int	*padding = NULL;
-     static int	pad_size = 0;
--    int		i;
-     const RECT	*pcliprect = NULL;
-     UINT	foptions = 0;
-     static WCHAR *unicodebuf = NULL;
-@@ -6031,6 +6030,8 @@ gui_mch_draw_string(
+-	    for (i = 0; i < *num_file; ++i)
++	    for (j = 0; j < *num_file; ++j)
+ 	    {
+-		char_u	*ptr = (*file)[i];
++		char_u	*ptr = (*file)[j];
  
-     if (pad_size != Columns || padding == NULL || padding[0] != gui.char_width)
+ 		while (*ptr != NUL)
+ 		{
+diff --git a/src/drawscreen.c b/src/drawscreen.c
+--- a/src/drawscreen.c
++++ b/src/drawscreen.c
+@@ -2554,17 +2554,17 @@ win_update(win_T *wp)
+     // See the version that was fixed.
+     if (use_vtp() && get_conpty_fix_type() < 1)
      {
-+	int	i;
-+
- 	vim_free(padding);
- 	pad_size = Columns;
+-	int i;
++	int k;
  
+-	for (i = 0; i < Rows; ++i)
++	for (k = 0; k < Rows; ++k)
+ 	    if (enc_utf8)
+-		if ((*mb_off2cells)(LineOffset[i] + Columns - 2,
+-					   LineOffset[i] + screen_Columns) > 1)
+-		    screen_draw_rectangle(i, Columns - 2, 1, 2, FALSE);
++		if ((*mb_off2cells)(LineOffset[k] + Columns - 2,
++					   LineOffset[k] + screen_Columns) > 1)
++		    screen_draw_rectangle(k, Columns - 2, 1, 2, FALSE);
+ 		else
+-		    screen_draw_rectangle(i, Columns - 1, 1, 1, FALSE);
++		    screen_draw_rectangle(k, Columns - 1, 1, 1, FALSE);
+ 	    else
+-		screen_char(LineOffset[i] + Columns - 1, i, Columns - 1);
++		screen_char(LineOffset[k] + Columns - 1, k, Columns - 1);
+     }
+ #endif
+ 
+diff --git a/src/filepath.c b/src/filepath.c
+--- a/src/filepath.c
++++ b/src/filepath.c
+@@ -372,12 +372,12 @@ repeat:
+ 	    {
+ 		if (GetLongPathNameW(wfname, buf, _MAX_PATH))
+ 		{
+-		    char_u *p = utf16_to_enc(buf, NULL);
+-
+-		    if (p != NULL)
++		    char_u *q = utf16_to_enc(buf, NULL);
++
++		    if (q != NULL)
+ 		    {
+ 			vim_free(*bufp);    // free any allocated file name
+-			*bufp = *fnamep = p;
++			*bufp = *fnamep = q;
+ 		    }
+ 		}
+ 		vim_free(wfname);
+diff --git a/src/getchar.c b/src/getchar.c
+--- a/src/getchar.c
++++ b/src/getchar.c
+@@ -1780,16 +1780,16 @@ vgetc(void)
+ 		    c == K_TEAROFF)
+ 		{
+ 		    char_u	name[200];
+-		    int		i;
++		    int		j;
+ 
+ 		    // get menu path, it ends with a <CR>
+-		    for (i = 0; (c = vgetorpeek(TRUE)) != '\r'; )
++		    for (j = 0; (c = vgetorpeek(TRUE)) != '\r'; )
+ 		    {
+-			name[i] = c;
+-			if (i < 199)
+-			    ++i;
++			name[j] = c;
++			if (j < 199)
++			    ++j;
+ 		    }
+-		    name[i] = NUL;
++		    name[j] = NUL;
+ 		    gui_make_tearoff(name);
+ 		    continue;
+ 		}
+diff --git a/src/menu.c b/src/menu.c
+--- a/src/menu.c
++++ b/src/menu.c
+@@ -677,7 +677,7 @@ add_menu_path(
+ 		}
+ 	    }
+ 
+-# if defined(FEAT_GUI_MSWIN) & defined(FEAT_TEAROFF)
++# if defined(FEAT_GUI_MSWIN) && defined(FEAT_TEAROFF)
+ 	    // When adding a new submenu, may add a tearoff item
+ 	    if (	addtearoff
+ 		    && *next_name
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -406,7 +406,7 @@ peek_console_input(
-     DWORD	    nLength UNUSED,
-     LPDWORD	    lpEvents)
- {
--    return read_console_input(hInput, lpBuffer, -1, lpEvents);
-+    return read_console_input(hInput, lpBuffer, (DWORD)-1, lpEvents);
- }
- 
- # ifdef FEAT_CLIENTSERVER
-@@ -418,7 +418,7 @@ msg_wait_for_multiple_objects(
-     DWORD    dwMilliseconds,
-     DWORD    dwWakeMask)
+@@ -431,7 +431,7 @@ wait_for_single_object(
+     HANDLE hHandle,
+     DWORD dwMilliseconds)
  {
 -    if (read_console_input(NULL, NULL, -2, NULL))
 +    if (read_console_input(NULL, NULL, (DWORD)-2, NULL))
  	return WAIT_OBJECT_0;
-     return MsgWaitForMultipleObjects(nCount, pHandles, fWaitAll,
- 				     dwMilliseconds, dwWakeMask);
-@@ -5538,7 +5538,7 @@ mch_signal_job(job_T *job, char_u *how)
- 	{
- 	    if (job->jv_channel != NULL && job->jv_channel->ch_anonymous_pipe)
- 		job->jv_channel->ch_killing = TRUE;
--	    return TerminateJobObject(job->jv_job_object, -1) ? OK : FAIL;
-+	    return TerminateJobObject(job->jv_job_object, (UINT)-1) ? OK : FAIL;
- 	}
- 	return terminate_all(job->jv_proc_info.hProcess, -1) ? OK : FAIL;
-     }
-@@ -6271,7 +6271,7 @@ write_chars(
- 	    cchwritten = 1;
-     }
+     return WaitForSingleObject(hHandle, dwMilliseconds);
+ }
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -9412,7 +9412,7 @@ list_in_columns(char_u **items, int size
+     // The rightmost column doesn't need a separator.
+     // Sacrifice it to fit in one more column if possible.
+     ncol = (int) (Columns + 1) / width;
+-    nrow = item_count / ncol + (item_count % ncol ? 1 : 0);
++    nrow = item_count / ncol + ((item_count % ncol) ? 1 : 0);
  
--    if (cchwritten == length)
-+    if (cchwritten == (DWORD)length)
-     {
- 	written = cbToWrite;
- 	g_coord.X += (SHORT)cells;
+     // "i" counts columns then rows.  "idx" counts rows then columns.
+     for (i = 0; !got_int && i < nrow * ncol; ++i)
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -545,8 +545,8 @@ extern int (*dyn_libintl_wputenv)(const 
+  */
+ #ifdef FEAT_GETTEXT
+ # ifdef DYNAMIC_GETTEXT
+-#  define _(x) (*dyn_libintl_gettext)((char *)(x))
+-#  define NGETTEXT(x, xs, n) (*dyn_libintl_ngettext)((char *)(x), (char *)(xs), (n))
++#  define _(x) (*dyn_libintl_gettext)((const char *)(x))
++#  define NGETTEXT(x, xs, n) (*dyn_libintl_ngettext)((const char *)(x), (const char *)(xs), (n))
+ #  define N_(x) x
+ #  define bindtextdomain(domain, dir) (*dyn_libintl_bindtextdomain)((domain), (dir))
+ #  define bind_textdomain_codeset(domain, codeset) (*dyn_libintl_bind_textdomain_codeset)((domain), (codeset))
+@@ -557,7 +557,7 @@ extern int (*dyn_libintl_wputenv)(const 
+ #  define libintl_wputenv(envstring) (*dyn_libintl_wputenv)(envstring)
+ # else
+ #  include <libintl.h>
+-#  define _(x) gettext((char *)(x))
++#  define _(x) gettext((const char *)(x))
+ #  define NGETTEXT(x, xs, n) ngettext((x), (xs), (n))
+ #  ifdef gettext_noop
+ #   define N_(x) gettext_noop(x)
+@@ -566,8 +566,8 @@ extern int (*dyn_libintl_wputenv)(const 
+ #  endif
+ # endif
+ #else
+-# define _(x) ((char *)(x))
+-# define NGETTEXT(x, xs, n) (((n) == 1) ? (char *)(x) : (char *)(xs))
++# define _(x) ((const char *)(x))
++# define NGETTEXT(x, xs, n) (((n) == 1) ? (const char *)(x) : (const char *)(xs))
+ # define N_(x) x
+ # ifdef bindtextdomain
+ #  undef bindtextdomain
+@@ -1667,11 +1667,11 @@ void *vim_memset(void *, int, size_t);
+ # define MB_STRICMP(d, s)	mb_strnicmp((char_u *)(d), (char_u *)(s), (int)MAXCOL)
+ # define MB_STRNICMP(d, s, n)	mb_strnicmp((char_u *)(d), (char_u *)(s), (int)(n))
+ 
+-#define STRCAT(d, s)	    strcat((char *)(d), (char *)(s))
+-#define STRNCAT(d, s, n)    strncat((char *)(d), (char *)(s), (size_t)(n))
++#define STRCAT(d, s)	    strcat((char *)(d), (const char *)(s))
++#define STRNCAT(d, s, n)    strncat((char *)(d), (const char *)(s), (size_t)(n))
+ 
+ #ifdef HAVE_STRPBRK
+-# define vim_strpbrk(s, cs) (char_u *)strpbrk((char *)(s), (char *)(cs))
++# define vim_strpbrk(s, cs) (char_u *)strpbrk((const char *)(s), (const char *)(cs))
+ #endif
+ 
+ #define OUT_STR(s)		    out_str((char_u *)(s))
