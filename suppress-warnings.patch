@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  0bea874bd35389e108185bf6a149d39c39775f8a
+# Parent  29274fb6ba32ad8e3264e01b5a32c3c870cc9199
 
 diff --git a/src/cmdexpand.c b/src/cmdexpand.c
 --- a/src/cmdexpand.c
@@ -70,7 +70,7 @@ diff --git a/src/filepath.c b/src/filepath.c
 diff --git a/src/getchar.c b/src/getchar.c
 --- a/src/getchar.c
 +++ b/src/getchar.c
-@@ -1780,16 +1780,16 @@ vgetc(void)
+@@ -1768,16 +1768,16 @@ vgetc(void)
  		    c == K_TEAROFF)
  		{
  		    char_u	name[200];
@@ -117,10 +117,19 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	return WAIT_OBJECT_0;
      return WaitForSingleObject(hHandle, dwMilliseconds);
  }
+@@ -725,7 +725,7 @@ dyn_libintl_init(void)
+     for (i = 0; libintl_entry[i].name != NULL
+ 					 && libintl_entry[i].ptr != NULL; ++i)
+     {
+-	if ((*libintl_entry[i].ptr = (FARPROC)GetProcAddress(hLibintlDLL,
++	if ((*libintl_entry[i].ptr = GetProcAddress(hLibintlDLL,
+ 					      libintl_entry[i].name)) == NULL)
+ 	{
+ 	    dyn_libintl_end();
 diff --git a/src/version.c b/src/version.c
 --- a/src/version.c
 +++ b/src/version.c
-@@ -9412,7 +9412,7 @@ list_in_columns(char_u **items, int size
+@@ -9460,7 +9460,7 @@ list_in_columns(char_u **items, int size
      // The rightmost column doesn't need a separator.
      // Sacrifice it to fit in one more column if possible.
      ncol = (int) (Columns + 1) / width;
