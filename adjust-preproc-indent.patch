@@ -1,6 +1,51 @@
 # HG changeset patch
-# Parent  8ddef66f2238ec97de56abfa1ee961f6f76de4f0
+# Parent  07f8a2d169a0bdf696679c7f6dc599a4da809447
 
+diff --git a/src/arglist.c b/src/arglist.c
+--- a/src/arglist.c
++++ b/src/arglist.c
+@@ -969,9 +969,9 @@ do_arg_all(
+     old_curwin = curwin;
+     old_curtab = curtab;
+ 
+-# ifdef FEAT_GUI
++#ifdef FEAT_GUI
+     need_mouse_correct = TRUE;
+-# endif
++#endif
+ 
+     // Try closing all windows that are not in the argument list.
+     // Also close windows that are not full width;
+diff --git a/src/change.c b/src/change.c
+--- a/src/change.c
++++ b/src/change.c
+@@ -1638,9 +1638,9 @@ open_line(
+ #ifdef FEAT_CINDENT
+     // May do indenting after opening a new line.
+     do_cindent = !p_paste && (curbuf->b_p_cin
+-#  ifdef FEAT_EVAL
++# ifdef FEAT_EVAL
+ 		    || *curbuf->b_p_inde != NUL
+-#  endif
++# endif
+ 		)
+ 	    && in_cinkeys(dir == FORWARD
+ 		? KEY_OPEN_FORW
+diff --git a/src/ex_cmds.c b/src/ex_cmds.c
+--- a/src/ex_cmds.c
++++ b/src/ex_cmds.c
+@@ -99,9 +99,9 @@ do_ascii(exarg_T *eap UNUSED)
+ 	    IObuff[len++] = ' ';
+ 	IObuff[len++] = '<';
+ 	if (enc_utf8 && utf_iscomposing(c)
+-# ifdef USE_GUI
++#ifdef USE_GUI
+ 		&& !gui.in_use
+-# endif
++#endif
+ 		)
+ 	    IObuff[len++] = ' '; // draw composing char on top of a space
+ 	len += (*mb_char2bytes)(c, IObuff + len);
 diff --git a/src/gui.c b/src/gui.c
 --- a/src/gui.c
 +++ b/src/gui.c
@@ -72,6 +117,61 @@ diff --git a/src/gui.c b/src/gui.c
  # ifdef FEAT_CONCEAL
  	if (curwin->w_p_cole > 0)
  	{
+diff --git a/src/hashtab.c b/src/hashtab.c
+--- a/src/hashtab.c
++++ b/src/hashtab.c
+@@ -189,13 +189,13 @@ hash_lookup(hashtab_T *ht, char_u *key, 
+     void
+ hash_debug_results(void)
+ {
+-#ifdef HT_DEBUG
++# ifdef HT_DEBUG
+     fprintf(stderr, "\r\n\r\n\r\n\r\n");
+     fprintf(stderr, "Number of hashtable lookups: %ld\r\n", hash_count_lookup);
+     fprintf(stderr, "Number of perturb loops: %ld\r\n", hash_count_perturb);
+     fprintf(stderr, "Percentage of perturb loops: %ld%%\r\n",
+ 				hash_count_perturb * 100 / hash_count_lookup);
+-#endif
++# endif
+ }
+ #endif
+ 
+diff --git a/src/indent.c b/src/indent.c
+--- a/src/indent.c
++++ b/src/indent.c
+@@ -2173,7 +2173,7 @@ f_indent(typval_T *argvars, typval_T *re
+     void
+ f_lispindent(typval_T *argvars UNUSED, typval_T *rettv)
+ {
+-#ifdef FEAT_LISP
++# ifdef FEAT_LISP
+     pos_T	pos;
+     linenr_T	lnum;
+ 
+@@ -2191,7 +2191,7 @@ f_lispindent(typval_T *argvars UNUSED, t
+     else if (in_vim9script())
+ 	semsg(_(e_invalid_line_number_nr), lnum);
+     else
+-#endif
++# endif
+ 	rettv->vval.v_number = -1;
+ }
+ #endif
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -3667,9 +3667,9 @@ do_pending_operator(cmdarg_T *cap, int o
+ 		curbuf->b_visual.vi_mode = VIsual_mode;
+ 		restore_visual_mode();
+ 		curbuf->b_visual.vi_curswant = curwin->w_curswant;
+-# ifdef FEAT_EVAL
++#ifdef FEAT_EVAL
+ 		curbuf->b_visual_mode_eval = VIsual_mode;
+-# endif
++#endif
+ 	    }
+ 
+ 	    // In Select mode, a linewise selection is operated upon like a
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
