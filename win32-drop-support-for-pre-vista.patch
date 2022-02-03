@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a17d2a73c8915d9c7fe6808b1304dc8e0ca44aea
+# Parent  8c4161f7b1af24ac99e55b23699ba8cd9075b559
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -271,8 +271,8 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
 @@ -247,27 +247,6 @@ static BOOL win8_or_later = FALSE;
- #  define UChar uChar.UnicodeChar
- # endif
+ # define UChar uChar.UnicodeChar
+ #endif
  
 -#if !defined(FEAT_GUI_MSWIN) || defined(VIMDLL)
 -// Dynamic loading for portability
