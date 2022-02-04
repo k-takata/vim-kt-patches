@@ -1,0 +1,170 @@
+# HG changeset patch
+# Parent  40f427c198ca043f9ef19f4fe5ebca4b974d4302
+
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -5196,7 +5196,7 @@ f_has(typval_T *argvars, typval_T *rettv
+ #endif
+ 		},
+ 	{"win32unix",
+-#if defined(UNIX) && defined(__CYGWIN__)
++#ifdef WIN32UNIX
+ 		1
+ #else
+ 		0
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -11,11 +11,9 @@
+ #include "vim.h"
+ 
+ #ifdef __CYGWIN__
+-# ifndef MSWIN
+-#  include <cygwin/version.h>
+-#  include <sys/cygwin.h>	// for cygwin_conv_to_posix_path() and/or
++# include <cygwin/version.h>
++# include <sys/cygwin.h>	// for cygwin_conv_to_posix_path() and/or
+ 				// cygwin_conv_path()
+-# endif
+ # include <limits.h>
+ #endif
+ 
+@@ -2576,7 +2574,7 @@ scripterror:
+ 		}
+ 	    }
+ #endif
+-#if defined(__CYGWIN32__) && !defined(MSWIN)
++#ifdef __CYGWIN32__
+ 	    /*
+ 	     * If vim is invoked by non-Cygwin tools, convert away any
+ 	     * DOS paths, so things like .swp files are created correctly.
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -44,15 +44,13 @@ static int selinux_enabled = -1;
+ #endif
+ 
+ #ifdef __CYGWIN__
+-# ifndef MSWIN
+-#  include <cygwin/version.h>
+-#  include <sys/cygwin.h>	// for cygwin_conv_to_posix_path() and/or
++# include <cygwin/version.h>
++# include <sys/cygwin.h>	// for cygwin_conv_to_posix_path() and/or
+ 				// for cygwin_conv_path()
+-#  ifdef FEAT_CYGWIN_WIN32_CLIPBOARD
+-#   define WIN32_LEAN_AND_MEAN
+-#   include <windows.h>
+-#   include "winclip.pro"
+-#  endif
++# ifdef FEAT_CYGWIN_WIN32_CLIPBOARD
++#  define WIN32_LEAN_AND_MEAN
++#  include <windows.h>
++#  include "winclip.pro"
+ # endif
+ #endif
+ 
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -241,12 +241,6 @@ static WCHAR *exe_pathw = NULL;
+ 
+ static BOOL win8_or_later = FALSE;
+ 
+-#if defined(__GNUC__) && !defined(__MINGW32__)  && !defined(__CYGWIN__)
+-# define UChar UnicodeChar
+-#else
+-# define UChar uChar.UnicodeChar
+-#endif
+-
+ /*
+  * Get version number including build number
+  */
+@@ -285,7 +279,7 @@ is_ambiwidth_event(
+ 		&& ir->Event.KeyEvent.wRepeatCount == 1
+ 		&& ir->Event.KeyEvent.wVirtualKeyCode == 0x12
+ 		&& ir->Event.KeyEvent.wVirtualScanCode == 0x38
+-		&& ir->Event.KeyEvent.UChar == 0
++		&& ir->Event.KeyEvent.uChar.UnicodeChar == 0
+ 		&& ir->Event.KeyEvent.dwControlKeyState == 2;
+ }
+ 
+@@ -296,7 +290,8 @@ make_ambiwidth_event(
+ {
+     down->Event.KeyEvent.wVirtualKeyCode = 0;
+     down->Event.KeyEvent.wVirtualScanCode = 0;
+-    down->Event.KeyEvent.UChar = up->Event.KeyEvent.UChar;
++    down->Event.KeyEvent.uChar.UnicodeChar
++				    = up->Event.KeyEvent.uChar.UnicodeChar;
+     down->Event.KeyEvent.dwControlKeyState = 0;
+ }
+ 
+@@ -1006,12 +1001,12 @@ win32_kbd_patch_key(
+ 
+     if (s_iIsDead == 2)
+     {
+-	pker->UChar = (WCHAR) awAnsiCode[1];
++	pker->uChar.UnicodeChar = (WCHAR) awAnsiCode[1];
+ 	s_iIsDead = 0;
+ 	return 1;
+     }
+ 
+-    if (pker->UChar != 0)
++    if (pker->uChar.UnicodeChar != 0)
+ 	return 1;
+ 
+     CLEAR_FIELD(abKeystate);
+@@ -1034,7 +1029,7 @@ win32_kbd_patch_key(
+ 			abKeystate, awAnsiCode, 2, 0);
+ 
+     if (s_iIsDead > 0)
+-	pker->UChar = (WCHAR) awAnsiCode[0];
++	pker->uChar.UnicodeChar = (WCHAR) awAnsiCode[0];
+ 
+     return s_iIsDead;
+ }
+@@ -1076,7 +1071,8 @@ decode_key_event(
+     }
+ 
+     // special cases
+-    if ((nModifs & CTRL) != 0 && (nModifs & ~CTRL) == 0 && pker->UChar == NUL)
++    if ((nModifs & CTRL) != 0 && (nModifs & ~CTRL) == 0
++					    && pker->uChar.UnicodeChar == NUL)
+     {
+ 	// Ctrl-6 is Ctrl-^
+ 	if (pker->wVirtualKeyCode == '6')
+@@ -1138,7 +1134,7 @@ decode_key_event(
+ 	*pch = NUL;
+     else
+     {
+-	*pch = (i > 0) ? pker->UChar : NUL;
++	*pch = (i > 0) ? pker->uChar.UnicodeChar : NUL;
+ 
+ 	if (pmodifiers != NULL)
+ 	{
+@@ -1684,7 +1680,7 @@ WaitForChar(long msec, int ignore_input)
+ # ifdef FEAT_MBYTE_IME
+ 		// Windows IME sends two '\n's with only one 'ENTER'.  First:
+ 		// wVirtualKeyCode == 13. second: wVirtualKeyCode == 0
+-		if (ir.Event.KeyEvent.UChar == 0
++		if (ir.Event.KeyEvent.uChar.UnicodeChar == 0
+ 			&& ir.Event.KeyEvent.wVirtualKeyCode == 13)
+ 		{
+ 		    read_console_input(g_hConIn, &ir, 1, &cRecords);
+diff --git a/src/os_win32.h b/src/os_win32.h
+--- a/src/os_win32.h
++++ b/src/os_win32.h
+@@ -11,11 +11,9 @@
+  */
+ 
+ #include "os_dos.h"		// common MS-DOS and Win32 stuff
+-#ifndef __CYGWIN__
+ // cproto fails on missing include files
+-# ifndef PROTO
+-#  include <direct.h>		// for _mkdir()
+-# endif
++#ifndef PROTO
++# include <direct.h>		// for _mkdir()
+ #endif
+ 
+ #define BINARY_FILE_IO
