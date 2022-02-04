@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  8c4161f7b1af24ac99e55b23699ba8cd9075b559
+# Parent  981e9985962cfe916401fb8f9d49f5f1e28514db
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -270,9 +270,9 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -247,27 +247,6 @@ static BOOL win8_or_later = FALSE;
- # define UChar uChar.UnicodeChar
- #endif
+@@ -241,27 +241,6 @@ static char_u *exe_path = NULL;
+ 
+ static BOOL win8_or_later = FALSE;
  
 -#if !defined(FEAT_GUI_MSWIN) || defined(VIMDLL)
 -// Dynamic loading for portability
@@ -298,7 +298,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /*
   * Get version number including build number
   */
-@@ -7800,30 +7779,13 @@ vtp_flag_init(void)
+@@ -7796,30 +7775,13 @@ vtp_flag_init(void)
      static void
  vtp_init(void)
  {
@@ -331,7 +331,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      save_console_bg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_bg];
      save_console_fg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_fg];
      store_console_bg_rgb = save_console_bg_rgb;
-@@ -8048,7 +8010,7 @@ ctermtoxterm(
+@@ -8044,7 +8006,7 @@ ctermtoxterm(
  set_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -340,7 +340,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      guicolor_T	fg, bg;
      int		ctermfg, ctermbg;
  
-@@ -8068,8 +8030,7 @@ set_console_color_rgb(void)
+@@ -8064,8 +8026,7 @@ set_console_color_rgb(void)
      bg = (GetRValue(bg) << 16) | (GetGValue(bg) << 8) | GetBValue(bg);
  
      csbi.cbSize = sizeof(csbi);
@@ -350,7 +350,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      csbi.cbSize = sizeof(csbi);
      csbi.srWindow.Right += 1;
-@@ -8078,8 +8039,7 @@ set_console_color_rgb(void)
+@@ -8074,8 +8035,7 @@ set_console_color_rgb(void)
      store_console_fg_rgb = csbi.ColorTable[g_color_index_fg];
      csbi.ColorTable[g_color_index_bg] = (COLORREF)bg;
      csbi.ColorTable[g_color_index_fg] = (COLORREF)fg;
@@ -360,7 +360,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8135,22 +8095,20 @@ get_default_console_color(
+@@ -8131,22 +8091,20 @@ get_default_console_color(
  reset_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -386,7 +386,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8161,19 +8119,17 @@ reset_console_color_rgb(void)
+@@ -8157,19 +8115,17 @@ reset_console_color_rgb(void)
  restore_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
