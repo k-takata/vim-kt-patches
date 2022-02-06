@@ -48,7 +48,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
      if (hinst == NULL || is_stdin_readable())
  	return;
  
-@@ -1063,6 +1062,53 @@ reset_stdin(void)
+@@ -1063,6 +1062,52 @@ reset_stdin(void)
  # define reset_stdin()
  #endif
  
@@ -95,14 +95,13 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +    orig_exit = NULL;
 +}
 +#else
-+# define hook_py_exit()
 +# define restore_py_exit()
 +#endif
 +
      static int
  Python3_Init(void)
  {
-@@ -1095,8 +1141,26 @@ Python3_Init(void)
+@@ -1095,8 +1140,27 @@ Python3_Init(void)
  
  	PyImport_AppendInittab("vim", Py3Init_vim);
  
@@ -124,6 +123,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +	else
 +	{
 +	    restore_py_exit();
++	    emsg(_("Exxxx: Critical error in python3 initialization. Check your python3 installation."));
 +	    goto fail;
 +	}
 +#endif
