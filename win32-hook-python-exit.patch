@@ -192,10 +192,10 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			return (void *)(pImage + pImpDesc->Name);
 +		    case 2:
 +			original = (void *)pIAT->u1.Function;
-+			VirtualProtect(&pIAT->u1.Function, sizeof(void*),
++			VirtualProtect(&pIAT->u1.Function, sizeof(void *),
 +				new, &old);
 +			pIAT->u1.Function = (UINT_PTR)ptr;
-+			VirtualProtect(&pIAT->u1.Function, sizeof(void*),
++			VirtualProtect(&pIAT->u1.Function, sizeof(void *),
 +				old, &new);
 +			return original;
  		    default:
