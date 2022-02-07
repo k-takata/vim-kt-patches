@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  add70cec08b07eb44dc69ccf01d473ccb24cae7c
+# Parent  4663988fb4ea1471b21985a8e37ebc6f7a6ef96d
 
 diff --git a/runtime/doc/if_pyth.txt b/runtime/doc/if_pyth.txt
 --- a/runtime/doc/if_pyth.txt
@@ -167,13 +167,13 @@ diff --git a/src/os_win32.c b/src/os_win32.c
   * Get related information about 'funcname' which is imported by 'hInst'.
   * If 'info' is 0, return the function address.
   * If 'info' is 1, return the module name which the function is imported from.
-+ * If 'info' is 2, hook the function with 'data', and return the original
++ * If 'info' is 2, hook the function with 'ptr', and return the original
 + * function address.
   */
      static void *
 -get_imported_func_info(HINSTANCE hInst, const char *funcname, int info)
 +get_imported_func_info(HINSTANCE hInst, const char *funcname, int info,
-+	const void *data)
++	const void *ptr)
  {
      PBYTE			pImage = (PBYTE)hInst;
      PIMAGE_DOS_HEADER		pDOS = (PIMAGE_DOS_HEADER)hInst;
@@ -194,7 +194,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +			original = (void *)pIAT->u1.Function;
 +			VirtualProtect(&pIAT->u1.Function, sizeof(void*),
 +				new, &old);
-+			pIAT->u1.Function = (UINT_PTR)data;
++			pIAT->u1.Function = (UINT_PTR)ptr;
 +			VirtualProtect(&pIAT->u1.Function, sizeof(void*),
 +				old, &new);
 +			return original;
