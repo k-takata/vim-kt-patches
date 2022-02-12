@@ -1,0 +1,264 @@
+# HG changeset patch
+# Parent  7604cf51c3c613a91b80861d8434819e7e802f06
+
+diff --git a/src/crypt.c b/src/crypt.c
+--- a/src/crypt.c
++++ b/src/crypt.c
+@@ -162,6 +162,22 @@ typedef struct {
+ 
+ 
+ # ifdef DYNAMIC_SODIUM
++#  ifdef MSWIN
++#   define SODIUM_PROC FARPROC
++#   define load_dll vimLoadLib
++#   define symbol_from_dll GetProcAddress
++#   define close_dll FreeLibrary
++#   define load_dll_error GetWin32Error
++#  else
++#   error Dynamic loading of libsodium is not supported for now.
++//#   define HINSTANCE void*
++//#   define SODIUM_PROC void*
++//#   define load_dll(n) dlopen((n), RTLD_LAZY|RTLD_GLOBAL)
++//#   define symbol_from_dll dlsym
++//#   define close_dll dlclose
++//#   define load_dll_error dlerror
++#  endif
++
+ #  define sodium_init	    load_sodium
+ #  define sodium_free	    dll_sodium_free
+ #  define sodium_malloc	    dll_sodium_malloc
+@@ -214,51 +230,70 @@ static void (*dll_randombytes_buf)(void 
+ 
+ static struct {
+     const char *name;
+-    FARPROC *ptr;
++    SODIUM_PROC *ptr;
+ } sodium_funcname_table[] = {
+-    {"sodium_init", (FARPROC*)&dll_sodium_init},
+-    {"sodium_free", (FARPROC*)&dll_sodium_free},
+-    {"sodium_malloc", (FARPROC*)&dll_sodium_malloc},
+-    {"sodium_memzero", (FARPROC*)&dll_sodium_memzero},
+-    {"sodium_mlock", (FARPROC*)&dll_sodium_mlock},
+-    {"sodium_munlock", (FARPROC*)&dll_sodium_munlock},
+-    {"crypto_secretstream_xchacha20poly1305_init_push", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_init_push},
+-    {"crypto_secretstream_xchacha20poly1305_push", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_push},
+-    {"crypto_secretstream_xchacha20poly1305_init_pull", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_init_pull},
+-    {"crypto_secretstream_xchacha20poly1305_pull", (FARPROC*)&dll_crypto_secretstream_xchacha20poly1305_pull},
+-    {"crypto_pwhash", (FARPROC*)&dll_crypto_pwhash},
+-    {"randombytes_buf", (FARPROC*)&dll_randombytes_buf},
++    {"sodium_init", (SODIUM_PROC*)&dll_sodium_init},
++    {"sodium_free", (SODIUM_PROC*)&dll_sodium_free},
++    {"sodium_malloc", (SODIUM_PROC*)&dll_sodium_malloc},
++    {"sodium_memzero", (SODIUM_PROC*)&dll_sodium_memzero},
++    {"sodium_mlock", (SODIUM_PROC*)&dll_sodium_mlock},
++    {"sodium_munlock", (SODIUM_PROC*)&dll_sodium_munlock},
++    {"crypto_secretstream_xchacha20poly1305_init_push", (SODIUM_PROC*)&dll_crypto_secretstream_xchacha20poly1305_init_push},
++    {"crypto_secretstream_xchacha20poly1305_push", (SODIUM_PROC*)&dll_crypto_secretstream_xchacha20poly1305_push},
++    {"crypto_secretstream_xchacha20poly1305_init_pull", (SODIUM_PROC*)&dll_crypto_secretstream_xchacha20poly1305_init_pull},
++    {"crypto_secretstream_xchacha20poly1305_pull", (SODIUM_PROC*)&dll_crypto_secretstream_xchacha20poly1305_pull},
++    {"crypto_pwhash", (SODIUM_PROC*)&dll_crypto_pwhash},
++    {"randombytes_buf", (SODIUM_PROC*)&dll_randombytes_buf},
+     {NULL, NULL}
+ };
+ 
+     static int
++sodium_runtime_link_init(int verbose)
++{
++    static HINSTANCE hsodium = NULL;
++    const char *libname = "libsodium.dll";
++    int i;
++
++    if (hsodium != NULL)
++	return OK;
++
++    hsodium = load_dll(libname);
++    if (hsodium == NULL)
++    {
++	if (verbose)
++	    semsg(_(e_could_not_load_library_str_str), libname, load_dll_error());
++	return FAIL;
++    }
++
++    for (i = 0; sodium_funcname_table[i].ptr; ++i)
++    {
++	if ((*sodium_funcname_table[i].ptr = symbol_from_dll(hsodium,
++			sodium_funcname_table[i].name)) == NULL)
++	{
++	    FreeLibrary(hsodium);
++	    hsodium = NULL;
++	    if (verbose)
++		semsg(_(e_could_not_load_library_function_str), sodium_funcname_table[i].name);
++	    return FAIL;
++	}
++    }
++    return OK;
++}
++
++    static int
+ load_sodium(void)
+ {
+-    static HANDLE hsodium = NULL;
+-    int i;
+-
+-    if (hsodium != NULL)
+-	return 0;
+-
+-    hsodium = vimLoadLib("libsodium.dll");
+-    if (hsodium == NULL)
+-    {
+-	// TODO: Show error message.
++    if (sodium_runtime_link_init(TRUE) == FAIL)
+ 	return -1;
+-    }
++    return dll_sodium_init();
++}
++# endif
+ 
+-    for (i = 0; sodium_funcname_table[i].ptr; ++i)
+-    {
+-	if ((*sodium_funcname_table[i].ptr = GetProcAddress(hsodium,
+-			sodium_funcname_table[i].name)) == NULL)
+-	{
+-	    FreeLibrary(hsodium);
+-	    hsodium = NULL;
+-	    // TODO: Show error message.
+-	    return -1;
+-	}
+-    }
+-    return dll_sodium_init();
++# if defined(DYNAMIC_SODIUM) || defined(PROTO)
++    int
++sodium_enabled(int verbose)
++{
++    return sodium_runtime_link_init(verbose) == OK;
+ }
+ # endif
+ #endif
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -5997,7 +5997,7 @@ f_has(typval_T *argvars, typval_T *rettv
+ #endif
+ 		},
+ 	{"sodium",
+-#ifdef FEAT_SODIUM
++#if defined(FEAT_SODIUM) && !defined(DYNAMIC_SODIUM)
+ 		1
+ #else
+ 		0
+@@ -6318,6 +6318,10 @@ f_has(typval_T *argvars, typval_T *rettv
+ 	else if (STRICMP(name, "tcl") == 0)
+ 	    n = tcl_enabled(FALSE);
+ #endif
++#ifdef DYNAMIC_SODIUM
++	else if (STRICMP(name, "sodium") == 0)
++	    n = sodium_enabled(FALSE);
++#endif
+ #if defined(FEAT_TERMINAL) && defined(MSWIN)
+ 	else if (STRICMP(name, "terminal") == 0)
+ 	    n = terminal_enabled();
+diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
+--- a/src/gui_dwrite.cpp
++++ b/src/gui_dwrite.cpp
+@@ -59,7 +59,7 @@
+ #endif
+ 
+ #ifdef DYNAMIC_DIRECTX
+-extern "C" HINSTANCE vimLoadLib(char *name);
++extern "C" HINSTANCE vimLoadLib(const char *name);
+ 
+ typedef int (WINAPI *PGETUSERDEFAULTLOCALENAME)(LPWSTR, int);
+ typedef HRESULT (WINAPI *PD2D1CREATEFACTORY)(D2D1_FACTORY_TYPE,
+@@ -1270,8 +1270,8 @@ DWrite_Init(void)
+ {
+ #ifdef DYNAMIC_DIRECTX
+     // Load libraries.
+-    hD2D1DLL = vimLoadLib(const_cast<char*>("d2d1.dll"));
+-    hDWriteDLL = vimLoadLib(const_cast<char*>("dwrite.dll"));
++    hD2D1DLL = vimLoadLib("d2d1.dll");
++    hDWriteDLL = vimLoadLib("dwrite.dll");
+     if (hD2D1DLL == NULL || hDWriteDLL == NULL)
+     {
+ 	DWrite_Final();
+diff --git a/src/if_cscope.c b/src/if_cscope.c
+--- a/src/if_cscope.c
++++ b/src/if_cscope.c
+@@ -1371,10 +1371,7 @@ cs_insert_filelist(
+ 		char *winmsg = GetWin32Error();
+ 
+ 		if (winmsg != NULL)
+-		{
+ 		    (void)semsg(cant_msg, winmsg);
+-		    LocalFree(winmsg);
+-		}
+ 		else
+ 		    // subst filename if can't get error text
+ 		    (void)semsg(cant_msg, fname);
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -521,7 +521,7 @@ unescape_shellxquote(char_u *p, char_u *
+  * Load library "name".
+  */
+     HINSTANCE
+-vimLoadLib(char *name)
++vimLoadLib(const char *name)
+ {
+     HINSTANCE	dll = NULL;
+ 
+@@ -8257,15 +8257,20 @@ resize_console_buf(void)
+     char *
+ GetWin32Error(void)
+ {
++    static char *oldmsg = NULL;
+     char *msg = NULL;
++
+     FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
+ 	    NULL, GetLastError(), 0, (LPSTR)&msg, 0, NULL);
++    if (oldmsg != NULL)
++	LocalFree(oldmsg);
+     if (msg != NULL)
+     {
+ 	// remove trailing \r\n
+ 	char *pcrlf = strstr(msg, "\r\n");
+ 	if (pcrlf != NULL)
+ 	    *pcrlf = '\0';
++	oldmsg = msg;
+     }
+     return msg;
+ }
+diff --git a/src/proto/crypt.pro b/src/proto/crypt.pro
+--- a/src/proto/crypt.pro
++++ b/src/proto/crypt.pro
+@@ -1,4 +1,5 @@
+ /* crypt.c */
++int sodium_enabled(int verbose);
+ int crypt_method_nr_from_name(char_u *name);
+ int crypt_method_nr_from_magic(char *ptr, int len);
+ int crypt_works_inplace(cryptstate_T *state);
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -1,6 +1,6 @@
+ /* os_win32.c */
+ void mch_get_exe_name(void);
+-HINSTANCE vimLoadLib(char *name);
++HINSTANCE vimLoadLib(const char *name);
+ int mch_is_gui_executable(void);
+ HINSTANCE find_imported_module_by_funcname(HINSTANCE hInst, const char *funcname);
+ void *get_dll_import_func(HINSTANCE hInst, const char *funcname);
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -548,7 +548,11 @@ static char *(features[]) =
+ 	"-smartindent",
+ #endif
+ #ifdef FEAT_SODIUM
++# ifdef DYNAMIC_SODIUM
++	"+sodium/dyn",
++# else
+ 	"+sodium",
++# endif
+ #else
+ 	"-sodium",
+ #endif
