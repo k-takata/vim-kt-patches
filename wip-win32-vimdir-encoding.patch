@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  966a55f59e8255979ed20950b33a89fe3ac9fa22
+# Parent  75d764289e9e44b75f1e3705270582f539a048f0
 
 diff --git a/src/locale.c b/src/locale.c
 --- a/src/locale.c
@@ -15,7 +15,7 @@ diff --git a/src/locale.c b/src/locale.c
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -1261,6 +1261,32 @@ free_users(void)
+@@ -1283,6 +1283,32 @@ free_users(void)
  }
  #endif
  
@@ -48,7 +48,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  /*
   * Call expand_env() and store the result in an allocated string.
   * This is not very memory efficient, this expects the result to be freed
-@@ -1406,7 +1432,9 @@ expand_env_esc(
+@@ -1428,7 +1454,9 @@ expand_env_esc(
  			++tail;
  #endif
  		    *var = NUL;
@@ -58,7 +58,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  #if defined(MSWIN) || defined(UNIX)
  		}
  #endif
-@@ -1693,6 +1721,7 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1715,6 +1743,7 @@ vim_getenv(char_u *name, int *mustfree)
      if (!vimruntime && STRCMP(name, "VIM") != 0)
  	return NULL;
  
@@ -66,7 +66,7 @@ diff --git a/src/misc1.c b/src/misc1.c
      /*
       * When expanding $VIMRUNTIME fails, try using $VIM/vim<version> or $VIM.
       * Don't do this when default_vimruntime_dir is non-empty.
-@@ -1750,10 +1779,12 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1772,10 +1801,12 @@ vim_getenv(char_u *name, int *mustfree)
  	else
  	    p = exe_name;
  #endif
@@ -79,7 +79,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  
  	    // remove "doc/" from 'helpfile', if present
  	    if (p == p_hf)
-@@ -1792,6 +1823,7 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1814,6 +1845,7 @@ vim_getenv(char_u *name, int *mustfree)
  		pend = remove_tail(p, pend, (char_u *)RUNTIME_DIRNAME);
  		pend = remove_tail(p, pend, (char_u *)VIM_VERSION_NODOT);
  	    }
@@ -87,7 +87,7 @@ diff --git a/src/misc1.c b/src/misc1.c
  
  	    // remove trailing path separator
  	    if (pend > p && after_pathsep(p, pend))
-@@ -1853,14 +1885,17 @@ vim_getenv(char_u *name, int *mustfree)
+@@ -1875,14 +1907,17 @@ vim_getenv(char_u *name, int *mustfree)
  	if (vimruntime)
  	{
  	    vim_setenv((char_u *)"VIMRUNTIME", p);
@@ -108,7 +108,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -2302,6 +2302,7 @@ option_expand(int opt_idx, char_u *val)
+@@ -2400,6 +2400,7 @@ option_expand(int opt_idx, char_u *val)
  	    (char_u **)options[opt_idx].var == &p_sps ? (char_u *)"file:" :
  #endif
  				  NULL);
@@ -119,7 +119,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/optionstr.c b/src/optionstr.c
 --- a/src/optionstr.c
 +++ b/src/optionstr.c
-@@ -1037,9 +1037,13 @@ ambw_end:
+@@ -1042,9 +1042,13 @@ ambw_end:
  	    }
  
  #if defined(MSWIN)
@@ -146,7 +146,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  static BOOL win8_or_later = FALSE;
  
-@@ -438,26 +438,47 @@ wait_for_single_object(
+@@ -433,26 +433,47 @@ wait_for_single_object(
  # endif
  #endif
  
@@ -206,7 +206,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (exe_path != NULL)
  	{
  	    // Append our starting directory to $PATH, so that when doing
-@@ -477,6 +498,7 @@ get_exe_name(void)
+@@ -472,6 +493,7 @@ get_exe_name(void)
  		STRCAT(temp, exe_path);
  		vim_setenv((char_u *)"PATH", (char_u *)temp);
  	    }
@@ -214,7 +214,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
      }
  }
-@@ -514,9 +536,9 @@ vimLoadLib(char *name)
+@@ -509,9 +531,9 @@ vimLoadLib(const char *name)
  
      // NOTE: Do not use mch_dirname() and mch_chdir() here, they may call
      // vimLoadLib() recursively, which causes a stack overflow.
@@ -227,7 +227,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      {
  	WCHAR old_dirw[MAXPATHL];
  
-@@ -525,7 +547,7 @@ vimLoadLib(char *name)
+@@ -520,7 +542,7 @@ vimLoadLib(const char *name)
  	    // Change directory to where the executable is, both to make
  	    // sure we find a .dll there and to avoid looking for a .dll
  	    // in the current directory.
@@ -236,7 +236,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	    dll = LoadLibrary(name);
  	    SetCurrentDirectoryW(old_dirw);
  	    return dll;
-@@ -2962,7 +2984,7 @@ mch_check_win(
+@@ -2974,7 +2996,7 @@ mch_check_win(
      int argc UNUSED,
      char **argv UNUSED)
  {
@@ -262,6 +262,6 @@ diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
 @@ -1,4 +1,5 @@
  /* os_win32.c */
 +void mch_get_exe_name(void);
- HINSTANCE vimLoadLib(char *name);
+ HINSTANCE vimLoadLib(const char *name);
  int mch_is_gui_executable(void);
  HINSTANCE find_imported_module_by_funcname(HINSTANCE hInst, const char *funcname);
