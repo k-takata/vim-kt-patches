@@ -1,20 +1,20 @@
 # HG changeset patch
-# Parent  87da22716dd7104149f968ba9a3225a1e82c1840
+# Parent  80e166e2a49c3b34940c872347a7ae51459ab6e7
 
 diff --git a/src/po/Make_all.mak b/src/po/Make_all.mak
 --- a/src/po/Make_all.mak
 +++ b/src/po/Make_all.mak
-@@ -76,7 +76,6 @@ MOFILES = \
+@@ -121,7 +121,6 @@ MOFILES = \
+ 		vi.mo \
  		zh_CN.UTF-8.mo \
- 		zh_CN.mo \
  		zh_TW.UTF-8.mo \
 -		zh_TW.mo \
  
  
  MOCONVERTED = \
-@@ -89,6 +88,7 @@ MOCONVERTED = \
- 		sk.cp1250.mo \
+@@ -135,6 +134,7 @@ MOCONVERTED = \
  		uk.cp1251.mo \
+ 		zh_CN.mo \
  		zh_CN.cp936.mo \
 +		zh_TW.mo \
  
@@ -23,9 +23,9 @@ diff --git a/src/po/Make_all.mak b/src/po/Make_all.mak
 diff --git a/src/po/Makefile b/src/po/Makefile
 --- a/src/po/Makefile
 +++ b/src/po/Makefile
-@@ -113,6 +113,17 @@ sk.cp1250.po: sk.po
- 	iconv -f iso-8859-2 -t cp1250 sk.po | \
- 		sed -e 's/charset=ISO-8859-2/charset=cp1250/' -e 's/# Original translations/# Generated from sk.po, DO NOT EDIT/' > sk.cp1250.po
+@@ -138,6 +138,17 @@ zh_CN.po: zh_CN.UTF-8.po
+ 	iconv -f UTF-8 -t gb2312 zh_CN.UTF-8.po | \
+ 		sed -e 's/charset=[uU][tT][fF]-8/charset=gb2312/' -e 's/# Original translations/# Generated from zh_CN.UTF-8.po, DO NOT EDIT/' > zh_CN.po
  
 +# Convert zh_TW.UTF-8.po to create zh_TW.po.  Requires doubling backslashes
 +# in the second byte.  Don't depend on big5corr, it should only be compiled
