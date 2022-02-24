@@ -30,4 +30,5 @@ add-testing-option-7970.patch
 wip-win32-vimdir-encoding.patch #+wip
 win32-directwrite-ambiwidth-auto.patch
 suppress-warnings.patch
+win32-vimdll-fix-garbage-chars.patch
 fix-config_cache-removal.patch #+rejected
