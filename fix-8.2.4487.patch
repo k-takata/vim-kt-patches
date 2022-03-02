@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  c26c0939420271137fbaabb66009cc9e72903ae2
+
+diff --git a/src/typval.c b/src/typval.c
+--- a/src/typval.c
++++ b/src/typval.c
+@@ -1403,6 +1403,7 @@ typval_compare_null(typval_T *tv1, typva
+ 	    case VAR_JOB: return tv->vval.v_job == NULL;
+ #endif
+ 	    case VAR_LIST: return tv->vval.v_list == NULL;
++	    case VAR_NUMBER: return tv->vval.v_number == 0;
+ 	    case VAR_PARTIAL: return tv->vval.v_partial == NULL;
+ 	    case VAR_STRING: return tv->vval.v_string == NULL;
+ 	    default: break;
