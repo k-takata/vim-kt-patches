@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  854b0e0aec81013a9cba57c3ec99991612c40ee9
+# Parent  c589751ab8b02b2f771345ba233981eabfcf4d64
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -63,7 +63,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 +ifdef SODIUM
 +DEFINES += -DHAVE_SODIUM
 + ifneq ($(SODIUM),yes)
-+DEFINES += -I $(SODIUM)
++CFLAGS += -I $(SODIUM)/include
 + endif
   ifndef DYNAMIC_SODIUM
  DYNAMIC_SODIUM=yes
