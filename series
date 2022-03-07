@@ -30,4 +30,6 @@ add-testing-option-7970.patch
 wip-win32-vimdir-encoding.patch #+wip
 win32-directwrite-ambiwidth-auto.patch
 suppress-warnings.patch
+installpctxt-libsodium.patch
+msys2-libsodium.patch
 fix-config_cache-removal.patch #+rejected

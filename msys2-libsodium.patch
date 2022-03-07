@@ -1,0 +1,60 @@
+# HG changeset patch
+# Parent  dee4a11695c248e4bb0ba0f330687c982ab6898e
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -671,14 +671,17 @@ endif
+ 
+ ifdef SODIUM
+ DEFINES += -DHAVE_SODIUM
+- ifneq ($(SODIUM),yes)
++ ifeq ($(SODIUM),yes)
++SODIUM_DLL = libsodium-23.dll
++ else
++SODIUM_DLL = libsodium.dll
+ CFLAGS += -I $(SODIUM)/include
+  endif
+  ifndef DYNAMIC_SODIUM
+ DYNAMIC_SODIUM=yes
+  endif
+  ifeq ($(DYNAMIC_SODIUM),yes)
+-DEFINES += -DDYNAMIC_SODIUM
++DEFINES += -DDYNAMIC_SODIUM -DDYNAMIC_SODIUM_DLL=\"$(SODIUM_DLL)\"
+  else
+ SODIUMLIB = -lsodium
+  endif
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -391,7 +391,8 @@ SODIUM = no
+ !if "$(SODIUM)" != "no"
+ SOD_INC		= /I "$(SODIUM)\include"
+ ! if "$(DYNAMIC_SODIUM)" == "yes"
+-SOD_DEFS	= -DHAVE_SODIUM -DDYNAMIC_SODIUM
++SODIUM_DLL	= libsodium.dll
++SOD_DEFS	= -DHAVE_SODIUM -DDYNAMIC_SODIUM -DDYNAMIC_SODIUM_DLL=\"$(SODIUM_DLL)\"
+ SOD_LIB		=
+ ! else
+ SOD_DEFS	= -DHAVE_SODIUM
+diff --git a/src/crypt.c b/src/crypt.c
+--- a/src/crypt.c
++++ b/src/crypt.c
+@@ -251,7 +251,7 @@ static struct {
+ sodium_runtime_link_init(int verbose)
+ {
+     static HINSTANCE hsodium = NULL;
+-    const char *libname = "libsodium.dll";
++    const char *libname = DYNAMIC_SODIUM_DLL;
+     int i;
+ 
+     if (hsodium != NULL)
+@@ -270,7 +270,7 @@ sodium_runtime_link_init(int verbose)
+ 	if ((*sodium_funcname_table[i].ptr = symbol_from_dll(hsodium,
+ 			sodium_funcname_table[i].name)) == NULL)
+ 	{
+-	    FreeLibrary(hsodium);
++	    close_dll(hsodium);
+ 	    hsodium = NULL;
+ 	    if (verbose)
+ 		semsg(_(e_could_not_load_library_function_str), sodium_funcname_table[i].name);
