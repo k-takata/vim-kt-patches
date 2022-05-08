@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  981e9985962cfe916401fb8f9d49f5f1e28514db
+# Parent  e9f883d404418e67db0c180f1253fa44040e7f49
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -75,7 +75,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  they might no longer work.
  
  The recommended way is to build a 32 bit Vim, also on 64 bit systems.  You can
-@@ -41,9 +41,9 @@ 16. Installing after building from sourc
+@@ -42,9 +42,9 @@ 17. Installing after building from sourc
  
  
  The currently recommended way (that means it has been verified to work) is
@@ -88,7 +88,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  
  1. Microsoft Visual C++
-@@ -54,15 +54,17 @@ can search for "Visual Studio Community 
+@@ -55,15 +55,17 @@ can search for "Visual Studio Community 
  create a Microsoft account (it's free).
  
  When installing "Visual Studio Community 2015 with Update 3" make sure to
@@ -110,7 +110,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  To build Vim from the command line with MSVC, use Make_mvc.mak.
  Visual Studio installed a batch file called vcvars32.bat, which you must
-@@ -100,6 +102,9 @@ Vim with Make_mvc.mak.
+@@ -101,6 +103,9 @@ Vim with Make_mvc.mak.
  Targeting Windows XP with MSVC 2012 and later      *new-msvc-windows-xp*
  ---------------------------------------------
  
@@ -120,7 +120,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  Beginning with Visual C++ 2012, Microsoft changed the behavior of LINK.EXE
  so that it targets Windows 6.0 (Vista) by default.  In order to override
  this, the target Windows version number needs to be passed to LINK like
-@@ -137,9 +142,6 @@ compiler by using the "x64" option:
+@@ -138,9 +143,6 @@ compiler by using the "x64" option:
  The following Visual C++ team blog can serve as a reference page:
      http://blogs.msdn.com/b/vcblog/archive/2012/10/08/windows-xp-targeting-with-c-in-visual-studio-2012.aspx
  
@@ -130,7 +130,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  
  Cross compile support for Windows on ARM64
  ------------------------------------------
-@@ -152,7 +154,7 @@ The ARM64 support was provided by Leende
+@@ -153,7 +155,7 @@ The ARM64 support was provided by Leende
  
  OLDER VERSIONS
  
@@ -139,7 +139,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  might still work, but these instructions might be outdated.
  
  If you need the executable to run on Windows 98 or ME, use the 2005 one
-@@ -749,12 +751,12 @@ config.h and Ruby's DLL name. Here are t
+@@ -747,12 +749,12 @@ config.h and Ruby's DLL name. Here are t
        nmake -f Make_mvc.mak
            RUBY=C:\Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
            RUBY_MSVCRT_NAME=msvcrt
@@ -154,7 +154,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
      When using this trick, you also need to set RUBY_MSVCRT_NAME to msvcrt
      which is used for the Ruby's DLL name.
  
-@@ -765,11 +767,11 @@ After you install RubyInstaller, just ty
+@@ -763,11 +765,11 @@ After you install RubyInstaller, just ty
  
      mingw32-make -f Make_ming.mak
          RUBY=C:/Ruby24 DYNAMIC_RUBY=yes RUBY_VER=24 RUBY_API_VER_LONG=2.4.0
@@ -171,7 +171,7 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -86,10 +86,9 @@ POSTSCRIPT=no
+@@ -87,10 +87,9 @@ POSTSCRIPT=no
  # Set to yes to enable OLE support.
  OLE=no
  
@@ -229,7 +229,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Use multiprocess build
-@@ -522,27 +522,27 @@ OUTDIR=$(OBJDIR)
+@@ -523,27 +523,27 @@ OUTDIR=$(OBJDIR)
  
  ### Validate CPUNR
  !ifndef CPUNR
@@ -270,7 +270,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -241,27 +241,6 @@ static char_u *exe_path = NULL;
+@@ -240,27 +240,6 @@ static char_u *exe_path = NULL;
  
  static BOOL win8_or_later = FALSE;
  
@@ -298,7 +298,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /*
   * Get version number including build number
   */
-@@ -7796,30 +7775,13 @@ vtp_flag_init(void)
+@@ -7842,30 +7821,13 @@ vtp_flag_init(void)
      static void
  vtp_init(void)
  {
@@ -306,7 +306,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 -    DYN_CONSOLE_SCREEN_BUFFER_INFOEX csbi;
 +    CONSOLE_SCREEN_BUFFER_INFOEX csbi;
  # ifdef FEAT_TERMGUICOLORS
-     COLORREF fg, bg;
+     COLORREF fg;
  # endif
  
 -    // Use functions supported from Vista
@@ -331,7 +331,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      save_console_bg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_bg];
      save_console_fg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_fg];
      store_console_bg_rgb = save_console_bg_rgb;
-@@ -8044,7 +8006,7 @@ ctermtoxterm(
+@@ -8087,7 +8049,7 @@ ctermtoxterm(
  set_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -340,7 +340,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      guicolor_T	fg, bg;
      int		ctermfg, ctermbg;
  
-@@ -8064,8 +8026,7 @@ set_console_color_rgb(void)
+@@ -8107,8 +8069,7 @@ set_console_color_rgb(void)
      bg = (GetRValue(bg) << 16) | (GetGValue(bg) << 8) | GetBValue(bg);
  
      csbi.cbSize = sizeof(csbi);
@@ -350,7 +350,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      csbi.cbSize = sizeof(csbi);
      csbi.srWindow.Right += 1;
-@@ -8074,8 +8035,7 @@ set_console_color_rgb(void)
+@@ -8117,8 +8078,7 @@ set_console_color_rgb(void)
      store_console_fg_rgb = csbi.ColorTable[g_color_index_fg];
      csbi.ColorTable[g_color_index_bg] = (COLORREF)bg;
      csbi.ColorTable[g_color_index_fg] = (COLORREF)fg;
@@ -360,7 +360,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8131,22 +8091,20 @@ get_default_console_color(
+@@ -8175,22 +8135,20 @@ get_default_console_color(
  reset_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -386,7 +386,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8157,19 +8115,17 @@ reset_console_color_rgb(void)
+@@ -8201,19 +8159,17 @@ reset_console_color_rgb(void)
  restore_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
