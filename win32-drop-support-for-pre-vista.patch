@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  e9f883d404418e67db0c180f1253fa44040e7f49
+# Parent  55a14aeebc4d662e67820551cc03a1ab3ffcb980
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -56,7 +56,7 @@ diff --git a/runtime/doc/os_win32.txt b/runtime/doc/os_win32.txt
  						*win32* *Win32* *MS-Windows*
  This file documents the idiosyncrasies of the Win32 version of Vim.
  
--The Win32 version of Vim works on Windows XP, Vista, 7, 8 and 10.  There are
+-The Win32 version of Vim works on Windows XP, Vista, 7, 8, 10 and 11.  There are
 -both console and GUI versions.
 +The Win32 version of Vim works on Windows 7, 8, 10 and 11.  There are both
 +console and GUI versions.
