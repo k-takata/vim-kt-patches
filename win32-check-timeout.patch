@@ -1,0 +1,94 @@
+# HG changeset patch
+# Parent  317044517bbeb2cc266c5216ae88e587f9877621
+
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -2002,8 +2002,8 @@ serverSendEnc(HWND target)
+     data.dwData = COPYDATA_ENCODING;
+     data.cbData = (DWORD)STRLEN(p_enc) + 1;
+     data.lpData = p_enc;
+-    (void)SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
+-							     (LPARAM)(&data));
++    (void)SendMessageTimeout(target, WM_COPYDATA, (WPARAM)message_window,
++		 (LPARAM)&data, SMTO_ABORTIFHUNG | SMTO_BLOCK, 10, NULL);
+ }
+ 
+ /*
+@@ -2061,6 +2061,7 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
+ 	COPYDATASTRUCT	reply;
+ 	char_u		*res;
+ 	int		retval;
++	DWORD_PTR	dwret;
+ 	char_u		*str;
+ 	char_u		*tofree;
+ 
+@@ -2115,8 +2116,13 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
+ 	    reply.cbData = (DWORD)STRLEN(res) + 1;
+ 
+ 	    serverSendEnc(sender);
+-	    retval = (int)SendMessage(sender, WM_COPYDATA,
+-				    (WPARAM)message_window, (LPARAM)(&reply));
++	    if (SendMessageTimeout(sender, WM_COPYDATA,
++		    (WPARAM)message_window, (LPARAM)&reply,
++		    SMTO_ABORTIFHUNG | SMTO_BLOCK | SMTO_NOTIMEOUTIFNOTHUNG,
++		    0, &dwret) == 0)
++		retval = -1;
++	    else
++		retval = (int)dwret;
+ 	    vim_free(tofree);
+ 	    vim_free(res);
+ 	    return retval;
+@@ -2394,6 +2400,7 @@ serverSendReply(
+     HWND	target;
+     COPYDATASTRUCT data;
+     long_u	n = 0;
++    DWORD_PTR	dwret;
+ 
+     // The "name" argument is a magic cookie obtained from expand("<client>").
+     // It should be of the form 0xXXXXX - i.e. a C hex literal, which is the
+@@ -2411,11 +2418,12 @@ serverSendReply(
+     data.lpData = reply;
+ 
+     serverSendEnc(target);
+-    if (SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
+-							     (LPARAM)(&data)))
+-	return 0;
+-
+-    return -1;
++    if (SendMessageTimeout(target, WM_COPYDATA,
++		(WPARAM)message_window, (LPARAM)&data,
++		SMTO_ABORTIFHUNG | SMTO_BLOCK | SMTO_NOTIMEOUTIFNOTHUNG,
++		0, &dwret) == 0)
++	return -1;
++    return !dwret;
+ }
+ 
+     int
+@@ -2432,6 +2440,7 @@ serverSendToVim(
+     COPYDATASTRUCT data;
+     char_u	*retval = NULL;
+     int		retcode = 0;
++    DWORD_PTR	dwret;
+     char_u	altname_buf[MAX_PATH];
+ 
+     // Execute locally if no display or target is ourselves
+@@ -2463,9 +2472,16 @@ serverSendToVim(
+     data.cbData = (DWORD)STRLEN(cmd) + 1;
+     data.lpData = cmd;
+ 
++    if (timeout == 0)
++	timeout = 600;
++
+     serverSendEnc(target);
+-    if (SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
+-							(LPARAM)(&data)) == 0)
++    if (SendMessageTimeout(target, WM_COPYDATA,
++		(WPARAM)message_window, (LPARAM)&data,
++		SMTO_ABORTIFHUNG | SMTO_BLOCK,
++		timeout * 1000, &dwret) == 0)
++	return -1;
++    if (dwret == 0)
+ 	return -1;
+ 
+     if (asExpr)
