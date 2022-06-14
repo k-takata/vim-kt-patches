@@ -4,26 +4,36 @@
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -2002,8 +2002,8 @@ serverSendEnc(HWND target)
+@@ -1971,6 +1971,8 @@ HWND message_window = 0;	    // window t
+ # define VIM_CLASSNAME      "VIM_MESSAGES"
+ # define VIM_CLASSNAME_LEN  (sizeof(VIM_CLASSNAME) - 1)
+ 
++# define SENDMESSAGE_TIMEOUT	(5 * 1000)
++
+ // Communication is via WM_COPYDATA messages. The message type is sent in
+ // the dwData parameter. Types are defined here.
+ # define COPYDATA_KEYS		0
+@@ -2002,8 +2004,9 @@ serverSendEnc(HWND target)
      data.dwData = COPYDATA_ENCODING;
      data.cbData = (DWORD)STRLEN(p_enc) + 1;
      data.lpData = p_enc;
 -    (void)SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
 -							     (LPARAM)(&data));
-+    (void)SendMessageTimeout(target, WM_COPYDATA, (WPARAM)message_window,
-+		 (LPARAM)&data, SMTO_ABORTIFHUNG | SMTO_BLOCK, 10, NULL);
++    (void)SendMessageTimeout(target, WM_COPYDATA,
++	    (WPARAM)message_window, (LPARAM)&data,
++	    SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, NULL);
  }
  
  /*
-@@ -2061,6 +2061,7 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
+@@ -2061,6 +2064,7 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
  	COPYDATASTRUCT	reply;
  	char_u		*res;
  	int		retval;
-+	DWORD_PTR	dwret;
++	DWORD_PTR	dwret = 0;
  	char_u		*str;
  	char_u		*tofree;
  
-@@ -2115,8 +2116,13 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
+@@ -2115,8 +2119,12 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
  	    reply.cbData = (DWORD)STRLEN(res) + 1;
  
  	    serverSendEnc(sender);
@@ -31,23 +41,22 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 -				    (WPARAM)message_window, (LPARAM)(&reply));
 +	    if (SendMessageTimeout(sender, WM_COPYDATA,
 +		    (WPARAM)message_window, (LPARAM)&reply,
-+		    SMTO_ABORTIFHUNG | SMTO_BLOCK | SMTO_NOTIMEOUTIFNOTHUNG,
-+		    0, &dwret) == 0)
++		    SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, &dwret) == 0)
 +		retval = -1;
 +	    else
 +		retval = (int)dwret;
  	    vim_free(tofree);
  	    vim_free(res);
  	    return retval;
-@@ -2394,6 +2400,7 @@ serverSendReply(
+@@ -2394,6 +2402,7 @@ serverSendReply(
      HWND	target;
      COPYDATASTRUCT data;
      long_u	n = 0;
-+    DWORD_PTR	dwret;
++    DWORD_PTR	dwret = 0;
  
      // The "name" argument is a magic cookie obtained from expand("<client>").
      // It should be of the form 0xXXXXX - i.e. a C hex literal, which is the
-@@ -2411,11 +2418,12 @@ serverSendReply(
+@@ -2411,11 +2420,11 @@ serverSendReply(
      data.lpData = reply;
  
      serverSendEnc(target);
@@ -58,35 +67,29 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 -    return -1;
 +    if (SendMessageTimeout(target, WM_COPYDATA,
 +		(WPARAM)message_window, (LPARAM)&data,
-+		SMTO_ABORTIFHUNG | SMTO_BLOCK | SMTO_NOTIMEOUTIFNOTHUNG,
-+		0, &dwret) == 0)
++		SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, &dwret) == 0)
 +	return -1;
-+    return !dwret;
++    return dwret ? 0 : -1;
  }
  
      int
-@@ -2432,6 +2440,7 @@ serverSendToVim(
+@@ -2432,6 +2441,7 @@ serverSendToVim(
      COPYDATASTRUCT data;
      char_u	*retval = NULL;
      int		retcode = 0;
-+    DWORD_PTR	dwret;
++    DWORD_PTR	dwret = 0;
      char_u	altname_buf[MAX_PATH];
  
      // Execute locally if no display or target is ourselves
-@@ -2463,9 +2472,16 @@ serverSendToVim(
-     data.cbData = (DWORD)STRLEN(cmd) + 1;
+@@ -2464,8 +2474,11 @@ serverSendToVim(
      data.lpData = cmd;
  
-+    if (timeout == 0)
-+	timeout = 600;
-+
      serverSendEnc(target);
 -    if (SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
 -							(LPARAM)(&data)) == 0)
 +    if (SendMessageTimeout(target, WM_COPYDATA,
 +		(WPARAM)message_window, (LPARAM)&data,
-+		SMTO_ABORTIFHUNG | SMTO_BLOCK,
-+		timeout * 1000, &dwret) == 0)
++		SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, &dwret) == 0)
 +	return -1;
 +    if (dwret == 0)
  	return -1;
