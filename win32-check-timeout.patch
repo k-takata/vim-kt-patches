@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  317044517bbeb2cc266c5216ae88e587f9877621
+# Parent  59e3b3a345b425d2686e1f364969281ed4887286
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
@@ -13,19 +13,33 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  // Communication is via WM_COPYDATA messages. The message type is sent in
  // the dwData parameter. Types are defined here.
  # define COPYDATA_KEYS		0
-@@ -2002,8 +2004,9 @@ serverSendEnc(HWND target)
+@@ -1992,9 +1994,9 @@ static char_u	*client_enc = NULL;
+ 
+ /*
+  * Tell the other side what encoding we are using.
+- * Errors are ignored.
++ * Return -1 if timeout happens.  Other errors are ignored.
+  */
+-    static void
++    static int
+ serverSendEnc(HWND target)
+ {
+     COPYDATASTRUCT data;
+@@ -2002,8 +2004,11 @@ serverSendEnc(HWND target)
      data.dwData = COPYDATA_ENCODING;
      data.cbData = (DWORD)STRLEN(p_enc) + 1;
      data.lpData = p_enc;
 -    (void)SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
 -							     (LPARAM)(&data));
-+    (void)SendMessageTimeout(target, WM_COPYDATA,
++    if (SendMessageTimeout(target, WM_COPYDATA,
 +	    (WPARAM)message_window, (LPARAM)&data,
-+	    SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, NULL);
++	    SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, NULL) == 0)
++	return -1;
++    return 0;
  }
  
  /*
-@@ -2061,6 +2064,7 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
+@@ -2061,6 +2066,7 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
  	COPYDATASTRUCT	reply;
  	char_u		*res;
  	int		retval;
@@ -33,22 +47,28 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  	char_u		*str;
  	char_u		*tofree;
  
-@@ -2115,8 +2119,12 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
+@@ -2114,9 +2120,17 @@ Messaging_WndProc(HWND hwnd, UINT msg, W
+ 	    reply.lpData = res;
  	    reply.cbData = (DWORD)STRLEN(res) + 1;
  
- 	    serverSendEnc(sender);
+-	    serverSendEnc(sender);
 -	    retval = (int)SendMessage(sender, WM_COPYDATA,
 -				    (WPARAM)message_window, (LPARAM)(&reply));
-+	    if (SendMessageTimeout(sender, WM_COPYDATA,
-+		    (WPARAM)message_window, (LPARAM)&reply,
-+		    SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, &dwret) == 0)
++	    if (serverSendEnc(sender) < 0)
 +		retval = -1;
 +	    else
-+		retval = (int)dwret;
++	    {
++		if (SendMessageTimeout(sender, WM_COPYDATA,
++			(WPARAM)message_window, (LPARAM)&reply,
++			SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, &dwret) == 0)
++		    retval = -1;
++		else
++		    retval = (int)dwret;
++	    }
  	    vim_free(tofree);
  	    vim_free(res);
  	    return retval;
-@@ -2394,6 +2402,7 @@ serverSendReply(
+@@ -2394,6 +2408,7 @@ serverSendReply(
      HWND	target;
      COPYDATASTRUCT data;
      long_u	n = 0;
@@ -56,15 +76,18 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  
      // The "name" argument is a magic cookie obtained from expand("<client>").
      // It should be of the form 0xXXXXX - i.e. a C hex literal, which is the
-@@ -2411,11 +2420,11 @@ serverSendReply(
+@@ -2410,12 +2425,13 @@ serverSendReply(
+     data.cbData = (DWORD)STRLEN(reply) + 1;
      data.lpData = reply;
  
-     serverSendEnc(target);
+-    serverSendEnc(target);
 -    if (SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
 -							     (LPARAM)(&data)))
 -	return 0;
 -
 -    return -1;
++    if (serverSendEnc(target) < 0)
++	return -1;
 +    if (SendMessageTimeout(target, WM_COPYDATA,
 +		(WPARAM)message_window, (LPARAM)&data,
 +		SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, &dwret) == 0)
@@ -73,7 +96,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  }
  
      int
-@@ -2432,6 +2441,7 @@ serverSendToVim(
+@@ -2432,6 +2448,7 @@ serverSendToVim(
      COPYDATASTRUCT data;
      char_u	*retval = NULL;
      int		retcode = 0;
@@ -81,12 +104,15 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      char_u	altname_buf[MAX_PATH];
  
      // Execute locally if no display or target is ourselves
-@@ -2464,8 +2474,11 @@ serverSendToVim(
+@@ -2463,9 +2480,13 @@ serverSendToVim(
+     data.cbData = (DWORD)STRLEN(cmd) + 1;
      data.lpData = cmd;
  
-     serverSendEnc(target);
+-    serverSendEnc(target);
 -    if (SendMessage(target, WM_COPYDATA, (WPARAM)message_window,
 -							(LPARAM)(&data)) == 0)
++    if (serverSendEnc(target) < 0)
++	return -1;
 +    if (SendMessageTimeout(target, WM_COPYDATA,
 +		(WPARAM)message_window, (LPARAM)&data,
 +		SMTO_ABORTIFHUNG, SENDMESSAGE_TIMEOUT, &dwret) == 0)
