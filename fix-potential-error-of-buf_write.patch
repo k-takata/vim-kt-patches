@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent  68664ab8ab6c6329faae01791b7f525e4dfb15d2
+
+diff --git a/src/bufwrite.c b/src/bufwrite.c
+--- a/src/bufwrite.c
++++ b/src/bufwrite.c
+@@ -1212,10 +1212,17 @@ buf_write(
+ 		{
+ 		    sprintf((char *)gettail(IObuff), "%d", i);
+ 		    if (mch_lstat((char *)IObuff, &st) < 0)
++		    {
++			fd = mch_open((char *)IObuff,
++				    O_CREAT|O_WRONLY|O_EXCL|O_NOFOLLOW, perm);
++			if (fd < 0 && errno == EEXIST)
++			    // If the same file name is created by another
++			    // process between lstat() and open(), go to the
++			    // next loop.
++			    continue;
+ 			break;
++		    }
+ 		}
+-		fd = mch_open((char *)IObuff,
+-				    O_CREAT|O_WRONLY|O_EXCL|O_NOFOLLOW, perm);
+ 		if (fd < 0)	// can't write in directory
+ 		    backup_copy = TRUE;
+ 		else
