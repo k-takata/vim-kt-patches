@@ -29,5 +29,4 @@ add-msvc-latest-bat.patch
 wip-win32-vimdir-encoding.patch #+wip
 win32-directwrite-ambiwidth-auto.patch
 suppress-warnings.patch
-fix-has-patch.patch
 fix-config_cache-removal.patch #+rejected
