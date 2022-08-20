@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  863765fb753c8161fd1554aa760a7de19e4dd50e
+# Parent  b25fb93f086e4ffb4a5188a0e17aff820047af6f
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6629,10 +6629,14 @@ A jump table for the options with a shor
+@@ -6870,10 +6870,14 @@ A jump table for the options with a shor
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
 --- a/runtime/doc/quickfix.txt
 +++ b/runtime/doc/quickfix.txt
-@@ -944,11 +944,13 @@ or simpler >
+@@ -970,11 +970,13 @@ or simpler >
  "$*" can be given multiple times, for example: >
     :set makeprg=gcc\ -o\ $*\ $*
  
