@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  114cb64261269e48d5469e34e91c9df4074d801d
+# Parent  69fa92ad06c42e73a3a8c05c668907dcf7015bc5
 
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 --- a/src/gui_dwrite.cpp
 +++ b/src/gui_dwrite.cpp
-@@ -343,6 +343,8 @@ struct DWriteContext {
+@@ -349,6 +349,8 @@ struct DWriteContext {
  
      void Flush();
  
@@ -13,7 +13,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      void SetRenderingParams(
  	    const DWriteRenderingParams *params);
  
-@@ -386,9 +388,11 @@ public:
+@@ -392,9 +394,11 @@ public:
  
      static FLOAT adjustToCell(FLOAT value, FLOAT cellWidth)
      {
@@ -26,7 +26,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
  	return cellCount * cellWidth;
      }
  };
-@@ -1155,6 +1159,60 @@ DWriteContext::Flush()
+@@ -1161,6 +1165,60 @@ DWriteContext::Flush()
      SetDrawingMode(DM_GDI);
  }
  
@@ -87,7 +87,7 @@ diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
      void
  DWriteContext::SetRenderingParams(
  	const DWriteRenderingParams *params)
-@@ -1322,6 +1380,14 @@ DWriteContext_Flush(DWriteContext *ctx)
+@@ -1328,6 +1386,14 @@ DWriteContext_Flush(DWriteContext *ctx)
  	ctx->Flush();
  }
  
@@ -116,7 +116,7 @@ diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -4913,52 +4913,71 @@ error:
+@@ -5086,52 +5086,71 @@ error:
  #endif
  
  #ifdef USE_AMBIWIDTH_AUTO
@@ -187,7 +187,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  	    SelectFont(s_hdc, hfntOld);
 -
 -	    return cache[c];
- 	}
+-	}
++	}
 +	if (len < 0)
 +	    cache[c] = 0;
 +	else
