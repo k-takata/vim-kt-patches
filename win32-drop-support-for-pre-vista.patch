@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  ca99f70a5c5824bb6dd4e6a473c888eb59fe60ff
+# Parent  776992ad6243d2621d582be1533a2c6ced0d51b3
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -93,10 +93,10 @@ diff --git a/src/INSTALLpc.txt b/src/INSTALLpc.txt
  When installing "Visual Studio Community 2015 with Update 3" or "Visual C++
  Build Tools for Visual Studio 2015 with Update 3" make sure to
 -select "custom" and check "Windows XP Support for C++" and all checkboxes
--under "Universal Windows App Development Tools".  Or whatevern they are called
+-under "Universal Windows App Development Tools".  Or whatever they are called
 -now.
 +select "custom" and check all checkboxes under "Universal Windows App
-+Development Tools".  Or whatevern they are called now.
++Development Tools".  Or whatever they are called now.
 +(If you still want to target Windows XP, check also "Windows XP Support for
 +C++".  Note that this is no longer supported.)
  
