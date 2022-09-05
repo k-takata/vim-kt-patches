@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  bf97e50d46044fb7d5475e4a7e07233d707753d1
+
+diff --git a/src/channel.c b/src/channel.c
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -3865,8 +3865,6 @@ channel_read(channel_T *channel, ch_part
+ 	// Store the read message in the queue.
+ 	channel_save(channel, part, buf, len, FALSE, "RECV ");
+ 	readlen += len;
+-	if (len < MAXMSGSIZE)
+-	    break;	// did read everything that's available
+     }
+ 
+     // Reading a disconnection (readlen == 0), or an error.
