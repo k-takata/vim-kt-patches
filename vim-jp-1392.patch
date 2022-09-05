@@ -4,7 +4,50 @@
 diff --git a/src/channel.c b/src/channel.c
 --- a/src/channel.c
 +++ b/src/channel.c
-@@ -3865,8 +3865,6 @@ channel_read(channel_T *channel, ch_part
+@@ -3591,6 +3591,32 @@ channel_free_all(void)
+ 
+ #if defined(HAVE_SELECT)
+ /*
++ * Check if there are remaining data that should be written.
++ */
++    static int
++is_channel_write_remaining(chanpart_T *in_part)
++{
++    if (in_part->ch_writeque.wq_next != NULL)
++	return 1;
++    if (in_part->ch_bufref.br_buf != NULL)
++    {
++	buf_T *buf = in_part->ch_bufref.br_buf;
++	if (in_part->ch_buf_append)
++	{
++	    if (in_part->ch_buf_bot < buf->b_ml.ml_line_count)
++		return 1;
++	}
++	else
++	{
++	    if (in_part->ch_buf_top <= in_part->ch_buf_bot
++		    && in_part->ch_buf_top <= buf->b_ml.ml_line_count)
++		return 1;
++	}
++    }
++    return 0;
++}
++
++/*
+  * Add write fds where we are waiting for writing to be possible.
+  */
+     static int
+@@ -3604,8 +3630,7 @@ channel_fill_wfds(int maxfd_arg, fd_set 
+ 	chanpart_T  *in_part = &ch->ch_part[PART_IN];
+ 
+ 	if (in_part->ch_fd != INVALID_FD
+-		&& (in_part->ch_bufref.br_buf != NULL
+-		    || in_part->ch_writeque.wq_next != NULL))
++		&& is_channel_write_remaining(in_part))
+ 	{
+ 	    FD_SET((int)in_part->ch_fd, wfds);
+ 	    if ((int)in_part->ch_fd >= maxfd)
+@@ -3865,8 +3890,6 @@ channel_read(channel_T *channel, ch_part
  	// Store the read message in the queue.
  	channel_save(channel, part, buf, len, FALSE, "RECV ");
  	readlen += len;
