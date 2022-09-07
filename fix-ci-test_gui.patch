@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  c0a5c856c6da540a2dffa4d220dfabbc9b243ff3
+
+diff --git a/src/testdir/test_gui.vim b/src/testdir/test_gui.vim
+--- a/src/testdir/test_gui.vim
++++ b/src/testdir/test_gui.vim
+@@ -1607,6 +1607,7 @@ func Test_gui_CTRL_SHIFT_V()
+ endfunc
+ 
+ func Test_gui_dialog_file()
++  call delete('Xdialfile')
+   let lines =<< trim END
+     file Xdialfile
+     normal axxx
