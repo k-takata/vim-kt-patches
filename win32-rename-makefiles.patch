@@ -1,0 +1,233 @@
+# HG changeset patch
+# Parent  a41b78c661a60fa2d41412c4731ef9e456fcdc10
+
+diff --git a/.appveyor.yml b/.appveyor.yml
+--- a/.appveyor.yml
++++ b/.appveyor.yml
+@@ -26,9 +26,9 @@ test_script:
+   - cd src/testdir
+     # Testing with MSVC gvim
+   - path C:\Python35-x64;%PATH%
+-  - nmake -f Make_dos.mak VIMPROG=..\gvim
+-  - nmake -f Make_dos.mak clean
++  - nmake -f Make_mvc.mak VIMPROG=..\gvim
++  - nmake -f Make_mvc.mak clean
+     # Testing with MSVC console version
+-  - nmake -f Make_dos.mak VIMPROG=..\vim
++  - nmake -f Make_mvc.mak VIMPROG=..\vim
+ 
+ # vim: sw=2 sts=2 et ts=8 sr
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -563,11 +563,11 @@ jobs:
+           call "%VCVARSALL%" ${{ matrix.vcarch }}
+ 
+           echo %COL_GREEN%Start testing Vim in background.%COL_RESET%
+-          start cmd /c "cd src2\testdir & nmake -nologo -f Make_dos.mak VIMPROG=..\..\src\vim > nul & echo done>done.txt"
++          start cmd /c "cd src2\testdir & nmake -nologo -f Make_mvc.mak VIMPROG=..\..\src\vim > nul & echo done>done.txt"
+ 
+           echo %COL_GREEN%Test gVim:%COL_RESET%
+           cd src\testdir
+-          nmake -nologo -f Make_dos.mak VIMPROG=..\gvim || exit 1
++          nmake -nologo -f Make_mvc.mak VIMPROG=..\gvim || exit 1
+ 
+       - name: Show the result of testing Vim
+         shell: cmd
+@@ -590,7 +590,7 @@ jobs:
+           echo %COL_GREEN%The result of testing Vim:%COL_RESET%
+           cd src2\testdir
+           if exist messages type messages
+-          nmake -nologo -f Make_dos.mak report VIMPROG=..\..\src\vim || exit 1
++          nmake -nologo -f Make_mvc.mak report VIMPROG=..\..\src\vim || exit 1
+ 
+           if "%timeout%"=="1" (
+             echo %COL_RED%Timed out.%COL_RESET%
+diff --git a/Filelist b/Filelist
+--- a/Filelist
++++ b/Filelist
+@@ -487,7 +487,6 @@ SRC_UNIX =	\
+ 		src/vimtutor \
+ 		src/gvimtutor \
+ 		src/which.sh \
+-		src/tee/Makefile \
+ 		src/xxd/Makefile \
+ 
+ # source files for both DOS and Unix
+@@ -520,7 +519,8 @@ SRC_DOS_UNIX =	\
+ SRC_DOS =	\
+ 		src/GvimExt/*.mak \
+ 		src/GvimExt/GvimExt.reg \
+-		src/GvimExt/Makefile \
++		src/GvimExt/Make_ming.mak \
++		src/GvimExt/Make_mvc.mak \
+ 		src/GvimExt/README.txt \
+ 		src/GvimExt/gvimext.cpp \
+ 		src/GvimExt/gvimext.def \
+@@ -569,7 +569,7 @@ SRC_DOS =	\
+ 		src/proto/if_ole.pro \
+ 		src/proto/os_win32.pro \
+ 		src/proto/os_mswin.pro \
+-		src/testdir/Make_dos.mak \
++		src/testdir/Make_mvc.mak \
+ 		src/testdir/Make_ming.mak \
+ 		src/testdir/dos.vim \
+ 		src/uninstall.c \
+@@ -578,6 +578,7 @@ SRC_DOS =	\
+ 		src/vimrun.c \
+ 		src/xpm_w32.c \
+ 		src/xpm_w32.h \
++		src/tee/Make_ming.mak \
+ 		src/tee/Make_mvc.mak \
+ 		src/xxd/Make_ming.mak \
+ 		src/xxd/Make_mvc.mak \
+diff --git a/src/GvimExt/Makefile b/src/GvimExt/Make_mvc.mak
+rename from src/GvimExt/Makefile
+rename to src/GvimExt/Make_mvc.mak
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -1152,7 +1152,7 @@ xxd/xxd.exe: xxd/xxd.c
+ 	$(MAKE) -C xxd -f Make_ming.mak CC='$(CC)'
+ 
+ tee/tee.exe: tee/tee.c
+-	$(MAKE) -C tee CC='$(CC)'
++	$(MAKE) -C tee -f Make_ming.mak CC='$(CC)'
+ 
+ GvimExt/gvimext.dll: GvimExt/gvimext.cpp GvimExt/gvimext.rc GvimExt/gvimext.h
+ 	$(MAKE) -C GvimExt -f Make_ming.mak CROSS=$(CROSS) CROSS_COMPILE=$(CROSS_COMPILE) CXX='$(CXX)' STATIC_STDCPLUS=$(STATIC_STDCPLUS)
+@@ -1179,7 +1179,7 @@ ifdef MZSCHEME
+ endif
+ 	$(MAKE) -C GvimExt -f Make_ming.mak clean
+ 	$(MAKE) -C xxd -f Make_ming.mak clean
+-	$(MAKE) -C tee clean
++	$(MAKE) -C tee -f Make_ming.mak clean
+ 
+ # Run vim script to generate the Ex command lookup table.
+ # This only needs to be run when a command name has been added or changed.
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1402,7 +1402,7 @@ tee/tee.exe: tee/tee.c
+ 
+ GvimExt/gvimext.dll: GvimExt/gvimext.cpp GvimExt/gvimext.rc GvimExt/gvimext.h
+ 	cd GvimExt
+-	$(MAKE) /NOLOGO -f Makefile $(MAKEFLAGS_GVIMEXT)
++	$(MAKE) /NOLOGO -f Make_mvc.mak $(MAKEFLAGS_GVIMEXT)
+ 	cd ..
+ 
+ 
+@@ -1443,7 +1443,7 @@ clean: testclean
+ 	$(MAKE) /NOLOGO -f Make_mvc.mak clean
+ 	cd ..
+ 	cd GvimExt
+-	$(MAKE) /NOLOGO -f Makefile clean
++	$(MAKE) /NOLOGO -f Make_mvc.mak clean
+ 	cd ..
+ 
+ # Run vim script to generate the Ex command lookup table.
+@@ -1465,27 +1465,27 @@ nvcmdidxs: nv_cmds.h
+ 
+ test:
+ 	cd testdir
+-	$(MAKE) /NOLOGO -f Make_dos.mak
++	$(MAKE) /NOLOGO -f Make_mvc.mak
+ 	cd ..
+ 
+ testgvim testgui:
+ 	cd testdir
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\gvim
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\gvim
+ 	cd ..
+ 
+ testtiny:
+ 	cd testdir
+-	$(MAKE) /NOLOGO -f Make_dos.mak tiny
++	$(MAKE) /NOLOGO -f Make_mvc.mak tiny
+ 	cd ..
+ 
+ testgvimtiny:
+ 	cd testdir
+-	$(MAKE) /NOLOGO -f Make_dos.mak tiny VIMPROG=..\gvim
++	$(MAKE) /NOLOGO -f Make_mvc.mak tiny VIMPROG=..\gvim
+ 	cd ..
+ 
+ testclean:
+ 	cd testdir
+-	$(MAKE) /NOLOGO -f Make_dos.mak clean
++	$(MAKE) /NOLOGO -f Make_mvc.mak clean
+ 	cd ..
+ 
+ # Run individual OLD style test.
+@@ -1493,8 +1493,8 @@ testclean:
+ $(SCRIPTS_TINY):
+ 	cd testdir
+ 	- if exist $@.out del $@.out
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) nolog
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) $@.out
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) nolog
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) $@.out
+ 	@ if exist test.log ( type test.log & exit /b 1 )
+ 	cd ..
+ 
+@@ -1503,9 +1503,9 @@ testclean:
+ $(NEW_TESTS):
+ 	cd testdir
+ 	- if exist $@.res del $@.res
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) nolog
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) $@.res
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) report
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) nolog
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) $@.res
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) report
+ 	cd ..
+ 
+ # Run Vim9 tests.
+@@ -1513,9 +1513,9 @@ testclean:
+ test_vim9:
+ 	cd testdir
+ 	-del test_vim9_*.res
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) nolog
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) $(TEST_VIM9_RES)
+-	$(MAKE) /NOLOGO -f Make_dos.mak VIMPROG=..\$(VIMTESTTARGET) report
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) nolog
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) $(TEST_VIM9_RES)
++	$(MAKE) /NOLOGO -f Make_mvc.mak VIMPROG=..\$(VIMTESTTARGET) report
+ 	cd ..
+ 
+ ###########################################################################
+diff --git a/src/tee/Makefile b/src/tee/Make_ming.mak
+rename from src/tee/Makefile
+rename to src/tee/Make_ming.mak
+diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_mvc.mak
+rename from src/testdir/Make_dos.mak
+rename to src/testdir/Make_mvc.mak
+--- a/src/testdir/Make_dos.mak
++++ b/src/testdir/Make_mvc.mak
+@@ -43,12 +43,12 @@ report:
+ 
+ 
+ # Execute an individual new style test, e.g.:
+-# 	nmake -f Make_dos.mak test_largefile
++# 	nmake -f Make_mvc.mak test_largefile
+ $(NEW_TESTS):
+ 	-if exist $@.res del $@.res
+ 	-if exist test.log del test.log
+ 	-if exist messages del messages
+-	@$(MAKE) -nologo -f Make_dos.mak $@.res VIMPROG=$(VIMPROG)
++	@$(MAKE) -nologo -f Make_mvc.mak $@.res VIMPROG=$(VIMPROG)
+ 	@type messages
+ 	@if exist test.log exit 1
+ 
+diff --git a/src/testdir/README.txt b/src/testdir/README.txt
+--- a/src/testdir/README.txt
++++ b/src/testdir/README.txt
+@@ -106,7 +106,7 @@ tests are successful, then this file wil
+ 
+ - To run the test on MS-Windows using the MSVC nmake:
+ 
+-    > nmake -f Make_dos.mak
++    > nmake -f Make_mvc.mak
+ 
+ - To run the tests with GUI Vim:
+ 
