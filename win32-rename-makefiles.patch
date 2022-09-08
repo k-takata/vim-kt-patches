@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a41b78c661a60fa2d41412c4731ef9e456fcdc10
+# Parent  0f807c0100053cd6e73a861be84161967871bb7b
 
 diff --git a/.appveyor.yml b/.appveyor.yml
 --- a/.appveyor.yml
@@ -201,7 +201,7 @@ rename to src/tee/Make_ming.mak
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 --- a/src/testdir/Make_dos.mak
 +++ b/src/testdir/Make_dos.mak
-@@ -1,152 +1,3 @@
+@@ -1,152 +1,4 @@
 -#
 -# Makefile to run all tests for Vim, on Dos-like machines.
 -#
@@ -256,7 +256,9 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 -	@type messages
 -	@if exist test.log exit 1
 -
--
++!message Make_dos.mak is deprecated. Use Make_mvc.mak instead.
++!message
+ 
 -# Delete files that may interfere with running tests.  This includes some files
 -# that may result from working on the tests, not only from running them.
 -clean:
@@ -354,8 +356,6 @@ diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 -	$(VIMPROG) -u NONE $(COMMON_ARGS) -S runtest.vim $*.vim
 -	@del vimcmd
 -	@IF EXIST benchmark.out ( type benchmark.out )
-+# This file is only for backward compatibility.
-+# Use Make_mvc.mak instead.
 +!include Make_mvc.mak
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_mvc.mak
 copy from src/testdir/Make_dos.mak
