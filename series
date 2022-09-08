@@ -30,5 +30,4 @@ wip-win32-vimdir-encoding.patch #+wip
 win32-directwrite-ambiwidth-auto.patch
 suppress-warnings.patch
 win32-rename-makefiles.patch #+wip
-win32-fix-test_gui_w32_sendevent.patch
 fix-config_cache-removal.patch #+rejected
