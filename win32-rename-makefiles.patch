@@ -72,6 +72,16 @@ diff --git a/Filelist b/Filelist
  		src/xxd/Make_ming.mak \
  		src/xxd/Make_mvc.mak \
  		nsis/gvim.nsi \
+@@ -945,9 +947,6 @@ EXTRA =		\
+ 		README_extra.txt \
+ 		src/VisVim/VisVim.dll \
+ 		runtime/vimlogo.xpm \
+-		src/tee/Makefile \
+-		src/tee/Make_mvc.mak \
+-		src/tee/tee.c \
+ 
+ # files in READMEdir that are included from the top dir
+ IN_README_DIR = \
 diff --git a/src/GvimExt/Makefile b/src/GvimExt/Make_mvc.mak
 copy from src/GvimExt/Makefile
 copy to src/GvimExt/Make_mvc.mak
