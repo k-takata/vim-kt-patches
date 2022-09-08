@@ -54,17 +54,7 @@ diff --git a/Filelist b/Filelist
  		src/xxd/Makefile \
  
  # source files for both DOS and Unix
-@@ -520,7 +519,8 @@ SRC_DOS_UNIX =	\
- SRC_DOS =	\
- 		src/GvimExt/*.mak \
- 		src/GvimExt/GvimExt.reg \
--		src/GvimExt/Makefile \
-+		src/GvimExt/Make_ming.mak \
-+		src/GvimExt/Make_mvc.mak \
- 		src/GvimExt/README.txt \
- 		src/GvimExt/gvimext.cpp \
- 		src/GvimExt/gvimext.def \
-@@ -570,6 +570,7 @@ SRC_DOS =	\
+@@ -570,6 +569,7 @@ SRC_DOS =	\
  		src/proto/os_win32.pro \
  		src/proto/os_mswin.pro \
  		src/testdir/Make_dos.mak \
@@ -72,17 +62,124 @@ diff --git a/Filelist b/Filelist
  		src/testdir/Make_ming.mak \
  		src/testdir/dos.vim \
  		src/uninstall.c \
-@@ -578,6 +579,7 @@ SRC_DOS =	\
+@@ -578,7 +578,9 @@ SRC_DOS =	\
  		src/vimrun.c \
  		src/xpm_w32.c \
  		src/xpm_w32.h \
 +		src/tee/Make_ming.mak \
  		src/tee/Make_mvc.mak \
++		src/xxd/Makefile \
  		src/xxd/Make_ming.mak \
  		src/xxd/Make_mvc.mak \
+ 		nsis/gvim.nsi \
 diff --git a/src/GvimExt/Makefile b/src/GvimExt/Make_mvc.mak
-rename from src/GvimExt/Makefile
-rename to src/GvimExt/Make_mvc.mak
+copy from src/GvimExt/Makefile
+copy to src/GvimExt/Make_mvc.mak
+diff --git a/src/GvimExt/Makefile b/src/GvimExt/Makefile
+--- a/src/GvimExt/Makefile
++++ b/src/GvimExt/Makefile
+@@ -1,98 +1,4 @@
+-# Makefile for GvimExt, using MSVC
+-# Options:
+-#   DEBUG=yes		Build debug version (for VC7 and maybe later)
+-#   CPUARG=		/arch:IA32/AVX/etc, call from main makefile to set
+-#   			automatically from CPUNR
+-#
+-
+-TARGETOS = WINNT
+-
+-!ifndef APPVER
+-APPVER = 5.01
+-!endif
+-!ifndef WINVER
+-WINVER = 0x0501
+-!endif
+-
+-!if "$(DEBUG)" != "yes"
+-NODEBUG = 1
+-!endif
+-
+-!ifdef PROCESSOR_ARCHITECTURE
+-# On Windows NT
+-! ifndef CPU
+-CPU = i386
+-!  if !defined(PLATFORM) && defined(TARGET_CPU)
+-PLATFORM = $(TARGET_CPU)
+-!  endif
+-!  ifdef PLATFORM
+-!   if ("$(PLATFORM)" == "x64") || ("$(PLATFORM)" == "X64")
+-CPU = AMD64
+-!   elseif ("$(PLATFORM)" == "arm64") || ("$(PLATFORM)" == "ARM64")
+-CPU = ARM64
+-!   elseif ("$(PLATFORM)" != "x86") && ("$(PLATFORM)" != "X86")
+-!    error *** ERROR Unknown target platform "$(PLATFORM)". Make aborted.
+-!   endif
+-!  endif
+-! endif
+-!else
+-CPU = i386
+-!endif
++!message This makefile is deprecated. Use Make_mvc.mak instead.
++!message
+ 
+-!ifdef SDK_INCLUDE_DIR
+-!include $(SDK_INCLUDE_DIR)\Win32.mak
+-!elseif "$(USE_WIN32MAK)"=="yes"
+-!include <Win32.mak>
+-!else
+-cc = cl
+-link = link
+-rc = rc
+-cflags = -nologo -c
+-lflags = -incremental:no -nologo
+-rcflags = /r
+-olelibsdll = ole32.lib uuid.lib oleaut32.lib user32.lib gdi32.lib advapi32.lib
+-!endif
+-
+-# include CPUARG
+-cflags = $(cflags) $(CPUARG)
+-
+-# set WINVER and _WIN32_WINNT
+-cflags = $(cflags) -DWINVER=$(WINVER) -D_WIN32_WINNT=$(WINVER)
+-
+-!if "$(CL)" == "/D_USING_V110_SDK71_"
+-rcflags = $(rcflags) /D_USING_V110_SDK71_
+-!endif
+-
+-SUBSYSTEM = console
+-!if "$(SUBSYSTEM_VER)" != ""
+-SUBSYSTEM = $(SUBSYSTEM),$(SUBSYSTEM_VER)
+-!endif
+-
+-!if "$(CPU)" == "AMD64" || "$(CPU)" == "ARM64"
+-OFFSET = 0x11C000000
+-!else
+-OFFSET = 0x1C000000
+-!endif
+-
+-all: gvimext.dll
+-
+-gvimext.dll:    gvimext.obj	\
+-		gvimext.res
+-	$(link) $(lflags) -dll -def:gvimext.def -base:$(OFFSET) -out:$*.dll $** $(olelibsdll) shell32.lib comctl32.lib -subsystem:$(SUBSYSTEM)
+-	if exist $*.dll.manifest mt -nologo -manifest $*.dll.manifest -outputresource:$*.dll;2
+-
+-gvimext.obj: gvimext.h
+-
+-.cpp.obj:
+-	$(cc) $(cflags) -DFEAT_GETTEXT $(cvarsmt) $*.cpp
+-
+-gvimext.res: gvimext.rc
+-	$(rc) /nologo $(rcflags) $(rcvars)  gvimext.rc
+-
+-clean:
+-	- if exist gvimext.dll del gvimext.dll
+-	- if exist gvimext.lib del gvimext.lib
+-	- if exist gvimext.exp del gvimext.exp
+-	- if exist gvimext.obj del gvimext.obj
+-	- if exist gvimext.res del gvimext.res
+-	- if exist gvimext.dll.manifest del gvimext.dll.manifest
++!include Make_mvc.mak
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
@@ -196,8 +293,35 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  
  ###########################################################################
 diff --git a/src/tee/Makefile b/src/tee/Make_ming.mak
-rename from src/tee/Makefile
-rename to src/tee/Make_ming.mak
+copy from src/tee/Makefile
+copy to src/tee/Make_ming.mak
+diff --git a/src/tee/Makefile b/src/tee/Makefile
+--- a/src/tee/Makefile
++++ b/src/tee/Makefile
+@@ -1,21 +1,2 @@
+-# A very (if not the most) simplistic Makefile for MS-Windows and OS/2
+-
+-CC=gcc
+-CFLAGS=-O2 -fno-strength-reduce
+-
+-ifneq (sh.exe, $(SHELL))
+-DEL = rm -f
+-else
+-DEL = del
+-endif
+-
+-tee.exe: tee.o
+-	$(CC) $(CFLAGS) -s -o $@ $<
+-
+-tee.o: tee.c
+-	$(CC) $(CFLAGS) -c $<
+-
+-clean:
+-	- $(DEL) tee.o
+-	- $(DEL) tee.exe
+-
++$(warning This makefile is deprecated. Use Make_ming.mak instead.)
++include Make_ming.mak
 diff --git a/src/testdir/Make_dos.mak b/src/testdir/Make_dos.mak
 --- a/src/testdir/Make_dos.mak
 +++ b/src/testdir/Make_dos.mak
