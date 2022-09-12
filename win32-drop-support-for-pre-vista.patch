@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  776992ad6243d2621d582be1533a2c6ced0d51b3
+# Parent  1b3eee2539aacf5a16ef8ce463397668a36f7a5f
 
 diff --git a/README.md b/README.md
 --- a/README.md
@@ -268,10 +268,64 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  # VC<11 generates fp87 code by default
  ! if $(MSVC_MAJOR) < 11
  CPUARG =
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -1744,13 +1744,6 @@ mch_print_set_fg(long_u fgcol)
+ #  include <shlobj.h>
+ # endif
+ 
+-typedef BOOL (WINAPI *pfnGetFinalPathNameByHandleW)(
+-	HANDLE	hFile,
+-	LPWSTR	lpszFilePath,
+-	DWORD	cchFilePath,
+-	DWORD	dwFlags);
+-static pfnGetFinalPathNameByHandleW pGetFinalPathNameByHandleW = NULL;
+-
+ # define is_path_sep(c)	    ((c) == L'\\' || (c) == L'/')
+ 
+     static int
+@@ -1792,20 +1785,6 @@ resolve_reparse_point(char_u *fname)
+     WCHAR	    *p, *wp;
+     char_u	    *rfname = NULL;
+     WCHAR	    *buff = NULL;
+-    static BOOL	    loaded = FALSE;
+-
+-    if (pGetFinalPathNameByHandleW == NULL)
+-    {
+-	HMODULE hmod = GetModuleHandle("kernel32.dll");
+-
+-	if (loaded == TRUE)
+-	    return NULL;
+-	pGetFinalPathNameByHandleW = (pfnGetFinalPathNameByHandleW)
+-		GetProcAddress(hmod, "GetFinalPathNameByHandleW");
+-	loaded = TRUE;
+-	if (pGetFinalPathNameByHandleW == NULL)
+-	    return NULL;
+-    }
+ 
+     p = enc_to_utf16(fname, NULL);
+     if (p == NULL)
+@@ -1824,13 +1803,13 @@ resolve_reparse_point(char_u *fname)
+     if (h == INVALID_HANDLE_VALUE)
+ 	goto fail;
+ 
+-    size = pGetFinalPathNameByHandleW(h, NULL, 0, 0);
++    size = GetFinalPathNameByHandleW(h, NULL, 0, 0);
+     if (size == 0)
+ 	goto fail;
+     buff = ALLOC_MULT(WCHAR, size);
+     if (buff == NULL)
+ 	goto fail;
+-    if (pGetFinalPathNameByHandleW(h, buff, size, 0) == 0)
++    if (GetFinalPathNameByHandleW(h, buff, size, 0) == 0)
+ 	goto fail;
+ 
+     if (wcsncmp(buff, L"\\\\?\\UNC\\", 8) == 0)
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -242,27 +242,6 @@ static char_u *exe_path = NULL;
+@@ -243,27 +243,6 @@ static char_u *exe_path = NULL;
  
  static BOOL win8_or_later = FALSE;
  
@@ -299,7 +353,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  /*
   * Get version number including build number
   */
-@@ -7848,30 +7827,13 @@ vtp_flag_init(void)
+@@ -7882,30 +7861,13 @@ vtp_flag_init(void)
      static void
  vtp_init(void)
  {
@@ -332,7 +386,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      save_console_bg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_bg];
      save_console_fg_rgb = (guicolor_T)csbi.ColorTable[g_color_index_fg];
      store_console_bg_rgb = save_console_bg_rgb;
-@@ -8093,7 +8055,7 @@ ctermtoxterm(
+@@ -8134,7 +8096,7 @@ ctermtoxterm(
  set_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -341,7 +395,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      guicolor_T	fg, bg;
      int		ctermfg, ctermbg;
  
-@@ -8113,8 +8075,7 @@ set_console_color_rgb(void)
+@@ -8154,8 +8116,7 @@ set_console_color_rgb(void)
      bg = (GetRValue(bg) << 16) | (GetGValue(bg) << 8) | GetBValue(bg);
  
      csbi.cbSize = sizeof(csbi);
@@ -351,7 +405,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
      csbi.cbSize = sizeof(csbi);
      csbi.srWindow.Right += 1;
-@@ -8123,8 +8084,7 @@ set_console_color_rgb(void)
+@@ -8164,8 +8125,7 @@ set_console_color_rgb(void)
      store_console_fg_rgb = csbi.ColorTable[g_color_index_fg];
      csbi.ColorTable[g_color_index_bg] = (COLORREF)bg;
      csbi.ColorTable[g_color_index_fg] = (COLORREF)fg;
@@ -361,7 +415,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8181,22 +8141,20 @@ get_default_console_color(
+@@ -8231,22 +8191,20 @@ get_default_console_color(
  reset_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
@@ -387,7 +441,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  # endif
  }
  
-@@ -8207,19 +8165,17 @@ reset_console_color_rgb(void)
+@@ -8257,19 +8215,17 @@ reset_console_color_rgb(void)
  restore_console_color_rgb(void)
  {
  # ifdef FEAT_TERMGUICOLORS
