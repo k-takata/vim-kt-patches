@@ -185,6 +185,15 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  endif
  
  # Set to yes to enable Cscope support.
+@@ -1325,7 +1324,7 @@ ifeq (16, $(RUBY))
+ endif
+ 
+ $(OUTDIR)/iscygpty.o:	iscygpty.c $(CUI_INCL)
+-	$(CC) -c $(CFLAGS) iscygpty.c -o $(OUTDIR)/iscygpty.o -U_WIN32_WINNT -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID -DENABLE_STUB_IMPL
++	$(CC) -c $(CFLAGS) iscygpty.c -o $@
+ 
+ $(OUTDIR)/main.o:	main.c $(INCL) $(CUI_INCL)
+ 	$(CC) -c $(CFLAGS) main.c -o $@
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
@@ -268,6 +277,15 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  # VC<11 generates fp87 code by default
  ! if $(MSVC_MAJOR) < 11
  CPUARG =
+@@ -1686,7 +1686,7 @@ lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).l
+ 	$(CC) $(CFLAGS_OUTDIR) $(TCL_INC) if_tcl.c
+ 
+ $(OUTDIR)/iscygpty.obj:	$(OUTDIR) iscygpty.c $(CUI_INCL)
+-	$(CC) $(CFLAGS_OUTDIR) iscygpty.c -D_WIN32_WINNT=0x0600 -DUSE_DYNFILEID -DENABLE_STUB_IMPL
++	$(CC) $(CFLAGS_OUTDIR) iscygpty.c
+ 
+ $(OUTDIR)/job.obj:	$(OUTDIR) job.c $(INCL)
+ 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
