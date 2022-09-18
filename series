@@ -24,7 +24,6 @@ mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
 big5corr.patch
 support-tee-with-sp-on-windows.patch
-win32-drop-support-for-pre-vista.patch
 add-msvc-latest-bat.patch
 wip-win32-vimdir-encoding.patch #+wip
 win32-directwrite-ambiwidth-auto.patch
