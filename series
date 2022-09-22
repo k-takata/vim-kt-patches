@@ -28,4 +28,5 @@ wip-win32-vimdir-encoding.patch #+wip
 win32-directwrite-ambiwidth-auto.patch
 suppress-warnings.patch
 win32-update-makefile.patch
+if_ruby-drop-18.patch
 fix-config_cache-removal.patch #+rejected
