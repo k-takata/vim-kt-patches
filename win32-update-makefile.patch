@@ -51,7 +51,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !if "$(FEATURES)"==""
  FEATURES = HUGE
  !endif
-@@ -461,15 +452,9 @@ XPM = no
+@@ -461,13 +452,7 @@ XPM = no
  # See the xpm directory for more information.
  XPM_OBJ   = $(OBJDIR)/xpm_w32.obj
  XPM_DEFS  = -DFEAT_XPM_W32
@@ -63,11 +63,8 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 -XPM_LIB   = $(XPM)\lib\libXpm.lib
 -!  endif
  XPM_INC	  = -I $(XPM)\include -I $(XPM)\..\include
--! endif
-+ endif
+ ! endif
  !endif # GUI
- 
- !if "$(SOUND)" == "yes"
 @@ -482,10 +467,7 @@ SOUND_LIB	= winmm.lib
  !if "$(CHANNEL)" == "yes"
  CHANNEL_PRO	= proto/job.pro proto/channel.pro
