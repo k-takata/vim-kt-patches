@@ -433,7 +433,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  # endif
  # if RUBY_VERSION >= 31
  #  ifdef _MSC_VER
-@@ -503,29 +451,19 @@ static void (*dll_rb_unexpected_type) (V
+@@ -503,29 +451,22 @@ static void (*dll_rb_unexpected_type) (V
  NORETURN(static void (*dll_rb_unexpected_type) (VALUE, int));
  #  endif
  # endif
@@ -454,10 +454,11 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  static void * (*dll_rb_ia64_bsp) (void);
  static void (*dll_ruby_init_stack)(VALUE*, void*);
 -#   else
--static void (*dll_ruby_init_stack)(VALUE*);
++# else
+ static void (*dll_ruby_init_stack)(VALUE*);
 -#   endif
 -#  endif
--# endif
+ # endif
 -# if RUBY_VERSION >= 19
  static VALUE (*dll_rb_int2big)(SIGNED_VALUE);
 -# endif
@@ -466,7 +467,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  static void (*dll_ruby_script) (const char*);
  static int (*dll_rb_enc_find_index) (const char*);
  static rb_encoding* (*dll_rb_enc_find) (const char*);
-@@ -533,7 +471,6 @@ static VALUE (*dll_rb_enc_str_new) (cons
+@@ -533,7 +474,6 @@ static VALUE (*dll_rb_enc_str_new) (cons
  static VALUE (*dll_rb_sprintf) (const char*, ...);
  static VALUE (*dll_rb_require) (const char*);
  static void* (*dll_ruby_options)(int, char**);
@@ -474,7 +475,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  
  # if defined(USE_RGENGC) && USE_RGENGC
  #  if RUBY_VERSION == 21
-@@ -557,28 +494,27 @@ void rb_ary_detransient_stub(VALUE x);
+@@ -557,28 +497,27 @@ void rb_ary_detransient_stub(VALUE x);
  
  // Do not generate a prototype here, VALUE isn't always defined.
  # ifndef PROTO
@@ -510,7 +511,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      long
  rb_fix2int_stub(VALUE x)
  {
-@@ -589,24 +525,23 @@ rb_num2int_stub(VALUE x)
+@@ -589,24 +528,23 @@ rb_num2int_stub(VALUE x)
  {
      return dll_rb_num2int(x);
  }
@@ -540,7 +541,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  #  endif
  #  if defined(USE_RGENGC) && USE_RGENGC
  #   if RUBY_VERSION == 21
-@@ -748,11 +683,7 @@ static struct
+@@ -748,11 +686,7 @@ static struct
      {"rb_obj_as_string", (RUBY_PROC*)&dll_rb_obj_as_string},
      {"rb_obj_id", (RUBY_PROC*)&dll_rb_obj_id},
      {"rb_raise", (RUBY_PROC*)&dll_rb_raise},
@@ -552,7 +553,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      {"rb_str_cat", (RUBY_PROC*)&dll_rb_str_cat},
      {"rb_str_concat", (RUBY_PROC*)&dll_rb_str_concat},
      {"rb_str_new", (RUBY_PROC*)&dll_rb_str_new},
-@@ -761,45 +692,32 @@ static struct
+@@ -761,45 +695,32 @@ static struct
  # else
      {"rb_str_new2", (RUBY_PROC*)&dll_rb_str_new2},
  # endif
@@ -606,7 +607,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      {"rb_int2big", (RUBY_PROC*)&dll_rb_int2big},
      {"ruby_script", (RUBY_PROC*)&dll_ruby_script},
      {"rb_enc_find_index", (RUBY_PROC*)&dll_rb_enc_find_index},
-@@ -808,13 +726,10 @@ static struct
+@@ -808,13 +729,10 @@ static struct
      {"rb_sprintf", (RUBY_PROC*)&dll_rb_sprintf},
      {"rb_require", (RUBY_PROC*)&dll_rb_require},
      {"ruby_options", (RUBY_PROC*)&dll_ruby_options},
@@ -622,7 +623,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  # if defined(USE_RGENGC) && USE_RGENGC
  #  if RUBY_VERSION == 21
      {"rb_gc_writebarrier_unprotect_promoted", (RUBY_PROC*)&dll_rb_gc_writebarrier_unprotect_promoted},
-@@ -906,7 +821,6 @@ ex_ruby(exarg_T *eap)
+@@ -906,7 +824,6 @@ ex_ruby(exarg_T *eap)
      static VALUE
  vim_str2rb_enc_str(const char *s)
  {
@@ -630,7 +631,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      long lval;
      char_u *sval;
      rb_encoding *enc;
-@@ -918,14 +832,12 @@ vim_str2rb_enc_str(const char *s)
+@@ -918,14 +835,12 @@ vim_str2rb_enc_str(const char *s)
  	if (enc)
  	    return rb_enc_str_new(s, (long)strlen(s), enc);
      }
@@ -645,7 +646,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      long lval;
      char_u *sval;
      rb_encoding *enc;
-@@ -941,7 +853,6 @@ eval_enc_string_protect(const char *str,
+@@ -941,7 +856,6 @@ eval_enc_string_protect(const char *str,
  	    return rb_eval_string_protect(StringValuePtr(v), state);
  	}
      }
@@ -653,7 +654,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      return rb_eval_string_protect(str, state);
  }
  
-@@ -1040,40 +951,30 @@ ensure_ruby_initialized(void)
+@@ -1040,40 +954,30 @@ ensure_ruby_initialized(void)
      {
  #ifdef DYNAMIC_RUBY
  	if (ruby_enabled(TRUE))
@@ -696,7 +697,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
  	else
  	{
  	    emsg(_(e_sorry_this_command_is_disabled_the_ruby_library_could_not_be_loaded));
-@@ -1087,9 +988,6 @@ ensure_ruby_initialized(void)
+@@ -1087,9 +991,6 @@ ensure_ruby_initialized(void)
      static void
  error_print(int state)
  {
@@ -706,7 +707,7 @@ diff --git a/src/if_ruby.c b/src/if_ruby.c
      VALUE error;
      VALUE eclass;
      VALUE einfo;
-@@ -1127,11 +1025,7 @@ error_print(int state)
+@@ -1127,11 +1028,7 @@ error_print(int state)
  	    break;
  	case TAG_RAISE:
  	case TAG_FATAL:
