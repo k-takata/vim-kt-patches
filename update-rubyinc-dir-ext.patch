@@ -1,27 +1,27 @@
 # HG changeset patch
-# Parent  0669c0c5d58f2a99c4565a6511442358e7275ae4
+# Parent  9280c6b0b927d1cd33db7e2a7d402bf5179fd78a
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -481,6 +481,8 @@ RUBY_19_OR_LATER = 1
+@@ -492,6 +492,8 @@ RUBY_INSTALL_NAME = $(RUBY_MSVCRT_NAME)-
+  endif
  
-  ifdef RUBY_19_OR_LATER
  RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
 +# For using header files from Ruby's source code directory (w/o installing)
 +RUBYINC += -I $(RUBY)/include -I $(RUBY)/.ext/include/$(RUBY_PLATFORM)
-  else
- RUBYINC = -I $(RUBY)/lib/ruby/$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
+  ifeq (no, $(DYNAMIC_RUBY))
+ RUBYLIB = -L$(RUBY)/lib -l$(RUBY_INSTALL_NAME)
   endif
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1152,6 +1152,8 @@ CFLAGS = $(CFLAGS) -DFEAT_RUBY
+@@ -1105,6 +1105,8 @@ RUBY_INSTALL_NAME = x64-$(RUBY_MSVCRT_NA
+ CFLAGS = $(CFLAGS) -DFEAT_RUBY
  RUBY_OBJ = $(OUTDIR)\if_ruby.obj
- ! if $(RUBY_VER) >= 19
  RUBY_INC = /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
 +# For using header files from Ruby's source code directory (w/o installing)
 +RUBY_INC = $(RUBY_INC) /I "$(RUBY)\include" /I "$(RUBY)\.ext\include\$(RUBY_PLATFORM)"
- ! else
- RUBY_INC = /I "$(RUBY)\lib\ruby\$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
- ! endif
+ RUBY_LIB = $(RUBY)\lib\$(RUBY_INSTALL_NAME).lib
+ # Do we want to load Ruby dynamically?
+ ! if "$(DYNAMIC_RUBY)" == "yes"
