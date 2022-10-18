@@ -1,0 +1,44 @@
+# HG changeset patch
+# Parent  78d40230f723434df57d1a0c6693fd23041b8afe
+
+diff --git a/src/autocmd.c b/src/autocmd.c
+--- a/src/autocmd.c
++++ b/src/autocmd.c
+@@ -159,6 +159,8 @@ static struct event_name
+     {"RemoteReply",	EVENT_REMOTEREPLY},
+     {"SafeState",	EVENT_SAFESTATE},
+     {"SafeStateAgain",	EVENT_SAFESTATEAGAIN},
++    {"SearchHitBottom",	EVENT_SEARCHHITBOTTOM},
++    {"SearchHitTop",	EVENT_SEARCHHITTOP},
+     {"SessionLoadPost",	EVENT_SESSIONLOADPOST},
+     {"ShellCmdPost",	EVENT_SHELLCMDPOST},
+     {"ShellFilterPost",	EVENT_SHELLFILTERPOST},
+diff --git a/src/search.c b/src/search.c
+--- a/src/search.c
++++ b/src/search.c
+@@ -1090,6 +1090,13 @@ searchit(
+ 		lnum = buf->b_ml.ml_line_count;
+ 	    else
+ 		lnum = 1;
++
++	    if (dir == BACKWARD)
++		apply_autocmds(EVENT_SEARCHHITTOP, NULL, NULL, FALSE, curbuf);
++	    else
++		apply_autocmds(EVENT_SEARCHHITBOTTOM, NULL, NULL, FALSE,
++								      curbuf);
++
+ 	    if (!shortmess(SHM_SEARCH) && (options & SEARCH_MSG))
+ 		give_warning((char_u *)_(dir == BACKWARD
+ 					  ? top_bot_msg : bot_top_msg), TRUE);
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -1377,6 +1377,8 @@ enum auto_event
+     EVENT_REMOTEREPLY,		// upon string reception from a remote vim
+     EVENT_SAFESTATE,		// going to wait for a character
+     EVENT_SAFESTATEAGAIN,	// still waiting for a character
++    EVENT_SEARCHHITBOTTOM,	// hit bottom when searching
++    EVENT_SEARCHHITTOP,		// hit top when searching
+     EVENT_SESSIONLOADPOST,	// after loading a session file
+     EVENT_SHELLCMDPOST,		// after ":!cmd"
+     EVENT_SHELLFILTERPOST,	// after ":1,2!cmd", ":w !cmd", ":r !cmd".
