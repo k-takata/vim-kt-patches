@@ -1,29 +1,29 @@
 # HG changeset patch
 # Parent 39963f43b4750a843318de4a5243dae55e86bd76
-# Parent  14c377eddf318da0e124e10df61f45232cfa9f94
+# Parent  82279571d16fa9eeea7a25aad4b552bbf0aa0c79
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -405,7 +405,7 @@ CClink = $(CC)
+@@ -388,7 +388,7 @@ CClink = $(CC)
  # Set PATH environment variable to find lua or luajit executable.
- # This requires at least "normal" features, "tiny" and "small" don't work.
+ # This requires at least "normal" features, "tiny" doesn't work.
  #CONF_OPT_LUA = --enable-luainterp
 -#CONF_OPT_LUA = --enable-luainterp=dynamic
 +CONF_OPT_LUA = --enable-luainterp=dynamic
  #CONF_OPT_LUA = --enable-luainterp --with-luajit
  #CONF_OPT_LUA = --enable-luainterp=dynamic --with-luajit
  # Lua installation dir (when not set uses $LUA_PREFIX or defaults to /usr)
-@@ -434,7 +434,7 @@ CClink = $(CC)
+@@ -417,7 +417,7 @@ CClink = $(CC)
  # one: "touch perl.exp".
- # This requires at least "normal" features, "tiny" and "small" don't work.
+ # This requires at least "normal" features, "tiny" doesn't work.
  #CONF_OPT_PERL = --enable-perlinterp
 -#CONF_OPT_PERL = --enable-perlinterp=dynamic
 +CONF_OPT_PERL = --enable-perlinterp=dynamic
  
  # PYTHON
  # Uncomment lines here when you want to include the Python interface.
-@@ -452,10 +452,10 @@ CClink = $(CC)
+@@ -435,10 +435,10 @@ CClink = $(CC)
  # Build two separate versions of Vim in that case.
  #CONF_OPT_PYTHON = --enable-pythoninterp
  #CONF_OPT_PYTHON = --enable-pythoninterp --with-python-command=python2.7
@@ -36,16 +36,16 @@ diff --git a/src/Makefile b/src/Makefile
  
  # RUBY
  # Uncomment this when you want to include the Ruby interface.
-@@ -463,7 +463,7 @@ CClink = $(CC)
+@@ -446,7 +446,7 @@ CClink = $(CC)
  # Debian package is "ruby-dev".
- # This requires at least "normal" features, "tiny" and "small" don't work.
+ # This requires at least "normal" features, "tiny" doesn't work.
  #CONF_OPT_RUBY = --enable-rubyinterp
 -#CONF_OPT_RUBY = --enable-rubyinterp=dynamic
 +CONF_OPT_RUBY = --enable-rubyinterp=dynamic
  #CONF_OPT_RUBY = --enable-rubyinterp --with-ruby-command=ruby1.9.1
  
  # TCL
-@@ -471,7 +471,7 @@ CClink = $(CC)
+@@ -454,7 +454,7 @@ CClink = $(CC)
  # First one is for static linking, second one for dynamic loading.
  # Debian package is "tcl-dev".
  #CONF_OPT_TCL = --enable-tclinterp
@@ -54,12 +54,3 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
  
  # CSCOPE
-@@ -548,7 +548,7 @@ CClink = $(CC)
- #CONF_OPT_FEAT = --with-features=small
- #CONF_OPT_FEAT = --with-features=normal
- #CONF_OPT_FEAT = --with-features=big
--#CONF_OPT_FEAT = --with-features=huge
-+CONF_OPT_FEAT = --with-features=huge
- 
- # COMPILED BY - For including a specific e-mail address for ":version".
- #CONF_OPT_COMPBY = "--with-compiledby=John Doe <JohnDoe@yahoo.com>"
