@@ -1,6 +1,31 @@
 # HG changeset patch
 # Parent  78d40230f723434df57d1a0c6693fd23041b8afe
 
+diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
+--- a/runtime/doc/autocmd.txt
++++ b/runtime/doc/autocmd.txt
+@@ -412,6 +412,9 @@ Name			triggered by ~
+ |TextChangedT|		after a change was made to the text in Terminal mode
+ |TextYankPost|		after text has been yanked or deleted
+ 
++|SearchHitBottom|	when searching hit the bottom of the file
++|SearchHitTop|		when searching hit the top of the file
++
+ |SafeState|		nothing pending, going to wait for the user to type a
+ 			character
+ |SafeStateAgain|	repeated SafeState
+@@ -1105,6 +1108,11 @@ SafeStateAgain			Like SafeState but afte
+ 				triggered often, don't do something that takes
+ 				time.
+ 
++							*SearchHitBottom*
++SearchHitBottom			When searching hit the bottom of the file.
++							*SearchHitTop*
++SearchHitTop			When searching hit the top of the file.
++
+ 							*SessionLoadPost*
+ SessionLoadPost			After loading the session file created using
+ 				the |:mksession| command.
 diff --git a/src/autocmd.c b/src/autocmd.c
 --- a/src/autocmd.c
 +++ b/src/autocmd.c
