@@ -142,7 +142,7 @@ diff --git a/src/filepath.c b/src/filepath.c
  {
 -    if (in_vim9script() && check_for_string_arg(argvars, 0) == FAIL)
 +    if (in_vim9script()
-+	    && (check_for_nonempty_string_arg(argvars, 0) == FAIL
++	    && (check_for_string_arg(argvars, 0) == FAIL
 +		|| check_for_opt_number_arg(argvars, 1) == FAIL
 +		|| (argvars[1].v_type != VAR_UNKNOWN
 +		    && check_for_opt_number_arg(argvars, 2) == FAIL)))
