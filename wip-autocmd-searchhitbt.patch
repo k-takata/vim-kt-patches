@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  78d40230f723434df57d1a0c6693fd23041b8afe
+# Parent  84cde1c2c2c3f86a3c53e832e6f18ffc3fdaf7ff
 
 diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 --- a/runtime/doc/autocmd.txt
@@ -41,16 +41,20 @@ diff --git a/src/autocmd.c b/src/autocmd.c
 diff --git a/src/search.c b/src/search.c
 --- a/src/search.c
 +++ b/src/search.c
-@@ -1090,6 +1090,13 @@ searchit(
+@@ -1087,9 +1087,17 @@ searchit(
+ 	     * written.
+ 	     */
+ 	    if (dir == BACKWARD)    // start second loop at the other end
++	    {
  		lnum = buf->b_ml.ml_line_count;
- 	    else
- 		lnum = 1;
-+
-+	    if (dir == BACKWARD)
 +		apply_autocmds(EVENT_SEARCHHITTOP, NULL, NULL, FALSE, curbuf);
-+	    else
++	    }
+ 	    else
++	    {
+ 		lnum = 1;
 +		apply_autocmds(EVENT_SEARCHHITBOTTOM, NULL, NULL, FALSE,
 +								      curbuf);
++	    }
 +
  	    if (!shortmess(SHM_SEARCH) && (options & SEARCH_MSG))
  		give_warning((char_u *)_(dir == BACKWARD
