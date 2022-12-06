@@ -4,6 +4,24 @@
 diff --git a/src/crypt.c b/src/crypt.c
 --- a/src/crypt.c
 +++ b/src/crypt.c
+@@ -73,7 +73,7 @@ typedef struct {
+ 							char_u *p2, int last);
+ } cryptmethod_T;
+ 
+-static int crypt_sodium_init(cryptstate_T *state, char_u *key, char_u *salt, int salt_len, char_u *seed, int seed_len);
++static int crypt_sodium_init_(cryptstate_T *state, char_u *key, char_u *salt, int salt_len, char_u *seed, int seed_len);
+ static long crypt_sodium_buffer_decode(cryptstate_T *state, char_u *from, size_t len, char_u **buf_out, int last);
+ static long crypt_sodium_buffer_encode(cryptstate_T *state, char_u *from, size_t len, char_u **buf_out, int last);
+ 
+@@ -145,7 +145,7 @@ static cryptmethod_T cryptmethods[CRYPT_
+ #endif
+ 	FALSE,
+ 	NULL,
+-	crypt_sodium_init,
++	crypt_sodium_init_,
+ 	NULL, NULL,
+ 	crypt_sodium_buffer_encode, crypt_sodium_buffer_decode,
+ 	NULL, NULL,
 @@ -198,6 +198,7 @@ typedef struct {
      dll_crypto_secretstream_xchacha20poly1305_pull
  #  define crypto_pwhash	    dll_crypto_pwhash
@@ -28,6 +46,15 @@ diff --git a/src/crypt.c b/src/crypt.c
      {NULL, NULL}
  };
  
+@@ -855,7 +858,7 @@ crypt_append_msg(
+ }
+ 
+     static int
+-crypt_sodium_init(
++crypt_sodium_init_(
+     cryptstate_T	*state UNUSED,
+     char_u		*key UNUSED,
+     char_u		*salt UNUSED,
 @@ -1143,6 +1146,18 @@ crypt_sodium_randombytes_buf(void *const
  {
      randombytes_buf(buf, size);
