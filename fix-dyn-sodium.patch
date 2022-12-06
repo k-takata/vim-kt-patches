@@ -1,0 +1,73 @@
+# HG changeset patch
+# Parent  1d70e7465c856dd39c64543e2dd9fc2f75f20c92
+
+diff --git a/src/crypt.c b/src/crypt.c
+--- a/src/crypt.c
++++ b/src/crypt.c
+@@ -198,6 +198,7 @@ typedef struct {
+     dll_crypto_secretstream_xchacha20poly1305_pull
+ #  define crypto_pwhash	    dll_crypto_pwhash
+ #  define randombytes_buf   dll_randombytes_buf
++#  define randombytes_random dll_randombytes_random
+ 
+ static int (*dll_sodium_init)(void) = NULL;
+ static void (*dll_sodium_free)(void *) = NULL;
+@@ -231,6 +232,7 @@ static int (*dll_crypto_pwhash)(unsigned
+     unsigned long long opslimit, size_t memlimit, int alg)
+     = NULL;
+ static void (*dll_randombytes_buf)(void * const buf, const size_t size);
++static uint32_t (*dll_randombytes_random)(void);
+ 
+ static struct {
+     const char *name;
+@@ -248,6 +250,7 @@ static struct {
+     {"crypto_secretstream_xchacha20poly1305_pull", (SODIUM_PROC*)&dll_crypto_secretstream_xchacha20poly1305_pull},
+     {"crypto_pwhash", (SODIUM_PROC*)&dll_crypto_pwhash},
+     {"randombytes_buf", (SODIUM_PROC*)&dll_randombytes_buf},
++    {"randombytes_random", (SODIUM_PROC*)&dll_randombytes_random},
+     {NULL, NULL}
+ };
+ 
+@@ -1143,6 +1146,18 @@ crypt_sodium_randombytes_buf(void *const
+ {
+     randombytes_buf(buf, size);
+ }
++
++    int
++crypt_sodium_init(void)
++{
++    return sodium_init();
++}
++
++    uint32_t
++crypt_sodium_randombytes_random(void)
++{
++    return randombytes_random();
++}
+ # endif
+ 
+ #endif // FEAT_CRYPT
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -8166,8 +8166,8 @@ init_srand(UINT32_T *x)
+ 	// - reltime() or time()
+ 	// - XOR with process ID
+ #if defined(FEAT_SODIUM)
+-	if (sodium_init() >= 0)
+-	    *x = randombytes_random();
++	if (crypt_sodium_init() >= 0)
++	    *x = crypt_sodium_randombytes_random();
+ 	else
+ #endif
+ 	{
+diff --git a/src/proto/crypt.pro b/src/proto/crypt.pro
+--- a/src/proto/crypt.pro
++++ b/src/proto/crypt.pro
+@@ -26,4 +26,6 @@ char_u *crypt_get_key(int store, int twi
+ void crypt_append_msg(buf_T *buf);
+ int crypt_sodium_munlock(void *const addr, const size_t len);
+ void crypt_sodium_randombytes_buf(void *const buf, const size_t size);
++int crypt_sodium_init(void);
++uint32_t crypt_sodium_randombytes_random(void);
+ /* vim: set ft=c : */
