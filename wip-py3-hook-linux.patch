@@ -1,0 +1,121 @@
+# HG changeset patch
+# Parent  8f062997819fdd6a73c794181ce42436c47c97a9
+
+diff --git a/src/errors.h b/src/errors.h
+--- a/src/errors.h
++++ b/src/errors.h
+@@ -3213,7 +3213,7 @@ EXTERN char e_autoload_import_cannot_use
+ EXTERN char e_cannot_use_partial_here[]
+ 	INIT(= N_("E1265: Cannot use a partial here"));
+ #endif
+-#if defined(FEAT_PYTHON3) && defined(MSWIN)
++#if defined(FEAT_PYTHON3) && (defined(MSWIN) || defined(__linux__))
+ EXTERN char e_critical_error_in_python3_initialization_check_your_installation[]
+ 	INIT(= N_("E1266: Critical error in python3 initialization, check your python3 installation"));
+ #endif
+diff --git a/src/if_python3.c b/src/if_python3.c
+--- a/src/if_python3.c
++++ b/src/if_python3.c
+@@ -29,6 +29,9 @@
+ // allocator
+ // #define Py_DEBUG_NO_PYMALLOC
+ 
++#ifdef __linux__
++# define _GNU_SOURCE
++#endif
+ #include "vim.h"
+ 
+ #include <limits.h>
+@@ -122,6 +125,9 @@ typedef PySliceObject PySliceObject_T;
+ 
+ #ifndef MSWIN
+ # define HINSTANCE void *
++# if defined(DYNAMIC_PYTHON3) || defined(__linux__)
++#  include <dlfcn.h>
++# endif
+ #endif
+ #if defined(DYNAMIC_PYTHON3) || defined(MSWIN)
+ static HINSTANCE hinstPy3 = 0; // Instance of python.dll
+@@ -130,7 +136,6 @@ static HINSTANCE hinstPy3 = 0; // Instan
+ #if defined(DYNAMIC_PYTHON3) || defined(PROTO)
+ 
+ # ifndef MSWIN
+-#  include <dlfcn.h>
+ #  define FARPROC void*
+ #  if defined(PY_NO_RTLD_GLOBAL) && defined(PY3_NO_RTLD_GLOBAL)
+ #   define load_dll(n) dlopen((n), RTLD_LAZY)
+@@ -1078,9 +1083,10 @@ reset_stdin(void)
+ // Python 3.2 or later will abort inside Py_Initialize() when mandatory
+ // modules cannot be loaded (e.g. 'pythonthreehome' is wrongly set.).
+ // Install a hook to python dll's exit() and recover from it.
+-#if defined(MSWIN) && (PY_VERSION_HEX >= 0x030200f0)
+-# define HOOK_EXIT
+-# include <setjmp.h>
++#if PY_VERSION_HEX >= 0x030200f0
++# ifdef MSWIN
++#  define HOOK_EXIT
++#  include <setjmp.h>
+ 
+ static jmp_buf exit_hook_jump_buf;
+ static void *orig_exit = NULL;
+@@ -1124,6 +1130,52 @@ restore_py_exit(void)
+ 	hook_dll_import_func(hinst, "exit", orig_exit);
+     orig_exit = NULL;
+ }
++# elif defined(__linux__)
++#  define HOOK_EXIT
++#  include <setjmp.h>
++
++static jmp_buf exit_hook_jump_buf;
++static int hooked = FALSE;
++static void (*orig_exit)(int) __attribute__((noreturn)) = NULL;
++
++/*
++ * Function that replaces exit() while calling Py_Initialize().
++ */
++    void
++exit(int ret)
++{
++    if (orig_exit == NULL)
++	orig_exit = dlsym(RTLD_NEXT, "exit");
++
++    if (hooked)
++    {
++	// Recover from exit.
++	longjmp(exit_hook_jump_buf, 1);
++    }
++    else
++    {
++	orig_exit(ret);
++    }
++}
++
++/*
++ * Start hooking exit().
++ */
++    static void
++hook_py_exit(void)
++{
++    hooked = TRUE;
++}
++
++/*
++ * End hooking exit().
++ */
++    static void
++restore_py_exit(void)
++{
++    hooked = FALSE;
++}
++# endif
+ #endif
+ 
+     static int
+@@ -1175,6 +1227,7 @@ Python3_Init(void)
+ 	{
+ 	    // exit() was called in Py_Initialize().
+ 	    restore_py_exit();
++	    redraw_later_clear();
+ 	    emsg(_(e_critical_error_in_python3_initialization_check_your_installation));
+ 	    goto fail;
+ 	}

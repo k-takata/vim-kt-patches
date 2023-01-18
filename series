@@ -29,4 +29,5 @@ win32-directwrite-ambiwidth-auto.patch
 suppress-warnings.patch
 wip-autocmd-searchhitbt.patch #+wip
 win32-mouse-flaky.patch
+wip-py3-hook-linux.patch #+wip
 fix-config_cache-removal.patch #+rejected
