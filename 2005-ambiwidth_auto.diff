@@ -1,11 +1,11 @@
 # HG changeset patch
-# Parent  301bae6110f0aede397626d601991620dbf56932
+# Parent  d677a57706446314abd331a778d5c7bf7168b85d
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -741,6 +741,9 @@ A jump table for the options with a shor
+@@ -753,6 +753,9 @@ A jump table for the options with a shor
  	"single":	Use the same width as characters in US-ASCII.  This is
  			expected by most users.
  	"double":	Use twice the width of ASCII characters.
@@ -15,7 +15,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  							*E834* *E835*
  	The value "double" cannot be used if 'listchars' or 'fillchars'
  	contains a character that would be double width.  These errors may
-@@ -769,6 +772,10 @@ A jump table for the options with a shor
+@@ -781,6 +784,10 @@ A jump table for the options with a shor
  	escape sequence to request cursor position report.  The response can
  	be found in |v:termu7resp|.
  
@@ -29,7 +29,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5221,6 +5221,59 @@ error:
+@@ -5102,6 +5102,59 @@ error:
  }
  #endif
  
@@ -92,7 +92,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -1559,6 +1559,27 @@ utf_char2cells(int c)
+@@ -1589,6 +1589,27 @@ utf_char2cells(int c)
  #endif
      };
  
@@ -123,9 +123,9 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 diff --git a/src/optionstr.c b/src/optionstr.c
 --- a/src/optionstr.c
 +++ b/src/optionstr.c
-@@ -13,7 +13,11 @@
- 
- #include "vim.h"
+@@ -16,7 +16,11 @@
+ static char_u shm_buf[SHM_LEN];
+ static int set_shm_recursive = 0;
  
 -static char *(p_ambw_values[]) = {"single", "double", NULL};
 +static char *(p_ambw_values[]) = {"single", "double",
@@ -150,7 +150,7 @@ diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -519,6 +519,13 @@ typedef unsigned int u8char_T;	// int is
+@@ -520,6 +520,13 @@ typedef unsigned int u8char_T;	// int is
  #endif
  
  /*
