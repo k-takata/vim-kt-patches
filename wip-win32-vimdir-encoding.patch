@@ -108,6 +108,108 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
+@@ -346,50 +346,6 @@ set_init_1(int clean_arg)
+     init_spell_chartab();
+ #endif
+ 
+-    /*
+-     * Expand environment variables and things like "~" for the defaults.
+-     * If option_expand() returns non-NULL the variable is expanded.  This can
+-     * only happen for non-indirect options.
+-     * Also set the default to the expanded value, so ":set" does not list
+-     * them.
+-     * Don't set the P_ALLOCED flag, because we don't want to free the
+-     * default.
+-     */
+-    for (opt_idx = 0; !istermoption_idx(opt_idx); opt_idx++)
+-    {
+-	if ((options[opt_idx].flags & P_GETTEXT)
+-					      && options[opt_idx].var != NULL)
+-	    p = (char_u *)_(*(char **)options[opt_idx].var);
+-	else
+-	    p = option_expand(opt_idx, NULL);
+-	if (p != NULL && (p = vim_strsave(p)) != NULL)
+-	{
+-	    *(char_u **)options[opt_idx].var = p;
+-	    // VIMEXP
+-	    // Defaults for all expanded options are currently the same for Vi
+-	    // and Vim.  When this changes, add some code here!  Also need to
+-	    // split P_DEF_ALLOCED in two.
+-	    if (options[opt_idx].flags & P_DEF_ALLOCED)
+-		vim_free(options[opt_idx].def_val[VI_DEFAULT]);
+-	    options[opt_idx].def_val[VI_DEFAULT] = p;
+-	    options[opt_idx].flags |= P_DEF_ALLOCED;
+-	}
+-    }
+-
+-    save_file_ff(curbuf);	// Buffer is unchanged
+-
+-#if defined(FEAT_ARABIC)
+-    // Detect use of mlterm.
+-    // Mlterm is a terminal emulator akin to xterm that has some special
+-    // abilities (bidi namely).
+-    // NOTE: mlterm's author is being asked to 'set' a variable
+-    //       instead of an environment variable due to inheritance.
+-    if (mch_getenv((char_u *)"MLTERM") != NULL)
+-	set_option_value_give_err((char_u *)"tbidi", 1L, NULL, 0);
+-#endif
+-
+-    didset_options2();
+-
+ # if defined(MSWIN) && defined(FEAT_GETTEXT)
+     /*
+      * If $LANG isn't set, try to get a good value for it.  This makes the
+@@ -523,6 +479,50 @@ set_init_1(int clean_arg)
+ 	}
+     }
+ 
++    /*
++     * Expand environment variables and things like "~" for the defaults.
++     * If option_expand() returns non-NULL the variable is expanded.  This can
++     * only happen for non-indirect options.
++     * Also set the default to the expanded value, so ":set" does not list
++     * them.
++     * Don't set the P_ALLOCED flag, because we don't want to free the
++     * default.
++     */
++    for (opt_idx = 0; !istermoption_idx(opt_idx); opt_idx++)
++    {
++	if ((options[opt_idx].flags & P_GETTEXT)
++					      && options[opt_idx].var != NULL)
++	    p = (char_u *)_(*(char **)options[opt_idx].var);
++	else
++	    p = option_expand(opt_idx, NULL);
++	if (p != NULL && (p = vim_strsave(p)) != NULL)
++	{
++	    *(char_u **)options[opt_idx].var = p;
++	    // VIMEXP
++	    // Defaults for all expanded options are currently the same for Vi
++	    // and Vim.  When this changes, add some code here!  Also need to
++	    // split P_DEF_ALLOCED in two.
++	    if (options[opt_idx].flags & P_DEF_ALLOCED)
++		vim_free(options[opt_idx].def_val[VI_DEFAULT]);
++	    options[opt_idx].def_val[VI_DEFAULT] = p;
++	    options[opt_idx].flags |= P_DEF_ALLOCED;
++	}
++    }
++
++    save_file_ff(curbuf);	// Buffer is unchanged
++
++#if defined(FEAT_ARABIC)
++    // Detect use of mlterm.
++    // Mlterm is a terminal emulator akin to xterm that has some special
++    // abilities (bidi namely).
++    // NOTE: mlterm's author is being asked to 'set' a variable
++    //       instead of an environment variable due to inheritance.
++    if (mch_getenv((char_u *)"MLTERM") != NULL)
++	set_option_value_give_err((char_u *)"tbidi", 1L, NULL, 0);
++#endif
++
++    didset_options2();
++
+ #ifdef FEAT_MULTI_LANG
+     // Set the default for 'helplang'.
+     set_helplang_default(get_mess_lang());
 @@ -2386,6 +2386,7 @@ option_expand(int opt_idx, char_u *val)
  	    (char_u **)options[opt_idx].var == &p_sps ? (char_u *)"file:" :
  #endif
