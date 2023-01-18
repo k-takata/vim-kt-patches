@@ -1,0 +1,17 @@
+# HG changeset patch
+# Parent  b66c7777ffbdd97dbfeb25b7330ca31d1f1ff5d6
+
+diff --git a/src/testdir/test_mswin_event.vim b/src/testdir/test_mswin_event.vim
+--- a/src/testdir/test_mswin_event.vim
++++ b/src/testdir/test_mswin_event.vim
+@@ -689,6 +689,10 @@ func Test_mswin_event_mouse()
+   CheckMSWindows
+   new
+ 
++  if !has('gui_running')
++    let g:test_is_flaky = 1
++  endif
++
+   set mousemodel=extend
+   call test_override('no_query_mouse', 1)
+   call WaitForResponses()
