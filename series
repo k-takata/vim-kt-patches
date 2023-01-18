@@ -9,6 +9,7 @@ backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+gtk2
 2005-ambiwidth_auto.diff
 ambiwidth_auto-mark.diff
+win32-directwrite-ambiwidth-auto.patch
 cpo-N.diff #+rejected
 cpo-N-mark.diff #+rejected
 cpo-N-update-tags.patch #+rejected
@@ -25,7 +26,6 @@ drop-support-for-glib-2.2.patch #+rejected
 big5corr.patch
 support-tee-with-sp-on-windows.patch
 wip-win32-vimdir-encoding.patch #+wip
-win32-directwrite-ambiwidth-auto.patch
 suppress-warnings.patch
 wip-autocmd-searchhitbt.patch #+wip
 win32-mouse-flaky.patch
