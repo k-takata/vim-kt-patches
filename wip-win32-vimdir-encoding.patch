@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  53e13761ef5d1d0353cf1c5bcb09d289b973fc31
+# Parent  5c937566eb5a246030ac90ae9c8bb10061388b1e
 
 diff --git a/src/misc1.c b/src/misc1.c
 --- a/src/misc1.c
@@ -40,7 +40,7 @@ diff --git a/src/misc1.c b/src/misc1.c
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -346,50 +346,6 @@ set_init_1(int clean_arg)
+@@ -350,50 +350,6 @@ set_init_1(int clean_arg)
      init_spell_chartab();
  #endif
  
@@ -91,7 +91,7 @@ diff --git a/src/option.c b/src/option.c
  # if defined(MSWIN) && defined(FEAT_GETTEXT)
      /*
       * If $LANG isn't set, try to get a good value for it.  This makes the
-@@ -523,6 +479,50 @@ set_init_1(int clean_arg)
+@@ -527,6 +483,50 @@ set_init_1(int clean_arg)
  	}
      }
  
@@ -145,25 +145,24 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/optionstr.c b/src/optionstr.c
 --- a/src/optionstr.c
 +++ b/src/optionstr.c
-@@ -1018,9 +1018,13 @@ did_set_string_option(
- 	    }
+@@ -1057,9 +1057,12 @@ did_set_encoding(char_u **varp, char_u *
+ 	}
  
  #if defined(MSWIN)
--	    // $HOME may have characters in active code page.
-+	    // $HOME, $VIM and $VIMRUNTIME may have characters in active code
-+	    // page.
- 	    if (varp == &p_enc)
-+	    {
- 		init_homedir();
-+		init_vimdir();
-+	    }
+-	// $HOME may have characters in active code page.
++	// $HOME, $VIM and $VIMRUNTIME may have characters in active code page.
+ 	if (varp == &p_enc)
++	{
+ 	    init_homedir();
++	    init_vimdir();
++	}
  #endif
- 	}
      }
+ 
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -253,7 +253,7 @@ static void restore_console_color_rgb(vo
+@@ -254,7 +254,7 @@ static void restore_console_color_rgb(vo
  static int suppress_winsize = 1;	// don't fiddle with console
  #endif
  
@@ -172,7 +171,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  
  static BOOL win8_or_later = FALSE;
  static BOOL win10_22H2_or_later = FALSE;
-@@ -461,27 +461,46 @@ wait_for_single_object(
+@@ -462,27 +462,46 @@ wait_for_single_object(
  # endif
  #endif   // !FEAT_GUI_MSWIN || VIMDLL
  
@@ -230,7 +229,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (exe_path == NULL)
  	return;
  
-@@ -502,6 +521,7 @@ get_exe_name(void)
+@@ -503,6 +522,7 @@ get_exe_name(void)
  	STRCAT(temp, exe_path);
  	vim_setenv((char_u *)"PATH", (char_u *)temp);
      }
@@ -238,7 +237,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  }
  
  /*
-@@ -537,10 +557,10 @@ vimLoadLib(const char *name)
+@@ -538,10 +558,10 @@ vimLoadLib(const char *name)
  
      // NOTE: Do not use mch_dirname() and mch_chdir() here, they may call
      // vimLoadLib() recursively, which causes a stack overflow.
@@ -253,7 +252,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	return NULL;
  
      WCHAR old_dirw[MAXPATHL];
-@@ -551,7 +571,7 @@ vimLoadLib(const char *name)
+@@ -552,7 +572,7 @@ vimLoadLib(const char *name)
      // Change directory to where the executable is, both to make
      // sure we find a .dll there and to avoid looking for a .dll
      // in the current directory.
@@ -262,7 +261,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      dll = LoadLibrary(name);
      SetCurrentDirectoryW(old_dirw);
      return dll;
-@@ -3581,7 +3601,7 @@ mch_check_win(
+@@ -3586,7 +3606,7 @@ mch_check_win(
      int argc UNUSED,
      char **argv UNUSED)
  {
