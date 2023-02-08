@@ -31,7 +31,7 @@ diff --git a/src/ex_getln.c b/src/ex_getln.c
  }
  
  /*
-@@ -2082,7 +2084,12 @@ getcmdline_int(
+@@ -2082,10 +2084,15 @@ getcmdline_int(
  	case Ctrl_R:			// insert register
  		res = cmdline_insert_reg(&gotesc);
  		if (res == CMDLINE_NOT_CHANGED)
@@ -43,4 +43,8 @@ diff --git a/src/ex_getln.c b/src/ex_getln.c
 +		}
  		else if (res == GOTO_NORMAL_MODE)
  		    goto returncmd;
- 		goto cmdline_changed;
+-		goto cmdline_changed;
++		goto cmdline_not_changed;
+ 
+ 	case Ctrl_D:
+ 		if (showmatches(&xpc, FALSE) == EXPAND_NOTHING)
