@@ -30,4 +30,5 @@ suppress-warnings.patch
 wip-autocmd-searchhitbt.patch #+wip
 win32-mouse-flaky.patch
 wip-py3-hook-linux.patch #+wip
+trigger-incsearch-on-cmdline-paste.patch
 fix-config_cache-removal.patch #+rejected
