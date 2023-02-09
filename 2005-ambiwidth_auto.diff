@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  d677a57706446314abd331a778d5c7bf7168b85d
+# Parent  3e94364a7d769d6a98c8e8af912d4a7894634139
 add 'auto' for 'ambiwidth'
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
@@ -92,23 +92,15 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -1589,6 +1589,27 @@ utf_char2cells(int c)
+@@ -1604,6 +1604,19 @@ utf_char2cells(int c)
+     }
  #endif
-     };
  
 +#ifdef USE_AMBIWIDTH_AUTO
 +    if (gui.in_use && *p_ambw == 'a')
 +    {
 +	int cell;
 +
-+# ifdef FEAT_EVAL
-+	if (c >= 0x100)
-+	{
-+	    int n = cw_value(c);
-+	    if (n != 0)
-+		return n;
-+	}
-+# endif
 +	/* This is required by screen.c implicitly. */
 +	if (c == 0)
 +	    return 1;
@@ -119,7 +111,7 @@ diff --git a/src/mbyte.c b/src/mbyte.c
 +
      if (c >= 0x100)
      {
- #if defined(FEAT_EVAL) || defined(USE_WCHAR_FUNCTIONS)
+ #ifdef USE_WCHAR_FUNCTIONS
 diff --git a/src/optionstr.c b/src/optionstr.c
 --- a/src/optionstr.c
 +++ b/src/optionstr.c
