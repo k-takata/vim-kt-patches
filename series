@@ -25,7 +25,6 @@ mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
 big5corr.patch
 support-tee-with-sp-on-windows.patch
-win32-vimdir-encoding.patch
 suppress-warnings.patch
 wip-autocmd-searchhitbt.patch #+wip
 win32-mouse-flaky.patch
