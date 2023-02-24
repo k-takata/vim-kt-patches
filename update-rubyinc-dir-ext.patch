@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  9280c6b0b927d1cd33db7e2a7d402bf5179fd78a
+# Parent  8b631a96226e252024118e82ac5929d6db465a2f
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -492,6 +492,8 @@ RUBY_INSTALL_NAME = $(RUBY_MSVCRT_NAME)-
+@@ -494,6 +494,8 @@ RUBY_INSTALL_NAME = $(RUBY_MSVCRT_NAME)-
   endif
  
  RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
@@ -16,12 +16,12 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1105,6 +1105,8 @@ RUBY_INSTALL_NAME = x64-$(RUBY_MSVCRT_NA
+@@ -1111,6 +1111,8 @@ RUBY_INSTALL_NAME = x64-$(RUBY_MSVCRT_NA
  CFLAGS = $(CFLAGS) -DFEAT_RUBY
  RUBY_OBJ = $(OUTDIR)\if_ruby.obj
  RUBY_INC = /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
 +# For using header files from Ruby's source code directory (w/o installing)
 +RUBY_INC = $(RUBY_INC) /I "$(RUBY)\include" /I "$(RUBY)\.ext\include\$(RUBY_PLATFORM)"
- RUBY_LIB = $(RUBY)\lib\$(RUBY_INSTALL_NAME).lib
+ RUBY_LIB = "$(RUBY)\lib\$(RUBY_INSTALL_NAME).lib"
  # Do we want to load Ruby dynamically?
  ! if "$(DYNAMIC_RUBY)" == "yes"
