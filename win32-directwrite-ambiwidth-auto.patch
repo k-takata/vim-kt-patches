@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  69fa92ad06c42e73a3a8c05c668907dcf7015bc5
+# Parent  d19f6cead035fbe02fdd49ea176b1a448ac2ba35
 
 diff --git a/src/gui_dwrite.cpp b/src/gui_dwrite.cpp
 --- a/src/gui_dwrite.cpp
@@ -116,7 +116,7 @@ diff --git a/src/gui_dwrite.h b/src/gui_dwrite.h
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5086,52 +5086,71 @@ error:
+@@ -5103,52 +5103,71 @@ error:
  #endif
  
  #ifdef USE_AMBIWIDTH_AUTO

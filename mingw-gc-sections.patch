@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  c529374cdfdced0cc6cc24148157bd23f326efd1
+# Parent  cf977c7582ca3b795595bdf7b4d493f9a21ab881
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -525,10 +525,10 @@ endif
+@@ -514,10 +514,10 @@ endif
  #>>>>> end of choices
  ###########################################################################
  
@@ -17,7 +17,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  # This used to have --preprocessor, but it's no longer supported
  WINDRES_FLAGS =
  EXTRA_LIBS =
-@@ -1095,6 +1095,8 @@ LIB += -lgcc_eh
+@@ -1086,6 +1086,8 @@ LIB += -lgcc_eh
  LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
  endif
  

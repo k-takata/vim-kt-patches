@@ -1,11 +1,11 @@
 # HG changeset patch
 # Parent e89f9176882f2e24edbe9d98fe007174d612b7a9
-# Parent  a2febb0007b2622a65f2de691f35ad38229dd4f7
+# Parent  21f341ed653033252e3772ab72bd984ff35bc94a
 
 diff --git a/src/undo.c b/src/undo.c
 --- a/src/undo.c
 +++ b/src/undo.c
-@@ -3045,6 +3045,8 @@ u_undo_end(
+@@ -3055,6 +3055,8 @@ u_undo_end(
      if (VIsual_active)
  	check_pos(curbuf, &VIsual);
  

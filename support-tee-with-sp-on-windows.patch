@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  b25fb93f086e4ffb4a5188a0e17aff820047af6f
+# Parent  3cd6df7f8c83dc8b227fc7705ff9afa3d5cc65b4
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6870,10 +6870,14 @@ A jump table for the options with a shor
+@@ -6956,10 +6956,14 @@ A jump table for the options with a shor
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
@@ -26,7 +26,7 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
 diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
 --- a/runtime/doc/quickfix.txt
 +++ b/runtime/doc/quickfix.txt
-@@ -970,11 +970,13 @@ or simpler >
+@@ -968,11 +968,13 @@ or simpler >
  "$*" can be given multiple times, for example: >
     :set makeprg=gcc\ -o\ $*\ $*
  
@@ -48,7 +48,7 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
-@@ -919,10 +919,11 @@ set_init_3(void)
+@@ -1013,10 +1013,11 @@ set_init_3(void)
  	    if (do_sp)
  	    {
  #  ifdef MSWIN
@@ -63,7 +63,7 @@ diff --git a/src/option.c b/src/option.c
  		options[idx_sp].def_val[VI_DEFAULT] = p_sp;
  	    }
  # endif
-@@ -939,20 +940,20 @@ set_init_3(void)
+@@ -1033,20 +1034,20 @@ set_init_3(void)
  		    || fnamecmp(p, "powershell.exe") == 0
  		)
  	{
@@ -87,7 +87,7 @@ diff --git a/src/option.c b/src/option.c
  	else
  	    // Always use POSIX shell style redirection if we reach this
  	    if (       fnamecmp(p, "sh") == 0
-@@ -968,6 +969,7 @@ set_init_3(void)
+@@ -1062,6 +1063,7 @@ set_init_3(void)
  		    || fnamecmp(p, "pwsh") == 0
  # ifdef MSWIN
  		    || fnamecmp(p, "cmd") == 0
@@ -95,7 +95,7 @@ diff --git a/src/option.c b/src/option.c
  		    || fnamecmp(p, "sh.exe") == 0
  		    || fnamecmp(p, "ksh.exe") == 0
  		    || fnamecmp(p, "mksh.exe") == 0
-@@ -975,7 +977,8 @@ set_init_3(void)
+@@ -1069,7 +1071,8 @@ set_init_3(void)
  		    || fnamecmp(p, "zsh.exe") == 0
  		    || fnamecmp(p, "zsh-beta.exe") == 0
  		    || fnamecmp(p, "bash.exe") == 0
@@ -105,7 +105,7 @@ diff --git a/src/option.c b/src/option.c
  		    || fnamecmp(p, "dash.exe") == 0
  		    || fnamecmp(p, "pwsh.exe") == 0
  # endif
-@@ -984,14 +987,15 @@ set_init_3(void)
+@@ -1078,14 +1081,15 @@ set_init_3(void)
  # if defined(FEAT_QUICKFIX)
  		if (do_sp)
  		{
@@ -128,7 +128,7 @@ diff --git a/src/option.c b/src/option.c
 diff --git a/src/testdir/test_shell.vim b/src/testdir/test_shell.vim
 --- a/src/testdir/test_shell.vim
 +++ b/src/testdir/test_shell.vim
-@@ -23,24 +23,45 @@ func Test_shell_options()
+@@ -28,24 +28,45 @@ func Test_shell_options()
            \ ['pwsh', '-c', '>%s 2>&1', '', '>%s 2>&1', '', '']]
    endif
    if has('win32')
