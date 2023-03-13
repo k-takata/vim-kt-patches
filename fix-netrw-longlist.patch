@@ -1,0 +1,17 @@
+# HG changeset patch
+# Parent  f742f20758a69dcc94ce532e2e3ba2d231507d72
+
+diff --git a/runtime/autoload/netrw.vim b/runtime/autoload/netrw.vim
+--- a/runtime/autoload/netrw.vim
++++ b/runtime/autoload/netrw.vim
+@@ -11093,8 +11093,8 @@ fun! s:LocalListing()
+     if g:netrw_sizestyle =~# "[hH]"
+      let sz= s:NetrwHumanReadable(sz)
+     endif
+-    let longfile= printf("%-".(g:netrw_maxfilenamelen+1)."s",pfile)
+-    let pfile   = longfile.sz." ".strftime(g:netrw_timefmt,getftime(filename))
++    let longfile= printf("%-".g:netrw_maxfilenamelen."S",pfile)
++    let pfile   = longfile."  ".sz." ".strftime(g:netrw_timefmt,getftime(filename))
+ "    call Decho("longlist support: sz=".sz." fsz=".fsz,'~'.expand("<slnum>"))
+    endif
+ 
