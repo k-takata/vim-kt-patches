@@ -15,9 +15,9 @@ diff --git a/runtime/autoload/netrw.vim b/runtime/autoload/netrw.vim
 -    let longfile= printf("%-".(g:netrw_maxfilenamelen+1)."s",pfile)
 -    let pfile   = longfile.sz." ".strftime(g:netrw_timefmt,getftime(filename))
 +    let longfile= printf("%-".g:netrw_maxfilenamelen."S",pfile)
-+    let extralen = strdisplaywidth(longfile) - g:netrw_maxfilenamelen
-+    let extralen = (extralen > 0) ? extralen : 0
-+    let fsz  = strpart("               ",1,15-extralen-strlen(sz)).sz
++    let szlen = 15 - (strdisplaywidth(longfile) - g:netrw_maxfilenamelen)
++    let szlen = (szlen > 0) ? szlen : 0
++    let fsz  = printf("%".szlen."S",sz)
 +    let pfile   = longfile."  ".fsz." ".strftime(g:netrw_timefmt,getftime(filename))
  "    call Decho("longlist support: sz=".sz." fsz=".fsz,'~'.expand("<slnum>"))
     endif
