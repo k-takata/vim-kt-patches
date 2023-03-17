@@ -1,46 +1,29 @@
 # HG changeset patch
-# Parent  80e166e2a49c3b34940c872347a7ae51459ab6e7
+# Parent  f531eb632dae4c5173da6ca288018bc9dea32755
 
-diff --git a/src/po/Make_all.mak b/src/po/Make_all.mak
---- a/src/po/Make_all.mak
-+++ b/src/po/Make_all.mak
-@@ -121,7 +121,6 @@ MOFILES = \
- 		vi.mo \
- 		zh_CN.UTF-8.mo \
- 		zh_TW.UTF-8.mo \
--		zh_TW.mo \
- 
- 
- MOCONVERTED = \
-@@ -135,6 +134,7 @@ MOCONVERTED = \
- 		uk.cp1251.mo \
- 		zh_CN.mo \
- 		zh_CN.cp936.mo \
-+		zh_TW.mo \
- 
- 
- CHECKFILES = \
 diff --git a/src/po/Makefile b/src/po/Makefile
 --- a/src/po/Makefile
 +++ b/src/po/Makefile
-@@ -138,6 +138,17 @@ zh_CN.po: zh_CN.UTF-8.po
- 	iconv -f UTF-8 -t gb2312 zh_CN.UTF-8.po | \
- 		sed -e 's/charset=[uU][tT][fF]-8/charset=gb2312/' -e 's/# Original translations/# Generated from zh_CN.UTF-8.po, DO NOT EDIT/' > zh_CN.po
+@@ -149,11 +149,16 @@ zh_CN.cp936.po: zh_CN.UTF-8.po
+ 	iconv -f UTF-8 -t cp936 zh_CN.UTF-8.po | \
+ 		$(SED) -e 's/charset=[uU][tT][fF]-8/charset=gbk/' -e 's/# Original translations/# Generated from zh_CN.UTF-8.po, DO NOT EDIT/' > zh_CN.cp936.po
  
+-# Convert zh_TW.UTF-8.po to create zh_TW.po
 +# Convert zh_TW.UTF-8.po to create zh_TW.po.  Requires doubling backslashes
 +# in the second byte.  Don't depend on big5corr, it should only be compiled
 +# when zh_TW.po is outdated.
-+zh_TW.po: zh_TW.UTF-8.po
+ zh_TW.po: zh_TW.UTF-8.po
 +	@$(MAKE) big5corr
-+	rm -f zh_TW.po
+ 	rm -f zh_TW.po
+-	iconv -f UTF-8 -t big5 zh_TW.UTF-8.po | \
+-		$(SED) -e 's/charset=[uU][tT][fF]-8/charset=big5/' -e 's/# Original translations/# Generated from zh_TW.UTF-8.po, DO NOT EDIT/' > zh_TW.po
 +	iconv -f utf-8 -t big5 zh_TW.UTF-8.po | ./big5corr > zh_TW.po
 +
 +big5corr: big5corr.c
 +	$(CC) -o big5corr big5corr.c
-+
- # Convert zh_CN.UTF-8.po to create zh_CN.cp936.po.
- # Set 'charset' to gbk to avoid that msfmt generates a warning.
- # This used to convert from zh_CN.po, but that results in a conversion error.
+ 
+ # Convert ko.UTF-8.po to create ko.po.
+ ko.po: ko.UTF-8.po
 diff --git a/src/po/big5corr.c b/src/po/big5corr.c
 new file mode 100644
 --- /dev/null
