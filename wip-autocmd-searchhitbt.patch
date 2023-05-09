@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  84cde1c2c2c3f86a3c53e832e6f18ffc3fdaf7ff
+# Parent  909bb0f575dc11518f781856d9a23197bdbb29ec
 
 diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 --- a/runtime/doc/autocmd.txt
@@ -14,7 +14,7 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
  |SafeState|		nothing pending, going to wait for the user to type a
  			character
  |SafeStateAgain|	repeated SafeState
-@@ -1105,6 +1108,11 @@ SafeStateAgain			Like SafeState but afte
+@@ -1107,6 +1110,11 @@ SafeStateAgain			Like SafeState but afte
  				triggered often, don't do something that takes
  				time.
  
@@ -41,7 +41,7 @@ diff --git a/src/autocmd.c b/src/autocmd.c
 diff --git a/src/search.c b/src/search.c
 --- a/src/search.c
 +++ b/src/search.c
-@@ -1087,9 +1087,17 @@ searchit(
+@@ -1097,9 +1097,16 @@ searchit(
  	     * written.
  	     */
  	    if (dir == BACKWARD)    // start second loop at the other end
@@ -55,14 +55,13 @@ diff --git a/src/search.c b/src/search.c
 +		apply_autocmds(EVENT_SEARCHHITBOTTOM, NULL, NULL, FALSE,
 +								      curbuf);
 +	    }
-+
- 	    if (!shortmess(SHM_SEARCH) && (options & SEARCH_MSG))
- 		give_warning((char_u *)_(dir == BACKWARD
- 					  ? top_bot_msg : bot_top_msg), TRUE);
+ 	    if (!shortmess(SHM_SEARCH)
+ 		    && shortmess(SHM_SEARCHCOUNT)
+ 		    && (options & SEARCH_MSG))
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1377,6 +1377,8 @@ enum auto_event
+@@ -1378,6 +1378,8 @@ enum auto_event
      EVENT_REMOTEREPLY,		// upon string reception from a remote vim
      EVENT_SAFESTATE,		// going to wait for a character
      EVENT_SAFESTATEAGAIN,	// still waiting for a character
