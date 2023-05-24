@@ -1,0 +1,94 @@
+# HG changeset patch
+# Parent  4c08c9117b51884a3af1e6aa04048f4e264bd3bd
+
+diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
+--- a/src/GvimExt/gvimext.cpp
++++ b/src/GvimExt/gvimext.cpp
+@@ -132,22 +132,22 @@ getRuntimeDir(char *buf)
+ 
+ HBITMAP IconToBitmap(HICON hIcon, HBRUSH hBackground, int width, int height)
+ {
+-	HDC hDC = GetDC(NULL);
+-	HDC hMemDC = CreateCompatibleDC(hDC);
+-	HBITMAP hMemBmp = CreateCompatibleBitmap(hDC, width, height);
+-	HBITMAP hResultBmp = NULL;
+-	HGDIOBJ hOrgBMP = SelectObject(hMemDC, hMemBmp);
++    HDC hDC = GetDC(NULL);
++    HDC hMemDC = CreateCompatibleDC(hDC);
++    HBITMAP hMemBmp = CreateCompatibleBitmap(hDC, width, height);
++    HBITMAP hResultBmp = NULL;
++    HGDIOBJ hOrgBMP = SelectObject(hMemDC, hMemBmp);
+ 
+-	DrawIconEx(hMemDC, 0, 0, hIcon, width, height, 0, hBackground, DI_NORMAL);
++    DrawIconEx(hMemDC, 0, 0, hIcon, width, height, 0, hBackground, DI_NORMAL);
+ 
+-	hResultBmp = hMemBmp;
+-	hMemBmp = NULL;
++    hResultBmp = hMemBmp;
++    hMemBmp = NULL;
+ 
+-	SelectObject(hMemDC, hOrgBMP);
+-	DeleteDC(hMemDC);
+-	ReleaseDC(NULL, hDC);
+-	DestroyIcon(hIcon);
+-	return hResultBmp;
++    SelectObject(hMemDC, hOrgBMP);
++    DeleteDC(hMemDC);
++    ReleaseDC(NULL, hDC);
++    DestroyIcon(hIcon);
++    return hResultBmp;
+ }
+ 
+ //
+@@ -819,8 +819,9 @@ STDMETHODIMP CShellExt::GetCommandString
+ 					 LPSTR pszName,
+ 					 UINT cchMax)
+ {
+-    if (uFlags == GCS_HELPTEXT && cchMax > 35)
+-	lstrcpy(pszName, _("Edits the selected file(s) with Vim"));
++    char *s = _("Edits the selected file(s) with Vim");
++    if (uFlags == GCS_HELPTEXT && cchMax > lstrlen(s))
++	lstrcpy(pszName, s);
+ 
+     return NOERROR;
+ }
+@@ -852,18 +853,18 @@ BOOL CALLBACK CShellExt::EnumWindowsProc
+ 
+ BOOL CShellExt::LoadMenuIcon()
+ {
+-	char vimExeFile[BUFSIZE];
+-	getGvimName(vimExeFile, 1);
+-	if (vimExeFile[0] == '\0')
+-		return FALSE;
+-	HICON hVimIcon;
+-	if (ExtractIconEx(vimExeFile, 0, NULL, &hVimIcon, 1) == 0)
+-		return FALSE;
+-	m_hVimIconBitmap = IconToBitmap(hVimIcon,
+-		GetSysColorBrush(COLOR_MENU),
+-		GetSystemMetrics(SM_CXSMICON),
+-		GetSystemMetrics(SM_CYSMICON));
+-	return TRUE;
++    char vimExeFile[BUFSIZE];
++    getGvimName(vimExeFile, 1);
++    if (vimExeFile[0] == '\0')
++	return FALSE;
++    HICON hVimIcon;
++    if (ExtractIconEx(vimExeFile, 0, NULL, &hVimIcon, 1) == 0)
++	return FALSE;
++    m_hVimIconBitmap = IconToBitmap(hVimIcon,
++	    GetSysColorBrush(COLOR_MENU),
++	    GetSystemMetrics(SM_CXSMICON),
++	    GetSystemMetrics(SM_CYSMICON));
++    return TRUE;
+ }
+ 
+     static char *
+@@ -948,7 +949,7 @@ STDMETHODIMP CShellExt::InvokeSingleGvim
+ 		FALSE,		// Set handle inheritance to FALSE.
+ 		0,		// No creation flags.
+ 		NULL,		// Use parent's environment block.
+-		workingDir,  // Use parent's starting directory.
++		workingDir,	// Use parent's starting directory.
+ 		&si,		// Pointer to STARTUPINFO structure.
+ 		&pi)		// Pointer to PROCESS_INFORMATION structure.
+        )

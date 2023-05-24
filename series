@@ -31,4 +31,5 @@ win32-mouse-flaky.patch
 wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 fix-netrw-longlist.patch
+gvimext-adjust-style.patch
 fix-config_cache-removal.patch #+rejected
