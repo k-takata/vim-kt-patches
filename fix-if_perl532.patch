@@ -1,0 +1,43 @@
+# HG changeset patch
+# Parent  b1d16faa45cd5f0885a36a55e3ae36c5c3485499
+
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -40,7 +40,7 @@
+ /* Work around for perl-5.18.
+  * Don't include "perl\lib\CORE\inline.h" for now,
+  * include it after Perl_sv_free2 is defined. */
+-#if (PERL_REVISION == 5) && (PERL_VERSION >= 18)
++#ifdef DYNAMIC_PERL
+ # define PERL_NO_INLINE_FUNCTIONS
+ #endif
+ 
+@@ -747,6 +747,27 @@ Perl_SvTRUE(pTHX_ SV *sv) {
+ }
+ # endif
+ 
++# if (PERL_REVISION == 5) && (PERL_VERSION >= 32)
++PERL_STATIC_INLINE U8
++Perl_gimme_V(pTHX)
++{
++    I32 cxix;
++    U8  gimme = (PL_op->op_flags & OPf_WANT);
++
++    if (gimme)
++        return gimme;
++    cxix = PL_curstackinfo->si_cxsubix;
++    if (cxix < 0)
++	return
++#  if (PERL_REVISION == 5) && (PERL_VERSION >= 34)
++	    PL_curstackinfo->si_type == PERLSI_SORT ? G_SCALAR:
++#  endif
++	    G_VOID;
++    assert(cxstack[cxix].blk_gimme & G_WANT);
++    return (cxstack[cxix].blk_gimme & G_WANT);
++}
++# endif
++
+ /*
+  * Make all runtime-links of perl.
+  *
