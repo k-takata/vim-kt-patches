@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  5f583ad310241bbb94793e0a90e79991819240c6
+
+diff --git a/src/testdir/test_functions.vim b/src/testdir/test_functions.vim
+--- a/src/testdir/test_functions.vim
++++ b/src/testdir/test_functions.vim
+@@ -3628,6 +3628,7 @@ endfunc
+ " Test for glob() with shell special patterns
+ func Test_glob_extended_bash()
+   CheckExecutable bash
++  CheckNotMSWindows
+   let _shell = &shell
+   set shell=bash
+ 
