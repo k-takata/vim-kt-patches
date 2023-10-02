@@ -23,7 +23,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
  static UINT (WINAPI *pGetDpiForSystem)(void) = NULL;
  static UINT (WINAPI *pGetDpiForWindow)(HWND hwnd) = NULL;
-@@ -4734,13 +4739,30 @@ destroy_sizing_tip(void)
+@@ -4734,13 +4739,32 @@ destroy_sizing_tip(void)
  }
  #endif
  
@@ -33,6 +33,8 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
 +    //TRACE("DPI: %d, SIZE=(%d,%d), s_dpi: %d", dpi, size->cx, size->cy, s_dpi);
 +
 +    // Calculate new approximate size.
++    // FIXME: If a bitmap font (e.g. FixedSys) is used, the font size may not
++    // be changed.  In that case, the calculated size can be wrong.
 +    size->cx = size->cx * dpi / s_dpi;
 +    size->cy = size->cy * dpi / s_dpi;
 +    //TRACE("New approx. SIZE=(%d,%d)", size->cx, size->cy);
@@ -55,7 +57,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      update_scrollbar_size();
      update_toolbar_size();
      set_tabline_font();
-@@ -4893,6 +4915,8 @@ destroy_sizing_tip(void)
+@@ -4893,6 +4917,8 @@ destroy_sizing_tip(void)
  	    return DefWindowProcW(hwnd, uMsg, wParam, lParam);
  	return 1L;
  #endif
@@ -64,7 +66,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      case WM_DPICHANGED:
  	return _OnDpiChanged(hwnd, (UINT)LOWORD(wParam), (UINT)HIWORD(wParam),
  		(RECT*)lParam);
-@@ -5622,7 +5646,12 @@ gui_mch_set_shellsize(
+@@ -5622,7 +5648,12 @@ gui_mch_set_shellsize(
      if (IsZoomed(s_hwnd) && starting == 0)
  	ShowWindow(s_hwnd, SW_SHOWNORMAL);
  
@@ -78,7 +80,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  
      // compute the size of the outside of the window
      win_width = width + (pGetSystemMetricsForDpi(SM_CXFRAME, s_dpi) +
-@@ -5639,21 +5668,36 @@ gui_mch_set_shellsize(
+@@ -5639,21 +5670,36 @@ gui_mch_set_shellsize(
      window_rect.bottom = window_rect.top + win_height;
  
      // If the window is going off the screen, move it on to the screen.
