@@ -1,0 +1,28 @@
+# HG changeset patch
+# Parent  06ccbaf1fe8f30449efca1877ab212fddf4ead53
+
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -4734,6 +4734,12 @@ destroy_sizing_tip(void)
+ }
+ #endif
+ 
++    static BOOL
++_OnGetDpiScaledSize(HWND hwnd, UINT dpi, SIZE *size)
++{
++    return FALSE;
++}
++
+     static LRESULT
+ _OnDpiChanged(HWND hwnd, UINT xdpi UNUSED, UINT ydpi, RECT *rc UNUSED)
+ {
+@@ -4893,6 +4899,8 @@ destroy_sizing_tip(void)
+ 	    return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+ 	return 1L;
+ #endif
++    case WM_GETDPISCALEDSIZE:
++	return _OnGetDpiScaledSize(hwnd, (UINT)wParam, (SIZE *)lParam);
+     case WM_DPICHANGED:
+ 	return _OnDpiChanged(hwnd, (UINT)LOWORD(wParam), (UINT)HIWORD(wParam),
+ 		(RECT*)lParam);
