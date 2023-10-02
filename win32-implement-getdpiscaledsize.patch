@@ -49,7 +49,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      //TRACE("DPI: %d", ydpi);
  
 +    s_suggested_rect = *rc;
-+    //TRACE("Suggested pos&size: %d,%d %d,%d", rc->left, rc->top, 
++    //TRACE("Suggested pos&size: %d,%d %d,%d", rc->left, rc->top,
 +    //		rc->right - rc->left, rc->bottom - rc->top);
 +
      update_scrollbar_size();
