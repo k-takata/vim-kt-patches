@@ -135,3 +135,30 @@ diff --git a/src/if_python3.c b/src/if_python3.c
      {"PySlice_Type", (PYTHON_PROC*)&py3_PySlice_Type},
      {"PyFloat_Type", (PYTHON_PROC*)&py3_PyFloat_Type},
  # if PY_VERSION_HEX < 0x030c00b0
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -641,15 +641,20 @@ get_imported_func_info(HINSTANCE hInst, 
+     PIMAGE_THUNK_DATA		pIAT;	    // Import Address Table
+     PIMAGE_THUNK_DATA		pINT;	    // Import Name Table
+     PIMAGE_IMPORT_BY_NAME	pImpName;
++    DWORD			ImpVA;
+ 
+     if (pDOS->e_magic != IMAGE_DOS_SIGNATURE)
+ 	return NULL;
+     pPE = (PIMAGE_NT_HEADERS)(pImage + pDOS->e_lfanew);
+     if (pPE->Signature != IMAGE_NT_SIGNATURE)
+ 	return NULL;
+-    pImpDesc = (PIMAGE_IMPORT_DESCRIPTOR)(pImage
+-	    + pPE->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT]
+-							    .VirtualAddress);
++
++    ImpVA = pPE->OptionalHeader
++		.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
++    if (ImpVA == 0)
++	return NULL;	// No Import Table
++    pImpDesc = (PIMAGE_IMPORT_DESCRIPTOR)(pImage + ImpVA);
++
+     for (; pImpDesc->FirstThunk; ++pImpDesc)
+     {
+ 	if (!pImpDesc->OriginalFirstThunk)
