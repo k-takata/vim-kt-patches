@@ -180,7 +180,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      for (; pImpDesc->FirstThunk; ++pImpDesc)
      {
  	if (!pImpDesc->OriginalFirstThunk)
-@@ -724,6 +729,62 @@ hook_dll_import_func(HINSTANCE hInst, co
+@@ -724,6 +729,63 @@ hook_dll_import_func(HINSTANCE hInst, co
  }
  #endif
  
@@ -230,6 +230,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
 +	const char *p = strchr(name, '.');
 +	if (p == NULL)
 +	    return hInst;
++	// Extract DllName.
 +	strncpy(buf, name, p - name);
 +	buf[p - name] = '\0';
 +	return GetModuleHandleA(buf);
