@@ -135,6 +135,24 @@ diff --git a/src/if_python3.c b/src/if_python3.c
      {"PySlice_Type", (PYTHON_PROC*)&py3_PySlice_Type},
      {"PyFloat_Type", (PYTHON_PROC*)&py3_PyFloat_Type},
  # if PY_VERSION_HEX < 0x030c00b0
+@@ -1172,7 +1184,7 @@ reset_stdin(void)
+ {
+     FILE *(*py__acrt_iob_func)(unsigned) = NULL;
+     FILE *(*pyfreopen)(const char *, const char *, FILE *) = NULL;
+-    HINSTANCE hinst = hinstPy3;
++    HINSTANCE hinst = get_forwarded_dll(hinstPy3);
+ 
+     if (hinst == NULL || is_stdin_readable())
+ 	return;
+@@ -1225,7 +1237,7 @@ hooked_exit(int ret)
+     static void
+ hook_py_exit(void)
+ {
+-    HINSTANCE hinst = hinstPy3;
++    HINSTANCE hinst = get_forwarded_dll(hinstPy3);
+ 
+     if (hinst == NULL || orig_exit != NULL)
+ 	return;
 diff --git a/src/os_win32.c b/src/os_win32.c
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
@@ -162,3 +180,77 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      for (; pImpDesc->FirstThunk; ++pImpDesc)
      {
  	if (!pImpDesc->OriginalFirstThunk)
+@@ -724,6 +729,62 @@ hook_dll_import_func(HINSTANCE hInst, co
+ }
+ #endif
+ 
++#if defined(FEAT_PYTHON3) || defined(PROTO)
++/*
++ * Check if the specified DLL is a function forwarder.
++ * If yes, return the instance of the forwarded DLL.
++ * If no, return the specified DLL.
++ * If error, return NULL.
++ * This assumes that the DLL forwards all the function to a single DLL.
++ */
++    HINSTANCE
++get_forwarded_dll(HINSTANCE hInst)
++{
++    PBYTE			pImage = (PBYTE)hInst;
++    PIMAGE_DOS_HEADER		pDOS = (PIMAGE_DOS_HEADER)hInst;
++    PIMAGE_NT_HEADERS		pPE;
++    PIMAGE_EXPORT_DIRECTORY	pExpDir;
++    DWORD			ExpVA;
++    DWORD			ExpSize;
++    LPDWORD			pFunctionTable;
++
++    if (pDOS->e_magic != IMAGE_DOS_SIGNATURE)
++	return NULL;
++    pPE = (PIMAGE_NT_HEADERS)(pImage + pDOS->e_lfanew);
++    if (pPE->Signature != IMAGE_NT_SIGNATURE)
++	return NULL;
++
++    ExpVA = pPE->OptionalHeader
++		.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
++    ExpSize = pPE->OptionalHeader
++		.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
++    if (ExpVA == 0)
++	return hInst;	// No Export Directory
++    pExpDir = (PIMAGE_EXPORT_DIRECTORY)(pImage + ExpVA);
++    pFunctionTable = (LPDWORD)(pImage + pExpDir->AddressOfFunctions);
++
++    if (pExpDir->NumberOfNames == 0)
++	return hInst;	// No export names.
++
++    if ((ExpVA <= pFunctionTable[0]) && (pFunctionTable[0] < ExpVA + ExpSize))
++    {
++	// Function forwarder entry is found.
++	// The name is represented as "DllName.FunctionName".
++	char buf[MAX_PATH];
++	const char *name = (const char *)(pImage + pFunctionTable[0]);
++	const char *p = strchr(name, '.');
++	if (p == NULL)
++	    return hInst;
++	strncpy(buf, name, p - name);
++	buf[p - name] = '\0';
++	return GetModuleHandleA(buf);
++    }
++    // The first entry is not a function forwarder.
++    return hInst;
++
++}
++#endif
++
+ #if defined(DYNAMIC_GETTEXT) || defined(PROTO)
+ # ifndef GETTEXT_DLL
+ #  define GETTEXT_DLL "libintl.dll"
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -5,6 +5,7 @@ int mch_is_gui_executable(void);
+ HINSTANCE find_imported_module_by_funcname(HINSTANCE hInst, const char *funcname);
+ void *get_dll_import_func(HINSTANCE hInst, const char *funcname);
+ void *hook_dll_import_func(HINSTANCE hInst, const char *funcname, const void *hook);
++HINSTANCE get_forwarded_dll(HINSTANCE hInst);
+ int dyn_libintl_init(void);
+ void dyn_libintl_end(void);
+ void PlatformId(void);
