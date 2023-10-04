@@ -1,6 +1,18 @@
 # HG changeset patch
 # Parent  23a82f900223580d224fe7337de0fdb009f8f1df
 
+diff --git a/src/gui_w32.c b/src/gui_w32.c
+--- a/src/gui_w32.c
++++ b/src/gui_w32.c
+@@ -385,7 +385,7 @@ static BOOL		s_in_dpichanged = FALSE;
+ static DPI_AWARENESS	s_process_dpi_aware = DPI_AWARENESS_INVALID;
+ static RECT		s_suggested_rect;
+ 
+-static UINT (WINAPI *pGetDpiForSystem)(void) = NULL;
++UINT (WINAPI *pGetDpiForSystem)(void) = NULL;
+ static UINT (WINAPI *pGetDpiForWindow)(HWND hwnd) = NULL;
+ static int (WINAPI *pGetSystemMetricsForDpi)(int, UINT) = NULL;
+ //static INT (WINAPI *pGetWindowDpiAwarenessContext)(HWND hwnd) = NULL;
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
@@ -34,19 +46,11 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  
  /*
   * Convert a string representing a point size into pixels. The string should
-@@ -2906,6 +2909,44 @@ utf16ascncmp(const WCHAR *w, const char 
+@@ -2906,6 +2909,36 @@ utf16ascncmp(const WCHAR *w, const char 
      return 0;
  }
  
-+    static int
-+get_system_dpi(void)
-+{
-+    HWND hwnd = GetDesktopWindow();
-+    HDC hdc = GetWindowDC(hwnd);
-+    int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
-+    ReleaseDC(hwnd, hdc);
-+    return dpi;
-+}
++extern UINT (WINAPI *pGetDpiForSystem)(void);
 +
 +/*
 + * Set default logfont based on current language.
@@ -64,7 +68,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +	fontname = "Courier New";
 +
 +    *lf = s_lfDefault;
-+    lf->lfHeight = DEFAULT_FONT_HEIGHT * get_system_dpi() / 96;
++    lf->lfHeight = DEFAULT_FONT_HEIGHT * (int)pGetDpiForSystem() / 96;
 +    if (current_font_height == 0)
 +	current_font_height = lf->lfHeight;
 +
@@ -79,7 +83,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  /*
   * Get font info from "name" into logfont "lf".
   * Return OK for a valid name, FAIL otherwise.
-@@ -2923,7 +2964,7 @@ get_logfont(
+@@ -2923,7 +2956,7 @@ get_logfont(
      static LOGFONTW *lastlf = NULL;
      WCHAR	*wname;
  
@@ -88,12 +92,12 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      if (name == NULL)
  	return OK;
  
-@@ -2963,7 +3004,7 @@ get_logfont(
+@@ -2963,7 +2996,7 @@ get_logfont(
  	lf->lfFaceName[p - wname] = NUL;
  
      // First set defaults
 -    lf->lfHeight = -12;
-+    lf->lfHeight = DEFAULT_FONT_HEIGHT * get_system_dpi() / 96;
++    lf->lfHeight = DEFAULT_FONT_HEIGHT * (int)pGetDpiForSystem() / 96;
      lf->lfWidth = 0;
      lf->lfWeight = FW_NORMAL;
      lf->lfItalic = FALSE;
