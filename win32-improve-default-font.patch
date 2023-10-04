@@ -59,13 +59,13 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +set_default_logfont(LOGFONTW *lf)
 +{
 +    // Default font name for current language on MS-Windows.
-+    // If not translated, falls back to "Courier New".
++    // If not translated, falls back to "Consolas".
 +    // This must be a fixed-pitch font.
 +    const char *defaultfontname = N_("DefaultFontNameForWindows");
 +    char *fontname = _(defaultfontname);
 +
 +    if (strcmp(fontname, defaultfontname) == 0)
-+	fontname = "Courier New";
++	fontname = "Consolas";
 +
 +    *lf = s_lfDefault;
 +    lf->lfHeight = DEFAULT_FONT_HEIGHT * (int)pGetDpiForSystem() / 96;
