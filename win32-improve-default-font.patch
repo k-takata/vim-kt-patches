@@ -4,7 +4,7 @@
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -385,7 +385,7 @@ static BOOL		s_in_dpichanged = FALSE;
+@@ -385,23 +385,13 @@ static BOOL		s_in_dpichanged = FALSE;
  static DPI_AWARENESS	s_process_dpi_aware = DPI_AWARENESS_INVALID;
  static RECT		s_suggested_rect;
  
@@ -13,6 +13,31 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  static UINT (WINAPI *pGetDpiForWindow)(HWND hwnd) = NULL;
  static int (WINAPI *pGetSystemMetricsForDpi)(int, UINT) = NULL;
  //static INT (WINAPI *pGetWindowDpiAwarenessContext)(HWND hwnd) = NULL;
+ static DPI_AWARENESS_CONTEXT (WINAPI *pSetThreadDpiAwarenessContext)(DPI_AWARENESS_CONTEXT dpiContext) = NULL;
+ static DPI_AWARENESS (WINAPI *pGetAwarenessFromDpiAwarenessContext)(DPI_AWARENESS_CONTEXT) = NULL;
+ 
+-    static UINT WINAPI
+-stubGetDpiForSystem(void)
+-{
+-    HWND hwnd = GetDesktopWindow();
+-    HDC hdc = GetWindowDC(hwnd);
+-    UINT dpi = GetDeviceCaps(hdc, LOGPIXELSY);
+-    ReleaseDC(hwnd, hdc);
+-    return dpi;
+-}
+-
+     static int WINAPI
+ stubGetSystemMetricsForDpi(int nIndex, UINT dpi UNUSED)
+ {
+@@ -5330,7 +5320,7 @@ load_dpi_func(void)
+ 
+ fail:
+     // Disable PerMonitorV2 APIs.
+-    pGetDpiForSystem = stubGetDpiForSystem;
++    pGetDpiForSystem = vimGetDpiForSystem;
+     pGetDpiForWindow = NULL;
+     pGetSystemMetricsForDpi = stubGetSystemMetricsForDpi;
+     pSetThreadDpiAwarenessContext = NULL;
 diff --git a/src/os_mswin.c b/src/os_mswin.c
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
@@ -46,11 +71,21 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  
  /*
   * Convert a string representing a point size into pixels. The string should
-@@ -2906,6 +2909,36 @@ utf16ascncmp(const WCHAR *w, const char 
-     return 0;
+@@ -2907,6 +2910,47 @@ utf16ascncmp(const WCHAR *w, const char 
  }
  
-+extern UINT (WINAPI *pGetDpiForSystem)(void);
+ /*
++ * Equivalent of GetDpiForSystem().
++ */
++    UINT WINAPI
++vimGetDpiForSystem(void)
++{
++    HWND hwnd = GetDesktopWindow();
++    HDC hdc = GetWindowDC(hwnd);
++    UINT dpi = GetDeviceCaps(hdc, LOGPIXELSY);
++    ReleaseDC(hwnd, hdc);
++    return dpi;
++}
 +
 +/*
 + * Set default logfont based on current language.
@@ -68,7 +103,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +	fontname = "Consolas";
 +
 +    *lf = s_lfDefault;
-+    lf->lfHeight = DEFAULT_FONT_HEIGHT * (int)pGetDpiForSystem() / 96;
++    lf->lfHeight = DEFAULT_FONT_HEIGHT * (int)vimGetDpiForSystem() / 96;
 +    if (current_font_height == 0)
 +	current_font_height = lf->lfHeight;
 +
@@ -80,10 +115,11 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +    }
 +}
 +
- /*
++/*
   * Get font info from "name" into logfont "lf".
   * Return OK for a valid name, FAIL otherwise.
-@@ -2923,7 +2956,7 @@ get_logfont(
+  */
+@@ -2923,7 +2967,7 @@ get_logfont(
      static LOGFONTW *lastlf = NULL;
      WCHAR	*wname;
  
@@ -92,12 +128,23 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      if (name == NULL)
  	return OK;
  
-@@ -2963,7 +2996,7 @@ get_logfont(
+@@ -2963,7 +3007,7 @@ get_logfont(
  	lf->lfFaceName[p - wname] = NUL;
  
      // First set defaults
 -    lf->lfHeight = -12;
-+    lf->lfHeight = DEFAULT_FONT_HEIGHT * (int)pGetDpiForSystem() / 96;
++    lf->lfHeight = DEFAULT_FONT_HEIGHT * (int)vimGetDpiForSystem() / 96;
      lf->lfWidth = 0;
      lf->lfWeight = FW_NORMAL;
      lf->lfItalic = FALSE;
+diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
+--- a/src/proto/os_mswin.pro
++++ b/src/proto/os_mswin.pro
+@@ -50,6 +50,7 @@ char_u *serverGetReply(HWND server, int 
+ void serverProcessPendingMessages(void);
+ char *charset_id2name(int id);
+ char *quality_id2name(DWORD id);
++UINT WINAPI vimGetDpiForSystem(void);
+ int get_logfont(LOGFONTW *lf, char_u *name, HDC printer_dc, int verbose);
+ void channel_init_winsock(void);
+ /* vim: set ft=c : */
