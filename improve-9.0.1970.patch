@@ -63,7 +63,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
  _OnGetDpiScaledSize(HWND hwnd, UINT dpi, SIZE *size)
  {
 +    int		old_width, old_height;
-+    int	    	new_width, new_height;
++    int		new_width, new_height;
 +    LOGFONTW	lf;
 +    HFONT	font;
 +
