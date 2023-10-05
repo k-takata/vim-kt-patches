@@ -28,7 +28,6 @@ support-tee-with-sp-on-windows.patch
 suppress-warnings.patch
 wip-autocmd-searchhitbt.patch #+wip
 win32-mouse-flaky.patch
-fix-python3-stable-api.patch
 wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 fix-netrw-longlist.patch
