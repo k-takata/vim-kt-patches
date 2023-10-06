@@ -4,15 +4,7 @@
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -385,23 +385,13 @@ static BOOL		s_in_dpichanged = FALSE;
- static DPI_AWARENESS	s_process_dpi_aware = DPI_AWARENESS_INVALID;
- static RECT		s_suggested_rect;
- 
--static UINT (WINAPI *pGetDpiForSystem)(void) = NULL;
-+UINT (WINAPI *pGetDpiForSystem)(void) = NULL;
- static UINT (WINAPI *pGetDpiForWindow)(HWND hwnd) = NULL;
- static int (WINAPI *pGetSystemMetricsForDpi)(int, UINT) = NULL;
- //static INT (WINAPI *pGetWindowDpiAwarenessContext)(HWND hwnd) = NULL;
+@@ -392,16 +392,6 @@ static int (WINAPI *pGetSystemMetricsFor
  static DPI_AWARENESS_CONTEXT (WINAPI *pSetThreadDpiAwarenessContext)(DPI_AWARENESS_CONTEXT dpiContext) = NULL;
  static DPI_AWARENESS (WINAPI *pGetAwarenessFromDpiAwarenessContext)(DPI_AWARENESS_CONTEXT) = NULL;
  
