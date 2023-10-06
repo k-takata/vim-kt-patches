@@ -51,7 +51,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #  endif
  # endif
  
-+# if PY_VERSION_HEX >= 0x030c00b0
++# if !defined(USE_LIMITED_API) && PY_VERSION_HEX >= 0x030c00b0
 +// Py_SIZE() uses PyLong_Type and PyBool_Type starting from Python 3.12.
 +// We need to define our own Py_SIZE() to replace Py{Bool,Long}_Type with
 +// py3_Py{Bool,Long}_Type.
