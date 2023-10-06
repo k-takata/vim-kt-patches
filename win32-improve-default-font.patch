@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  23a82f900223580d224fe7337de0fdb009f8f1df
+# Parent  237549381d585c62943c8675f5b620865638a9ea
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
@@ -29,7 +29,7 @@ diff --git a/src/gui_w32.c b/src/gui_w32.c
      static int WINAPI
  stubGetSystemMetricsForDpi(int nIndex, UINT dpi UNUSED)
  {
-@@ -5330,7 +5320,7 @@ load_dpi_func(void)
+@@ -5358,7 +5348,7 @@ load_dpi_func(void)
  
  fail:
      // Disable PerMonitorV2 APIs.
@@ -71,7 +71,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  
  /*
   * Convert a string representing a point size into pixels. The string should
-@@ -2907,6 +2910,47 @@ utf16ascncmp(const WCHAR *w, const char 
+@@ -3027,6 +3030,47 @@ utf16ascncmp(const WCHAR *w, const char 
  }
  
  /*
@@ -119,7 +119,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
   * Get font info from "name" into logfont "lf".
   * Return OK for a valid name, FAIL otherwise.
   */
-@@ -2923,7 +2967,7 @@ get_logfont(
+@@ -3043,7 +3087,7 @@ get_logfont(
      static LOGFONTW *lastlf = NULL;
      WCHAR	*wname;
  
@@ -128,7 +128,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
      if (name == NULL)
  	return OK;
  
-@@ -2963,7 +3007,7 @@ get_logfont(
+@@ -3083,7 +3127,7 @@ get_logfont(
  	lf->lfFaceName[p - wname] = NUL;
  
      // First set defaults
@@ -146,5 +146,5 @@ diff --git a/src/proto/os_mswin.pro b/src/proto/os_mswin.pro
  char *quality_id2name(DWORD id);
 +UINT WINAPI vimGetDpiForSystem(void);
  int get_logfont(LOGFONTW *lf, char_u *name, HDC printer_dc, int verbose);
+ void gui_mch_expand_font(optexpand_T *args, void *param, int (*cb)(char_u *val));
  void channel_init_winsock(void);
- /* vim: set ft=c : */
