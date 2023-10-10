@@ -1,0 +1,421 @@
+# HG changeset patch
+# Parent  913091fc847588e2f068ae25306ba5c933aadeb2
+
+diff --git a/src/if_lua.c b/src/if_lua.c
+--- a/src/if_lua.c
++++ b/src/if_lua.c
+@@ -102,18 +102,18 @@ static void luaV_call_lua_func_free(void
+ 
+ #ifdef DYNAMIC_LUA
+ 
+-#ifndef MSWIN
++#ifdef MSWIN
++# define load_dll vimLoadLib
++# define symbol_from_dll GetProcAddress
++# define close_dll FreeLibrary
++# define load_dll_error GetWin32Error
++#else
+ # include <dlfcn.h>
+ # define HANDLE void*
+ # define load_dll(n) dlopen((n), RTLD_LAZY|RTLD_GLOBAL)
+ # define symbol_from_dll dlsym
+ # define close_dll dlclose
+ # define load_dll_error dlerror
+-#else
+-# define load_dll vimLoadLib
+-# define symbol_from_dll GetProcAddress
+-# define close_dll FreeLibrary
+-# define load_dll_error GetWin32Error
+ #endif
+ 
+ // lauxlib
+diff --git a/src/if_mzsch.c b/src/if_mzsch.c
+--- a/src/if_mzsch.c
++++ b/src/if_mzsch.c
+@@ -1366,10 +1366,10 @@ mzscheme_buffer_free(buf_T *buf)
+ 
+     bp = BUFFER_REF(buf);
+     bp->buf = INVALID_BUFFER_VALUE;
+-#ifndef MZ_PRECISE_GC
++#ifdef MZ_PRECISE_GC
++    scheme_free_immobile_box(buf->b_mzscheme_ref);
++#else
+     scheme_gc_ptr_ok(bp);
+-#else
+-    scheme_free_immobile_box(buf->b_mzscheme_ref);
+ #endif
+     buf->b_mzscheme_ref = NULL;
+     MZ_GC_CHECK();
+@@ -1391,10 +1391,10 @@ mzscheme_window_free(win_T *win)
+     MZ_GC_REG();
+     wp = WINDOW_REF(win);
+     wp->win = INVALID_WINDOW_VALUE;
+-#ifndef MZ_PRECISE_GC
++#ifdef MZ_PRECISE_GC
++    scheme_free_immobile_box(win->w_mzscheme_ref);
++#else
+     scheme_gc_ptr_ok(wp);
+-#else
+-    scheme_free_immobile_box(win->w_mzscheme_ref);
+ #endif
+     win->w_mzscheme_ref = NULL;
+     MZ_GC_CHECK();
+@@ -1921,10 +1921,10 @@ window_new(win_T *win)
+     MZ_GC_REG();
+     self = scheme_malloc_fail_ok(scheme_malloc_tagged, sizeof(vim_mz_window));
+     CLEAR_POINTER(self);
+-#ifndef MZ_PRECISE_GC
++#ifdef MZ_PRECISE_GC
++    win->w_mzscheme_ref = scheme_malloc_immobile_box(NULL);
++#else
+     scheme_dont_gc_ptr(self);	// because win isn't visible to GC
+-#else
+-    win->w_mzscheme_ref = scheme_malloc_immobile_box(NULL);
+ #endif
+     MZ_GC_CHECK();
+     WINDOW_REF(win) = self;
+@@ -2305,10 +2305,10 @@ buffer_new(buf_T *buf)
+     MZ_GC_REG();
+     self = scheme_malloc_fail_ok(scheme_malloc_tagged, sizeof(vim_mz_buffer));
+     CLEAR_POINTER(self);
+-#ifndef MZ_PRECISE_GC
++#ifdef MZ_PRECISE_GC
++    buf->b_mzscheme_ref = scheme_malloc_immobile_box(NULL);
++#else
+     scheme_dont_gc_ptr(self);	// because buf isn't visible to GC
+-#else
+-    buf->b_mzscheme_ref = scheme_malloc_immobile_box(NULL);
+ #endif
+     MZ_GC_CHECK();
+     BUFFER_REF(buf) = self;
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -166,7 +166,13 @@ typedef int XSUBADDR_t;
+ typedef int perl_key;
+ # endif
+ 
+-# ifndef MSWIN
++# ifdef MSWIN
++#  define PERL_PROC FARPROC
++#  define load_dll vimLoadLib
++#  define symbol_from_dll GetProcAddress
++#  define close_dll FreeLibrary
++#  define load_dll_error GetWin32Error
++# else
+ #  include <dlfcn.h>
+ #  define HANDLE void*
+ #  define PERL_PROC void*
+@@ -174,12 +180,6 @@ typedef int perl_key;
+ #  define symbol_from_dll dlsym
+ #  define close_dll dlclose
+ #  define load_dll_error dlerror
+-# else
+-#  define PERL_PROC FARPROC
+-#  define load_dll vimLoadLib
+-#  define symbol_from_dll GetProcAddress
+-#  define close_dll FreeLibrary
+-#  define load_dll_error GetWin32Error
+ # endif
+ /*
+  * Wrapper defines
+diff --git a/src/if_python.c b/src/if_python.c
+--- a/src/if_python.c
++++ b/src/if_python.c
+@@ -130,7 +130,12 @@ struct PyMethodDef { Py_ssize_t a; };
+ #  define HINSTANCE long_u		// for generating prototypes
+ # endif
+ 
+-# ifndef MSWIN
++# ifdef MSWIN
++#  define load_dll vimLoadLib
++#  define close_dll FreeLibrary
++#  define symbol_from_dll GetProcAddress
++#  define load_dll_error GetWin32Error
++# else
+ #  include <dlfcn.h>
+ #  define FARPROC void*
+ #  define HINSTANCE void*
+@@ -142,11 +147,6 @@ struct PyMethodDef { Py_ssize_t a; };
+ #  define close_dll dlclose
+ #  define symbol_from_dll dlsym
+ #  define load_dll_error dlerror
+-# else
+-#  define load_dll vimLoadLib
+-#  define close_dll FreeLibrary
+-#  define symbol_from_dll GetProcAddress
+-#  define load_dll_error GetWin32Error
+ # endif
+ 
+ // This makes if_python.c compile without warnings against Python 2.5
+@@ -496,14 +496,14 @@ static struct
+     PYTHON_PROC *ptr;
+ } python_funcname_table[] =
+ {
+-# ifndef PY_SSIZE_T_CLEAN
++# ifdef PY_SSIZE_T_CLEAN
++    {"_PyArg_Parse_SizeT", (PYTHON_PROC*)&dll_PyArg_Parse},
++    {"_PyArg_ParseTuple_SizeT", (PYTHON_PROC*)&dll_PyArg_ParseTuple},
++    {"_Py_BuildValue_SizeT", (PYTHON_PROC*)&dll_Py_BuildValue},
++# else
+     {"PyArg_Parse", (PYTHON_PROC*)&dll_PyArg_Parse},
+     {"PyArg_ParseTuple", (PYTHON_PROC*)&dll_PyArg_ParseTuple},
+     {"Py_BuildValue", (PYTHON_PROC*)&dll_Py_BuildValue},
+-# else
+-    {"_PyArg_Parse_SizeT", (PYTHON_PROC*)&dll_PyArg_Parse},
+-    {"_PyArg_ParseTuple_SizeT", (PYTHON_PROC*)&dll_PyArg_ParseTuple},
+-    {"_Py_BuildValue_SizeT", (PYTHON_PROC*)&dll_Py_BuildValue},
+ # endif
+     {"PyMem_Free", (PYTHON_PROC*)&dll_PyMem_Free},
+     {"PyMem_Malloc", (PYTHON_PROC*)&dll_PyMem_Malloc},
+diff --git a/src/if_python3.c b/src/if_python3.c
+--- a/src/if_python3.c
++++ b/src/if_python3.c
+@@ -107,6 +107,9 @@
+ #define PyString_FromString(repr) \
+     PyUnicode_Decode(repr, STRLEN(repr), ENC_OPT, ERRORS_DECODE_ARG)
+ #define PyString_FromFormat PyUnicode_FromFormat
++#ifdef PyUnicode_FromFormat
++# define Py_UNICODE_USE_UCS_FUNCTIONS
++#endif
+ #ifndef PyInt_Check
+ # define PyInt_Check(obj) PyLong_Check(obj)
+ #endif
+@@ -140,7 +143,12 @@ static HINSTANCE hinstPy3 = 0; // Instan
+ 
+ #if defined(DYNAMIC_PYTHON3) || defined(PROTO)
+ 
+-# ifndef MSWIN
++# ifdef MSWIN
++#  define load_dll vimLoadLib
++#  define close_dll FreeLibrary
++#  define symbol_from_dll GetProcAddress
++#  define load_dll_error GetWin32Error
++# else
+ #  define FARPROC void*
+ #  if defined(PY_NO_RTLD_GLOBAL) && defined(PY3_NO_RTLD_GLOBAL)
+ #   define load_dll(n) dlopen((n), RTLD_LAZY)
+@@ -150,11 +158,6 @@ static HINSTANCE hinstPy3 = 0; // Instan
+ #  define close_dll dlclose
+ #  define symbol_from_dll dlsym
+ #  define load_dll_error dlerror
+-# else
+-#  define load_dll vimLoadLib
+-#  define close_dll FreeLibrary
+-#  define symbol_from_dll GetProcAddress
+-#  define load_dll_error GetWin32Error
+ # endif
+ /*
+  * Wrapper defines
+@@ -221,14 +224,14 @@ static HINSTANCE hinstPy3 = 0; // Instan
+ # define PyObject_GetItem py3_PyObject_GetItem
+ # define PyObject_IsTrue py3_PyObject_IsTrue
+ # define PyModule_GetDict py3_PyModule_GetDict
+-# ifndef USE_LIMITED_API
++# ifdef USE_LIMITED_API
++#  define Py_CompileString py3_Py_CompileString
++#  define PyEval_EvalCode py3_PyEval_EvalCode
++# else
+ #  undef PyRun_SimpleString
+ #  define PyRun_SimpleString py3_PyRun_SimpleString
+ #  undef PyRun_String
+ #  define PyRun_String py3_PyRun_String
+-# else
+-#  define Py_CompileString py3_Py_CompileString
+-#  define PyEval_EvalCode py3_PyEval_EvalCode
+ # endif
+ # define PyObject_GetAttrString py3_PyObject_GetAttrString
+ # define PyObject_HasAttrString py3_PyObject_HasAttrString
+@@ -326,15 +329,14 @@ static HINSTANCE hinstPy3 = 0; // Instan
+ # define PyType_GenericNew py3_PyType_GenericNew
+ # undef PyUnicode_FromString
+ # define PyUnicode_FromString py3_PyUnicode_FromString
+-# ifndef PyUnicode_FromFormat
+-#  define PyUnicode_FromFormat py3_PyUnicode_FromFormat
+-# else
+-#  define Py_UNICODE_USE_UCS_FUNCTIONS
++# ifdef Py_UNICODE_USE_UCS_FUNCTIONS
+ #  ifdef Py_UNICODE_WIDE
+ #   define PyUnicodeUCS4_FromFormat py3_PyUnicodeUCS4_FromFormat
+ #  else
+ #   define PyUnicodeUCS2_FromFormat py3_PyUnicodeUCS2_FromFormat
+ #  endif
++# else
++#  define PyUnicode_FromFormat py3_PyUnicode_FromFormat
+ # endif
+ # undef PyUnicode_Decode
+ # define PyUnicode_Decode py3_PyUnicode_Decode
+@@ -393,12 +395,12 @@ static void (*py3_Py_Finalize)(void);
+ static void (*py3_PyErr_SetString)(PyObject *, const char *);
+ static void (*py3_PyErr_SetObject)(PyObject *, PyObject *);
+ static int (*py3_PyErr_ExceptionMatches)(PyObject *);
+-# ifndef USE_LIMITED_API
++# ifdef USE_LIMITED_API
++static PyObject* (*py3_Py_CompileString)(const char *, const char *, int);
++static PyObject* (*py3_PyEval_EvalCode)(PyObject *co, PyObject *globals, PyObject *locals);
++# else
+ static int (*py3_PyRun_SimpleString)(char *);
+ static PyObject* (*py3_PyRun_String)(char *, int, PyObject *, PyObject *);
+-# else
+-static PyObject* (*py3_Py_CompileString)(const char *, const char *, int);
+-static PyObject* (*py3_PyEval_EvalCode)(PyObject *co, PyObject *globals, PyObject *locals);
+ # endif
+ static PyObject* (*py3_PyObject_GetAttrString)(PyObject *, const char *);
+ static int (*py3_PyObject_HasAttrString)(PyObject *, const char *);
+@@ -435,14 +437,14 @@ static int (*py3_PyType_GetFlags)(PyType
+ static int (*py3_PyType_Ready)(PyTypeObject *type);
+ static int (*py3_PyDict_SetItemString)(PyObject *dp, char *key, PyObject *item);
+ static PyObject* (*py3_PyUnicode_FromString)(const char *u);
+-# ifndef Py_UNICODE_USE_UCS_FUNCTIONS
+-static PyObject* (*py3_PyUnicode_FromFormat)(const char *u, ...);
+-# else
++# ifdef Py_UNICODE_USE_UCS_FUNCTIONS
+ #  ifdef Py_UNICODE_WIDE
+ static PyObject* (*py3_PyUnicodeUCS4_FromFormat)(const char *u, ...);
+ #  else
+ static PyObject* (*py3_PyUnicodeUCS2_FromFormat)(const char *u, ...);
+ #  endif
++# else
++static PyObject* (*py3_PyUnicode_FromFormat)(const char *u, ...);
+ # endif
+ static PyObject* (*py3_PyUnicode_Decode)(const char *u, Py_ssize_t size,
+ 	const char *encoding, const char *errors);
+@@ -599,12 +601,12 @@ static struct
+     {"PyErr_SetString", (PYTHON_PROC*)&py3_PyErr_SetString},
+     {"PyErr_SetObject", (PYTHON_PROC*)&py3_PyErr_SetObject},
+     {"PyErr_ExceptionMatches", (PYTHON_PROC*)&py3_PyErr_ExceptionMatches},
+-# ifndef USE_LIMITED_API
++# ifdef USE_LIMITED_API
++    {"Py_CompileString", (PYTHON_PROC*)&py3_Py_CompileString},
++    {"PyEval_EvalCode", (PYTHON_PROC*)&PyEval_EvalCode},
++# else
+     {"PyRun_SimpleString", (PYTHON_PROC*)&py3_PyRun_SimpleString},
+     {"PyRun_String", (PYTHON_PROC*)&py3_PyRun_String},
+-# else
+-    {"Py_CompileString", (PYTHON_PROC*)&py3_Py_CompileString},
+-    {"PyEval_EvalCode", (PYTHON_PROC*)&PyEval_EvalCode},
+ # endif
+     {"PyObject_GetAttrString", (PYTHON_PROC*)&py3_PyObject_GetAttrString},
+     {"PyObject_HasAttrString", (PYTHON_PROC*)&py3_PyObject_HasAttrString},
+@@ -673,14 +675,14 @@ static struct
+ # endif
+     {"PyUnicode_CompareWithASCIIString", (PYTHON_PROC*)&py3_PyUnicode_CompareWithASCIIString},
+     {"PyUnicode_AsUTF8String", (PYTHON_PROC*)&py3_PyUnicode_AsUTF8String},
+-# ifndef Py_UNICODE_USE_UCS_FUNCTIONS
+-    {"PyUnicode_FromFormat", (PYTHON_PROC*)&py3_PyUnicode_FromFormat},
+-# else
++# ifdef Py_UNICODE_USE_UCS_FUNCTIONS
+ #  ifdef Py_UNICODE_WIDE
+     {"PyUnicodeUCS4_FromFormat", (PYTHON_PROC*)&py3_PyUnicodeUCS4_FromFormat},
+ #  else
+     {"PyUnicodeUCS2_FromFormat", (PYTHON_PROC*)&py3_PyUnicodeUCS2_FromFormat},
+ #  endif
++# else
++    {"PyUnicode_FromFormat", (PYTHON_PROC*)&py3_PyUnicode_FromFormat},
+ # endif
+     {"PyBytes_AsString", (PYTHON_PROC*)&py3_PyBytes_AsString},
+     {"PyBytes_AsStringAndSize", (PYTHON_PROC*)&py3_PyBytes_AsStringAndSize},
+@@ -1098,13 +1100,7 @@ static struct PyModuleDef vimmodule;
+  */
+ #include "if_py_both.h"
+ 
+-#ifndef USE_LIMITED_API
+-# if PY_VERSION_HEX >= 0x030300f0
+-#  define PY_UNICODE_GET_UTF8_CHARS(obj) PyUnicode_AsUTF8AndSize(obj, NULL)
+-# else
+-#  define PY_UNICODE_GET_UTF8_CHARS _PyUnicode_AsString
+-# endif
+-#else
++#ifdef USE_LIMITED_API
+ # if Py_LIMITED_API >= 0x030A0000
+ #  define PY_UNICODE_GET_UTF8_CHARS(obj) PyUnicode_AsUTF8AndSize(obj, NULL)
+ # else
+@@ -1136,6 +1132,12 @@ static char* PY_UNICODE_GET_UTF8_CHARS(P
+     return py3_unicode_utf8_chars;
+ }
+ # endif
++#else	// !USE_LIMITED_API
++# if PY_VERSION_HEX >= 0x030300f0
++#  define PY_UNICODE_GET_UTF8_CHARS(obj) PyUnicode_AsUTF8AndSize(obj, NULL)
++# else
++#  define PY_UNICODE_GET_UTF8_CHARS _PyUnicode_AsString
++# endif
+ #endif
+ 
+ // NOTE: Must always be used at the start of a block, since it declares "name".
+diff --git a/src/if_ruby.c b/src/if_ruby.c
+--- a/src/if_ruby.c
++++ b/src/if_ruby.c
+@@ -174,7 +174,13 @@
+ #include "version.h"
+ 
+ #ifdef DYNAMIC_RUBY
+-# if !defined(MSWIN)  // must come after including vim.h, where it is defined
++# ifdef MSWIN	// must come after including vim.h, where it is defined
++#  define RUBY_PROC FARPROC
++#  define load_dll vimLoadLib
++#  define symbol_from_dll GetProcAddress
++#  define close_dll FreeLibrary
++#  define load_dll_error GetWin32Error
++# else
+ #  include <dlfcn.h>
+ #  define HINSTANCE void*
+ #  define RUBY_PROC void*
+@@ -182,12 +188,6 @@
+ #  define symbol_from_dll dlsym
+ #  define close_dll dlclose
+ #  define load_dll_error dlerror
+-# else
+-#  define RUBY_PROC FARPROC
+-#  define load_dll vimLoadLib
+-#  define symbol_from_dll GetProcAddress
+-#  define close_dll FreeLibrary
+-#  define load_dll_error GetWin32Error
+ # endif
+ #endif
+ 
+diff --git a/src/if_tcl.c b/src/if_tcl.c
+--- a/src/if_tcl.c
++++ b/src/if_tcl.c
+@@ -160,7 +160,13 @@ static struct ref refsdeleted;	// dummy 
+ typedef int HANDLE;
+ # endif
+ 
+-# ifndef MSWIN
++# ifdef MSWIN
++#  define TCL_PROC FARPROC
++#  define load_dll vimLoadLib
++#  define symbol_from_dll GetProcAddress
++#  define close_dll FreeLibrary
++#  define load_dll_error GetWin32Error
++# else
+ #  include <dlfcn.h>
+ #  define HANDLE void*
+ #  define TCL_PROC void*
+@@ -168,12 +174,6 @@ typedef int HANDLE;
+ #  define symbol_from_dll dlsym
+ #  define close_dll dlclose
+ #  define load_dll_error dlerror
+-# else
+-#  define TCL_PROC FARPROC
+-#  define load_dll vimLoadLib
+-#  define symbol_from_dll GetProcAddress
+-#  define close_dll FreeLibrary
+-#  define load_dll_error GetWin32Error
+ # endif
+ 
+ /*
+@@ -242,10 +242,10 @@ static char *find_executable_arg = NULL;
+     void
+ vim_tcl_init(char *arg)
+ {
+-#ifndef DYNAMIC_TCL
++#ifdef DYNAMIC_TCL
++    find_executable_arg = arg;
++#else
+     Tcl_FindExecutable(arg);
+-#else
+-    find_executable_arg = arg;
+ #endif
+ }
+ 
