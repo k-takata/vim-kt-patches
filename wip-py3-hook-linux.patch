@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  8f062997819fdd6a73c794181ce42436c47c97a9
+# Parent  f9b743f501d380574792f03ac47dc49a7070724e
 
 diff --git a/src/errors.h b/src/errors.h
 --- a/src/errors.h
 +++ b/src/errors.h
-@@ -3213,7 +3213,7 @@ EXTERN char e_autoload_import_cannot_use
+@@ -3240,7 +3240,7 @@ EXTERN char e_autoload_import_cannot_use
  EXTERN char e_cannot_use_partial_here[]
  	INIT(= N_("E1265: Cannot use a partial here"));
  #endif
@@ -26,7 +26,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #include "vim.h"
  
  #include <limits.h>
-@@ -122,6 +125,9 @@ typedef PySliceObject PySliceObject_T;
+@@ -130,6 +133,9 @@ typedef PySliceObject PySliceObject_T;
  
  #ifndef MSWIN
  # define HINSTANCE void *
@@ -36,15 +36,15 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #endif
  #if defined(DYNAMIC_PYTHON3) || defined(MSWIN)
  static HINSTANCE hinstPy3 = 0; // Instance of python.dll
-@@ -130,7 +136,6 @@ static HINSTANCE hinstPy3 = 0; // Instan
- #if defined(DYNAMIC_PYTHON3) || defined(PROTO)
- 
- # ifndef MSWIN
+@@ -143,7 +149,6 @@ static HINSTANCE hinstPy3 = 0; // Instan
+ #  define symbol_from_dll GetProcAddress
+ #  define load_dll_error GetWin32Error
+ # else
 -#  include <dlfcn.h>
  #  define FARPROC void*
  #  if defined(PY_NO_RTLD_GLOBAL) && defined(PY3_NO_RTLD_GLOBAL)
  #   define load_dll(n) dlopen((n), RTLD_LAZY)
-@@ -1078,9 +1083,10 @@ reset_stdin(void)
+@@ -1249,9 +1254,10 @@ reset_stdin(void)
  // Python 3.2 or later will abort inside Py_Initialize() when mandatory
  // modules cannot be loaded (e.g. 'pythonthreehome' is wrongly set.).
  // Install a hook to python dll's exit() and recover from it.
@@ -58,7 +58,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  
  static jmp_buf exit_hook_jump_buf;
  static void *orig_exit = NULL;
-@@ -1124,6 +1130,52 @@ restore_py_exit(void)
+@@ -1295,6 +1301,52 @@ restore_py_exit(void)
  	hook_dll_import_func(hinst, "exit", orig_exit);
      orig_exit = NULL;
  }
@@ -111,7 +111,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #endif
  
      static int
-@@ -1175,6 +1227,7 @@ Python3_Init(void)
+@@ -1346,6 +1398,7 @@ Python3_Init(void)
  	{
  	    // exit() was called in Py_Initialize().
  	    restore_py_exit();
