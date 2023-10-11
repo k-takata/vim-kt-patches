@@ -18,7 +18,7 @@ used, search only the matching version.
 diff --git a/src/if_python3.c b/src/if_python3.c
 --- a/src/if_python3.c
 +++ b/src/if_python3.c
-@@ -835,20 +835,20 @@ Py_ssize_t py3_PyList_GET_SIZE(PyObject 
+@@ -837,20 +837,20 @@ Py_ssize_t py3_PyList_GET_SIZE(PyObject 
  
  # ifdef MSWIN
  /*
@@ -49,7 +49,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  
      while (*cp != '\0')
      {
-@@ -860,35 +860,82 @@ py3_get_system_libname(const char *libna
+@@ -862,35 +862,82 @@ py3_get_system_libname(const char *libna
  	}
  	++cp;
      }
@@ -136,7 +136,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 -    // Ignore if InstallPath is effectively empty.
 -    if (cp <= installpath)
 +
-+    swprintf(subkey, ARRAY_LENGTH(subkey), L"%s\\%s\\InstallPath",
++    swprintf(subkey, ARRAY_LENGTH(subkey), L"%ls\\%ls\\InstallPath",
 +							pythoncore, keyfound);
 +    ret = RegGetValueW(hKeyFound, subkey, NULL, RRF_RT_REG_SZ,
 +							    NULL, NULL, &len);
@@ -156,7 +156,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  }
  # endif
  
-@@ -926,12 +973,16 @@ py3_runtime_link_init(char *libname, int
+@@ -928,12 +975,16 @@ py3_runtime_link_init(char *libname, int
      if (!hinstPy3)
      {
  	// Attempt to use the path from InstallPath as stored in the registry.
