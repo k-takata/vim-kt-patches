@@ -35,14 +35,13 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +    const WCHAR	*pythoncore = L"Software\\Python\\PythonCore";
      const char	*cp = libname;
 -    char	subkey[128];
--    HKEY	hKey;
++    WCHAR	subkey[128];
+     HKEY	hKey;
 -    char	installpath[MAXPATHL];
 -    LONG	len = sizeof(installpath);
 -    LSTATUS	rc;
 -    size_t	sysliblen;
 -    char	*syslibname;
-+    WCHAR	subkey[128];
-+    HKEY	hKeyPyCore;
 +    int		i;
 +    DWORD	j, len;
 +    LSTATUS	ret;
@@ -63,7 +62,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +    {
 +	long	major, minor;
 +
-+	ret = RegOpenKeyExW(hKeyTop[i], pythoncore, 0, KEY_READ, &hKeyPyCore);
++	ret = RegOpenKeyExW(hKeyTop[i], pythoncore, 0, KEY_READ, &hKey);
 +	if (ret != ERROR_SUCCESS)
 +	    continue;
 +	for (j = 0;; j++)
@@ -72,7 +71,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +	    WCHAR   *wp;
 +
 +	    len = ARRAY_LENGTH(keyname);
-+	    ret = RegEnumKeyExW(hKeyPyCore, j, keyname, &len,
++	    ret = RegEnumKeyExW(hKey, j, keyname, &len,
 +						    NULL, NULL, NULL, NULL);
 +	    if (ret == ERROR_NO_MORE_ITEMS)
 +		break;
@@ -113,12 +112,12 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +	    {
 +		wcscpy(keyfound, keyname);
 +		hKeyFound = hKeyTop[i];
-+		RegCloseKey(hKeyPyCore);
++		RegCloseKey(hKey);
 +		goto found;
 +	    }
 +#  endif
 +	}
-+	RegCloseKey(hKeyPyCore);
++	RegCloseKey(hKey);
 +    }
 +#  ifndef USE_LIMITED_API
 +found:
