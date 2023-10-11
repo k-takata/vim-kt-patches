@@ -32,5 +32,6 @@ wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 fix-netrw-longlist.patch
 win32-improve-default-font.patch
+win32-py3-load-from-reg.patch
 if_x-avoid-ifndef-else-endif.patch
 fix-config_cache-removal.patch #+rejected

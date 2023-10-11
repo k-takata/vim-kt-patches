@@ -1,0 +1,179 @@
+From a78bd6666c27948776776591a567b8a93da02ac1 Mon Sep 17 00:00:00 2001
+From: "K.Takata" <kentkt@csc.jp>
+Date: Wed, 11 Oct 2023 19:12:10 +0900
+Subject: [PATCH] win32,python3: Load DLL from registry path
+
+Support loading python3.dll and/or python3xx.dll from the path written
+in the registry.  To support Stable ABI's forwarder DLL (python3.dll),
+use AddDllDirectory() to add the registry path as the search directory
+instead of using an absolute path to the DLL.
+
+If Stable ABI is used, search the latest version from the registry (both
+from HKEY_CURRENT_USER and HKEY_LOCAL_MACHINE).  If Stable ABI is not
+used, search only the matching version.
+---
+ src/if_python3.c | 125 +++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 88 insertions(+), 37 deletions(-)
+
+diff --git a/src/if_python3.c b/src/if_python3.c
+--- a/src/if_python3.c
++++ b/src/if_python3.c
+@@ -835,20 +835,20 @@ Py_ssize_t py3_PyList_GET_SIZE(PyObject 
+ 
+ # ifdef MSWIN
+ /*
+- * Look up the library "libname" using the InstallPath registry key.
++ * Look up the library path using the InstallPath registry key.
+  * Return NULL when failed.  Return an allocated string when successful.
++ * "libname" is used to check if it is an absolute path.
+  */
+-    static char *
+-py3_get_system_libname(const char *libname)
++    static WCHAR *
++py3_get_system_libpath(const char *libname)
+ {
++    const WCHAR	*pythoncore = L"Software\\Python\\PythonCore";
+     const char	*cp = libname;
+-    char	subkey[128];
+-    HKEY	hKey;
+-    char	installpath[MAXPATHL];
+-    LONG	len = sizeof(installpath);
+-    LSTATUS	rc;
+-    size_t	sysliblen;
+-    char	*syslibname;
++    WCHAR	subkey[128];
++    HKEY	hKeyPyCore;
++    int		i;
++    DWORD	j, len;
++    LSTATUS	ret;
+ 
+     while (*cp != '\0')
+     {
+@@ -860,35 +860,82 @@ py3_get_system_libname(const char *libna
+ 	}
+ 	++cp;
+     }
+-    vim_snprintf(subkey, sizeof(subkey),
++
++    WCHAR   keyfound[32];
++    HKEY    hKeyTop[] = {HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE};
++    HKEY    hKeyFound = NULL;
++    long    maxminor = -1;
++    for (i = 0; i < ARRAY_LENGTH(hKeyTop); i++)
++    {
++	long	major, minor;
++
++	ret = RegOpenKeyExW(hKeyTop[i], pythoncore, 0, KEY_READ, &hKeyPyCore);
++	if (ret != ERROR_SUCCESS)
++	    continue;
++	for (j = 0;; j++)
++	{
++	    WCHAR   keyname[32];
++	    WCHAR   *wp;
++
++	    len = ARRAY_LENGTH(keyname);
++	    ret = RegEnumKeyExW(hKeyPyCore, j, keyname, &len,
++						    NULL, NULL, NULL, NULL);
++	    if (ret == ERROR_NO_MORE_ITEMS)
++		break;
++
++	    major = wcstol(keyname, &wp, 10);
++	    if (*wp == L'.')
++		minor = wcstol(wp + 1, &wp, 10);
+ #  ifdef _WIN64
+-		 "Software\\Python\\PythonCore\\%d.%d\\InstallPath",
++	    if (*wp != L'\0')
++		continue;
+ #  else
+-		 "Software\\Python\\PythonCore\\%d.%d-32\\InstallPath",
++	    if (wcscmp(wp, L"-32") != 0)
++		continue;
+ #  endif
+-		 PY_MAJOR_VERSION, PY_MINOR_VERSION);
+-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, subkey, 0, KEY_QUERY_VALUE, &hKey)
+-							      != ERROR_SUCCESS)
+-	return NULL;
+-    rc = RegQueryValueA(hKey, NULL, installpath, &len);
+-    RegCloseKey(hKey);
+-    if (ERROR_SUCCESS != rc)
++
++	    if (major != PY_MAJOR_VERSION)
++		continue;
++#  ifdef USE_LIMITED_API
++	    // Search the latest version.
++	    if (minor > maxminor)
++	    {
++		maxminor = minor;
++		wcscpy(keyfound, keyname);
++		hKeyFound = hKeyTop[i];
++	    }
++#  else
++	    // Check if it matches with the compiled version.
++	    if (minor == PY_MINOR_VERSION)
++	    {
++		wcscpy(keyfound, keyname);
++		hKeyFound = hKeyTop[i];
++		RegCloseKey(hKeyPyCore);
++		goto found;
++	    }
++#  endif
++	}
++	RegCloseKey(hKeyPyCore);
++    }
++#  ifndef USE_LIMITED_API
++found:
++#  endif
++
++    if (hKeyFound == NULL)
+ 	return NULL;
+-    cp = installpath + len;
+-    // Just in case registry value contains null terminators.
+-    while (cp > installpath && *(cp-1) == '\0')
+-	--cp;
+-    // Remove trailing path separators.
+-    while (cp > installpath && (*(cp-1) == '\\' || *(cp-1) == '/'))
+-	--cp;
+-    // Ignore if InstallPath is effectively empty.
+-    if (cp <= installpath)
++
++    swprintf(subkey, ARRAY_LENGTH(subkey), L"%s\\%s\\InstallPath",
++							pythoncore, keyfound);
++    ret = RegGetValueW(hKeyFound, subkey, NULL, RRF_RT_REG_SZ,
++							    NULL, NULL, &len);
++    if (ret != ERROR_MORE_DATA && ret != ERROR_SUCCESS)
+ 	return NULL;
+-    sysliblen = (cp - installpath) + 1 + STRLEN(libname) + 1;
+-    syslibname = alloc(sysliblen);
+-    vim_snprintf(syslibname, sysliblen, "%.*s\\%s",
+-				(int)(cp - installpath), installpath, libname);
+-    return syslibname;
++    WCHAR *path = alloc(len);
++    if (path == NULL)
++	return NULL;
++    ret = RegGetValueW(hKeyFound, subkey, NULL, RRF_RT_REG_SZ,
++							    NULL, path, &len);
++    return path;
+ }
+ # endif
+ 
+@@ -926,12 +973,16 @@ py3_runtime_link_init(char *libname, int
+     if (!hinstPy3)
+     {
+ 	// Attempt to use the path from InstallPath as stored in the registry.
+-	char *syslibname = py3_get_system_libname(libname);
++	WCHAR *syslibpath = py3_get_system_libpath(libname);
+ 
+-	if (syslibname != NULL)
++	if (syslibpath != NULL)
+ 	{
+-	    hinstPy3 = load_dll(syslibname);
+-	    vim_free(syslibname);
++	    // Add the path as the search directory.
++	    AddDllDirectory(syslibpath);
++	    hinstPy3 = LoadLibraryExA(libname, NULL,
++		    LOAD_LIBRARY_SEARCH_USER_DIRS |
++		    LOAD_LIBRARY_SEARCH_SYSTEM32);
++	    vim_free(syslibpath);
+ 	}
+     }
+ # endif
