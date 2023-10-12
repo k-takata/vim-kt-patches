@@ -56,7 +56,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  
      while (*cp != '\0')
      {
-@@ -862,35 +861,94 @@ py3_get_system_libname(const char *libna
+@@ -862,35 +861,95 @@ py3_get_system_libname(const char *libna
  	}
  	++cp;
      }
@@ -112,7 +112,8 @@ diff --git a/src/if_python3.c b/src/if_python3.c
 +		continue;
 +#  ifdef USE_LIMITED_API
 +	    // Search the latest version.
-+	    if (minor > maxminor)
++	    if ((minor > maxminor)
++		    && (minor >= ((Py_LIMITED_API >> 16) & 0xff)))
 +	    {
 +		maxminor = minor;
 +		wcscpy(keyfound, keyname);
@@ -177,7 +178,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  }
  # endif
  
-@@ -928,11 +986,13 @@ py3_runtime_link_init(char *libname, int
+@@ -928,11 +987,13 @@ py3_runtime_link_init(char *libname, int
      if (!hinstPy3)
      {
  	// Attempt to use the path from InstallPath as stored in the registry.
