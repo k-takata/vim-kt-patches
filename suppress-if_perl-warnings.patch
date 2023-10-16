@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent  39ef83528e612e5c7b5f60edb013474b954af587
+
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -1483,7 +1483,7 @@ vim_IOLayer_init(void)
+ 
+ # if (PERL_REVISION == 5) && (PERL_VERSION >= 18)
+ #  undef Perl_sv_free2
+-void Perl_sv_free2(pTHX_ SV* sv, const U32 refcnt)
++void Perl_sv_free2(pTHX_ SV *const sv, const U32 refcnt)
+ {
+     (*dll_Perl_sv_free2)(aTHX_ sv, refcnt);
+ }
+@@ -1519,7 +1519,7 @@ NV Perl_sv_2nv_flags(pTHX_ SV *const sv,
+ 
+ # ifdef PERL589_OR_LATER
+ #  undef Perl_sv_2iv_flags
+-IV Perl_sv_2iv_flags(pTHX_ SV* sv, I32 flags)
++IV Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
+ {
+     return (*dll_Perl_sv_2iv_flags)(aTHX_ sv, flags);
+ }
