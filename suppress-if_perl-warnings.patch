@@ -9,7 +9,7 @@ diff --git a/src/if_perl.xs b/src/if_perl.xs
  #endif
  
 +#if defined(MSWIN) && defined(DYNAMIC_PERL)
-+// Work around for suppressing warning C4273 (inconsistent DLL linkage).
++// Work around for warning C4273 (inconsistent DLL linkage).
 +# define PERL_EXT_RE_BUILD
 +#endif
 +
