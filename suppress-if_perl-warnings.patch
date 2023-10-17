@@ -1,21 +1,21 @@
 # HG changeset patch
-# Parent  daafc613df026e623e0b0d4685866884248a307b
+# Parent  cc549c58e03a13dbebd0bf3d869c42bcf979fea5
 
 diff --git a/src/if_perl.xs b/src/if_perl.xs
 --- a/src/if_perl.xs
 +++ b/src/if_perl.xs
-@@ -44,6 +44,11 @@
- # define __builtin_expect(expr, val) (expr)
- // Work around for using MSVC and Strawberry Perl 5.32.
+@@ -46,6 +46,11 @@
  # define NO_THREAD_SAFE_LOCALE
-+
-+# ifdef DYNAMIC_PERL
-+// Work around for suppressing warning C4273 (inconsistent DLL linkage).
-+#  define PERL_EXT_RE_BUILD
-+# endif
  #endif
  
++#if defined(MSWIN) && defined(DYNAMIC_PERL)
++// Work around for suppressing warning C4273 (inconsistent DLL linkage).
++# define PERL_EXT_RE_BUILD
++#endif
++
  #ifdef __GNUC__
+ # pragma GCC diagnostic push
+ # pragma GCC diagnostic ignored "-Wunused-variable"
 @@ -1483,7 +1488,7 @@ vim_IOLayer_init(void)
  
  # if (PERL_REVISION == 5) && (PERL_VERSION >= 18)
