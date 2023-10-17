@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  9e5079b42278b7c486875f964fa1b557510d44ea
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1589,7 +1589,6 @@ lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).l
+ 	$(CC) $(CFLAGS_OUTDIR) $(TCL_INC) if_tcl.c
+ 
+ $(OUTDIR)/iscygpty.obj:	$(OUTDIR) iscygpty.c $(CUI_INCL)
+-	$(CC) $(CFLAGS_OUTDIR) iscygpty.c
+ 
+ $(OUTDIR)/job.obj:	$(OUTDIR) job.c $(INCL)
+ 
