@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  237549381d585c62943c8675f5b620865638a9ea
+# Parent  5566c2e3b7754b407f3639028c55ebe1d7d94807
 
 diff --git a/src/gui_w32.c b/src/gui_w32.c
 --- a/src/gui_w32.c
@@ -99,7 +99,7 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
 +    if (current_font_height == 0)
 +	current_font_height = lf->lfHeight;
 +
-+    WCHAR *wfontname = enc_to_utf16(fontname, NULL);
++    WCHAR *wfontname = enc_to_utf16((char_u*)fontname, NULL);
 +    if (wfontname != NULL)
 +    {
 +	wcscpy(lf->lfFaceName, wfontname);
