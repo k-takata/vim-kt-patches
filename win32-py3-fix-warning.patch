@@ -1,0 +1,18 @@
+# HG changeset patch
+# Parent  03d7dc239bbc7027bfcb272fa6d8b4bd2c02e766
+
+diff --git a/src/if_python3.c b/src/if_python3.c
+--- a/src/if_python3.c
++++ b/src/if_python3.c
+@@ -853,8 +853,9 @@ py3_get_system_libname(const char *libna
+ 		break;
+ 
+ 	    major = wcstol(keyname, &wp, 10);
+-	    if (*wp == L'.')
+-		minor = wcstol(wp + 1, &wp, 10);
++	    if (*wp != L'.')
++		continue;
++	    minor = wcstol(wp + 1, &wp, 10);
+ #  ifdef _WIN64
+ 	    if (*wp != L'\0')
+ 		continue;
