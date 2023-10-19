@@ -33,3 +33,55 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # need advapi32.lib for GetUserName()
+diff --git a/src/channel.c b/src/channel.c
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -10,13 +10,6 @@
+  * Implements communication through a socket or any file handle.
+  */
+ 
+-#ifdef WIN32
+-// Must include winsock2.h before windows.h since it conflicts with winsock.h
+-// (included in windows.h).
+-# include <winsock2.h>
+-# include <ws2tcpip.h>
+-#endif
+-
+ #include "vim.h"
+ 
+ #if defined(FEAT_JOB_CHANNEL) || defined(PROTO)
+diff --git a/src/if_perl.xs b/src/if_perl.xs
+--- a/src/if_perl.xs
++++ b/src/if_perl.xs
+@@ -24,17 +24,6 @@
+ # define _USE_32BIT_TIME_T
+ #endif
+ 
+-/*
+- * Prevent including winsock.h.  perl.h tries to detect whether winsock.h is
+- * already included before including winsock2.h, because winsock2.h isn't
+- * compatible with winsock.h.  However the detection doesn't work with some
+- * versions of MinGW.  If WIN32_LEAN_AND_MEAN is defined, windows.h will not
+- * include winsock.h.
+- */
+-#ifdef WIN32
+-# define WIN32_LEAN_AND_MEAN
+-#endif
+-
+ #include "vim.h"
+ 
+ #ifdef _MSC_VER
+diff --git a/src/os_win32.h b/src/os_win32.h
+--- a/src/os_win32.h
++++ b/src/os_win32.h
+@@ -85,6 +85,10 @@
+ # define COBJMACROS	// For OLE: Enable "friendlier" access to objects
+ #endif
+ #ifndef PROTO
++// Must include winsock2.h before windows.h since it conflicts with winsock.h
++// (included in windows.h).
++# include <winsock2.h>
++# include <ws2tcpip.h>
+ # include <windows.h>
+ 
+ // Weird: rpcndr.h defines "small" to "char", which causes trouble
