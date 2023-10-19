@@ -33,5 +33,4 @@ debug-mswin_event.patch #+wip
 fix-netrw-longlist.patch
 win32-improve-default-font.patch
 win32-use-same-cmdline-for-iscygpty.patch
-win32-stop-using-wsock32.patch
 fix-config_cache-removal.patch #+rejected
