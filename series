@@ -31,5 +31,4 @@ wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 win32-improve-default-font.patch
 win32-use-same-cmdline-for-iscygpty.patch
-fix-src-po-makefiles.patch
 fix-config_cache-removal.patch #+rejected
