@@ -1,0 +1,23 @@
+# HG changeset patch
+# Parent  2d5c1852f1c021851f716b5514b677c2673e328f
+
+diff --git a/runtime/indent/arduino.vim b/runtime/indent/arduino.vim
+new file mode 100644
+--- /dev/null
++++ b/runtime/indent/arduino.vim
+@@ -0,0 +1,15 @@
++" Vim indent file
++" Language:	Arduino
++" Maintainer:	The Vim Project <https://github.com/vim/vim>
++" Last Change:	2024 Feb 08
++
++" Only load this indent file when no other was loaded.
++if exists("b:did_indent")
++   finish
++endif
++let b:did_indent = 1
++
++" Use C indenting.
++setlocal cindent
++
++let b:undo_indent = "setl cin<"
