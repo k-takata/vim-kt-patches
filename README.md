@@ -10,7 +10,7 @@ Some of the patches are already sent to [vim_dev](https://groups.google.com/foru
 ## How to use ##
 ### First time ###
 
-    $ hg qclone http://hg.osdn.net/view/vim/vim -p http://hg.pf.osdn.net/view/k/k_/k_takata/vim-ktakata-mq vim
+    $ hg qclone https://hg.256bit.org/vim -p http://hg.pf.osdn.net/view/k/k_/k_takata/vim-ktakata-mq vim
     $ cd vim
     $ hg qselect linux    # if needed
     $ hg qpush -a
