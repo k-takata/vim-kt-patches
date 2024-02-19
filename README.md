@@ -10,11 +10,15 @@ Some of the patches are already sent to [vim_dev](https://groups.google.com/foru
 ## How to use ##
 ### First time ###
 
-    $ hg qclone https://hg.osdn.net/view/vim/vim -p http://hg.pf.osdn.net/view/k/k_/k_takata/vim-ktakata-mq vim
+    $ hg qclone http://hg.osdn.net/view/vim/vim -p http://hg.pf.osdn.net/view/k/k_/k_takata/vim-ktakata-mq vim
     $ cd vim
     $ hg qselect linux    # if needed
     $ hg qpush -a
     $ make
+
+You can use one of the following URL for the main repository of Vim:
+ * <https://hg.256bit.org/vim>
+ * <http://hg.osdn.net/view/vim/vim>
 
 ### Update ###
 
