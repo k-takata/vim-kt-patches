@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  909bb0f575dc11518f781856d9a23197bdbb29ec
+# Parent  797312af1e1ec30f0c3aabb5fcca62be9833a179
 
 diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 --- a/runtime/doc/autocmd.txt
 +++ b/runtime/doc/autocmd.txt
-@@ -412,6 +412,9 @@ Name			triggered by ~
+@@ -414,6 +414,9 @@ Name			triggered by ~
  |TextChangedT|		after a change was made to the text in Terminal mode
  |TextYankPost|		after text has been yanked or deleted
  
@@ -14,7 +14,7 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
  |SafeState|		nothing pending, going to wait for the user to type a
  			character
  |SafeStateAgain|	repeated SafeState
-@@ -1107,6 +1110,11 @@ SafeStateAgain			Like SafeState but afte
+@@ -1115,6 +1118,11 @@ SafeStateAgain			Like SafeState but afte
  				triggered often, don't do something that takes
  				time.
  
@@ -36,12 +36,12 @@ diff --git a/src/autocmd.c b/src/autocmd.c
 +    {"SearchHitBottom",	EVENT_SEARCHHITBOTTOM},
 +    {"SearchHitTop",	EVENT_SEARCHHITTOP},
      {"SessionLoadPost",	EVENT_SESSIONLOADPOST},
+     {"SessionWritePost",EVENT_SESSIONWRITEPOST},
      {"ShellCmdPost",	EVENT_SHELLCMDPOST},
-     {"ShellFilterPost",	EVENT_SHELLFILTERPOST},
 diff --git a/src/search.c b/src/search.c
 --- a/src/search.c
 +++ b/src/search.c
-@@ -1097,9 +1097,16 @@ searchit(
+@@ -1055,9 +1055,16 @@ searchit(
  	     * written.
  	     */
  	    if (dir == BACKWARD)    // start second loop at the other end
@@ -61,12 +61,12 @@ diff --git a/src/search.c b/src/search.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1378,6 +1378,8 @@ enum auto_event
+@@ -1410,6 +1410,8 @@ enum auto_event
      EVENT_REMOTEREPLY,		// upon string reception from a remote vim
      EVENT_SAFESTATE,		// going to wait for a character
      EVENT_SAFESTATEAGAIN,	// still waiting for a character
 +    EVENT_SEARCHHITBOTTOM,	// hit bottom when searching
 +    EVENT_SEARCHHITTOP,		// hit top when searching
      EVENT_SESSIONLOADPOST,	// after loading a session file
+     EVENT_SESSIONWRITEPOST,	// after writing a session file
      EVENT_SHELLCMDPOST,		// after ":!cmd"
-     EVENT_SHELLFILTERPOST,	// after ":1,2!cmd", ":w !cmd", ":r !cmd".
