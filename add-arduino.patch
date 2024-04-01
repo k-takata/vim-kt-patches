@@ -1,6 +1,29 @@
 # HG changeset patch
-# Parent  2d5c1852f1c021851f716b5514b677c2673e328f
+# Parent  7d0ce5fbf74bbf0b969ec3fe547707f24a05e4c4
 
+diff --git a/runtime/doc/filetype.txt b/runtime/doc/filetype.txt
+--- a/runtime/doc/filetype.txt
++++ b/runtime/doc/filetype.txt
+@@ -437,6 +437,19 @@ So to enable this only for ruby, set the
+ If both, the global `plugin_exec` and the `<filetype>_exec` specific variable
+ are set, the filetype specific variable should have precedent.
+ 
++
++ARDUINO							*ft-arduino-plugin*
++
++By default the following options are set, in accordance with the default
++settings of Arduino IDE: >
++
++	setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
++
++To disable this behavior, set the following variable in your vimrc: >
++
++	let g:arduino_recommended_style = 0
++
++
+ AWK							*ft-awk-plugin*
+ 
+ Support for features specific to GNU Awk, like @include, can be enabled by
 diff --git a/runtime/ftplugin/arduino.vim b/runtime/ftplugin/arduino.vim
 new file mode 100644
 --- /dev/null
@@ -82,7 +105,7 @@ new file mode 100644
 +
 +" Only load this indent file when no other was loaded.
 +if exists("b:did_indent")
-+   finish
++  finish
 +endif
 +let b:did_indent = 1
 +
