@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  797312af1e1ec30f0c3aabb5fcca62be9833a179
+# Parent  64e1a0bf3208768cf2c93e18725f3995c97bbc29
 
 diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 --- a/runtime/doc/autocmd.txt
@@ -29,15 +29,15 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 diff --git a/src/autocmd.c b/src/autocmd.c
 --- a/src/autocmd.c
 +++ b/src/autocmd.c
-@@ -159,6 +159,8 @@ static struct event_name
-     {"RemoteReply",	EVENT_REMOTEREPLY},
-     {"SafeState",	EVENT_SAFESTATE},
-     {"SafeStateAgain",	EVENT_SAFESTATEAGAIN},
-+    {"SearchHitBottom",	EVENT_SEARCHHITBOTTOM},
-+    {"SearchHitTop",	EVENT_SEARCHHITTOP},
-     {"SessionLoadPost",	EVENT_SESSIONLOADPOST},
-     {"SessionWritePost",EVENT_SESSIONWRITEPOST},
-     {"ShellCmdPost",	EVENT_SHELLCMDPOST},
+@@ -163,6 +163,8 @@ static keyvalue_T event_tab[] = {
+     KEYVALUE_ENTRY(EVENT_REMOTEREPLY, "RemoteReply"),
+     KEYVALUE_ENTRY(EVENT_SAFESTATE, "SafeState"),
+     KEYVALUE_ENTRY(EVENT_SAFESTATEAGAIN, "SafeStateAgain"),
++    KEYVALUE_ENTRY(EVENT_SEARCHHITBOTTOM, "SearchHitBottom"),
++    KEYVALUE_ENTRY(EVENT_SEARCHHITTOP, "SearchHitTop"),
+     KEYVALUE_ENTRY(EVENT_SESSIONLOADPOST, "SessionLoadPost"),
+     KEYVALUE_ENTRY(EVENT_SESSIONWRITEPOST, "SessionWritePost"),
+     KEYVALUE_ENTRY(EVENT_SHELLCMDPOST, "ShellCmdPost"),
 diff --git a/src/search.c b/src/search.c
 --- a/src/search.c
 +++ b/src/search.c
