@@ -1,6 +1,25 @@
 # HG changeset patch
 # Parent  90b67a171c85b6a99f88cf4deefb11f7572bf807
 
+diff --git a/.github/CODEOWNERS b/.github/CODEOWNERS
+--- a/.github/CODEOWNERS
++++ b/.github/CODEOWNERS
+@@ -105,6 +105,7 @@ runtime/compiler/zsh.vim		@dkearns
+ runtime/doc/ps1.txt			@heaths
+ runtime/ftplugin/abaqus.vim		@costerwi
+ runtime/ftplugin/apache.vim		@dubgeiser 
++runtime/ftplugin/arduino.vim		@k-takata
+ runtime/ftplugin/awk.vim		@dkearns
+ runtime/ftplugin/basic.vim		@dkearns
+ runtime/ftplugin/bst.vim		@tpope
+@@ -230,6 +231,7 @@ runtime/ftplugin/xml.vim		@chrisbra
+ runtime/ftplugin/xs.vim			@petdance
+ runtime/ftplugin/zsh.vim		@chrisbra
+ runtime/import/dist/vimhighlight.vim	@lacygoill
++runtime/indent/arduino.vim		@k-takata
+ runtime/indent/basic.vim		@dkearns
+ runtime/indent/bst.vim			@tpope
+ runtime/indent/cdl.vim			@dkearns
 diff --git a/runtime/doc/filetype.txt b/runtime/doc/filetype.txt
 --- a/runtime/doc/filetype.txt
 +++ b/runtime/doc/filetype.txt
@@ -27,11 +46,12 @@ diff --git a/runtime/ftplugin/arduino.vim b/runtime/ftplugin/arduino.vim
 new file mode 100644
 --- /dev/null
 +++ b/runtime/ftplugin/arduino.vim
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,65 @@
 +" Vim filetype plugin file
 +" Language:	Arduino
 +" Maintainer:	The Vim Project <https://github.com/vim/vim>
-+" Last Change:	2024 Feb 08
++"		Ken Takata <https://github.com/k-takata>
++" Last Change:	2024 Apr 03
 +"
 +" Most of the part was copied from c.vim.
 +
@@ -96,11 +116,12 @@ diff --git a/runtime/indent/arduino.vim b/runtime/indent/arduino.vim
 new file mode 100644
 --- /dev/null
 +++ b/runtime/indent/arduino.vim
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,16 @@
 +" Vim indent file
 +" Language:	Arduino
 +" Maintainer:	The Vim Project <https://github.com/vim/vim>
-+" Last Change:	2024 Feb 08
++"		Ken Takata <https://github.com/k-takata>
++" Last Change:	2024 Apr 03
 +
 +" Only load this indent file when no other was loaded.
 +if exists("b:did_indent")
