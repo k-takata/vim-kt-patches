@@ -1,14 +1,13 @@
 # HG changeset patch
-# Parent  7d0ce5fbf74bbf0b969ec3fe547707f24a05e4c4
+# Parent  90b67a171c85b6a99f88cf4deefb11f7572bf807
 
 diff --git a/runtime/doc/filetype.txt b/runtime/doc/filetype.txt
 --- a/runtime/doc/filetype.txt
 +++ b/runtime/doc/filetype.txt
-@@ -437,6 +437,19 @@ So to enable this only for ruby, set the
- If both, the global `plugin_exec` and the `<filetype>_exec` specific variable
- are set, the filetype specific variable should have precedent.
+@@ -450,6 +450,18 @@ To disable folding everything under the 
+ 	let asciidoc_fold_under_title = 0
  
-+
+ 
 +ARDUINO							*ft-arduino-plugin*
 +
 +By default the following options are set, in accordance with the default

@@ -30,5 +30,6 @@ win32-mouse-flaky.patch
 wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 win32-use-same-cmdline-for-iscygpty.patch
+fix-doc-filetype.patch
 add-arduino.patch
 fix-config_cache-removal.patch #+rejected

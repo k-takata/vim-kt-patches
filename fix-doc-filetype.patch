@@ -1,0 +1,45 @@
+# HG changeset patch
+# Parent  30fcdba537c9f9b3ea992a367a59f3d7cd3c2773
+
+diff --git a/runtime/doc/filetype.txt b/runtime/doc/filetype.txt
+--- a/runtime/doc/filetype.txt
++++ b/runtime/doc/filetype.txt
+@@ -437,6 +437,19 @@ So to enable this only for ruby, set the
+ If both, the global `plugin_exec` and the `<filetype>_exec` specific variable
+ are set, the filetype specific variable should have precedent.
+ 
++
++ASCIIDOC						*ft-asciidoc-plugin*
++
++To enable |folding| use this: >
++	let g:asciidoc_folding = 1
++
++To disable nesting of folded headers use this: >
++	let g:asciidoc_foldnested = 0
++
++To disable folding everything under the title use this: >
++	let asciidoc_fold_under_title = 0
++
++
+ AWK							*ft-awk-plugin*
+ 
+ Support for features specific to GNU Awk, like @include, can be enabled by
+@@ -564,18 +577,6 @@ under it.  If not found, a new entry and
+ the Changelog.
+ 
+ 
+-ASCIIDOC						*ft-asciidoc-plugin*
+-
+-To enable |folding| use this: >
+-	let g:asciidoc_folding = 1
+-
+-To disable nesting of folded headers use this: >
+-	let g:asciidoc_foldnested = 0
+-
+-To disable folding everything under the title use this: >
+-	let asciidoc_fold_under_title = 0
+-
+-
+ FORTRAN							*ft-fortran-plugin*
+ 
+ Options:
