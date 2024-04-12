@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  90b67a171c85b6a99f88cf4deefb11f7572bf807
+# Parent  9ed34868e7c8080892abdf0e372b4e93060971cc
 
 diff --git a/.github/CODEOWNERS b/.github/CODEOWNERS
 --- a/.github/CODEOWNERS
@@ -12,7 +12,7 @@ diff --git a/.github/CODEOWNERS b/.github/CODEOWNERS
  runtime/ftplugin/awk.vim		@dkearns
  runtime/ftplugin/basic.vim		@dkearns
  runtime/ftplugin/bst.vim		@tpope
-@@ -230,6 +231,7 @@ runtime/ftplugin/xml.vim		@chrisbra
+@@ -231,6 +232,7 @@ runtime/ftplugin/xml.vim		@chrisbra
  runtime/ftplugin/xs.vim			@petdance
  runtime/ftplugin/zsh.vim		@chrisbra
  runtime/import/dist/vimhighlight.vim	@lacygoill
@@ -23,7 +23,7 @@ diff --git a/.github/CODEOWNERS b/.github/CODEOWNERS
 diff --git a/runtime/doc/filetype.txt b/runtime/doc/filetype.txt
 --- a/runtime/doc/filetype.txt
 +++ b/runtime/doc/filetype.txt
-@@ -450,6 +450,18 @@ To disable folding everything under the 
+@@ -452,6 +452,18 @@ To disable folding everything under the 
  	let asciidoc_fold_under_title = 0
  
  
@@ -46,12 +46,12 @@ diff --git a/runtime/ftplugin/arduino.vim b/runtime/ftplugin/arduino.vim
 new file mode 100644
 --- /dev/null
 +++ b/runtime/ftplugin/arduino.vim
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,66 @@
 +" Vim filetype plugin file
 +" Language:	Arduino
 +" Maintainer:	The Vim Project <https://github.com/vim/vim>
 +"		Ken Takata <https://github.com/k-takata>
-+" Last Change:	2024 Apr 03
++" Last Change:	2024 Apr 12
 +"
 +" Most of the part was copied from c.vim.
 +
@@ -72,6 +72,7 @@ new file mode 100644
 +if !exists("g:arduino_recommended_style") || g:arduino_recommended_style != 0
 +  " Use the default setting of Arduino IDE.
 +  setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
++  let b:undo_ftplugin ..= " et< ts< sts< sw<"
 +endif
 +
 +" Set 'formatoptions' to break comment lines but not other lines,
