@@ -1,9 +1,9 @@
 # HG changeset patch
 # Parent  f67bb25238d6ce83a99b99a8fc27a719d0a62422
 
-diff --git a/.github/CODEOWNERS b/.github/CODEOWNERS
---- a/.github/CODEOWNERS
-+++ b/.github/CODEOWNERS
+diff --git a/.github/MAINTAINERS b/.github/MAINTAINERS
+--- a/.github/MAINTAINERS
++++ b/.github/MAINTAINERS
 @@ -105,6 +105,7 @@ runtime/compiler/zsh.vim		@dkearns
  runtime/doc/ps1.txt			@heaths
  runtime/ftplugin/abaqus.vim		@costerwi
