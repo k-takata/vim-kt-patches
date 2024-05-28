@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  df2df176fd8da03fcce6d653dbcc7eb0fcbee267
+# Parent  f3dc2d1460f4183754c166aea586a987ebae2273
 
 diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 --- a/runtime/doc/autocmd.txt
@@ -14,7 +14,7 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
  |SafeState|		nothing pending, going to wait for the user to type a
  			character
  |SafeStateAgain|	repeated SafeState
-@@ -1115,6 +1118,23 @@ SafeStateAgain			Like SafeState but afte
+@@ -1115,6 +1118,20 @@ SafeStateAgain			Like SafeState but afte
  				triggered often, don't do something that takes
  				time.
  
@@ -24,16 +24,13 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 +SearchHitTop			When searching hit the top of the file.
 +				This is a simple example to show a popup when
 +				hitting the top or the bottom: >
-+
-+				augroup SearchHit
-+				  au!
-+				  au SearchHitTop * call popup_create(
-+					\ "Search hit top: " .. @/,
-+					\ #{border: [], time: 3000})
-+				  au SearchHitBottom * call popup_create(
-+					\ "Search hit bottom: " .. @/,
-+					\ #{border: [], time: 3000})
-+				augroup END
++	augroup SearchHit
++	  au!
++	  au SearchHitTop * call popup_create(
++		\ "Search hit top: " .. @/, #{border: [], time: 3000})
++	  au SearchHitBottom * call popup_create(
++		\ "Search hit bottom: " .. @/, #{border: [], time: 3000})
++	augroup END
 +<
  							*SessionLoadPost*
  SessionLoadPost			After loading the session file created using
@@ -53,7 +50,7 @@ diff --git a/src/autocmd.c b/src/autocmd.c
 diff --git a/src/search.c b/src/search.c
 --- a/src/search.c
 +++ b/src/search.c
-@@ -1055,9 +1055,16 @@ searchit(
+@@ -1129,9 +1129,16 @@ searchit(
  	     * written.
  	     */
  	    if (dir == BACKWARD)    // start second loop at the other end
