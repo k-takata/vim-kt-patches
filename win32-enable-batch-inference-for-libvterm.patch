@@ -11,6 +11,7 @@ This should make the compilation process a bit faster.
  1 file changed, 28 insertions(+), 30 deletions(-)
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+index 64f01db19..a7e20dd6a 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
 @@ -384,15 +384,15 @@ TERMINAL = no
@@ -38,17 +39,17 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  TERM_DEFS = -DFEAT_TERMINAL
  TERM_DEPS = \
  	libvterm/include/vterm.h \
-@@ -1333,6 +1333,9 @@ all:	$(MAIN_TARGET) \
+@@ -1320,6 +1320,9 @@ $(VIM): $(VIM).exe
  $(OUTDIR):
  	if not exist $(OUTDIR)/nul  mkdir $(OUTDIR:/=\)
  
 +$(OUTDIR)/libvterm: $(OUTDIR)
 +	if not exist $(OUTDIR)/libvterm/nul  mkdir $(OUTDIR:/=\)\libvterm
 +
- CFLAGS_INST = /nologo /O2 -DNDEBUG -DWIN32 -DWINVER=$(WINVER) \
- 	      -D_WIN32_WINNT=$(WINVER) $(CFLAGS_DEPR)
+ CFLAGS_INST = /nologo /O2 -DNDEBUG -DWIN32 -DWINVER=$(WINVER) -D_WIN32_WINNT=$(WINVER) $(CFLAGS_DEPR)
  
-@@ -1486,15 +1489,15 @@ test_vim9:
+ !IFDEF PATCHLEVEL
+@@ -1471,15 +1474,15 @@ test_vim9:
  ###########################################################################
  
  # Create a default rule for transforming .c files to .obj files in $(OUTDIR)
@@ -67,37 +68,36 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  	$(CC) $(CFLAGS_OUTDIR) $<
  
  $(OUTDIR)/alloc.obj:	$(OUTDIR) alloc.c  $(INCL)
-@@ -1840,32 +1843,27 @@ CCCTERM = $(CC) $(CFLAGS) -Ilibvterm/inc
+@@ -1824,32 +1827,27 @@ CCCTERM = $(CC) $(CFLAGS) -Ilibvterm/include -DINLINE="" \
  	-DGET_SPECIAL_PTY_TYPE_FUNCTION=get_special_pty_type \
  	-D_CRT_SECURE_NO_WARNINGS
  
 -$(OUTDIR)/vterm_encoding.obj: $(OUTDIR) libvterm/src/encoding.c $(TERM_DEPS)
 -	$(CCCTERM) /Fo$@ libvterm/src/encoding.c
--
--$(OUTDIR)/vterm_keyboard.obj: $(OUTDIR) libvterm/src/keyboard.c $(TERM_DEPS)
--	$(CCCTERM) /Fo$@ libvterm/src/keyboard.c
 +# Create a default rule for vterm.
 +{libvterm/src}.c{$(OUTDIR)/libvterm}.obj::
 +	$(CCCTERM) /Fo$(OUTDIR)/libvterm/ $<
++
++$(OUTDIR)/libvterm/encoding.obj: $(OUTDIR)/libvterm libvterm/src/encoding.c $(TERM_DEPS)
+ 
+-$(OUTDIR)/vterm_keyboard.obj: $(OUTDIR) libvterm/src/keyboard.c $(TERM_DEPS)
+-	$(CCCTERM) /Fo$@ libvterm/src/keyboard.c
++$(OUTDIR)/libvterm/keyboard.obj: $(OUTDIR)/libvterm libvterm/src/keyboard.c $(TERM_DEPS)
  
 -$(OUTDIR)/vterm_mouse.obj: $(OUTDIR) libvterm/src/mouse.c $(TERM_DEPS)
 -	$(CCCTERM) /Fo$@ libvterm/src/mouse.c
-+$(OUTDIR)/libvterm/encoding.obj: $(OUTDIR)/libvterm libvterm/src/encoding.c $(TERM_DEPS)
++$(OUTDIR)/libvterm/mouse.obj: $(OUTDIR)/libvterm libvterm/src/mouse.c $(TERM_DEPS)
  
 -$(OUTDIR)/vterm_parser.obj: $(OUTDIR) libvterm/src/parser.c $(TERM_DEPS)
 -	$(CCCTERM) /Fo$@ libvterm/src/parser.c
-+$(OUTDIR)/libvterm/keyboard.obj: $(OUTDIR)/libvterm libvterm/src/keyboard.c $(TERM_DEPS)
-+
-+$(OUTDIR)/libvterm/mouse.obj: $(OUTDIR)/libvterm libvterm/src/mouse.c $(TERM_DEPS)
++$(OUTDIR)/libvterm/parser.obj: $(OUTDIR)/libvterm libvterm/src/parser.c $(TERM_DEPS)
  
 -$(OUTDIR)/vterm_pen.obj: $(OUTDIR) libvterm/src/pen.c $(TERM_DEPS)
 -	$(CCCTERM) /Fo$@ libvterm/src/pen.c
-+$(OUTDIR)/libvterm/parser.obj: $(OUTDIR)/libvterm libvterm/src/parser.c $(TERM_DEPS)
++$(OUTDIR)/libvterm/pen.obj: $(OUTDIR)/libvterm libvterm/src/pen.c $(TERM_DEPS)
  
 -$(OUTDIR)/vterm_screen.obj: $(OUTDIR) libvterm/src/screen.c $(TERM_DEPS)
 -	$(CCCTERM) /Fo$@ libvterm/src/screen.c
-+$(OUTDIR)/libvterm/pen.obj: $(OUTDIR)/libvterm libvterm/src/pen.c $(TERM_DEPS)
-+
 +$(OUTDIR)/libvterm/screen.obj: $(OUTDIR)/libvterm libvterm/src/screen.c $(TERM_DEPS)
  
 -$(OUTDIR)/vterm_state.obj: $(OUTDIR) libvterm/src/state.c $(TERM_DEPS)
@@ -114,3 +114,6 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  
  
  # $CFLAGS may contain backslashes, quotes and chevrons, escape them all.
+-- 
+2.45.1
+

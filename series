@@ -17,6 +17,7 @@ redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 subpixel-artifacts.patch #+disabled
 fix-italic-overhang-before-space.patch #+disabled
+win32-enable-batch-inference-for-libvterm.patch
 win32-fold-long-lines-in-make_mvc.mak.patch
 update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
@@ -30,5 +31,4 @@ win32-mouse-flaky.patch
 wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 xxd-msvc-specify-source-charset.patch
-win32-enable-batch-inference-for-libvterm.patch
 fix-config_cache-removal.patch #+rejected
