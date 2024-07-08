@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  f3dc2d1460f4183754c166aea586a987ebae2273
+# Parent  731d5fe2b0e8d4a929245417927a350872df8e98
 
 diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 --- a/runtime/doc/autocmd.txt
 +++ b/runtime/doc/autocmd.txt
-@@ -414,6 +414,9 @@ Name			triggered by ~
+@@ -415,6 +415,9 @@ Name			triggered by ~
  |TextChangedT|		after a change was made to the text in Terminal mode
  |TextYankPost|		after text has been yanked or deleted
  
@@ -14,7 +14,7 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
  |SafeState|		nothing pending, going to wait for the user to type a
  			character
  |SafeStateAgain|	repeated SafeState
-@@ -1115,6 +1118,20 @@ SafeStateAgain			Like SafeState but afte
+@@ -1123,6 +1126,20 @@ SafeStateAgain			Like SafeState but afte
  				triggered often, don't do something that takes
  				time.
  
@@ -35,10 +35,22 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
  							*SessionLoadPost*
  SessionLoadPost			After loading the session file created using
  				the |:mksession| command.
+diff --git a/runtime/doc/tags b/runtime/doc/tags
+--- a/runtime/doc/tags
++++ b/runtime/doc/tags
+@@ -5700,6 +5700,8 @@ SQLGetType	ft_sql.txt	/*SQLGetType*
+ SQLSetType	ft_sql.txt	/*SQLSetType*
+ SafeState	autocmd.txt	/*SafeState*
+ SafeStateAgain	autocmd.txt	/*SafeStateAgain*
++SearchHitBottom	autocmd.txt	/*SearchHitBottom*
++SearchHitTop	autocmd.txt	/*SearchHitTop*
+ Select	visual.txt	/*Select*
+ Select-mode	visual.txt	/*Select-mode*
+ Select-mode-mapping	visual.txt	/*Select-mode-mapping*
 diff --git a/src/autocmd.c b/src/autocmd.c
 --- a/src/autocmd.c
 +++ b/src/autocmd.c
-@@ -163,6 +163,8 @@ static keyvalue_T event_tab[] = {
+@@ -164,6 +164,8 @@ static keyvalue_T event_tab[] = {
      KEYVALUE_ENTRY(EVENT_REMOTEREPLY, "RemoteReply"),
      KEYVALUE_ENTRY(EVENT_SAFESTATE, "SafeState"),
      KEYVALUE_ENTRY(EVENT_SAFESTATEAGAIN, "SafeStateAgain"),
@@ -70,7 +82,7 @@ diff --git a/src/search.c b/src/search.c
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1410,6 +1410,8 @@ enum auto_event
+@@ -1411,6 +1411,8 @@ enum auto_event
      EVENT_REMOTEREPLY,		// upon string reception from a remote vim
      EVENT_SAFESTATE,		// going to wait for a character
      EVENT_SAFESTATEAGAIN,	// still waiting for a character
