@@ -1,16 +1,10 @@
 # HG changeset patch
-# Parent  7fbc893df0f08df826af26bedeca531ccde4f1c1
+# Parent  0778674761f2fdf7492a19610526c4ab9d57ac3f
 
 diff --git a/src/testdir/test_gui.vim b/src/testdir/test_gui.vim
 --- a/src/testdir/test_gui.vim
 +++ b/src/testdir/test_gui.vim
-@@ -1706,10 +1706,13 @@ endfunc
- func Test_gui_lowlevel_keyevent()
-   CheckMSWindows
-   new
-+  let g:test_is_flaky = 1
-+  "throw 'Skipped: failing with unknown reasons.'
- 
+@@ -1711,6 +1711,7 @@ func Test_gui_lowlevel_keyevent()
    " Test for <Ctrl-A> to <Ctrl-Z> keys
    for kc in range(65, 90)
      call SendKeys([0x11, kc])
