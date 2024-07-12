@@ -28,4 +28,5 @@ wip-autocmd-searchhitbt.patch #+wip
 win32-mouse-flaky.patch
 wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
+check-gettext_path.patch
 fix-config_cache-removal.patch #+rejected

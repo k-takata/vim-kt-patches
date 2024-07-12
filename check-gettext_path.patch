@@ -1,0 +1,16 @@
+# HG changeset patch
+# Parent  6c8720876ca95a55957af8a89cb522c8b54afe16
+
+diff --git a/src/testdir/test_gettext_make.vim b/src/testdir/test_gettext_make.vim
+--- a/src/testdir/test_gettext_make.vim
++++ b/src/testdir/test_gettext_make.vim
+@@ -6,6 +6,9 @@ CheckNotMac
+ func Test_gettext_makefile()
+   cd ../po
+   if has('win32')
++    if getenv('GETTEXT_PATH') == ''
++      throw '%GETTEXT_PATH% is not set.'
++    endif
+     call system('nmake.exe -f Make_mvc.mak "VIMPROG=' .. getenv('VIMPROG') ..
+           \ '" "GETTEXT_PATH=' .. getenv('GETTEXT_PATH') ..
+           \ '" PLUGPACKAGE=test_gettext
