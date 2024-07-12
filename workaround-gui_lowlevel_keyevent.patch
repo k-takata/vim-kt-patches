@@ -4,11 +4,11 @@
 diff --git a/src/testdir/test_gui.vim b/src/testdir/test_gui.vim
 --- a/src/testdir/test_gui.vim
 +++ b/src/testdir/test_gui.vim
-@@ -1711,6 +1711,7 @@ func Test_gui_lowlevel_keyevent()
-   " Test for <Ctrl-A> to <Ctrl-Z> keys
-   for kc in range(65, 90)
-     call SendKeys([0x11, kc])
-+    sleep 1m
-     try
-       let ch = getcharstr()
+@@ -1716,6 +1716,7 @@ func Test_gui_lowlevel_keyevent()
      catch /^Vim:Interrupt$/
+       let ch = "\<c-c>"
+     endtry
++    sleep 10m
+     call assert_equal(nr2char(kc - 64), ch)
+   endfor
+ 
