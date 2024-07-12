@@ -4,11 +4,12 @@
 diff --git a/src/testdir/test_gui.vim b/src/testdir/test_gui.vim
 --- a/src/testdir/test_gui.vim
 +++ b/src/testdir/test_gui.vim
-@@ -1706,6 +1706,7 @@ endfunc
+@@ -1706,6 +1706,8 @@ endfunc
  func Test_gui_lowlevel_keyevent()
    CheckMSWindows
    new
-+  throw 'Skipped: failing with unknown reasons.'
++  let g:test_is_flaky = 1
++  "throw 'Skipped: failing with unknown reasons.'
  
    " Test for <Ctrl-A> to <Ctrl-Z> keys
    for kc in range(65, 90)
