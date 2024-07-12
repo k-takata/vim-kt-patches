@@ -4,7 +4,7 @@
 diff --git a/src/testdir/test_gui.vim b/src/testdir/test_gui.vim
 --- a/src/testdir/test_gui.vim
 +++ b/src/testdir/test_gui.vim
-@@ -1706,6 +1706,8 @@ endfunc
+@@ -1706,10 +1706,13 @@ endfunc
  func Test_gui_lowlevel_keyevent()
    CheckMSWindows
    new
@@ -13,3 +13,8 @@ diff --git a/src/testdir/test_gui.vim b/src/testdir/test_gui.vim
  
    " Test for <Ctrl-A> to <Ctrl-Z> keys
    for kc in range(65, 90)
+     call SendKeys([0x11, kc])
++    sleep 1m
+     try
+       let ch = getcharstr()
+     catch /^Vim:Interrupt$/
