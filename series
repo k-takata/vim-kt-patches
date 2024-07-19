@@ -1,4 +1,3 @@
-ignore-return-value-on-pipelines.patch #+pipelines
 debug-enable-Trace-also-on-release-build.patch #+debug
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
