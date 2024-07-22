@@ -1,6 +1,6 @@
 # HG changeset patch
 # Parent 39963f43b4750a843318de4a5243dae55e86bd76
-# Parent  82279571d16fa9eeea7a25aad4b552bbf0aa0c79
+# Parent  31b224083517815cb2320d21c5ba0f81caf6cabb
 
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
@@ -14,7 +14,7 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_LUA = --enable-luainterp --with-luajit
  #CONF_OPT_LUA = --enable-luainterp=dynamic --with-luajit
  # Lua installation dir (when not set uses $LUA_PREFIX or defaults to /usr)
-@@ -417,7 +417,7 @@ CClink = $(CC)
+@@ -419,7 +419,7 @@ CClink = $(CC)
  # one: "touch perl.exp".
  # This requires at least "normal" features, "tiny" doesn't work.
  #CONF_OPT_PERL = --enable-perlinterp
@@ -23,7 +23,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  # PYTHON
  # Uncomment lines here when you want to include the Python interface.
-@@ -435,10 +435,10 @@ CClink = $(CC)
+@@ -437,10 +437,10 @@ CClink = $(CC)
  # Build two separate versions of Vim in that case.
  #CONF_OPT_PYTHON = --enable-pythoninterp
  #CONF_OPT_PYTHON = --enable-pythoninterp --with-python-command=python2.7
@@ -36,7 +36,7 @@ diff --git a/src/Makefile b/src/Makefile
  
  # RUBY
  # Uncomment this when you want to include the Ruby interface.
-@@ -446,7 +446,7 @@ CClink = $(CC)
+@@ -448,7 +448,7 @@ CClink = $(CC)
  # Debian package is "ruby-dev".
  # This requires at least "normal" features, "tiny" doesn't work.
  #CONF_OPT_RUBY = --enable-rubyinterp
@@ -45,9 +45,9 @@ diff --git a/src/Makefile b/src/Makefile
  #CONF_OPT_RUBY = --enable-rubyinterp --with-ruby-command=ruby1.9.1
  
  # TCL
-@@ -454,7 +454,7 @@ CClink = $(CC)
- # First one is for static linking, second one for dynamic loading.
+@@ -457,7 +457,7 @@ CClink = $(CC)
  # Debian package is "tcl-dev".
+ # This requires at least "normal" features, "tiny" doesn't work.
  #CONF_OPT_TCL = --enable-tclinterp
 -#CONF_OPT_TCL = --enable-tclinterp=dynamic
 +CONF_OPT_TCL = --enable-tclinterp=dynamic
