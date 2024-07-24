@@ -1,0 +1,56 @@
+# HG changeset patch
+# Parent  1ea7ce576bbcc1ba0a019e17efe8e14ad4f3f4dc
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1305,11 +1305,11 @@ all:	$(MAIN_TARGET) \
+ 
+ $(GVIM).exe: $(OUTDIR) $(EXEOBJG) $(VIMDLLBASE).dll
+ 	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(GVIM).exe \
+-		$(EXEOBJG) $(VIMDLLBASE).lib $(LIBC)
++		$(EXEOBJG) $(VIMDLLBASE).lib
+ 
+ $(VIM).exe: $(OUTDIR) $(EXEOBJC) $(VIMDLLBASE).dll
+ 	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM_CON) -out:$(VIM).exe \
+-		$(EXEOBJC) $(VIMDLLBASE).lib $(LIBC)
++		$(EXEOBJC) $(VIMDLLBASE).lib
+ 
+ !else
+ 
+@@ -1718,10 +1718,10 @@ lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).l
+ $(OUTDIR)/os_w32exe.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
+ 
+ $(OUTDIR)/os_w32exec.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
+-	$(CC) $(CFLAGS:-DFEAT_GUI_MSWIN=) /Fo$@ os_w32exe.c
++	$(CC) $(CFLAGS:-DFEAT_GUI_MSWIN=) /DUSE_OWNSTARTUP /GS- /Fo$@ os_w32exe.c
+ 
+ $(OUTDIR)/os_w32exeg.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
+-	$(CC) $(CFLAGS) /Fo$@ os_w32exe.c
++	$(CC) $(CFLAGS) /DUSE_OWNSTARTUP /GS- /Fo$@ os_w32exe.c
+ 
+ $(OUTDIR)/pathdef.obj:	$(OUTDIR) $(PATHDEF_SRC) $(INCL)
+ 	$(CC) $(CFLAGS_OUTDIR) $(PATHDEF_SRC)
+diff --git a/src/os_w32exe.c b/src/os_w32exe.c
+--- a/src/os_w32exe.c
++++ b/src/os_w32exe.c
+@@ -49,3 +49,19 @@ wmain(int argc UNUSED, wchar_t **argv UN
+     return 0;
+ }
+ #endif
++
++#ifdef USE_OWNSTARTUP
++# ifdef FEAT_GUI
++    void WINAPI
++wWinMainCRTStartup(void)
++{
++    wWinMain(NULL, NULL, NULL, 0);
++}
++# else
++    void
++wmainCRTStartup(void)
++{
++    wmain(0, NULL);
++}
++# endif
++#endif
