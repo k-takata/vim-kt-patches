@@ -34,7 +34,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 --- a/src/os_w32exe.c
 +++ b/src/os_w32exe.c
-@@ -49,3 +49,19 @@ wmain(int argc UNUSED, wchar_t **argv UN
+@@ -49,3 +49,21 @@ wmain(int argc UNUSED, wchar_t **argv UN
      return 0;
  }
  #endif
@@ -44,13 +44,15 @@ diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 +    void WINAPI
 +wWinMainCRTStartup(void)
 +{
-+    wWinMain(NULL, NULL, NULL, 0);
++    //wWinMain(NULL, NULL, NULL, 0);
++    VimMain(0, NULL);
 +}
 +# else
 +    void
 +wmainCRTStartup(void)
 +{
-+    wmain(0, NULL);
++    //wmain(0, NULL);
++    VimMain(0, NULL);
 +}
 +# endif
 +#endif
