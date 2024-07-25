@@ -1,6 +1,35 @@
 # HG changeset patch
 # Parent  1ea7ce576bbcc1ba0a019e17efe8e14ad4f3f4dc
 
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -1130,10 +1130,10 @@ ifeq ($(VIMDLL),yes)
+ 	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid -lgdi32 $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
+ 
+ $(GVIMEXE): $(EXEOBJG) $(VIMDLLBASE).dll
+-	$(CC) -L. $(EXELFLAGS) -mwindows -o $@ $(EXEOBJG) -l$(VIMDLLBASE)
++	$(CC) -L. $(EXELFLAGS) -mwindows -o $@ $(EXEOBJG) -l$(VIMDLLBASE) -nostdlib
+ 
+ $(VIMEXE): $(EXEOBJC) $(VIMDLLBASE).dll
+-	$(CC) -L. $(EXELFLAGS) -o $@ $(EXEOBJC) -l$(VIMDLLBASE)
++	$(CC) -L. $(EXELFLAGS) -o $@ $(EXEOBJC) -l$(VIMDLLBASE) -nostdlib
+ else
+ $(TARGET): $(OBJ)
+ 	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
+@@ -1334,10 +1334,10 @@ endif
+ 	$(CC) -c $(CFLAGS) netbeans.c -o $@
+ 
+ $(OUTDIR)/os_w32exec.o:	os_w32exe.c $(INCL)
+-	$(CC) -c $(CFLAGS) -UFEAT_GUI_MSWIN os_w32exe.c -o $@
++	$(CC) -c $(CFLAGS) -UFEAT_GUI_MSWIN -DUSE_OWNSTARTUP os_w32exe.c -o $@
+ 
+ $(OUTDIR)/os_w32exeg.o:	os_w32exe.c $(INCL)
+-	$(CC) -c $(CFLAGS) os_w32exe.c -o $@
++	$(CC) -c $(CFLAGS) -DUSE_OWNSTARTUP os_w32exe.c -o $@
+ 
+ $(OUTDIR)/os_win32.o:	os_win32.c $(INCL) $(MZSCHEME_INCL)
+ 	$(CC) -c $(CFLAGS) os_win32.c -o $@
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
@@ -92,9 +121,9 @@ diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 +#ifdef USE_OWNSTARTUP
 +// Use our own entry point and don't use the default CRT startup code to
 +// reduce the size of (g)vim.exe.
-+// This only works on MSVC when VIMDLL is defined.  The /GS- compiler option
-+// is needed to disable the security check and avoid the undefined symbol
-+// error.  (It is disabled only in this function and doesn't have any effect
++// This only works when VIMDLL is defined.  For MSVC, the /GS- compiler option
++// is needed to avoid the undefined symbol error.  (It disables the security
++// check. However, it affects only this function and doesn't have any effect
 +// on Vim itself.)
 +# ifdef FEAT_GUI
 +    void WINAPI
