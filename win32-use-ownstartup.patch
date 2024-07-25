@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  241e23c661e7efc5ef5c5145bc0c81b3a0ecb97b
+# Parent  c8afd553573493877e429f80ca4cb408c49cc5ac
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -69,23 +69,36 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  
  $(OUTDIR)/pathdef.obj:	$(OUTDIR) $(PATHDEF_SRC) $(INCL)
  	$(CC) $(CFLAGS_OUTDIR) $(PATHDEF_SRC)
+diff --git a/src/os_w32dll.c b/src/os_w32dll.c
+--- a/src/os_w32dll.c
++++ b/src/os_w32dll.c
+@@ -7,7 +7,7 @@
+  * See README.txt for an overview of the Vim source code.
+  */
+ /*
+- * Windows GUI: main program (DLL) entry point:
++ * Windows GUI/Console: main program (DLL) entry point:
+  *
+  * Ron Aaron <ronaharon@yahoo.com> wrote this and the DLL support code.
+  * Adapted by Ken Takata.
 diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 --- a/src/os_w32exe.c
 +++ b/src/os_w32exe.c
-@@ -8,10 +8,9 @@
+@@ -8,10 +8,10 @@
   * See README.txt for an overview of the Vim source code.
   */
  /*
 - * Windows GUI: main program (EXE) entry point:
-+ * Windows GUI/CUI: main program (EXE) entry point:
++ * Windows GUI/Console: main program (EXE) entry point:
   *
 - * Ron Aaron <ronaharon@yahoo.com> wrote this and the (now deleted) DLL support
 - * code.
 + * Ron Aaron <ronaharon@yahoo.com> wrote this and the DLL support code.
++ * Adapted by Ken Takata.
   */
  #include "vim.h"
  
-@@ -20,32 +19,53 @@
+@@ -20,32 +20,53 @@
  __declspec(dllimport)
  #endif
  int VimMain(int argc, char **argv);
