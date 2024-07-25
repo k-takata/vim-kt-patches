@@ -4,16 +4,25 @@
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
+@@ -997,7 +997,7 @@ VIMDLLBASE := vim32$(DEBUG_SUFFIX)
+  endif
+ TARGET = $(VIMDLLBASE).dll
+ LFLAGS += -shared
+-EXELFLAGS += -municode
++EXELFLAGS += -municode -nostdlib -Wl,--gc-sections
+  ifneq ($(DEBUG),yes)
+ EXELFLAGS += -s
+  endif
 @@ -1130,10 +1130,10 @@ ifeq ($(VIMDLL),yes)
  	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid -lgdi32 $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
  
  $(GVIMEXE): $(EXEOBJG) $(VIMDLLBASE).dll
 -	$(CC) -L. $(EXELFLAGS) -mwindows -o $@ $(EXEOBJG) -l$(VIMDLLBASE)
-+	$(CC) -L. $(EXELFLAGS) -mwindows -o $@ $(EXEOBJG) -l$(VIMDLLBASE) -nostdlib
++	$(CC) -L. $(EXELFLAGS) -mwindows -o $@ $(EXEOBJG) -l$(VIMDLLBASE) -Wl,--entry=wWinMainCRTStartup
  
  $(VIMEXE): $(EXEOBJC) $(VIMDLLBASE).dll
 -	$(CC) -L. $(EXELFLAGS) -o $@ $(EXEOBJC) -l$(VIMDLLBASE)
-+	$(CC) -L. $(EXELFLAGS) -o $@ $(EXEOBJC) -l$(VIMDLLBASE) -nostdlib
++	$(CC) -L. $(EXELFLAGS) -o $@ $(EXEOBJC) -l$(VIMDLLBASE) -Wl,--entry=wmainCRTStartup
  else
  $(TARGET): $(OBJ)
  	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
@@ -73,7 +82,7 @@ diff --git a/src/os_w32exe.c b/src/os_w32exe.c
   */
  #include "vim.h"
  
-@@ -20,32 +19,51 @@
+@@ -20,32 +19,53 @@
  __declspec(dllimport)
  #endif
  int VimMain(int argc, char **argv);
@@ -120,11 +129,13 @@ diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 +
 +#ifdef USE_OWNSTARTUP
 +// Use our own entry point and don't use the default CRT startup code to
-+// reduce the size of (g)vim.exe.
-+// This only works when VIMDLL is defined.  For MSVC, the /GS- compiler option
-+// is needed to avoid the undefined symbol error.  (It disables the security
-+// check. However, it affects only this function and doesn't have any effect
-+// on Vim itself.)
++// reduce the size of (g)vim.exe.  This works only when VIMDLL is defined.
++//
++// For MSVC, the /GS- compiler option is needed to avoid the undefined symbol
++// error.  (It disables the security check. However, it affects only this
++// function and doesn't have any effect on Vim itself.)
++// For MinGW, the -nostdlib compiler option and the --entry linker option are
++// needed.
 +# ifdef FEAT_GUI
 +    void WINAPI
 +wWinMainCRTStartup(void)
