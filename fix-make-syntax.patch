@@ -1,0 +1,70 @@
+# HG changeset patch
+# Parent  17e0bdb0728fc758f547db7ff59069510c531b09
+
+diff --git a/runtime/doc/syntax.txt b/runtime/doc/syntax.txt
+--- a/runtime/doc/syntax.txt
++++ b/runtime/doc/syntax.txt
+@@ -2276,7 +2276,7 @@ By default mail.vim synchronises syntax 
+ displayed line.  If you have a slow machine, and generally deal with emails
+ with short headers, you can change this to a smaller value: >
+ 
+-    :let mail_minlines = 30
++	:let mail_minlines = 30
+ 
+ 
+ MAKE						*make.vim* *ft-make-syntax*
+@@ -2287,6 +2287,16 @@ feature off by using: >
+ 
+ 	:let make_no_commands = 1
+ 
++Comments are also highlighted by default.  You can turn this off by using: >
++
++	:let make_no_comments = 1
++
++Microsoft Makefile handles variable expansion and comments differently
++(backslashes are not used for escape).  If you see any wrong highlights
++because of this, you can try this: >
++
++	:let make_microsoft = 1
++
+ 
+ MAPLE						*maple.vim* *ft-maple-syntax*
+ 
+diff --git a/runtime/syntax/make.vim b/runtime/syntax/make.vim
+--- a/runtime/syntax/make.vim
++++ b/runtime/syntax/make.vim
+@@ -28,8 +28,13 @@ syn match makePreCondit "^!\s*\(cmdswitc
+ syn case match
+ 
+ " identifiers
+-syn region makeIdent	start="\$(" skip="\\)\|\\\\" end=")" contains=makeStatement,makeIdent
+-syn region makeIdent	start="\${" skip="\\}\|\\\\" end="}" contains=makeStatement,makeIdent
++if exists("make_microsoft")
++  syn region makeIdent	start="\$(" end=")" contains=makeStatement,makeIdent
++  syn region makeIdent	start="\${" end="}" contains=makeStatement,makeIdent
++else
++  syn region makeIdent	start="\$(" skip="\\)\|\\\\" end=")" contains=makeStatement,makeIdent
++  syn region makeIdent	start="\${" skip="\\}\|\\\\" end="}" contains=makeStatement,makeIdent
++endif
+ syn match makeIdent	"\$\$\w*"
+ syn match makeIdent	"\$[^({]"
+ syn match makeIdent	"^ *[^:#= \t]*\s*[:+?!*]="me=e-2
+@@ -78,11 +83,13 @@ syn match makeOverride	"^ *override\>"
+ syn match makeStatement contained "(\(abspath\|addprefix\|addsuffix\|and\|basename\|call\|dir\|error\|eval\|file\|filter-out\|filter\|findstring\|firstword\|flavor\|foreach\|guile\|if\|info\|join\|lastword\|notdir\|or\|origin\|patsubst\|realpath\|shell\|sort\|strip\|subst\|suffix\|value\|warning\|wildcard\|word\|wordlist\|words\)\>"ms=s+1
+ 
+ " Comment
+-if exists("make_microsoft")
+-   syn match  makeComment "#.*" contains=@Spell,makeTodo
+-elseif !exists("make_no_comments")
+-   syn region  makeComment	start="#" end="^$" end="[^\\]$" keepend contains=@Spell,makeTodo
+-   syn match   makeComment	"#$" contains=@Spell
++if !exists("make_no_comments")
++  if exists("make_microsoft")
++    syn match   makeComment	"#.*" contains=@Spell,makeTodo
++  else
++    syn region  makeComment	start="#" end="^$" end="[^\\]$" keepend contains=@Spell,makeTodo
++    syn match   makeComment	"#$" contains=@Spell
++  endif
+ endif
+ syn keyword makeTodo TODO FIXME XXX contained
+ 
