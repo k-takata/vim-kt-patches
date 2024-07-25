@@ -1,5 +1,12 @@
 # HG changeset patch
-# Parent  1ea7ce576bbcc1ba0a019e17efe8e14ad4f3f4dc
+# Parent  a30fc8eddac7a722f2408771abde4f68f839c2c9
+
+diff --git a/src/INSTALL b/src/INSTALL
+deleted file mode 100644
+index cc6cf6f6353e105382a30ac112069f1f11f01a9e..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+GIT binary patch
+literal 0
+Hc$@<O00001
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -13,7 +20,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
   ifneq ($(DEBUG),yes)
  EXELFLAGS += -s
   endif
-@@ -1130,10 +1130,10 @@ ifeq ($(VIMDLL),yes)
+@@ -1133,10 +1133,10 @@ ifeq ($(VIMDLL),yes)
  	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid -lgdi32 $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
  
  $(GVIMEXE): $(EXEOBJG) $(VIMDLLBASE).dll
@@ -26,7 +33,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  else
  $(TARGET): $(OBJ)
  	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
-@@ -1334,10 +1334,10 @@ endif
+@@ -1337,10 +1337,10 @@ endif
  	$(CC) -c $(CFLAGS) netbeans.c -o $@
  
  $(OUTDIR)/os_w32exec.o:	os_w32exe.c $(INCL)
@@ -72,9 +79,12 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 --- a/src/os_w32exe.c
 +++ b/src/os_w32exe.c
-@@ -10,8 +10,7 @@
+@@ -8,10 +8,9 @@
+  * See README.txt for an overview of the Vim source code.
+  */
  /*
-  * Windows GUI: main program (EXE) entry point:
+- * Windows GUI: main program (EXE) entry point:
++ * Windows GUI/CUI: main program (EXE) entry point:
   *
 - * Ron Aaron <ronaharon@yahoo.com> wrote this and the (now deleted) DLL support
 - * code.
