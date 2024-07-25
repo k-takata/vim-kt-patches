@@ -34,25 +34,79 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/os_w32exe.c b/src/os_w32exe.c
 --- a/src/os_w32exe.c
 +++ b/src/os_w32exe.c
-@@ -49,3 +49,21 @@ wmain(int argc UNUSED, wchar_t **argv UN
-     return 0;
+@@ -10,8 +10,7 @@
+ /*
+  * Windows GUI: main program (EXE) entry point:
+  *
+- * Ron Aaron <ronaharon@yahoo.com> wrote this and the (now deleted) DLL support
+- * code.
++ * Ron Aaron <ronaharon@yahoo.com> wrote this and the DLL support code.
+  */
+ #include "vim.h"
+ 
+@@ -20,32 +19,51 @@
+ __declspec(dllimport)
+ #endif
+ int VimMain(int argc, char **argv);
+-#ifndef VIMDLL
++
++#ifdef VIMDLL
++# define SaveInst(hInst)    // Do nothing
++#else
+ void SaveInst(HINSTANCE hInst);
+ #endif
+ 
+-#ifndef PROTO
+-# ifdef FEAT_GUI
++#ifdef FEAT_GUI
+     int WINAPI
+ wWinMain(
+     HINSTANCE	hInstance,
+     HINSTANCE	hPrevInst UNUSED,
+     LPWSTR	lpszCmdLine UNUSED,
+     int		nCmdShow UNUSED)
+-# else
++{
++    SaveInst(hInstance);
++    return VimMain(0, NULL);
++}
++#else
+     int
+ wmain(int argc UNUSED, wchar_t **argv UNUSED)
+-# endif
+ {
+-# ifndef VIMDLL
+-#  ifdef FEAT_GUI
+-    SaveInst(hInstance);
+-#  else
+     SaveInst(GetModuleHandleW(NULL));
+-#  endif
+-# endif
+-    VimMain(0, NULL);
+-
+-    return 0;
++    return VimMain(0, NULL);
  }
  #endif
 +
 +#ifdef USE_OWNSTARTUP
++// Use our own entry point and don't use the default CRT startup code to
++// reduce the size of (g)vim.exe.
++// This only works on MSVC when VIMDLL is defined.  The /GS- compiler option
++// is needed to disable the security check and avoid the undefined symbol
++// error.  (It is disabled only in this function and doesn't have any effect
++// on Vim itself.)
 +# ifdef FEAT_GUI
 +    void WINAPI
 +wWinMainCRTStartup(void)
 +{
-+    //wWinMain(NULL, NULL, NULL, 0);
 +    VimMain(0, NULL);
 +}
 +# else
 +    void
 +wmainCRTStartup(void)
 +{
-+    //wmain(0, NULL);
 +    VimMain(0, NULL);
 +}
 +# endif
-+#endif
++#endif	// USE_OWNSTARTUP
