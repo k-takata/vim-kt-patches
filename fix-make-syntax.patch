@@ -14,9 +14,9 @@ diff --git a/runtime/autoload/dist/ft.vim b/runtime/autoload/dist/ft.vim
 +    unlet b:make_microsoft
 +  endif
 +  var n = 1
-+  while n < 1000 && n < line('$')
++  while n < 1000 && n <= line('$')
 +    var line = getline(n)
-+    if line =~? '^\s*!\s*\(ifn\=\(def\)\=\|include\)\>'
++    if line =~? '^\s*!\s*\(ifn\=\(def\)\=\|include\|message\|error\)\>'
 +      b:make_microsoft = 1
 +      break
 +    elseif line =~ '^ *ifn\=\(eq\|def\)\>' || line =~ '^ *[-s]\=include\s'
