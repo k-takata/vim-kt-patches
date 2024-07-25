@@ -1,12 +1,5 @@
 # HG changeset patch
-# Parent  a30fc8eddac7a722f2408771abde4f68f839c2c9
-
-diff --git a/src/INSTALL b/src/INSTALL
-deleted file mode 100644
-index cc6cf6f6353e105382a30ac112069f1f11f01a9e..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
-GIT binary patch
-literal 0
-Hc$@<O00001
+# Parent  241e23c661e7efc5ef5c5145bc0c81b3a0ecb97b
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
