@@ -21,7 +21,7 @@ diff --git a/runtime/autoload/dist/ft.vim b/runtime/autoload/dist/ft.vim
 +      break
 +    elseif line =~ '^ *ifn\=\(eq\|def\)\>' || line =~ '^ *[-s]\=include\s'
 +      break
-+    elseif line =~ '^ *\w\+\s*[!?:]='
++    elseif line =~ '^ *\w\+\s*[!?:+]='
 +      break
 +    endif
 +    n += 1
