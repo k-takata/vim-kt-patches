@@ -33,7 +33,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  # If the user doesn't want gettext, undefine it.
  ifeq (no, $(GETTEXT))
  GETTEXT=
-@@ -1095,6 +1102,13 @@ LIB += -lgcc_eh
+@@ -1095,6 +1102,16 @@ LIB += -lgcc_eh
  LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
  endif
  
@@ -42,6 +42,9 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 +CFLAGS += -ffunction-sections -fno-asynchronous-unwind-tables
 +CXXFLAGS += -fasynchronous-unwind-tables
 +LFLAGS += -Wl,--gc-sections
++ ifeq (yes, $(VIMDLL))
++EXELFLAGS += -Wl,--gc-sections
++ endif
 +endif
 +
  ifeq (yes, $(MAP))
