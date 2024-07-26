@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  c45d50aaaa40c441c681779bbd42f3d184741e13
+# Parent  22efdd1422ba8f99b585dd344be166fb8427e21a
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -9,7 +9,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  CROSS_COMPILE = i586-pc-mingw32msvc-
   endif
 +CP = cp
- DEL = rm
+ DEL = rm -f
  MKDIR = mkdir -p
  DIRSLASH = /
 @@ -214,10 +215,12 @@ CROSS_COMPILE =
@@ -17,7 +17,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  #
   ifneq (sh.exe, $(SHELL))
 +CP = cp
- DEL = rm
+ DEL = rm -f
  MKDIR = mkdir -p
  DIRSLASH = /
   else

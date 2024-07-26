@@ -1,6 +1,27 @@
 # HG changeset patch
 # Parent  03d5d7ec99df5fc5f530015051b63ba68dffcf98
 
+diff --git a/src/GvimExt/Make_ming.mak b/src/GvimExt/Make_ming.mak
+--- a/src/GvimExt/Make_ming.mak
++++ b/src/GvimExt/Make_ming.mak
+@@ -29,7 +29,7 @@ LDFLAGS += -static-libgcc -static-libstd
+ endif
+ 
+ ifeq ($(CROSS),yes)
+-DEL = rm
++DEL = rm -f
+ ifeq ($(MINGWOLD),yes)
+ CXXFLAGS := -O2 -fvtable-thunks
+ else
+@@ -38,7 +38,7 @@ endif
+ else
+ CXXFLAGS := -O2
+ ifneq (sh.exe, $(SHELL))
+-DEL = rm
++DEL = rm -f
+ else
+ DEL = del
+ endif
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
@@ -33,6 +54,24 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  # If the user doesn't want gettext, undefine it.
  ifeq (no, $(GETTEXT))
  GETTEXT=
+@@ -179,7 +186,7 @@ ifeq ($(CROSS),yes)
+  ifndef CROSS_COMPILE
+ CROSS_COMPILE = i586-pc-mingw32msvc-
+  endif
+-DEL = rm
++DEL = rm -f
+ MKDIR = mkdir -p
+ DIRSLASH = /
+ else
+@@ -207,7 +214,7 @@ CROSS_COMPILE =
+ # In this case, unix-like commands can be used.
+ #
+  ifneq (sh.exe, $(SHELL))
+-DEL = rm
++DEL = rm -f
+ MKDIR = mkdir -p
+ DIRSLASH = /
+  else
 @@ -1095,6 +1102,16 @@ LIB += -lgcc_eh
  LIB += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
  endif
@@ -49,4 +88,16 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 +
  ifeq (yes, $(MAP))
  LFLAGS += -Wl,-Map=$(TARGET).map
+ endif
+diff --git a/src/xxd/Make_ming.mak b/src/xxd/Make_ming.mak
+--- a/src/xxd/Make_ming.mak
++++ b/src/xxd/Make_ming.mak
+@@ -16,7 +16,7 @@ CC = gcc
+ CFLAGS = -O2 -Wall -DWIN32 $(DEFINES)
+ 
+ ifneq (sh.exe, $(SHELL))
+-DEL = rm
++DEL = rm -f
+ else
+ DEL = del
  endif
