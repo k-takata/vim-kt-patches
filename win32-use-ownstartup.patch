@@ -1,19 +1,29 @@
 # HG changeset patch
-# Parent  c8afd553573493877e429f80ca4cb408c49cc5ac
+# Parent  65d1a0d918f1d45d9a634d45d941eb8d59fcd0dd
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -997,7 +997,7 @@ VIMDLLBASE := vim32$(DEBUG_SUFFIX)
+@@ -1004,7 +1004,7 @@ VIMDLLBASE := vim32$(DEBUG_SUFFIX)
   endif
  TARGET = $(VIMDLLBASE).dll
  LFLAGS += -shared
 -EXELFLAGS += -municode
-+EXELFLAGS += -municode -nostdlib -Wl,--gc-sections
++EXELFLAGS += -municode -nostdlib
   ifneq ($(DEBUG),yes)
  EXELFLAGS += -s
   endif
-@@ -1133,10 +1133,10 @@ ifeq ($(VIMDLL),yes)
+@@ -1107,6 +1107,9 @@ ifeq (yes, $(USE_GC_SECTIONS))
+ CFLAGS += -ffunction-sections -fno-asynchronous-unwind-tables
+ CXXFLAGS += -fasynchronous-unwind-tables
+ LFLAGS += -Wl,--gc-sections
++ ifeq (yes, $(VIMDLL))
++EXELFLAGS += -Wl,--gc-sections
++ endif
+ endif
+ 
+ ifeq (yes, $(MAP))
+@@ -1142,10 +1145,10 @@ ifeq ($(VIMDLL),yes)
  	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid -lgdi32 $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
  
  $(GVIMEXE): $(EXEOBJG) $(VIMDLLBASE).dll
@@ -26,7 +36,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  else
  $(TARGET): $(OBJ)
  	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
-@@ -1337,10 +1337,10 @@ endif
+@@ -1346,10 +1349,10 @@ endif
  	$(CC) -c $(CFLAGS) netbeans.c -o $@
  
  $(OUTDIR)/os_w32exec.o:	os_w32exe.c $(INCL)
