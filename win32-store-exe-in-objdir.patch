@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  22efdd1422ba8f99b585dd344be166fb8427e21a
+# Parent  c5f39e06905ddc9dc31d48e045600e517b5b45d8
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -186,6 +186,7 @@ ifeq ($(CROSS),yes)
+@@ -184,6 +184,7 @@ ifeq ($(CROSS),yes)
   ifndef CROSS_COMPILE
  CROSS_COMPILE = i586-pc-mingw32msvc-
   endif
@@ -12,7 +12,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  DEL = rm -f
  MKDIR = mkdir -p
  DIRSLASH = /
-@@ -214,10 +215,12 @@ CROSS_COMPILE =
+@@ -212,10 +213,12 @@ CROSS_COMPILE =
  # In this case, unix-like commands can be used.
  #
   ifneq (sh.exe, $(SHELL))
@@ -25,7 +25,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  DEL = del
  MKDIR = mkdir
  DIRSLASH = \\
-@@ -1150,16 +1153,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStar
+@@ -1153,16 +1156,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStar
   endif
  
  $(TARGET): $(OBJ)
@@ -50,9 +50,9 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  endif
  
  upx: exes
-@@ -1188,6 +1195,8 @@ notags:
- clean:
- 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.o
+@@ -1193,6 +1200,8 @@ clean:
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcno
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcda
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
 +	-$(DEL) $(OUTDIR)$(DIRSLASH)*.dll
 +	-$(DEL) $(OUTDIR)$(DIRSLASH)*.exe
