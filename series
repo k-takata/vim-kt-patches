@@ -19,7 +19,6 @@ fix-italic-overhang-before-space.patch #+disabled
 update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
 add-getpackages.patch #+disabled
-mingw-gc-sections.patch
 drop-support-for-glib-2.2.patch #+rejected
 support-tee-with-sp-on-windows.patch
 suppress-warnings.patch
@@ -27,6 +26,5 @@ wip-autocmd-searchhitbt.patch #+wip
 win32-mouse-flaky.patch
 wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
-win32-use-ownstartup.patch
 win32-store-exe-in-objdir.patch
 fix-config_cache-removal.patch #+rejected
