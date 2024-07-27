@@ -60,6 +60,15 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 diff --git a/src/if_mzsch.c b/src/if_mzsch.c
 --- a/src/if_mzsch.c
 +++ b/src/if_mzsch.c
+@@ -383,7 +383,7 @@ static void (*dll_scheme_set_config_path
+ # define scheme_null dll_scheme_null
+ # define scheme_true dll_scheme_true
+ 
+-// pointers are GetProceAddress'ed as pointers to pointer
++// pointers are GetProcAddress'ed as pointers to pointer
+ #if !defined(USE_THREAD_LOCAL) && !defined(LINK_EXTENSIONS_BY_TABLE)
+ #  define scheme_current_thread (*dll_scheme_current_thread_ptr)
+ # endif
 @@ -924,7 +924,7 @@ mzscheme_end(void)
  #endif
  }
