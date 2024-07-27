@@ -1,0 +1,124 @@
+# HG changeset patch
+# Parent  c5f39e06905ddc9dc31d48e045600e517b5b45d8
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -1008,7 +1008,7 @@ EXELFLAGS += -s
+  endif
+  ifeq ($(COVERAGE),yes)
+ EXELFLAGS += --coverage
+- else
++ else ifndef MZSCHEME
+ EXELFLAGS += -nostdlib
+ EXECFLAGS = -DUSE_OWNSTARTUP
+  endif
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -801,6 +801,13 @@ OBJ = $(OBJ) $(OUTDIR)\os_w32dll.obj $(O
+ EXEOBJC = $(OUTDIR)\os_w32exec.obj $(OUTDIR)\vimc.res
+ EXEOBJG = $(OUTDIR)\os_w32exeg.obj $(OUTDIR)\vimg.res
+ CFLAGS = $(CFLAGS) -DVIMDLL
++! ifdef MZSCHEME
++EXECFLAGS =
++EXELIBC = $(LIBC)
++! else
++EXECFLAGS = -DUSE_OWNSTARTUP /GS-
++EXELIBC =
++! endif
+ !else
+ OBJ = $(OBJ) $(OUTDIR)\os_w32exe.obj $(OUTDIR)\vim.res
+ !endif
+@@ -1305,11 +1312,11 @@ all:	$(MAIN_TARGET) \
+ 
+ $(GVIM).exe: $(OUTDIR) $(EXEOBJG) $(VIMDLLBASE).dll
+ 	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(GVIM).exe \
+-		$(EXEOBJG) $(VIMDLLBASE).lib
++		$(EXEOBJG) $(VIMDLLBASE).lib $(EXELIBC)
+ 
+ $(VIM).exe: $(OUTDIR) $(EXEOBJC) $(VIMDLLBASE).dll
+ 	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM_CON) -out:$(VIM).exe \
+-		$(EXEOBJC) $(VIMDLLBASE).lib
++		$(EXEOBJC) $(VIMDLLBASE).lib $(EXELIBC)
+ 
+ !else
+ 
+@@ -1718,10 +1725,10 @@ lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).l
+ $(OUTDIR)/os_w32exe.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
+ 
+ $(OUTDIR)/os_w32exec.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
+-	$(CC) $(CFLAGS:-DFEAT_GUI_MSWIN=) /DUSE_OWNSTARTUP /GS- /Fo$@ os_w32exe.c
++	$(CC) $(CFLAGS:-DFEAT_GUI_MSWIN=) $(EXECFLAGS) /Fo$@ os_w32exe.c
+ 
+ $(OUTDIR)/os_w32exeg.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
+-	$(CC) $(CFLAGS) /DUSE_OWNSTARTUP /GS- /Fo$@ os_w32exe.c
++	$(CC) $(CFLAGS) $(EXECFLAGS) /Fo$@ os_w32exe.c
+ 
+ $(OUTDIR)/pathdef.obj:	$(OUTDIR) $(PATHDEF_SRC) $(INCL)
+ 	$(CC) $(CFLAGS_OUTDIR) $(PATHDEF_SRC)
+diff --git a/src/if_mzsch.c b/src/if_mzsch.c
+--- a/src/if_mzsch.c
++++ b/src/if_mzsch.c
+@@ -924,7 +924,7 @@ mzscheme_end(void)
+ #endif
+ }
+ 
+-#if HAVE_TLS_SPACE
++#if HAVE_TLS_SPACE && !defined(VIMDLL)
+ # if defined(_MSC_VER)
+ static __declspec(thread) void *tls_space;
+ extern intptr_t _tls_index;
+@@ -960,7 +960,24 @@ mzscheme_main(void)
+     }
+ #endif
+ #ifdef HAVE_TLS_SPACE
++# ifdef VIMDLL
++    void **ptls_space;
++    intptr_t tls_index;
++    void (*pget_tls_info)(void ***ptls_space, intptr_t *ptls_index);
++
++    // Get the address of get_tls_info() from (g)vim.exe.
++    pget_tls_info = (void *)GetProcAddress(
++				GetModuleHandle(NULL), "get_tls_info");
++    if (pget_tls_info == NULL)
++    {
++	disabled = TRUE;
++	return vim_main2();
++    }
++    pget_tls_info(&ptls_space, &tls_index);
++    scheme_register_tls_space(ptls_space, tls_index);
++# else
+     scheme_register_tls_space(&tls_space, _tls_index);
++# endif
+ #endif
+ #ifdef TRAMPOLINED_MZVIM_STARTUP
+     return scheme_main_setup(TRUE, mzscheme_env_main, argc, &argv);
+diff --git a/src/os_w32exe.c b/src/os_w32exe.c
+--- a/src/os_w32exe.c
++++ b/src/os_w32exe.c
+@@ -70,3 +70,24 @@ wmainCRTStartup(void)
+ }
+ # endif
+ #endif	// USE_OWNSTARTUP
++
++
++#if defined(VIMDLL) && defined(FEAT_MZSCHEME)
++
++# if defined(_MSC_VER)
++static __declspec(thread) void *tls_space;
++extern intptr_t _tls_index;
++# elif defined(__MINGW32__)
++static __thread void *tls_space;
++extern intptr_t _tls_index;
++# endif
++
++// Get TLS information that is needed for if_mzsch.
++    __declspec(dllexport) void
++get_tls_info(void ***ptls_space, intptr_t *ptls_index)
++{
++    *ptls_space = &tls_space;
++    *ptls_index = _tls_index;
++    return;
++}
++#endif

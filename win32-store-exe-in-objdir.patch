@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  c5f39e06905ddc9dc31d48e045600e517b5b45d8
+# Parent  e020940f8638fecb9ad307cab49ed58dd50d65da
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
@@ -25,7 +25,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  DEL = del
  MKDIR = mkdir
  DIRSLASH = \\
-@@ -1153,16 +1156,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStar
+@@ -1155,16 +1158,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStar
   endif
  
  $(TARGET): $(OBJ)
@@ -50,7 +50,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  endif
  
  upx: exes
-@@ -1193,6 +1200,8 @@ clean:
+@@ -1195,6 +1202,8 @@ clean:
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcno
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcda
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
@@ -62,7 +62,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1297,19 +1297,23 @@ all:	$(MAIN_TARGET) \
+@@ -1304,19 +1304,23 @@ all:	$(MAIN_TARGET) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<
@@ -78,18 +78,18 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  $(GVIM).exe: $(OUTDIR) $(EXEOBJG) $(VIMDLLBASE).dll
 -	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(GVIM).exe \
 +	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(OUTDIR)\$(GVIM).exe \
- 		$(EXEOBJG) $(VIMDLLBASE).lib
+ 		$(EXEOBJG) $(VIMDLLBASE).lib $(EXELIBC)
 +	copy /y $(OUTDIR:/=\)\$(GVIM).exe $(GVIM).exe > nul
  
  $(VIM).exe: $(OUTDIR) $(EXEOBJC) $(VIMDLLBASE).dll
 -	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM_CON) -out:$(VIM).exe \
 +	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM_CON) -out:$(OUTDIR)\$(VIM).exe \
- 		$(EXEOBJC) $(VIMDLLBASE).lib
+ 		$(EXEOBJC) $(VIMDLLBASE).lib $(EXELIBC)
 +	copy /y $(OUTDIR:/=\)\$(VIM).exe $(VIM).exe > nul
  
  !else
  
-@@ -1320,11 +1324,12 @@ all:	$(MAIN_TARGET) \
+@@ -1327,11 +1331,12 @@ all:	$(MAIN_TARGET) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<
