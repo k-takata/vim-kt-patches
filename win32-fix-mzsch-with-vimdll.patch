@@ -44,7 +44,24 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  
  !else
  
-@@ -1718,10 +1725,10 @@ lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).l
+@@ -1383,12 +1390,16 @@ clean: testclean
+ 	- if exist $(OUTDIR)/nul $(DEL_TREE) $(OUTDIR)
+ 	- if exist *.obj del *.obj
+ 	- if exist $(VIM).exe del $(VIM).exe
++	- if exist $(VIM).exp del $(VIM).exp
++	- if exist $(VIM).lib del $(VIM).lib
+ 	- if exist $(VIM).ilk del $(VIM).ilk
+ 	- if exist $(VIM).pdb del $(VIM).pdb
+ 	- if exist $(VIM).map del $(VIM).map
+ 	- if exist $(VIM).ncb del $(VIM).ncb
+ !if "$(VIMDLL)" == "yes"
+ 	- if exist $(GVIM).exe del $(GVIM).exe
++	- if exist $(GVIM).exp del $(GVIM).exp
++	- if exist $(GVIM).lib del $(GVIM).lib
+ 	- if exist $(GVIM).map del $(GVIM).map
+ 	- if exist $(VIMDLLBASE).dll del $(VIMDLLBASE).dll
+ 	- if exist $(VIMDLLBASE).ilk del $(VIMDLLBASE).ilk
+@@ -1718,10 +1729,10 @@ lib$(MZSCHEME_MAIN_LIB)$(MZSCHEME_VER).l
  $(OUTDIR)/os_w32exe.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
  
  $(OUTDIR)/os_w32exec.obj:	$(OUTDIR) os_w32exe.c  $(INCL)
