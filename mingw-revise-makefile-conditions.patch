@@ -1,0 +1,25 @@
+# HG changeset patch
+# Parent  d750d08d3cf74e9d623e18e7820513ecbfae1486
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -1145,15 +1145,13 @@ uninstall.exe: uninstall.c dosinst.h ver
+ $(EXEOBJC): | $(OUTDIR)
+ 
+ ifeq ($(VIMDLL),yes)
+- ifneq ($(COVERAGE),yes)
+-  ifndef MZSCHEME
+-   ifeq ($(ARCH),x86-64)
++ ifneq ($(findstring -nostdlib,$(EXELFLAGS)),)
++  ifeq ($(ARCH),x86-64)
+ EXEENTRYC = -Wl,--entry=wmainCRTStartup
+ EXEENTRYG = -Wl,--entry=wWinMainCRTStartup
+-   else ifeq ($(ARCH),i686)
++  else ifeq ($(ARCH),i686)
+ EXEENTRYC = -Wl,--entry=_wmainCRTStartup
+ EXEENTRYG = -Wl,--entry=_wWinMainCRTStartup@0
+-   endif
+   endif
+  endif
+ 
