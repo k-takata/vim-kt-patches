@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  d750d08d3cf74e9d623e18e7820513ecbfae1486
+# Parent  4c2fb30b4e9d7ca8cd1e419fe5a163a97f3b6707
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -1145,15 +1145,13 @@ uninstall.exe: uninstall.c dosinst.h ver
+@@ -1145,15 +1145,14 @@ uninstall.exe: uninstall.c dosinst.h ver
  $(EXEOBJC): | $(OUTDIR)
  
  ifeq ($(VIMDLL),yes)
@@ -12,6 +12,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
 -  ifndef MZSCHEME
 -   ifeq ($(ARCH),x86-64)
 + ifneq ($(findstring -nostdlib,$(EXELFLAGS)),)
++  # -Wl,--entry needs to be specified when -nostdlib is used.
 +  ifeq ($(ARCH),x86-64)
  EXEENTRYC = -Wl,--entry=wmainCRTStartup
  EXEENTRYG = -Wl,--entry=wWinMainCRTStartup
