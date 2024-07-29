@@ -29,4 +29,5 @@ debug-mswin_event.patch #+wip
 win32-store-exe-in-objdir.patch
 mingw-revise-makefile-conditions.patch
 win32-dont-enable-ole-on-console.patch
+msvc-revise-makefile.patch
 fix-config_cache-removal.patch #+rejected
