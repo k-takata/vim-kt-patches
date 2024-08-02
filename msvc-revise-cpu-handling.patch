@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  d368d8cccc279c8b5d0abe35c1e9938fe6ca88ea
+# Parent  d38abac3ea3dc72e75234628f5056d47baa75250
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
@@ -18,7 +18,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  #
  #	Version Support: WINVER=[0x0601, 0x0602, 0x0603, 0x0A00] (default is
  #	0x0601)
-@@ -248,38 +249,29 @@ OBJDIR = $(OBJDIR)V
+@@ -253,38 +254,29 @@ OBJDIR = $(OBJDIR)V
  OBJDIR = $(OBJDIR)d
  !endif
  
@@ -73,7 +73,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  OBJDIR = $(OBJDIR)$(CPU)
  
  # Build a retail version by default
-@@ -550,40 +542,53 @@ INTDIR = $(OBJDIR)
+@@ -555,40 +547,53 @@ INTDIR = $(OBJDIR)
  OUTDIR = $(OBJDIR)
  
  ### Validate CPUNR
@@ -145,3 +145,12 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Pass CPUARG to GvimExt, to avoid using version-dependent defaults
+@@ -596,7 +601,7 @@ MAKEFLAGS_GVIMEXT = $(MAKEFLAGS_GVIMEXT)
+ 
+ !if "$(VIMDLL)" == "yes"
+ VIMDLLBASE = vim
+-! if "$(ASSEMBLY_ARCHITECTURE)" == "i386"
++! if "$(CPU)" == "i386"
+ VIMDLLBASE = $(VIMDLLBASE)32
+ ! else
+ VIMDLLBASE = $(VIMDLLBASE)64
