@@ -1,0 +1,14 @@
+# HG changeset patch
+# Parent  58e91dc37cc985a002b19a0a8b93dcefe35c5873
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -204,6 +204,7 @@ TARGETOS = WINNT
+ !IFDEF PATCHLEVEL
+ RCFLAGS =	-DVIM_VERSION_PATCHLEVEL=$(PATCHLEVEL)
+ !ENDIF
++!message Vim version: $(MAJOR).$(MINOR).$(PATCHLEVEL)
+ 
+ 
+ !if "$(VIMDLL)" == "yes"
