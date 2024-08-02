@@ -46,10 +46,10 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 -! INCLUDE .\patchlvl.tmp
 -! IF [$(RM) .\patchlvl.tmp]
 +!IF ![cmd /V:ON /C "echo off && set LINE=0&& set FIND=0&& set LL=&& \
-+	for /f "tokens=1,3 delims=, " %i in (version.c) do \
-+	( set /A LINE+=1 > NUL && set LL=%j&& \
++	for /f "tokens=1,3 delims=, " %I in (version.c) do \
++	( set /A LINE+=1 > NUL && set LL=%J&& \
 +	if "!LL:~0,-2!"=="included_patches" ( set /A FIND=LINE+3 > NUL ) \
-+	else if "!LINE!"=="!FIND!" ( echo PATCHLEVEL=%i>.\patchlvl.tmp ) )"]
++	else if "!LINE!"=="!FIND!" ( echo PATCHLEVEL=%I>.\patchlvl.tmp ) )"]
 +! IF EXIST(.\patchlvl.tmp)
 +!  INCLUDE .\patchlvl.tmp
 +!  IF [$(RM) .\patchlvl.tmp]
