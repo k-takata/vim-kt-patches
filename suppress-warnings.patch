@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  741e7897470278bbcaf43fcbae86c593d6e62a93
+# Parent  a5e33312bf4166b0e2a6994e6f9791b5ce3ac966
 
 diff --git a/src/vim.h b/src/vim.h
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -553,8 +553,8 @@ extern int (*dyn_libintl_wputenv)(const 
+@@ -578,8 +578,8 @@ extern int (*dyn_libintl_wputenv)(const 
   */
  #ifdef FEAT_GETTEXT
  # ifdef DYNAMIC_GETTEXT
@@ -15,7 +15,7 @@ diff --git a/src/vim.h b/src/vim.h
  #  define N_(x) x
  #  define bindtextdomain(domain, dir) (*dyn_libintl_bindtextdomain)((domain), (dir))
  #  define bind_textdomain_codeset(domain, codeset) (*dyn_libintl_bind_textdomain_codeset)((domain), (codeset))
-@@ -565,7 +565,7 @@ extern int (*dyn_libintl_wputenv)(const 
+@@ -590,7 +590,7 @@ extern int (*dyn_libintl_wputenv)(const 
  #  define libintl_wputenv(envstring) (*dyn_libintl_wputenv)(envstring)
  # else
  #  include <libintl.h>
@@ -24,7 +24,7 @@ diff --git a/src/vim.h b/src/vim.h
  #  define NGETTEXT(x, xs, n) ngettext((x), (xs), (n))
  #  ifdef gettext_noop
  #   define N_(x) gettext_noop(x)
-@@ -574,8 +574,8 @@ extern int (*dyn_libintl_wputenv)(const 
+@@ -599,8 +599,8 @@ extern int (*dyn_libintl_wputenv)(const 
  #  endif
  # endif
  #else
@@ -35,9 +35,9 @@ diff --git a/src/vim.h b/src/vim.h
  # define N_(x) x
  # ifdef bindtextdomain
  #  undef bindtextdomain
-@@ -1718,11 +1718,11 @@ void *vim_memset(void *, int, size_t);
- # define MB_STRICMP(d, s)	mb_strnicmp((char_u *)(d), (char_u *)(s), (int)MAXCOL)
+@@ -1778,11 +1778,11 @@ void *vim_memset(void *, int, size_t);
  # define MB_STRNICMP(d, s, n)	mb_strnicmp((char_u *)(d), (char_u *)(s), (int)(n))
+ # define MB_STRNICMP2(d, s, n1, n2)	mb_strnicmp2((char_u *)(d), (char_u *)(s), (n1), (n2))
  
 -#define STRCAT(d, s)	    strcat((char *)(d), (char *)(s))
 -#define STRNCAT(d, s, n)    strncat((char *)(d), (char *)(s), (size_t)(n))
