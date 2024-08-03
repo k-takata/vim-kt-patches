@@ -29,7 +29,4 @@ debug-mswin_event.patch #+wip
 win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 msvc-show-detected-version.patch
-msvc-stop-using-powershell.patch
-msvc-revise-cpu-handling.patch
-msvc-reduce-cl-command.patch
 fix-config_cache-removal.patch #+rejected
