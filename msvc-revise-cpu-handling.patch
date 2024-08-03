@@ -1,24 +1,84 @@
 # HG changeset patch
-# Parent  d38abac3ea3dc72e75234628f5056d47baa75250
+# Parent  2d446aca0ad099816c8a8f7f353cc865d26456af
 
+diff --git a/src/GvimExt/Make_mvc.mak b/src/GvimExt/Make_mvc.mak
+--- a/src/GvimExt/Make_mvc.mak
++++ b/src/GvimExt/Make_mvc.mak
+@@ -19,25 +19,24 @@ WINVER = 0x0601
+ NODEBUG = 1
+ !endif
+ 
+-!ifdef PROCESSOR_ARCHITECTURE
+-# On Windows NT
+-! ifndef CPU
++!ifndef CPU
+ CPU = i386
+-!  if !defined(PLATFORM) && defined(TARGET_CPU)
++! ifndef PLATFORM
++!  ifdef TARGET_CPU
+ PLATFORM = $(TARGET_CPU)
+-!  endif
+-!  ifdef PLATFORM
+-!   if ("$(PLATFORM)" == "x64") || ("$(PLATFORM)" == "X64")
+-CPU = AMD64
+-!   elseif ("$(PLATFORM)" == "arm64") || ("$(PLATFORM)" == "ARM64")
+-CPU = ARM64
+-!   elseif ("$(PLATFORM)" != "x86") && ("$(PLATFORM)" != "X86")
+-!    error *** ERROR Unknown target platform "$(PLATFORM)". Make aborted.
+-!   endif
++!  elseif defined(VSCMD_ARG_TGT_ARCH)
++PLATFORM = $(VSCMD_ARG_TGT_ARCH)
+ !  endif
+ ! endif
+-!else
+-CPU = i386
++! ifdef PLATFORM
++!  if ("$(PLATFORM)" == "x64") || ("$(PLATFORM)" == "X64")
++CPU = AMD64
++!  elseif ("$(PLATFORM)" == "arm64") || ("$(PLATFORM)" == "ARM64")
++CPU = ARM64
++!  elseif ("$(PLATFORM)" != "x86") && ("$(PLATFORM)" != "X86")
++!   error *** ERROR Unknown target platform "$(PLATFORM)". Make aborted.
++!  endif
++! endif
+ !endif
+ 
+ !ifdef SDK_INCLUDE_DIR
+@@ -80,7 +79,6 @@ all: gvimext.dll
+ gvimext.dll:    gvimext.obj	\
+ 		gvimext.res
+ 	$(link) $(lflags) -dll -def:gvimext.def -base:$(OFFSET) -out:$*.dll $** $(olelibsdll) shell32.lib comctl32.lib -subsystem:$(SUBSYSTEM)
+-	if exist $*.dll.manifest mt -nologo -manifest $*.dll.manifest -outputresource:$*.dll;2
+ 
+ gvimext.obj: gvimext.h
+ 
+@@ -96,4 +94,3 @@ clean:
+ 	- if exist gvimext.exp del gvimext.exp
+ 	- if exist gvimext.obj del gvimext.obj
+ 	- if exist gvimext.res del gvimext.res
+-	- if exist gvimext.dll.manifest del gvimext.dll.manifest
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -127,10 +127,11 @@
+@@ -127,10 +127,15 @@
  #
  #	Optimization: OPTIMIZE=[SPACE, SPEED, MAXSPEED] (default is MAXSPEED)
  #
 -#	Processor Version: CPUNR=[any, i686, sse, sse2, avx, avx2] (default is
 -#	sse2)
-+#	Processor Version: CPUNR=[any, i686, sse, sse2, avx, avx2, avx512]
-+#	(default is sse2)
++#	Processor Version:
++#	 For x86: CPUNR=[any, i686, sse, sse2, avx, avx2, avx512]
++#	 For x64: CPUNR=[sse2, avx, avx2, avx512]
++#	                (default is sse2 (both x86 and x64))
  #	  avx is available on Visual C++ 2010 and after.
  #	  avx2 is available on Visual C++ 2013 Update 2 and after.
 +#	  avx512 is available on Visual C++ 2017 and after.
++#	 For ARM64:
++#	  See: https://learn.microsoft.com/en-us/cpp/build/reference/arch-arm64
  #
  #	Version Support: WINVER=[0x0601, 0x0602, 0x0603, 0x0A00] (default is
  #	0x0601)
-@@ -253,38 +254,29 @@ OBJDIR = $(OBJDIR)V
+@@ -253,38 +258,29 @@ OBJDIR = $(OBJDIR)V
  OBJDIR = $(OBJDIR)d
  !endif
  
@@ -73,7 +133,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  OBJDIR = $(OBJDIR)$(CPU)
  
  # Build a retail version by default
-@@ -555,40 +547,53 @@ INTDIR = $(OBJDIR)
+@@ -555,40 +551,53 @@ INTDIR = $(OBJDIR)
  OUTDIR = $(OBJDIR)
  
  ### Validate CPUNR
@@ -145,7 +205,7 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  !endif
  
  # Pass CPUARG to GvimExt, to avoid using version-dependent defaults
-@@ -596,7 +601,7 @@ MAKEFLAGS_GVIMEXT = $(MAKEFLAGS_GVIMEXT)
+@@ -596,7 +605,7 @@ MAKEFLAGS_GVIMEXT = $(MAKEFLAGS_GVIMEXT)
  
  !if "$(VIMDLL)" == "yes"
  VIMDLLBASE = vim
