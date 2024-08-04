@@ -28,5 +28,4 @@ wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
-msvc-revise-9.1.0657.patch
 fix-config_cache-removal.patch #+rejected
