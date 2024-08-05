@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  9465ad31ec60e87e913002483b1e72c0f30bba39
+# Parent  edb7e0c8693583b694649afb1a5b9d4f78af3d24
 
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 --- a/src/msvc-latest.bat
@@ -10,7 +10,7 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
  :done
 +if defined VCToolsVersion (
 +	if "%VSVEROPT%"=="-latest" (
-+		title VCTools Version %VCToolsVersion% ^(%VSCMD_ARG_TGT_ARCH%^)
++		title VCTools %VCToolsVersion:~0,5% ^(%VSCMD_ARG_TGT_ARCH%^)
 +	)
 +)
  if "%VSWHERE_SET%"=="yes" (
@@ -19,12 +19,18 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 diff --git a/src/msvc2015.bat b/src/msvc2015.bat
 --- a/src/msvc2015.bat
 +++ b/src/msvc2015.bat
-@@ -13,3 +13,6 @@ rem   option:
+@@ -12,4 +12,12 @@ rem   If you use Community (or Professio
+ rem   option:
  rem     msvc2015 x64
  
++set Platform=
  call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" %*
-+if defined VCToolsVersion (
-+	title Visual C++ 2015 ^(%VCToolsVersion%^) ^(%VSCMD_ARG_TGT_ARCH%^)
++if defined VisualStudioVersion (
++	if defined Platform (
++		title VC++ 2015 ^(%VisualStudioVersion%^) ^(%Platform%^)
++	) else (
++		title VC++ 2015 ^(%VisualStudioVersion%^) ^(x86^)
++	)
 +)
 diff --git a/src/msvc2017.bat b/src/msvc2017.bat
 --- a/src/msvc2017.bat
@@ -34,7 +40,7 @@ diff --git a/src/msvc2017.bat b/src/msvc2017.bat
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
-+	title Visual C++ 2017 ^(%VCToolsVersion%^) ^(%VSCMD_ARG_TGT_ARCH%^)
++	title VC++ 2017 ^(%VCToolsVersion:~0,5%^) ^(%VSCMD_ARG_TGT_ARCH%^)
 +)
 diff --git a/src/msvc2019.bat b/src/msvc2019.bat
 --- a/src/msvc2019.bat
@@ -44,7 +50,7 @@ diff --git a/src/msvc2019.bat b/src/msvc2019.bat
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
-+	title Visual C++ 2019 ^(%VCToolsVersion%^) ^(%VSCMD_ARG_TGT_ARCH%^)
++	title VC++ 2019 ^(%VCToolsVersion:~0,5%^) ^(%VSCMD_ARG_TGT_ARCH%^)
 +)
 diff --git a/src/msvc2022.bat b/src/msvc2022.bat
 --- a/src/msvc2022.bat
@@ -54,5 +60,5 @@ diff --git a/src/msvc2022.bat b/src/msvc2022.bat
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
-+	title Visual C++ 2022 ^(%VCToolsVersion%^) ^(%VSCMD_ARG_TGT_ARCH%^)
++	title VC++ 2022 ^(%VCToolsVersion:~0,5%^) ^(%VSCMD_ARG_TGT_ARCH%^)
 +)
