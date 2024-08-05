@@ -4,13 +4,18 @@
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 --- a/src/msvc-latest.bat
 +++ b/src/msvc-latest.bat
-@@ -70,3 +70,6 @@ if "%VSVEROPT_SET%"=="yes" (
- 	set VSVEROPT_SET=
+@@ -61,6 +61,11 @@ if exist "%InstallDir%\VC\Auxiliary\Buil
  )
- set InstallDir=
+ 
+ :done
 +if defined VCToolsVersion (
-+	title VCTools Version %VCToolsVersion% ^(%VSCMD_ARG_TGT_ARCH%^)
++	if "%VSVEROPT%"=="-latest" (
++		title VCTools Version %VCToolsVersion% ^(%VSCMD_ARG_TGT_ARCH%^)
++	)
 +)
+ if "%VSWHERE_SET%"=="yes" (
+ 	set VSWHERE=
+ 	set VSWHERE_SET=
 diff --git a/src/msvc2015.bat b/src/msvc2015.bat
 --- a/src/msvc2015.bat
 +++ b/src/msvc2015.bat
