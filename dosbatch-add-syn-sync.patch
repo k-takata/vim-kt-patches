@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent  2bed93122bb329999779e2f087370d147629c12d
+
+diff --git a/runtime/syntax/dosbatch.vim b/runtime/syntax/dosbatch.vim
+--- a/runtime/syntax/dosbatch.vim
++++ b/runtime/syntax/dosbatch.vim
+@@ -105,6 +105,8 @@ syn match dosbatchColonCommentErr contai
+ syn region dosbatchCodeBlock	transparent start=+(+ end=+)+ contains=dosbatchString,dosbatchVariable,dosBatchArgument,@dosbatchNumber,dosbatchImplicit,dosbatchStatement,dosbatchConditional,dosbatchRepeat,dosbatchOperator,@dosbatchCodeBlockComment,dosbatchColonCommentErr,dosbatchCodeBlock
+ syn match dosbatchCodeBlockErr	")"
+ 
++syn sync match dosbatchSyncCodeBlock grouphere NONE "^\s*)\s*$"
++
+ syn keyword dosbatchImplicit    append assoc at attrib break cacls cd chcp chdir
+ syn keyword dosbatchImplicit    chkdsk chkntfs cls cmd color comp compact convert copy
+ syn keyword dosbatchImplicit    date del dir diskcomp diskcopy doskey echo endlocal
