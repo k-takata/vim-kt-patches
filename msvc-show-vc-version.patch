@@ -10,7 +10,7 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
  :done
 +if defined VCToolsVersion (
 +	if "%VSVEROPT%"=="-latest" (
-+		title VCTools %VCToolsVersion:~0,5% ^(%VSCMD_ARG_TGT_ARCH%^)
++		title VCTools %VCToolsVersion:~0,5% %VSCMD_ARG_TGT_ARCH%
 +	)
 +)
  if "%VSWHERE_SET%"=="yes" (
@@ -31,9 +31,9 @@ diff --git a/src/msvc2015.bat b/src/msvc2015.bat
  call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" %*
 +if defined VisualStudioVersion (
 +	if defined Platform (
-+		title VC++ 2015 ^(%Platform%^)
++		title VS 2015 %Platform%
 +	) else (
-+		title VC++ 2015 ^(x86^)
++		title VS 2015 x86
 +	)
 +)
 diff --git a/src/msvc2017.bat b/src/msvc2017.bat
@@ -44,7 +44,7 @@ diff --git a/src/msvc2017.bat b/src/msvc2017.bat
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
-+	title VC++ 2017 ^(%VSCMD_ARG_TGT_ARCH%^)
++	title VS 2017 %VSCMD_ARG_TGT_ARCH%
 +)
 diff --git a/src/msvc2019.bat b/src/msvc2019.bat
 --- a/src/msvc2019.bat
@@ -54,7 +54,7 @@ diff --git a/src/msvc2019.bat b/src/msvc2019.bat
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
-+	title VC++ 2019 ^(%VSCMD_ARG_TGT_ARCH%^)
++	title VS 2019 %VSCMD_ARG_TGT_ARCH%
 +)
 diff --git a/src/msvc2022.bat b/src/msvc2022.bat
 --- a/src/msvc2022.bat
@@ -64,5 +64,5 @@ diff --git a/src/msvc2022.bat b/src/msvc2022.bat
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
-+	title VC++ 2022 ^(%VSCMD_ARG_TGT_ARCH%^)
++	title VS 2022 %VSCMD_ARG_TGT_ARCH%
 +)
