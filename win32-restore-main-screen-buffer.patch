@@ -1,0 +1,28 @@
+# HG changeset patch
+# Parent  ebca1844d41eddc7a3b1dc0b5750654c7211cee2
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -3579,6 +3579,10 @@ mch_exit_c(int r)
+ {
+     exiting = TRUE;
+ 
++    // Switch back to main screen buffer.
++    if (use_alternate_screen_buffer)
++	vtp_printf("\033[?1049l");
++
+     vtp_exit();
+ 
+     stoptermcap();
+@@ -6355,10 +6359,6 @@ termcap_mode_end(void)
+     RestoreConsoleBuffer(cb, p_rs);
+     restore_console_color_rgb();
+ 
+-    // Switch back to main screen buffer.
+-    if (exiting && use_alternate_screen_buffer)
+-	vtp_printf("\033[?1049l");
+-
+     if (!USE_WT && (p_rs || exiting))
+     {
+ 	/*
