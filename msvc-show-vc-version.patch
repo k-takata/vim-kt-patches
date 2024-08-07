@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  a8086327b8b390d1e3a48cee96201c589eb9d7eb
+# Parent  d95dbe815673fca7f4c651ced61325f922fb3ed8
 
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 --- a/src/msvc-latest.bat
@@ -30,12 +30,13 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
  )
  if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
  	call "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
-@@ -61,6 +59,13 @@ if exist "%InstallDir%\VC\Auxiliary\Buil
+@@ -61,6 +59,14 @@ if exist "%InstallDir%\VC\Auxiliary\Buil
  )
  
  :done
 +if defined VCToolsVersion (
 +	if "%VSVEROPT%"=="-latest" (
++		echo VCTools %VCToolsVersion% %VSCMD_ARG_TGT_ARCH%
 +		for /f "tokens=1,2 delims=." %%I in ("%VCToolsVersion%") do (
 +			title VCTools %%I.%%J %VSCMD_ARG_TGT_ARCH%
 +		)
@@ -47,7 +48,7 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 diff --git a/src/msvc2015.bat b/src/msvc2015.bat
 --- a/src/msvc2015.bat
 +++ b/src/msvc2015.bat
-@@ -12,4 +12,16 @@ rem   If you use Community (or Professio
+@@ -12,4 +12,18 @@ rem   If you use Community (or Professio
  rem   option:
  rem     msvc2015 x64
  
@@ -59,38 +60,43 @@ diff --git a/src/msvc2015.bat b/src/msvc2015.bat
  call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" %*
 +if defined VisualStudioVersion (
 +	if defined Platform (
++		echo VS 2015 ^(%VisualStudioVersion%^) %Platform%
 +		title VS 2015 %Platform%
 +	) else (
++		echo VS 2015 ^(%VisualStudioVersion%^) x86
 +		title VS 2015 x86
 +	)
 +)
 diff --git a/src/msvc2017.bat b/src/msvc2017.bat
 --- a/src/msvc2017.bat
 +++ b/src/msvc2017.bat
-@@ -11,3 +11,6 @@ rem     msvc2017 x86_amd64
+@@ -11,3 +11,7 @@ rem     msvc2017 x86_amd64
  set "VSVEROPT=-version [15.0^,16.0^)"
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
++	echo VS 2017 ^(%VCToolsVersion%^) %VSCMD_ARG_TGT_ARCH%
 +	title VS 2017 %VSCMD_ARG_TGT_ARCH%
 +)
 diff --git a/src/msvc2019.bat b/src/msvc2019.bat
 --- a/src/msvc2019.bat
 +++ b/src/msvc2019.bat
-@@ -11,3 +11,6 @@ rem     msvc2019 x64
+@@ -11,3 +11,7 @@ rem     msvc2019 x64
  set "VSVEROPT=-version [16.0^,17.0^)"
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
++	echo VS 2019 ^(%VCToolsVersion%^) %VSCMD_ARG_TGT_ARCH%
 +	title VS 2019 %VSCMD_ARG_TGT_ARCH%
 +)
 diff --git a/src/msvc2022.bat b/src/msvc2022.bat
 --- a/src/msvc2022.bat
 +++ b/src/msvc2022.bat
-@@ -11,3 +11,6 @@ rem     msvc2022 x64
+@@ -11,3 +11,7 @@ rem     msvc2022 x64
  set "VSVEROPT=-version [17.0^,18.0^)"
  call "%~dp0msvc-latest.bat" %*
  set VSVEROPT=
 +if defined VCToolsVersion (
++	echo VS 2022 ^(%VCToolsVersion%^) %VSCMD_ARG_TGT_ARCH%
 +	title VS 2022 %VSCMD_ARG_TGT_ARCH%
 +)
