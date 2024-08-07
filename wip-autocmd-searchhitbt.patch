@@ -27,10 +27,10 @@ diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
 +	if exists("##SearchHitTop")
 +	  augroup SearchHit
 +	    au!
-+	    au SearchHitTop * call popup_create(
-+		\ "Search hit top: " .. @/, #{border: [], time: 3000})
-+	    au SearchHitBottom * call popup_create(
-+		\ "Search hit bottom: " .. @/, #{border: [], time: 3000})
++	    au SearchHitTop * call popup_notification(
++		\ $"Search hit top: {@/}", #{time: 2000})
++	    au SearchHitBottom * call popup_notification(
++		\ $"Search hit bottom: {@/}", #{time: 2000})
 +	  augroup END
 +	endif
 +<
