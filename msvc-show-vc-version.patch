@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  d95dbe815673fca7f4c651ced61325f922fb3ed8
+# Parent  a1facdb1cd2e8e53135b8a0c4ce5f88346e6e006
 
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
 --- a/src/msvc-latest.bat
@@ -30,10 +30,11 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
  )
  if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
  	call "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
-@@ -61,6 +59,14 @@ if exist "%InstallDir%\VC\Auxiliary\Buil
+@@ -60,7 +58,14 @@ if exist "%InstallDir%\VC\Auxiliary\Buil
+ 	call
  )
  
- :done
+-:done
 +if defined VCToolsVersion (
 +	if "%VSVEROPT%"=="-latest" (
 +		echo VCTools %VCToolsVersion% %VSCMD_ARG_TGT_ARCH%
