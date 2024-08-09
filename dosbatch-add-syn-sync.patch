@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  50a927bd975f5b4adcb276016e0072cddae7525d
+# Parent  c5681b4918a1dacb8987b38052a51a5d61bcdee7
 
 diff --git a/runtime/syntax/dosbatch.vim b/runtime/syntax/dosbatch.vim
 --- a/runtime/syntax/dosbatch.vim
@@ -13,6 +13,15 @@ diff --git a/runtime/syntax/dosbatch.vim b/runtime/syntax/dosbatch.vim
  
  " Numbers - surround with ws to not include in dir and filenames
  syn match dosbatchInteger       "[[:space:]=(/:,!~-]\d\+"lc=1
+@@ -74,7 +74,7 @@ syn match dosbatchSet		"\s\h\w*[+-]\==\{
+ 
+ " Args to bat files and for loops, etc
+ syn match dosbatchArgument	"%\(\d\|\*\)"
+-syn match dosbatchArgument	"%[a-z]\>"
++syn match dosbatchArgument	"%%[a-z]\>"
+ if dosbatch_cmdextversion == 1
+   syn match dosbatchArgument	"%\~[fdpnxs]\+\(\($PATH:\)\=[a-z]\|\d\)\>"
+ else
 @@ -102,9 +102,11 @@ else
    syn match dosbatchColonCommentErr contained "\s*:\s*:.*$"
  endif
