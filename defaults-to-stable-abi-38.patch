@@ -1,6 +1,58 @@
 # HG changeset patch
-# Parent  b84bee39be1489dcb70263005f8821bcf7dbc9bf
+# Parent  1f2bca7e834721e423f5adba2e5ad108bc32c105
 
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -394,14 +394,19 @@ endif
+ #	Python3 interface:
+ #	  PYTHON3=[Path to Python3 directory] (Set inside Make_cyg.mak or Make_ming.mak)
+ #	  DYNAMIC_PYTHON3=yes (to load the Python3 DLL dynamically)
+-#	  PYTHON3_VER=[Python3 version, eg 31, 32] (default is 36)
++#	  PYTHON3_VER=[Python3 version, eg 31, 32] (default is 38)
+ ifdef PYTHON3
+  ifndef DYNAMIC_PYTHON3
+ DYNAMIC_PYTHON3=yes
+  endif
++ ifndef DYNAMIC_PYTHON3_STABLE_ABI
++  ifeq (yes,$(DYNAMIC_PYTHON3))
++DYNAMIC_PYTHON3_STABLE_ABI=yes
++  endif
++ endif
+ 
+  ifndef PYTHON3_VER
+-PYTHON3_VER=36
++PYTHON3_VER=38
+  endif
+  ifeq ($(DYNAMIC_PYTHON3_STABLE_ABI),yes)
+ PYTHON3_NAME=python3
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -80,7 +80,7 @@
+ #	Python3 interface:
+ #	  PYTHON3=[Path to Python3 directory]
+ #	  DYNAMIC_PYTHON3=yes (to load the Python3 DLL dynamically)
+-#	  PYTHON3_VER=[Python3 version, eg 30, 31]  (default is 36)
++#	  PYTHON3_VER=[Python3 version, eg 30, 31]  (default is 38)
+ #
+ #	Ruby interface:
+ #	  RUBY=[Path to Ruby directory]
+@@ -1000,8 +1000,13 @@ PYTHON_LIB = "$(PYTHON)\libs\python$(PYT
+ 
+ # PYTHON3 interface
+ !ifdef PYTHON3
++! ifndef DYNAMIC_PYTHON3_STABLE_ABI
++!  if "$(DYNAMIC_PYTHON3)" == "yes"
++DYNAMIC_PYTHON3_STABLE_ABI = yes
++!  endif
++! endif
+ ! ifndef PYTHON3_VER
+-PYTHON3_VER = 36
++PYTHON3_VER = 38
+ ! endif
+ ! if "$(DYNAMIC_PYTHON3_STABLE_ABI)" == "yes"
+ PYTHON3_NAME = python3
 diff --git a/src/configure.ac b/src/configure.ac
 --- a/src/configure.ac
 +++ b/src/configure.ac
