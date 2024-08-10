@@ -32,4 +32,5 @@ msvc-show-vc-version.patch
 dosbatch-add-syn-sync.patch
 fix-python3-stable-abi-312.patch
 defaults-to-stable-abi-38.patch
+update-generated-po.patch
 fix-config_cache-removal.patch #+rejected
