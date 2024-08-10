@@ -104,11 +104,12 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  # ifdef USE_LIMITED_API
  static PyObject* (*py3_Py_CompileString)(const char *, const char *, int);
  static PyObject* (*py3_PyEval_EvalCode)(PyObject *co, PyObject *globals, PyObject *locals);
-@@ -603,6 +623,13 @@ static struct
+@@ -603,6 +623,14 @@ static struct
      {"PyErr_SetString", (PYTHON_PROC*)&py3_PyErr_SetString},
      {"PyErr_SetObject", (PYTHON_PROC*)&py3_PyErr_SetObject},
      {"PyErr_ExceptionMatches", (PYTHON_PROC*)&py3_PyErr_ExceptionMatches},
-+# if defined(USE_LIMITED_API) && (Py_LIMITED_API+0 >= 0x030c0000 || defined(Py_REF_DEBUG))
++# if defined(USE_LIMITED_API) \
++    && (Py_LIMITED_API+0 >= 0x030c0000 || defined(Py_REF_DEBUG))
 +#  if Py_LIMITED_API+0 >= 0x030a00A7
 +    {"_Py_IncRef", (PYTHON_PROC*)&py3__Py_IncRef},
 +#  else
@@ -118,7 +119,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  # ifdef USE_LIMITED_API
      {"Py_CompileString", (PYTHON_PROC*)&py3_Py_CompileString},
      {"PyEval_EvalCode", (PYTHON_PROC*)&PyEval_EvalCode},
-@@ -779,6 +806,20 @@ py3__Py_XDECREF(PyObject *op)
+@@ -779,6 +807,20 @@ py3__Py_XDECREF(PyObject *op)
  #  define Py_XDECREF(op) py3__Py_XDECREF(_PyObject_CAST(op))
  # endif
  
@@ -139,7 +140,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  # if PY_VERSION_HEX >= 0x030900b0
      static inline int
  py3_PyType_HasFeature(PyTypeObject *type, unsigned long feature)
-@@ -1084,7 +1125,7 @@ static int python_end_called = FALSE;
+@@ -1084,7 +1126,7 @@ static int python_end_called = FALSE;
  
  #ifdef USE_LIMITED_API
  # define DESTRUCTOR_FINISH(self) \
