@@ -30,5 +30,4 @@ win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 msvc-show-vc-version.patch
 dosbatch-add-syn-sync.patch
-defaults-to-stable-abi-38.patch
 fix-config_cache-removal.patch #+rejected
