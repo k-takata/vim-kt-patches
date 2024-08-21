@@ -1,25 +1,34 @@
 # HG changeset patch
-# Parent  080b172233d68c560d1748db6618c4441148d6fa
+# Parent  618d92ff83a34cbacf79bce7fbe017a732d7d221
 
 diff --git a/runtime/syntax/generator/gen_syntax_vim.vim b/runtime/syntax/generator/gen_syntax_vim.vim
 --- a/runtime/syntax/generator/gen_syntax_vim.vim
 +++ b/runtime/syntax/generator/gen_syntax_vim.vim
+@@ -2,7 +2,7 @@
+ " Language: Vim script
+ " Maintainer: Hirohito Higashi (h_east)
+ " URL: https://github.com/vim-jp/syntax-vim-ex
+-" Last Change: 2024 Jul 18
++" Last Change: 2024 Aug 21
+ " Version: 2.1.1
+ 
+ let s:keepcpo= &cpo
 @@ -526,15 +526,15 @@ function! s:parse_vim_complete_name(li)
  		new
  		exec 'read ' . file_name
  		norm! gg
 -		exec '/^}\s*command_complete\[\]\s*=\s*$/+1;/^};/-1yank'
-+		exec '/^static\s\+keyvalue_T\s\+command_complete_tab\[\]\s*=\s*$/+1;/^};/-1yank'
++		exec '/^static keyvalue_T command_complete_tab\[] =$/+1;/^};$/-1yank'
  		%delete _
  
  		put
 -		g!/^\s*{.*"\w\+"\s*}\s*,.*$/d
-+		g!/KEYVALUE_ENTRY/d
++		g!/^\s*KEYVALUE_ENTRY(/d
  		g/"custom\(list\)\?"/d
  
  		for line in getline(1, line('$'))
 -			let list = matchlist(line, '^\s*{.*"\(\w\+\)"\s*}\s*,')
-+			let list = matchlist(line, '^\s*KEYVALUE_ENTRY(\w\+,\s*"\(\w\+\)"\s*)')
++			let list = matchlist(line, '^\s*KEYVALUE_ENTRY(EXPAND_\w\+,\s*"\(\w\+\)"')
  			let item.name = list[1]
  			call add(a:li, copy(item))
  		endfor
@@ -61,9 +70,9 @@ diff --git a/runtime/syntax/generator/vim.vim.base b/runtime/syntax/generator/vi
 -"       specify code blocks where :let commonly appears in the heredoc text.
 -VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\s*\%(trim\s\+\)\=\z(\L\S*\)'		             matchgroup=vimLetHereDocStop end='^\s*\z1$' extend
 -VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\s*\%(trim\s\+\)\=eval\s\+\|eval\s\+\%(trim\s\+\)\=\z(\L\S*\)' matchgroup=vimLetHereDocStop end='^\s*\z1$' contains=vimStringInterpolationExpr,vimStringInterpolationBrace extend
-+VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\w\+\>.*\)\@<==<<\s*trim\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' extend
++VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\S.*\)\@<==<<\s*trim\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' extend
 +VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\%(\s*\)\@>\z(\L\S*\)'			matchgroup=vimLetHereDocStop end='^\z1$' extend
-+VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\w\+\>.*\)\@<==<<\s*\%(trim\s\+eval\|eval\s\+trim\)\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' contains=@vimStringInterpolation extend
++VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\S.*\)\@<==<<\s*\%(trim\s\+eval\|eval\s\+trim\)\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' contains=@vimStringInterpolation extend
 +VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\s*eval\%(\s\+\)\@>\z(\L\S*\)'			matchgroup=vimLetHereDocStop end='^\z1$' contains=@vimStringInterpolation extend
  
  Vim9 syn keyword	vim9Const	const	skipwhite nextgroup=vim9Variable,vim9VariableList
@@ -239,9 +248,9 @@ diff --git a/runtime/syntax/vim.vim b/runtime/syntax/vim.vim
 -"       specify code blocks where :let commonly appears in the heredoc text.
 -VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\s*\%(trim\s\+\)\=\z(\L\S*\)'			matchgroup=vimLetHereDocStop end='^\s*\z1$' extend
 -VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\s*\%(\%(trim\s\+\)\=eval\s\+\|eval\s\+\%(trim\s\+\)\=\)\z(\L\S*\)' matchgroup=vimLetHereDocStop end='^\s*\z1$' contains=@vimStringInterpolation extend
-+VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\w\+\>.*\)\@<==<<\s*trim\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' extend
++VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\S.*\)\@<==<<\s*trim\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' extend
 +VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\%(\s*\)\@>\z(\L\S*\)'			matchgroup=vimLetHereDocStop end='^\z1$' extend
-+VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\w\+\>.*\)\@<==<<\s*\%(trim\s\+eval\|eval\s\+trim\)\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' contains=@vimStringInterpolation extend
++VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='\%(^\z(\s*\)\S.*\)\@<==<<\s*\%(trim\s\+eval\|eval\s\+trim\)\%(\s\+\)\@>\z(\L\S*\)'	matchgroup=vimLetHereDocStop end='^\z1\z2$' contains=@vimStringInterpolation extend
 +VimFoldh syn region vimLetHereDoc	matchgroup=vimLetHereDocStart start='=<<\s*eval\%(\s\+\)\@>\z(\L\S*\)'			matchgroup=vimLetHereDocStop end='^\z1$' contains=@vimStringInterpolation extend
  
  Vim9 syn keyword	vim9Const	const	skipwhite nextgroup=vim9Variable,vim9VariableList
