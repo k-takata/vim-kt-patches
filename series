@@ -29,4 +29,5 @@ debug-mswin_event.patch #+wip
 win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 msvc-show-vc-version.patch
+wip-optimize-insertion.patch #+wip
 fix-config_cache-removal.patch #+rejected

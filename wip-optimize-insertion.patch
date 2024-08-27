@@ -1,0 +1,338 @@
+# HG changeset patch
+# Parent  cc9d6bc43705401a756ac8736312afacbe4ef6b9
+
+diff --git a/src/change.c b/src/change.c
+--- a/src/change.c
++++ b/src/change.c
+@@ -1049,6 +1049,7 @@ ins_char_bytes(char_u *buf, int charlen)
+     linenr_T	lnum = curwin->w_cursor.lnum;
+     int		i;
+ 
++    Trace("ins_char_bytes");
+     // Break tabs if needed.
+     if (virtual_active() && curwin->w_cursor.coladd > 0)
+ 	coladvance_force(getviscol());
+@@ -1117,9 +1118,19 @@ ins_char_bytes(char_u *buf, int charlen)
+ 	}
+     }
+ 
+-    newp = alloc(linelen + newlen - oldlen);
+-    if (newp == NULL)
+-	return;
++    int new_size = linelen + newlen - oldlen;
++    Trace("ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
++    Trace("ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
++    if ((curbuf->b_ml.ml_flags & (ML_ALLOCATED)) == 0
++	    || (curbuf->b_ml.ml_line_size < new_size))
++    {
++	Trace("oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
++	new_size = new_size * 3 / 2;
++	newp = alloc(new_size);
++	if (newp == NULL)
++	    return;
++    }
++    curbuf->b_ml.ml_line_size = new_size;
+ 
+     // Copy bytes before the cursor.
+     if (col > 0)
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -2086,6 +2086,7 @@ insertchar(
+     int		fo_ins_blank;
+     int		force_format = flags & INSCHAR_FORMAT;
+ 
++    Trace("insertchar()");
+     textwidth = comp_textwidth(force_format);
+     fo_ins_blank = has_format_option(FO_INS_BLANK);
+ 
+@@ -2270,6 +2271,7 @@ insertchar(
+ 	}
+ 	else
+ 	    i = 0;
++	Trace("insertchar() 1");
+ 	if (buf[i] != NUL)
+ 	    AppendToRedobuffLit(buf + i, -1);
+     }
+@@ -2284,17 +2286,20 @@ insertchar(
+ 	    (*mb_char2bytes)(c, buf);
+ 	    buf[cc] = NUL;
+ 	    ins_char_bytes(buf, cc);
++	    Trace("insertchar() 2");
+ 	    AppendCharToRedobuff(c);
+ 	}
+ 	else
+ 	{
+ 	    ins_char(c);
++	    Trace("insertchar() 3");
+ 	    if (flags & INSCHAR_CTRLV)
+ 		redo_literal(c);
+ 	    else
+ 		AppendCharToRedobuff(c);
+ 	}
+     }
++    Trace("insertchar() end");
+ }
+ 
+ /*
+diff --git a/src/getchar.c b/src/getchar.c
+--- a/src/getchar.c
++++ b/src/getchar.c
+@@ -231,6 +231,7 @@ add_buff(
+ 		    STRLEN(buf->bh_first.b_next->b_str + buf->bh_index) + 1);
+     buf->bh_index = 0;
+ 
++    Trace("bh_space:%d, slen:%d", buf->bh_space, slen);
+     if (buf->bh_space >= (int)slen)
+     {
+ 	len = (long_u)STRLEN(buf->bh_curr->b_str);
+@@ -298,6 +299,7 @@ add_char_buff(buffheader_T *buf, int c)
+     int		i;
+     char_u	temp[4];
+ 
++    Trace("add_char_buff");
+     if (IS_SPECIAL(c))
+ 	len = 1;
+     else
+@@ -564,6 +566,7 @@ restoreRedobuff(save_redo_T *save_redo)
+     void
+ AppendToRedobuff(char_u *s)
+ {
++    Trace("AppendToRedobuff");
+     if (!block_redo)
+ 	add_buff(&redobuff, s, -1L);
+ }
+@@ -581,6 +584,7 @@ AppendToRedobuffLit(
+     int		c;
+     char_u	*start;
+ 
++    Trace("AppendToRedobuffLit(), block_redo:%d, str:%s, len:%d", block_redo, str, len);
+     if (block_redo)
+ 	return;
+ 
+@@ -626,6 +630,7 @@ AppendToRedobuffLit(
+     void
+ AppendToRedobuffSpec(char_u *s)
+ {
++    Trace("AppendToRedobuffSpec(), block_redo:%d, s:%s", block_redo, s);
+     if (block_redo)
+ 	return;
+ 
+@@ -649,6 +654,7 @@ AppendToRedobuffSpec(char_u *s)
+     void
+ AppendCharToRedobuff(int c)
+ {
++    Trace("AppendCharToRedobuff");
+     if (!block_redo)
+ 	add_char_buff(&redobuff, c);
+ }
+@@ -670,6 +676,7 @@ AppendNumberToRedobuff(long n)
+     void
+ stuffReadbuff(char_u *s)
+ {
++    Trace("stuffReadbuff");
+     add_buff(&readbuf1, s, -1L);
+ }
+ 
+@@ -680,12 +687,14 @@ stuffReadbuff(char_u *s)
+     void
+ stuffRedoReadbuff(char_u *s)
+ {
++    Trace("stuffRedoReadbuff");
+     add_buff(&readbuf2, s, -1L);
+ }
+ 
+     static void
+ stuffReadbuffLen(char_u *s, long len)
+ {
++    Trace("stuffReadbuffLen");
+     add_buff(&readbuf1, s, len);
+ }
+ 
+@@ -700,6 +709,7 @@ stuffReadbuffSpec(char_u *s)
+ {
+     int c;
+ 
++    Trace("stuffReadbuffSpec");
+     while (*s != NUL)
+     {
+ 	if (*s == K_SPECIAL && s[1] != NUL && s[2] != NUL)
+@@ -726,6 +736,7 @@ stuffReadbuffSpec(char_u *s)
+     void
+ stuffcharReadbuff(int c)
+ {
++    Trace("stuffcharReadbuff");
+     add_char_buff(&readbuf1, c);
+ }
+ 
+@@ -854,8 +865,10 @@ copy_redo(int old_redo)
+ {
+     int	    c;
+ 
++    Trace("copy_redo");
+     while ((c = read_redo(FALSE, old_redo)) != NUL)
+ 	add_char_buff(&readbuf2, c);
++    Trace("copy_redo end");
+ }
+ 
+ /*
+@@ -872,6 +885,7 @@ start_redo(long count, int old_redo)
+ {
+     int	    c;
+ 
++    Trace("start_redo");
+     // init the pointers; return if nothing to redo
+     if (read_redo(TRUE, old_redo) == FAIL)
+ 	return FAIL;
+@@ -949,6 +963,7 @@ start_redo_ins(void)
+ {
+     int	    c;
+ 
++    Trace("start_redo_ins");
+     if (read_redo(TRUE, FALSE) == FAIL)
+ 	return FAIL;
+     start_stuff();
+@@ -973,6 +988,7 @@ start_redo_ins(void)
+     void
+ stop_redo_ins(void)
+ {
++    Trace("stop_redo_ins");
+     block_redo = FALSE;
+ }
+ 
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -2750,6 +2750,7 @@ errorret:
+ 	buf->b_ml.ml_line_len = 4;
+ 	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
+ 	buf->b_ml.ml_line_lnum = lnum;
++	buf->b_ml.ml_line_size = 0;
+ 	return questions;
+     }
+     if (lnum <= 0)			// pretend line 0 is line 1
+@@ -2759,6 +2760,7 @@ errorret:
+     {
+ 	buf->b_ml.ml_line_len = 1;
+ 	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
++	buf->b_ml.ml_line_size = 0;
+ 	return (char_u *)"";
+     }
+ 
+@@ -2819,6 +2821,7 @@ errorret:
+ #endif
+ 	    buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
+ 	buf->b_ml.ml_line_lnum = lnum;
++	buf->b_ml.ml_line_size = 0;
+ 	buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
+     }
+     if (will_change)
+@@ -2840,6 +2843,7 @@ errorret:
+ 	// make sure the text is in allocated memory
+ 	if (p != NULL)
+ 	{
++	    buf->b_ml.ml_line_size = buf->b_ml.ml_line_len;
+ 	    memmove(p, buf->b_ml.ml_line_ptr, buf->b_ml.ml_line_len);
+ 	    buf->b_ml.ml_line_ptr = p;
+ 	    buf->b_ml.ml_flags |= ML_ALLOCATED;
+@@ -3647,11 +3651,13 @@ ml_replace_len(
+ 	{
+ 	    char_u *newline;
+ 	    size_t textproplen = curbuf->b_ml.ml_line_len - oldtextlen;
++	    int new_size = len + (int)textproplen;
+ 
+ 	    // Need to copy over text properties, stored after the text.
+-	    newline = alloc(len + (int)textproplen);
++	    newline = alloc(new_size);
+ 	    if (newline != NULL)
+ 	    {
++		curbuf->b_ml.ml_line_size = new_size;
+ 		mch_memmove(newline, line, len);
+ 		mch_memmove(newline + len, curbuf->b_ml.ml_line_ptr
+ 						    + oldtextlen, textproplen);
+diff --git a/src/structs.h b/src/structs.h
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -802,6 +802,7 @@ typedef struct memline
+ #define ML_ALLOCATED	0x10	// ml_line_ptr is an allocated copy
+     int		ml_flags;
+ 
++    int		ml_line_size;	// allocated size of ml_line_ptr
+     colnr_T	ml_line_len;	// length of the cached line + NUL + text properties
+     colnr_T	ml_line_textlen;// length of the cached line + NUL, 0 if not known yet
+     linenr_T	ml_line_lnum;	// line number of cached line, 0 if not valid
+diff --git a/src/textprop.c b/src/textprop.c
+--- a/src/textprop.c
++++ b/src/textprop.c
+@@ -273,7 +273,8 @@ prop_add_one(
+ 	}
+ 
+ 	// Allocate the new line with space for the new property.
+-	newtext = alloc(buf->b_ml.ml_line_len + sizeof(textprop_T));
++	size_t new_size = buf->b_ml.ml_line_len + sizeof(textprop_T);
++	newtext = alloc(new_size);
+ 	if (newtext == NULL)
+ 	    goto theend;
+ 	// Copy the text, including terminating NUL.
+@@ -321,6 +322,7 @@ prop_add_one(
+ 	    vim_free(buf->b_ml.ml_line_ptr);
+ 	buf->b_ml.ml_line_ptr = newtext;
+ 	buf->b_ml.ml_line_len += sizeof(textprop_T);
++	buf->b_ml.ml_line_size = (int)new_size;
+ 	buf->b_ml.ml_flags |= ML_LINE_DIRTY;
+     }
+ 
+@@ -855,11 +857,12 @@ set_text_props(linenr_T lnum, char_u *pr
+ {
+     char_u  *text;
+     char_u  *newtext;
+-    int	    textlen;
++    int	    textlen, new_size;
+ 
+     text = ml_get(lnum);
+     textlen = ml_get_len(lnum) + 1;
+-    newtext = alloc(textlen + len);
++    new_size = textlen + len;
++    newtext = alloc(new_size);
+     if (newtext == NULL)
+ 	return;
+     mch_memmove(newtext, text, textlen);
+@@ -868,7 +871,8 @@ set_text_props(linenr_T lnum, char_u *pr
+     if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
+ 	vim_free(curbuf->b_ml.ml_line_ptr);
+     curbuf->b_ml.ml_line_ptr = newtext;
+-    curbuf->b_ml.ml_line_len = textlen + len;
++    curbuf->b_ml.ml_line_len = new_size;
++    curbuf->b_ml.ml_line_size = new_size;
+     curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ }
+ 
+@@ -881,9 +885,11 @@ add_text_props(linenr_T lnum, textprop_T
+     char_u  *text;
+     char_u  *newtext;
+     int	    proplen = text_prop_count * (int)sizeof(textprop_T);
++    int	    new_size;
+ 
+     text = ml_get(lnum);
+-    newtext = alloc(curbuf->b_ml.ml_line_len + proplen);
++    new_size = curbuf->b_ml.ml_line_len + proplen;
++    newtext = alloc(new_size);
+     if (newtext == NULL)
+ 	return;
+     mch_memmove(newtext, text, curbuf->b_ml.ml_line_len);
+@@ -892,6 +898,7 @@ add_text_props(linenr_T lnum, textprop_T
+ 	vim_free(curbuf->b_ml.ml_line_ptr);
+     curbuf->b_ml.ml_line_ptr = newtext;
+     curbuf->b_ml.ml_line_len += proplen;
++    curbuf->b_ml.ml_line_size = new_size;
+     curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ }
+ 
+@@ -1099,6 +1106,7 @@ f_prop_clear(typval_T *argvars, typval_T
+ 		if (buf->b_ml.ml_flags & ML_ALLOCATED)
+ 		    vim_free(buf->b_ml.ml_line_ptr);
+ 		buf->b_ml.ml_line_ptr = newtext;
++		buf->b_ml.ml_line_size = (int)STRLEN(newtext) + 1;
+ 		buf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ 	    }
+ 	    buf->b_ml.ml_line_len = (int)len;
