@@ -4,15 +4,7 @@
 diff --git a/src/change.c b/src/change.c
 --- a/src/change.c
 +++ b/src/change.c
-@@ -1049,6 +1049,7 @@ ins_char_bytes(char_u *buf, int charlen)
-     linenr_T	lnum = curwin->w_cursor.lnum;
-     int		i;
- 
-+    Trace("ins_char_bytes");
-     // Break tabs if needed.
-     if (virtual_active() && curwin->w_cursor.coladd > 0)
- 	coladvance_force(getviscol());
-@@ -1117,9 +1118,19 @@ ins_char_bytes(char_u *buf, int charlen)
+@@ -1117,9 +1117,21 @@ ins_char_bytes(char_u *buf, int charlen)
  	}
      }
  
@@ -20,186 +12,65 @@ diff --git a/src/change.c b/src/change.c
 -    if (newp == NULL)
 -	return;
 +    int new_size = linelen + newlen - oldlen;
-+    Trace("ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
-+    Trace("ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
-+    if ((curbuf->b_ml.ml_flags & (ML_ALLOCATED)) == 0
++    Trace("ins_char_bytes(): ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
++    Trace("ins_char_bytes(): ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
++    if (/*(curbuf->b_ml.ml_flags & (ML_ALLOCATED)) ==*/ 0
 +	    || (curbuf->b_ml.ml_line_size < new_size))
 +    {
-+	Trace("oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
++	Trace("ins_char_bytes(): oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
 +	new_size = new_size * 3 / 2;
 +	newp = alloc(new_size);
 +	if (newp == NULL)
 +	    return;
++	curbuf->b_ml.ml_line_size = new_size;
 +    }
-+    curbuf->b_ml.ml_line_size = new_size;
++    else
++	newp = oldp;
  
      // Copy bytes before the cursor.
      if (col > 0)
-diff --git a/src/edit.c b/src/edit.c
---- a/src/edit.c
-+++ b/src/edit.c
-@@ -2086,6 +2086,7 @@ insertchar(
-     int		fo_ins_blank;
-     int		force_format = flags & INSCHAR_FORMAT;
+@@ -1184,6 +1196,7 @@ ins_str(char_u *s)
+     char_u	*oldp, *newp;
+     int		newlen = (int)STRLEN(s);
+     int		oldlen;
++    int		new_size;
+     colnr_T	col;
+     linenr_T	lnum = curwin->w_cursor.lnum;
  
-+    Trace("insertchar()");
-     textwidth = comp_textwidth(force_format);
-     fo_ins_blank = has_format_option(FO_INS_BLANK);
+@@ -1194,14 +1207,27 @@ ins_str(char_u *s)
+     oldp = ml_get(lnum);
+     oldlen = (int)ml_get_len(lnum);
  
-@@ -2270,6 +2271,7 @@ insertchar(
- 	}
- 	else
- 	    i = 0;
-+	Trace("insertchar() 1");
- 	if (buf[i] != NUL)
- 	    AppendToRedobuffLit(buf + i, -1);
-     }
-@@ -2284,17 +2286,20 @@ insertchar(
- 	    (*mb_char2bytes)(c, buf);
- 	    buf[cc] = NUL;
- 	    ins_char_bytes(buf, cc);
-+	    Trace("insertchar() 2");
- 	    AppendCharToRedobuff(c);
- 	}
- 	else
- 	{
- 	    ins_char(c);
-+	    Trace("insertchar() 3");
- 	    if (flags & INSCHAR_CTRLV)
- 		redo_literal(c);
- 	    else
- 		AppendCharToRedobuff(c);
- 	}
-     }
-+    Trace("insertchar() end");
+-    newp = alloc(oldlen + newlen + 1);
+-    if (newp == NULL)
+-	return;
+-    if (col > 0)
++    new_size = oldlen + newlen + 1;
++    Trace("ins_str(): ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
++    Trace("ins_str(): ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
++    if (/*(curbuf->b_ml.ml_flags & (ML_ALLOCATED)) ==*/ 0
++	    || (curbuf->b_ml.ml_line_size < new_size))
++    {
++	Trace("ins_str(): oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
++	new_size = new_size * 3 / 2;
++	newp = alloc(new_size);
++	if (newp == NULL)
++	    return;
++	curbuf->b_ml.ml_line_size = new_size;
++    }
++    else
++	newp = oldp;
++
++    if (col > 0 && newp != oldp)
+ 	mch_memmove(newp, oldp, (size_t)col);
++    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
+     mch_memmove(newp + col, s, (size_t)newlen);
+-    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
+-    ml_replace(lnum, newp, FALSE);
++    ml_replace_len(lnum, newp, oldlen + newlen, FALSE, FALSE);
+     inserted_bytes(lnum, col, newlen);
+     curwin->w_cursor.col += newlen;
  }
- 
- /*
-diff --git a/src/getchar.c b/src/getchar.c
---- a/src/getchar.c
-+++ b/src/getchar.c
-@@ -231,6 +231,7 @@ add_buff(
- 		    STRLEN(buf->bh_first.b_next->b_str + buf->bh_index) + 1);
-     buf->bh_index = 0;
- 
-+    Trace("bh_space:%d, slen:%d", buf->bh_space, slen);
-     if (buf->bh_space >= (int)slen)
-     {
- 	len = (long_u)STRLEN(buf->bh_curr->b_str);
-@@ -298,6 +299,7 @@ add_char_buff(buffheader_T *buf, int c)
-     int		i;
-     char_u	temp[4];
- 
-+    Trace("add_char_buff");
-     if (IS_SPECIAL(c))
- 	len = 1;
-     else
-@@ -564,6 +566,7 @@ restoreRedobuff(save_redo_T *save_redo)
-     void
- AppendToRedobuff(char_u *s)
- {
-+    Trace("AppendToRedobuff");
-     if (!block_redo)
- 	add_buff(&redobuff, s, -1L);
- }
-@@ -581,6 +584,7 @@ AppendToRedobuffLit(
-     int		c;
-     char_u	*start;
- 
-+    Trace("AppendToRedobuffLit(), block_redo:%d, str:%s, len:%d", block_redo, str, len);
-     if (block_redo)
- 	return;
- 
-@@ -626,6 +630,7 @@ AppendToRedobuffLit(
-     void
- AppendToRedobuffSpec(char_u *s)
- {
-+    Trace("AppendToRedobuffSpec(), block_redo:%d, s:%s", block_redo, s);
-     if (block_redo)
- 	return;
- 
-@@ -649,6 +654,7 @@ AppendToRedobuffSpec(char_u *s)
-     void
- AppendCharToRedobuff(int c)
- {
-+    Trace("AppendCharToRedobuff");
-     if (!block_redo)
- 	add_char_buff(&redobuff, c);
- }
-@@ -670,6 +676,7 @@ AppendNumberToRedobuff(long n)
-     void
- stuffReadbuff(char_u *s)
- {
-+    Trace("stuffReadbuff");
-     add_buff(&readbuf1, s, -1L);
- }
- 
-@@ -680,12 +687,14 @@ stuffReadbuff(char_u *s)
-     void
- stuffRedoReadbuff(char_u *s)
- {
-+    Trace("stuffRedoReadbuff");
-     add_buff(&readbuf2, s, -1L);
- }
- 
-     static void
- stuffReadbuffLen(char_u *s, long len)
- {
-+    Trace("stuffReadbuffLen");
-     add_buff(&readbuf1, s, len);
- }
- 
-@@ -700,6 +709,7 @@ stuffReadbuffSpec(char_u *s)
- {
-     int c;
- 
-+    Trace("stuffReadbuffSpec");
-     while (*s != NUL)
-     {
- 	if (*s == K_SPECIAL && s[1] != NUL && s[2] != NUL)
-@@ -726,6 +736,7 @@ stuffReadbuffSpec(char_u *s)
-     void
- stuffcharReadbuff(int c)
- {
-+    Trace("stuffcharReadbuff");
-     add_char_buff(&readbuf1, c);
- }
- 
-@@ -854,8 +865,10 @@ copy_redo(int old_redo)
- {
-     int	    c;
- 
-+    Trace("copy_redo");
-     while ((c = read_redo(FALSE, old_redo)) != NUL)
- 	add_char_buff(&readbuf2, c);
-+    Trace("copy_redo end");
- }
- 
- /*
-@@ -872,6 +885,7 @@ start_redo(long count, int old_redo)
- {
-     int	    c;
- 
-+    Trace("start_redo");
-     // init the pointers; return if nothing to redo
-     if (read_redo(TRUE, old_redo) == FAIL)
- 	return FAIL;
-@@ -949,6 +963,7 @@ start_redo_ins(void)
- {
-     int	    c;
- 
-+    Trace("start_redo_ins");
-     if (read_redo(TRUE, FALSE) == FAIL)
- 	return FAIL;
-     start_stuff();
-@@ -973,6 +988,7 @@ start_redo_ins(void)
-     void
- stop_redo_ins(void)
- {
-+    Trace("stop_redo_ins");
-     block_redo = FALSE;
- }
- 
 diff --git a/src/memline.c b/src/memline.c
 --- a/src/memline.c
 +++ b/src/memline.c
@@ -250,6 +121,16 @@ diff --git a/src/memline.c b/src/memline.c
  		mch_memmove(newline, line, len);
  		mch_memmove(newline + len, curbuf->b_ml.ml_line_ptr
  						    + oldtextlen, textproplen);
+@@ -3663,7 +3669,8 @@ ml_replace_len(
+     }
+ #endif
+ 
+-    if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
++    if ((curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
++	    && (curbuf->b_ml.ml_line_ptr != line))
+ 	vim_free(curbuf->b_ml.ml_line_ptr);	// free allocated line
+ 
+     curbuf->b_ml.ml_line_ptr = line;
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
