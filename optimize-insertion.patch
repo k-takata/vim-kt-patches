@@ -1,0 +1,22 @@
+# HG changeset patch
+# Parent  cc9d6bc43705401a756ac8736312afacbe4ef6b9
+
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -549,11 +549,13 @@ edit(
+ 	}
+ 
+ 	// May need to adjust w_topline to show the cursor.
+-	update_topline();
++	if (!char_avail())
++	    update_topline();
+ 
+ 	did_backspace = FALSE;
+ 
+-	validate_cursor();		// may set must_redraw
++	if (!char_avail())
++	    validate_cursor();		// may set must_redraw
+ 
+ 	/*
+ 	 * Redraw the display when no characters are waiting.

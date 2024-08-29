@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  cc9d6bc43705401a756ac8736312afacbe4ef6b9
+# Parent  f7ad9651885fb34ff3bf2d7ad769f080eac3232c
 
 diff --git a/src/change.c b/src/change.c
 --- a/src/change.c
@@ -82,19 +82,18 @@ diff --git a/src/edit.c b/src/edit.c
  #ifdef FEAT_RIGHTLEFT
  	if (!revins_legal)
  	    revins_scol = -1;	    // reset on illegal motions
-@@ -553,7 +554,10 @@ edit(
+@@ -554,8 +555,10 @@ edit(
  
  	did_backspace = FALSE;
  
--	validate_cursor();		// may set must_redraw
 +	//Trace("calling validate_cursor()");
-+	if (count <= 1)
-+	    validate_cursor();		// may set must_redraw
+ 	if (!char_avail())
+ 	    validate_cursor();		// may set must_redraw
 +	//Trace("validate_cursor() end");
  
  	/*
  	 * Redraw the display when no characters are waiting.
-@@ -595,7 +599,9 @@ edit(
+@@ -597,7 +600,9 @@ edit(
  	else
  	    do
  	    {
