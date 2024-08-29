@@ -46,12 +46,12 @@ diff --git a/src/change.c b/src/change.c
 -	return;
 -    if (col > 0)
 +    new_size = oldlen + newlen + 1;
-+    Trace("ins_str(): ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
-+    Trace("ins_str(): ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
++    //Trace("ins_str(): ml_line_size: %d, new_size: %d, col:%d", curbuf->b_ml.ml_line_size, new_size, col);
++    //Trace("ins_str(): ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
 +    if (/*(curbuf->b_ml.ml_flags & (ML_ALLOCATED)) ==*/ 0
 +	    || (curbuf->b_ml.ml_line_size < new_size))
 +    {
-+	Trace("ins_str(): oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
++	//Trace("ins_str(): oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
 +	new_size = new_size * 3 / 2;
 +	newp = alloc(new_size);
 +	if (newp == NULL)
@@ -71,6 +71,39 @@ diff --git a/src/change.c b/src/change.c
      inserted_bytes(lnum, col, newlen);
      curwin->w_cursor.col += newlen;
  }
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -431,6 +431,7 @@ edit(
+      */
+     for (;;)
+     {
++	//Trace("for (;;), count=%d", count);
+ #ifdef FEAT_RIGHTLEFT
+ 	if (!revins_legal)
+ 	    revins_scol = -1;	    // reset on illegal motions
+@@ -553,7 +554,10 @@ edit(
+ 
+ 	did_backspace = FALSE;
+ 
+-	validate_cursor();		// may set must_redraw
++	//Trace("calling validate_cursor()");
++	if (count <= 1)
++	    validate_cursor();		// may set must_redraw
++	//Trace("validate_cursor() end");
+ 
+ 	/*
+ 	 * Redraw the display when no characters are waiting.
+@@ -595,7 +599,9 @@ edit(
+ 	else
+ 	    do
+ 	    {
++		//Trace("calling safe_vgetc()");
+ 		c = safe_vgetc();
++		//Trace("safe_vgetc(), %c %02x", c, c);
+ 
+ 		if (stop_insert_mode
+ #ifdef FEAT_TERMINAL
 diff --git a/src/memline.c b/src/memline.c
 --- a/src/memline.c
 +++ b/src/memline.c
@@ -217,3 +250,11 @@ diff --git a/src/textprop.c b/src/textprop.c
  		buf->b_ml.ml_flags |= ML_LINE_DIRTY;
  	    }
  	    buf->b_ml.ml_line_len = (int)len;
+@@ -2296,6 +2304,7 @@ adjust_prop_columns(
+ 	}
+ 	curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ 	curbuf->b_ml.ml_line_len = newlen;
++	curbuf->b_ml.ml_line_size = 0;
+     }
+     return dirty;
+ }
