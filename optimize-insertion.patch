@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  cc9d6bc43705401a756ac8736312afacbe4ef6b9
+# Parent  8f5e50c10893a0ded275aa9b64dbdb4bf53a67b2
 
 diff --git a/src/edit.c b/src/edit.c
 --- a/src/edit.c
@@ -9,13 +9,13 @@ diff --git a/src/edit.c b/src/edit.c
  
  	// May need to adjust w_topline to show the cursor.
 -	update_topline();
-+	if (!char_avail())
++	if (count <= 1)
 +	    update_topline();
  
  	did_backspace = FALSE;
  
 -	validate_cursor();		// may set must_redraw
-+	if (!char_avail())
++	if (count <= 1)
 +	    validate_cursor();		// may set must_redraw
  
  	/*

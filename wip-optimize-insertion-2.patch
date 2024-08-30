@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  f7ad9651885fb34ff3bf2d7ad769f080eac3232c
+# Parent  ed1dd4913c133990814d1761bb17c895e06612ce
 
 diff --git a/src/change.c b/src/change.c
 --- a/src/change.c
@@ -87,7 +87,7 @@ diff --git a/src/edit.c b/src/edit.c
  	did_backspace = FALSE;
  
 +	//Trace("calling validate_cursor()");
- 	if (!char_avail())
+ 	if (count <= 1)
  	    validate_cursor();		// may set must_redraw
 +	//Trace("validate_cursor() end");
  
