@@ -1,0 +1,81 @@
+# HG changeset patch
+# Parent  1856271fb9299fff270ee3fc540aa631892db4b2
+
+diff --git a/src/change.c b/src/change.c
+--- a/src/change.c
++++ b/src/change.c
+@@ -1184,6 +1184,7 @@ ins_str(char_u *s)
+     char_u	*oldp, *newp;
+     int		newlen = (int)STRLEN(s);
+     int		oldlen;
++    int		new_size;
+     colnr_T	col;
+     linenr_T	lnum = curwin->w_cursor.lnum;
+ 
+@@ -1194,16 +1195,28 @@ ins_str(char_u *s)
+     oldp = ml_get(lnum);
+     oldlen = (int)ml_get_len(lnum);
+ 
+-    newp = alloc(oldlen + newlen + 1);
+-    if (newp == NULL)
+-	return;
+-    if (col > 0)
++    new_size = oldlen + newlen + 1;
++    if ((curbuf->b_ml.ml_flags & (ML_ALLOCATED)) == 0
++	    || (curbuf->b_ml.ml_line_size < new_size))
++    {
++	new_size = new_size * 3 / 2;
++	newp = alloc(new_size);
++	if (newp == NULL)
++	    return;
++	curbuf->b_ml.ml_line_size = new_size;
++    }
++    else
++	newp = oldp;
++
++    if (col > 0 && newp != oldp)
+ 	mch_memmove(newp, oldp, (size_t)col);
++    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
+     mch_memmove(newp + col, s, (size_t)newlen);
+-    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
+-    ml_replace(lnum, newp, FALSE);
++    ml_replace_len(lnum, newp, oldlen + newlen, FALSE, FALSE);
+     inserted_bytes(lnum, col, newlen);
+     curwin->w_cursor.col += newlen;
++    if ((newp != oldp) && (newp == curbuf->b_ml.ml_line_ptr))
++	curbuf->b_ml.ml_flags |= ML_ALLOCATED;
+ }
+ 
+ /*
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -2840,6 +2840,7 @@ errorret:
+ 	// make sure the text is in allocated memory
+ 	if (p != NULL)
+ 	{
++	    buf->b_ml.ml_line_size = buf->b_ml.ml_line_len;
+ 	    memmove(p, buf->b_ml.ml_line_ptr, buf->b_ml.ml_line_len);
+ 	    buf->b_ml.ml_line_ptr = p;
+ 	    buf->b_ml.ml_flags |= ML_ALLOCATED;
+@@ -3663,7 +3664,8 @@ ml_replace_len(
+     }
+ #endif
+ 
+-    if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
++    if ((curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
++	    && (curbuf->b_ml.ml_line_ptr != line))
+ 	vim_free(curbuf->b_ml.ml_line_ptr);	// free allocated line
+ 
+     curbuf->b_ml.ml_line_ptr = line;
+diff --git a/src/structs.h b/src/structs.h
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -802,6 +802,7 @@ typedef struct memline
+ #define ML_ALLOCATED	0x10	// ml_line_ptr is an allocated copy
+     int		ml_flags;
+ 
++    int		ml_line_size;   // allocated size of ml_line_ptr (Used for ML_ALLOCATED)
+     colnr_T	ml_line_len;	// length of the cached line + NUL + text properties
+     colnr_T	ml_line_textlen;// length of the cached line + NUL, 0 if not known yet
+     linenr_T	ml_line_lnum;	// line number of cached line, 0 if not valid
