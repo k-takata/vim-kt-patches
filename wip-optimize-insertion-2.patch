@@ -12,12 +12,12 @@ diff --git a/src/change.c b/src/change.c
 -    if (newp == NULL)
 -	return;
 +    int new_size = linelen + newlen - oldlen;
-+    Trace("ins_char_bytes(): ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
-+    Trace("ins_char_bytes(): ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
++    //Trace("ins_char_bytes(): ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
++    //Trace("ins_char_bytes(): ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
 +    if (/*(curbuf->b_ml.ml_flags & (ML_ALLOCATED)) ==*/ 0
 +	    || (curbuf->b_ml.ml_line_size < new_size))
 +    {
-+	Trace("ins_char_bytes(): oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
++	//Trace("ins_char_bytes(): oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
 +	new_size = new_size * 3 / 2;
 +	newp = alloc(new_size);
 +	if (newp == NULL)
