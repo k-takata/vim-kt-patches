@@ -12,7 +12,7 @@ diff --git a/src/change.c b/src/change.c
      colnr_T	col;
      linenr_T	lnum = curwin->w_cursor.lnum;
  
-@@ -1194,14 +1195,33 @@ ins_str(char_u *s)
+@@ -1194,14 +1195,37 @@ ins_str(char_u *s)
      oldp = ml_get(lnum);
      oldlen = (int)ml_get_len(lnum);
  
@@ -22,7 +22,11 @@ diff --git a/src/change.c b/src/change.c
 -    if (col > 0)
 +    new_size = oldlen + newlen + 1;
 +    if ((curbuf->b_ml.ml_flags & (ML_ALLOCATED)) == 0
-+	    || (curbuf->b_ml.ml_line_size < new_size))
++	    || (curbuf->b_ml.ml_line_size < new_size)
++#ifdef FEAT_PROP_POPUP
++	    || curbuf->b_has_textprop
++#endif
++	    )
 +    {
 +	new_size = new_size * 3 / 2;
 +	newp = alloc(new_size);
