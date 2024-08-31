@@ -4,11 +4,12 @@
 diff --git a/src/change.c b/src/change.c
 --- a/src/change.c
 +++ b/src/change.c
-@@ -1181,9 +1181,12 @@ ins_char_bytes(char_u *buf, int charlen)
+@@ -1181,9 +1181,13 @@ ins_char_bytes(char_u *buf, int charlen)
      void
  ins_str(char_u *s)
  {
 +    static char_u	*prevp = NULL;
++    static int		prev_size = 0;
      char_u	*oldp, *newp;
      int		newlen = (int)STRLEN(s);
      int		oldlen;
@@ -17,7 +18,7 @@ diff --git a/src/change.c b/src/change.c
      colnr_T	col;
      linenr_T	lnum = curwin->w_cursor.lnum;
  
-@@ -1194,14 +1197,45 @@ ins_str(char_u *s)
+@@ -1194,14 +1198,32 @@ ins_str(char_u *s)
      oldp = ml_get(lnum);
      oldlen = (int)ml_get_len(lnum);
  
@@ -27,17 +28,20 @@ diff --git a/src/change.c b/src/change.c
 -    if (col > 0)
 +    newtotlen = oldlen + newlen;
 +    new_size = newtotlen + 1;
-+    if ((curbuf->b_ml.ml_line_size < new_size) || (prevp != oldp)
++    if ((prev_size < new_size) || (prevp != oldp)
 +#ifdef FEAT_PROP_POPUP
 +	    || curbuf->b_has_textprop
 +#endif
 +	    )
 +    {
-+	new_size = new_size * 3 / 2;
++#ifdef FEAT_PROP_POPUP
++	if (!curbuf->b_has_textprop)
++#endif
++	    new_size = new_size * 3 / 2;
 +	newp = alloc(new_size);
 +	if (newp == NULL)
 +	    return;
-+	curbuf->b_ml.ml_line_size = new_size;
++	prev_size = new_size;
 +    }
 +    else
 +	newp = oldp;
@@ -49,34 +53,20 @@ diff --git a/src/change.c b/src/change.c
      mch_memmove(newp + col, s, (size_t)newlen);
 -    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
 -    ml_replace(lnum, newp, FALSE);
-+    if (newp != oldp)
-+	ml_replace_len(lnum, newp, newtotlen, FALSE, FALSE);
-+    else
-+    {
-+#ifdef FEAT_NETBEANS_INTG
-+	if (netbeans_active())
-+	{
-+	    netbeans_removed(curbuf, lnum, 0, (long)ml_get_len(lnum));
-+	    netbeans_inserted(curbuf, lnum, 0, newp, newtotlen);
-+	}
-+#endif
-+	curbuf->b_ml.ml_line_len = newtotlen + 1;
-+	curbuf->b_ml.ml_line_textlen = newtotlen + 1;
-+	curbuf->b_ml.ml_line_lnum = lnum;
-+	curbuf->b_ml.ml_flags =
-+			(curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
-+    }
++    ml_replace_len(lnum, newp, newtotlen, FALSE, FALSE);
      inserted_bytes(lnum, col, newlen);
      curwin->w_cursor.col += newlen;
  }
-diff --git a/src/structs.h b/src/structs.h
---- a/src/structs.h
-+++ b/src/structs.h
-@@ -802,6 +802,7 @@ typedef struct memline
- #define ML_ALLOCATED	0x10	// ml_line_ptr is an allocated copy
-     int		ml_flags;
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -3663,7 +3663,8 @@ ml_replace_len(
+     }
+ #endif
  
-+    int		ml_line_size;   // allocated size of ml_line_ptr (Used for ins_str())
-     colnr_T	ml_line_len;	// length of the cached line + NUL + text properties
-     colnr_T	ml_line_textlen;// length of the cached line + NUL, 0 if not known yet
-     linenr_T	ml_line_lnum;	// line number of cached line, 0 if not valid
+-    if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
++    if ((curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
++	    && (curbuf->b_ml.ml_line_ptr != line))
+ 	vim_free(curbuf->b_ml.ml_line_ptr);	// free allocated line
+ 
+     curbuf->b_ml.ml_line_ptr = line;
