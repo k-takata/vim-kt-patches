@@ -4,7 +4,11 @@
 diff --git a/src/change.c b/src/change.c
 --- a/src/change.c
 +++ b/src/change.c
-@@ -1184,6 +1184,7 @@ ins_str(char_u *s)
+@@ -1181,9 +1181,11 @@ ins_char_bytes(char_u *buf, int charlen)
+     void
+ ins_str(char_u *s)
+ {
++    static char_u	*prevp = NULL;
      char_u	*oldp, *newp;
      int		newlen = (int)STRLEN(s);
      int		oldlen;
@@ -12,7 +16,7 @@ diff --git a/src/change.c b/src/change.c
      colnr_T	col;
      linenr_T	lnum = curwin->w_cursor.lnum;
  
-@@ -1194,14 +1195,37 @@ ins_str(char_u *s)
+@@ -1194,14 +1196,37 @@ ins_str(char_u *s)
      oldp = ml_get(lnum);
      oldlen = (int)ml_get_len(lnum);
  
@@ -21,8 +25,7 @@ diff --git a/src/change.c b/src/change.c
 -	return;
 -    if (col > 0)
 +    new_size = oldlen + newlen + 1;
-+    if ((curbuf->b_ml.ml_flags & (ML_ALLOCATED)) == 0
-+	    || (curbuf->b_ml.ml_line_size < new_size)
++    if ((curbuf->b_ml.ml_line_size < new_size) || (prevp != oldp)
 +#ifdef FEAT_PROP_POPUP
 +	    || curbuf->b_has_textprop
 +#endif
@@ -36,6 +39,7 @@ diff --git a/src/change.c b/src/change.c
 +    }
 +    else
 +	newp = oldp;
++    prevp = newp;
 +
 +    if (col > 0 && newp != oldp)
  	mch_memmove(newp, oldp, (size_t)col);
@@ -47,11 +51,11 @@ diff --git a/src/change.c b/src/change.c
 +	ml_replace_len(lnum, newp, oldlen + newlen, FALSE, FALSE);
 +    else
 +    {
-+	curbuf->b_ml.ml_flags |= ML_ALLOCATED;
 +	curbuf->b_ml.ml_line_len = oldlen + newlen + 1;
 +	curbuf->b_ml.ml_line_textlen = oldlen + newlen + 1;
 +	curbuf->b_ml.ml_line_lnum = lnum;
-+	curbuf->b_ml.ml_flags = (curbuf->b_ml.ml_flags | ML_LINE_DIRTY | ML_ALLOCATED) & ~ML_EMPTY;
++	curbuf->b_ml.ml_flags =
++			(curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
 +    }
      inserted_bytes(lnum, col, newlen);
      curwin->w_cursor.col += newlen;
@@ -74,7 +78,7 @@ diff --git a/src/structs.h b/src/structs.h
  #define ML_ALLOCATED	0x10	// ml_line_ptr is an allocated copy
      int		ml_flags;
  
-+    int		ml_line_size;   // allocated size of ml_line_ptr (Used for ML_ALLOCATED)
++    int		ml_line_size;   // allocated size of ml_line_ptr (Used for ins_str())
      colnr_T	ml_line_len;	// length of the cached line + NUL + text properties
      colnr_T	ml_line_textlen;// length of the cached line + NUL, 0 if not known yet
      linenr_T	ml_line_lnum;	// line number of cached line, 0 if not valid
