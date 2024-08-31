@@ -53,6 +53,31 @@ diff --git a/src/change.c b/src/change.c
      inserted_bytes(lnum, col, newlen);
      curwin->w_cursor.col += newlen;
  }
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -4125,7 +4125,10 @@ ins_bs(
+ 
+ 			    if (curbuf->b_ml.ml_flags
+ 					      & (ML_LINE_DIRTY | ML_ALLOCATED))
++			    {
+ 				vim_free(curbuf->b_ml.ml_line_ptr);
++				curbuf->b_ml.ml_line_size = 0;
++			    }
+ 			    curbuf->b_ml.ml_line_ptr = newp;
+ 			    curbuf->b_ml.ml_line_len--;
+ 			    curbuf->b_ml.ml_line_textlen--;
+@@ -5111,7 +5114,10 @@ ins_tab(void)
+ 					   curbuf->b_ml.ml_line_len - col - i);
+ 
+ 		    if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
++		    {
+ 			vim_free(curbuf->b_ml.ml_line_ptr);
++			curbuf->b_ml.ml_line_size = 0;
++		    }
+ 		    curbuf->b_ml.ml_line_ptr = newp;
+ 		    curbuf->b_ml.ml_line_len -= i;
+ 		    curbuf->b_ml.ml_line_textlen = 0;
 diff --git a/src/memline.c b/src/memline.c
 --- a/src/memline.c
 +++ b/src/memline.c
@@ -67,7 +92,23 @@ diff --git a/src/memline.c b/src/memline.c
      vim_free(buf->b_ml.ml_stack);
  #ifdef FEAT_BYTEOFF
      VIM_CLEAR(buf->b_ml.ml_chunksize);
-@@ -3575,7 +3578,7 @@ ml_replace(linenr_T lnum, char_u *line, 
+@@ -2809,6 +2812,7 @@ errorret:
+ 
+ 	buf->b_ml.ml_line_ptr = (char_u *)dp + start;
+ 	buf->b_ml.ml_line_len = end - start;
++	buf->b_ml.ml_line_size = 0;
+ #if defined(FEAT_BYTEOFF) && defined(FEAT_PROP_POPUP)
+ 	// Text properties come after a NUL byte, so ml_line_len should be
+ 	// larger than the size of textprop_T if there is any.
+@@ -2842,6 +2846,7 @@ errorret:
+ 	{
+ 	    memmove(p, buf->b_ml.ml_line_ptr, buf->b_ml.ml_line_len);
+ 	    buf->b_ml.ml_line_ptr = p;
++	    buf->b_ml.ml_line_size = 0;
+ 	    buf->b_ml.ml_flags |= ML_ALLOCATED;
+ 	    if (will_change)
+ 		// can't make the change in the data block
+@@ -3575,7 +3580,7 @@ ml_replace(linenr_T lnum, char_u *line, 
  
      if (line != NULL)
  	len = (colnr_T)STRLEN(line);
@@ -76,7 +117,7 @@ diff --git a/src/memline.c b/src/memline.c
  }
  
  /*
-@@ -3594,8 +3597,27 @@ ml_replace_len(
+@@ -3594,8 +3599,27 @@ ml_replace_len(
  	int	    has_props,
  	int	    copy)
  {
@@ -104,7 +145,7 @@ diff --git a/src/memline.c b/src/memline.c
  
      if (line == NULL)		// just checking...
  	return FAIL;
-@@ -3656,6 +3678,7 @@ ml_replace_len(
+@@ -3656,6 +3680,7 @@ ml_replace_len(
  		mch_memmove(newline + len, curbuf->b_ml.ml_line_ptr
  						    + oldtextlen, textproplen);
  		vim_free(line);
@@ -112,7 +153,7 @@ diff --git a/src/memline.c b/src/memline.c
  		line = newline;
  		len += (colnr_T)textproplen;
  	    }
-@@ -3663,11 +3686,13 @@ ml_replace_len(
+@@ -3663,11 +3688,13 @@ ml_replace_len(
      }
  #endif
  
@@ -127,7 +168,7 @@ diff --git a/src/memline.c b/src/memline.c
      curbuf->b_ml.ml_line_textlen = !has_props ? len_arg + 1 : 0;
      curbuf->b_ml.ml_line_lnum = lnum;
      curbuf->b_ml.ml_flags = (curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
-@@ -4236,11 +4261,15 @@ ml_flush_line(buf_T *buf)
+@@ -4236,11 +4263,15 @@ ml_flush_line(buf_T *buf)
  	    }
  	}
  	vim_free(new_line);
