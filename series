@@ -31,5 +31,6 @@ msvc-revise-use_msvcrt.patch
 msvc-show-vc-version.patch
 optimize-insertion.patch
 optimize-mem-alloc-for-insertion
+debug-cursor-computation.patch #+wip
 wip-optimize-insertion-2.patch #+wip
 fix-config_cache-removal.patch #+rejected

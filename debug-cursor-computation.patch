@@ -1,0 +1,179 @@
+# HG changeset patch
+# Parent  5a05db573aa7e6ca2e464ea0e42b22548ac82465
+
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -852,6 +852,7 @@ linetabsize_no_outer(win_T *wp, linenr_T
+     void
+ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
+ {
++    Trace("win_linetabsize_cts");
+     vimlong_T vcol = cts->cts_vcol;
+ #ifdef FEAT_PROP_POPUP
+     cts->cts_with_trailing = len == MAXCOL;
+@@ -881,6 +882,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+ 	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
+     }
+ #endif
++    Trace("win_linetabsize_cts end");
+ }
+ 
+ /*
+@@ -1570,6 +1572,7 @@ getvcol(
+     int		on_NUL = FALSE;
+ #endif
+ 
++    Trace("getvcol");
+     vcol = 0;
+     line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
+ 
+@@ -1707,6 +1710,7 @@ getvcol(
+ 	    *cursor = vcol + head;	    // cursor at start
+ 	}
+     }
++    Trace("getvcol end");
+ }
+ 
+ /*
+@@ -1743,6 +1747,7 @@ getvvcol(
+     colnr_T	endadd;
+     char_u	*ptr;
+ 
++    Trace("getvvcol");
+     if (virtual_active())
+     {
+ 	// For virtual mode, only want one value
+@@ -1775,6 +1780,7 @@ getvvcol(
+     }
+     else
+ 	getvcol(wp, pos, start, cursor, end);
++    Trace("getvvcol end");
+ }
+ 
+ /*
+diff --git a/src/move.c b/src/move.c
+--- a/src/move.c
++++ b/src/move.c
+@@ -282,9 +282,13 @@ update_topline(void)
+     long	*so_ptr = curwin->w_p_so >= 0 ? &curwin->w_p_so : &p_so;
+     int		save_so = *so_ptr;
+ 
++    Trace("update_topline");
+     // Cursor is updated instead when this is TRUE for 'splitkeep'.
+     if (skip_update_topline)
++    {
++	Trace("update_topline end1");
+ 	return;
++    }
+ 
+     // If there is no valid screen and when the window height is zero just use
+     // the cursor line.
+@@ -294,12 +298,16 @@ update_topline(void)
+ 	curwin->w_topline = curwin->w_cursor.lnum;
+ 	curwin->w_botline = curwin->w_topline;
+ 	curwin->w_scbind_pos = 1;
++	Trace("update_topline end2");
+ 	return;
+     }
+ 
+     check_cursor_moved(curwin);
+     if (curwin->w_valid & VALID_TOPLINE)
++    {
++	Trace("update_topline end3");
+ 	return;
++    }
+ 
+     // When dragging with the mouse, don't scroll that quickly
+     if (mouse_dragging > 0)
+@@ -524,6 +532,7 @@ update_topline(void)
+     }
+ 
+     *so_ptr = save_so;
++    Trace("update_topline end");
+ }
+ 
+ /*
+@@ -838,10 +847,12 @@ cursor_valid(void)
+     void
+ validate_cursor(void)
+ {
++    Trace("validate_cursor");
+     check_cursor_lnum();
+     check_cursor_moved(curwin);
+     if ((curwin->w_valid & (VALID_WCOL|VALID_WROW)) != (VALID_WCOL|VALID_WROW))
+ 	curs_columns(TRUE);
++    Trace("validate_cursor end");
+ }
+ 
+ #if defined(FEAT_GUI) || defined(PROTO)
+@@ -876,6 +887,7 @@ curs_rows(win_T *wp)
+     long	fold_count;
+ #endif
+ 
++    Trace("curs_rows: wp->w_cline_row=%d, wp->w_cline_height=%d", wp->w_cline_row, wp->w_cline_height);
+     // Check if wp->w_lines[].wl_size is invalid
+     all_invalid = (!redrawing()
+ 			|| wp->w_lines_valid == 0
+@@ -982,6 +994,7 @@ curs_rows(win_T *wp)
+ 
+     redraw_for_cursorline(curwin);
+     wp->w_valid |= VALID_CROW|VALID_CHEIGHT;
++    Trace("curs_rows end: wp->w_cline_row=%d, wp->w_cline_height=%d", wp->w_cline_row, wp->w_cline_height);
+ }
+ 
+ /*
+@@ -1143,6 +1156,7 @@ curs_columns(
+     long	siso = get_sidescrolloff_value();
+     int		did_sub_skipcol = FALSE;
+ 
++    Trace("curs_columns: curwin->w_wcol=%d curwin->w_virtcol=%d", curwin->w_wcol, curwin->w_virtcol);
+     /*
+      * First make sure that w_topline is valid (after moving the cursor).
+      */
+@@ -1178,6 +1192,7 @@ curs_columns(
+     extra = curwin_col_off();
+     curwin->w_wcol = curwin->w_virtcol + extra;
+     endcol += extra;
++    Trace("curs_columns 2: after curwin_col_off()");
+ 
+     /*
+      * Now compute w_wrow, counting screen lines from w_cline_row.
+@@ -1301,6 +1316,7 @@ curs_columns(
+     else
+ 	curwin->w_wrow += diff_check_fill(curwin, curwin->w_cursor.lnum);
+ #endif
++    Trace("curs_columns 3");
+ 
+     prev_skipcol = curwin->w_skipcol;
+ 
+@@ -1322,6 +1338,7 @@ curs_columns(
+ 	    && width2 > 0
+ 	    && curwin->w_width != 0)
+     {
++	Trace("curs_columns 4");
+ 	// Cursor past end of screen.  Happens with a single line that does
+ 	// not fit on screen.  Find a skipcol to show the text around the
+ 	// cursor.  Avoid scrolling all the time. compute value of "extra":
+@@ -1400,11 +1417,13 @@ curs_columns(
+ 	    win_ins_lines(curwin, 0, extra, FALSE, FALSE);
+ 	else if (extra < 0)
+ 	    win_del_lines(curwin, 0, -extra, FALSE, FALSE, 0);
++	Trace("curs_columns 5");
+     }
+     else if (!curwin->w_p_sms)
+ 	curwin->w_skipcol = 0;
+     if (prev_skipcol != curwin->w_skipcol)
+ 	redraw_later(UPD_SOME_VALID);
++    Trace("curs_columns 6");
+ 
+ #ifdef FEAT_SYN_HL
+     redraw_for_cursorcolumn(curwin);
+@@ -1426,6 +1445,7 @@ curs_columns(
+     curwin->w_valid_skipcol = curwin->w_skipcol;
+ 
+     curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
++    Trace("curs_columns end: curwin->w_wcol=%d curwin->w_virtcol=%d", curwin->w_wcol, curwin->w_virtcol);
+ }
+ 
+ #if (defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)) || defined(PROTO)
