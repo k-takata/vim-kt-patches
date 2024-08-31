@@ -29,7 +29,7 @@ debug-mswin_event.patch #+wip
 win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 msvc-show-vc-version.patch
-optimize-mem-alloc-for-insertion
+optimize-mem-alloc-for-insertion.patch
 debug-cursor-computation.patch #+wip
 wip-optimize-insertion-2.patch #+wip
 fix-config_cache-removal.patch #+rejected
