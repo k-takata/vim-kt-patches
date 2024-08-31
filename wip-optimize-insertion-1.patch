@@ -4,7 +4,7 @@
 diff --git a/src/change.c b/src/change.c
 --- a/src/change.c
 +++ b/src/change.c
-@@ -1181,9 +1181,11 @@ ins_char_bytes(char_u *buf, int charlen)
+@@ -1181,9 +1181,12 @@ ins_char_bytes(char_u *buf, int charlen)
      void
  ins_str(char_u *s)
  {
@@ -12,11 +12,12 @@ diff --git a/src/change.c b/src/change.c
      char_u	*oldp, *newp;
      int		newlen = (int)STRLEN(s);
      int		oldlen;
++    int		newtotlen;
 +    int		new_size;
      colnr_T	col;
      linenr_T	lnum = curwin->w_cursor.lnum;
  
-@@ -1194,14 +1196,37 @@ ins_str(char_u *s)
+@@ -1194,14 +1197,45 @@ ins_str(char_u *s)
      oldp = ml_get(lnum);
      oldlen = (int)ml_get_len(lnum);
  
@@ -24,7 +25,8 @@ diff --git a/src/change.c b/src/change.c
 -    if (newp == NULL)
 -	return;
 -    if (col > 0)
-+    new_size = oldlen + newlen + 1;
++    newtotlen = oldlen + newlen;
++    new_size = newtotlen + 1;
 +    if ((curbuf->b_ml.ml_line_size < new_size) || (prevp != oldp)
 +#ifdef FEAT_PROP_POPUP
 +	    || curbuf->b_has_textprop
@@ -48,11 +50,18 @@ diff --git a/src/change.c b/src/change.c
 -    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
 -    ml_replace(lnum, newp, FALSE);
 +    if (newp != oldp)
-+	ml_replace_len(lnum, newp, oldlen + newlen, FALSE, FALSE);
++	ml_replace_len(lnum, newp, newtotlen, FALSE, FALSE);
 +    else
 +    {
-+	curbuf->b_ml.ml_line_len = oldlen + newlen + 1;
-+	curbuf->b_ml.ml_line_textlen = oldlen + newlen + 1;
++#ifdef FEAT_NETBEANS_INTG
++	if (netbeans_active())
++	{
++	    netbeans_removed(curbuf, lnum, 0, (long)ml_get_len(lnum));
++	    netbeans_inserted(curbuf, lnum, 0, newp, newtotlen);
++	}
++#endif
++	curbuf->b_ml.ml_line_len = newtotlen + 1;
++	curbuf->b_ml.ml_line_textlen = newtotlen + 1;
 +	curbuf->b_ml.ml_line_lnum = lnum;
 +	curbuf->b_ml.ml_flags =
 +			(curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
@@ -60,17 +69,6 @@ diff --git a/src/change.c b/src/change.c
      inserted_bytes(lnum, col, newlen);
      curwin->w_cursor.col += newlen;
  }
-diff --git a/src/memline.c b/src/memline.c
---- a/src/memline.c
-+++ b/src/memline.c
-@@ -2840,6 +2840,7 @@ errorret:
- 	// make sure the text is in allocated memory
- 	if (p != NULL)
- 	{
-+	    buf->b_ml.ml_line_size = buf->b_ml.ml_line_len;
- 	    memmove(p, buf->b_ml.ml_line_ptr, buf->b_ml.ml_line_len);
- 	    buf->b_ml.ml_line_ptr = p;
- 	    buf->b_ml.ml_flags |= ML_ALLOCATED;
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
