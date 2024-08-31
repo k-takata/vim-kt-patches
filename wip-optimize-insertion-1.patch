@@ -12,7 +12,7 @@ diff --git a/src/change.c b/src/change.c
      colnr_T	col;
      linenr_T	lnum = curwin->w_cursor.lnum;
  
-@@ -1194,16 +1195,28 @@ ins_str(char_u *s)
+@@ -1194,14 +1195,33 @@ ins_str(char_u *s)
      oldp = ml_get(lnum);
      oldlen = (int)ml_get_len(lnum);
  
@@ -39,14 +39,19 @@ diff --git a/src/change.c b/src/change.c
      mch_memmove(newp + col, s, (size_t)newlen);
 -    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
 -    ml_replace(lnum, newp, FALSE);
-+    ml_replace_len(lnum, newp, oldlen + newlen, FALSE, FALSE);
++    if (newp != oldp)
++	ml_replace_len(lnum, newp, oldlen + newlen, FALSE, FALSE);
++    else
++    {
++	curbuf->b_ml.ml_flags |= ML_ALLOCATED;
++	curbuf->b_ml.ml_line_len = oldlen + newlen + 1;
++	curbuf->b_ml.ml_line_textlen = oldlen + newlen + 1;
++	curbuf->b_ml.ml_line_lnum = lnum;
++	curbuf->b_ml.ml_flags = (curbuf->b_ml.ml_flags | ML_LINE_DIRTY | ML_ALLOCATED) & ~ML_EMPTY;
++    }
      inserted_bytes(lnum, col, newlen);
      curwin->w_cursor.col += newlen;
-+    if ((newp != oldp) && (newp == curbuf->b_ml.ml_line_ptr))
-+	curbuf->b_ml.ml_flags |= ML_ALLOCATED;
  }
- 
- /*
 diff --git a/src/memline.c b/src/memline.c
 --- a/src/memline.c
 +++ b/src/memline.c
@@ -58,16 +63,6 @@ diff --git a/src/memline.c b/src/memline.c
  	    memmove(p, buf->b_ml.ml_line_ptr, buf->b_ml.ml_line_len);
  	    buf->b_ml.ml_line_ptr = p;
  	    buf->b_ml.ml_flags |= ML_ALLOCATED;
-@@ -3663,7 +3664,8 @@ ml_replace_len(
-     }
- #endif
- 
--    if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
-+    if ((curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
-+	    && (curbuf->b_ml.ml_line_ptr != line))
- 	vim_free(curbuf->b_ml.ml_line_ptr);	// free allocated line
- 
-     curbuf->b_ml.ml_line_ptr = line;
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
