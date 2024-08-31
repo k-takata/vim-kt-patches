@@ -17,7 +17,7 @@ diff --git a/src/change.c b/src/change.c
      colnr_T	col;
      linenr_T	lnum = curwin->w_cursor.lnum;
  
-@@ -1194,14 +1197,34 @@ ins_str(char_u *s)
+@@ -1194,14 +1197,32 @@ ins_str(char_u *s)
      oldp = ml_get(lnum);
      oldlen = (int)ml_get_len(lnum);
  
@@ -40,12 +40,10 @@ diff --git a/src/change.c b/src/change.c
 +	newp = alloc(new_size);
 +	if (newp == NULL)
 +	    return;
++	curbuf->b_ml.ml_line_size = new_size;
 +    }
 +    else
-+    {
 +	newp = oldp;
-+	new_size = curbuf->b_ml.ml_line_size;
-+    }
 +    prevp = newp;
 +
 +    if (col > 0 && newp != oldp)
@@ -54,7 +52,7 @@ diff --git a/src/change.c b/src/change.c
      mch_memmove(newp + col, s, (size_t)newlen);
 -    mch_memmove(newp + col + newlen, oldp + col, (size_t)(oldlen - col + 1));
 -    ml_replace(lnum, newp, FALSE);
-+    ml_replace_len_size(lnum, newp, newtotlen, FALSE, FALSE, new_size);
++    ml_replace_len(lnum, newp, newtotlen, FALSE, FALSE);
      inserted_bytes(lnum, col, newlen);
      curwin->w_cursor.col += newlen;
  }
@@ -129,52 +127,7 @@ diff --git a/src/memline.c b/src/memline.c
  	    buf->b_ml.ml_flags |= ML_ALLOCATED;
  	    if (will_change)
  		// can't make the change in the data block
-@@ -3575,7 +3582,7 @@ ml_replace(linenr_T lnum, char_u *line, 
- 
-     if (line != NULL)
- 	len = (colnr_T)STRLEN(line);
--    return ml_replace_len(lnum, line, len, FALSE, copy);
-+    return ml_replace_len_size(lnum, line, len, FALSE, copy, 0);
- }
- 
- /*
-@@ -3594,8 +3601,27 @@ ml_replace_len(
- 	int	    has_props,
- 	int	    copy)
- {
-+    return ml_replace_len_size(lnum, line_arg, len_arg, has_props, copy, 0);
-+}
-+
-+/*
-+ * Replace a line for the current buffer.  Like ml_replace_len() with:
-+ * "size_arg" is the size of the buffer.
-+ * If this is called from ins_str(), "size_arg" is set to non-zero and
-+ * "line_arg" can be same with curbuf->b_ml.ml_line_ptr.
-+ */
-+    int
-+ml_replace_len_size(
-+	linenr_T    lnum,
-+	char_u	    *line_arg,
-+	colnr_T	    len_arg,
-+	int	    has_props,
-+	int	    copy,
-+	int	    size_arg)
-+{
-     char_u *line = line_arg;
-     colnr_T len = len_arg;
-+    int	    size = size_arg;
- 
-     if (line == NULL)		// just checking...
- 	return FAIL;
-@@ -3656,6 +3682,7 @@ ml_replace_len(
- 		mch_memmove(newline + len, curbuf->b_ml.ml_line_ptr
- 						    + oldtextlen, textproplen);
- 		vim_free(line);
-+		size = 0;
- 		line = newline;
- 		len += (colnr_T)textproplen;
- 	    }
-@@ -3663,11 +3690,13 @@ ml_replace_len(
+@@ -3663,7 +3670,8 @@ ml_replace_len(
      }
  #endif
  
@@ -184,12 +137,7 @@ diff --git a/src/memline.c b/src/memline.c
  	vim_free(curbuf->b_ml.ml_line_ptr);	// free allocated line
  
      curbuf->b_ml.ml_line_ptr = line;
-     curbuf->b_ml.ml_line_len = len;
-+    curbuf->b_ml.ml_line_size = size;
-     curbuf->b_ml.ml_line_textlen = !has_props ? len_arg + 1 : 0;
-     curbuf->b_ml.ml_line_lnum = lnum;
-     curbuf->b_ml.ml_flags = (curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
-@@ -4236,11 +4265,15 @@ ml_flush_line(buf_T *buf)
+@@ -4236,11 +4244,15 @@ ml_flush_line(buf_T *buf)
  	    }
  	}
  	vim_free(new_line);
@@ -205,17 +153,6 @@ diff --git a/src/memline.c b/src/memline.c
  
      buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
      buf->b_ml.ml_line_lnum = 0;
-diff --git a/src/proto/memline.pro b/src/proto/memline.pro
---- a/src/proto/memline.pro
-+++ b/src/proto/memline.pro
-@@ -31,6 +31,7 @@ int ml_append_flags(linenr_T lnum, char_
- int ml_append_buf(buf_T *buf, linenr_T lnum, char_u *line, colnr_T len, int newfile);
- int ml_replace(linenr_T lnum, char_u *line, int copy);
- int ml_replace_len(linenr_T lnum, char_u *line_arg, colnr_T len_arg, int has_props, int copy);
-+int ml_replace_len_size(linenr_T lnum, char_u *line_arg, colnr_T len_arg, int has_props, int copy, int size_arg);
- int ml_delete(linenr_T lnum);
- int ml_delete_flags(linenr_T lnum, int flags);
- void ml_setmarked(linenr_T lnum);
 diff --git a/src/structs.h b/src/structs.h
 --- a/src/structs.h
 +++ b/src/structs.h
