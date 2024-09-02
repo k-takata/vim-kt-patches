@@ -117,28 +117,46 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1634,6 +1684,12 @@ getvcol(
- 	    }
- 
- 	    char_u *next_ptr = ptr + (*mb_ptr2len)(ptr);
-+	    if ((ptr - line <= pos->col * 4 / 5)
-+		    && (next_ptr - line >= pos->col * 4 / 5))
-+	    {
-+		saved_ptr = ptr;
-+		saved_vcol = vcol;
-+	    }
+@@ -1637,12 +1687,25 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
-@@ -1643,6 +1699,7 @@ getvcol(
++	    if ((ptr - line <= pos->col * 4 / 5)
++		    && (next_ptr - line >= pos->col * 4 / 5))
++	    {
++		saved_ptr = next_ptr;
++		saved_vcol = vcol + incr;
++	    }
+ 	    vcol += incr;
+ 	    ptr = next_ptr;
+ 	}
      }
      else
      {
 +	Trace("getvcol 2");
++	if ((old_line == line)
++		&& (saved_ptr - line <= pos->col))
++	{
++	    cts.cts_ptr = saved_ptr;
++	    cts.cts_vcol = saved_vcol;
++	}
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1710,6 +1767,9 @@ getvcol(
+@@ -1670,6 +1733,12 @@ getvcol(
+ 	    if (next_ptr - line > pos->col) // character at pos->col
+ 		break;
+ 
++	    if ((cts.cts_ptr - line <= pos->col * 4 / 5)
++		    && (next_ptr - line >= pos->col * 4 / 5))
++	    {
++		saved_ptr = next_ptr;
++		saved_vcol = cts.cts_vcol + incr;
++	    }
+ 	    cts.cts_vcol += incr;
+ 	    cts.cts_ptr = next_ptr;
+ 	}
+@@ -1710,6 +1779,9 @@ getvcol(
  	    *cursor = vcol + head;	    // cursor at start
  	}
      }
@@ -148,7 +166,7 @@ diff --git a/src/charset.c b/src/charset.c
  }
  
  /*
-@@ -1746,6 +1806,7 @@ getvvcol(
+@@ -1746,6 +1818,7 @@ getvvcol(
      colnr_T	endadd;
      char_u	*ptr;
  
@@ -156,7 +174,7 @@ diff --git a/src/charset.c b/src/charset.c
      if (virtual_active())
      {
  	// For virtual mode, only want one value
-@@ -1778,6 +1839,7 @@ getvvcol(
+@@ -1778,6 +1851,7 @@ getvvcol(
      }
      else
  	getvcol(wp, pos, start, cursor, end);
