@@ -1,20 +1,13 @@
 # HG changeset patch
-# Parent  cd7e6d71268cd00c0230b82fe4b8c70e122d00cc
+# Parent  737c8fa9895c1efe89a57a39bd364f03e9efcbc2
 
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -852,10 +852,30 @@ linetabsize_no_outer(win_T *wp, linenr_T
-     void
- win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
- {
-+    static char_u   *old_line = NULL;
-+    static char_u   *saved_ptr = NULL;
-+    static colnr_T  saved_vcol = 0;
-+    colnr_T slen = len;
-+    colnr_T col_save;
+@@ -859,6 +859,10 @@ win_linetabsize_cts(chartabsize_T *cts, 
+     colnr_T col_save;
      vimlong_T vcol = cts->cts_vcol;
-+
+ 
 +    proftime_T tm;
 +    profile_start(&tm);
 +    Trace("win_linetabsize_cts: cts->cts_line=%p cts->cts_ptr=%p cts->cts_vcol=%d\n", cts->cts_line, cts->cts_ptr, cts->cts_vcol);
@@ -22,45 +15,7 @@ diff --git a/src/charset.c b/src/charset.c
  #ifdef FEAT_PROP_POPUP
      cts->cts_with_trailing = len == MAXCOL;
  #endif
-+    if (slen == MAXCOL)
-+	slen = STRLEN(cts->cts_line);
-+    col_save = slen * 4 / 5;
-+    if (slen - col_save > 4096)
-+	col_save = slen - 4096;
-+    if ((old_line == cts->cts_line) && (saved_ptr - cts->cts_line <= slen))
-+    {
-+	cts->cts_ptr = saved_ptr;
-+	vcol = saved_vcol;
-+    }
-     for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
- 						      MB_PTR_ADV(cts->cts_ptr))
-     {
-@@ -867,6 +887,14 @@ win_linetabsize_cts(chartabsize_T *cts, 
- 	}
- 	else
- 	    cts->cts_vcol = (int)vcol;
-+
-+	if ((cts->cts_ptr - cts->cts_line <= col_save)
-+		&& (cts->cts_ptr + (*mb_ptr2len)(cts->cts_ptr) - cts->cts_line
-+			>= col_save))
-+	{
-+	    saved_ptr = cts->cts_ptr;
-+	    saved_vcol = vcol;
-+	}
-     }
- #ifdef FEAT_PROP_POPUP
-     // check for a virtual text at the end of a line or on an empty line
-@@ -881,6 +909,9 @@ win_linetabsize_cts(chartabsize_T *cts, 
- 	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
-     }
- #endif
-+    old_line = cts->cts_line;
-+    profile_end(&tm);
-+    Trace("win_linetabsize_cts end, %s", profile_msg(&tm));
- }
- 
- /*
-@@ -1190,6 +1221,9 @@ win_lbr_chartabsize(
+@@ -1215,6 +1219,9 @@ win_lbr_chartabsize(
      int		no_sbr = FALSE;
  #endif
  
@@ -70,7 +25,7 @@ diff --git a/src/charset.c b/src/charset.c
  #if defined(FEAT_PROP_POPUP)
      cts->cts_cur_text_width = 0;
      cts->cts_first_char = 0;
-@@ -1211,7 +1245,12 @@ win_lbr_chartabsize(
+@@ -1236,7 +1243,12 @@ win_lbr_chartabsize(
  #endif
      {
  	if (wp->w_p_wrap)
@@ -84,7 +39,7 @@ diff --git a/src/charset.c b/src/charset.c
  	RET_WIN_BUF_CHARTABSIZE(wp, wp->w_buffer, s, vcol)
      }
  
-@@ -1472,6 +1511,8 @@ win_lbr_chartabsize(
+@@ -1497,6 +1509,8 @@ win_lbr_chartabsize(
  #  ifdef FEAT_PROP_POPUP
      size += cts->cts_first_char;
  #  endif
@@ -93,14 +48,9 @@ diff --git a/src/charset.c b/src/charset.c
      return size;
  # endif
  #endif
-@@ -1569,13 +1610,23 @@ getvcol(
- #ifdef FEAT_PROP_POPUP
-     int		on_NUL = FALSE;
- #endif
-+    colnr_T	col_save;
-+    static char_u   *old_line = NULL;
-+    static char_u   *saved_ptr = NULL;
-+    static colnr_T  saved_vcol = 0;
+@@ -1599,6 +1613,9 @@ getvcol(
+     static char_u   *saved_ptr = NULL;
+     static colnr_T  saved_vcol = 0;
  
 +    proftime_T tm;
 +    profile_start(&tm);
@@ -108,79 +58,23 @@ diff --git a/src/charset.c b/src/charset.c
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
  
-     init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
-     cts.cts_max_head_vcol = -1;
- 
-+    col_save = pos->col * 4 / 5;
-+    if (pos->col - col_save > 4096)
-+	col_save = pos->col - 4096;
-     /*
-      * This function is used very often, do some speed optimizations.
-      * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
-@@ -1591,6 +1642,13 @@ getvcol(
+@@ -1623,6 +1640,7 @@ getvcol(
  #endif
         )
      {
 +	Trace("getvcol 1");
-+	if ((old_line == line)
-+		&& (saved_ptr - line <= pos->col))
-+	{
-+	    ptr = saved_ptr;
-+	    vcol = saved_vcol;
-+	}
- 	for (;;)
+ 	if ((old_line == line)
+ 		&& (saved_ptr - line <= pos->col))
  	{
- 	    head = 0;
-@@ -1637,12 +1695,25 @@ getvcol(
- 	    if (next_ptr - line > pos->col) // character at pos->col
- 		break;
- 
-+	    if ((ptr - line <= col_save)
-+		    && (next_ptr - line >= col_save))
-+	    {
-+		saved_ptr = next_ptr;
-+		saved_vcol = vcol + incr;
-+	    }
- 	    vcol += incr;
- 	    ptr = next_ptr;
- 	}
+@@ -1687,6 +1705,7 @@ getvcol(
      }
      else
      {
 +	Trace("getvcol 2");
-+	if ((old_line == line)
-+		&& (saved_ptr - line <= pos->col))
-+	{
-+	    cts.cts_ptr = saved_ptr;
-+	    cts.cts_vcol = saved_vcol;
-+	}
- 	for (;;)
+ 	if ((old_line == line)
+ 		&& (saved_ptr - line <= pos->col))
  	{
- 	    // A tab gets expanded, depending on the current column.
-@@ -1670,6 +1741,12 @@ getvcol(
- 	    if (next_ptr - line > pos->col) // character at pos->col
- 		break;
- 
-+	    if ((cts.cts_ptr - line <= col_save)
-+		    && (next_ptr - line >= col_save))
-+	    {
-+		saved_ptr = next_ptr;
-+		saved_vcol = cts.cts_vcol + incr;
-+	    }
- 	    cts.cts_vcol += incr;
- 	    cts.cts_ptr = next_ptr;
- 	}
-@@ -1710,6 +1787,9 @@ getvcol(
- 	    *cursor = vcol + head;	    // cursor at start
- 	}
-     }
-+    old_line = line;
-+    profile_end(&tm);
-+    Trace("getvcol end, %s", profile_msg(&tm));
- }
- 
- /*
-@@ -1746,6 +1826,7 @@ getvvcol(
+@@ -1803,6 +1822,7 @@ getvvcol(
      colnr_T	endadd;
      char_u	*ptr;
  
@@ -188,7 +82,7 @@ diff --git a/src/charset.c b/src/charset.c
      if (virtual_active())
      {
  	// For virtual mode, only want one value
-@@ -1778,6 +1859,7 @@ getvvcol(
+@@ -1835,6 +1855,7 @@ getvvcol(
      }
      else
  	getvcol(wp, pos, start, cursor, end);

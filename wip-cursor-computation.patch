@@ -1,0 +1,136 @@
+# HG changeset patch
+# Parent  cd7e6d71268cd00c0230b82fe4b8c70e122d00cc
+
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -852,10 +852,26 @@ linetabsize_no_outer(win_T *wp, linenr_T
+     void
+ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
+ {
++    static char_u   *old_line = NULL;
++    static char_u   *saved_ptr = NULL;
++    static colnr_T  saved_vcol = 0;
++    colnr_T slen = len;
++    colnr_T col_save;
+     vimlong_T vcol = cts->cts_vcol;
++
+ #ifdef FEAT_PROP_POPUP
+     cts->cts_with_trailing = len == MAXCOL;
+ #endif
++    if (slen == MAXCOL)
++	slen = STRLEN(cts->cts_line);
++    col_save = slen * 4 / 5;
++    if (slen - col_save > 4096)
++	col_save = slen - 4096;
++    if ((old_line == cts->cts_line) && (saved_ptr - cts->cts_line <= slen))
++    {
++	cts->cts_ptr = saved_ptr;
++	vcol = saved_vcol;
++    }
+     for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
+ 						      MB_PTR_ADV(cts->cts_ptr))
+     {
+@@ -867,6 +883,14 @@ win_linetabsize_cts(chartabsize_T *cts, 
+ 	}
+ 	else
+ 	    cts->cts_vcol = (int)vcol;
++
++	if ((cts->cts_ptr - cts->cts_line <= col_save)
++		&& (cts->cts_ptr + (*mb_ptr2len)(cts->cts_ptr) - cts->cts_line
++			>= col_save))
++	{
++	    saved_ptr = cts->cts_ptr;
++	    saved_vcol = vcol;
++	}
+     }
+ #ifdef FEAT_PROP_POPUP
+     // check for a virtual text at the end of a line or on an empty line
+@@ -881,6 +905,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+ 	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
+     }
+ #endif
++    old_line = cts->cts_line;
+ }
+ 
+ /*
+@@ -1569,6 +1594,10 @@ getvcol(
+ #ifdef FEAT_PROP_POPUP
+     int		on_NUL = FALSE;
+ #endif
++    colnr_T	col_save;
++    static char_u   *old_line = NULL;
++    static char_u   *saved_ptr = NULL;
++    static colnr_T  saved_vcol = 0;
+ 
+     vcol = 0;
+     line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
+@@ -1576,6 +1605,9 @@ getvcol(
+     init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
+     cts.cts_max_head_vcol = -1;
+ 
++    col_save = pos->col * 4 / 5;
++    if (pos->col - col_save > 4096)
++	col_save = pos->col - 4096;
+     /*
+      * This function is used very often, do some speed optimizations.
+      * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
+@@ -1591,6 +1623,12 @@ getvcol(
+ #endif
+        )
+     {
++	if ((old_line == line)
++		&& (saved_ptr - line <= pos->col))
++	{
++	    ptr = saved_ptr;
++	    vcol = saved_vcol;
++	}
+ 	for (;;)
+ 	{
+ 	    head = 0;
+@@ -1637,12 +1675,24 @@ getvcol(
+ 	    if (next_ptr - line > pos->col) // character at pos->col
+ 		break;
+ 
++	    if ((ptr - line <= col_save)
++		    && (next_ptr - line >= col_save))
++	    {
++		saved_ptr = next_ptr;
++		saved_vcol = vcol + incr;
++	    }
+ 	    vcol += incr;
+ 	    ptr = next_ptr;
+ 	}
+     }
+     else
+     {
++	if ((old_line == line)
++		&& (saved_ptr - line <= pos->col))
++	{
++	    cts.cts_ptr = saved_ptr;
++	    cts.cts_vcol = saved_vcol;
++	}
+ 	for (;;)
+ 	{
+ 	    // A tab gets expanded, depending on the current column.
+@@ -1670,6 +1720,12 @@ getvcol(
+ 	    if (next_ptr - line > pos->col) // character at pos->col
+ 		break;
+ 
++	    if ((cts.cts_ptr - line <= col_save)
++		    && (next_ptr - line >= col_save))
++	    {
++		saved_ptr = next_ptr;
++		saved_vcol = cts.cts_vcol + incr;
++	    }
+ 	    cts.cts_vcol += incr;
+ 	    cts.cts_ptr = next_ptr;
+ 	}
+@@ -1710,6 +1766,7 @@ getvcol(
+ 	    *cursor = vcol + head;	    // cursor at start
+ 	}
+     }
++    old_line = line;
+ }
+ 
+ /*

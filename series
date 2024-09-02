@@ -30,6 +30,7 @@ win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 msvc-show-vc-version.patch
 optimize-mem-alloc-for-insertion.patch
+wip-cursor-computation.patch #+wip
 debug-cursor-computation.patch #+wip
 wip-optimize-insertion-2.patch #+wip
 fix-config_cache-removal.patch #+rejected
