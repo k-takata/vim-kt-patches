@@ -12,7 +12,7 @@ diff --git a/src/charset.c b/src/charset.c
 +    static char_u   *saved_ptr = NULL;
 +    static colnr_T  saved_vcol = 0;
 +    colnr_T slen = len;
-+    colnr_T col_save = len;
++    colnr_T col_save;
      vimlong_T vcol = cts->cts_vcol;
 +
 +    proftime_T tm;
