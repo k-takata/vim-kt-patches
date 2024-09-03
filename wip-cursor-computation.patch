@@ -91,7 +91,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1637,12 +1678,24 @@ getvcol(
+@@ -1637,12 +1678,25 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -107,7 +107,8 @@ diff --git a/src/charset.c b/src/charset.c
      }
      else
      {
-+	if ((old_line == line)
++	if ((old_line != NULL)
++		&& (old_line == line)
 +		&& (saved_ptr - line <= pos->col))
 +	{
 +	    cts.cts_ptr = saved_ptr;
@@ -116,7 +117,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1670,6 +1723,12 @@ getvcol(
+@@ -1670,6 +1724,12 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -129,7 +130,7 @@ diff --git a/src/charset.c b/src/charset.c
  	    cts.cts_vcol += incr;
  	    cts.cts_ptr = next_ptr;
  	}
-@@ -1710,6 +1769,7 @@ getvcol(
+@@ -1710,6 +1770,7 @@ getvcol(
  	    *cursor = vcol + head;	    // cursor at start
  	}
      }

@@ -1,0 +1,16 @@
+# HG changeset patch
+# Parent  477c5f32b46be9630d02f0ebeaf6fb3cb2ac1d14
+
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -7835,7 +7835,8 @@ mch_fopen(const char *name, const char *
+     vim_free(wm);
+ 
+ #if defined(DEBUG) && _MSC_VER >= 1400
+-    _set_fmode(oldMode);
++    if (oldMode != 0)
++	_set_fmode(oldMode);
+ #endif
+     return f;
+ }

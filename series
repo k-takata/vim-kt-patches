@@ -31,6 +31,7 @@ msvc-revise-use_msvcrt.patch
 msvc-show-vc-version.patch
 optimize-mem-alloc-for-insertion.patch
 fix-turkish-test.patch
+win32-assert-gui.patch
 wip-cursor-computation.patch #+wip
 debug-cursor-computation.patch #+wip
 wip-optimize-insertion-2.patch #+wip
