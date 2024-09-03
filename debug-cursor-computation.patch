@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  737c8fa9895c1efe89a57a39bd364f03e9efcbc2
+# Parent  6924ac3d1d2ab628c41753d4720ebd76b99f87d6
 
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
@@ -15,7 +15,7 @@ diff --git a/src/charset.c b/src/charset.c
  #ifdef FEAT_PROP_POPUP
      cts->cts_with_trailing = len == MAXCOL;
  #endif
-@@ -1215,6 +1219,9 @@ win_lbr_chartabsize(
+@@ -1217,6 +1221,9 @@ win_lbr_chartabsize(
      int		no_sbr = FALSE;
  #endif
  
@@ -25,7 +25,7 @@ diff --git a/src/charset.c b/src/charset.c
  #if defined(FEAT_PROP_POPUP)
      cts->cts_cur_text_width = 0;
      cts->cts_first_char = 0;
-@@ -1236,7 +1243,12 @@ win_lbr_chartabsize(
+@@ -1238,7 +1245,12 @@ win_lbr_chartabsize(
  #endif
      {
  	if (wp->w_p_wrap)
@@ -39,7 +39,7 @@ diff --git a/src/charset.c b/src/charset.c
  	RET_WIN_BUF_CHARTABSIZE(wp, wp->w_buffer, s, vcol)
      }
  
-@@ -1497,6 +1509,8 @@ win_lbr_chartabsize(
+@@ -1499,6 +1511,8 @@ win_lbr_chartabsize(
  #  ifdef FEAT_PROP_POPUP
      size += cts->cts_first_char;
  #  endif
@@ -48,7 +48,7 @@ diff --git a/src/charset.c b/src/charset.c
      return size;
  # endif
  #endif
-@@ -1599,6 +1613,9 @@ getvcol(
+@@ -1601,6 +1615,9 @@ getvcol(
      static char_u   *saved_ptr = NULL;
      static colnr_T  saved_vcol = 0;
  
@@ -58,23 +58,23 @@ diff --git a/src/charset.c b/src/charset.c
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
  
-@@ -1623,6 +1640,7 @@ getvcol(
+@@ -1625,6 +1642,7 @@ getvcol(
  #endif
         )
      {
 +	Trace("getvcol 1");
- 	if ((old_line == line)
+ 	if ((old_line != NULL)
+ 		&& (old_line == line)
  		&& (saved_ptr - line <= pos->col))
- 	{
-@@ -1687,6 +1705,7 @@ getvcol(
+@@ -1691,6 +1709,7 @@ getvcol(
      }
      else
      {
 +	Trace("getvcol 2");
- 	if ((old_line == line)
+ 	if ((old_line != NULL)
+ 		&& (old_line == line)
  		&& (saved_ptr - line <= pos->col))
- 	{
-@@ -1803,6 +1822,7 @@ getvvcol(
+@@ -1808,6 +1827,7 @@ getvvcol(
      colnr_T	endadd;
      char_u	*ptr;
  
@@ -82,7 +82,7 @@ diff --git a/src/charset.c b/src/charset.c
      if (virtual_active())
      {
  	// For virtual mode, only want one value
-@@ -1835,6 +1855,7 @@ getvvcol(
+@@ -1840,6 +1860,7 @@ getvvcol(
      }
      else
  	getvcol(wp, pos, start, cursor, end);
