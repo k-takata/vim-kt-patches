@@ -1,0 +1,19 @@
+diff --git a/src/testdir/test_autocmd.vim b/src/testdir/test_autocmd.vim
+index a863a238d..0882917a8 100644
+--- a/src/testdir/test_autocmd.vim
++++ b/src/testdir/test_autocmd.vim
+@@ -4871,11 +4871,11 @@ func Test_GuiEnter_Turkish_locale()
+     let lng = v:lang
+     lang tr_TR.UTF-8
+     let result = execute(':au GuiEnter')
+-    call assert_equal("\n--- Autocommands ---", result)
++    call assert_match("\n--- \\(Autocommands\\|Otokomutlar\\) ---", result)
+     let result = execute(':au GUIENTER')
+-    call assert_equal("\n--- Autocommands ---", result)
++    call assert_match("\n--- \\(Autocommands\\|Otokomutlar\\) ---", result)
+     let result = execute(':au guienter')
+-    call assert_equal("\n--- Autocommands ---", result)
++    call assert_match("\n--- \\(Autocommands\\|Otokomutlar\\) ---", result)
+     exe ":lang" lng
+   catch /E197:/
+     " can't use Turkish locale
