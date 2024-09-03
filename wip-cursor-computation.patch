@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  bf4ed6092013a7a2b509131ed82dd2b3c6911fd3
+# Parent  a1d29576ce43be1962ddd2bca5e9ea964673f3e7
 
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
@@ -33,7 +33,7 @@ diff --git a/src/charset.c b/src/charset.c
      for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
  						      MB_PTR_ADV(cts->cts_ptr))
      {
-@@ -867,6 +885,14 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -867,6 +885,15 @@ win_linetabsize_cts(chartabsize_T *cts, 
  	}
  	else
  	    cts->cts_vcol = (int)vcol;
@@ -44,18 +44,11 @@ diff --git a/src/charset.c b/src/charset.c
 +	{
 +	    saved_ptr = cts->cts_ptr;
 +	    saved_vcol = vcol;
++	    old_line = cts->cts_line;
 +	}
      }
  #ifdef FEAT_PROP_POPUP
      // check for a virtual text at the end of a line or on an empty line
-@@ -881,6 +907,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
- 	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
-     }
- #endif
-+    old_line = cts->cts_line;
- }
- 
- /*
 @@ -1569,6 +1596,10 @@ getvcol(
  #ifdef FEAT_PROP_POPUP
      int		on_NUL = FALSE;
@@ -91,7 +84,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1637,12 +1678,25 @@ getvcol(
+@@ -1637,12 +1678,26 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -100,6 +93,7 @@ diff --git a/src/charset.c b/src/charset.c
 +	    {
 +		saved_ptr = next_ptr;
 +		saved_vcol = vcol + incr;
++		old_line = line;
 +	    }
  	    vcol += incr;
  	    ptr = next_ptr;
@@ -117,7 +111,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1670,6 +1724,12 @@ getvcol(
+@@ -1670,6 +1725,13 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -126,15 +120,8 @@ diff --git a/src/charset.c b/src/charset.c
 +	    {
 +		saved_ptr = next_ptr;
 +		saved_vcol = cts.cts_vcol + incr;
++		old_line = line;
 +	    }
  	    cts.cts_vcol += incr;
  	    cts.cts_ptr = next_ptr;
  	}
-@@ -1710,6 +1770,7 @@ getvcol(
- 	    *cursor = vcol + head;	    // cursor at start
- 	}
-     }
-+    old_line = line;
- }
- 
- /*
