@@ -33,7 +33,7 @@ diff --git a/src/charset.c b/src/charset.c
  #endif
 +    if (slen == MAXCOL)
 +	slen = STRLEN(cts->cts_line);
-+    col_save = slen * 4 / 5;
++    col_save = (colnr_T)((varnumber_T)slen * 4 / 5);
 +    if (slen - col_save > 4096)
 +	col_save = slen - 4096;
 +    if (s_vcol_cache_valid1
@@ -76,7 +76,7 @@ diff --git a/src/charset.c b/src/charset.c
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
-+    col_save = pos->col * 4 / 5;
++    col_save = (colnr_T)((varnumber_T)pos->col * 4 / 5);
 +    if (pos->col - col_save > 4096)
 +	col_save = pos->col - 4096;
      /*
@@ -145,6 +145,17 @@ diff --git a/src/charset.c b/src/charset.c
  	    cts.cts_vcol += incr;
  	    cts.cts_ptr = next_ptr;
  	}
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -11942,6 +11942,7 @@ f_virtcol(typval_T *argvars, typval_T *r
+ 	    if (fp->col > len)
+ 		fp->col = len;
+ 	}
++	invalidate_vcol_cache();
+ 	getvvcol(curwin, fp, &vcol_start, NULL, &vcol_end);
+ 	++vcol_start;
+ 	++vcol_end;
 diff --git a/src/mbyte.c b/src/mbyte.c
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
