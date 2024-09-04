@@ -4,7 +4,7 @@
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -849,13 +849,41 @@ linetabsize_no_outer(win_T *wp, linenr_T
+@@ -849,16 +849,54 @@ linetabsize_no_outer(win_T *wp, linenr_T
  #endif
  }
  
@@ -46,11 +46,6 @@ diff --git a/src/charset.c b/src/charset.c
      for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
  						      MB_PTR_ADV(cts->cts_ptr))
      {
-@@ -867,6 +895,17 @@ win_linetabsize_cts(chartabsize_T *cts, 
- 	}
- 	else
- 	    cts->cts_vcol = (int)vcol;
-+
 +	if ((cts->cts_ptr > cts->cts_line)
 +		&& (cts->cts_ptr - cts->cts_line <= col_save)
 +		&& (cts->cts_ptr + (*mb_ptr2len)(cts->cts_ptr) - cts->cts_line
@@ -61,10 +56,10 @@ diff --git a/src/charset.c b/src/charset.c
 +	    old_line = cts->cts_line;
 +	    s_vcol_cache_valid = TRUE;
 +	}
-     }
- #ifdef FEAT_PROP_POPUP
-     // check for a virtual text at the end of a line or on an empty line
-@@ -1569,6 +1608,10 @@ getvcol(
+ 	vcol += win_lbr_chartabsize(cts, NULL);
+ 	if (vcol > MAXCOL)
+ 	{
+@@ -1569,6 +1607,10 @@ getvcol(
  #ifdef FEAT_PROP_POPUP
      int		on_NUL = FALSE;
  #endif
@@ -75,7 +70,7 @@ diff --git a/src/charset.c b/src/charset.c
  
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
-@@ -1576,6 +1619,9 @@ getvcol(
+@@ -1576,6 +1618,9 @@ getvcol(
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
@@ -85,7 +80,7 @@ diff --git a/src/charset.c b/src/charset.c
      /*
       * This function is used very often, do some speed optimizations.
       * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
-@@ -1591,6 +1637,15 @@ getvcol(
+@@ -1591,6 +1636,15 @@ getvcol(
  #endif
         )
      {
@@ -101,7 +96,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1637,12 +1692,30 @@ getvcol(
+@@ -1637,12 +1691,30 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -132,7 +127,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1670,6 +1743,15 @@ getvcol(
+@@ -1670,6 +1742,15 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -148,6 +143,25 @@ diff --git a/src/charset.c b/src/charset.c
  	    cts.cts_vcol += incr;
  	    cts.cts_ptr = next_ptr;
  	}
+diff --git a/src/mbyte.c b/src/mbyte.c
+--- a/src/mbyte.c
++++ b/src/mbyte.c
+@@ -5657,6 +5657,7 @@ f_setcellwidths(typval_T *argvars, typva
+ 	// Clearing the table.
+ 	VIM_CLEAR(cw_table);
+ 	cw_table_size = 0;
++	invalidate_vcol_cache();
+ 	return;
+     }
+ 
+@@ -5768,6 +5769,7 @@ f_setcellwidths(typval_T *argvars, typva
+ 	return;
+     }
+ 
++    invalidate_vcol_cache();
+     vim_free(cw_table_save);
+     changed_window_setting_all();
+     redraw_all_later(UPD_CLEAR);
 diff --git a/src/option.c b/src/option.c
 --- a/src/option.c
 +++ b/src/option.c
