@@ -1,0 +1,33 @@
+# HG changeset patch
+# Parent  0cdfccef3ca2fb09bbac0bfb2e0a1864c5a553b3
+
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -875,7 +875,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+     col_save = slen * 4 / 5;
+     if (slen - col_save > 4096)
+ 	col_save = slen - 4096;
+-    if (s_vcol_cache_valid
++    if (0 && s_vcol_cache_valid
+ 	    && (old_line != NULL)
+ 	    && (old_line == cts->cts_line)
+ 	    && (saved_ptr >= cts->cts_line)
+@@ -1637,7 +1637,7 @@ getvcol(
+ #endif
+        )
+     {
+-	if (s_vcol_cache_valid
++	if (0 && s_vcol_cache_valid
+ 		&& (old_line != NULL)
+ 		&& (old_line == line)
+ 		&& (saved_ptr >= line)
+@@ -1706,7 +1706,7 @@ getvcol(
+     }
+     else
+     {
+-	if (s_vcol_cache_valid
++	if (0 && s_vcol_cache_valid
+ 		&& (old_line != NULL)
+ 		&& (old_line == line)
+ 		&& (saved_ptr >= line)
