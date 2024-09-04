@@ -1,10 +1,18 @@
 # HG changeset patch
-# Parent  85a27bb6e221f7f95731584c25f9c4b07cb19930
+# Parent  2ec6bc29f02ab6af3878de75e7762488f72b1813
 
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -884,6 +884,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -855,6 +855,7 @@ static int s_vcol_cache_valid2 = FALSE;
+     void
+ invalidate_vcol_cache(void)
+ {
++    Trace("invalidate_vcol_cache");
+     s_vcol_cache_valid1 = FALSE;
+     s_vcol_cache_valid2 = FALSE;
+ }
+@@ -886,6 +887,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
  	cts->cts_ptr = saved_ptr;
  	cts->cts_vcol = vcol = saved_vcol;
      }
@@ -12,7 +20,7 @@ diff --git a/src/charset.c b/src/charset.c
      for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
  						      MB_PTR_ADV(cts->cts_ptr))
      {
-@@ -920,6 +921,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -921,6 +923,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
  	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
      }
  #endif
@@ -20,11 +28,39 @@ diff --git a/src/charset.c b/src/charset.c
  }
  
  /*
-@@ -1792,6 +1794,7 @@ getvcol(
+@@ -1649,6 +1652,9 @@ getvcol(
+ 	    ptr = saved_ptr;
+ 	    vcol = saved_vcol;
+ 	}
++	Trace("getvcol 1: vcol=%d pos->col=%d", vcol, pos->col);
++	Trace("getvcol 1: old_line=%p line=%p saved_ptr=%p", old_line, line, saved_ptr);
++	Trace("getvcol 1: line=\"%s\"", line);
+ 	for (;;)
+ 	{
+ 	    head = 0;
+@@ -1704,6 +1710,7 @@ getvcol(
+ 		old_line = line;
+ 		old_cond = 1;
+ 		s_vcol_cache_valid2 = TRUE;
++		//Trace("getvcol 1-2: saved_vcol=%d ptr=%d", saved_vcol, next_ptr-line);
+ 	    }
+ 	    vcol += incr;
+ 	    ptr = next_ptr;
+@@ -1721,6 +1728,9 @@ getvcol(
+ 	    cts.cts_ptr = saved_ptr;
+ 	    cts.cts_vcol = saved_vcol;
+ 	}
++	Trace("getvcol 2: cts.cts_vcol=%d pos->col=%d", cts.cts_vcol, pos->col);
++	Trace("getvcol 2: old_line=%p line=%p saved_ptr=%p", old_line, line, saved_ptr);
++	Trace("getvcol 2: line=\"%s\"", line);
+ 	for (;;)
+ 	{
+ 	    // A tab gets expanded, depending on the current column.
+@@ -1798,6 +1808,7 @@ getvcol(
  	    *cursor = vcol + head;	    // cursor at start
  	}
      }
-+    Trace("getvcol: start=%d cursor=%d end=%d", start ? *start : -1, cursor ? *cursor : -1, end ? *end : -1);
++    Trace("getvcol 3: start=%d cursor=%d end=%d", start ? *start : -1, cursor ? *cursor : -1, end ? *end : -1);
  }
  
  /*

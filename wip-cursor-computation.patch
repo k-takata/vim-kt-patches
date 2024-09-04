@@ -61,7 +61,7 @@ diff --git a/src/charset.c b/src/charset.c
  	vcol += win_lbr_chartabsize(cts, NULL);
  	if (vcol > MAXCOL)
  	{
-@@ -1569,6 +1609,10 @@ getvcol(
+@@ -1569,6 +1609,11 @@ getvcol(
  #ifdef FEAT_PROP_POPUP
      int		on_NUL = FALSE;
  #endif
@@ -69,10 +69,11 @@ diff --git a/src/charset.c b/src/charset.c
 +    static char_u   *old_line = NULL;
 +    static char_u   *saved_ptr = NULL;
 +    static colnr_T  saved_vcol = 0;
++    static int	    old_cond = 0;
  
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
-@@ -1576,6 +1620,9 @@ getvcol(
+@@ -1576,6 +1621,9 @@ getvcol(
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
@@ -82,7 +83,7 @@ diff --git a/src/charset.c b/src/charset.c
      /*
       * This function is used very often, do some speed optimizations.
       * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
-@@ -1591,6 +1638,15 @@ getvcol(
+@@ -1591,6 +1639,16 @@ getvcol(
  #endif
         )
      {
@@ -90,7 +91,8 @@ diff --git a/src/charset.c b/src/charset.c
 +		&& (old_line != NULL)
 +		&& (old_line == line)
 +		&& (saved_ptr >= line)
-+		&& (saved_ptr < line + pos->col))
++		&& (saved_ptr < line + pos->col)
++		&& (old_cond == 1))
 +	{
 +	    ptr = saved_ptr;
 +	    vcol = saved_vcol;
@@ -98,7 +100,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1637,12 +1693,30 @@ getvcol(
+@@ -1637,12 +1695,32 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -109,6 +111,7 @@ diff --git a/src/charset.c b/src/charset.c
 +		saved_ptr = next_ptr;
 +		saved_vcol = vcol + incr;
 +		old_line = line;
++		old_cond = 1;
 +		s_vcol_cache_valid2 = TRUE;
 +	    }
  	    vcol += incr;
@@ -121,7 +124,8 @@ diff --git a/src/charset.c b/src/charset.c
 +		&& (old_line != NULL)
 +		&& (old_line == line)
 +		&& (saved_ptr >= line)
-+		&& (saved_ptr < line + pos->col))
++		&& (saved_ptr < line + pos->col)
++		&& (old_cond == 2))
 +	{
 +	    cts.cts_ptr = saved_ptr;
 +	    cts.cts_vcol = saved_vcol;
@@ -129,7 +133,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1670,6 +1744,15 @@ getvcol(
+@@ -1670,6 +1748,16 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -140,6 +144,7 @@ diff --git a/src/charset.c b/src/charset.c
 +		saved_ptr = next_ptr;
 +		saved_vcol = cts.cts_vcol + incr;
 +		old_line = line;
++		old_cond = 2;
 +		s_vcol_cache_valid2 = TRUE;
 +	    }
  	    cts.cts_vcol += incr;
@@ -167,6 +172,41 @@ diff --git a/src/mbyte.c b/src/mbyte.c
  	return;
      }
  
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -886,6 +886,7 @@ ml_close(buf_T *buf, int del_file)
+     {
+ 	vim_free(buf->b_ml.ml_line_ptr);
+ 	buf->b_ml.ml_line_size = 0;
++	invalidate_vcol_cache();
+     }
+     vim_free(buf->b_ml.ml_stack);
+ #ifdef FEAT_BYTEOFF
+@@ -3679,6 +3680,7 @@ ml_replace_len(
+     curbuf->b_ml.ml_line_textlen = !has_props ? len_arg + 1 : 0;
+     curbuf->b_ml.ml_line_lnum = lnum;
+     curbuf->b_ml.ml_flags = (curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
++    invalidate_vcol_cache();
+ 
+     return OK;
+ }
+@@ -4245,6 +4247,7 @@ ml_flush_line(buf_T *buf)
+ 	}
+ 	vim_free(new_line);
+ 	buf->b_ml.ml_line_size = 0;
++	invalidate_vcol_cache();
+ 
+ 	entered = FALSE;
+     }
+@@ -4252,6 +4255,7 @@ ml_flush_line(buf_T *buf)
+     {
+ 	vim_free(buf->b_ml.ml_line_ptr);
+ 	buf->b_ml.ml_line_size = 0;
++	invalidate_vcol_cache();
+     }
+ 
+     buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
 diff --git a/src/move.c b/src/move.c
 --- a/src/move.c
 +++ b/src/move.c
