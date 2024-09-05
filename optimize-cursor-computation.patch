@@ -4,7 +4,7 @@
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -849,16 +849,85 @@ linetabsize_no_outer(win_T *wp, linenr_T
+@@ -849,16 +849,87 @@ linetabsize_no_outer(win_T *wp, linenr_T
  #endif
  }
  
@@ -34,6 +34,7 @@ diff --git a/src/charset.c b/src/charset.c
      void
  win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
  {
++    static win_T    *old_win = NULL;
 +    static char_u   *old_line = NULL;
 +    static char_u   *saved_ptr = NULL;
 +    static colnr_T  saved_vcol = 0;
@@ -56,8 +57,8 @@ diff --git a/src/charset.c b/src/charset.c
 +    else
 +	s_vcol_cache_valid1 = FALSE;
 +    if (s_vcol_cache_valid1
-+	    && (old_line != NULL)
-+	    && (old_line == cts->cts_line)
++	    && (old_win != NULL) && (old_win != cts->cts_win)
++	    && (old_line != NULL) && (old_line == cts->cts_line)
 +	    && (saved_ptr >= cts->cts_line)
 +	    && (saved_ptr < cts->cts_line + slen)
 +#ifdef FEAT_PROP_POPUP
@@ -84,17 +85,19 @@ diff --git a/src/charset.c b/src/charset.c
 +	{
 +	    saved_ptr = cts->cts_ptr;
 +	    saved_vcol = vcol;
++	    old_win = cts->cts_win;
 +	    old_line = cts->cts_line;
 +	    s_vcol_cache_valid1 = TRUE;
 +	}
  	vcol += win_lbr_chartabsize(cts, NULL);
  	if (vcol > MAXCOL)
  	{
-@@ -1569,6 +1638,11 @@ getvcol(
+@@ -1569,6 +1640,12 @@ getvcol(
  #ifdef FEAT_PROP_POPUP
      int		on_NUL = FALSE;
  #endif
 +    colnr_T	col_save = 0;
++    static win_T    *old_win = NULL;
 +    static char_u   *old_line = NULL;
 +    static char_u   *saved_ptr = NULL;
 +    static colnr_T  saved_vcol = 0;
@@ -102,7 +105,7 @@ diff --git a/src/charset.c b/src/charset.c
  
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
-@@ -1576,6 +1650,15 @@ getvcol(
+@@ -1576,6 +1653,15 @@ getvcol(
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
@@ -118,13 +121,13 @@ diff --git a/src/charset.c b/src/charset.c
      /*
       * This function is used very often, do some speed optimizations.
       * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
-@@ -1591,6 +1674,16 @@ getvcol(
+@@ -1591,6 +1677,16 @@ getvcol(
  #endif
         )
      {
 +	if (s_vcol_cache_valid2
-+		&& (old_line != NULL)
-+		&& (old_line == line)
++		&& (old_win != NULL) && (old_win == wp)
++		&& (old_line != NULL) && (old_line == line)
 +		&& (saved_ptr >= line)
 +		&& (saved_ptr < line + pos->col)
 +		&& (old_cond == 1))
@@ -135,7 +138,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1637,12 +1730,37 @@ getvcol(
+@@ -1637,12 +1733,38 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -146,6 +149,7 @@ diff --git a/src/charset.c b/src/charset.c
 +	    {
 +		saved_ptr = next_ptr;
 +		saved_vcol = vcol + incr;
++		old_win = wp;
 +		old_line = line;
 +		old_cond = 1;
 +		s_vcol_cache_valid2 = TRUE;
@@ -157,8 +161,8 @@ diff --git a/src/charset.c b/src/charset.c
      else
      {
 +	if (s_vcol_cache_valid2
-+		&& (old_line != NULL)
-+		&& (old_line == line)
++		&& (old_win != NULL) && (old_win == wp)
++		&& (old_line != NULL) && (old_line == line)
 +		&& (saved_ptr >= line)
 +		&& (saved_ptr < line + pos->col)
 +		&& (old_cond == 2)
@@ -173,7 +177,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1670,6 +1788,21 @@ getvcol(
+@@ -1670,6 +1792,22 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -184,10 +188,11 @@ diff --git a/src/charset.c b/src/charset.c
 +#ifdef FEAT_PROP_POPUP
 +		    && !cts.cts_has_prop_with_text
 +#endif
-+		    )
++	       )
 +	    {
 +		saved_ptr = next_ptr;
 +		saved_vcol = cts.cts_vcol + incr;
++		old_win = wp;
 +		old_line = line;
 +		old_cond = 2;
 +		s_vcol_cache_valid2 = TRUE;

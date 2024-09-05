@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent  2ec6bc29f02ab6af3878de75e7762488f72b1813
+# Parent  0fb1e966779addb05034b858ce8f0fb7ab15d336
 
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -855,6 +855,7 @@ static int s_vcol_cache_valid2 = FALSE;
+@@ -868,6 +868,7 @@ disable_vcol_cache(void)
      void
  invalidate_vcol_cache(void)
  {
@@ -12,15 +12,15 @@ diff --git a/src/charset.c b/src/charset.c
      s_vcol_cache_valid1 = FALSE;
      s_vcol_cache_valid2 = FALSE;
  }
-@@ -886,6 +887,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -910,6 +911,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
  	cts->cts_ptr = saved_ptr;
  	cts->cts_vcol = vcol = saved_vcol;
      }
-+    Trace("win_linetabsize_cts 1: vcol=%d cts_ptr-cts_line=%d", cts->cts_vcol, cts->cts_ptr - cts->cts_line);
++    Trace("win_linetabsize_cts 1: vcol=%d cts_ptr-cts_line=%d s_use_vcol_cache:%d", cts->cts_vcol, cts->cts_ptr - cts->cts_line, s_use_vcol_cache);
+ 
      for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
  						      MB_PTR_ADV(cts->cts_ptr))
-     {
-@@ -921,6 +923,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -952,6 +954,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
  	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
      }
  #endif
@@ -28,17 +28,17 @@ diff --git a/src/charset.c b/src/charset.c
  }
  
  /*
-@@ -1649,6 +1652,9 @@ getvcol(
+@@ -1687,6 +1690,9 @@ getvcol(
  	    ptr = saved_ptr;
  	    vcol = saved_vcol;
  	}
-+	Trace("getvcol 1: vcol=%d pos->col=%d", vcol, pos->col);
++	Trace("getvcol 1: vcol=%d pos->col=%d s_use_vcol_cache:%d", vcol, pos->col, s_use_vcol_cache);
 +	Trace("getvcol 1: old_line=%p line=%p saved_ptr=%p", old_line, line, saved_ptr);
 +	Trace("getvcol 1: line=\"%s\"", line);
  	for (;;)
  	{
  	    head = 0;
-@@ -1704,6 +1710,7 @@ getvcol(
+@@ -1744,6 +1750,7 @@ getvcol(
  		old_line = line;
  		old_cond = 1;
  		s_vcol_cache_valid2 = TRUE;
@@ -46,17 +46,17 @@ diff --git a/src/charset.c b/src/charset.c
  	    }
  	    vcol += incr;
  	    ptr = next_ptr;
-@@ -1721,6 +1728,9 @@ getvcol(
+@@ -1765,6 +1772,9 @@ getvcol(
  	    cts.cts_ptr = saved_ptr;
  	    cts.cts_vcol = saved_vcol;
  	}
-+	Trace("getvcol 2: cts.cts_vcol=%d pos->col=%d", cts.cts_vcol, pos->col);
++	Trace("getvcol 2: cts.cts_vcol=%d pos->col=%d s_use_vcol_cache:%d", cts.cts_vcol, pos->col, s_use_vcol_cache);
 +	Trace("getvcol 2: old_line=%p line=%p saved_ptr=%p", old_line, line, saved_ptr);
 +	Trace("getvcol 2: line=\"%s\"", line);
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1798,6 +1808,7 @@ getvcol(
+@@ -1848,6 +1858,7 @@ getvcol(
  	    *cursor = vcol + head;	    // cursor at start
  	}
      }
