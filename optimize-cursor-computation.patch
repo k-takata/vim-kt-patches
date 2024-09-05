@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent  be075d8a8aaec7d4b6c12b11ec030e278b7dd0ef
+# Parent  1c884a5bbbb83d8b271ca855b6db0c27fec5a5a3
 
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
@@ -211,17 +211,6 @@ diff --git a/src/evalfunc.c b/src/evalfunc.c
  	getvvcol(curwin, fp, &vcol_start, NULL, &vcol_end);
  	++vcol_start;
  	++vcol_end;
-diff --git a/src/mbyte.c b/src/mbyte.c
---- a/src/mbyte.c
-+++ b/src/mbyte.c
-@@ -5657,6 +5657,7 @@ f_setcellwidths(typval_T *argvars, typva
- 	// Clearing the table.
- 	VIM_CLEAR(cw_table);
- 	cw_table_size = 0;
-+	invalidate_vcol_cache();
- 	return;
-     }
- 
 diff --git a/src/memline.c b/src/memline.c
 --- a/src/memline.c
 +++ b/src/memline.c
