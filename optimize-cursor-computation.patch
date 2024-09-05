@@ -4,12 +4,25 @@
 diff --git a/src/charset.c b/src/charset.c
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -849,16 +849,56 @@ linetabsize_no_outer(win_T *wp, linenr_T
+@@ -849,16 +849,85 @@ linetabsize_no_outer(win_T *wp, linenr_T
  #endif
  }
  
++static int s_use_vcol_cache = FALSE;
 +static int s_vcol_cache_valid1 = FALSE;
 +static int s_vcol_cache_valid2 = FALSE;
++
++    void
++enable_vcol_cache(void)
++{
++    s_use_vcol_cache = TRUE;
++}
++
++    void
++disable_vcol_cache(void)
++{
++    s_use_vcol_cache = TRUE;
++}
 +
 +    void
 +invalidate_vcol_cache(void)
@@ -25,33 +38,49 @@ diff --git a/src/charset.c b/src/charset.c
 +    static char_u   *saved_ptr = NULL;
 +    static colnr_T  saved_vcol = 0;
 +    colnr_T slen = len;
-+    colnr_T col_save;
++    colnr_T col_save = 0;
      vimlong_T vcol = cts->cts_vcol;
 +
  #ifdef FEAT_PROP_POPUP
      cts->cts_with_trailing = len == MAXCOL;
  #endif
-+    if (slen == MAXCOL)
-+	slen = STRLEN(cts->cts_line);
-+    col_save = (colnr_T)((varnumber_T)slen * 4 / 5);
-+    if (slen - col_save > 4096)
-+	col_save = slen - 4096;
++
++    if (s_use_vcol_cache)
++    {
++	if (slen == MAXCOL)
++	    slen = STRLEN(cts->cts_line);
++	col_save = (colnr_T)((varnumber_T)slen * 4 / 5);
++	if (slen - col_save > 4096)
++	    col_save = slen - 4096;
++    }
++    else
++	s_vcol_cache_valid1 = FALSE;
 +    if (s_vcol_cache_valid1
 +	    && (old_line != NULL)
 +	    && (old_line == cts->cts_line)
 +	    && (saved_ptr >= cts->cts_line)
-+	    && (saved_ptr < cts->cts_line + slen))
++	    && (saved_ptr < cts->cts_line + slen)
++#ifdef FEAT_PROP_POPUP
++	    && !cts->cts_has_prop_with_text
++#endif
++       )
 +    {
 +	cts->cts_ptr = saved_ptr;
 +	cts->cts_vcol = vcol = saved_vcol;
 +    }
++
      for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
  						      MB_PTR_ADV(cts->cts_ptr))
      {
-+	if ((cts->cts_ptr > cts->cts_line)
++	if (s_use_vcol_cache
++		&& (cts->cts_ptr > cts->cts_line)
 +		&& (cts->cts_ptr - cts->cts_line <= col_save)
 +		&& (cts->cts_ptr + (*mb_ptr2len)(cts->cts_ptr) - cts->cts_line
-+			>= col_save))
++			>= col_save)
++#ifdef FEAT_PROP_POPUP
++		&& !cts->cts_has_prop_with_text
++#endif
++	   )
 +	{
 +	    saved_ptr = cts->cts_ptr;
 +	    saved_vcol = vcol;
@@ -61,11 +90,11 @@ diff --git a/src/charset.c b/src/charset.c
  	vcol += win_lbr_chartabsize(cts, NULL);
  	if (vcol > MAXCOL)
  	{
-@@ -1569,6 +1609,11 @@ getvcol(
+@@ -1569,6 +1638,11 @@ getvcol(
  #ifdef FEAT_PROP_POPUP
      int		on_NUL = FALSE;
  #endif
-+    colnr_T	col_save;
++    colnr_T	col_save = 0;
 +    static char_u   *old_line = NULL;
 +    static char_u   *saved_ptr = NULL;
 +    static colnr_T  saved_vcol = 0;
@@ -73,17 +102,23 @@ diff --git a/src/charset.c b/src/charset.c
  
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
-@@ -1576,6 +1621,9 @@ getvcol(
+@@ -1576,6 +1650,15 @@ getvcol(
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
-+    col_save = (colnr_T)((varnumber_T)pos->col * 4 / 5);
-+    if (pos->col - col_save > 4096)
-+	col_save = pos->col - 4096;
++    if (s_use_vcol_cache)
++    {
++	col_save = (colnr_T)((varnumber_T)pos->col * 4 / 5);
++	if (pos->col - col_save > 4096)
++	    col_save = pos->col - 4096;
++    }
++    else
++	s_vcol_cache_valid2 = FALSE;
++
      /*
       * This function is used very often, do some speed optimizations.
       * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
-@@ -1591,6 +1639,16 @@ getvcol(
+@@ -1591,6 +1674,16 @@ getvcol(
  #endif
         )
      {
@@ -100,11 +135,12 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1637,12 +1695,32 @@ getvcol(
+@@ -1637,12 +1730,37 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
-+	    if ((ptr > line)
++	    if (s_use_vcol_cache
++		    && (ptr > line)
 +		    && (ptr - line <= col_save)
 +		    && (next_ptr - line >= col_save))
 +	    {
@@ -125,7 +161,11 @@ diff --git a/src/charset.c b/src/charset.c
 +		&& (old_line == line)
 +		&& (saved_ptr >= line)
 +		&& (saved_ptr < line + pos->col)
-+		&& (old_cond == 2))
++		&& (old_cond == 2)
++#ifdef FEAT_PROP_POPUP
++		&& !cts.cts_has_prop_with_text
++#endif
++	   )
 +	{
 +	    cts.cts_ptr = saved_ptr;
 +	    cts.cts_vcol = saved_vcol;
@@ -133,13 +173,18 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1670,6 +1748,16 @@ getvcol(
+@@ -1670,6 +1788,21 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
-+	    if ((cts.cts_ptr > line)
++	    if (s_use_vcol_cache
++		    && (cts.cts_ptr > line)
 +		    && (cts.cts_ptr - line <= col_save)
-+		    && (next_ptr - line >= col_save))
++		    && (next_ptr - line >= col_save)
++#ifdef FEAT_PROP_POPUP
++		    && !cts.cts_has_prop_with_text
++#endif
++		    )
 +	    {
 +		saved_ptr = next_ptr;
 +		saved_vcol = cts.cts_vcol + incr;
@@ -218,24 +263,43 @@ diff --git a/src/move.c b/src/move.c
      wp->w_lines_valid = 0;
      changed_line_abv_curs_win(wp);
      wp->w_valid &= ~(VALID_BOTLINE|VALID_BOTLINE_AP|VALID_TOPLINE);
-diff --git a/src/option.c b/src/option.c
---- a/src/option.c
-+++ b/src/option.c
-@@ -2751,6 +2751,7 @@ did_set_option(
- 	*p = *p | P_INSECURE;
-     else if (new_value)
- 	*p = *p & ~P_INSECURE;
-+    invalidate_vcol_cache();
+@@ -1143,6 +1144,7 @@ curs_columns(
+     long	siso = get_sidescrolloff_value();
+     int		did_sub_skipcol = FALSE;
+ 
++    enable_vcol_cache();
+     /*
+      * First make sure that w_topline is valid (after moving the cursor).
+      */
+@@ -1426,6 +1428,8 @@ curs_columns(
+     curwin->w_valid_skipcol = curwin->w_skipcol;
+ 
+     curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
++
++    disable_vcol_cache();
  }
  
- /*
+ #if (defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)) || defined(PROTO)
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -3958,6 +3958,7 @@ do_pending_operator(cmdarg_T *cap, int o
+ 
+ 	if (VIsual_active || redo_VIsual_busy)
+ 	{
++	    invalidate_vcol_cache();
+ 	    get_op_vcol(oap, redo_VIsual.rv_vcol, TRUE);
+ 
+ 	    if (!redo_VIsual_busy && !gui_yank)
 diff --git a/src/proto/charset.pro b/src/proto/charset.pro
 --- a/src/proto/charset.pro
 +++ b/src/proto/charset.pro
-@@ -21,6 +21,7 @@ int linetabsize_col(int startcol, char_u
+@@ -21,6 +21,9 @@ int linetabsize_col(int startcol, char_u
  int win_linetabsize(win_T *wp, linenr_T lnum, char_u *line, colnr_T len);
  int linetabsize(win_T *wp, linenr_T lnum);
  int linetabsize_no_outer(win_T *wp, linenr_T lnum);
++void enable_vcol_cache(void);
++void disable_vcol_cache(void);
 +void invalidate_vcol_cache(void);
  void win_linetabsize_cts(chartabsize_T *cts, colnr_T len);
  int vim_isIDc(int c);

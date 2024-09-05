@@ -64,3 +64,86 @@ diff --git a/src/charset.c b/src/charset.c
  }
  
  /*
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -300,6 +300,7 @@ shift_block(oparg_T *oap, int amount)
+     p_ri = 0;			// don't want revins in indent
+ #endif
+ 
++    Trace("shift_block");
+     State = MODE_INSERT;	// don't want MODE_REPLACE for State
+     block_prep(oap, &bd, curwin->w_cursor.lnum, TRUE);
+     if (bd.is_short)
+@@ -523,6 +524,7 @@ block_insert(
+ 
+     State = MODE_INSERT;	// don't want MODE_REPLACE for State
+ 
++    Trace("block_insert");
+     for (lnum = oap->start.lnum + 1; lnum <= oap->end.lnum; lnum++)
+     {
+ 	block_prep(oap, bdp, lnum, TRUE);
+@@ -642,6 +644,7 @@ op_delete(oparg_T *oap)
+     linenr_T		old_lcount = curbuf->b_ml.ml_line_count;
+     int			did_yank = FALSE;
+ 
++    Trace("op_delete");
+     if (curbuf->b_ml.ml_flags & ML_EMPTY)	    // nothing to do
+ 	return OK;
+ 
+@@ -1049,6 +1052,7 @@ op_replace(oparg_T *oap, int c)
+     char_u		*after_p = NULL;
+     int			had_ctrl_v_cr = FALSE;
+ 
++    Trace("op_replace");
+     if ((curbuf->b_ml.ml_flags & ML_EMPTY ) || oap->empty)
+ 	return OK;	    // nothing to do
+ 
+@@ -1521,6 +1525,7 @@ op_insert(oparg_T *oap, long count1)
+     pos_T		t1;
+     pos_T		start_insert;
+ 
++    Trace("op_insert");
+     // edit() changes this - record it for OP_APPEND
+     bd.is_MAX = (curwin->w_curswant == MAXCOL);
+ 
+@@ -1552,6 +1557,7 @@ op_insert(oparg_T *oap, long count1)
+ 	    curwin->w_ve_flags = old_ve_flags;
+ 	}
+ 	// Get the info about the block before entering the text
++	Trace("op_insert 1");
+ 	block_prep(oap, &bd, oap->start.lnum, TRUE);
+ 	// Get indent information
+ 	ind_pre_col = (colnr_T)getwhitecols_curline();
+@@ -1677,6 +1683,7 @@ op_insert(oparg_T *oap, long count1)
+ 	    oap->end.col += ind_post_col - ind_pre_col;
+ 	    oap->end_vcol += ind_post_vcol - ind_pre_vcol;
+ 	}
++	Trace("op_insert 2");
+ 	block_prep(oap, &bd2, oap->start.lnum, TRUE);
+ 	if (did_indent && bd.textcol - ind_post_col > 0)
+ 	{
+@@ -1762,6 +1769,7 @@ op_change(oparg_T *oap)
+     char_u		*ins_text, *newp, *oldp;
+     struct block_def	bd;
+ 
++    Trace("op_change");
+     l = oap->start.col;
+     if (oap->motion_type == MLINE)
+     {
+@@ -2303,6 +2311,7 @@ block_prep(
+     int		lbr_saved = reset_lbr();
+ #endif
+ 
++    Trace("block_prep");
+     bdp->startspaces = 0;
+     bdp->endspaces = 0;
+     bdp->textlen = 0;
+@@ -3724,6 +3733,7 @@ do_pending_operator(cmdarg_T *cap, int o
+ 
+     int		    include_line_break = FALSE;
+ 
++    Trace("do_pending_operator");
+ #if defined(FEAT_CLIPBOARD)
+     // Yank the visual area into the GUI selection register before we operate
+     // on it and lose it forever.
