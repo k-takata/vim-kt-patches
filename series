@@ -32,6 +32,8 @@ msvc-show-vc-version.patch
 optimize-mem-alloc-for-insertion.patch
 win32-assert-gui.patch
 optimize-cursor-computation.patch
+optimize-cursor-computation2.patch
+remove-enable-disable_vcol_cache.patch
 wip-cursor-add-trace.patch #+wip
 wip-cursor-disable.patch #+wip
 debug-cursor-computation.patch #+wip
