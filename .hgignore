@@ -1,7 +1,0 @@
-^\.hg
-^\.mq
-syntax: glob
-status
-guards
-*~
-.*.sw?
