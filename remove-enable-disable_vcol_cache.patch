@@ -1,10 +1,19 @@
-# HG changeset patch
-# Parent  06534187db909127a44bc4a80aa4f49c599c0f38
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/charset.c         |   54 +++++++++++++------------------------------------
+ src/move.c            |    3 ---
+ src/proto/charset.pro |    2 --
+ 3 files changed, 14 insertions(+), 45 deletions(-)
 
 diff --git a/src/charset.c b/src/charset.c
+index 268788222..4dbe0481e 100644
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -849,23 +849,10 @@ linetabsize_no_outer(win_T *wp, linenr_T
+@@ -895,22 +895,9 @@ linetabsize_no_outer(win_T *wp, linenr_T lnum)
  #endif
  }
  
@@ -12,7 +21,7 @@ diff --git a/src/charset.c b/src/charset.c
  static int s_vcol_cache_valid1 = FALSE;
  static int s_vcol_cache_valid2 = FALSE;
  
-     void
+-    void
 -enable_vcol_cache(void)
 -{
 -    s_use_vcol_cache = TRUE;
@@ -24,11 +33,10 @@ diff --git a/src/charset.c b/src/charset.c
 -    s_use_vcol_cache = FALSE;
 -}
 -
--    void
+     void
  invalidate_vcol_cache(void)
  {
-     s_vcol_cache_valid1 = FALSE;
-@@ -887,21 +874,16 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -933,21 +920,16 @@ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
      cts->cts_with_trailing = len == MAXCOL;
  #endif
  
@@ -58,7 +66,7 @@ diff --git a/src/charset.c b/src/charset.c
      if (s_vcol_cache_valid1
  	    && (old_win != NULL) && (old_win == cts->cts_win)
  	    && (old_line != NULL) && (old_line == cts->cts_line)
-@@ -919,8 +901,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -965,8 +947,7 @@ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
      for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
  						      MB_PTR_ADV(cts->cts_ptr))
      {
@@ -68,7 +76,7 @@ diff --git a/src/charset.c b/src/charset.c
  		&& (cts->cts_ptr - cts->cts_line <= col_save)
  		&& (cts->cts_ptr + (*mb_ptr2len)(cts->cts_ptr) - cts->cts_line
  			>= col_save)
-@@ -1672,14 +1653,9 @@ getvcol(
+@@ -1725,14 +1706,9 @@ getvcol(
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
@@ -86,7 +94,7 @@ diff --git a/src/charset.c b/src/charset.c
  
      /*
       * This function is used very often, do some speed optimizations.
-@@ -1752,8 +1728,7 @@ getvcol(
+@@ -1805,8 +1781,7 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -96,7 +104,7 @@ diff --git a/src/charset.c b/src/charset.c
  		    && (ptr - line <= col_save)
  		    && (next_ptr - line >= col_save))
  	    {
-@@ -1811,8 +1786,7 @@ getvcol(
+@@ -1863,8 +1838,7 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -107,9 +115,10 @@ diff --git a/src/charset.c b/src/charset.c
  		    && (next_ptr - line >= col_save)
  #ifdef FEAT_PROP_POPUP
 diff --git a/src/move.c b/src/move.c
+index 103879181..b6113e364 100644
 --- a/src/move.c
 +++ b/src/move.c
-@@ -1144,7 +1144,6 @@ curs_columns(
+@@ -1158,7 +1158,6 @@ curs_columns(
      long	siso = get_sidescrolloff_value();
      int		did_sub_skipcol = FALSE;
  
@@ -117,7 +126,7 @@ diff --git a/src/move.c b/src/move.c
      /*
       * First make sure that w_topline is valid (after moving the cursor).
       */
-@@ -1428,8 +1427,6 @@ curs_columns(
+@@ -1442,8 +1441,6 @@ curs_columns(
      curwin->w_valid_skipcol = curwin->w_skipcol;
  
      curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
@@ -125,13 +134,14 @@ diff --git a/src/move.c b/src/move.c
 -    disable_vcol_cache();
  }
  
- #if (defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)) || defined(PROTO)
+ #if defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)
 diff --git a/src/proto/charset.pro b/src/proto/charset.pro
+index d4219eb82..631b7a589 100644
 --- a/src/proto/charset.pro
 +++ b/src/proto/charset.pro
-@@ -21,8 +21,6 @@ int linetabsize_col(int startcol, char_u
- int win_linetabsize(win_T *wp, linenr_T lnum, char_u *line, colnr_T len);
+@@ -24,8 +24,6 @@ int win_linetabsize(win_T *wp, linenr_T lnum, char_u *line, colnr_T len);
  int linetabsize(win_T *wp, linenr_T lnum);
+ int linetabsize_eol(win_T *wp, linenr_T lnum);
  int linetabsize_no_outer(win_T *wp, linenr_T lnum);
 -void enable_vcol_cache(void);
 -void disable_vcol_cache(void);

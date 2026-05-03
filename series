@@ -1,4 +1,4 @@
-debug-enable-Trace-also-on-release-build.patch #+debug
+debug-enable-Trace-also-on-release-build.patch #=debug-enable-Trace-also-on #+debug
 myconfiguration-for-cygwin.patch #+cygwin #+linux
 myconfiguration-for-linux-gui.patch #+linux
 myconfiguration-private-install.patch #+private-install
@@ -6,36 +6,36 @@ myconfiguration-clang.patch #+clang
 myconfiguration-for-gtk2.patch #+gtk2
 backout-7.3.638.patch #+disabled
 gtk2_force_redraw.diff #+gtk2
-2005-ambiwidth_auto.diff
-ambiwidth_auto-mark.diff
-win32-directwrite-ambiwidth-auto.patch
+2005-ambiwidth_auto.diff #=2005-ambiwidth_auto.diff
+ambiwidth_auto-mark.diff #=ambiwidth_auto-mark.diff
+win32-directwrite-ambiwidth-auto.patch #=win32-directwrite-ambiwidth
 cpo-N.diff #+rejected
 cpo-N-mark.diff #+rejected
 cpo-N-update-tags.patch #+rejected
-redraw-after-undo.patch #-undo1
+redraw-after-undo.patch #=redraw-after-undo.patch #-undo1
 add-smsg_attr_keep.patch #+undo1
 subpixel-artifacts.patch #+disabled
 fix-italic-overhang-before-space.patch #+disabled
-update-rubyinc-dir-ext.patch
+update-rubyinc-dir-ext.patch #=update-rubyinc-dir-ext.patch
 fix-char_u-usage.patch #+disabled
 add-getpackages.patch #+disabled
 drop-support-for-glib-2.2.patch #+rejected
-support-tee-with-sp-on-windows.patch
-suppress-warnings.patch
-wip-autocmd-searchhitbt.patch #+wip
-win32-mouse-flaky.patch
-wip-py3-hook-linux.patch #+wip
-debug-mswin_event.patch #+wip
-win32-store-exe-in-objdir.patch
-msvc-revise-use_msvcrt.patch
-msvc-show-vc-version.patch
-optimize-mem-alloc-for-insertion.patch
-win32-assert-gui.patch
-optimize-cursor-computation.patch
-optimize-cursor-computation2.patch
-remove-enable-disable_vcol_cache.patch
-wip-cursor-add-trace.patch #+wip
-wip-cursor-disable.patch #+wip
+support-tee-with-sp-on-windows.patch #=support-tee-with-sp-on
+suppress-warnings.patch #=suppress-warnings.patch
+wip-autocmd-searchhitbt.patch #=wip-autocmd-searchhitbt.patch #+wip
+win32-mouse-flaky.patch #=win32-mouse-flaky.patch
+wip-py3-hook-linux.patch #=wip-py3-hook-linux.patch #+wip
+debug-mswin_event.patch #=debug-mswin_event.patch #+wip
+win32-store-exe-in-objdir.patch #=win32-store-exe-in
+msvc-revise-use_msvcrt.patch #=msvc-revise-use_msvcrt.patch
+msvc-show-vc-version.patch #=msvc-show-vc-version.patch
+optimize-mem-alloc-for-insertion.patch #=optimize-mem-alloc-for-insertion.patch
+win32-assert-gui.patch #=win32-assert-gui.patch
+optimize-cursor-computation.patch #=optimize-cursor-computation.patch
+optimize-cursor-computation2.patch #=optimize-cursor
+remove-enable-disable_vcol_cache.patch #=remove-enable-disable_vcol_cache.patch
+wip-cursor-add-trace.patch #=wip-cursor-add-trace.patch #+wip
+wip-cursor-disable.patch #=wip-cursor-disable.patch #+wip
 debug-cursor-computation.patch #+wip
 wip-optimize-insertion-2.patch #+wip
 fix-config_cache-removal.patch #+rejected

@@ -1,10 +1,22 @@
-# HG changeset patch
-# Parent  b483950b7d906b68d588a04d2b94c07683e6dba0
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/getchar.c                    |    1 +
+ src/misc1.c                      |    1 +
+ src/mouse.c                      |    4 ++++
+ src/os_win32.c                   |   23 ++++++++++++++++++++++-
+ src/term.c                       |    1 +
+ src/testdir/test_mswin_event.vim |    1 +
+ 6 files changed, 30 insertions(+), 1 deletion(-)
 
 diff --git a/src/getchar.c b/src/getchar.c
+index e825498c5..ea99061ac 100644
 --- a/src/getchar.c
 +++ b/src/getchar.c
-@@ -2490,6 +2490,7 @@ handle_mapping(
+@@ -2821,6 +2821,7 @@ handle_mapping(
  	    int *timedout,
  	    int *mapdepth)
  {
@@ -13,20 +25,22 @@ diff --git a/src/getchar.c b/src/getchar.c
      mapblock_T	*mp2;
      mapblock_T	*mp_match;
 diff --git a/src/misc1.c b/src/misc1.c
+index bc1d5b6b3..343a78b19 100644
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -831,6 +831,7 @@ get_keystroke(void)
+@@ -871,6 +871,7 @@ get_keystroke(void)
      int		save_mapped_ctrl_c = mapped_ctrl_c;
      int		waited = 0;
  
 +    Trace("get_keystroke()");
+     mod_mask = 0;
      mapped_ctrl_c = FALSE;	// mappings are not used here
      for (;;)
-     {
 diff --git a/src/mouse.c b/src/mouse.c
+index e043e1b4f..87a0d6561 100644
 --- a/src/mouse.c
 +++ b/src/mouse.c
-@@ -297,6 +297,7 @@ do_mouse(
+@@ -296,6 +296,7 @@ do_mouse(
  		vungetc(nc);
  		mouse_row = save_mouse_row;
  		mouse_col = save_mouse_col;
@@ -34,7 +48,7 @@ diff --git a/src/mouse.c b/src/mouse.c
  	    }
  	}
  	break;
-@@ -2325,6 +2326,7 @@ check_termcode_mouse(
+@@ -2353,6 +2354,7 @@ check_termcode_mouse(
  		    + bytes[2] - ' ' - 1;
  		mouse_row = 128 * (bytes[3] - ' ' - 1)
  		    + bytes[4] - ' ' - 1;
@@ -42,7 +56,7 @@ diff --git a/src/mouse.c b/src/mouse.c
  	    }
  	    else
  # endif
-@@ -2980,6 +2982,7 @@ check_termcode_mouse(
+@@ -3014,6 +3016,7 @@ check_termcode_mouse(
      if (mouse_row >= Rows)
  	mouse_row = Rows - 1;
  
@@ -50,7 +64,7 @@ diff --git a/src/mouse.c b/src/mouse.c
      return 0;
  }
  
-@@ -3235,6 +3238,7 @@ f_getmousepos(typval_T *argvars UNUSED, 
+@@ -3288,6 +3291,7 @@ f_getmousepos(typval_T *argvars UNUSED, typval_T *rettv)
  
      dict_add_number(d, "screenrow", (varnumber_T)mouse_row + 1);
      dict_add_number(d, "screencol", (varnumber_T)mouse_col + 1);
@@ -59,9 +73,10 @@ diff --git a/src/mouse.c b/src/mouse.c
      wp = mouse_find_win(&row, &col, FIND_POPUP);
      if (wp != NULL)
 diff --git a/src/os_win32.c b/src/os_win32.c
+index 6ccd185f0..aa698de30 100644
 --- a/src/os_win32.c
 +++ b/src/os_win32.c
-@@ -341,11 +341,15 @@ read_console_input(
+@@ -247,11 +247,15 @@ read_console_input(
      int i;
      static INPUT_RECORD s_irPseudo;
  
@@ -77,7 +92,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      }
  
      if (nLength == -2)
-@@ -368,6 +372,13 @@ read_console_input(
+@@ -274,6 +278,13 @@ read_console_input(
  	ReadConsoleInputW(hInput, s_irCache, IRSIZE, &dwEvents);
  	s_dwIndex = 0;
  	s_dwMax = dwEvents;
@@ -91,7 +106,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	if (dwEvents == 0)
  	{
  	    *lpEvents = 0;
-@@ -413,10 +424,14 @@ read_console_input(
+@@ -319,10 +330,14 @@ read_console_input(
  	}
      }
  
@@ -106,7 +121,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      return TRUE;
  }
  
-@@ -1660,7 +1675,8 @@ decode_mouse_event(
+@@ -1664,7 +1679,8 @@ decode_mouse_event(
  		{
  		    // wait a short time for next input event
  		    if (WaitForSingleObject(g_hConIn, p_mouset / 3)
@@ -116,7 +131,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  			break;
  		    else
  		    {
-@@ -2124,6 +2140,7 @@ WaitForChar(long msec, int ignore_input)
+@@ -2144,6 +2160,7 @@ WaitForChar(long msec, int ignore_input)
      int		    tb_change_cnt = typebuf.tb_change_cnt;
  # endif
  
@@ -124,7 +139,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
      if (msec > 0)
  	// Wait until the specified time has elapsed.
  	dwEndTime = GetTickCount() + msec;
-@@ -2278,7 +2295,10 @@ WaitForChar(long msec, int ignore_input)
+@@ -2298,7 +2315,10 @@ WaitForChar(long msec, int ignore_input)
  	    }
  	    else if (ir.EventType == MOUSE_EVENT
  		    && decode_mouse_event(&ir.Event.MouseEvent))
@@ -135,7 +150,7 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  	}
  	else if (msec == 0)
  	    break;
-@@ -2374,6 +2394,7 @@ tgetch(int *pmodifiers, WCHAR *pch2)
+@@ -2394,6 +2414,7 @@ tgetch(int *pmodifiers, WCHAR *pch2)
  	    shell_resized();
  	else if (ir.EventType == MOUSE_EVENT)
  	{
@@ -144,9 +159,10 @@ diff --git a/src/os_win32.c b/src/os_win32.c
  		return 0;
  	}
 diff --git a/src/term.c b/src/term.c
+index 5e8b0945c..0571b16be 100644
 --- a/src/term.c
 +++ b/src/term.c
-@@ -6321,6 +6321,7 @@ check_termcode(
+@@ -6628,6 +6628,7 @@ handle_osc:
  		|| key_name[0] == KS_SGR_MOUSE
  		|| key_name[0] == KS_SGR_MOUSE_RELEASE)
  	{
@@ -155,9 +171,10 @@ diff --git a/src/term.c b/src/term.c
  							     &modifiers) == -1)
  		return -1;
 diff --git a/src/testdir/test_mswin_event.vim b/src/testdir/test_mswin_event.vim
+index 101051748..7a47ea10c 100644
 --- a/src/testdir/test_mswin_event.vim
 +++ b/src/testdir/test_mswin_event.vim
-@@ -718,6 +718,7 @@ func Test_mswin_event_mouse()
+@@ -733,6 +733,7 @@ func Test_mswin_event_mouse()
    let pos = getmousepos()
    call assert_equal(8, pos.screenrow)
    call assert_equal(13, pos.screencol)

@@ -1,10 +1,26 @@
-# HG changeset patch
-# Parent  bd19efdd875f8134b226da2e518349491473edce
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/charset.c    |   12 ++++++++++++
+ src/drawline.c   |   11 +++++++++++
+ src/drawscreen.c |   11 +++++++++++
+ src/edit.c       |    7 +++++++
+ src/misc1.c      |    5 +++++
+ src/move.c       |   12 ++++++++++++
+ src/normal.c     |    5 +++++
+ src/ops.c        |   10 ++++++++++
+ src/screen.c     |    6 ++++++
+ src/window.c     |    1 +
+ 10 files changed, 80 insertions(+)
 
 diff --git a/src/charset.c b/src/charset.c
+index 4dbe0481e..1c2ff7b25 100644
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -855,6 +855,7 @@ static int s_vcol_cache_valid2 = FALSE;
+@@ -901,6 +901,7 @@ static int s_vcol_cache_valid2 = FALSE;
      void
  invalidate_vcol_cache(void)
  {
@@ -12,7 +28,7 @@ diff --git a/src/charset.c b/src/charset.c
      s_vcol_cache_valid1 = FALSE;
      s_vcol_cache_valid2 = FALSE;
  }
-@@ -897,6 +898,8 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -943,6 +944,8 @@ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
  	cts->cts_ptr = saved_ptr;
  	cts->cts_vcol = vcol = saved_vcol;
      }
@@ -21,7 +37,7 @@ diff --git a/src/charset.c b/src/charset.c
  
      for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
  						      MB_PTR_ADV(cts->cts_ptr))
-@@ -938,6 +941,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+@@ -985,6 +988,7 @@ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
  	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
      }
  #endif
@@ -29,7 +45,7 @@ diff --git a/src/charset.c b/src/charset.c
  }
  
  /*
-@@ -1682,6 +1686,9 @@ getvcol(
+@@ -1735,6 +1739,9 @@ getvcol(
  	    ptr = saved_ptr;
  	    vcol = saved_vcol;
  	}
@@ -39,7 +55,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    head = 0;
-@@ -1738,6 +1745,7 @@ getvcol(
+@@ -1791,6 +1798,7 @@ getvcol(
  		old_line = line;
  		old_cond = 1;
  		s_vcol_cache_valid2 = TRUE;
@@ -47,7 +63,7 @@ diff --git a/src/charset.c b/src/charset.c
  	    }
  	    vcol += incr;
  	    ptr = next_ptr;
-@@ -1759,6 +1767,9 @@ getvcol(
+@@ -1812,6 +1820,9 @@ getvcol(
  	    cts.cts_ptr = saved_ptr;
  	    cts.cts_vcol = saved_vcol;
  	}
@@ -57,7 +73,7 @@ diff --git a/src/charset.c b/src/charset.c
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1841,6 +1852,7 @@ getvcol(
+@@ -1893,6 +1904,7 @@ getvcol(
  	    *cursor = vcol + head;	    // cursor at start
  	}
      }
@@ -66,9 +82,10 @@ diff --git a/src/charset.c b/src/charset.c
  
  /*
 diff --git a/src/drawline.c b/src/drawline.c
+index 8880cb9a8..437c20f93 100644
 --- a/src/drawline.c
 +++ b/src/drawline.c
-@@ -888,6 +888,9 @@ draw_screen_line(win_T *wp, winlinevars_
+@@ -920,6 +920,9 @@ draw_screen_line(win_T *wp, winlinevars_T *wlv)
      long	v;
      int		wcol;
  
@@ -78,7 +95,7 @@ diff --git a/src/drawline.c b/src/drawline.c
      // Highlight 'cursorcolumn' & 'colorcolumn' past end of the line.
      if (wp->w_p_wrap)
  	v = wlv->startrow == 0 ? wp->w_skipcol : 0;
-@@ -994,6 +997,9 @@ draw_screen_line(win_T *wp, winlinevars_
+@@ -1026,6 +1029,9 @@ draw_screen_line(win_T *wp, winlinevars_T *wlv)
      wlv->screen_line_flags &= ~SLF_INC_VCOL;
      ++wlv->row;
      ++wlv->screen_row;
@@ -88,7 +105,7 @@ diff --git a/src/drawline.c b/src/drawline.c
  }
  #undef VCOL_HLC
  
-@@ -1280,6 +1286,9 @@ win_line(
+@@ -1316,6 +1322,9 @@ win_line(
  # define VCOL_HLC (wlv.vcol - wlv.vcol_off_tp)
  #endif
  
@@ -98,7 +115,7 @@ diff --git a/src/drawline.c b/src/drawline.c
      if (startrow > endrow)		// past the end already!
  	return startrow;
  
-@@ -4371,5 +4380,7 @@ win_line(
+@@ -4507,5 +4516,7 @@ win_line(
  
      vim_free(wlv.p_extra_free);
      vim_free(wlv.saved_p_extra_free);
@@ -107,11 +124,12 @@ diff --git a/src/drawline.c b/src/drawline.c
      return wlv.row;
  }
 diff --git a/src/drawscreen.c b/src/drawscreen.c
+index bdaaaf0be..6f0429c5f 100644
 --- a/src/drawscreen.c
 +++ b/src/drawscreen.c
-@@ -93,6 +93,9 @@ update_screen(int type_arg)
-     int		no_update = FALSE;
-     int		save_pum_will_redraw = pum_will_redraw;
+@@ -102,6 +102,9 @@ update_screen(int type_arg)
+ #endif
+     bool	override_success;
  
 +    proftime_T tm;
 +    profile_start(&tm);
@@ -119,18 +137,18 @@ diff --git a/src/drawscreen.c b/src/drawscreen.c
      // Don't do anything if the screen structures are (not yet) valid.
      if (!screen_valid(TRUE))
  	return FAIL;
-@@ -397,6 +400,8 @@ update_screen(int type_arg)
- 	gui_update_scrollbars(FALSE);
-     }
- #endif
+@@ -438,6 +441,8 @@ update_screen(int type_arg)
+ 
+     term_set_sync_output(TERM_SYNC_OUTPUT_DISABLE);
+ 
 +    profile_end(&tm);
 +    Trace("update_screen: %s", profile_msg(&tm));
      return OK;
  }
  
-@@ -1469,6 +1474,9 @@ win_update(win_T *wp)
-     int		save_got_int;
+@@ -1530,6 +1535,9 @@ win_update(win_T *wp)
  #endif
+     bool	override_success;
  
 +    proftime_T tm;
 +    profile_start(&tm);
@@ -138,19 +156,21 @@ diff --git a/src/drawscreen.c b/src/drawscreen.c
  #if defined(FEAT_SEARCH_EXTRA) || defined(FEAT_CLIPBOARD)
      // This needs to be done only for the first window when update_screen() is
      // called.
-@@ -2801,6 +2809,8 @@ win_update(win_T *wp)
-     if (!got_int)
- 	got_int = save_got_int;
- #endif
+@@ -2869,6 +2877,9 @@ win_update(win_T *wp)
+ 
+     if (override_success)
+ 	pop_highlight_overrides();
++
 +    profile_end(&tm);
 +    Trace("win_update: %s", profile_msg(&tm));
  }
  
  #if defined(FEAT_NETBEANS_INTG) || defined(FEAT_GUI)
 diff --git a/src/edit.c b/src/edit.c
+index ef32bfd3e..b53512529 100644
 --- a/src/edit.c
 +++ b/src/edit.c
-@@ -2709,6 +2709,9 @@ oneright(void)
+@@ -2797,6 +2797,9 @@ oneright(void)
      int
  oneleft(void)
  {
@@ -160,7 +180,7 @@ diff --git a/src/edit.c b/src/edit.c
      if (virtual_active())
      {
  #ifdef FEAT_LINEBREAK
-@@ -2750,6 +2753,8 @@ oneleft(void)
+@@ -2838,6 +2841,8 @@ oneleft(void)
  
  	curwin->w_set_curswant = TRUE;
  	adjust_skipcol();
@@ -169,7 +189,7 @@ diff --git a/src/edit.c b/src/edit.c
  	return OK;
      }
  
-@@ -2764,6 +2769,8 @@ oneleft(void)
+@@ -2852,6 +2857,8 @@ oneleft(void)
      if (has_mbyte)
  	mb_adjust_cursor();
      adjust_skipcol();
@@ -179,9 +199,10 @@ diff --git a/src/edit.c b/src/edit.c
  }
  
 diff --git a/src/misc1.c b/src/misc1.c
+index d0a2c0d9e..4995e7b29 100644
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -408,6 +408,9 @@ plines_win_nofold(win_T *wp, linenr_T ln
+@@ -408,6 +408,9 @@ plines_win_nofold(win_T *wp, linenr_T lnum)
      colnr_T	len;
      chartabsize_T cts;
  
@@ -191,7 +212,7 @@ diff --git a/src/misc1.c b/src/misc1.c
      s = ml_get_buf(wp->w_buffer, lnum, FALSE);
      len = ml_get_buf_len(wp->w_buffer, lnum);
      init_chartabsize_arg_len(&cts, wp, lnum, 0, s, s, len);
-@@ -426,6 +429,8 @@ plines_win_nofold(win_T *wp, linenr_T ln
+@@ -426,6 +429,8 @@ plines_win_nofold(win_T *wp, linenr_T lnum)
      if (wp->w_p_list && wp->w_lcs_chars.eol != NUL)
  	col += 1;
  
@@ -201,9 +222,10 @@ diff --git a/src/misc1.c b/src/misc1.c
       * Add column offset for 'number', 'relativenumber' and 'foldcolumn'.
       */
 diff --git a/src/move.c b/src/move.c
+index b6113e364..9410b616c 100644
 --- a/src/move.c
 +++ b/src/move.c
-@@ -839,10 +839,16 @@ cursor_valid(void)
+@@ -853,10 +853,16 @@ cursor_valid(void)
      void
  validate_cursor(void)
  {
@@ -219,8 +241,8 @@ diff --git a/src/move.c b/src/move.c
 +    Trace("validate_cursor: %s", profile_msg(&tm));
  }
  
- #if defined(FEAT_GUI) || defined(PROTO)
-@@ -1144,6 +1150,9 @@ curs_columns(
+ #if defined(FEAT_GUI)
+@@ -1158,6 +1164,9 @@ curs_columns(
      long	siso = get_sidescrolloff_value();
      int		did_sub_skipcol = FALSE;
  
@@ -230,7 +252,7 @@ diff --git a/src/move.c b/src/move.c
      /*
       * First make sure that w_topline is valid (after moving the cursor).
       */
-@@ -1427,6 +1436,9 @@ curs_columns(
+@@ -1441,6 +1450,9 @@ curs_columns(
      curwin->w_valid_skipcol = curwin->w_skipcol;
  
      curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
@@ -239,11 +261,12 @@ diff --git a/src/move.c b/src/move.c
 +    Trace("curs_columns: %s", profile_msg(&tm));
  }
  
- #if (defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)) || defined(PROTO)
+ #if defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)
 diff --git a/src/normal.c b/src/normal.c
+index 42e9eafec..623e0aad6 100644
 --- a/src/normal.c
 +++ b/src/normal.c
-@@ -3905,6 +3905,9 @@ nv_left(cmdarg_T *cap)
+@@ -3922,6 +3922,9 @@ nv_left(cmdarg_T *cap)
  {
      long	n;
  
@@ -253,7 +276,7 @@ diff --git a/src/normal.c b/src/normal.c
      if (mod_mask & (MOD_MASK_SHIFT | MOD_MASK_CTRL))
      {
  	// <C-Left> and <S-Left> move a word or WORD left
-@@ -3968,6 +3971,8 @@ nv_left(cmdarg_T *cap)
+@@ -3985,6 +3988,8 @@ nv_left(cmdarg_T *cap)
  					       && cap->oap->op_type == OP_NOP)
  	foldOpenCursor();
  #endif
@@ -263,9 +286,10 @@ diff --git a/src/normal.c b/src/normal.c
  
  /*
 diff --git a/src/ops.c b/src/ops.c
+index 4de54a849..2416c68b0 100644
 --- a/src/ops.c
 +++ b/src/ops.c
-@@ -300,6 +300,7 @@ shift_block(oparg_T *oap, int amount)
+@@ -436,6 +436,7 @@ shift_block(oparg_T *oap, int amount)
      p_ri = 0;			// don't want revins in indent
  #endif
  
@@ -273,7 +297,7 @@ diff --git a/src/ops.c b/src/ops.c
      State = MODE_INSERT;	// don't want MODE_REPLACE for State
      block_prep(oap, &bd, curwin->w_cursor.lnum, TRUE);
      if (bd.is_short)
-@@ -523,6 +524,7 @@ block_insert(
+@@ -659,6 +660,7 @@ block_insert(
  
      State = MODE_INSERT;	// don't want MODE_REPLACE for State
  
@@ -281,7 +305,7 @@ diff --git a/src/ops.c b/src/ops.c
      for (lnum = oap->start.lnum + 1; lnum <= oap->end.lnum; lnum++)
      {
  	block_prep(oap, bdp, lnum, TRUE);
-@@ -642,6 +644,7 @@ op_delete(oparg_T *oap)
+@@ -783,6 +785,7 @@ op_delete(oparg_T *oap)
      linenr_T		old_lcount = curbuf->b_ml.ml_line_count;
      int			did_yank = FALSE;
  
@@ -289,7 +313,7 @@ diff --git a/src/ops.c b/src/ops.c
      if (curbuf->b_ml.ml_flags & ML_EMPTY)	    // nothing to do
  	return OK;
  
-@@ -1049,6 +1052,7 @@ op_replace(oparg_T *oap, int c)
+@@ -1202,6 +1205,7 @@ op_replace(oparg_T *oap, int c)
      char_u		*after_p = NULL;
      int			had_ctrl_v_cr = FALSE;
  
@@ -297,7 +321,7 @@ diff --git a/src/ops.c b/src/ops.c
      if ((curbuf->b_ml.ml_flags & ML_EMPTY ) || oap->empty)
  	return OK;	    // nothing to do
  
-@@ -1521,6 +1525,7 @@ op_insert(oparg_T *oap, long count1)
+@@ -1674,6 +1678,7 @@ op_insert(oparg_T *oap, long count1)
      pos_T		t1;
      pos_T		start_insert;
  
@@ -305,7 +329,7 @@ diff --git a/src/ops.c b/src/ops.c
      // edit() changes this - record it for OP_APPEND
      bd.is_MAX = (curwin->w_curswant == MAXCOL);
  
-@@ -1552,6 +1557,7 @@ op_insert(oparg_T *oap, long count1)
+@@ -1705,6 +1710,7 @@ op_insert(oparg_T *oap, long count1)
  	    curwin->w_ve_flags = old_ve_flags;
  	}
  	// Get the info about the block before entering the text
@@ -313,7 +337,7 @@ diff --git a/src/ops.c b/src/ops.c
  	block_prep(oap, &bd, oap->start.lnum, TRUE);
  	// Get indent information
  	ind_pre_col = (colnr_T)getwhitecols_curline();
-@@ -1677,6 +1683,7 @@ op_insert(oparg_T *oap, long count1)
+@@ -1830,6 +1836,7 @@ op_insert(oparg_T *oap, long count1)
  	    oap->end.col += ind_post_col - ind_pre_col;
  	    oap->end_vcol += ind_post_vcol - ind_pre_vcol;
  	}
@@ -321,7 +345,7 @@ diff --git a/src/ops.c b/src/ops.c
  	block_prep(oap, &bd2, oap->start.lnum, TRUE);
  	if (did_indent && bd.textcol - ind_post_col > 0)
  	{
-@@ -1762,6 +1769,7 @@ op_change(oparg_T *oap)
+@@ -1915,6 +1922,7 @@ op_change(oparg_T *oap)
      char_u		*ins_text, *newp, *oldp;
      struct block_def	bd;
  
@@ -329,7 +353,7 @@ diff --git a/src/ops.c b/src/ops.c
      l = oap->start.col;
      if (oap->motion_type == MLINE)
      {
-@@ -2303,6 +2311,7 @@ block_prep(
+@@ -2457,6 +2465,7 @@ block_prep(
      int		lbr_saved = reset_lbr();
  #endif
  
@@ -337,7 +361,7 @@ diff --git a/src/ops.c b/src/ops.c
      bdp->startspaces = 0;
      bdp->endspaces = 0;
      bdp->textlen = 0;
-@@ -3724,6 +3733,7 @@ do_pending_operator(cmdarg_T *cap, int o
+@@ -3883,6 +3892,7 @@ do_pending_operator(cmdarg_T *cap, int old_col, int gui_yank)
  
      int		    include_line_break = FALSE;
  
@@ -346,11 +370,12 @@ diff --git a/src/ops.c b/src/ops.c
      // Yank the visual area into the GUI selection register before we operate
      // on it and lose it forever.
 diff --git a/src/screen.c b/src/screen.c
+index 01f9118d5..093b24bab 100644
 --- a/src/screen.c
 +++ b/src/screen.c
-@@ -487,6 +487,9 @@ screen_line(
-     int		    char_cells;		// 1: normal char
- 					// 2: occupies two display cells
+@@ -502,6 +502,9 @@ screen_line(
+     bool	    override_success =
+ 	push_highlight_overrides(wp->w_hl, wp->w_hl_len);
  
 +    proftime_T tm;
 +    profile_start(&tm);
@@ -358,19 +383,21 @@ diff --git a/src/screen.c b/src/screen.c
      // Check for illegal row and col, just in case.
      if (row >= Rows)
  	row = Rows - 1;
-@@ -887,6 +890,8 @@ screen_line(
- 	else
- 	    LineWraps[row] = FALSE;
-     }
+@@ -1076,6 +1079,9 @@ skip_opacity:
+ 
+     if (override_success)
+ 	pop_highlight_overrides();
++
 +    profile_end(&tm);
 +    Trace("screen_line: %s", profile_msg(&tm));
  }
  
- #if defined(FEAT_RIGHTLEFT) || defined(PROTO)
+ #if defined(FEAT_RIGHTLEFT)
 diff --git a/src/window.c b/src/window.c
+index defcc70e6..797dc013d 100644
 --- a/src/window.c
 +++ b/src/window.c
-@@ -7244,6 +7244,7 @@ scroll_to_fraction(win_T *wp, int prev_h
+@@ -7445,6 +7445,7 @@ scroll_to_fraction(win_T *wp, int prev_height)
      void
  win_new_width(win_T *wp, int width)
  {

@@ -1,10 +1,18 @@
-# HG changeset patch
-# Parent  e020940f8638fecb9ad307cab49ed58dd50d65da
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/Make_cyg_ming.mak |   17 +++++++++++++----
+ src/Make_mvc.mak      |   13 +++++++++----
+ 2 files changed, 22 insertions(+), 8 deletions(-)
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+index 0e14d6a15..ab49eed50 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -184,6 +184,7 @@ ifeq ($(CROSS),yes)
+@@ -186,6 +186,7 @@ ifeq ($(CROSS),yes)
   ifndef CROSS_COMPILE
  CROSS_COMPILE = i586-pc-mingw32msvc-
   endif
@@ -12,7 +20,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  DEL = rm -f
  MKDIR = mkdir -p
  DIRSLASH = /
-@@ -212,10 +213,12 @@ CROSS_COMPILE =
+@@ -214,10 +215,12 @@ CROSS_COMPILE =
  # In this case, unix-like commands can be used.
  #
   ifneq (sh.exe, $(SHELL))
@@ -25,7 +33,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  DEL = del
  MKDIR = mkdir
  DIRSLASH = \\
-@@ -1155,16 +1158,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStar
+@@ -1179,16 +1182,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStartup@0
   endif
  
  $(TARGET): $(OBJ)
@@ -50,7 +58,7 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  endif
  
  upx: exes
-@@ -1195,6 +1202,8 @@ clean:
+@@ -1219,6 +1226,8 @@ clean:
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcno
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcda
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
@@ -60,9 +68,10 @@ diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
  	-rmdir $(OUTDIR)
  	-$(DEL) $(MAIN_TARGET) vimrun.exe install.exe uninstall.exe
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+index 0b5a4b2b9..8601adc1d 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1304,19 +1304,23 @@ all:	$(MAIN_TARGET) \
+@@ -1315,19 +1315,23 @@ $(VIMDLLBASE).dll: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<
@@ -87,9 +96,9 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  		$(EXEOBJC) $(VIMDLLBASE).lib $(EXELIBC)
 +	copy /y $(OUTDIR:/=\)\$(VIM).exe $(VIM).exe > nul
  
- !else
+ !ELSE
  
-@@ -1327,11 +1331,12 @@ all:	$(MAIN_TARGET) \
+@@ -1338,11 +1342,12 @@ $(VIM).exe: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<
@@ -101,5 +110,5 @@ diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
  <<
 +	copy /y $(OUTDIR:/=\)\$(VIM).exe $(VIM).exe > nul
  
- !endif
+ !ENDIF
  

@@ -1,10 +1,17 @@
-# HG changeset patch
-# Parent  a5e33312bf4166b0e2a6994e6f9791b5ce3ac966
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/vim.h |   16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/src/vim.h b/src/vim.h
+index 530a42c66..47604e50b 100644
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -578,8 +578,8 @@ extern int (*dyn_libintl_wputenv)(const 
+@@ -610,8 +610,8 @@ extern int (*dyn_libintl_wputenv)(const wchar_t *envstring);
   */
  #ifdef FEAT_GETTEXT
  # ifdef DYNAMIC_GETTEXT
@@ -15,7 +22,7 @@ diff --git a/src/vim.h b/src/vim.h
  #  define N_(x) x
  #  define bindtextdomain(domain, dir) (*dyn_libintl_bindtextdomain)((domain), (dir))
  #  define bind_textdomain_codeset(domain, codeset) (*dyn_libintl_bind_textdomain_codeset)((domain), (codeset))
-@@ -590,7 +590,7 @@ extern int (*dyn_libintl_wputenv)(const 
+@@ -622,7 +622,7 @@ extern int (*dyn_libintl_wputenv)(const wchar_t *envstring);
  #  define libintl_wputenv(envstring) (*dyn_libintl_wputenv)(envstring)
  # else
  #  include <libintl.h>
@@ -24,7 +31,7 @@ diff --git a/src/vim.h b/src/vim.h
  #  define NGETTEXT(x, xs, n) ngettext((x), (xs), (n))
  #  ifdef gettext_noop
  #   define N_(x) gettext_noop(x)
-@@ -599,8 +599,8 @@ extern int (*dyn_libintl_wputenv)(const 
+@@ -631,8 +631,8 @@ extern int (*dyn_libintl_wputenv)(const wchar_t *envstring);
  #  endif
  # endif
  #else
@@ -35,9 +42,9 @@ diff --git a/src/vim.h b/src/vim.h
  # define N_(x) x
  # ifdef bindtextdomain
  #  undef bindtextdomain
-@@ -1778,11 +1778,11 @@ void *vim_memset(void *, int, size_t);
- # define MB_STRNICMP(d, s, n)	mb_strnicmp((char_u *)(d), (char_u *)(s), (int)(n))
- # define MB_STRNICMP2(d, s, n1, n2)	mb_strnicmp2((char_u *)(d), (char_u *)(s), (n1), (n2))
+@@ -1850,11 +1850,11 @@ void *vim_memset(void *, int, size_t);
+ #define MB_STRNICMP(d, s, n)	mb_strnicmp((char_u *)(d), (char_u *)(s), (int)(n))
+ #define MB_STRNICMP2(d, s, n1, n2)	mb_strnicmp2((char_u *)(d), (char_u *)(s), (n1), (n2))
  
 -#define STRCAT(d, s)	    strcat((char *)(d), (char *)(s))
 -#define STRNCAT(d, s, n)    strncat((char *)(d), (char *)(s), (size_t)(n))

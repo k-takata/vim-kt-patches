@@ -1,10 +1,20 @@
-# HG changeset patch
-# Parent  3cd6df7f8c83dc8b227fc7705ff9afa3d5cc65b4
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ runtime/doc/options.txt    |   12 ++++++---
+ runtime/doc/quickfix.txt   |   12 +++++----
+ src/option.c               |   20 +++++++++------
+ src/testdir/test_shell.vim |   57 ++++++++++++++++++++++++++++++--------------
+ 4 files changed, 66 insertions(+), 35 deletions(-)
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+index ae1658db5..4839c19f9 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -6956,10 +6956,14 @@ A jump table for the options with a shor
+@@ -7669,10 +7669,14 @@ A jump table for the options with a short description can be found at |Q_op|.
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
@@ -24,9 +34,10 @@ diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
  	in a file and echoed to the screen.  If the 'shell' option is "csh" or
  	"tcsh" after initializations, the default becomes "|& tee".  If the
 diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
+index 581d00b7a..65d5e3d2a 100644
 --- a/runtime/doc/quickfix.txt
 +++ b/runtime/doc/quickfix.txt
-@@ -968,11 +968,13 @@ or simpler >
+@@ -981,11 +981,13 @@ or simpler >
  "$*" can be given multiple times, for example: >
     :set makeprg=gcc\ -o\ $*\ $*
  
@@ -46,9 +57,10 @@ diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
  If 'shellpipe' is empty, the {errorfile} part will be omitted.  This is useful
  for compilers that write to an errorfile themselves (e.g., Manx's Amiga C).
 diff --git a/src/option.c b/src/option.c
+index a56dfa3ae..355500521 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -1013,10 +1013,11 @@ set_init_3(void)
+@@ -1129,10 +1129,11 @@ set_init_3(void)
  	    if (do_sp)
  	    {
  #  ifdef MSWIN
@@ -63,31 +75,7 @@ diff --git a/src/option.c b/src/option.c
  		options[idx_sp].def_val[VI_DEFAULT] = p_sp;
  	    }
  # endif
-@@ -1033,20 +1034,20 @@ set_init_3(void)
- 		    || fnamecmp(p, "powershell.exe") == 0
- 		)
- 	{
--# if defined(FEAT_QUICKFIX)
-+#  if defined(FEAT_QUICKFIX)
- 		if (do_sp)
- 		{
- 		    p_sp = (char_u *)"2>&1 | Out-File -Encoding default";
- 		    options[idx_sp].def_val[VI_DEFAULT] = p_sp;
- 		}
--# endif
-+#  endif
- 		if (do_srr)
- 		{
- 		    p_srr = (char_u *)"2>&1 | Out-File -Encoding default";
- 		    options[idx_srr].def_val[VI_DEFAULT] = p_srr;
- 		}
- 	}
--#endif
-+# endif
- 	else
- 	    // Always use POSIX shell style redirection if we reach this
- 	    if (       fnamecmp(p, "sh") == 0
-@@ -1062,6 +1063,7 @@ set_init_3(void)
+@@ -1178,6 +1179,7 @@ set_init_3(void)
  		    || fnamecmp(p, "pwsh") == 0
  # ifdef MSWIN
  		    || fnamecmp(p, "cmd") == 0
@@ -95,7 +83,7 @@ diff --git a/src/option.c b/src/option.c
  		    || fnamecmp(p, "sh.exe") == 0
  		    || fnamecmp(p, "ksh.exe") == 0
  		    || fnamecmp(p, "mksh.exe") == 0
-@@ -1069,7 +1071,8 @@ set_init_3(void)
+@@ -1185,7 +1187,8 @@ set_init_3(void)
  		    || fnamecmp(p, "zsh.exe") == 0
  		    || fnamecmp(p, "zsh-beta.exe") == 0
  		    || fnamecmp(p, "bash.exe") == 0
@@ -105,7 +93,7 @@ diff --git a/src/option.c b/src/option.c
  		    || fnamecmp(p, "dash.exe") == 0
  		    || fnamecmp(p, "pwsh.exe") == 0
  # endif
-@@ -1078,14 +1081,15 @@ set_init_3(void)
+@@ -1194,14 +1197,15 @@ set_init_3(void)
  # if defined(FEAT_QUICKFIX)
  		if (do_sp)
  		{
@@ -126,9 +114,10 @@ diff --git a/src/option.c b/src/option.c
  		}
  # endif
 diff --git a/src/testdir/test_shell.vim b/src/testdir/test_shell.vim
+index 647d34870..7243ffb23 100644
 --- a/src/testdir/test_shell.vim
 +++ b/src/testdir/test_shell.vim
-@@ -28,24 +28,45 @@ func Test_shell_options()
+@@ -25,24 +25,45 @@ func Test_shell_options()
            \ ['pwsh', '-c', '>%s 2>&1', '', '>%s 2>&1', '', '']]
    endif
    if has('win32')
