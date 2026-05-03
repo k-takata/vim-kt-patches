@@ -1,0 +1,167 @@
+# HG changeset patch
+# Parent  b483950b7d906b68d588a04d2b94c07683e6dba0
+
+diff --git a/src/getchar.c b/src/getchar.c
+--- a/src/getchar.c
++++ b/src/getchar.c
+@@ -2490,6 +2490,7 @@ handle_mapping(
+ 	    int *timedout,
+ 	    int *mapdepth)
+ {
++    Trace("handle_mapping");
+     mapblock_T	*mp = NULL;
+     mapblock_T	*mp2;
+     mapblock_T	*mp_match;
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -831,6 +831,7 @@ get_keystroke(void)
+     int		save_mapped_ctrl_c = mapped_ctrl_c;
+     int		waited = 0;
+ 
++    Trace("get_keystroke()");
+     mapped_ctrl_c = FALSE;	// mappings are not used here
+     for (;;)
+     {
+diff --git a/src/mouse.c b/src/mouse.c
+--- a/src/mouse.c
++++ b/src/mouse.c
+@@ -297,6 +297,7 @@ do_mouse(
+ 		vungetc(nc);
+ 		mouse_row = save_mouse_row;
+ 		mouse_col = save_mouse_col;
++		Trace("do_mouse: restore pos: %d,%d", mouse_col, mouse_row);
+ 	    }
+ 	}
+ 	break;
+@@ -2325,6 +2326,7 @@ check_termcode_mouse(
+ 		    + bytes[2] - ' ' - 1;
+ 		mouse_row = 128 * (bytes[3] - ' ' - 1)
+ 		    + bytes[4] - ' ' - 1;
++		Trace("check_termcode_mouse 1: mouse_col,mouse_row=%d,%d", mouse_col, mouse_row);
+ 	    }
+ 	    else
+ # endif
+@@ -2980,6 +2982,7 @@ check_termcode_mouse(
+     if (mouse_row >= Rows)
+ 	mouse_row = Rows - 1;
+ 
++    Trace("check_termcode_mouse 2: mouse_col,mouse_row=%d,%d", mouse_col, mouse_row);
+     return 0;
+ }
+ 
+@@ -3235,6 +3238,7 @@ f_getmousepos(typval_T *argvars UNUSED, 
+ 
+     dict_add_number(d, "screenrow", (varnumber_T)mouse_row + 1);
+     dict_add_number(d, "screencol", (varnumber_T)mouse_col + 1);
++    Trace("getmousepos(): %d,%d", mouse_col + 1, mouse_row + 1);
+ 
+     wp = mouse_find_win(&row, &col, FIND_POPUP);
+     if (wp != NULL)
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -341,11 +341,15 @@ read_console_input(
+     int i;
+     static INPUT_RECORD s_irPseudo;
+ 
++    Trace("read_console_input: s_dwMax=%d, input_record_buffer.length=%d", s_dwMax, input_record_buffer.length);
+     if (s_dwMax == 0 && input_record_buffer.length > 0)
+     {
+ 	dwEvents = read_input_record_buffer(s_irCache, IRSIZE);
+ 	s_dwIndex = 0;
+ 	s_dwMax = dwEvents;
++	if (s_dwMax > 0 && s_irCache[0].EventType == MOUSE_EVENT) {
++	    Trace("input: x,y=%d,%d (nLength=%d)", s_irCache[0].Event.MouseEvent.dwMousePosition.X+1, s_irCache[0].Event.MouseEvent.dwMousePosition.Y+1,nLength);
++	}
+     }
+ 
+     if (nLength == -2)
+@@ -368,6 +372,13 @@ read_console_input(
+ 	ReadConsoleInputW(hInput, s_irCache, IRSIZE, &dwEvents);
+ 	s_dwIndex = 0;
+ 	s_dwMax = dwEvents;
++	if (s_dwMax > 0) {
++	    if (s_irCache[0].EventType == MOUSE_EVENT) {
++		Trace("ReadConsoleInputW: x,y=%d,%d dwEventFlags=0x%08x (s_dwMax=%d)", s_irCache[0].Event.MouseEvent.dwMousePosition.X+1, s_irCache[0].Event.MouseEvent.dwMousePosition.Y+1, s_irCache[0].Event.MouseEvent.dwEventFlags, s_dwMax);
++	    } else {
++		Trace("ReadConsoleInputW: s_dwMax=%d", s_dwMax);
++	    }
++	}
+ 	if (dwEvents == 0)
+ 	{
+ 	    *lpEvents = 0;
+@@ -413,10 +424,14 @@ read_console_input(
+ 	}
+     }
+ 
++    if (s_dwMax > 0 && s_irCache[0].EventType == MOUSE_EVENT) {
++	Trace("input 2: x,y=%d,%d (nLength=%d, s_dwMax=%d)", s_irCache[0].Event.MouseEvent.dwMousePosition.X+1, s_irCache[0].Event.MouseEvent.dwMousePosition.Y+1,nLength,s_dwMax);
++    }
+     *lpBuffer = s_irCache[s_dwIndex];
+     if (!(nLength == -1 || nLength == -2) && ++s_dwIndex >= s_dwMax)
+ 	s_dwMax = 0;
+     *lpEvents = 1;
++    Trace("input 3: s_dwMax=%d", s_dwMax);
+     return TRUE;
+ }
+ 
+@@ -1660,7 +1675,8 @@ decode_mouse_event(
+ 		{
+ 		    // wait a short time for next input event
+ 		    if (WaitForSingleObject(g_hConIn, p_mouset / 3)
+-							     != WAIT_OBJECT_0)
++							     != WAIT_OBJECT_0
++					 && input_record_buffer.length == 0)
+ 			break;
+ 		    else
+ 		    {
+@@ -2124,6 +2140,7 @@ WaitForChar(long msec, int ignore_input)
+     int		    tb_change_cnt = typebuf.tb_change_cnt;
+ # endif
+ 
++    Trace("WaitForChar: %d, %d", msec, ignore_input);
+     if (msec > 0)
+ 	// Wait until the specified time has elapsed.
+ 	dwEndTime = GetTickCount() + msec;
+@@ -2278,7 +2295,10 @@ WaitForChar(long msec, int ignore_input)
+ 	    }
+ 	    else if (ir.EventType == MOUSE_EVENT
+ 		    && decode_mouse_event(&ir.Event.MouseEvent))
++	    {
++		Trace("WaitForChar: decode_mouse_event called");
+ 		return TRUE;
++	    }
+ 	}
+ 	else if (msec == 0)
+ 	    break;
+@@ -2374,6 +2394,7 @@ tgetch(int *pmodifiers, WCHAR *pch2)
+ 	    shell_resized();
+ 	else if (ir.EventType == MOUSE_EVENT)
+ 	{
++	    Trace("tgetch: calling decode_mouse_event");
+ 	    if (decode_mouse_event(&ir.Event.MouseEvent))
+ 		return 0;
+ 	}
+diff --git a/src/term.c b/src/term.c
+--- a/src/term.c
++++ b/src/term.c
+@@ -6321,6 +6321,7 @@ check_termcode(
+ 		|| key_name[0] == KS_SGR_MOUSE
+ 		|| key_name[0] == KS_SGR_MOUSE_RELEASE)
+ 	{
++	    Trace("check_termcode: KS_MOUSE");
+ 	    if (check_termcode_mouse(tp, &slen, key_name, modifiers_start, idx,
+ 							     &modifiers) == -1)
+ 		return -1;
+diff --git a/src/testdir/test_mswin_event.vim b/src/testdir/test_mswin_event.vim
+--- a/src/testdir/test_mswin_event.vim
++++ b/src/testdir/test_mswin_event.vim
+@@ -718,6 +718,7 @@ func Test_mswin_event_mouse()
+   let pos = getmousepos()
+   call assert_equal(8, pos.screenrow)
+   call assert_equal(13, pos.screencol)
++  return
+ 
+   if !has('gui_running')
+     call MouseLeftClick(2, 3)

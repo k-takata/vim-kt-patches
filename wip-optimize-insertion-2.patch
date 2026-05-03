@@ -1,0 +1,247 @@
+# HG changeset patch
+# Parent  e1f76572b4f3f6d39da97cc40dee84717c48f32c
+
+diff --git a/src/change.c b/src/change.c
+--- a/src/change.c
++++ b/src/change.c
+@@ -1117,9 +1117,21 @@ ins_char_bytes(char_u *buf, int charlen)
+ 	}
+     }
+ 
+-    newp = alloc(linelen + newlen - oldlen);
+-    if (newp == NULL)
+-	return;
++    int new_size = linelen + newlen - oldlen;
++    //Trace("ins_char_bytes(): ml_line_size: %d, new_size: %d", curbuf->b_ml.ml_line_size, new_size);
++    //Trace("ins_char_bytes(): ml_flags: %08x", curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED));
++    if (/*(curbuf->b_ml.ml_flags & (ML_ALLOCATED)) ==*/ 0
++	    || (curbuf->b_ml.ml_line_size < new_size))
++    {
++	//Trace("ins_char_bytes(): oldlen: %d, newlen: %d, new_size: %d", oldlen, newlen, new_size);
++	new_size = new_size * 3 / 2;
++	newp = alloc(new_size);
++	if (newp == NULL)
++	    return;
++	curbuf->b_ml.ml_line_size = new_size;
++    }
++    else
++	newp = oldp;
+ 
+     // Copy bytes before the cursor.
+     if (col > 0)
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -431,6 +431,7 @@ edit(
+      */
+     for (;;)
+     {
++	//Trace("for (;;), count=%d", count);
+ #ifdef FEAT_RIGHTLEFT
+ 	if (!revins_legal)
+ 	    revins_scol = -1;	    // reset on illegal motions
+@@ -493,6 +494,7 @@ edit(
+ 	}
+ #endif
+ 
++	//Trace("edit(): 1");
+ 	/*
+ 	 * If we inserted a character at the last position of the last line in
+ 	 * the window, scroll the window one line up. This avoids an extra
+@@ -547,6 +549,7 @@ edit(
+ #endif
+ 		    set_topline(curwin, curwin->w_topline + 1);
+ 	    }
++	    //Trace("edit(): 2");
+ 	}
+ 
+ 	// May need to adjust w_topline to show the cursor.
+@@ -555,8 +558,10 @@ edit(
+ 
+ 	did_backspace = FALSE;
+ 
++	//Trace("calling validate_cursor()");
+ 	if (count <= 1)
+ 	    validate_cursor();		// may set must_redraw
++	//Trace("validate_cursor() end");
+ 
+ 	/*
+ 	 * Redraw the display when no characters are waiting.
+@@ -599,7 +604,9 @@ edit(
+ 	else
+ 	    do
+ 	    {
++		//Trace("calling safe_vgetc()");
+ 		c = safe_vgetc();
++		//Trace("safe_vgetc(), %c %02x", c, c);
+ 
+ 		if (stop_insert_mode
+ #ifdef FEAT_TERMINAL
+@@ -832,6 +839,7 @@ do_intr:
+ 		break;
+ 	    }
+ doESCkey:
++	    //Trace("label doESCkey:");
+ 	    /*
+ 	     * This is the ONLY return from edit()!
+ 	     */
+@@ -1322,6 +1330,7 @@ docomplete:
+ #endif
+ 
+ normalchar:
++	    //Trace("label normalchar:");
+ 	    /*
+ 	     * Insert a normal character.
+ 	     */
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -2750,6 +2750,7 @@ errorret:
+ 	buf->b_ml.ml_line_len = 4;
+ 	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
+ 	buf->b_ml.ml_line_lnum = lnum;
++	buf->b_ml.ml_line_size = 0;
+ 	return questions;
+     }
+     if (lnum <= 0)			// pretend line 0 is line 1
+@@ -2759,6 +2760,7 @@ errorret:
+     {
+ 	buf->b_ml.ml_line_len = 1;
+ 	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
++	buf->b_ml.ml_line_size = 0;
+ 	return (char_u *)"";
+     }
+ 
+@@ -2819,6 +2821,7 @@ errorret:
+ #endif
+ 	    buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
+ 	buf->b_ml.ml_line_lnum = lnum;
++	buf->b_ml.ml_line_size = 0;
+ 	buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
+     }
+     if (will_change)
+@@ -3648,11 +3651,13 @@ ml_replace_len(
+ 	{
+ 	    char_u *newline;
+ 	    size_t textproplen = curbuf->b_ml.ml_line_len - oldtextlen;
++	    int new_size = len + (int)textproplen;
+ 
+ 	    // Need to copy over text properties, stored after the text.
+-	    newline = alloc(len + (int)textproplen);
++	    newline = alloc(new_size);
+ 	    if (newline != NULL)
+ 	    {
++		curbuf->b_ml.ml_line_size = new_size;
+ 		mch_memmove(newline, line, len);
+ 		mch_memmove(newline + len, curbuf->b_ml.ml_line_ptr
+ 						    + oldtextlen, textproplen);
+diff --git a/src/move.c b/src/move.c
+--- a/src/move.c
++++ b/src/move.c
+@@ -282,6 +282,7 @@ update_topline(void)
+     long	*so_ptr = curwin->w_p_so >= 0 ? &curwin->w_p_so : &p_so;
+     int		save_so = *so_ptr;
+ 
++    //Trace("update_topline");
+     // Cursor is updated instead when this is TRUE for 'splitkeep'.
+     if (skip_update_topline)
+ 	return;
+@@ -838,6 +839,7 @@ cursor_valid(void)
+     void
+ validate_cursor(void)
+ {
++    //Trace("validate_cursor");
+     check_cursor_lnum();
+     check_cursor_moved(curwin);
+     if ((curwin->w_valid & (VALID_WCOL|VALID_WROW)) != (VALID_WCOL|VALID_WROW))
+@@ -1143,6 +1145,7 @@ curs_columns(
+     long	siso = get_sidescrolloff_value();
+     int		did_sub_skipcol = FALSE;
+ 
++    //Trace("curs_columns");
+     /*
+      * First make sure that w_topline is valid (after moving the cursor).
+      */
+diff --git a/src/textprop.c b/src/textprop.c
+--- a/src/textprop.c
++++ b/src/textprop.c
+@@ -273,7 +273,8 @@ prop_add_one(
+ 	}
+ 
+ 	// Allocate the new line with space for the new property.
+-	newtext = alloc(buf->b_ml.ml_line_len + sizeof(textprop_T));
++	size_t new_size = buf->b_ml.ml_line_len + sizeof(textprop_T);
++	newtext = alloc(new_size);
+ 	if (newtext == NULL)
+ 	    goto theend;
+ 	// Copy the text, including terminating NUL.
+@@ -321,6 +322,7 @@ prop_add_one(
+ 	    vim_free(buf->b_ml.ml_line_ptr);
+ 	buf->b_ml.ml_line_ptr = newtext;
+ 	buf->b_ml.ml_line_len += sizeof(textprop_T);
++	buf->b_ml.ml_line_size = (int)new_size;
+ 	buf->b_ml.ml_flags |= ML_LINE_DIRTY;
+     }
+ 
+@@ -855,11 +857,12 @@ set_text_props(linenr_T lnum, char_u *pr
+ {
+     char_u  *text;
+     char_u  *newtext;
+-    int	    textlen;
++    int	    textlen, new_size;
+ 
+     text = ml_get(lnum);
+     textlen = ml_get_len(lnum) + 1;
+-    newtext = alloc(textlen + len);
++    new_size = textlen + len;
++    newtext = alloc(new_size);
+     if (newtext == NULL)
+ 	return;
+     mch_memmove(newtext, text, textlen);
+@@ -868,7 +871,8 @@ set_text_props(linenr_T lnum, char_u *pr
+     if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
+ 	vim_free(curbuf->b_ml.ml_line_ptr);
+     curbuf->b_ml.ml_line_ptr = newtext;
+-    curbuf->b_ml.ml_line_len = textlen + len;
++    curbuf->b_ml.ml_line_len = new_size;
++    curbuf->b_ml.ml_line_size = new_size;
+     curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ }
+ 
+@@ -881,9 +885,11 @@ add_text_props(linenr_T lnum, textprop_T
+     char_u  *text;
+     char_u  *newtext;
+     int	    proplen = text_prop_count * (int)sizeof(textprop_T);
++    int	    new_size;
+ 
+     text = ml_get(lnum);
+-    newtext = alloc(curbuf->b_ml.ml_line_len + proplen);
++    new_size = curbuf->b_ml.ml_line_len + proplen;
++    newtext = alloc(new_size);
+     if (newtext == NULL)
+ 	return;
+     mch_memmove(newtext, text, curbuf->b_ml.ml_line_len);
+@@ -892,6 +898,7 @@ add_text_props(linenr_T lnum, textprop_T
+ 	vim_free(curbuf->b_ml.ml_line_ptr);
+     curbuf->b_ml.ml_line_ptr = newtext;
+     curbuf->b_ml.ml_line_len += proplen;
++    curbuf->b_ml.ml_line_size = new_size;
+     curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ }
+ 
+@@ -1099,6 +1106,7 @@ f_prop_clear(typval_T *argvars, typval_T
+ 		if (buf->b_ml.ml_flags & ML_ALLOCATED)
+ 		    vim_free(buf->b_ml.ml_line_ptr);
+ 		buf->b_ml.ml_line_ptr = newtext;
++		buf->b_ml.ml_line_size = (int)STRLEN(newtext) + 1;
+ 		buf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ 	    }
+ 	    buf->b_ml.ml_line_len = (int)len;
+@@ -2296,6 +2304,7 @@ adjust_prop_columns(
+ 	}
+ 	curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
+ 	curbuf->b_ml.ml_line_len = newlen;
++	curbuf->b_ml.ml_line_size = 0;
+     }
+     return dirty;
+ }

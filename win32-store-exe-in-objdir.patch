@@ -1,0 +1,105 @@
+# HG changeset patch
+# Parent  e020940f8638fecb9ad307cab49ed58dd50d65da
+
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -184,6 +184,7 @@ ifeq ($(CROSS),yes)
+  ifndef CROSS_COMPILE
+ CROSS_COMPILE = i586-pc-mingw32msvc-
+  endif
++CP = cp
+ DEL = rm -f
+ MKDIR = mkdir -p
+ DIRSLASH = /
+@@ -212,10 +213,12 @@ CROSS_COMPILE =
+ # In this case, unix-like commands can be used.
+ #
+  ifneq (sh.exe, $(SHELL))
++CP = cp
+ DEL = rm -f
+ MKDIR = mkdir -p
+ DIRSLASH = /
+  else
++CP = copy /y
+ DEL = del
+ MKDIR = mkdir
+ DIRSLASH = \\
+@@ -1155,16 +1158,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStar
+  endif
+ 
+ $(TARGET): $(OBJ)
+-	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid -lgdi32 $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
++	$(LINK) $(CFLAGS) $(LFLAGS) -o $(OUTDIR)/$@ $(OBJ) $(LIB) -lole32 -luuid -lgdi32 $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
++	$(CP) $(OUTDIR)$(DIRSLASH)$@ $@
+ 
+ $(GVIMEXE): $(EXEOBJG) $(VIMDLLBASE).dll
+-	$(CC) -L. $(EXELFLAGS) -mwindows -o $@ $(EXEOBJG) -l$(VIMDLLBASE) $(EXEENTRYG)
++	$(CC) -L. $(EXELFLAGS) -mwindows -o $(OUTDIR)/$@ $(EXEOBJG) -l$(VIMDLLBASE) $(EXEENTRYG)
++	$(CP) $(OUTDIR)$(DIRSLASH)$@ $@
+ 
+ $(VIMEXE): $(EXEOBJC) $(VIMDLLBASE).dll
+-	$(CC) -L. $(EXELFLAGS) -o $@ $(EXEOBJC) -l$(VIMDLLBASE) $(EXEENTRYC)
++	$(CC) -L. $(EXELFLAGS) -o $(OUTDIR)/$@ $(EXEOBJC) -l$(VIMDLLBASE) $(EXEENTRYC)
++	$(CP) $(OUTDIR)$(DIRSLASH)$@ $@
+ else
+ $(TARGET): $(OBJ)
+-	$(LINK) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
++	$(LINK) $(CFLAGS) $(LFLAGS) -o $(OUTDIR)/$@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB) $(SODIUMLIB)
++	$(CP) $(OUTDIR)$(DIRSLASH)$@ $@
+ endif
+ 
+ upx: exes
+@@ -1195,6 +1202,8 @@ clean:
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcno
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcda
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
++	-$(DEL) $(OUTDIR)$(DIRSLASH)*.dll
++	-$(DEL) $(OUTDIR)$(DIRSLASH)*.exe
+ 	-$(DEL) $(OUTDIR)$(DIRSLASH)pathdef.c
+ 	-rmdir $(OUTDIR)
+ 	-$(DEL) $(MAIN_TARGET) vimrun.exe install.exe uninstall.exe
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -1304,19 +1304,23 @@ all:	$(MAIN_TARGET) \
+ 		$(XPM_OBJ) version.c version.h
+ 	$(CC) $(CFLAGS_OUTDIR) version.c
+ 	$(LINK) @<<
+-$(LINKARGS1) /dll -out:$(VIMDLLBASE).dll $(OBJ) $(XDIFF_OBJ)
++$(LINKARGS1) /dll -out:$(OUTDIR)\$(VIMDLLBASE).dll $(OBJ) $(XDIFF_OBJ)
+ $(GUI_OBJ) $(CUI_OBJ) $(OLE_OBJ) $(LUA_OBJ) $(MZSCHEME_OBJ) $(PERL_OBJ)
+ $(PYTHON_OBJ) $(PYTHON3_OBJ) $(RUBY_OBJ) $(TCL_OBJ) $(TERM_OBJ) $(SOUND_OBJ)
+ $(NETBEANS_OBJ) $(CHANNEL_OBJ) $(XPM_OBJ) $(OUTDIR)\version.obj $(LINKARGS2)
+ <<
++	copy /y $(OUTDIR:/=\)\$(VIMDLLBASE).dll $(VIMDLLBASE).dll > nul
++	copy /y $(OUTDIR:/=\)\$(VIMDLLBASE).lib $(VIMDLLBASE).lib > nul
+ 
+ $(GVIM).exe: $(OUTDIR) $(EXEOBJG) $(VIMDLLBASE).dll
+-	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(GVIM).exe \
++	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(OUTDIR)\$(GVIM).exe \
+ 		$(EXEOBJG) $(VIMDLLBASE).lib $(EXELIBC)
++	copy /y $(OUTDIR:/=\)\$(GVIM).exe $(GVIM).exe > nul
+ 
+ $(VIM).exe: $(OUTDIR) $(EXEOBJC) $(VIMDLLBASE).dll
+-	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM_CON) -out:$(VIM).exe \
++	$(LINK) $(LINKARGS1) /subsystem:$(SUBSYSTEM_CON) -out:$(OUTDIR)\$(VIM).exe \
+ 		$(EXEOBJC) $(VIMDLLBASE).lib $(EXELIBC)
++	copy /y $(OUTDIR:/=\)\$(VIM).exe $(VIM).exe > nul
+ 
+ !else
+ 
+@@ -1327,11 +1331,12 @@ all:	$(MAIN_TARGET) \
+ 		$(XPM_OBJ) version.c version.h
+ 	$(CC) $(CFLAGS_OUTDIR) version.c
+ 	$(LINK) @<<
+-$(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(VIM).exe $(OBJ) $(XDIFF_OBJ)
++$(LINKARGS1) /subsystem:$(SUBSYSTEM) -out:$(OUTDIR)\$(VIM).exe $(OBJ) $(XDIFF_OBJ)
+ $(GUI_OBJ) $(CUI_OBJ) $(OLE_OBJ) $(LUA_OBJ) $(MZSCHEME_OBJ) $(PERL_OBJ)
+ $(PYTHON_OBJ) $(PYTHON3_OBJ) $(RUBY_OBJ) $(TCL_OBJ) $(TERM_OBJ) $(SOUND_OBJ)
+ $(NETBEANS_OBJ) $(CHANNEL_OBJ) $(XPM_OBJ) $(OUTDIR)\version.obj $(LINKARGS2)
+ <<
++	copy /y $(OUTDIR:/=\)\$(VIM).exe $(VIM).exe > nul
+ 
+ !endif
+ 

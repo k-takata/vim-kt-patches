@@ -1,0 +1,10 @@
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -861,2 +861,6 @@
+ {   /* Add your patch description below this line */
++/**/
++#ifdef USE_AMBIWIDTH_AUTO
++    "ambiwidth_auto",
++#endif
+ /**/

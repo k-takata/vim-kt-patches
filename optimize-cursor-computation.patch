@@ -1,0 +1,300 @@
+# HG changeset patch
+# Parent  1c884a5bbbb83d8b271ca855b6db0c27fec5a5a3
+
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -849,16 +849,87 @@ linetabsize_no_outer(win_T *wp, linenr_T
+ #endif
+ }
+ 
++static int s_use_vcol_cache = FALSE;
++static int s_vcol_cache_valid1 = FALSE;
++static int s_vcol_cache_valid2 = FALSE;
++
++    void
++enable_vcol_cache(void)
++{
++    s_use_vcol_cache = TRUE;
++}
++
++    void
++disable_vcol_cache(void)
++{
++    s_use_vcol_cache = FALSE;
++}
++
++    void
++invalidate_vcol_cache(void)
++{
++    s_vcol_cache_valid1 = FALSE;
++    s_vcol_cache_valid2 = FALSE;
++}
++
+     void
+ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
+ {
++    static win_T    *old_win = NULL;
++    static char_u   *old_line = NULL;
++    static char_u   *saved_ptr = NULL;
++    static colnr_T  saved_vcol = 0;
++    colnr_T slen = len;
++    colnr_T col_save = 0;
+     vimlong_T vcol = cts->cts_vcol;
++
+ #ifdef FEAT_PROP_POPUP
+     cts->cts_with_trailing = len == MAXCOL;
+ #endif
++
++    if (s_use_vcol_cache)
++    {
++	if (slen == MAXCOL)
++	    slen = STRLEN(cts->cts_line);
++	col_save = (colnr_T)((varnumber_T)slen * 4 / 5);
++	if (slen - col_save > 4096)
++	    col_save = slen - 4096;
++    }
++    else
++	s_vcol_cache_valid1 = FALSE;
++    if (s_vcol_cache_valid1
++	    && (old_win != NULL) && (old_win == cts->cts_win)
++	    && (old_line != NULL) && (old_line == cts->cts_line)
++	    && (saved_ptr >= cts->cts_line)
++	    && (saved_ptr < cts->cts_line + slen)
++#ifdef FEAT_PROP_POPUP
++	    && !cts->cts_has_prop_with_text
++#endif
++       )
++    {
++	cts->cts_ptr = saved_ptr;
++	cts->cts_vcol = vcol = saved_vcol;
++    }
++
+     for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
+ 						      MB_PTR_ADV(cts->cts_ptr))
+     {
++	if (s_use_vcol_cache
++		&& (cts->cts_ptr > cts->cts_line)
++		&& (cts->cts_ptr - cts->cts_line <= col_save)
++		&& (cts->cts_ptr + (*mb_ptr2len)(cts->cts_ptr) - cts->cts_line
++			>= col_save)
++#ifdef FEAT_PROP_POPUP
++		&& !cts->cts_has_prop_with_text
++#endif
++	   )
++	{
++	    saved_ptr = cts->cts_ptr;
++	    saved_vcol = vcol;
++	    old_win = cts->cts_win;
++	    old_line = cts->cts_line;
++	    s_vcol_cache_valid1 = TRUE;
++	}
+ 	vcol += win_lbr_chartabsize(cts, NULL);
+ 	if (vcol > MAXCOL)
+ 	{
+@@ -1569,6 +1640,12 @@ getvcol(
+ #ifdef FEAT_PROP_POPUP
+     int		on_NUL = FALSE;
+ #endif
++    colnr_T	col_save = 0;
++    static win_T    *old_win = NULL;
++    static char_u   *old_line = NULL;
++    static char_u   *saved_ptr = NULL;
++    static colnr_T  saved_vcol = 0;
++    static int	    old_cond = 0;
+ 
+     vcol = 0;
+     line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
+@@ -1576,6 +1653,15 @@ getvcol(
+     init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
+     cts.cts_max_head_vcol = -1;
+ 
++    if (s_use_vcol_cache)
++    {
++	col_save = (colnr_T)((varnumber_T)pos->col * 4 / 5);
++	if (pos->col - col_save > 4096)
++	    col_save = pos->col - 4096;
++    }
++    else
++	s_vcol_cache_valid2 = FALSE;
++
+     /*
+      * This function is used very often, do some speed optimizations.
+      * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
+@@ -1591,6 +1677,16 @@ getvcol(
+ #endif
+        )
+     {
++	if (s_vcol_cache_valid2
++		&& (old_win != NULL) && (old_win == wp)
++		&& (old_line != NULL) && (old_line == line)
++		&& (saved_ptr >= line)
++		&& (saved_ptr < line + pos->col)
++		&& (old_cond == 1))
++	{
++	    ptr = saved_ptr;
++	    vcol = saved_vcol;
++	}
+ 	for (;;)
+ 	{
+ 	    head = 0;
+@@ -1637,12 +1733,38 @@ getvcol(
+ 	    if (next_ptr - line > pos->col) // character at pos->col
+ 		break;
+ 
++	    if (s_use_vcol_cache
++		    && (ptr > line)
++		    && (ptr - line <= col_save)
++		    && (next_ptr - line >= col_save))
++	    {
++		saved_ptr = next_ptr;
++		saved_vcol = vcol + incr;
++		old_win = wp;
++		old_line = line;
++		old_cond = 1;
++		s_vcol_cache_valid2 = TRUE;
++	    }
+ 	    vcol += incr;
+ 	    ptr = next_ptr;
+ 	}
+     }
+     else
+     {
++	if (s_vcol_cache_valid2
++		&& (old_win != NULL) && (old_win == wp)
++		&& (old_line != NULL) && (old_line == line)
++		&& (saved_ptr >= line)
++		&& (saved_ptr < line + pos->col)
++		&& (old_cond == 2)
++#ifdef FEAT_PROP_POPUP
++		&& !cts.cts_has_prop_with_text
++#endif
++	   )
++	{
++	    cts.cts_ptr = saved_ptr;
++	    cts.cts_vcol = saved_vcol;
++	}
+ 	for (;;)
+ 	{
+ 	    // A tab gets expanded, depending on the current column.
+@@ -1670,6 +1792,22 @@ getvcol(
+ 	    if (next_ptr - line > pos->col) // character at pos->col
+ 		break;
+ 
++	    if (s_use_vcol_cache
++		    && (cts.cts_ptr > line)
++		    && (cts.cts_ptr - line <= col_save)
++		    && (next_ptr - line >= col_save)
++#ifdef FEAT_PROP_POPUP
++		    && !cts.cts_has_prop_with_text
++#endif
++	       )
++	    {
++		saved_ptr = next_ptr;
++		saved_vcol = cts.cts_vcol + incr;
++		old_win = wp;
++		old_line = line;
++		old_cond = 2;
++		s_vcol_cache_valid2 = TRUE;
++	    }
+ 	    cts.cts_vcol += incr;
+ 	    cts.cts_ptr = next_ptr;
+ 	}
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -11942,6 +11942,7 @@ f_virtcol(typval_T *argvars, typval_T *r
+ 	    if (fp->col > len)
+ 		fp->col = len;
+ 	}
++	invalidate_vcol_cache();
+ 	getvvcol(curwin, fp, &vcol_start, NULL, &vcol_end);
+ 	++vcol_start;
+ 	++vcol_end;
+diff --git a/src/memline.c b/src/memline.c
+--- a/src/memline.c
++++ b/src/memline.c
+@@ -886,6 +886,7 @@ ml_close(buf_T *buf, int del_file)
+     {
+ 	vim_free(buf->b_ml.ml_line_ptr);
+ 	buf->b_ml.ml_line_size = 0;
++	invalidate_vcol_cache();
+     }
+     vim_free(buf->b_ml.ml_stack);
+ #ifdef FEAT_BYTEOFF
+@@ -3679,6 +3680,7 @@ ml_replace_len(
+     curbuf->b_ml.ml_line_textlen = !has_props ? len_arg + 1 : 0;
+     curbuf->b_ml.ml_line_lnum = lnum;
+     curbuf->b_ml.ml_flags = (curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
++    invalidate_vcol_cache();
+ 
+     return OK;
+ }
+@@ -4245,6 +4247,7 @@ ml_flush_line(buf_T *buf)
+ 	}
+ 	vim_free(new_line);
+ 	buf->b_ml.ml_line_size = 0;
++	invalidate_vcol_cache();
+ 
+ 	entered = FALSE;
+     }
+@@ -4252,6 +4255,7 @@ ml_flush_line(buf_T *buf)
+     {
+ 	vim_free(buf->b_ml.ml_line_ptr);
+ 	buf->b_ml.ml_line_size = 0;
++	invalidate_vcol_cache();
+     }
+ 
+     buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
+diff --git a/src/move.c b/src/move.c
+--- a/src/move.c
++++ b/src/move.c
+@@ -656,6 +656,7 @@ changed_window_setting(void)
+     void
+ changed_window_setting_win(win_T *wp)
+ {
++    invalidate_vcol_cache();
+     wp->w_lines_valid = 0;
+     changed_line_abv_curs_win(wp);
+     wp->w_valid &= ~(VALID_BOTLINE|VALID_BOTLINE_AP|VALID_TOPLINE);
+@@ -1143,6 +1144,7 @@ curs_columns(
+     long	siso = get_sidescrolloff_value();
+     int		did_sub_skipcol = FALSE;
+ 
++    enable_vcol_cache();
+     /*
+      * First make sure that w_topline is valid (after moving the cursor).
+      */
+@@ -1426,6 +1428,8 @@ curs_columns(
+     curwin->w_valid_skipcol = curwin->w_skipcol;
+ 
+     curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
++
++    disable_vcol_cache();
+ }
+ 
+ #if (defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)) || defined(PROTO)
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -3958,6 +3958,7 @@ do_pending_operator(cmdarg_T *cap, int o
+ 
+ 	if (VIsual_active || redo_VIsual_busy)
+ 	{
++	    invalidate_vcol_cache();
+ 	    get_op_vcol(oap, redo_VIsual.rv_vcol, TRUE);
+ 
+ 	    if (!redo_VIsual_busy && !gui_yank)
+diff --git a/src/proto/charset.pro b/src/proto/charset.pro
+--- a/src/proto/charset.pro
++++ b/src/proto/charset.pro
+@@ -21,6 +21,9 @@ int linetabsize_col(int startcol, char_u
+ int win_linetabsize(win_T *wp, linenr_T lnum, char_u *line, colnr_T len);
+ int linetabsize(win_T *wp, linenr_T lnum);
+ int linetabsize_no_outer(win_T *wp, linenr_T lnum);
++void enable_vcol_cache(void);
++void disable_vcol_cache(void);
++void invalidate_vcol_cache(void);
+ void win_linetabsize_cts(chartabsize_T *cts, colnr_T len);
+ int vim_isIDc(int c);
+ int vim_isNormalIDc(int c);

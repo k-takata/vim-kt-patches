@@ -1,0 +1,56 @@
+# HG changeset patch
+# Parent 39963f43b4750a843318de4a5243dae55e86bd76
+# Parent  31b224083517815cb2320d21c5ba0f81caf6cabb
+
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -388,7 +388,7 @@ CClink = $(CC)
+ # Set PATH environment variable to find lua or luajit executable.
+ # This requires at least "normal" features, "tiny" doesn't work.
+ #CONF_OPT_LUA = --enable-luainterp
+-#CONF_OPT_LUA = --enable-luainterp=dynamic
++CONF_OPT_LUA = --enable-luainterp=dynamic
+ #CONF_OPT_LUA = --enable-luainterp --with-luajit
+ #CONF_OPT_LUA = --enable-luainterp=dynamic --with-luajit
+ # Lua installation dir (when not set uses $LUA_PREFIX or defaults to /usr)
+@@ -419,7 +419,7 @@ CClink = $(CC)
+ # one: "touch perl.exp".
+ # This requires at least "normal" features, "tiny" doesn't work.
+ #CONF_OPT_PERL = --enable-perlinterp
+-#CONF_OPT_PERL = --enable-perlinterp=dynamic
++CONF_OPT_PERL = --enable-perlinterp=dynamic
+ 
+ # PYTHON
+ # Uncomment lines here when you want to include the Python interface.
+@@ -437,10 +437,10 @@ CClink = $(CC)
+ # Build two separate versions of Vim in that case.
+ #CONF_OPT_PYTHON = --enable-pythoninterp
+ #CONF_OPT_PYTHON = --enable-pythoninterp --with-python-command=python2.7
+-#CONF_OPT_PYTHON = --enable-pythoninterp=dynamic
++CONF_OPT_PYTHON = --enable-pythoninterp=dynamic
+ #CONF_OPT_PYTHON3 = --enable-python3interp
+ #CONF_OPT_PYTHON3 = --enable-python3interp --with-python3-command=python3.6
+-#CONF_OPT_PYTHON3 = --enable-python3interp=dynamic
++CONF_OPT_PYTHON3 = --enable-python3interp=dynamic
+ 
+ # RUBY
+ # Uncomment this when you want to include the Ruby interface.
+@@ -448,7 +448,7 @@ CClink = $(CC)
+ # Debian package is "ruby-dev".
+ # This requires at least "normal" features, "tiny" doesn't work.
+ #CONF_OPT_RUBY = --enable-rubyinterp
+-#CONF_OPT_RUBY = --enable-rubyinterp=dynamic
++CONF_OPT_RUBY = --enable-rubyinterp=dynamic
+ #CONF_OPT_RUBY = --enable-rubyinterp --with-ruby-command=ruby1.9.1
+ 
+ # TCL
+@@ -457,7 +457,7 @@ CClink = $(CC)
+ # Debian package is "tcl-dev".
+ # This requires at least "normal" features, "tiny" doesn't work.
+ #CONF_OPT_TCL = --enable-tclinterp
+-#CONF_OPT_TCL = --enable-tclinterp=dynamic
++CONF_OPT_TCL = --enable-tclinterp=dynamic
+ #CONF_OPT_TCL = --enable-tclinterp --with-tclsh=tclsh8.4
+ 
+ # CSCOPE

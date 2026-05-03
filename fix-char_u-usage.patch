@@ -1,0 +1,199 @@
+# HG changeset patch
+# Parent  79d406e55b6572295ec1c884156b0cbd776aa0df
+
+diff --git a/src/channel.c b/src/channel.c
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -5058,7 +5058,7 @@ job_start(typval_T *argvars)
+     mch_start_job(argv, job, &opt);
+ #else
+     ch_logs(NULL, "Starting job: %s", (char *)cmd);
+-    mch_start_job((char *)cmd, job, &opt);
++    mch_start_job(cmd, job, &opt);
+ #endif
+ 
+     /* If the channel is reading from a buffer, write lines now. */
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -418,9 +418,9 @@ mch_isFullName(char_u *fname)
+     /* WinNT and later can use _MAX_PATH wide characters for a pathname, which
+      * means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
+      * UTF-8. */
+-    char szName[_MAX_PATH * 3 + 1];
++    char_u szName[_MAX_PATH * 3 + 1];
+ #else
+-    char szName[_MAX_PATH + 1];
++    char_u szName[_MAX_PATH + 1];
+ #endif
+ 
+     /* A name like "d:/foo" and "//server/share" is absolute */
+@@ -429,7 +429,7 @@ mch_isFullName(char_u *fname)
+ 	return TRUE;
+ 
+     /* A name that can't be made absolute probably isn't absolute. */
+-    if (mch_FullName(fname, (char_u *)szName, sizeof(szName) - 1, FALSE) == FAIL)
++    if (mch_FullName(fname, szName, sizeof(szName) - 1, FALSE) == FAIL)
+ 	return FALSE;
+ 
+     return pathcmp((const char *)fname, (const char *)szName, -1) == 0;
+@@ -597,7 +597,7 @@ vim_stat(const char *name, stat_T *stp)
+ #endif
+     char_u	*p;
+ 
+-    vim_strncpy((char_u *)buf, (char_u *)name, sizeof(buf) - 1);
++    vim_strncpy(buf, (char_u *)name, sizeof(buf) - 1);
+     p = buf + STRLEN(buf);
+     if (p > buf)
+ 	MB_PTR_BACK(buf, p);
+diff --git a/src/os_win32.c b/src/os_win32.c
+--- a/src/os_win32.c
++++ b/src/os_win32.c
+@@ -3976,7 +3976,7 @@ mch_set_winsize_now(void)
+ 
+     static BOOL
+ vim_create_process(
+-    char		*cmd,
++    char_u		*cmd,
+     BOOL		inherit_handles,
+     DWORD		flags,
+     STARTUPINFO		*si,
+@@ -3985,7 +3985,7 @@ vim_create_process(
+ #ifdef FEAT_MBYTE
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+-	WCHAR	*wcmd = enc_to_utf16((char_u *)cmd, NULL);
++	WCHAR	*wcmd = enc_to_utf16(cmd, NULL);
+ 
+ 	if (wcmd != NULL)
+ 	{
+@@ -4008,7 +4008,7 @@ vim_create_process(
+ #endif
+     return CreateProcess(
+ 	NULL,			/* Executable name */
+-	cmd,			/* Command to execute */
++	(char *)cmd,		/* Command to execute */
+ 	NULL,			/* Process security attributes */
+ 	NULL,			/* Thread security attributes */
+ 	inherit_handles,	/* Inherit handles */
+@@ -4053,7 +4053,7 @@ vim_shell_execute(
+  *    4. Prompt the user to press a key to close the console window
+  */
+     static int
+-mch_system_classic(char *cmd, int options)
++mch_system_classic(char_u *cmd, int options)
+ {
+     STARTUPINFO		si;
+     PROCESS_INFORMATION pi;
+@@ -4319,7 +4319,7 @@ dump_pipe(int	    options,
+  * for communication and doesn't open any new window.
+  */
+     static int
+-mch_system_piped(char *cmd, int options)
++mch_system_piped(char_u *cmd, int options)
+ {
+     STARTUPINFO		si;
+     PROCESS_INFORMATION pi;
+@@ -4341,9 +4341,9 @@ mch_system_piped(char *cmd, int options)
+     int		c;
+     int		noread_cnt = 0;
+     garray_T	ga;
+-    int	    delay = 1;
++    int		delay = 1;
+     DWORD	buffer_off = 0;	/* valid bytes in buffer[] */
+-    char	*p = NULL;
++    char_u	*p = NULL;
+ 
+     SECURITY_ATTRIBUTES saAttr;
+ 
+@@ -4386,9 +4386,9 @@ mch_system_piped(char *cmd, int options)
+ 
+     if (cmd != NULL)
+     {
+-	p = (char *)vim_strsave((char_u *)cmd);
++	p = vim_strsave(cmd);
+ 	if (p != NULL)
+-	    unescape_shellxquote((char_u *)p, p_sxe);
++	    unescape_shellxquote(p, p_sxe);
+ 	else
+ 	    p = cmd;
+     }
+@@ -4602,7 +4602,7 @@ mch_system_piped(char *cmd, int options)
+ }
+ 
+     static int
+-mch_system(char *cmd, int options)
++mch_system(char_u *cmd, int options)
+ {
+     /* if we can pipe and the shelltemp option is off */
+     if (!p_stmp)
+@@ -4614,7 +4614,7 @@ mch_system(char *cmd, int options)
+ 
+ # ifdef FEAT_MBYTE
+     static int
+-mch_system(char *cmd, int options)
++mch_system(char_u *cmd, int options)
+ {
+     if (enc_codepage >= 0 && (int)GetACP() != enc_codepage)
+     {
+@@ -4626,10 +4626,10 @@ mch_system(char *cmd, int options)
+ 	    return ret;
+ 	}
+     }
+-    return system(cmd);
++    return system((char *)cmd);
+ }
+ # else
+-#  define mch_system(c, o) system(c)
++#  define mch_system(c, o) system((char *)c)
+ # endif
+ 
+ #endif
+@@ -4725,7 +4725,7 @@ mch_call_shell(
+ 
+     if (cmd == NULL)
+     {
+-	x = mch_system((char *)p_sh, options);
++	x = mch_system(p_sh, options);
+     }
+     else
+     {
+@@ -4834,7 +4834,7 @@ mch_call_shell(
+ 	     * inherit our handles which causes unpleasant dangling swap
+ 	     * files if we exit before the spawned process
+ 	     */
+-	    if (vim_create_process((char *)newcmd, FALSE, flags, &si, &pi))
++	    if (vim_create_process(newcmd, FALSE, flags, &si, &pi))
+ 		x = 0;
+ 	    else if (vim_shell_execute((char *)newcmd, n_show_cmd)
+ 							       > (HINSTANCE)32)
+@@ -4905,7 +4905,7 @@ mch_call_shell(
+ #endif
+ 		    vim_snprintf((char *)newcmd, cmdlen, "%s %s %s",
+ 							   p_sh, p_shcf, cmd);
+-		x = mch_system((char *)newcmd, options);
++		x = mch_system(newcmd, options);
+ 		vim_free(newcmd);
+ 	    }
+ 	}
+@@ -4976,7 +4976,7 @@ job_io_file_open(
+ }
+ 
+     void
+-mch_start_job(char *cmd, job_T *job, jobopt_T *options)
++mch_start_job(char_u *cmd, job_T *job, jobopt_T *options)
+ {
+     STARTUPINFO		si;
+     PROCESS_INFORMATION	pi;
+diff --git a/src/proto/os_win32.pro b/src/proto/os_win32.pro
+--- a/src/proto/os_win32.pro
++++ b/src/proto/os_win32.pro
+@@ -41,7 +41,7 @@ void mch_set_shellsize(void);
+ void mch_new_shellsize(void);
+ void mch_set_winsize_now(void);
+ int mch_call_shell(char_u *cmd, int options);
+-void mch_start_job(char *cmd, job_T *job, jobopt_T *options);
++void mch_start_job(char_u *cmd, job_T *job, jobopt_T *options);
+ char *mch_job_status(job_T *job);
+ job_T *mch_detect_ended_job(job_T *job_list);
+ int mch_stop_job(job_T *job, char_u *how);

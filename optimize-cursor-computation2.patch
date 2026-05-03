@@ -1,0 +1,85 @@
+# HG changeset patch
+# Parent  0348a2f6d096ecda0a374ce9a9c65227efb4c667
+
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -891,7 +891,12 @@ win_linetabsize_cts(chartabsize_T *cts, 
+     if (s_use_vcol_cache)
+     {
+ 	if (slen == MAXCOL)
+-	    slen = STRLEN(cts->cts_line);
++	{
++	    if (cts->cts_len != -1)
++		slen = cts->cts_len;
++	    else
++		slen = STRLEN(cts->cts_line);
++	}
+ 	col_save = (colnr_T)((varnumber_T)slen * 4 / 5);
+ 	if (slen - col_save > 4096)
+ 	    col_save = slen - 4096;
+@@ -1102,11 +1107,25 @@ init_chartabsize_arg(
+ 	char_u		*line,
+ 	char_u		*ptr)
+ {
++    init_chartabsize_arg_len(cts, wp, lnum, col, line, ptr, -1);
++}
++
++    void
++init_chartabsize_arg_len(
++	chartabsize_T	*cts,
++	win_T		*wp,
++	linenr_T	lnum UNUSED,
++	colnr_T		col,
++	char_u		*line,
++	char_u		*ptr,
++	colnr_T		len)
++{
+     CLEAR_POINTER(cts);
+     cts->cts_win = wp;
+     cts->cts_vcol = col;
+     cts->cts_line = line;
+     cts->cts_ptr = ptr;
++    cts->cts_len = len;
+ #ifdef FEAT_LINEBREAK
+     cts->cts_bri_size = -1;
+ #endif
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -405,10 +405,12 @@ plines_win_nofold(win_T *wp, linenr_T ln
+     char_u	*s;
+     long	col;
+     int		width;
++    colnr_T	len;
+     chartabsize_T cts;
+ 
+     s = ml_get_buf(wp->w_buffer, lnum, FALSE);
+-    init_chartabsize_arg(&cts, wp, lnum, 0, s, s);
++    len = ml_get_buf_len(wp->w_buffer, lnum);
++    init_chartabsize_arg_len(&cts, wp, lnum, 0, s, s, len);
+     if (*s == NUL
+ #ifdef FEAT_PROP_POPUP
+ 	    && !cts.cts_has_prop_with_text
+diff --git a/src/proto/charset.pro b/src/proto/charset.pro
+--- a/src/proto/charset.pro
++++ b/src/proto/charset.pro
+@@ -37,6 +37,7 @@ int vim_isfilec_or_wc(int c);
+ int vim_isprintc(int c);
+ int vim_isprintc_strict(int c);
+ void init_chartabsize_arg(chartabsize_T *cts, win_T *wp, linenr_T lnum, colnr_T col, char_u *line, char_u *ptr);
++void init_chartabsize_arg_len(chartabsize_T *cts, win_T *wp, linenr_T lnum, colnr_T col, char_u *line, char_u *ptr, colnr_T len);
+ void clear_chartabsize_arg(chartabsize_T *cts);
+ int lbr_chartabsize(chartabsize_T *cts);
+ int lbr_chartabsize_adv(chartabsize_T *cts);
+diff --git a/src/structs.h b/src/structs.h
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -4976,6 +4976,7 @@ typedef struct {
+ #endif
+     int		cts_vcol;		// virtual column at current position
+     int		cts_max_head_vcol;	// see win_lbr_chartabsize()
++    colnr_T	cts_len;		// length of cts_line, or -1
+ } chartabsize_T;
+ 
+ /*

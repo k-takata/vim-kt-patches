@@ -1,0 +1,225 @@
+# HG changeset patch
+# Parent  99236522f2de7652ce4fe9797443e6d275ea5f64
+
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -2481,6 +2481,8 @@ getline({lnum}, {end})		List	lines {lnum
+ getloclist({nr} [, {what}])	List	list of location list items
+ getmatches([{win}])		List	list of current matches
+ getmousepos()			Dict	last known mouse position
++getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
++				List	list of pakage/plugin directories
+ getpid()			Number	process ID of Vim
+ getpos({expr})			List	position of cursor, mark, etc.
+ getqflist([{what}])		List	list of quickfix items
+@@ -5360,6 +5362,23 @@ getmousepos()						*getmousepos()*
+ 		When using |getchar()| the Vim variables |v:mouse_lnum|,
+ 		|v:mouse_col| and |v:mouse_winid| also provide these values.
+ 
++							*getpackages()*
++getpackages([{packname} [, {packtype} [, {plugname} [, {nameonly}]]]])
++		Return a List of package/plugin directories.
++
++		{packname} specifies a package name.  If it is not given or an
++		empty string, "*" is used.  |wildcards| can be used.
++		{packtype} specifies a package type.  It can be "opt", "start",
++		"*" or "NONE".  If it is not given or an empty string, "*" is
++		used.  If "NONE" is specified only package directories are
++		listed.  Otherwise all plugin directories under the specified
++		packages are listed.
++		{plugname} specifies a plugin name.  If it is not given or an
++		empty string, "*" is used.  |wildcards| can be used.
++		If {nameonly} is |TRUE|, plugin (or package) names are listed
++		instead of the directories.
++		See: |packages|
++
+ 							*getpid()*
+ getpid()	Return a Number which is the process ID of the Vim process.
+ 		On Unix and MS-Windows this is a unique number, until Vim
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -94,6 +94,7 @@ static void f_getcmdwintype(typval_T *ar
+ static void f_getenv(typval_T *argvars, typval_T *rettv);
+ static void f_getfontname(typval_T *argvars, typval_T *rettv);
+ static void f_getjumplist(typval_T *argvars, typval_T *rettv);
++static void f_getpackages(typval_T *argvars, typval_T *rettv);
+ static void f_getpid(typval_T *argvars, typval_T *rettv);
+ static void f_getcurpos(typval_T *argvars, typval_T *rettv);
+ static void f_getpos(typval_T *argvars, typval_T *rettv);
+@@ -466,6 +467,7 @@ static funcentry_T global_functions[] =
+     {"getloclist",	1, 2, 0,	  f_getloclist},
+     {"getmatches",	0, 1, 0,	  f_getmatches},
+     {"getmousepos",	0, 0, 0,	  f_getmousepos},
++    {"getpackages",	0, 4, 0,	  f_getpackages},
+     {"getpid",		0, 0, 0,	  f_getpid},
+     {"getpos",		1, 1, FEARG_1,	  f_getpos},
+     {"getqflist",	0, 1, 0,	  f_getqflist},
+@@ -2978,6 +2980,80 @@ f_getjumplist(typval_T *argvars, typval_
+ #endif
+ }
+ 
++
++    static void
++list_pack_plugin(char_u *fname, void *cookie)
++{
++    typval_T	*rettv = (typval_T*)cookie;
++
++    list_append_string(rettv->vval.v_list, fname, -1);
++}
++
++/*
++ * "getpackages()" function
++ */
++    static void
++f_getpackages(typval_T *argvars, typval_T *rettv)
++{
++    char_u	buf1[NUMBUFLEN], buf2[NUMBUFLEN], buf3[NUMBUFLEN];
++    char_u	*packname = NULL, *packtype = NULL, *plugname = NULL;
++    char_u	*pat;
++    size_t	len;
++    int		nameonly = 0;
++
++    if (rettv_list_alloc(rettv) != OK)
++	return;
++
++    if (argvars[0].v_type != VAR_UNKNOWN)
++    {
++	packname = tv_get_string_buf_chk(&argvars[0], buf1);
++	if (argvars[1].v_type != VAR_UNKNOWN)
++	{
++	    packtype = tv_get_string_buf_chk(&argvars[1], buf2);
++	    if (argvars[2].v_type != VAR_UNKNOWN)
++	    {
++		plugname = tv_get_string_buf_chk(&argvars[2], buf3);
++		if (argvars[3].v_type != VAR_UNKNOWN)
++		    nameonly = (int)tv_get_number_chk(&argvars[3], NULL);
++	    }
++	}
++    }
++    if (packname == NULL || packname[0] == NUL)
++	packname = (char_u*)"*";
++    if (packtype == NULL || packtype[0] == NUL)
++	packtype = (char_u*)"*";
++    if (plugname == NULL || plugname[0] == NUL)
++	plugname = (char_u*)"*";
++
++    len = 8 + STRLEN(packname) + STRLEN(packtype) + STRLEN(plugname);
++    pat = alloc((int)len);
++    if (pat == NULL)
++	return;
++
++    if (STRCMP(packtype, "NONE") == 0)
++	/* List only packages. */
++	vim_snprintf((char*)pat, len, "pack/%s", packname);
++    else
++	/* List all plugins under the specified packages. */
++	vim_snprintf((char*)pat, len, "pack/%s/%s/%s",
++					    packname, packtype, plugname);
++    do_in_path(p_pp, pat, DIP_ALL + DIP_DIR, list_pack_plugin, rettv);
++
++    if (nameonly && (rettv->v_type == VAR_LIST))
++    {
++	listitem_T	*li;
++
++	for (li = rettv->vval.v_list->lv_first; li != NULL; li = li->li_next)
++	{
++	    char_u	*p = li->li_tv.vval.v_string;
++	    li->li_tv.vval.v_string = do_string_sub(p, (char_u *)"^.*[/\\\\]",
++					    (char_u *)"", NULL, (char_u *)"");
++	    vim_free(p);
++	}
++    }
++    vim_free(pat);
++}
++
+ /*
+  * "getpid()" function
+  */
+diff --git a/src/testdir/test_packadd.vim b/src/testdir/test_packadd.vim
+--- a/src/testdir/test_packadd.vim
++++ b/src/testdir/test_packadd.vim
+@@ -355,3 +355,82 @@ func Test_runtime()
+   runtime! ALL extra/bar.vim
+   call assert_equal('runstartopt', g:sequence)
+ endfunc
++
++func s:getnames(plugs)
++  return sort(map(a:plugs, {-> substitute(v:val, '^.*[/\\]', '', '')}))
++endfunc
++func Test_getpackages()
++  call delete(&packpath, 'rf')
++
++  let plugs = [
++	\ &packpath . '/pack/foo/start/plug0',
++	\ &packpath . '/pack/foo/start/plug1',
++	\ &packpath . '/pack/foo/opt/plug2',
++	\ &packpath . '/pack/foo/opt/plug3',
++	\ &packpath . '/pack/bar/start/plug4',
++	\ &packpath . '/pack/bar/start/plug5',
++	\ &packpath . '/pack/bar/opt/plug6',
++	\ &packpath . '/pack/bar/opt/plug7',
++	\ ]
++  for dir in plugs
++    call mkdir(dir, 'p')
++  endfor
++
++  " All plugins
++  let p = getpackages()
++  let exp = plugs[:]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', '', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " All packages
++  let p = getpackages('', 'NONE')
++  let exp = [&packpath . '/pack/foo', &packpath . '/pack/bar']
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', 'NONE', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " Plugins under foo
++  let p = getpackages('foo')
++  let exp = plugs[0 : 3]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('foo', '', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " 'start' plugins
++  let p = getpackages('', 'start')
++  let exp = plugs[0 : 1] + plugs[4 : 5]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', 'start', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " 'opt' plugins
++  let p = getpackages('*', 'opt', '')
++  let exp = plugs[2 : 3] + plugs[6 : 7]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('*', 'opt', '', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " Plugins with 'plug1*' name
++  let p = getpackages('', '', 'plug1*')
++  let exp = plugs[1 : 1]
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('', '', 'plug1', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  " No match
++  let p = getpackages('foo', 'opt', 'plug1*')
++  let exp = []
++  call assert_equal(sort(exp), sort(p))
++  " name only
++  let p = getpackages('foo', 'opt', 'plug1*', 1)
++  call assert_equal(s:getnames(exp), sort(p))
++
++  call delete(&packpath, 'rf')
++endfunc

@@ -1,0 +1,194 @@
+# HG changeset patch
+# Parent  3cd6df7f8c83dc8b227fc7705ff9afa3d5cc65b4
+
+diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
+--- a/runtime/doc/options.txt
++++ b/runtime/doc/options.txt
+@@ -6956,10 +6956,14 @@ A jump table for the options with a shor
+ 	The name of the temporary file can be represented by "%s" if necessary
+ 	(the file name is appended automatically if no %s appears in the value
+ 	of this option).
+-	For the Amiga the default is ">".  For MS-Windows using powershell the
+-	default is "2>&1 | Out-File -Encoding default", otherwise the default
+-	is ">%s 2>&1".  The output is directly saved in a file and not echoed
+-	to the screen.
++	For the Amiga the default is ">".  The output is directly saved in a
++	file and not echoed to the screen.
++	For MS-Windows using powershell the default is "2>&1 | Out-File
++	-Encoding default", otherwise if "tee" command is not found in the
++	PATH the default is ">%s 2>&1".  The output is directly saved in a
++	file and not echoed to the screen.  If "tee" command is found in the
++	PATH the default becomes "2>&1| tee" or "|& tee" depends on the
++	'shell' option.  The output is also echoed to the screen.
+ 	For Unix the default is "| tee".  The stdout of the compiler is saved
+ 	in a file and echoed to the screen.  If the 'shell' option is "csh" or
+ 	"tcsh" after initializations, the default becomes "|& tee".  If the
+diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
+--- a/runtime/doc/quickfix.txt
++++ b/runtime/doc/quickfix.txt
+@@ -968,11 +968,13 @@ or simpler >
+ "$*" can be given multiple times, for example: >
+    :set makeprg=gcc\ -o\ $*\ $*
+ 
+-The 'shellpipe' option defaults to ">" for the Amiga and ">%s 2>&1" for Win32.
+-This means that the output of the compiler is saved in a file and not shown on
+-the screen directly.  For Unix "| tee" is used.  The compiler output is shown
+-on the screen and saved in a file the same time.  Depending on the shell used
+-"|& tee" or "2>&1| tee" is the default, so stderr output will be included.
++The 'shellpipe' option defaults to ">" for the Amiga and ">%s 2>&1" Win32 if
++"tee" command is not found in the PATH.  This means that the output of the
++compiler is saved in a file and not shown on the screen directly.  If "tee"
++command is found on Win32 the default becomes "2>&1| tee" and the output is
++also echoed to the screen.  For Unix "| tee" is used.  The compiler output is
++shown on the screen and saved in a file the same time.  Depending on the shell
++used "|& tee" or "2>&1| tee" is the default, so stderr output will be included.
+ 
+ If 'shellpipe' is empty, the {errorfile} part will be omitted.  This is useful
+ for compilers that write to an errorfile themselves (e.g., Manx's Amiga C).
+diff --git a/src/option.c b/src/option.c
+--- a/src/option.c
++++ b/src/option.c
+@@ -1013,10 +1013,11 @@ set_init_3(void)
+ 	    if (do_sp)
+ 	    {
+ #  ifdef MSWIN
+-		p_sp = (char_u *)">&";
+-#  else
+-		p_sp = (char_u *)"|& tee";
++		if (!mch_can_exe((char_u *)"tee", NULL, TRUE))
++		    p_sp = (char_u *)">&";
++		else
+ #  endif
++		    p_sp = (char_u *)"|& tee";
+ 		options[idx_sp].def_val[VI_DEFAULT] = p_sp;
+ 	    }
+ # endif
+@@ -1033,20 +1034,20 @@ set_init_3(void)
+ 		    || fnamecmp(p, "powershell.exe") == 0
+ 		)
+ 	{
+-# if defined(FEAT_QUICKFIX)
++#  if defined(FEAT_QUICKFIX)
+ 		if (do_sp)
+ 		{
+ 		    p_sp = (char_u *)"2>&1 | Out-File -Encoding default";
+ 		    options[idx_sp].def_val[VI_DEFAULT] = p_sp;
+ 		}
+-# endif
++#  endif
+ 		if (do_srr)
+ 		{
+ 		    p_srr = (char_u *)"2>&1 | Out-File -Encoding default";
+ 		    options[idx_srr].def_val[VI_DEFAULT] = p_srr;
+ 		}
+ 	}
+-#endif
++# endif
+ 	else
+ 	    // Always use POSIX shell style redirection if we reach this
+ 	    if (       fnamecmp(p, "sh") == 0
+@@ -1062,6 +1063,7 @@ set_init_3(void)
+ 		    || fnamecmp(p, "pwsh") == 0
+ # ifdef MSWIN
+ 		    || fnamecmp(p, "cmd") == 0
++		    || fnamecmp(p, "cmd.exe") == 0
+ 		    || fnamecmp(p, "sh.exe") == 0
+ 		    || fnamecmp(p, "ksh.exe") == 0
+ 		    || fnamecmp(p, "mksh.exe") == 0
+@@ -1069,7 +1071,8 @@ set_init_3(void)
+ 		    || fnamecmp(p, "zsh.exe") == 0
+ 		    || fnamecmp(p, "zsh-beta.exe") == 0
+ 		    || fnamecmp(p, "bash.exe") == 0
+-		    || fnamecmp(p, "cmd.exe") == 0
++		    || fnamecmp(p, "fish.exe") == 0
++		    || fnamecmp(p, "ash.exe") == 0
+ 		    || fnamecmp(p, "dash.exe") == 0
+ 		    || fnamecmp(p, "pwsh.exe") == 0
+ # endif
+@@ -1078,14 +1081,15 @@ set_init_3(void)
+ # if defined(FEAT_QUICKFIX)
+ 		if (do_sp)
+ 		{
++		    if (fnamecmp(p, "pwsh") == 0
+ #  ifdef MSWIN
+-		    p_sp = (char_u *)">%s 2>&1";
+-#  else
+-		    if (fnamecmp(p, "pwsh") == 0)
++			    || fnamecmp(p, "pwsh.exe") == 0
++			    || !mch_can_exe((char_u *)"tee", NULL, TRUE)
++#  endif
++			    )
+ 			p_sp = (char_u *)">%s 2>&1";
+ 		    else
+ 			p_sp = (char_u *)"2>&1| tee";
+-#  endif
+ 		    options[idx_sp].def_val[VI_DEFAULT] = p_sp;
+ 		}
+ # endif
+diff --git a/src/testdir/test_shell.vim b/src/testdir/test_shell.vim
+--- a/src/testdir/test_shell.vim
++++ b/src/testdir/test_shell.vim
+@@ -28,24 +28,45 @@ func Test_shell_options()
+           \ ['pwsh', '-c', '>%s 2>&1', '', '>%s 2>&1', '', '']]
+   endif
+   if has('win32')
+-    let shells += [['cmd', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', ''],
+-          \ ['cmd.exe', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '('],
+-          \ ['powershell.exe', '-Command', '2>&1 | Out-File -Encoding default',
+-          \           '', '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
+-          \ ['powershell', '-Command', '2>&1 | Out-File -Encoding default', '',
+-          \               '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
+-          \ ['pwsh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['pwsh', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['sh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['ksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['mksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['pdksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['zsh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['zsh-beta.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['bash.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['dash.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
+-          \ ['csh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"'],
+-          \ ['tcsh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"']]
++    if executable('tee')
++      let shells += [['cmd', '/c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', ''],
++            \ ['cmd.exe', '/c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '('],
++            \ ['powershell.exe', '-Command', '2>&1 | Out-File -Encoding default',
++            \           '', '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
++            \ ['powershell', '-Command', '2>&1 | Out-File -Encoding default', '',
++            \               '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
++            \ ['pwsh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['pwsh', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['sh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['ksh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['mksh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['pdksh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['zsh.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['zsh-beta.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['bash.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['dash.exe', '-c', '2>&1| tee', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['csh.exe', '-c', '|& tee', '', '>&', '"&|<>()@^', '"'],
++            \ ['tcsh.exe', '-c', '|& tee', '', '>&', '"&|<>()@^', '"']]
++    else
++      let shells += [['cmd', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', ''],
++            \ ['cmd.exe', '/c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '('],
++            \ ['powershell.exe', '-Command', '2>&1 | Out-File -Encoding default',
++            \           '', '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
++            \ ['powershell', '-Command', '2>&1 | Out-File -Encoding default', '',
++            \               '2>&1 | Out-File -Encoding default', '"&|<>()@^', '"'],
++            \ ['pwsh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['pwsh', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['sh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['ksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['mksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['pdksh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['zsh.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['zsh-beta.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['bash.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['dash.exe', '-c', '>%s 2>&1', '', '>%s 2>&1', '"&|<>()@^', '"'],
++            \ ['csh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"'],
++            \ ['tcsh.exe', '-c', '>&', '', '>&', '"&|<>()@^', '"']]
++    endif
+   endif
+ 
+   " start a new Vim instance with 'shell' set to each of the supported shells

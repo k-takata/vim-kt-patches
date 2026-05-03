@@ -1,0 +1,380 @@
+# HG changeset patch
+# Parent  bd19efdd875f8134b226da2e518349491473edce
+
+diff --git a/src/charset.c b/src/charset.c
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -855,6 +855,7 @@ static int s_vcol_cache_valid2 = FALSE;
+     void
+ invalidate_vcol_cache(void)
+ {
++    Trace("invalidate_vcol_cache");
+     s_vcol_cache_valid1 = FALSE;
+     s_vcol_cache_valid2 = FALSE;
+ }
+@@ -897,6 +898,8 @@ win_linetabsize_cts(chartabsize_T *cts, 
+ 	cts->cts_ptr = saved_ptr;
+ 	cts->cts_vcol = vcol = saved_vcol;
+     }
++    Trace("win_linetabsize_cts 1: vcol=%d cts_ptr-cts_line=%d", cts->cts_vcol, cts->cts_ptr - cts->cts_line);
++    Trace("win_linetabsize_cts 1: old_line=%p line=%p saved_ptr=%p", old_line, cts->cts_line, saved_ptr);
+ 
+     for ( ; *cts->cts_ptr != NUL && (len == MAXCOL || cts->cts_ptr < cts->cts_line + len);
+ 						      MB_PTR_ADV(cts->cts_ptr))
+@@ -938,6 +941,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
+ 	cts->cts_vcol = vcol > MAXCOL ? MAXCOL : (int)vcol;
+     }
+ #endif
++    Trace("win_linetabsize_cts 2: vcol=%d", cts->cts_vcol);
+ }
+ 
+ /*
+@@ -1682,6 +1686,9 @@ getvcol(
+ 	    ptr = saved_ptr;
+ 	    vcol = saved_vcol;
+ 	}
++	Trace("getvcol 1: vcol=%d pos->col=%d", vcol, pos->col);
++	Trace("getvcol 1: old_line=%p line=%p saved_ptr=%p", old_line, line, saved_ptr);
++	//Trace("getvcol 1: line=\"%s\"", line);
+ 	for (;;)
+ 	{
+ 	    head = 0;
+@@ -1738,6 +1745,7 @@ getvcol(
+ 		old_line = line;
+ 		old_cond = 1;
+ 		s_vcol_cache_valid2 = TRUE;
++		//Trace("getvcol 1-2: saved_vcol=%d ptr=%d", saved_vcol, next_ptr-line);
+ 	    }
+ 	    vcol += incr;
+ 	    ptr = next_ptr;
+@@ -1759,6 +1767,9 @@ getvcol(
+ 	    cts.cts_ptr = saved_ptr;
+ 	    cts.cts_vcol = saved_vcol;
+ 	}
++	Trace("getvcol 2: cts.cts_vcol=%d pos->col=%d", cts.cts_vcol, pos->col);
++	Trace("getvcol 2: old_line=%p line=%p saved_ptr=%p", old_line, line, saved_ptr);
++	//Trace("getvcol 2: line=\"%s\"", line);
+ 	for (;;)
+ 	{
+ 	    // A tab gets expanded, depending on the current column.
+@@ -1841,6 +1852,7 @@ getvcol(
+ 	    *cursor = vcol + head;	    // cursor at start
+ 	}
+     }
++    Trace("getvcol 3: start=%d cursor=%d end=%d", start ? *start : -1, cursor ? *cursor : -1, end ? *end : -1);
+ }
+ 
+ /*
+diff --git a/src/drawline.c b/src/drawline.c
+--- a/src/drawline.c
++++ b/src/drawline.c
+@@ -888,6 +888,9 @@ draw_screen_line(win_T *wp, winlinevars_
+     long	v;
+     int		wcol;
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+     // Highlight 'cursorcolumn' & 'colorcolumn' past end of the line.
+     if (wp->w_p_wrap)
+ 	v = wlv->startrow == 0 ? wp->w_skipcol : 0;
+@@ -994,6 +997,9 @@ draw_screen_line(win_T *wp, winlinevars_
+     wlv->screen_line_flags &= ~SLF_INC_VCOL;
+     ++wlv->row;
+     ++wlv->screen_row;
++
++    profile_end(&tm);
++    Trace("draw_screen_line: %s", profile_msg(&tm));
+ }
+ #undef VCOL_HLC
+ 
+@@ -1280,6 +1286,9 @@ win_line(
+ # define VCOL_HLC (wlv.vcol - wlv.vcol_off_tp)
+ #endif
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+     if (startrow > endrow)		// past the end already!
+ 	return startrow;
+ 
+@@ -4371,5 +4380,7 @@ win_line(
+ 
+     vim_free(wlv.p_extra_free);
+     vim_free(wlv.saved_p_extra_free);
++    profile_end(&tm);
++    Trace("win_line: %s", profile_msg(&tm));
+     return wlv.row;
+ }
+diff --git a/src/drawscreen.c b/src/drawscreen.c
+--- a/src/drawscreen.c
++++ b/src/drawscreen.c
+@@ -93,6 +93,9 @@ update_screen(int type_arg)
+     int		no_update = FALSE;
+     int		save_pum_will_redraw = pum_will_redraw;
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+     // Don't do anything if the screen structures are (not yet) valid.
+     if (!screen_valid(TRUE))
+ 	return FAIL;
+@@ -397,6 +400,8 @@ update_screen(int type_arg)
+ 	gui_update_scrollbars(FALSE);
+     }
+ #endif
++    profile_end(&tm);
++    Trace("update_screen: %s", profile_msg(&tm));
+     return OK;
+ }
+ 
+@@ -1469,6 +1474,9 @@ win_update(win_T *wp)
+     int		save_got_int;
+ #endif
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+ #if defined(FEAT_SEARCH_EXTRA) || defined(FEAT_CLIPBOARD)
+     // This needs to be done only for the first window when update_screen() is
+     // called.
+@@ -2801,6 +2809,8 @@ win_update(win_T *wp)
+     if (!got_int)
+ 	got_int = save_got_int;
+ #endif
++    profile_end(&tm);
++    Trace("win_update: %s", profile_msg(&tm));
+ }
+ 
+ #if defined(FEAT_NETBEANS_INTG) || defined(FEAT_GUI)
+diff --git a/src/edit.c b/src/edit.c
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -2709,6 +2709,9 @@ oneright(void)
+     int
+ oneleft(void)
+ {
++    proftime_T tm;
++    profile_start(&tm);
++
+     if (virtual_active())
+     {
+ #ifdef FEAT_LINEBREAK
+@@ -2750,6 +2753,8 @@ oneleft(void)
+ 
+ 	curwin->w_set_curswant = TRUE;
+ 	adjust_skipcol();
++	profile_end(&tm);
++	Trace("oneleft 1: %s", profile_msg(&tm));
+ 	return OK;
+     }
+ 
+@@ -2764,6 +2769,8 @@ oneleft(void)
+     if (has_mbyte)
+ 	mb_adjust_cursor();
+     adjust_skipcol();
++    profile_end(&tm);
++    Trace("oneleft 2: %s", profile_msg(&tm));
+     return OK;
+ }
+ 
+diff --git a/src/misc1.c b/src/misc1.c
+--- a/src/misc1.c
++++ b/src/misc1.c
+@@ -408,6 +408,9 @@ plines_win_nofold(win_T *wp, linenr_T ln
+     colnr_T	len;
+     chartabsize_T cts;
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+     s = ml_get_buf(wp->w_buffer, lnum, FALSE);
+     len = ml_get_buf_len(wp->w_buffer, lnum);
+     init_chartabsize_arg_len(&cts, wp, lnum, 0, s, s, len);
+@@ -426,6 +429,8 @@ plines_win_nofold(win_T *wp, linenr_T ln
+     if (wp->w_p_list && wp->w_lcs_chars.eol != NUL)
+ 	col += 1;
+ 
++    profile_end(&tm);
++    Trace("plines_win_nofold: %s", profile_msg(&tm));
+     /*
+      * Add column offset for 'number', 'relativenumber' and 'foldcolumn'.
+      */
+diff --git a/src/move.c b/src/move.c
+--- a/src/move.c
++++ b/src/move.c
+@@ -839,10 +839,16 @@ cursor_valid(void)
+     void
+ validate_cursor(void)
+ {
++    proftime_T tm;
++    profile_start(&tm);
++
+     check_cursor_lnum();
+     check_cursor_moved(curwin);
+     if ((curwin->w_valid & (VALID_WCOL|VALID_WROW)) != (VALID_WCOL|VALID_WROW))
+ 	curs_columns(TRUE);
++
++    profile_end(&tm);
++    Trace("validate_cursor: %s", profile_msg(&tm));
+ }
+ 
+ #if defined(FEAT_GUI) || defined(PROTO)
+@@ -1144,6 +1150,9 @@ curs_columns(
+     long	siso = get_sidescrolloff_value();
+     int		did_sub_skipcol = FALSE;
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+     /*
+      * First make sure that w_topline is valid (after moving the cursor).
+      */
+@@ -1427,6 +1436,9 @@ curs_columns(
+     curwin->w_valid_skipcol = curwin->w_skipcol;
+ 
+     curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
++
++    profile_end(&tm);
++    Trace("curs_columns: %s", profile_msg(&tm));
+ }
+ 
+ #if (defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)) || defined(PROTO)
+diff --git a/src/normal.c b/src/normal.c
+--- a/src/normal.c
++++ b/src/normal.c
+@@ -3905,6 +3905,9 @@ nv_left(cmdarg_T *cap)
+ {
+     long	n;
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+     if (mod_mask & (MOD_MASK_SHIFT | MOD_MASK_CTRL))
+     {
+ 	// <C-Left> and <S-Left> move a word or WORD left
+@@ -3968,6 +3971,8 @@ nv_left(cmdarg_T *cap)
+ 					       && cap->oap->op_type == OP_NOP)
+ 	foldOpenCursor();
+ #endif
++    profile_end(&tm);
++    Trace("nv_left: %s", profile_msg(&tm));
+ }
+ 
+ /*
+diff --git a/src/ops.c b/src/ops.c
+--- a/src/ops.c
++++ b/src/ops.c
+@@ -300,6 +300,7 @@ shift_block(oparg_T *oap, int amount)
+     p_ri = 0;			// don't want revins in indent
+ #endif
+ 
++    Trace("shift_block");
+     State = MODE_INSERT;	// don't want MODE_REPLACE for State
+     block_prep(oap, &bd, curwin->w_cursor.lnum, TRUE);
+     if (bd.is_short)
+@@ -523,6 +524,7 @@ block_insert(
+ 
+     State = MODE_INSERT;	// don't want MODE_REPLACE for State
+ 
++    Trace("block_insert");
+     for (lnum = oap->start.lnum + 1; lnum <= oap->end.lnum; lnum++)
+     {
+ 	block_prep(oap, bdp, lnum, TRUE);
+@@ -642,6 +644,7 @@ op_delete(oparg_T *oap)
+     linenr_T		old_lcount = curbuf->b_ml.ml_line_count;
+     int			did_yank = FALSE;
+ 
++    Trace("op_delete");
+     if (curbuf->b_ml.ml_flags & ML_EMPTY)	    // nothing to do
+ 	return OK;
+ 
+@@ -1049,6 +1052,7 @@ op_replace(oparg_T *oap, int c)
+     char_u		*after_p = NULL;
+     int			had_ctrl_v_cr = FALSE;
+ 
++    Trace("op_replace");
+     if ((curbuf->b_ml.ml_flags & ML_EMPTY ) || oap->empty)
+ 	return OK;	    // nothing to do
+ 
+@@ -1521,6 +1525,7 @@ op_insert(oparg_T *oap, long count1)
+     pos_T		t1;
+     pos_T		start_insert;
+ 
++    Trace("op_insert");
+     // edit() changes this - record it for OP_APPEND
+     bd.is_MAX = (curwin->w_curswant == MAXCOL);
+ 
+@@ -1552,6 +1557,7 @@ op_insert(oparg_T *oap, long count1)
+ 	    curwin->w_ve_flags = old_ve_flags;
+ 	}
+ 	// Get the info about the block before entering the text
++	Trace("op_insert 1");
+ 	block_prep(oap, &bd, oap->start.lnum, TRUE);
+ 	// Get indent information
+ 	ind_pre_col = (colnr_T)getwhitecols_curline();
+@@ -1677,6 +1683,7 @@ op_insert(oparg_T *oap, long count1)
+ 	    oap->end.col += ind_post_col - ind_pre_col;
+ 	    oap->end_vcol += ind_post_vcol - ind_pre_vcol;
+ 	}
++	Trace("op_insert 2");
+ 	block_prep(oap, &bd2, oap->start.lnum, TRUE);
+ 	if (did_indent && bd.textcol - ind_post_col > 0)
+ 	{
+@@ -1762,6 +1769,7 @@ op_change(oparg_T *oap)
+     char_u		*ins_text, *newp, *oldp;
+     struct block_def	bd;
+ 
++    Trace("op_change");
+     l = oap->start.col;
+     if (oap->motion_type == MLINE)
+     {
+@@ -2303,6 +2311,7 @@ block_prep(
+     int		lbr_saved = reset_lbr();
+ #endif
+ 
++    Trace("block_prep");
+     bdp->startspaces = 0;
+     bdp->endspaces = 0;
+     bdp->textlen = 0;
+@@ -3724,6 +3733,7 @@ do_pending_operator(cmdarg_T *cap, int o
+ 
+     int		    include_line_break = FALSE;
+ 
++    Trace("do_pending_operator");
+ #if defined(FEAT_CLIPBOARD)
+     // Yank the visual area into the GUI selection register before we operate
+     // on it and lose it forever.
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -487,6 +487,9 @@ screen_line(
+     int		    char_cells;		// 1: normal char
+ 					// 2: occupies two display cells
+ 
++    proftime_T tm;
++    profile_start(&tm);
++
+     // Check for illegal row and col, just in case.
+     if (row >= Rows)
+ 	row = Rows - 1;
+@@ -887,6 +890,8 @@ screen_line(
+ 	else
+ 	    LineWraps[row] = FALSE;
+     }
++    profile_end(&tm);
++    Trace("screen_line: %s", profile_msg(&tm));
+ }
+ 
+ #if defined(FEAT_RIGHTLEFT) || defined(PROTO)
+diff --git a/src/window.c b/src/window.c
+--- a/src/window.c
++++ b/src/window.c
+@@ -7244,6 +7244,7 @@ scroll_to_fraction(win_T *wp, int prev_h
+     void
+ win_new_width(win_T *wp, int width)
+ {
++    Trace("win_new_width");
+     // Should we give an error if width < 0?
+     wp->w_width = width < 0 ? 0 : width;
+     wp->w_lines_valid = 0;

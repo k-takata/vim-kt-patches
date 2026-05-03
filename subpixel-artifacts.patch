@@ -1,0 +1,67 @@
+# HG changeset patch
+# Parent  bdbeea2db066e2cef809deee3a795d3db434abef
+
+diff --git a/src/screen.c b/src/screen.c
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -420,6 +420,10 @@ screen_line(
+     int		    char_cells;		// 1: normal char
+ 					// 2: occupies two display cells
+ # define CHAR_CELLS char_cells
++#ifdef FEAT_GUI
++    int		    changed_this;   // bool: is character changed?
++    int		    changed_next;   // bool: changed_this for next character
++#endif
+ 
+     // Check for illegal row and col, just in case.
+     if (row >= Rows)
+@@ -473,6 +477,9 @@ screen_line(
+ #endif
+ 
+     redraw_next = char_needs_redraw(off_from, off_to, endcol - col);
++#ifdef FEAT_GUI
++    changed_next = redraw_next;
++#endif
+ 
+     while (col < endcol)
+     {
+@@ -484,19 +491,16 @@ screen_line(
+ 	redraw_this = redraw_next;
+ 	redraw_next = force || char_needs_redraw(off_from + CHAR_CELLS,
+ 			      off_to + CHAR_CELLS, endcol - col - CHAR_CELLS);
+-
+ #ifdef FEAT_GUI
+-	// If the next character was bold, then redraw the current character to
+-	// remove any pixels that might have spilt over into us.  This only
+-	// happens in the GUI.
++	changed_this = changed_next;
++	changed_next = redraw_next;
++
++	// Redraw the current character to remove any pixels that might have
++	// spilt over into us.  This only happens in the GUI, and only when
++	// subpixel rendering is used. We can only detect if the GUI is used, so
++	// we should always redraw.
+ 	if (redraw_next && gui.in_use)
+-	{
+-	    hl = ScreenAttrs[off_to + CHAR_CELLS];
+-	    if (hl > HL_ALL)
+-		hl = syn_attr2attr(hl);
+-	    if (hl & HL_BOLD)
+-		redraw_this = TRUE;
+-	}
++	    redraw_this = TRUE;
+ #endif
+ #ifdef FEAT_PROP_POPUP
+ 	if (blocked_by_popup(row, col + coloff))
+@@ -628,6 +632,11 @@ screen_line(
+ 		    redraw_next = TRUE;
+ 	    }
+ #endif
++
++#ifdef FEAT_GUI
++	    if (gui.in_use && changed_this)
++		redraw_next = TRUE;
++#endif
+ 	    ScreenAttrs[off_to] = ScreenAttrs[off_from];
+ 
+ 	    // For simplicity set the attributes of second half of a

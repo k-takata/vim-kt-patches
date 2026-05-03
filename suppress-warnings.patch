@@ -1,0 +1,52 @@
+# HG changeset patch
+# Parent  a5e33312bf4166b0e2a6994e6f9791b5ce3ac966
+
+diff --git a/src/vim.h b/src/vim.h
+--- a/src/vim.h
++++ b/src/vim.h
+@@ -578,8 +578,8 @@ extern int (*dyn_libintl_wputenv)(const 
+  */
+ #ifdef FEAT_GETTEXT
+ # ifdef DYNAMIC_GETTEXT
+-#  define _(x) (*dyn_libintl_gettext)((char *)(x))
+-#  define NGETTEXT(x, xs, n) (*dyn_libintl_ngettext)((char *)(x), (char *)(xs), (n))
++#  define _(x) (*dyn_libintl_gettext)((const char *)(x))
++#  define NGETTEXT(x, xs, n) (*dyn_libintl_ngettext)((const char *)(x), (const char *)(xs), (n))
+ #  define N_(x) x
+ #  define bindtextdomain(domain, dir) (*dyn_libintl_bindtextdomain)((domain), (dir))
+ #  define bind_textdomain_codeset(domain, codeset) (*dyn_libintl_bind_textdomain_codeset)((domain), (codeset))
+@@ -590,7 +590,7 @@ extern int (*dyn_libintl_wputenv)(const 
+ #  define libintl_wputenv(envstring) (*dyn_libintl_wputenv)(envstring)
+ # else
+ #  include <libintl.h>
+-#  define _(x) gettext((char *)(x))
++#  define _(x) gettext((const char *)(x))
+ #  define NGETTEXT(x, xs, n) ngettext((x), (xs), (n))
+ #  ifdef gettext_noop
+ #   define N_(x) gettext_noop(x)
+@@ -599,8 +599,8 @@ extern int (*dyn_libintl_wputenv)(const 
+ #  endif
+ # endif
+ #else
+-# define _(x) ((char *)(x))
+-# define NGETTEXT(x, xs, n) (((n) == 1) ? (char *)(x) : (char *)(xs))
++# define _(x) ((const char *)(x))
++# define NGETTEXT(x, xs, n) (((n) == 1) ? (const char *)(x) : (const char *)(xs))
+ # define N_(x) x
+ # ifdef bindtextdomain
+ #  undef bindtextdomain
+@@ -1778,11 +1778,11 @@ void *vim_memset(void *, int, size_t);
+ # define MB_STRNICMP(d, s, n)	mb_strnicmp((char_u *)(d), (char_u *)(s), (int)(n))
+ # define MB_STRNICMP2(d, s, n1, n2)	mb_strnicmp2((char_u *)(d), (char_u *)(s), (n1), (n2))
+ 
+-#define STRCAT(d, s)	    strcat((char *)(d), (char *)(s))
+-#define STRNCAT(d, s, n)    strncat((char *)(d), (char *)(s), (size_t)(n))
++#define STRCAT(d, s)	    strcat((char *)(d), (const char *)(s))
++#define STRNCAT(d, s, n)    strncat((char *)(d), (const char *)(s), (size_t)(n))
+ 
+ #ifdef HAVE_STRPBRK
+-# define vim_strpbrk(s, cs) (char_u *)strpbrk((char *)(s), (char *)(cs))
++# define vim_strpbrk(s, cs) (char_u *)strpbrk((const char *)(s), (const char *)(cs))
+ #endif
+ 
+ #define OUT_STR(s)		    out_str((char_u *)(s))

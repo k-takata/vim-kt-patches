@@ -1,0 +1,105 @@
+# HG changeset patch
+# Parent e182ca7f57a0e48d8b3d85a143b8cee04505d476
+
+diff --git a/src/message.c b/src/message.c
+--- a/src/message.c
++++ b/src/message.c
+@@ -339,8 +339,8 @@
+ 
+ /*
+  * Automatic prototype generation does not understand this function.
+- * Note: Caller of smgs() and smsg_attr() must check the resulting string is
+- * shorter than IOSIZE!!!
++ * Note: Caller of smgs(), smsg_attr() and smsg_attr_keep() must check the
++ * resulting string is shorter than IOSIZE!!!
+  */
+ #ifndef PROTO
+ # ifndef HAVE_STDARG_H
+@@ -357,6 +357,12 @@
+ #endif
+ smsg_attr __ARGS((int, char_u *, long, long, long,
+ 			long, long, long, long, long, long, long));
++int
++#ifdef __BORLANDC__
++_RTLENTRYF
++#endif
++smsg_attr_keep __ARGS((int, int, char_u *, long, long, long,
++			long, long, long, long, long, long, long));
+ 
+ int vim_snprintf __ARGS((char *, size_t, char *, long, long, long,
+ 				   long, long, long, long, long, long, long));
+@@ -389,9 +395,24 @@
+     char_u	*s;
+     long	a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
+ {
++    return smsg_attr_keep(0, FALSE, s,
++				     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
++}
++
++/* VARARGS */
++    int
++#ifdef __BORLANDC__
++_RTLENTRYF
++#endif
++smsg_attr_keep(attr, keep, s, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
++    int		attr;
++    int		keep;
++    char_u	*s;
++    long	a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
++{
+     vim_snprintf((char *)IObuff, IOSIZE, (char *)s,
+ 				     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+-    return msg_attr(IObuff, attr);
++    return msg_attr_keep(IObuff, attr, keep);
+ }
+ 
+ # else /* HAVE_STDARG_H */
+@@ -426,6 +447,20 @@
+     return msg_attr(IObuff, attr);
+ }
+ 
++    int
++#ifdef __BORLANDC__
++_RTLENTRYF
++#endif
++smsg_attr_keep(int attr, int keep, char_u *s, ...)
++{
++    va_list arglist;
++
++    va_start(arglist, s);
++    vim_vsnprintf((char *)IObuff, IOSIZE, (char *)s, arglist, NULL);
++    va_end(arglist);
++    return msg_attr_keep(IObuff, attr, keep);
++}
++
+ # endif /* HAVE_STDARG_H */
+ #endif
+ 
+diff --git a/src/proto.h b/src/proto.h
+--- a/src/proto.h
++++ b/src/proto.h
+@@ -120,6 +120,12 @@
+ #  ifdef __BORLANDC__
+ _RTLENTRYF
+ #  endif
++smsg_attr_keep __ARGS((int, int, char_u *, ...));
++
++int
++#  ifdef __BORLANDC__
++_RTLENTRYF
++#  endif
+ vim_snprintf_add __ARGS((char *, size_t, char *, ...));
+ 
+ int
+diff --git a/src/undo.c b/src/undo.c
+--- a/src/undo.c
++++ b/src/undo.c
+@@ -2729,7 +2729,7 @@
+     }
+ #endif
+ 
+-    smsg((char_u *)_("%ld %s; %s #%ld  %s"),
++    smsg_attr_keep(0, TRUE, (char_u *)_("%ld %s; %s #%ld  %s"),
+ 	    u_oldcount < 0 ? -u_oldcount : u_oldcount,
+ 	    _(msgstr),
+ 	    did_undo ? _("before") : _("after"),
