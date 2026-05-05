@@ -1,11 +1,20 @@
-# HG changeset patch
-# Parent  6924ac3d1d2ab628c41753d4720ebd76b99f87d6
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/charset.c |   23 ++++++++++++++++++++++-
+ src/misc1.c   |    4 ++++
+ src/move.c    |   34 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 60 insertions(+), 1 deletion(-)
 
 diff --git a/src/charset.c b/src/charset.c
+index 4f2f5b40a..129f298cf 100644
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -859,6 +859,10 @@ win_linetabsize_cts(chartabsize_T *cts, 
-     colnr_T col_save;
+@@ -916,6 +916,10 @@ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
+     colnr_T col_save = 0;
      vimlong_T vcol = cts->cts_vcol;
  
 +    proftime_T tm;
@@ -15,7 +24,7 @@ diff --git a/src/charset.c b/src/charset.c
  #ifdef FEAT_PROP_POPUP
      cts->cts_with_trailing = len == MAXCOL;
  #endif
-@@ -1217,6 +1221,9 @@ win_lbr_chartabsize(
+@@ -1329,6 +1333,9 @@ win_lbr_chartabsize(
      int		no_sbr = FALSE;
  #endif
  
@@ -25,7 +34,7 @@ diff --git a/src/charset.c b/src/charset.c
  #if defined(FEAT_PROP_POPUP)
      cts->cts_cur_text_width = 0;
      cts->cts_first_char = 0;
-@@ -1238,7 +1245,12 @@ win_lbr_chartabsize(
+@@ -1350,7 +1357,12 @@ win_lbr_chartabsize(
  #endif
      {
  	if (wp->w_p_wrap)
@@ -39,18 +48,18 @@ diff --git a/src/charset.c b/src/charset.c
  	RET_WIN_BUF_CHARTABSIZE(wp, wp->w_buffer, s, vcol)
      }
  
-@@ -1499,6 +1511,8 @@ win_lbr_chartabsize(
- #  ifdef FEAT_PROP_POPUP
+@@ -1623,6 +1635,8 @@ win_lbr_chartabsize(
      size += cts->cts_first_char;
  #  endif
+ # endif
 +    profile_end(&tm);
 +    //Trace("win_lbr_chartabsize 2: %s, cts->cts_vcol=%d\n", profile_msg(&tm), cts->cts_vcol);
      return size;
- # endif
  #endif
-@@ -1601,6 +1615,9 @@ getvcol(
-     static char_u   *saved_ptr = NULL;
+ }
+@@ -1732,6 +1746,9 @@ getvcol(
      static colnr_T  saved_vcol = 0;
+     static int	    old_cond = 0;
  
 +    proftime_T tm;
 +    profile_start(&tm);
@@ -58,23 +67,23 @@ diff --git a/src/charset.c b/src/charset.c
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
  
-@@ -1625,6 +1642,7 @@ getvcol(
+@@ -1757,6 +1774,7 @@ getvcol(
  #endif
         )
      {
 +	Trace("getvcol 1");
- 	if ((old_line != NULL)
- 		&& (old_line == line)
- 		&& (saved_ptr - line <= pos->col))
-@@ -1691,6 +1709,7 @@ getvcol(
+ 	if (0 && s_vcol_cache_valid2
+ 		&& (old_win != NULL) && (old_win == wp)
+ 		&& (old_line != NULL) && (old_line == line)
+@@ -1832,6 +1850,7 @@ getvcol(
      }
      else
      {
 +	Trace("getvcol 2");
- 	if ((old_line != NULL)
- 		&& (old_line == line)
- 		&& (saved_ptr - line <= pos->col))
-@@ -1808,6 +1827,7 @@ getvvcol(
+ 	if (0 && s_vcol_cache_valid2
+ 		&& (old_win != NULL) && (old_win == wp)
+ 		&& (old_line != NULL) && (old_line == line)
+@@ -1966,6 +1985,7 @@ getvvcol(
      colnr_T	endadd;
      char_u	*ptr;
  
@@ -82,27 +91,28 @@ diff --git a/src/charset.c b/src/charset.c
      if (virtual_active())
      {
  	// For virtual mode, only want one value
-@@ -1840,6 +1860,7 @@ getvvcol(
+@@ -1998,6 +2018,7 @@ getvvcol(
      }
      else
- 	getvcol(wp, pos, start, cursor, end);
+ 	getvcol(wp, pos, start, cursor, end, flags);
 +    Trace("getvvcol end");
  }
  
  /*
 diff --git a/src/misc1.c b/src/misc1.c
+index cc27ced20..494c6c771 100644
 --- a/src/misc1.c
 +++ b/src/misc1.c
-@@ -407,6 +407,8 @@ plines_win_nofold(win_T *wp, linenr_T ln
-     int		width;
+@@ -408,6 +408,8 @@ plines_win_nofold(win_T *wp, linenr_T lnum)
+     colnr_T	len;
      chartabsize_T cts;
  
 +    proftime_T tm;
 +    profile_start(&tm);
      s = ml_get_buf(wp->w_buffer, lnum, FALSE);
-     init_chartabsize_arg(&cts, wp, lnum, 0, s, s);
-     if (*s == NUL
-@@ -434,6 +436,8 @@ plines_win_nofold(win_T *wp, linenr_T ln
+     len = ml_get_buf_len(wp->w_buffer, lnum);
+     init_chartabsize_arg_len(&cts, wp, lnum, 0, s, s, len);
+@@ -436,6 +438,8 @@ plines_win_nofold(win_T *wp, linenr_T lnum)
  	return 1;
      col -= width;
      width += win_col_off2(wp);
@@ -112,11 +122,12 @@ diff --git a/src/misc1.c b/src/misc1.c
  }
  
 diff --git a/src/move.c b/src/move.c
+index 1e3be9206..87a6b39d5 100644
 --- a/src/move.c
 +++ b/src/move.c
-@@ -282,9 +282,13 @@ update_topline(void)
-     long	*so_ptr = curwin->w_p_so >= 0 ? &curwin->w_p_so : &p_so;
+@@ -322,9 +322,13 @@ update_topline(void)
      int		save_so = *so_ptr;
+     bool	eof_pressure;
  
 +    Trace("update_topline");
      // Cursor is updated instead when this is TRUE for 'splitkeep'.
@@ -128,7 +139,7 @@ diff --git a/src/move.c b/src/move.c
  
      // If there is no valid screen and when the window height is zero just use
      // the cursor line.
-@@ -294,12 +298,16 @@ update_topline(void)
+@@ -334,12 +338,16 @@ update_topline(void)
  	curwin->w_topline = curwin->w_cursor.lnum;
  	curwin->w_botline = curwin->w_topline;
  	curwin->w_scbind_pos = 1;
@@ -145,7 +156,7 @@ diff --git a/src/move.c b/src/move.c
  
      // When dragging with the mouse, don't scroll that quickly
      if (mouse_dragging > 0)
-@@ -524,6 +532,7 @@ update_topline(void)
+@@ -581,6 +589,7 @@ update_topline(void)
      }
  
      *so_ptr = save_so;
@@ -153,7 +164,7 @@ diff --git a/src/move.c b/src/move.c
  }
  
  /*
-@@ -838,10 +847,12 @@ cursor_valid(void)
+@@ -896,10 +905,12 @@ cursor_valid(void)
      void
  validate_cursor(void)
  {
@@ -165,8 +176,8 @@ diff --git a/src/move.c b/src/move.c
 +    Trace("validate_cursor end");
  }
  
- #if defined(FEAT_GUI) || defined(PROTO)
-@@ -876,6 +887,7 @@ curs_rows(win_T *wp)
+ #if defined(FEAT_GUI)
+@@ -934,6 +945,7 @@ curs_rows(win_T *wp)
      long	fold_count;
  #endif
  
@@ -174,7 +185,7 @@ diff --git a/src/move.c b/src/move.c
      // Check if wp->w_lines[].wl_size is invalid
      all_invalid = (!redrawing()
  			|| wp->w_lines_valid == 0
-@@ -982,6 +994,7 @@ curs_rows(win_T *wp)
+@@ -1040,6 +1052,7 @@ curs_rows(win_T *wp)
  
      redraw_for_cursorline(curwin);
      wp->w_valid |= VALID_CROW|VALID_CHEIGHT;
@@ -182,7 +193,7 @@ diff --git a/src/move.c b/src/move.c
  }
  
  /*
-@@ -1143,6 +1156,9 @@ curs_columns(
+@@ -1201,6 +1214,9 @@ curs_columns(
      long	siso = get_sidescrolloff_value();
      int		did_sub_skipcol = FALSE;
  
@@ -192,7 +203,7 @@ diff --git a/src/move.c b/src/move.c
      /*
       * First make sure that w_topline is valid (after moving the cursor).
       */
-@@ -1159,6 +1175,9 @@ curs_columns(
+@@ -1217,6 +1233,9 @@ curs_columns(
      curwin->w_virtcol_first_char = 0;
  #endif
  
@@ -202,7 +213,7 @@ diff --git a/src/move.c b/src/move.c
      /*
       * Compute the number of virtual columns.
       */
-@@ -1178,6 +1197,9 @@ curs_columns(
+@@ -1236,6 +1255,9 @@ curs_columns(
      extra = curwin_col_off();
      curwin->w_wcol = curwin->w_virtcol + extra;
      endcol += extra;
@@ -212,7 +223,7 @@ diff --git a/src/move.c b/src/move.c
  
      /*
       * Now compute w_wrow, counting screen lines from w_cline_row.
-@@ -1301,6 +1323,9 @@ curs_columns(
+@@ -1358,6 +1380,9 @@ curs_columns(
      else
  	curwin->w_wrow += diff_check_fill(curwin, curwin->w_cursor.lnum);
  #endif
@@ -222,7 +233,7 @@ diff --git a/src/move.c b/src/move.c
  
      prev_skipcol = curwin->w_skipcol;
  
-@@ -1322,6 +1347,9 @@ curs_columns(
+@@ -1379,6 +1404,9 @@ curs_columns(
  	    && width2 > 0
  	    && curwin->w_width != 0)
      {
@@ -232,7 +243,7 @@ diff --git a/src/move.c b/src/move.c
  	// Cursor past end of screen.  Happens with a single line that does
  	// not fit on screen.  Find a skipcol to show the text around the
  	// cursor.  Avoid scrolling all the time. compute value of "extra":
-@@ -1400,11 +1428,16 @@ curs_columns(
+@@ -1457,11 +1485,16 @@ curs_columns(
  	    win_ins_lines(curwin, 0, extra, FALSE, FALSE);
  	else if (extra < 0)
  	    win_del_lines(curwin, 0, -extra, FALSE, FALSE, 0);
@@ -249,11 +260,11 @@ diff --git a/src/move.c b/src/move.c
  
  #ifdef FEAT_SYN_HL
      redraw_for_cursorcolumn(curwin);
-@@ -1426,6 +1459,7 @@ curs_columns(
+@@ -1483,6 +1516,7 @@ curs_columns(
      curwin->w_valid_skipcol = curwin->w_skipcol;
  
      curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
 +    Trace("curs_columns end: curwin->w_wcol=%d curwin->w_virtcol=%d", curwin->w_wcol, curwin->w_virtcol);
  }
  
- #if (defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)) || defined(PROTO)
+ #if defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)

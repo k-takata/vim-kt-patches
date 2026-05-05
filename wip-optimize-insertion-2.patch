@@ -1,10 +1,20 @@
-# HG changeset patch
-# Parent  e1f76572b4f3f6d39da97cc40dee84717c48f32c
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/change.c   |   18 +++++++++++++++---
+ src/edit.c     |    9 +++++++++
+ src/memline.c  |    7 ++++++-
+ src/textprop.c |    5 +++++
+ 4 files changed, 35 insertions(+), 4 deletions(-)
 
 diff --git a/src/change.c b/src/change.c
+index f78e14515..55cfccfee 100644
 --- a/src/change.c
 +++ b/src/change.c
-@@ -1117,9 +1117,21 @@ ins_char_bytes(char_u *buf, int charlen)
+@@ -1309,9 +1309,21 @@ ins_char_bytes(char_u *buf, int charlen)
  	}
      }
  
@@ -30,9 +40,10 @@ diff --git a/src/change.c b/src/change.c
      // Copy bytes before the cursor.
      if (col > 0)
 diff --git a/src/edit.c b/src/edit.c
+index 450a48e64..4c01d625f 100644
 --- a/src/edit.c
 +++ b/src/edit.c
-@@ -431,6 +431,7 @@ edit(
+@@ -447,6 +447,7 @@ edit(
       */
      for (;;)
      {
@@ -40,7 +51,7 @@ diff --git a/src/edit.c b/src/edit.c
  #ifdef FEAT_RIGHTLEFT
  	if (!revins_legal)
  	    revins_scol = -1;	    // reset on illegal motions
-@@ -493,6 +494,7 @@ edit(
+@@ -509,6 +510,7 @@ edit(
  	}
  #endif
  
@@ -48,7 +59,7 @@ diff --git a/src/edit.c b/src/edit.c
  	/*
  	 * If we inserted a character at the last position of the last line in
  	 * the window, scroll the window one line up. This avoids an extra
-@@ -547,6 +549,7 @@ edit(
+@@ -563,6 +565,7 @@ edit(
  #endif
  		    set_topline(curwin, curwin->w_topline + 1);
  	    }
@@ -56,7 +67,7 @@ diff --git a/src/edit.c b/src/edit.c
  	}
  
  	// May need to adjust w_topline to show the cursor.
-@@ -555,8 +558,10 @@ edit(
+@@ -571,8 +574,10 @@ edit(
  
  	did_backspace = FALSE;
  
@@ -67,8 +78,8 @@ diff --git a/src/edit.c b/src/edit.c
  
  	/*
  	 * Redraw the display when no characters are waiting.
-@@ -599,7 +604,9 @@ edit(
- 	else
+@@ -639,7 +644,9 @@ edit(
+ 
  	    do
  	    {
 +		//Trace("calling safe_vgetc()");
@@ -77,7 +88,7 @@ diff --git a/src/edit.c b/src/edit.c
  
  		if (stop_insert_mode
  #ifdef FEAT_TERMINAL
-@@ -832,6 +839,7 @@ do_intr:
+@@ -891,6 +898,7 @@ do_intr:
  		break;
  	    }
  doESCkey:
@@ -85,7 +96,7 @@ diff --git a/src/edit.c b/src/edit.c
  	    /*
  	     * This is the ONLY return from edit()!
  	     */
-@@ -1322,6 +1330,7 @@ docomplete:
+@@ -1398,6 +1406,7 @@ docomplete:
  #endif
  
  normalchar:
@@ -94,25 +105,26 @@ diff --git a/src/edit.c b/src/edit.c
  	     * Insert a normal character.
  	     */
 diff --git a/src/memline.c b/src/memline.c
+index d6eddc210..88dea6c13 100644
 --- a/src/memline.c
 +++ b/src/memline.c
-@@ -2750,6 +2750,7 @@ errorret:
- 	buf->b_ml.ml_line_len = 4;
+@@ -2795,6 +2795,7 @@ errorret:
+ 	buf->b_ml.ml_line_size = 0;
  	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
  	buf->b_ml.ml_line_lnum = lnum;
 +	buf->b_ml.ml_line_size = 0;
  	return questions;
      }
      if (lnum <= 0)			// pretend line 0 is line 1
-@@ -2759,6 +2760,7 @@ errorret:
-     {
+@@ -2805,6 +2806,7 @@ errorret:
  	buf->b_ml.ml_line_len = 1;
+ 	buf->b_ml.ml_line_size = 0;
  	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
 +	buf->b_ml.ml_line_size = 0;
  	return (char_u *)"";
      }
  
-@@ -2819,6 +2821,7 @@ errorret:
+@@ -2866,6 +2868,7 @@ errorret:
  #endif
  	    buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
  	buf->b_ml.ml_line_lnum = lnum;
@@ -120,14 +132,14 @@ diff --git a/src/memline.c b/src/memline.c
  	buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
      }
      if (will_change)
-@@ -3648,11 +3651,13 @@ ml_replace_len(
+@@ -3707,11 +3710,13 @@ ml_replace_len(
  	{
  	    char_u *newline;
  	    size_t textproplen = curbuf->b_ml.ml_line_len - oldtextlen;
-+	    int new_size = len + (int)textproplen;
++	    size_t new_size = len + textproplen;
  
  	    // Need to copy over text properties, stored after the text.
--	    newline = alloc(len + (int)textproplen);
+-	    newline = alloc(len + textproplen);
 +	    newline = alloc(new_size);
  	    if (newline != NULL)
  	    {
@@ -135,113 +147,47 @@ diff --git a/src/memline.c b/src/memline.c
  		mch_memmove(newline, line, len);
  		mch_memmove(newline + len, curbuf->b_ml.ml_line_ptr
  						    + oldtextlen, textproplen);
-diff --git a/src/move.c b/src/move.c
---- a/src/move.c
-+++ b/src/move.c
-@@ -282,6 +282,7 @@ update_topline(void)
-     long	*so_ptr = curwin->w_p_so >= 0 ? &curwin->w_p_so : &p_so;
-     int		save_so = *so_ptr;
- 
-+    //Trace("update_topline");
-     // Cursor is updated instead when this is TRUE for 'splitkeep'.
-     if (skip_update_topline)
- 	return;
-@@ -838,6 +839,7 @@ cursor_valid(void)
-     void
- validate_cursor(void)
- {
-+    //Trace("validate_cursor");
-     check_cursor_lnum();
-     check_cursor_moved(curwin);
-     if ((curwin->w_valid & (VALID_WCOL|VALID_WROW)) != (VALID_WCOL|VALID_WROW))
-@@ -1143,6 +1145,7 @@ curs_columns(
-     long	siso = get_sidescrolloff_value();
-     int		did_sub_skipcol = FALSE;
- 
-+    //Trace("curs_columns");
-     /*
-      * First make sure that w_topline is valid (after moving the cursor).
-      */
 diff --git a/src/textprop.c b/src/textprop.c
+index 5d23c1673..19d92a4f5 100644
 --- a/src/textprop.c
 +++ b/src/textprop.c
-@@ -273,7 +273,8 @@ prop_add_one(
+@@ -903,6 +903,7 @@ prop_add_one(
  	}
- 
- 	// Allocate the new line with space for the new property.
--	newtext = alloc(buf->b_ml.ml_line_len + sizeof(textprop_T));
-+	size_t new_size = buf->b_ml.ml_line_len + sizeof(textprop_T);
-+	newtext = alloc(new_size);
- 	if (newtext == NULL)
- 	    goto theend;
- 	// Copy the text, including terminating NUL.
-@@ -321,6 +322,7 @@ prop_add_one(
- 	    vim_free(buf->b_ml.ml_line_ptr);
  	buf->b_ml.ml_line_ptr = newtext;
- 	buf->b_ml.ml_line_len += sizeof(textprop_T);
-+	buf->b_ml.ml_line_size = (int)new_size;
+ 	buf->b_ml.ml_line_len = new_line_len;
++	buf->b_ml.ml_line_size = new_line_len;
  	buf->b_ml.ml_flags |= ML_LINE_DIRTY;
      }
  
-@@ -855,11 +857,12 @@ set_text_props(linenr_T lnum, char_u *pr
- {
-     char_u  *text;
-     char_u  *newtext;
--    int	    textlen;
-+    int	    textlen, new_size;
- 
-     text = ml_get(lnum);
-     textlen = ml_get_len(lnum) + 1;
--    newtext = alloc(textlen + len);
-+    new_size = textlen + len;
-+    newtext = alloc(new_size);
-     if (newtext == NULL)
- 	return;
-     mch_memmove(newtext, text, textlen);
-@@ -868,7 +871,8 @@ set_text_props(linenr_T lnum, char_u *pr
-     if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
- 	vim_free(curbuf->b_ml.ml_line_ptr);
-     curbuf->b_ml.ml_line_ptr = newtext;
--    curbuf->b_ml.ml_line_len = textlen + len;
-+    curbuf->b_ml.ml_line_len = new_size;
-+    curbuf->b_ml.ml_line_size = new_size;
-     curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
- }
- 
-@@ -881,9 +885,11 @@ add_text_props(linenr_T lnum, textprop_T
-     char_u  *text;
-     char_u  *newtext;
-     int	    proplen = text_prop_count * (int)sizeof(textprop_T);
-+    int	    new_size;
- 
-     text = ml_get(lnum);
--    newtext = alloc(curbuf->b_ml.ml_line_len + proplen);
-+    new_size = curbuf->b_ml.ml_line_len + proplen;
-+    newtext = alloc(new_size);
-     if (newtext == NULL)
- 	return;
-     mch_memmove(newtext, text, curbuf->b_ml.ml_line_len);
-@@ -892,6 +898,7 @@ add_text_props(linenr_T lnum, textprop_T
- 	vim_free(curbuf->b_ml.ml_line_ptr);
-     curbuf->b_ml.ml_line_ptr = newtext;
-     curbuf->b_ml.ml_line_len += proplen;
-+    curbuf->b_ml.ml_line_size = new_size;
-     curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
- }
- 
-@@ -1099,6 +1106,7 @@ f_prop_clear(typval_T *argvars, typval_T
- 		if (buf->b_ml.ml_flags & ML_ALLOCATED)
- 		    vim_free(buf->b_ml.ml_line_ptr);
- 		buf->b_ml.ml_line_ptr = newtext;
-+		buf->b_ml.ml_line_size = (int)STRLEN(newtext) + 1;
- 		buf->b_ml.ml_flags |= ML_LINE_DIRTY;
- 	    }
- 	    buf->b_ml.ml_line_len = (int)len;
-@@ -2296,6 +2304,7 @@ adjust_prop_columns(
+@@ -1469,6 +1470,7 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
  	}
+ 	curbuf->b_ml.ml_line_ptr = newtext;
+ 	curbuf->b_ml.ml_line_len = textlen;
++	curbuf->b_ml.ml_line_size = textlen;
  	curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
- 	curbuf->b_ml.ml_line_len = newlen;
-+	curbuf->b_ml.ml_line_size = 0;
      }
+     else
+@@ -1642,6 +1644,7 @@ add_text_props(linenr_T lnum, textprop_T *text_props, int text_prop_count)
+ 	um.props[um.prop_count++] = text_props[i];
+ 
+     um_close(&um);
++    // TODO: Update curbuf->b_ml.ml_line_size?
+ }
+ 
+ /*
+@@ -1840,6 +1843,7 @@ f_prop_clear(typval_T *argvars, typval_T *rettv UNUSED)
+ 		did_clear = TRUE;
+ 		for (idx = um.prop_count - 1; idx >= 0; --idx)
+ 		    um_delete_prop(&um, idx);
++		// TODO: Update buf->b_ml.ml_line_size?
+ 	    }
+ 	}
+ 	um_close(&um);
+@@ -3031,6 +3035,7 @@ adjust_prop_columns(
+ 	um_close(&um);
+     else
+ 	um_abort(&um);
++    // TODO: Update curbuf->b_ml.ml_line_size?
      return dirty;
  }
+ 

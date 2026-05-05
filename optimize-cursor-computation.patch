@@ -1,4 +1,4 @@
-
+Optimize cursor computation
 
 From: K.Takata <kentkt@csc.jp>
 
@@ -13,7 +13,7 @@ From: K.Takata <kentkt@csc.jp>
  6 files changed, 151 insertions(+)
 
 diff --git a/src/charset.c b/src/charset.c
-index 49320fcb6..ebc03d042 100644
+index bf7c59620..de3657f54 100644
 --- a/src/charset.c
 +++ b/src/charset.c
 @@ -895,16 +895,87 @@ linetabsize_no_outer(win_T *wp, linenr_T lnum)
@@ -101,10 +101,10 @@ index 49320fcb6..ebc03d042 100644
 +	    old_line = cts->cts_line;
 +	    s_vcol_cache_valid1 = TRUE;
 +	}
- 	vcol += win_lbr_chartabsize(cts, NULL);
+ 	vcol += win_lbr_chartabsize(cts, NULL, NULL);
  	if (vcol > MAXCOL)
  	{
-@@ -1622,6 +1693,12 @@ getvcol(
+@@ -1654,6 +1725,12 @@ getvcol(
  #ifdef FEAT_PROP_POPUP
      int		on_NUL = FALSE;
  #endif
@@ -117,7 +117,7 @@ index 49320fcb6..ebc03d042 100644
  
      vcol = 0;
      line = ptr = ml_get_buf(wp->w_buffer, pos->lnum, FALSE);
-@@ -1629,6 +1706,15 @@ getvcol(
+@@ -1661,6 +1738,15 @@ getvcol(
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
@@ -133,7 +133,7 @@ index 49320fcb6..ebc03d042 100644
      /*
       * This function is used very often, do some speed optimizations.
       * When 'list', 'linebreak', 'showbreak' and 'breakindent' are not set
-@@ -1644,6 +1730,16 @@ getvcol(
+@@ -1676,6 +1762,16 @@ getvcol(
  #endif
         )
      {
@@ -150,7 +150,7 @@ index 49320fcb6..ebc03d042 100644
  	for (;;)
  	{
  	    head = 0;
-@@ -1690,12 +1786,38 @@ getvcol(
+@@ -1722,6 +1818,18 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -169,6 +169,7 @@ index 49320fcb6..ebc03d042 100644
  	    vcol += incr;
  	    ptr = next_ptr;
  	}
+@@ -1730,6 +1838,20 @@ getvcol(
      }
      else
      {
@@ -189,7 +190,7 @@ index 49320fcb6..ebc03d042 100644
  	for (;;)
  	{
  	    // A tab gets expanded, depending on the current column.
-@@ -1722,6 +1844,22 @@ getvcol(
+@@ -1757,6 +1879,22 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -213,19 +214,19 @@ index 49320fcb6..ebc03d042 100644
  	    cts.cts_ptr = next_ptr;
  	}
 diff --git a/src/evalfunc.c b/src/evalfunc.c
-index 3c872af56..feda6aba8 100644
+index ed0359263..ed065aed4 100644
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
-@@ -12756,6 +12756,7 @@ f_virtcol(typval_T *argvars, typval_T *rettv)
+@@ -12819,6 +12819,7 @@ f_virtcol(typval_T *argvars, typval_T *rettv)
  	    if (fp->col > len)
  		fp->col = len;
  	}
 +	invalidate_vcol_cache();
- 	getvvcol(curwin, fp, &vcol_start, NULL, &vcol_end);
+ 	getvvcol(curwin, fp, &vcol_start, NULL, &vcol_end, 0);
  	++vcol_start;
  	++vcol_end;
 diff --git a/src/memline.c b/src/memline.c
-index 1951864e1..399bcd351 100644
+index 5a0dfdb32..d6eddc210 100644
 --- a/src/memline.c
 +++ b/src/memline.c
 @@ -884,6 +884,7 @@ ml_close(buf_T *buf, int del_file)
@@ -236,7 +237,7 @@ index 1951864e1..399bcd351 100644
      }
      vim_free(buf->b_ml.ml_stack);
  #ifdef FEAT_BYTEOFF
-@@ -3702,6 +3703,7 @@ ml_replace_len(
+@@ -3731,6 +3732,7 @@ ml_replace_len(
      curbuf->b_ml.ml_line_textlen = !has_props ? len_arg + 1 : 0;
      curbuf->b_ml.ml_line_lnum = lnum;
      curbuf->b_ml.ml_flags = (curbuf->b_ml.ml_flags | ML_LINE_DIRTY) & ~ML_EMPTY;
@@ -244,7 +245,7 @@ index 1951864e1..399bcd351 100644
  
      return OK;
  }
-@@ -4268,6 +4270,7 @@ ml_flush_line(buf_T *buf)
+@@ -4321,6 +4323,7 @@ ml_flush_line(buf_T *buf)
  	}
  	vim_free(new_line);
  	buf->b_ml.ml_line_size = 0;
@@ -252,7 +253,7 @@ index 1951864e1..399bcd351 100644
  
  	entered = FALSE;
      }
-@@ -4275,6 +4278,7 @@ ml_flush_line(buf_T *buf)
+@@ -4328,6 +4331,7 @@ ml_flush_line(buf_T *buf)
      {
  	vim_free(buf->b_ml.ml_line_ptr);
  	buf->b_ml.ml_line_size = 0;
@@ -261,10 +262,10 @@ index 1951864e1..399bcd351 100644
  
      buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
 diff --git a/src/move.c b/src/move.c
-index 2bf8c2b74..103879181 100644
+index 14271240f..616140ba7 100644
 --- a/src/move.c
 +++ b/src/move.c
-@@ -670,6 +670,7 @@ changed_window_setting(void)
+@@ -713,6 +713,7 @@ changed_window_setting(void)
      void
  changed_window_setting_win(win_T *wp)
  {
@@ -272,7 +273,7 @@ index 2bf8c2b74..103879181 100644
      wp->w_lines_valid = 0;
      changed_line_abv_curs_win(wp);
      wp->w_valid &= ~(VALID_BOTLINE|VALID_BOTLINE_AP|VALID_TOPLINE);
-@@ -1157,6 +1158,7 @@ curs_columns(
+@@ -1200,6 +1201,7 @@ curs_columns(
      long	siso = get_sidescrolloff_value();
      int		did_sub_skipcol = FALSE;
  
@@ -280,7 +281,7 @@ index 2bf8c2b74..103879181 100644
      /*
       * First make sure that w_topline is valid (after moving the cursor).
       */
-@@ -1440,6 +1442,8 @@ curs_columns(
+@@ -1482,6 +1484,8 @@ curs_columns(
      curwin->w_valid_skipcol = curwin->w_skipcol;
  
      curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
@@ -290,10 +291,10 @@ index 2bf8c2b74..103879181 100644
  
  #if defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)
 diff --git a/src/ops.c b/src/ops.c
-index 3fad2b44f..4de54a849 100644
+index 0ebdb381d..08c84de4f 100644
 --- a/src/ops.c
 +++ b/src/ops.c
-@@ -4117,6 +4117,7 @@ do_pending_operator(cmdarg_T *cap, int old_col, int gui_yank)
+@@ -4125,6 +4125,7 @@ do_pending_operator(cmdarg_T *cap, int old_col, int gui_yank)
  
  	if (VIsual_active || redo_VIsual_busy)
  	{
@@ -302,7 +303,7 @@ index 3fad2b44f..4de54a849 100644
  
  	    if (!redo_VIsual_busy && !gui_yank)
 diff --git a/src/proto/charset.pro b/src/proto/charset.pro
-index c9af1b0d6..63456ea42 100644
+index bc09b01b8..02894b08e 100644
 --- a/src/proto/charset.pro
 +++ b/src/proto/charset.pro
 @@ -24,6 +24,9 @@ int win_linetabsize(win_T *wp, linenr_T lnum, char_u *line, colnr_T len);

@@ -1,33 +1,40 @@
-# HG changeset patch
-# Parent  0cdfccef3ca2fb09bbac0bfb2e0a1864c5a553b3
+
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/charset.c |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/src/charset.c b/src/charset.c
+index d6c2af04e..4f2f5b40a 100644
 --- a/src/charset.c
 +++ b/src/charset.c
-@@ -875,7 +875,7 @@ win_linetabsize_cts(chartabsize_T *cts, 
-     col_save = slen * 4 / 5;
+@@ -930,7 +930,7 @@ win_linetabsize_cts(chartabsize_T *cts, colnr_T len)
+     col_save = (colnr_T)((varnumber_T)slen * 4 / 5);
      if (slen - col_save > 4096)
  	col_save = slen - 4096;
--    if (s_vcol_cache_valid
-+    if (0 && s_vcol_cache_valid
- 	    && (old_line != NULL)
- 	    && (old_line == cts->cts_line)
+-    if (s_vcol_cache_valid1
++    if (0 && s_vcol_cache_valid1
+ 	    && (old_win != NULL) && (old_win == cts->cts_win)
+ 	    && (old_line != NULL) && (old_line == cts->cts_line)
  	    && (saved_ptr >= cts->cts_line)
-@@ -1637,7 +1637,7 @@ getvcol(
+@@ -1757,7 +1757,7 @@ getvcol(
  #endif
         )
      {
--	if (s_vcol_cache_valid
-+	if (0 && s_vcol_cache_valid
- 		&& (old_line != NULL)
- 		&& (old_line == line)
+-	if (s_vcol_cache_valid2
++	if (0 && s_vcol_cache_valid2
+ 		&& (old_win != NULL) && (old_win == wp)
+ 		&& (old_line != NULL) && (old_line == line)
  		&& (saved_ptr >= line)
-@@ -1706,7 +1706,7 @@ getvcol(
+@@ -1832,7 +1832,7 @@ getvcol(
      }
      else
      {
--	if (s_vcol_cache_valid
-+	if (0 && s_vcol_cache_valid
- 		&& (old_line != NULL)
- 		&& (old_line == line)
+-	if (s_vcol_cache_valid2
++	if (0 && s_vcol_cache_valid2
+ 		&& (old_win != NULL) && (old_win == wp)
+ 		&& (old_line != NULL) && (old_line == line)
  		&& (saved_ptr >= line)
