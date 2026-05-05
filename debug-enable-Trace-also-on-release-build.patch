@@ -1,10 +1,18 @@
-# HG changeset patch
-# Parent  9dd7e4c50a52e0be614e5eea0abad8a466599f5d
+debug: win32: Enable Trace also on release build
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/os_mswin.c |    2 +-
+ src/os_win32.h |    3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/os_mswin.c b/src/os_mswin.c
+index bfd0f1a38..d250ae11f 100644
 --- a/src/os_mswin.c
 +++ b/src/os_mswin.c
-@@ -936,7 +936,7 @@ DumpPutS(const char *psz UNUSED)
+@@ -982,7 +982,7 @@ DumpPutS(const char *psz UNUSED)
  #endif
  }
  
@@ -14,9 +22,10 @@ diff --git a/src/os_mswin.c b/src/os_mswin.c
  void __cdecl
  Trace(
 diff --git a/src/os_win32.h b/src/os_win32.h
+index cfdff674f..559ee1f6f 100644
 --- a/src/os_win32.h
 +++ b/src/os_win32.h
-@@ -191,6 +191,9 @@ Trace(char *pszFormat, ...);
+@@ -216,6 +216,9 @@ Trace(char *pszFormat, ...);
  # define TRACE3(sz, p1, p2, p3)
  # define TRACE4(sz, p1, p2, p3, p4)
  

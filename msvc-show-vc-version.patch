@@ -1,7 +1,18 @@
-# HG changeset patch
-# Parent  a1facdb1cd2e8e53135b8a0c4ce5f88346e6e006
+MSVC: Show VC version
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/msvc-latest.bat |   25 +++++++++++++++----------
+ src/msvc2015.bat    |   14 ++++++++++++++
+ src/msvc2017.bat    |    4 ++++
+ src/msvc2019.bat    |    4 ++++
+ src/msvc2022.bat    |    4 ++++
+ 5 files changed, 41 insertions(+), 10 deletions(-)
 
 diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
+index 4529fa02e..93ac70570 100644
 --- a/src/msvc-latest.bat
 +++ b/src/msvc-latest.bat
 @@ -39,18 +39,16 @@ if "%VSVEROPT%"=="" (
@@ -30,7 +41,7 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
  )
  if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
  	call "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" %*
-@@ -60,7 +58,14 @@ if exist "%InstallDir%\VC\Auxiliary\Buil
+@@ -60,7 +58,14 @@ if exist "%InstallDir%\VC\Auxiliary\Build\vcvarsall.bat" (
  	call
  )
  
@@ -47,9 +58,10 @@ diff --git a/src/msvc-latest.bat b/src/msvc-latest.bat
  	set VSWHERE=
  	set VSWHERE_SET=
 diff --git a/src/msvc2015.bat b/src/msvc2015.bat
+index b541719ac..2ee864ca6 100644
 --- a/src/msvc2015.bat
 +++ b/src/msvc2015.bat
-@@ -12,4 +12,18 @@ rem   If you use Community (or Professio
+@@ -12,4 +12,18 @@ rem   If you use Community (or Professional) edition, you can also use "x64"
  rem   option:
  rem     msvc2015 x64
  
@@ -69,6 +81,7 @@ diff --git a/src/msvc2015.bat b/src/msvc2015.bat
 +	)
 +)
 diff --git a/src/msvc2017.bat b/src/msvc2017.bat
+index c7731c92c..569eddd15 100644
 --- a/src/msvc2017.bat
 +++ b/src/msvc2017.bat
 @@ -11,3 +11,7 @@ rem     msvc2017 x86_amd64
@@ -80,6 +93,7 @@ diff --git a/src/msvc2017.bat b/src/msvc2017.bat
 +	title VS 2017 %VSCMD_ARG_TGT_ARCH%
 +)
 diff --git a/src/msvc2019.bat b/src/msvc2019.bat
+index a45ef2c56..16a893f1d 100644
 --- a/src/msvc2019.bat
 +++ b/src/msvc2019.bat
 @@ -11,3 +11,7 @@ rem     msvc2019 x64
@@ -91,6 +105,7 @@ diff --git a/src/msvc2019.bat b/src/msvc2019.bat
 +	title VS 2019 %VSCMD_ARG_TGT_ARCH%
 +)
 diff --git a/src/msvc2022.bat b/src/msvc2022.bat
+index b70741007..67a9491b6 100644
 --- a/src/msvc2022.bat
 +++ b/src/msvc2022.bat
 @@ -11,3 +11,7 @@ rem     msvc2022 x64

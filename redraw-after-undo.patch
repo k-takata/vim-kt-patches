@@ -1,11 +1,17 @@
-# HG changeset patch
-# Parent e89f9176882f2e24edbe9d98fe007174d612b7a9
-# Parent  21f341ed653033252e3772ab72bd984ff35bc94a
+Redraw after undo
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/undo.c |    2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/src/undo.c b/src/undo.c
+index ac38a8bf2..cc9422ee2 100644
 --- a/src/undo.c
 +++ b/src/undo.c
-@@ -3055,6 +3055,8 @@ u_undo_end(
+@@ -3061,6 +3061,8 @@ u_undo_end(
      if (VIsual_active)
  	check_pos(curbuf, &VIsual);
  

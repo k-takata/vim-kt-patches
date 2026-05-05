@@ -1,4 +1,4 @@
-
+Win32: Store exe in OBJDIR
 
 From: K.Takata <kentkt@csc.jp>
 
@@ -9,10 +9,10 @@ From: K.Takata <kentkt@csc.jp>
  2 files changed, 22 insertions(+), 8 deletions(-)
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
-index 0e14d6a15..ab49eed50 100644
+index 07c2d345e..9db365090 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -186,6 +186,7 @@ ifeq ($(CROSS),yes)
+@@ -193,6 +193,7 @@ ifeq ($(CROSS),yes)
   ifndef CROSS_COMPILE
  CROSS_COMPILE = i586-pc-mingw32msvc-
   endif
@@ -20,7 +20,7 @@ index 0e14d6a15..ab49eed50 100644
  DEL = rm -f
  MKDIR = mkdir -p
  DIRSLASH = /
-@@ -214,10 +215,12 @@ CROSS_COMPILE =
+@@ -221,10 +222,12 @@ CROSS_COMPILE =
  # In this case, unix-like commands can be used.
  #
   ifneq (sh.exe, $(SHELL))
@@ -33,7 +33,7 @@ index 0e14d6a15..ab49eed50 100644
  DEL = del
  MKDIR = mkdir
  DIRSLASH = \\
-@@ -1179,16 +1182,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStartup@0
+@@ -1188,16 +1191,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStartup@0
   endif
  
  $(TARGET): $(OBJ)
@@ -58,7 +58,7 @@ index 0e14d6a15..ab49eed50 100644
  endif
  
  upx: exes
-@@ -1219,6 +1226,8 @@ clean:
+@@ -1228,6 +1235,8 @@ clean:
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcno
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcda
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
@@ -68,10 +68,10 @@ index 0e14d6a15..ab49eed50 100644
  	-rmdir $(OUTDIR)
  	-$(DEL) $(MAIN_TARGET) vimrun.exe install.exe uninstall.exe
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
-index 0b5a4b2b9..8601adc1d 100644
+index 462af211c..f966d5a14 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1315,19 +1315,23 @@ $(VIMDLLBASE).dll: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
+@@ -1316,19 +1316,23 @@ $(VIMDLLBASE).dll: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<
@@ -98,7 +98,7 @@ index 0b5a4b2b9..8601adc1d 100644
  
  !ELSE
  
-@@ -1338,11 +1342,12 @@ $(VIM).exe: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
+@@ -1339,11 +1343,12 @@ $(VIM).exe: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<

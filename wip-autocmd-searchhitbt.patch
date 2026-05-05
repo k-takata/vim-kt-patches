@@ -1,4 +1,4 @@
-
+WIP: Add searchhitbt autocmd
 
 From: K.Takata <kentkt@csc.jp>
 
@@ -49,10 +49,10 @@ index eba6e4354..ec33e4049 100644
  SessionLoadPre			Before loading the session file created using
  				the |:mksession| command.
 diff --git a/runtime/doc/tags b/runtime/doc/tags
-index a000eacbd..17d090817 100644
+index 4ad699ed5..2a342f0c0 100644
 --- a/runtime/doc/tags
 +++ b/runtime/doc/tags
-@@ -5899,6 +5899,8 @@ SQLGetType	ft_sql.txt	/*SQLGetType*
+@@ -5911,6 +5911,8 @@ SQLGetType	ft_sql.txt	/*SQLGetType*
  SQLSetType	ft_sql.txt	/*SQLSetType*
  SafeState	autocmd.txt	/*SafeState*
  SafeStateAgain	autocmd.txt	/*SafeStateAgain*
@@ -62,7 +62,7 @@ index a000eacbd..17d090817 100644
  Select-mode	visual.txt	/*Select-mode*
  Select-mode-mapping	visual.txt	/*Select-mode-mapping*
 diff --git a/src/autocmd.c b/src/autocmd.c
-index e6b6ecbe0..0c30b63a5 100644
+index 78965529d..dc394d851 100644
 --- a/src/autocmd.c
 +++ b/src/autocmd.c
 @@ -167,6 +167,8 @@ static keyvalue_T event_tab[NUM_EVENTS] = {
@@ -75,7 +75,7 @@ index e6b6ecbe0..0c30b63a5 100644
      KEYVALUE_ENTRY(EVENT_SESSIONLOADPRE, "SessionLoadPre"),
      KEYVALUE_ENTRY(EVENT_SESSIONWRITEPOST, "SessionWritePost"),
 diff --git a/src/search.c b/src/search.c
-index 5d50b1fc5..41d30d866 100644
+index bb85873dc..8a9e78ee4 100644
 --- a/src/search.c
 +++ b/src/search.c
 @@ -1125,9 +1125,16 @@ searchit(
@@ -96,10 +96,10 @@ index 5d50b1fc5..41d30d866 100644
  		    && shortmess(SHM_SEARCHCOUNT)
  		    && (options & SEARCH_MSG))
 diff --git a/src/vim.h b/src/vim.h
-index 47604e50b..005d1b21c 100644
+index 59da75209..917104035 100644
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1476,6 +1476,8 @@ enum auto_event
+@@ -1461,6 +1461,8 @@ enum auto_event
      EVENT_REMOTEREPLY,		// upon string reception from a remote vim
      EVENT_SAFESTATE,		// going to wait for a character
      EVENT_SAFESTATEAGAIN,	// still waiting for a character

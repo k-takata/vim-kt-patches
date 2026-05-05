@@ -1,4 +1,4 @@
-
+MSVC: Revise USE_MSVCRT
 
 From: K.Takata <kentkt@csc.jp>
 
@@ -12,7 +12,7 @@ From: K.Takata <kentkt@csc.jp>
  create mode 100644 src/xpm/vcrt-x86/lib-vc14/libXpm.lib
 
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
-index 8601adc1d..32302e259 100644
+index f966d5a14..b9001dbf6 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
 @@ -469,9 +469,17 @@ DIRECTX_OBJ = $(OUTDIR)\gui_dwrite.obj
@@ -45,7 +45,7 @@ index 8601adc1d..32302e259 100644
  !  ENDIF # USE_MSVCRT
  ! ENDIF # XPM
  ! IF "$(XPM)" != "no"
-@@ -814,7 +820,7 @@ EXECFLAGS =
+@@ -815,7 +821,7 @@ EXECFLAGS =
  EXELIBC = $(LIBC)
  ! ELSE
  EXECFLAGS = -DUSE_OWNSTARTUP /GS-

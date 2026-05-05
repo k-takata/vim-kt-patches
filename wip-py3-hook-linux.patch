@@ -1,10 +1,18 @@
-# HG changeset patch
-# Parent  f9b743f501d380574792f03ac47dc49a7070724e
+WIP: Py3 hook linux
+
+From: K.Takata <kentkt@csc.jp>
+
+
+---
+ src/errors.h     |    2 +-
+ src/if_python3.c |   61 ++++++++++++++++++++++++++++++++++++++++++++++++++----
+ 2 files changed, 58 insertions(+), 5 deletions(-)
 
 diff --git a/src/errors.h b/src/errors.h
+index 384dfaab9..9074613d0 100644
 --- a/src/errors.h
 +++ b/src/errors.h
-@@ -3240,7 +3240,7 @@ EXTERN char e_autoload_import_cannot_use
+@@ -3247,7 +3247,7 @@ EXTERN char e_autoload_import_cannot_use_absolute_or_relative_path[]
  EXTERN char e_cannot_use_partial_here[]
  	INIT(= N_("E1265: Cannot use a partial here"));
  #endif
@@ -14,6 +22,7 @@ diff --git a/src/errors.h b/src/errors.h
  	INIT(= N_("E1266: Critical error in python3 initialization, check your python3 installation"));
  #endif
 diff --git a/src/if_python3.c b/src/if_python3.c
+index 6ed457395..af950d2ec 100644
 --- a/src/if_python3.c
 +++ b/src/if_python3.c
 @@ -29,6 +29,9 @@
@@ -26,7 +35,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #include "vim.h"
  
  #include <limits.h>
-@@ -130,6 +133,9 @@ typedef PySliceObject PySliceObject_T;
+@@ -127,6 +130,9 @@ typedef PySliceObject PySliceObject_T;
  
  #ifndef MSWIN
  # define HINSTANCE void *
@@ -36,7 +45,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #endif
  #if defined(DYNAMIC_PYTHON3) || defined(MSWIN)
  static HINSTANCE hinstPy3 = 0; // Instance of python.dll
-@@ -143,7 +149,6 @@ static HINSTANCE hinstPy3 = 0; // Instan
+@@ -140,7 +146,6 @@ static HINSTANCE hinstPy3 = 0; // Instance of python.dll
  #  define symbol_from_dll GetProcAddress
  #  define load_dll_error GetWin32Error
  # else
@@ -44,7 +53,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #  define FARPROC void*
  #  if defined(PY_NO_RTLD_GLOBAL) && defined(PY3_NO_RTLD_GLOBAL)
  #   define load_dll(n) dlopen((n), RTLD_LAZY)
-@@ -1249,9 +1254,10 @@ reset_stdin(void)
+@@ -1283,9 +1288,10 @@ reset_stdin(void)
  // Python 3.2 or later will abort inside Py_Initialize() when mandatory
  // modules cannot be loaded (e.g. 'pythonthreehome' is wrongly set.).
  // Install a hook to python dll's exit() and recover from it.
@@ -58,7 +67,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  
  static jmp_buf exit_hook_jump_buf;
  static void *orig_exit = NULL;
-@@ -1295,6 +1301,52 @@ restore_py_exit(void)
+@@ -1329,6 +1335,52 @@ restore_py_exit(void)
  	hook_dll_import_func(hinst, "exit", orig_exit);
      orig_exit = NULL;
  }
@@ -111,7 +120,7 @@ diff --git a/src/if_python3.c b/src/if_python3.c
  #endif
  
      static int
-@@ -1346,6 +1398,7 @@ Python3_Init(void)
+@@ -1385,6 +1437,7 @@ Python3_Init(void)
  	{
  	    // exit() was called in Py_Initialize().
  	    restore_py_exit();

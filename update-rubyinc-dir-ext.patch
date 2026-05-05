@@ -1,4 +1,4 @@
-
+Win32: if_ruby: Update RUBYINC directory to use .ext/include
 
 From: K.Takata <kentkt@csc.jp>
 
@@ -9,10 +9,10 @@ From: K.Takata <kentkt@csc.jp>
  2 files changed, 5 insertions(+)
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
-index 9ec5ef8e0..0e14d6a15 100644
+index 7f3d519bf..07c2d345e 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -526,6 +526,8 @@ RUBY_INSTALL_NAME = $(RUBY_MSVCRT_NAME)-ruby$(RUBY_API_VER)
+@@ -533,6 +533,8 @@ RUBY_INSTALL_NAME = $(RUBY_MSVCRT_NAME)-ruby$(RUBY_API_VER)
   endif
  
  RUBYINC = -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG) -I $(RUBY)/include/ruby-$(RUBY_API_VER_LONG)/$(RUBY_PLATFORM)
@@ -22,10 +22,10 @@ index 9ec5ef8e0..0e14d6a15 100644
  RUBYLIB = -L$(RUBY)/lib -l$(RUBY_INSTALL_NAME)
   endif
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
-index a59b083e7..0b5a4b2b9 100644
+index 8994143c9..462af211c 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1188,6 +1188,9 @@ CFLAGS = $(CFLAGS) -DFEAT_RUBY
+@@ -1189,6 +1189,9 @@ CFLAGS = $(CFLAGS) -DFEAT_RUBY
  RUBY_OBJ = $(OUTDIR)\if_ruby.obj
  RUBY_INC = /I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)" \
  	/I "$(RUBY)\include\ruby-$(RUBY_API_VER_LONG)\$(RUBY_PLATFORM)"
