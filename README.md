@@ -22,11 +22,9 @@ Use [stq](https://github.com/k-takata/stq) to manage the patches.
 
 ### Update
 
-If you want to get the latest source code after clone, you can use the following commands:
+If you want to get the latest source code after clone, you can use the following command:
 
-    $ stq pop -a
-    $ stg pull
-    $ stq push -a
+    $ stq pull
 
 ## License
 
