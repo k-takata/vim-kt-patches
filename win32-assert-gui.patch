@@ -2,7 +2,9 @@ Win32: W/A for assert error on GUI
 
 From: K.Takata <kentkt@csc.jp>
 
-
+If Vim is built with debug mode, gvim causes an assertion error and
+stops working when running on Visual Studio Debugger.
+Stop calling _set_fmode() if not needed.
 ---
  src/os_win32.c |    3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)

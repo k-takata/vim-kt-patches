@@ -1,8 +1,9 @@
-MSVC: Show VC version
+MSVC: Show VS version
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Show the selected Visual Studio version and the target architecture when
+running msvc*.bat. Also, set the title of Command Prompt.
 ---
  src/msvc-latest.bat |   25 +++++++++++++++----------
  src/msvc2015.bat    |   14 ++++++++++++++
