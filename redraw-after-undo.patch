@@ -8,10 +8,10 @@ From: K.Takata <kentkt@csc.jp>
  1 file changed, 2 insertions(+)
 
 diff --git a/src/undo.c b/src/undo.c
-index ac38a8bf2..cc9422ee2 100644
+index 06efd9230..b54dcffac 100644
 --- a/src/undo.c
 +++ b/src/undo.c
-@@ -3061,6 +3061,8 @@ u_undo_end(
+@@ -3077,6 +3077,8 @@ u_undo_end(
      if (VIsual_active)
  	check_pos(curbuf, &VIsual);
  

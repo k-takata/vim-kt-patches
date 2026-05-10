@@ -30,7 +30,6 @@ win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 msvc-show-vc-version.patch
 optimize-mem-alloc-for-insertion.patch
-win32-assert-gui.patch
 optimize-cursor-computation.patch #+wip
 optimize-cursor-computation2.patch #+wip
 remove-enable-disable_vcol_cache.patch #+wip

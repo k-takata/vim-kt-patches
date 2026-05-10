@@ -11,10 +11,10 @@ From: K.Takata <kentkt@csc.jp>
  4 files changed, 66 insertions(+), 35 deletions(-)
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index bb08b9e8e..28c206462 100644
+index c80fb28b2..31f77b3cd 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -7828,10 +7828,14 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -7827,10 +7827,14 @@ A jump table for the options with a short description can be found at |Q_op|.
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
@@ -57,7 +57,7 @@ index 581d00b7a..65d5e3d2a 100644
  If 'shellpipe' is empty, the {errorfile} part will be omitted.  This is useful
  for compilers that write to an errorfile themselves (e.g., Manx's Amiga C).
 diff --git a/src/option.c b/src/option.c
-index b44a3990a..6a5b91285 100644
+index 31f84c98d..69188b839 100644
 --- a/src/option.c
 +++ b/src/option.c
 @@ -1131,10 +1131,11 @@ set_init_3(void)

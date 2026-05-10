@@ -166,7 +166,7 @@ index 2887ebbf9..5a0dfdb32 100644
      buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
      buf->b_ml.ml_line_lnum = 0;
 diff --git a/src/structs.h b/src/structs.h
-index 4d92ca75a..21fabfafb 100644
+index 6c6ea8c0e..68d498404 100644
 --- a/src/structs.h
 +++ b/src/structs.h
 @@ -870,6 +870,7 @@ typedef struct memline
@@ -178,7 +178,7 @@ index 4d92ca75a..21fabfafb 100644
      colnr_T	ml_line_textlen;// length of the cached line + NUL, 0 if not known yet
      linenr_T	ml_line_lnum;	// line number of cached line, 0 if not valid
 diff --git a/src/textprop.c b/src/textprop.c
-index 48cbad4b6..5d23c1673 100644
+index a049edec9..23eefdcba 100644
 --- a/src/textprop.c
 +++ b/src/textprop.c
 @@ -497,7 +497,10 @@ um_store_changes(unpacked_memline_T *um)
@@ -203,7 +203,7 @@ index 48cbad4b6..5d23c1673 100644
  	buf->b_ml.ml_line_ptr = newtext;
  	buf->b_ml.ml_line_len = new_line_len;
  	buf->b_ml.ml_flags |= ML_LINE_DIRTY;
-@@ -1457,7 +1463,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
+@@ -1479,7 +1485,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
  	    return;
  	mch_memmove(newtext, text, textlen);
  	if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
@@ -214,7 +214,7 @@ index 48cbad4b6..5d23c1673 100644
  	curbuf->b_ml.ml_line_ptr = newtext;
  	curbuf->b_ml.ml_line_len = textlen;
  	curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
-@@ -1511,7 +1520,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
+@@ -1533,7 +1542,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
  	}
  
  	if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
