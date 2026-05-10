@@ -13,9 +13,9 @@ Use [stq](https://github.com/k-takata/stq) to manage the patches.
 
 ### First time
 
-    $ stg clone https://github.com/vim/vim.git vim
+    $ stq clone https://github.com/vim/vim.git vim \
+        -p https://github.com/k-takata/vim-kt-patches.git
     $ cd vim
-    $ git clone https://github.com/k-takata/vim-kt-patches.git .git/patches
     $ stq select linux    # if needed
     $ stq push -a
     $ make
