@@ -16,6 +16,7 @@ Use [stq](https://github.com/k-takata/stq) to manage the patches.
     $ git clone https://github.com/vim/vim.git
     $ cd vim
     $ git clone https://github.com/k-takata/vim-kt-patches.git .git/patches
+    $ stq init
     $ stq select linux    # if needed
     $ stq push -a
     $ make
