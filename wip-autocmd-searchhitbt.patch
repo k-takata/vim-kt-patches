@@ -12,11 +12,11 @@ From: K.Takata <kentkt@csc.jp>
  5 files changed, 32 insertions(+)
 
 diff --git a/runtime/doc/autocmd.txt b/runtime/doc/autocmd.txt
-index eba6e4354..ec33e4049 100644
+index 62cd761e1..57aabc34b 100644
 --- a/runtime/doc/autocmd.txt
 +++ b/runtime/doc/autocmd.txt
-@@ -423,6 +423,9 @@ Name			triggered by ~
- |TextChangedT|		after a change was made to the text in Terminal mode
+@@ -425,6 +425,9 @@ Name			triggered by ~
+ |TextPutPre|		before text is put
  |TextYankPost|		after text has been yanked or deleted
  
 +|SearchHitBottom|	when searching hit the bottom of the file
@@ -25,7 +25,7 @@ index eba6e4354..ec33e4049 100644
  |SafeState|		nothing pending, going to wait for the user to type a
  			character
  |SafeStateAgain|	repeated SafeState
-@@ -1183,6 +1186,22 @@ SafeStateAgain			Like SafeState but after processing any
+@@ -1185,6 +1188,22 @@ SafeStateAgain			Like SafeState but after processing any
  				triggered often, don't do something that takes
  				time.
  
@@ -49,10 +49,10 @@ index eba6e4354..ec33e4049 100644
  SessionLoadPre			Before loading the session file created using
  				the |:mksession| command.
 diff --git a/runtime/doc/tags b/runtime/doc/tags
-index 4ad699ed5..2a342f0c0 100644
+index d5a8a1b30..ed282697b 100644
 --- a/runtime/doc/tags
 +++ b/runtime/doc/tags
-@@ -5911,6 +5911,8 @@ SQLGetType	ft_sql.txt	/*SQLGetType*
+@@ -5912,6 +5912,8 @@ SQLGetType	ft_sql.txt	/*SQLGetType*
  SQLSetType	ft_sql.txt	/*SQLSetType*
  SafeState	autocmd.txt	/*SafeState*
  SafeStateAgain	autocmd.txt	/*SafeStateAgain*
@@ -62,7 +62,7 @@ index 4ad699ed5..2a342f0c0 100644
  Select-mode	visual.txt	/*Select-mode*
  Select-mode-mapping	visual.txt	/*Select-mode-mapping*
 diff --git a/src/autocmd.c b/src/autocmd.c
-index 78965529d..dc394d851 100644
+index 3b16a6b5b..961833c3e 100644
 --- a/src/autocmd.c
 +++ b/src/autocmd.c
 @@ -167,6 +167,8 @@ static keyvalue_T event_tab[NUM_EVENTS] = {
@@ -75,7 +75,7 @@ index 78965529d..dc394d851 100644
      KEYVALUE_ENTRY(EVENT_SESSIONLOADPRE, "SessionLoadPre"),
      KEYVALUE_ENTRY(EVENT_SESSIONWRITEPOST, "SessionWritePost"),
 diff --git a/src/search.c b/src/search.c
-index bb85873dc..8a9e78ee4 100644
+index 12977dc8f..9a85d859a 100644
 --- a/src/search.c
 +++ b/src/search.c
 @@ -1125,9 +1125,16 @@ searchit(
@@ -96,10 +96,10 @@ index bb85873dc..8a9e78ee4 100644
  		    && shortmess(SHM_SEARCHCOUNT)
  		    && (options & SEARCH_MSG))
 diff --git a/src/vim.h b/src/vim.h
-index 59da75209..917104035 100644
+index 50c3bf0fd..07380de3b 100644
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1461,6 +1461,8 @@ enum auto_event
+@@ -1462,6 +1462,8 @@ enum auto_event
      EVENT_REMOTEREPLY,		// upon string reception from a remote vim
      EVENT_SAFESTATE,		// going to wait for a character
      EVENT_SAFESTATEAGAIN,	// still waiting for a character
