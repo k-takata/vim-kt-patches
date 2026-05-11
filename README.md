@@ -22,9 +22,15 @@ Use [stq](https://github.com/k-takata/stq) to manage the patches.
 
 ### Update
 
-If you want to get the latest source code after clone, you can use the following command:
+If you want to get the latest Vim source code after clone, you can use the following command:
 
     $ stq pull
+
+If you want to get the latest patches after clone, you can use the following commands:
+
+    $ stq qgit pull
+    $ stq discard -a
+    $ stq push -a
 
 ## License
 
