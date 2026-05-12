@@ -2,7 +2,7 @@ Suppress compiler warnings
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/vim.h |   16 ++++++++--------
  1 file changed, 8 insertions(+), 8 deletions(-)

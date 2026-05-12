@@ -2,7 +2,7 @@ MSVC: Revise USE_MSVCRT
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/Make_mvc.mak                     |   18 ++++++++++++------
  src/xpm/vcrt-x64/lib-vc14/libXpm.lib |  Bin

@@ -2,7 +2,7 @@ Win32: W/A for flaky mouse test
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/testdir/test_mswin_event.vim |    4 ++++
  1 file changed, 4 insertions(+)

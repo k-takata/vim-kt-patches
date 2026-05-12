@@ -2,7 +2,7 @@ Optimize cursor computation
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/charset.c         |  138 +++++++++++++++++++++++++++++++++++++++++++++++++
  src/evalfunc.c        |    1 

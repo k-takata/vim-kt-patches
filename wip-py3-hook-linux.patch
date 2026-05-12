@@ -2,14 +2,14 @@ WIP: Py3 hook linux
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/errors.h     |    2 +-
  src/if_python3.c |   61 ++++++++++++++++++++++++++++++++++++++++++++++++++----
  2 files changed, 58 insertions(+), 5 deletions(-)
 
 diff --git a/src/errors.h b/src/errors.h
-index 384dfaab9..9074613d0 100644
+index 3ba7eca8f..5f6e557f5 100644
 --- a/src/errors.h
 +++ b/src/errors.h
 @@ -3247,7 +3247,7 @@ EXTERN char e_autoload_import_cannot_use_absolute_or_relative_path[]

@@ -2,7 +2,7 @@ WIP: Add searchhitbt autocmd
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  runtime/doc/autocmd.txt |   19 +++++++++++++++++++
  runtime/doc/tags        |    2 ++

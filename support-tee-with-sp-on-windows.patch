@@ -1,8 +1,8 @@
-Win32: Support tee with sp
+Win32: Support tee with 'shellpipe'
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  runtime/doc/options.txt    |   12 ++++++---
  runtime/doc/quickfix.txt   |   12 +++++----

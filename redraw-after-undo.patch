@@ -2,7 +2,7 @@ Redraw after undo
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/undo.c |    2 ++
  1 file changed, 2 insertions(+)

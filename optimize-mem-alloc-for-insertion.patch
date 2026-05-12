@@ -2,7 +2,7 @@ Optimize memory allocation for insertion
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/change.c   |   33 +++++++++++++++++++++++++++------
  src/edit.c     |    6 ++++++

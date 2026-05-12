@@ -2,7 +2,7 @@ Win32: if_ruby: Update RUBYINC directory to use .ext/include
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/Make_cyg_ming.mak |    2 ++
  src/Make_mvc.mak      |    3 +++

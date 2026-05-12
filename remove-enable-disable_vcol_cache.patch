@@ -1,4 +1,4 @@
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 
 From: K.Takata <kentkt@csc.jp>
 
@@ -10,7 +10,7 @@ From: K.Takata <kentkt@csc.jp>
  3 files changed, 14 insertions(+), 45 deletions(-)
 
 diff --git a/src/charset.c b/src/charset.c
-index 268788222..4dbe0481e 100644
+index a1b3e4ca5..d6c2af04e 100644
 --- a/src/charset.c
 +++ b/src/charset.c
 @@ -895,22 +895,9 @@ linetabsize_no_outer(win_T *wp, linenr_T lnum)
@@ -76,7 +76,7 @@ index 268788222..4dbe0481e 100644
  		&& (cts->cts_ptr - cts->cts_line <= col_save)
  		&& (cts->cts_ptr + (*mb_ptr2len)(cts->cts_ptr) - cts->cts_line
  			>= col_save)
-@@ -1725,14 +1706,9 @@ getvcol(
+@@ -1757,14 +1738,9 @@ getvcol(
      init_chartabsize_arg(&cts, wp, pos->lnum, 0, line, line);
      cts.cts_max_head_vcol = -1;
  
@@ -94,7 +94,7 @@ index 268788222..4dbe0481e 100644
  
      /*
       * This function is used very often, do some speed optimizations.
-@@ -1805,8 +1781,7 @@ getvcol(
+@@ -1837,8 +1813,7 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -104,7 +104,7 @@ index 268788222..4dbe0481e 100644
  		    && (ptr - line <= col_save)
  		    && (next_ptr - line >= col_save))
  	    {
-@@ -1863,8 +1838,7 @@ getvcol(
+@@ -1898,8 +1873,7 @@ getvcol(
  	    if (next_ptr - line > pos->col) // character at pos->col
  		break;
  
@@ -115,10 +115,10 @@ index 268788222..4dbe0481e 100644
  		    && (next_ptr - line >= col_save)
  #ifdef FEAT_PROP_POPUP
 diff --git a/src/move.c b/src/move.c
-index 103879181..b6113e364 100644
+index 616140ba7..1e3be9206 100644
 --- a/src/move.c
 +++ b/src/move.c
-@@ -1158,7 +1158,6 @@ curs_columns(
+@@ -1201,7 +1201,6 @@ curs_columns(
      long	siso = get_sidescrolloff_value();
      int		did_sub_skipcol = FALSE;
  
@@ -126,7 +126,7 @@ index 103879181..b6113e364 100644
      /*
       * First make sure that w_topline is valid (after moving the cursor).
       */
-@@ -1442,8 +1441,6 @@ curs_columns(
+@@ -1484,8 +1483,6 @@ curs_columns(
      curwin->w_valid_skipcol = curwin->w_skipcol;
  
      curwin->w_valid |= VALID_WCOL|VALID_WROW|VALID_VIRTCOL;
@@ -136,7 +136,7 @@ index 103879181..b6113e364 100644
  
  #if defined(FEAT_EVAL) || defined(FEAT_PROP_POPUP)
 diff --git a/src/proto/charset.pro b/src/proto/charset.pro
-index d4219eb82..631b7a589 100644
+index 88a4c61df..e32550f9a 100644
 --- a/src/proto/charset.pro
 +++ b/src/proto/charset.pro
 @@ -24,8 +24,6 @@ int win_linetabsize(win_T *wp, linenr_T lnum, char_u *line, colnr_T len);

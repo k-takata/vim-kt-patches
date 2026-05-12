@@ -1,8 +1,8 @@
-ambiwidth=auto
+Support "auto" in 'ambiwidth'
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: Muraoka Taro <koron.kaoriya@gmail.com>
 ---
  runtime/doc/options.txt |    7 ++++++
  src/gui_w32.c           |   53 +++++++++++++++++++++++++++++++++++++++++++++++

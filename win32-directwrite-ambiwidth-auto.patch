@@ -1,8 +1,8 @@
-Win32: DirectWrite ambiwidth=auto
+Win32: Support "auto" in 'ambiwidth' when using DirectWrite
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/gui_dwrite.cpp |   68 +++++++++++++++++++++++++++++++++++++++++++++++++++-
  src/gui_dwrite.h   |    1 +
