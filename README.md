@@ -11,6 +11,8 @@ Some of the patches are already sent to [vim_dev](https://groups.google.com/foru
 
 Use [stq](https://github.com/k-takata/stq) to manage the patches.
 
+To get a prebuilt package, go to [vim-kt](https://github.com/k-takata/vim-kt).
+
 ### First time
 
     $ stq clone https://github.com/vim/vim.git vim \
@@ -19,6 +21,15 @@ Use [stq](https://github.com/k-takata/stq) to manage the patches.
     $ stq select linux    # if needed
     $ stq push -a
     $ make
+
+#### Additional step (optional)
+
+To see the complete patch history in a single line:
+
+    $ stq qgit fetch origin 'refs/replace/*:refs/replace/*'
+
+This fetches the information for "git replace --graft". It grafts the history of the master branch onto the mq-master branch.
+(The mq-master branch was the default branch of the old Mercurial Queues repository.)
 
 ### Update
 
