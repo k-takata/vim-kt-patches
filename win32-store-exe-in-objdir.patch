@@ -2,6 +2,13 @@ Win32: Store exe in OBJDIR
 
 From: K.Takata <kentkt@csc.jp>
 
+Currently, .obj files are written in $OBJDIR. However, .exe/.dll files
+are written in the src directory. This means that if we build an exe
+with different settings, .exe/.dll files are overwritten.
+
+Output .exe/.dll files to $OBJDIR, then copy them to the src directory
+to keep the executable files with the different settings.
+
 Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/Make_cyg_ming.mak |   17 +++++++++++++----
