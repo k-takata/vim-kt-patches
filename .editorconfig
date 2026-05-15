@@ -1,0 +1,4 @@
+root = true
+
+[*.{diff,patch}]
+trim_trailing_whitespace = false
