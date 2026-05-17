@@ -29,6 +29,7 @@ debug-mswin_event.patch #+wip
 win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 optimize-mem-alloc-for-insertion.patch
+nsis-dont-install-32-bit-dll-on-arm64.patch
 optimize-cursor-computation.patch #+wip
 optimize-cursor-computation2.patch #+wip
 remove-enable-disable_vcol_cache.patch #+wip
