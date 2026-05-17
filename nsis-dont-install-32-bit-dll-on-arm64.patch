@@ -2,7 +2,7 @@ NSIS: Don't install 32-bit dll on ARM64
 
 From: K.Takata <kentkt@csc.jp>
 
-
+Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  nsis/gvim.nsi |   34 ++++++++++++++++++----------------
  1 file changed, 18 insertions(+), 16 deletions(-)
