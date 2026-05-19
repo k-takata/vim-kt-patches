@@ -1,0 +1,267 @@
+CI: Stop using AppVeyor
+
+From: K.Takata <kentkt@csc.jp>
+
+We started the Windows CI with AppVeyor (v7.4.872), but nowadays, GitHub Actions
+supports Windows, and the performance is better than AppVeyor.
+Especially, AppVeyor doesn't allow running multiple jobs in parallel.
+
+Before 9.0.0529, we used VC 2010 on AppVeyor to ensure that C99 syntax
+was not used.
+Now we use some C99 syntax. Also, MSVC's C99 support level remains
+almost the same since VS 2015. So, using VS 2015 isn't very useful.
+
+Signed-off-by: K.Takata <kentkt@csc.jp>
+---
+ .appveyor.yml       |   52 --------------------
+ .github/labeler.yml |    1 
+ Filelist            |    3 -
+ README.md           |    1 
+ ci/appveyor.bat     |  131 ---------------------------------------------------
+ 5 files changed, 188 deletions(-)
+ delete mode 100644 .appveyor.yml
+ delete mode 100644 ci/appveyor.bat
+
+diff --git a/.appveyor.yml b/.appveyor.yml
+deleted file mode 100644
+index 35da10921..000000000
+--- a/.appveyor.yml
++++ /dev/null
+@@ -1,52 +0,0 @@
+-version: "{build}"
+-
+-image: Visual Studio 2015
+-
+-skip_tags: true
+-
+-environment:
+-  matrix:
+-    - FEATURE: HUGE
+-  
+-    # Alternate environments, not used right now.  2022 is a lot slower.
+-    #
+-    # - job_name: VS-2015
+-    #   appveyor_build_worker_image: Visual Studio 2015
+-    #   FEATURE: HUGE
+-
+-    # - job_name: VS-2017
+-    #   appveyor_build_worker_image: Visual Studio 2017
+-    #   FEATURE: HUGE
+-
+-    # - job_name: VS-2019
+-    #   appveyor_build_worker_image: Visual Studio 2019
+-    #   FEATURE: HUGE
+-
+-    # - job_name: VS-2022
+-    #   appveyor_build_worker_image: Visual Studio 2022
+-    #   FEATURE: HUGE
+-
+-# disabled
+-#    - FEATURE: TINY
+-#    - FEATURE: NORMAL
+-
+-matrix:
+-  fast_finish: true
+-
+-before_build:
+-  - call ver
+-  - ci\appveyor.bat install
+-
+-build_script:
+-  - ci\appveyor.bat build
+-
+-test_script:
+-  - ci\appveyor.bat test
+-
+-artifacts:
+-  - path: src/vim.exe
+-    name: vim
+-  - path: src/gvim.exe
+-    name: gvim
+-
+-# vim: sw=2 sts=2 et ts=8 sr
+diff --git a/.github/labeler.yml b/.github/labeler.yml
+index 720765d38..157f791e7 100644
+--- a/.github/labeler.yml
++++ b/.github/labeler.yml
+@@ -8,7 +8,6 @@ CI:
+         - '.github/dependabot.yml'
+         - '.github/labeler.yml'
+         - '.github/workflows/*'
+-        - '.appveyor.yml'
+         - '.codecov.yml'
+ 
+ documentation:
+diff --git a/Filelist b/Filelist
+index 13e0f85f6..ceb06739b 100644
+--- a/Filelist
++++ b/Filelist
+@@ -18,11 +18,9 @@ SRC_ALL =	\
+ 		.github/dependabot.yml \
+ 		.gitignore \
+ 		.hgignore \
+-		.appveyor.yml \
+ 		.clang-format \
+ 		.codecov.yml \
+ 		.editorconfig \
+-		ci/appveyor.bat \
+ 		ci/config.mk*.sed \
+ 		ci/gen_testset.py \
+ 		ci/if_ver*.vim \
+@@ -1195,7 +1193,6 @@ LANG_DOS = \
+ # be excluded from distribution tarballs and the like.
+ # This excludes them from the CI check for unlisted files.
+ IGNORE = \
+-		.appveyor.yml \
+ 		.github/FUNDING.yml \
+ 		.github/labeler.yml \
+ 		.github/workflows/label.yml \
+diff --git a/README.md b/README.md
+index 949fcd7b4..3e57f0e8c 100644
+--- a/README.md
++++ b/README.md
+@@ -1,7 +1,6 @@
+ # [![Vim The editor](https://github.com/vim/vim/raw/master/runtime/vimlogo.gif)](https://www.vim.org)
+ 
+ [![Github Build status](https://github.com/vim/vim/workflows/GitHub%20CI/badge.svg)](https://github.com/vim/vim/actions?query=workflow%3A%22GitHub+CI%22)
+-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/o2qht2kjm02sgghk?svg=true)](https://ci.appveyor.com/project/chrisbra/vim)
+ [![Cirrus Build Status](https://api.cirrus-ci.com/github/vim/vim.svg)](https://cirrus-ci.com/github/vim/vim)
+ [![Coverage Status](https://codecov.io/gh/vim/vim/coverage.svg?branch=master)](https://codecov.io/gh/vim/vim?branch=master)
+ [![Coverity Scan](https://scan.coverity.com/projects/241/badge.svg)](https://scan.coverity.com/projects/vim)
+diff --git a/ci/appveyor.bat b/ci/appveyor.bat
+deleted file mode 100644
+index 17d95ff69..000000000
+--- a/ci/appveyor.bat
++++ /dev/null
+@@ -1,131 +0,0 @@
+-@echo off
+-:: Batch file for building/testing Vim on AppVeyor
+-set target=%1
+-set "GETTEXT_PATH=c:\gettext64\bin"
+-
+-setlocal ENABLEDELAYEDEXPANSION
+-cd %APPVEYOR_BUILD_FOLDER%
+-
+-:: Python3
+-set "PYTHON3_VER=311"
+-set "PYTHON3_RELEASE=3.11.1"
+-set "PYTHON3_URL=https://www.python.org/ftp/python/%PYTHON3_RELEASE%/python-%PYTHON3_RELEASE%-amd64.exe"
+-set "PYTHON3_DIR=C:\python%PYTHON3_VER%-x64"
+-
+-:: Gettext-tools, iconv and libraries
+-set "GETTEXT64_URL=https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.21-v1.16/gettext0.21-iconv1.16-shared-64.zip"
+-set "GETTEXT64_DIR=c:\gettext64"
+-
+-set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+-
+-if exist "%VSWHERE%" (
+-  for /f "usebackq delims=" %%i in (
+-    `"%VSWHERE%" -products * -latest -property installationPath`
+-  ) do (
+-    set "VCVARSALL=%%i\VC\Auxiliary\Build\vcvarsall.bat"
+-  )
+-)
+-
+-if not exist "%VCVARSALL%" (
+-  set "VCVARSALL=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+-)
+-call "%VCVARSALL%" x64
+-
+-goto %target%
+-echo Unknown build target.
+-exit 1
+-
+-:: ----------------------------------------------------------------------------
+-:install
+-@echo on
+-if not exist downloads mkdir downloads
+-
+-:: Python 3
+-if not exist %PYTHON3_DIR% (
+-  call :downloadfile %PYTHON3_URL% downloads\python3.exe
+-  cmd /c start /wait downloads\python3.exe /quiet TargetDir=%PYTHON3_DIR% ^
+-      Include_pip=0 Include_tcltk=0 Include_test=0 Include_tools=0 ^
+-      AssociateFiles=0 Shortcuts=0 Include_doc=0 Include_launcher=0 ^
+-      InstallLauncherAllUsers=0
+-)
+-:: GETTEXT
+-if not exist %GETTEXT64_DIR% (
+-  mkdir %GETTEXT64_DIR%
+-  call :downloadfile %GETTEXT64_URL% downloads\gettext64.zip
+-  cmd /c powershell.exe -NoLogo -NoProfile -Command ^
+-    Add-Type -AssemblyName 'System.IO.Compression.FileSystem'; ^
+-    [System.IO.Compression.ZipFile]::ExtractToDirectory^('downloads\gettext64.zip', ^
+-    '%GETTEXT64_DIR%'^)
+-    copy /y %GETTEXT64_DIR%\bin\libintl-8.dll C:\projects\vim\src\ || exit 1
+-    copy /y %GETTEXT64_DIR%\bin\libiconv-2.dll C:\projects\vim\src\ || exit 1
+-)
+-
+-@echo off
+-goto :eof
+-
+-:: ----------------------------------------------------------------------------
+-:build
+-
+-cd src
+-
+-echo "Building MSVC 64bit console Version"
+-nmake -f Make_mvc.mak CPU=AMD64 ^
+-    OLE=no GUI=no IME=yes ICONV=yes DEBUG=no ^
+-    FEATURES=%FEATURE% CI_CFLAGS=/we4267
+-if not exist vim.exe (
+-    echo Build failure.
+-    exit 1
+-)
+-
+-:: build MSVC huge version with python and channel support
+-:: GUI needs to be last, so that testing works
+-echo "Building MSVC 64bit GUI Version"
+-if "%FEATURE%" == "HUGE" (
+-    nmake -f Make_mvc.mak CPU=AMD64 ^
+-        OLE=no GUI=yes IME=yes ICONV=yes DEBUG=no POSTSCRIPT=yes ^
+-        PYTHON_VER=27 DYNAMIC_PYTHON=yes PYTHON=C:\Python27-x64 ^
+-        PYTHON3_VER=%PYTHON3_VER% DYNAMIC_PYTHON3=yes PYTHON3=%PYTHON3_DIR% ^
+-        FEATURES=%FEATURE% CI_CFLAGS=/we4267
+-) ELSE (
+-    nmake -f Make_mvc.mak CPU=AMD64 ^
+-        OLE=no GUI=yes IME=yes ICONV=yes DEBUG=no ^
+-        FEATURES=%FEATURE% CI_CFLAGS=/we4267
+-)
+-if not exist gvim.exe (
+-    echo Build failure.
+-    exit 1
+-)
+-.\gvim -u NONE -c "redir @a | ver |0put a | wq" ver_msvc.txt || exit 1
+-
+-echo "version output MSVC console"
+-.\vim --version || exit 1
+-echo "version output MSVC GUI"
+-type ver_msvc.txt || exit 1
+-
+-goto :eof
+-
+-:: ----------------------------------------------------------------------------
+-:test
+-@echo on
+-cd src/testdir
+-:: Testing with MSVC gvim
+-path %PYTHON3_DIR%;%GETTEXT_PATH%;%PATH%
+-nmake -f Make_mvc.mak VIMPROG=..\gvim
+-nmake -f Make_mvc.mak clean
+-:: Testing with MSVC console version
+-nmake -f Make_mvc.mak VIMPROG=..\vim
+-
+-@echo off
+-goto :eof
+-
+-:: ----------------------------------------------------------------------------
+-:downloadfile
+-:: call :downloadfile <URL> <localfile>
+-if not exist %2 (
+-	curl -f -L %1 -o %2
+-)
+-if ERRORLEVEL 1 (
+-	rem Retry once.
+-	curl -f -L %1 -o %2 || exit 1
+-)
+-@goto :eof
