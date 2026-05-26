@@ -23,7 +23,6 @@ drop-support-for-glib-2.2.patch #+rejected
 support-tee-with-sp-on-windows.patch
 suppress-warnings.patch
 wip-autocmd-searchhitbt.patch #+wip
-win32-mouse-flaky.patch
 wip-py3-hook-linux.patch #+wip
 debug-mswin_event.patch #+wip
 win32-store-exe-in-objdir.patch
