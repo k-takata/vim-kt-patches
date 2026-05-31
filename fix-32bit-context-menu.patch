@@ -1,0 +1,25 @@
+nsis: Fix 32-bit context menu
+
+From: K.Takata <kentkt@csc.jp>
+
+The 32-bit context menu was not translated after 8ae45e420218f5ed913c6b99cbccce99245ea97c.
+NSIS requires a space after a `!`.
+
+Signed-off-by: K.Takata <kentkt@csc.jp>
+---
+ nsis/gvim.nsi |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/nsis/gvim.nsi b/nsis/gvim.nsi
+index 3d4800886..02751ce90 100644
+--- a/nsis/gvim.nsi
++++ b/nsis/gvim.nsi
+@@ -638,7 +638,7 @@ SectionGroupEnd
+ 	!undef LIBRARY_X64
+       ${EndIf}
+ 
+-      !if !${ARM64}
++      !if ! ${ARM64}
+ 	# Install DLLs for 32-bit gvimext.dll into the GvimExt32 directory.
+ 	SetOutPath $0\GvimExt32
+ 	ClearErrors
