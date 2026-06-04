@@ -17,8 +17,8 @@ Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  src/GvimExt/Make_ming.mak |    4 +-
  src/GvimExt/Make_mvc.mak  |    4 +-
- src/GvimExt/gvimext.cpp   |   80 +++++++++++++++++++++++++++++++++------------
- 3 files changed, 63 insertions(+), 25 deletions(-)
+ src/GvimExt/gvimext.cpp   |   76 +++++++++++++++++++++++++++++++++------------
+ 3 files changed, 60 insertions(+), 24 deletions(-)
 
 diff --git a/src/GvimExt/Make_ming.mak b/src/GvimExt/Make_ming.mak
 index b73e6fd92..341f4add5 100644
@@ -58,20 +58,18 @@ index 874b34c74..b05a43147 100644
  .cpp.obj:
  	$(cc) $(cflags) -DFEAT_GETTEXT $(cvarsmt) $*.cpp
 diff --git a/src/GvimExt/gvimext.cpp b/src/GvimExt/gvimext.cpp
-index f98423c15..bdc1a6cdb 100644
+index 6d07b8b3c..60bb60e61 100644
 --- a/src/GvimExt/gvimext.cpp
 +++ b/src/GvimExt/gvimext.cpp
-@@ -15,6 +15,9 @@
+@@ -15,6 +15,7 @@
   */
  
  #include "gvimext.h"
 +#include "../version.h"
-+
-+#define ARRAY_LENGTH(a) (sizeof(a) / sizeof((a)[0]))
  
- static char *searchpath(char *name);
+ #define ARRAY_LENGTH(a) (sizeof(a) / sizeof((a)[0]))
  
-@@ -50,7 +53,7 @@ UINT cbFiles = 0;
+@@ -52,7 +53,7 @@ UINT cbFiles = 0;
  // Returns the path in name[BUFSIZE].  It's empty when it fails.
  //
      static void
@@ -80,7 +78,7 @@ index f98423c15..bdc1a6cdb 100644
  {
      HKEY	keyhandle;
      DWORD	hlen;
-@@ -100,9 +103,9 @@ getGvimName(char *name, int runtime)
+@@ -102,9 +103,9 @@ getGvimName(char *name, int runtime)
  }
  
      static void
@@ -92,7 +90,7 @@ index f98423c15..bdc1a6cdb 100644
      // avoid that Vim tries to expand wildcards in the file names
      strcat(name, " --literal");
  }
-@@ -113,11 +116,20 @@ getGvimInvocationW(wchar_t *nameW)
+@@ -115,11 +116,20 @@ getGvimInvocationW(wchar_t *nameW)
      char *name;
  
      name = (char *)malloc(BUFSIZE);
@@ -114,7 +112,7 @@ index f98423c15..bdc1a6cdb 100644
  //
  // Get the Vim runtime directory into buf[BUFSIZE].
  // The result is empty when it failed.
-@@ -128,21 +140,47 @@ getRuntimeDir(char *buf)
+@@ -130,21 +140,47 @@ getRuntimeDir(char *buf)
  {
      int		idx;
  
@@ -175,7 +173,7 @@ index f98423c15..bdc1a6cdb 100644
  }
  
      WCHAR *
-@@ -921,10 +959,10 @@ BOOL CALLBACK CShellExt::EnumWindowsProc(HWND hWnd, LPARAM lParam)
+@@ -923,10 +959,10 @@ BOOL CALLBACK CShellExt::EnumWindowsProc(HWND hWnd, LPARAM lParam)
      // No child window ???
      // if (GetParent(hWnd)) return TRUE;
      // Class name should be Vim, if failed to get class name, return
@@ -188,7 +186,7 @@ index f98423c15..bdc1a6cdb 100644
  	return TRUE;
      // First check if the number of vim instance exceeds MAX_HWND
      CShellExt *cs = (CShellExt*) lParam;
-@@ -940,7 +978,7 @@ BOOL CALLBACK CShellExt::EnumWindowsProc(HWND hWnd, LPARAM lParam)
+@@ -942,7 +978,7 @@ BOOL CALLBACK CShellExt::EnumWindowsProc(HWND hWnd, LPARAM lParam)
  BOOL CShellExt::LoadMenuIcon()
  {
      char vimExeFile[BUFSIZE];
@@ -197,12 +195,3 @@ index f98423c15..bdc1a6cdb 100644
      if (vimExeFile[0] == '\0')
  	return FALSE;
      HICON hVimIcon;
-@@ -1002,7 +1040,7 @@ STDMETHODIMP CShellExt::InvokeSingleGvim(HWND hParent,
- 	DragQueryFileW((HDROP)medium.hGlobal,
- 		i,
- 		m_szFileUserClickedOn,
--		sizeof(m_szFileUserClickedOn));
-+		ARRAY_LENGTH(m_szFileUserClickedOn));
- 
- 	len = wcslen(cmdStrW) + wcslen(m_szFileUserClickedOn) + 4;
- 	if (len > cmdlen)
