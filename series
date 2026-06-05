@@ -29,6 +29,7 @@ win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 optimize-mem-alloc-for-insertion.patch
 gvimext-additional-runtimedir.patch
+gvimext-use-union.patch
 optimize-cursor-computation.patch #+wip
 optimize-cursor-computation2.patch #+wip
 remove-enable-disable_vcol_cache.patch #+wip
