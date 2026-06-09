@@ -1,0 +1,32 @@
+win32: Fix evim startup
+
+From: K.Takata <kentkt@csc.jp>
+
+When gvim.exe is built with VIMDLL=yes, and gvim.exe is copied to
+evim.exe, evim.exe didn't start in the easy mode. (It spawned gvim.exe
+and started in the normal mode.)
+
+Check the executable file type in addition to its filename.
+
+Signed-off-by: K.Takata <kentkt@csc.jp>
+---
+ src/main.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/main.c b/src/main.c
+index e30012be4..e59910b22 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -2047,7 +2047,11 @@ parse_command_name(mparm_T *parmp)
+     }
+ 
+     // "gvim" starts the GUI.  Also accept "Gvim" for MS-Windows.
+-    if (TOLOWER_ASC(initstr[0]) == 'g')
++    if (TOLOWER_ASC(initstr[0]) == 'g'
++#ifdef VIMDLL
++	    || mch_is_gui_executable()
++#endif
++       )
+     {
+ 	main_start_gui();
+ # ifdef FEAT_GUI
