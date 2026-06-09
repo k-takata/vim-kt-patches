@@ -14,7 +14,7 @@ Signed-off-by: K.Takata <kentkt@csc.jp>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/src/main.c b/src/main.c
-index e30012be4..e59910b22 100644
+index e30012be4..53a292325 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -2047,7 +2047,11 @@ parse_command_name(mparm_T *parmp)
@@ -23,9 +23,9 @@ index e30012be4..e59910b22 100644
      // "gvim" starts the GUI.  Also accept "Gvim" for MS-Windows.
 -    if (TOLOWER_ASC(initstr[0]) == 'g')
 +    if (TOLOWER_ASC(initstr[0]) == 'g'
-+#ifdef VIMDLL
++# ifdef VIMDLL
 +	    || mch_is_gui_executable()
-+#endif
++# endif
 +       )
      {
  	main_start_gui();
