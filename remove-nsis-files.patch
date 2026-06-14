@@ -13,13 +13,12 @@ Signed-off-by: K.Takata <kentkt@csc.jp>
 ---
  .github/MAINTAINERS        |    1 
  CONTRIBUTING.md            |    5 
- Filelist                   |    8 
+ Filelist                   |    7 
  Makefile                   |   23 -
  READMEdir/README_extra.txt |    2 
  nsis/Make_mvc.mak          |   95 ----
  nsis/Makefile              |   82 ---
- nsis/README.md             |    4 
- nsis/README.txt            |  112 ----
+ nsis/README.txt            |  114 ----
  nsis/auxiliary.nsh         |  148 ------
  nsis/gvim.nsi              | 1157 --------------------------------------------
  nsis/icons.zip             |  Bin
@@ -39,11 +38,9 @@ Signed-off-by: K.Takata <kentkt@csc.jp>
  nsis/lang/tradchinese.nsi  |  289 -----------
  nsis/lang/turkish.nsi      |  206 --------
  uninstall.txt              |    3 
- 28 files changed, 11 insertions(+), 5577 deletions(-)
+ 27 files changed, 10 insertions(+), 5575 deletions(-)
  delete mode 100644 nsis/Make_mvc.mak
  delete mode 100644 nsis/Makefile
- create mode 100644 nsis/README.md
- delete mode 100644 nsis/README.txt
  delete mode 100644 nsis/auxiliary.nsh
  delete mode 100644 nsis/gvim.nsi
  delete mode 100644 nsis/icons.zip
@@ -103,10 +100,10 @@ index 6b14c623f..41de1d0b5 100644
  [19]: https://web.libera.chat/#vim
 +[20]: https://github.com/vim/vim-win32-installer
 diff --git a/Filelist b/Filelist
-index 5526e539a..b930aaef8 100644
+index 5526e539a..bfd346fe5 100644
 --- a/Filelist
 +++ b/Filelist
-@@ -660,13 +660,6 @@ SRC_DOS =	\
+@@ -660,13 +660,7 @@ SRC_DOS =	\
  		src/tee/tee.c \
  		src/xxd/Make_ming.mak \
  		src/xxd/Make_mvc.mak \
@@ -114,13 +111,13 @@ index 5526e539a..b930aaef8 100644
 -		nsis/gvim.nsi \
 -		nsis/Makefile \
 -		nsis/Make_mvc.mak \
--		nsis/README.txt \
+ 		nsis/README.txt \
 -		nsis/lang/*.nsi \
 -		nsis/lang/README.txt \
  		uninstall.txt \
  
  # Source files for MS Windows without CR/LF translation (also in the extra archive).
-@@ -684,7 +677,6 @@ SRC_DOS_BIN =	\
+@@ -684,7 +678,6 @@ SRC_DOS_BIN =	\
  		src/xpm/x86/lib-vc14/libXpm.lib \
  		src/xpm/x86/lib/libXpm.a \
  		runtime/bitmaps/vim.ico \
@@ -378,25 +375,16 @@ index 4b51b2ac7..000000000
 -	if test -f gvim??.exe ; then rm -f gvim??.exe ; fi
 -
 -# vim: set noet sw=8 ts=8 sts=0 wm=0 tw=0 ft=make:
-diff --git a/nsis/README.md b/nsis/README.md
-new file mode 100644
-index 000000000..f7e72a02e
---- /dev/null
-+++ b/nsis/README.md
-@@ -0,0 +1,4 @@
-+The code for the one-click installer for Vim for MS Windows has been moved to
-+the vim-win32-installer repository.
-+
-+    https://github.com/vim/vim-win32-installer/tree/master/nsis
 diff --git a/nsis/README.txt b/nsis/README.txt
-deleted file mode 100644
-index 01c6c5d3b..000000000
+index 01c6c5d3b..f7e72a02e 100644
 --- a/nsis/README.txt
-+++ /dev/null
-@@ -1,112 +0,0 @@
++++ b/nsis/README.txt
+@@ -1,112 +1,4 @@
 -This builds a one-click install for Vim for MS Windows using the Nullsoft
 -Installation System (NSIS), available at http://nsis.sourceforge.net/
--
++The code for the one-click installer for Vim for MS Windows has been moved to
++the vim-win32-installer repository.
+ 
 -To build the installable .exe file:
 -
 -Preparatory stage
@@ -506,6 +494,7 @@ index 01c6c5d3b..000000000
 -			    located.
 -
 -Note: for icons used in the installer, see the README.txt in the icons.zip
++    https://github.com/vim/vim-win32-installer/tree/master/nsis
 diff --git a/nsis/auxiliary.nsh b/nsis/auxiliary.nsh
 deleted file mode 100644
 index c350f69e0..000000000
