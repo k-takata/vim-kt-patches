@@ -1,0 +1,33 @@
+Add msvc2026.bat
+
+From: K.Takata <kentkt@csc.jp>
+
+Signed-off-by: K.Takata <kentkt@csc.jp>
+---
+ src/msvc2026.bat |   17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+ create mode 100644 src/msvc2026.bat
+
+diff --git a/src/msvc2026.bat b/src/msvc2026.bat
+new file mode 100644
+index 000000000..f7477f53b
+--- /dev/null
++++ b/src/msvc2026.bat
+@@ -0,0 +1,17 @@
++@echo off
++rem To be used on MS-Windows for Visual C++ 2026.
++rem See INSTALLpc.txt for information.
++rem
++rem Usage:
++rem   For x86 builds run this with "x86" option:
++rem     msvc2026 x86
++rem   For x64 builds run this with "x64" option:
++rem     msvc2026 x64
++
++set "VSVEROPT=-version [18.0^,19.0^)"
++call "%~dp0msvc-latest.bat" %*
++set VSVEROPT=
++if defined VCToolsVersion (
++	echo VS 2026 ^(%VCToolsVersion%^) %VSCMD_ARG_TGT_ARCH%
++	title VS 2026 %VSCMD_ARG_TGT_ARCH%
++)
