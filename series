@@ -29,6 +29,8 @@ win32-store-exe-in-objdir.patch
 msvc-revise-use_msvcrt.patch
 optimize-mem-alloc-for-insertion.patch
 add-msvc2026-bat.patch
+doc-add-installer-updates.patch
+remove-nsis-files.patch
 optimize-cursor-computation.patch #+wip
 optimize-cursor-computation2.patch #+wip
 remove-enable-disable_vcol_cache.patch #+wip
