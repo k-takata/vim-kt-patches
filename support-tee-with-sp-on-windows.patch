@@ -11,10 +11,10 @@ Signed-off-by: K.Takata <kentkt@csc.jp>
  4 files changed, 66 insertions(+), 35 deletions(-)
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index c80fb28b2..31f77b3cd 100644
+index 1e6d3f103..f08084b16 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
-@@ -7827,10 +7827,14 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -7839,10 +7839,14 @@ A jump table for the options with a short description can be found at |Q_op|.
  	The name of the temporary file can be represented by "%s" if necessary
  	(the file name is appended automatically if no %s appears in the value
  	of this option).
@@ -34,7 +34,7 @@ index c80fb28b2..31f77b3cd 100644
  	in a file and echoed to the screen.  If the 'shell' option is "csh" or
  	"tcsh" after initializations, the default becomes "|& tee".  If the
 diff --git a/runtime/doc/quickfix.txt b/runtime/doc/quickfix.txt
-index 581d00b7a..65d5e3d2a 100644
+index 4b24d1298..7ce7fab46 100644
 --- a/runtime/doc/quickfix.txt
 +++ b/runtime/doc/quickfix.txt
 @@ -981,11 +981,13 @@ or simpler >
@@ -57,7 +57,7 @@ index 581d00b7a..65d5e3d2a 100644
  If 'shellpipe' is empty, the {errorfile} part will be omitted.  This is useful
  for compilers that write to an errorfile themselves (e.g., Manx's Amiga C).
 diff --git a/src/option.c b/src/option.c
-index 31f84c98d..69188b839 100644
+index d15cc3f3c..9ddc96b2c 100644
 --- a/src/option.c
 +++ b/src/option.c
 @@ -1131,10 +1131,11 @@ set_init_3(void)

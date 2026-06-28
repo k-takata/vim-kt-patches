@@ -13,7 +13,7 @@ Signed-off-by: Muraoka Taro <koron.kaoriya@gmail.com>
  6 files changed, 86 insertions(+), 1 deletion(-)
 
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index 99e4e70a3..c80fb28b2 100644
+index 7339133c6..1e6d3f103 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
 @@ -839,6 +839,9 @@ A jump table for the options with a short description can be found at |Q_op|.
@@ -38,10 +38,10 @@ index 99e4e70a3..c80fb28b2 100644
  'antialias' 'anti'	boolean (default: off)
  			global
 diff --git a/src/gui_w32.c b/src/gui_w32.c
-index 724266aeb..e4b0c98e1 100644
+index 077ca9c1f..916825634 100644
 --- a/src/gui_w32.c
 +++ b/src/gui_w32.c
-@@ -5656,6 +5656,59 @@ error:
+@@ -5865,6 +5865,59 @@ error:
  }
  #endif
  
@@ -126,7 +126,7 @@ index 8370c3fa2..898292f12 100644
      {
  	if (!utf_printable(c))
 diff --git a/src/optionstr.c b/src/optionstr.c
-index b60e59586..06ba38e92 100644
+index b187dc319..4006e259e 100644
 --- a/src/optionstr.c
 +++ b/src/optionstr.c
 @@ -16,7 +16,11 @@
@@ -143,10 +143,10 @@ index b60e59586..06ba38e92 100644
  static char *(p_bkc_values[]) = {"yes", "auto", "no", "breaksymlink", "breakhardlink", NULL};
  static char *(p_bo_values[]) = {"all", "backspace", "cursor", "complete",
 diff --git a/src/proto/gui_w32.pro b/src/proto/gui_w32.pro
-index a93df3672..51e5c4260 100644
+index e6319e90c..6631bd33c 100644
 --- a/src/proto/gui_w32.pro
 +++ b/src/proto/gui_w32.pro
-@@ -80,6 +80,7 @@ void im_set_active(int active);
+@@ -83,6 +83,7 @@ void im_set_active(int active);
  int im_get_status(void);
  void gui_mch_draw_string(int row, int col, char_u *text, int len, int flags);
  void gui_mch_flush(void);
@@ -155,10 +155,10 @@ index a93df3672..51e5c4260 100644
  void gui_mch_add_menu(vimmenu_T *menu, int pos);
  void gui_mch_show_popupmenu(vimmenu_T *menu);
 diff --git a/src/vim.h b/src/vim.h
-index 25c81f2f8..55c3f1aac 100644
+index c04e5f389..d1b8ad03a 100644
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -560,6 +560,13 @@ typedef long long vimlong_T;
+@@ -563,6 +563,13 @@ typedef long long vimlong_T;
  # endif
  #endif
  

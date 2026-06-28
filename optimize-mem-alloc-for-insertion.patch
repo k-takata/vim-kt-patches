@@ -67,10 +67,10 @@ index c9e27c194..f78e14515 100644
      curwin->w_cursor.col += (colnr_T)slen;
  }
 diff --git a/src/edit.c b/src/edit.c
-index 1db9c1307..450a48e64 100644
+index c10654e36..c6e375a19 100644
 --- a/src/edit.c
 +++ b/src/edit.c
-@@ -4257,7 +4257,10 @@ ins_bs(
+@@ -4313,7 +4313,10 @@ ins_bs(
  
  			    if (curbuf->b_ml.ml_flags
  					      & (ML_LINE_DIRTY | ML_ALLOCATED))
@@ -81,7 +81,7 @@ index 1db9c1307..450a48e64 100644
  			    curbuf->b_ml.ml_line_ptr = newp;
  			    curbuf->b_ml.ml_line_len--;
  			    curbuf->b_ml.ml_line_textlen--;
-@@ -5243,7 +5246,10 @@ ins_tab(void)
+@@ -5299,7 +5302,10 @@ ins_tab(void)
  					   curbuf->b_ml.ml_line_len - col - i);
  
  		    if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
@@ -93,7 +93,7 @@ index 1db9c1307..450a48e64 100644
  		    curbuf->b_ml.ml_line_len -= i;
  		    curbuf->b_ml.ml_line_textlen = 0;
 diff --git a/src/memline.c b/src/memline.c
-index 2887ebbf9..5a0dfdb32 100644
+index 2e0403d41..cff734205 100644
 --- a/src/memline.c
 +++ b/src/memline.c
 @@ -881,7 +881,10 @@ ml_close(buf_T *buf, int del_file)
@@ -107,7 +107,7 @@ index 2887ebbf9..5a0dfdb32 100644
      vim_free(buf->b_ml.ml_stack);
  #ifdef FEAT_BYTEOFF
      VIM_CLEAR(buf->b_ml.ml_chunksize);
-@@ -2788,6 +2791,7 @@ ml_get_buf(
+@@ -2812,6 +2815,7 @@ ml_get_buf(
  errorret:
  	STRCPY(questions, "???");
  	buf->b_ml.ml_line_len = 4;
@@ -115,7 +115,7 @@ index 2887ebbf9..5a0dfdb32 100644
  	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
  	buf->b_ml.ml_line_lnum = lnum;
  	return questions;
-@@ -2798,6 +2802,7 @@ errorret:
+@@ -2822,6 +2826,7 @@ errorret:
      if (buf->b_ml.ml_mfp == NULL)	// there are no lines
      {
  	buf->b_ml.ml_line_len = 1;
@@ -123,7 +123,7 @@ index 2887ebbf9..5a0dfdb32 100644
  	buf->b_ml.ml_line_textlen = buf->b_ml.ml_line_len;
  	return (char_u *)"";
      }
-@@ -2849,6 +2854,7 @@ errorret:
+@@ -2873,6 +2878,7 @@ errorret:
  
  	buf->b_ml.ml_line_ptr = (char_u *)dp + start;
  	buf->b_ml.ml_line_len = end - start;
@@ -131,7 +131,7 @@ index 2887ebbf9..5a0dfdb32 100644
  #if defined(FEAT_BYTEOFF) && defined(FEAT_PROP_POPUP)
  	// Text properties come after a NUL byte, so ml_line_len should be
  	// larger than the size of textprop_T if there is any.
-@@ -2882,6 +2888,7 @@ errorret:
+@@ -2906,6 +2912,7 @@ errorret:
  	{
  	    memmove(p, buf->b_ml.ml_line_ptr, buf->b_ml.ml_line_len);
  	    buf->b_ml.ml_line_ptr = p;
@@ -139,7 +139,7 @@ index 2887ebbf9..5a0dfdb32 100644
  	    buf->b_ml.ml_flags |= ML_ALLOCATED;
  	    if (will_change)
  		// can't make the change in the data block
-@@ -3715,7 +3722,8 @@ ml_replace_len(
+@@ -3739,7 +3746,8 @@ ml_replace_len(
      }
  #endif
  
@@ -149,7 +149,7 @@ index 2887ebbf9..5a0dfdb32 100644
  	vim_free(curbuf->b_ml.ml_line_ptr);	// free allocated line
  
      curbuf->b_ml.ml_line_ptr = line;
-@@ -4312,11 +4320,15 @@ ml_flush_line(buf_T *buf)
+@@ -4343,11 +4351,15 @@ ml_flush_line(buf_T *buf)
  	    }
  	}
  	vim_free(new_line);
@@ -166,10 +166,10 @@ index 2887ebbf9..5a0dfdb32 100644
      buf->b_ml.ml_flags &= ~(ML_LINE_DIRTY | ML_ALLOCATED);
      buf->b_ml.ml_line_lnum = 0;
 diff --git a/src/structs.h b/src/structs.h
-index 6c6ea8c0e..68d498404 100644
+index b112c6d18..b7aa73760 100644
 --- a/src/structs.h
 +++ b/src/structs.h
-@@ -870,6 +870,7 @@ typedef struct memline
+@@ -871,6 +871,7 @@ typedef struct memline
  #define ML_ALLOCATED	0x10	// ml_line_ptr is an allocated copy
      int		ml_flags;
  
@@ -178,10 +178,10 @@ index 6c6ea8c0e..68d498404 100644
      colnr_T	ml_line_textlen;// length of the cached line + NUL, 0 if not known yet
      linenr_T	ml_line_lnum;	// line number of cached line, 0 if not valid
 diff --git a/src/textprop.c b/src/textprop.c
-index a049edec9..23eefdcba 100644
+index 6d5a10863..666417663 100644
 --- a/src/textprop.c
 +++ b/src/textprop.c
-@@ -497,7 +497,10 @@ um_store_changes(unpacked_memline_T *um)
+@@ -510,7 +510,10 @@ um_store_changes(unpacked_memline_T *um)
      um_free_vtext(um->props, um->prop_count);
  
      if (um->buf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
@@ -192,7 +192,7 @@ index a049edec9..23eefdcba 100644
      um->buf->b_ml.ml_line_ptr = packed;
      um->buf->b_ml.ml_line_len = packed_len;
      um->buf->b_ml.ml_flags |= ML_LINE_DIRTY;
-@@ -894,7 +897,10 @@ prop_add_one(
+@@ -907,7 +910,10 @@ prop_add_one(
  							sizeof(textprop_T));
  
  	if (buf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
@@ -203,7 +203,7 @@ index a049edec9..23eefdcba 100644
  	buf->b_ml.ml_line_ptr = newtext;
  	buf->b_ml.ml_line_len = new_line_len;
  	buf->b_ml.ml_flags |= ML_LINE_DIRTY;
-@@ -1479,7 +1485,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
+@@ -1503,7 +1509,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
  	    return;
  	mch_memmove(newtext, text, textlen);
  	if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))
@@ -214,7 +214,7 @@ index a049edec9..23eefdcba 100644
  	curbuf->b_ml.ml_line_ptr = newtext;
  	curbuf->b_ml.ml_line_len = textlen;
  	curbuf->b_ml.ml_flags |= ML_LINE_DIRTY;
-@@ -1533,7 +1542,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
+@@ -1557,7 +1566,10 @@ set_text_props(linenr_T lnum, textprop_T *tps, int count)
  	}
  
  	if (curbuf->b_ml.ml_flags & (ML_LINE_DIRTY | ML_ALLOCATED))

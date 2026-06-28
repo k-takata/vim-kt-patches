@@ -16,7 +16,7 @@ Signed-off-by: K.Takata <kentkt@csc.jp>
  2 files changed, 22 insertions(+), 8 deletions(-)
 
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
-index 07c2d345e..9db365090 100644
+index 5e77fc549..4ccb332cc 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
 @@ -193,6 +193,7 @@ ifeq ($(CROSS),yes)
@@ -40,7 +40,7 @@ index 07c2d345e..9db365090 100644
  DEL = del
  MKDIR = mkdir
  DIRSLASH = \\
-@@ -1188,16 +1191,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStartup@0
+@@ -1192,16 +1195,20 @@ EXEENTRYG = -Wl,--entry=_wWinMainCRTStartup@0
   endif
  
  $(TARGET): $(OBJ)
@@ -65,7 +65,7 @@ index 07c2d345e..9db365090 100644
  endif
  
  upx: exes
-@@ -1228,6 +1235,8 @@ clean:
+@@ -1232,6 +1239,8 @@ clean:
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcno
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.gcda
  	-$(DEL) $(OUTDIR)$(DIRSLASH)*.res
@@ -75,10 +75,10 @@ index 07c2d345e..9db365090 100644
  	-rmdir $(OUTDIR)
  	-$(DEL) $(MAIN_TARGET) vimrun.exe install.exe uninstall.exe
 diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
-index 462af211c..f966d5a14 100644
+index 6223f79c5..71fd5796b 100644
 --- a/src/Make_mvc.mak
 +++ b/src/Make_mvc.mak
-@@ -1316,19 +1316,23 @@ $(VIMDLLBASE).dll: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
+@@ -1320,19 +1320,23 @@ $(VIMDLLBASE).dll: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<
@@ -105,7 +105,7 @@ index 462af211c..f966d5a14 100644
  
  !ELSE
  
-@@ -1339,11 +1343,12 @@ $(VIM).exe: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
+@@ -1343,11 +1347,12 @@ $(VIM).exe: $(OUTDIR) $(OBJ) $(XDIFF_OBJ) $(GUI_OBJ) $(CUI_OBJ) \
  		$(XPM_OBJ) version.c version.h
  	$(CC) $(CFLAGS_OUTDIR) version.c
  	$(LINK) @<<
